@@ -681,18 +681,23 @@ def build_issue_report_comment(results: dict) -> str:
     }
     keys = sorted(set(single) | set(throughput))
     gpus = (results.get("hardware") or {}).get("gpus") or []
+    gpu_model = "; ".join(sorted(set(gpus)))
+    sglang_runtime = results.get("sglang_runtime") or {}
 
     lines = [
         f"## Diffusion Benchmark Data - {_md_cell(results.get('timestamp'))}",
         "",
-        "| commit | run_id | gpu_count |",
-        "| --- | --- | ---: |",
+        "| bench_commit | sglang_commit | sglang_version | run_id | gpu_count | gpu_model |",
+        "| --- | --- | --- | --- | ---: | --- |",
         "| "
         + " | ".join(
             [
                 _md_cell(results.get("commit_sha")),
+                _md_cell(sglang_runtime.get("git_commit")),
+                _md_cell(sglang_runtime.get("package_version")),
                 _md_cell(results.get("run_id")),
                 str(len(gpus)),
+                _md_cell(gpu_model),
             ]
         )
         + " |",
@@ -718,9 +723,13 @@ def build_issue_report_comment(results: dict) -> str:
             _fmt_report_float((single_entry or {}).get("latency_s")),
             _result_status(single_entry),
             _fmt_report_float(
-                metrics.get("latency_p50") or (throughput_entry or {}).get("latency_s")
+                metrics.get("latency_p50_s")
+                or metrics.get("latency_p50")
+                or (throughput_entry or {}).get("latency_s")
             ),
-            _fmt_report_float(metrics.get("latency_p95")),
+            _fmt_report_float(
+                metrics.get("latency_p95_s") or metrics.get("latency_p95")
+            ),
             _fmt_report_float(metrics.get("throughput_rps")),
             _result_status(throughput_entry),
         ]

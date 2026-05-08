@@ -1313,6 +1313,7 @@ def run_comparison(
     frameworks: list[str] | None = None,
     modes: list[str] | None = None,
     sglang_profile: str | None = None,
+    run_id: str | None = None,
     port: int = DEFAULT_PORT,
     output: str = "comparison-results.json",
     dry_run: bool = False,
@@ -1324,7 +1325,12 @@ def run_comparison(
     """
     timestamp = datetime.now(timezone.utc).isoformat()
     commit_sha = _current_commit_sha()
-    run_id = os.environ.get("GITHUB_RUN_ID", "local")
+    run_id = (
+        run_id
+        or os.environ.get("DIFFUSION_BENCH_RUN_ID")
+        or os.environ.get("GITHUB_RUN_ID")
+        or "local"
+    )
 
     log_dir = Path("comparison-logs")
     log_dir.mkdir(exist_ok=True)
@@ -1493,6 +1499,11 @@ def main():
         ),
     )
     parser.add_argument(
+        "--run-id",
+        default=None,
+        help="Stable identifier to record in the output JSON",
+    )
+    parser.add_argument(
         "--port",
         type=int,
         default=DEFAULT_PORT,
@@ -1522,6 +1533,7 @@ def main():
         frameworks=args.frameworks,
         modes=args.modes,
         sglang_profile=args.sglang_profile,
+        run_id=args.run_id,
         port=args.port,
         output=args.output,
         dry_run=args.dry_run,

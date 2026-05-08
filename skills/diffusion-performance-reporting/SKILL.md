@@ -9,7 +9,7 @@ description: Use when generating formal benchmark reports, dashboards, summaries
 
 A formal report should append one comment to the fixed tracker issue, not open a new issue. The comment should contain only benchmark data:
 
-- run timestamp, commit, run id, and GPU count
+- run timestamp, benchmark commit, SGLang commit/version, run id, GPU count, and GPU model
 - case, model, task, dimensions, steps, CFG fields, framework, and GPU count
 - single-request latency and status
 - throughput p50/p95/RPS and status
