@@ -23,7 +23,7 @@ case "${FRAMEWORK}" in
     ;;
   lightx2v)
     python3 -m pip install --upgrade --force-reinstall "${LIGHTX2V_INSTALL_SPEC:-git+https://github.com/ModelTC/LightX2V.git}"
-    python3 -m pip install --upgrade ninja packaging
+    python3 -m pip install --upgrade ninja packaging matplotlib
     export MAX_JOBS="${MAX_JOBS:-8}"
     export TORCH_CUDA_ARCH_LIST="${TORCH_CUDA_ARCH_LIST:-9.0}"
     python3 -m pip install --upgrade --no-build-isolation --no-deps "${LIGHTX2V_FLASH_ATTN_INSTALL_SPEC:-flash-attn==2.8.3}"
