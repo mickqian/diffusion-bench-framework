@@ -24,10 +24,12 @@ For every `sglang` framework entry, maintain `command_profiles`:
 
 - `sglang_ref`: tag, commit, or meaningful branch line.
 - `serve_args`: full best-known SGLang serve args for that case/profile.
+- `hardware`: optional hardware selector such as `["h100"]` or `["h200"]` when a command is hardware-specific.
 - `notes`: why this profile exists, especially when it differs from `default`.
 - Optional runtime overrides: `num_gpus`, `extra_env`, and `benchmark`.
 
 Do not delete old profiles just because a newer command is better. Add a new profile when the best command changes by SGLang version, hardware class, or model implementation.
+If a SGLang profile OOMs or fails on one hardware class, add a hardware-specific stable profile and rerun instead of letting the failed result stand as a valid comparison.
 
 ## Framework Checklist
 
@@ -39,4 +41,3 @@ Do not delete old profiles just because a newer command is better. Add a new pro
 ## Validation
 
 At minimum, run a dry run and inspect generated commands. GPU benchmark validation should happen on a remote GPU machine, not on a local Mac.
-

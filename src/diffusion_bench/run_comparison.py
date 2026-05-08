@@ -56,6 +56,7 @@ DEFAULT_BENCHMARK = {
     "throughput": {"num_requests": 4, "max_concurrency": 2},
 }
 DEFAULT_SGLANG_PROFILE = "default"
+HARDWARE_PROFILE_ENV = "SGLANG_BENCH_HARDWARE_PROFILE"
 
 # Frameworks that need separate installation (conflict with sglang's deps)
 INSTALLABLE_FRAMEWORKS = {"vllm-omni", "lightx2v"}
@@ -227,19 +228,94 @@ def build_server_cmd(framework: str, case: dict, fw_cfg: dict, port: int) -> lis
     return builder(case, fw_cfg, port)
 
 
-def _requested_sglang_profile(profile: str | None) -> str:
+def _explicit_sglang_profile(profile: str | None) -> str | None:
     return (
         profile
         or os.environ.get("SGLANG_BENCH_SGLANG_PROFILE")
         or os.environ.get("SGLANG_BENCH_PROFILE")
-        or DEFAULT_SGLANG_PROFILE
     )
+
+
+def _requested_sglang_profile(profile: str | None) -> str:
+    return _explicit_sglang_profile(profile) or "auto"
+
+
+def _hardware_profile_candidates(hardware_metadata: dict | None) -> list[str]:
+    metadata = hardware_metadata or {}
+    values = [
+        metadata.get("hardware_profile_override"),
+        os.environ.get(HARDWARE_PROFILE_ENV),
+        metadata.get("gpu_config"),
+        metadata.get("runner_labels"),
+        *(metadata.get("gpus") or []),
+    ]
+    text = " ".join(str(value).lower() for value in values if value)
+    candidates = []
+    for profile in ("h200", "h100", "a100", "l40", "l4", "rtx4090", "rtx3090"):
+        if profile in text or profile.replace("rtx", "rtx ") in text:
+            candidates.append(profile)
+    return candidates
+
+
+def _profile_hardware_values(profile_cfg: dict) -> list[str]:
+    hardware = (
+        profile_cfg.get("hardware")
+        or profile_cfg.get("hardware_profile")
+        or profile_cfg.get("hardware_profiles")
+    )
+    if not hardware:
+        return []
+    if isinstance(hardware, str):
+        values = [hardware]
+    elif isinstance(hardware, list):
+        values = hardware
+    else:
+        values = []
+    return [str(value).lower() for value in values]
+
+
+def _profile_matches_hardware(
+    profile_name: str, profile_cfg: dict, candidates: list[str]
+) -> bool:
+    if not candidates:
+        return False
+    values = [profile_name.lower(), *_profile_hardware_values(profile_cfg)]
+    return any(candidate in value for candidate in candidates for value in values)
+
+
+def _select_sglang_profile(
+    profiles: dict,
+    explicit_profile: str | None,
+    hardware_metadata: dict | None,
+) -> tuple[str | None, str, list[str]]:
+    candidates = _hardware_profile_candidates(hardware_metadata)
+    if explicit_profile:
+        if explicit_profile not in profiles:
+            available = ", ".join(sorted(profiles))
+            raise ValueError(
+                f"Unknown SGLang command profile '{explicit_profile}'. "
+                f"Available profiles: {available}"
+            )
+        return explicit_profile, "explicit", candidates
+
+    for profile_name, profile_cfg in profiles.items():
+        if profile_name == DEFAULT_SGLANG_PROFILE:
+            continue
+        if _profile_matches_hardware(profile_name, profile_cfg, candidates):
+            return profile_name, "hardware", candidates
+
+    if DEFAULT_SGLANG_PROFILE in profiles:
+        return DEFAULT_SGLANG_PROFILE, "default", candidates
+    if profiles:
+        return next(iter(profiles)), "first", candidates
+    return None, "inline", candidates
 
 
 def _resolve_framework_config(
     framework: str,
     fw_cfg: dict,
     sglang_profile: str | None = None,
+    hardware_metadata: dict | None = None,
 ) -> dict:
     resolved = {
         key: value
@@ -252,14 +328,12 @@ def _resolve_framework_config(
     profiles = fw_cfg.get("command_profiles") or {}
     profile_name = None
     profile_cfg = {}
+    profile_source = "inline"
+    hardware_candidates: list[str] = []
     if profiles:
-        profile_name = _requested_sglang_profile(sglang_profile)
-        if profile_name not in profiles:
-            available = ", ".join(sorted(profiles))
-            raise ValueError(
-                f"Unknown SGLang command profile '{profile_name}'. "
-                f"Available profiles: {available}"
-            )
+        profile_name, profile_source, hardware_candidates = _select_sglang_profile(
+            profiles, _explicit_sglang_profile(sglang_profile), hardware_metadata
+        )
         profile_cfg = profiles[profile_name]
         runtime_cfg = {
             key: value
@@ -270,8 +344,11 @@ def _resolve_framework_config(
 
     resolved["_benchmark_metadata"] = {
         "sglang_profile": profile_name,
-        "sglang_profile_source": "command_profiles" if profiles else "inline",
+        "sglang_profile_request": _requested_sglang_profile(sglang_profile),
+        "sglang_profile_source": profile_source,
         "sglang_ref": profile_cfg.get("sglang_ref"),
+        "hardware": profile_cfg.get("hardware"),
+        "hardware_candidates": hardware_candidates,
         "description": profile_cfg.get("description"),
         "notes": profile_cfg.get("notes"),
         "serve_args": resolved.get("serve_args", ""),
@@ -1322,6 +1399,7 @@ def run_comparison(
     frameworks: list[str] | None = None,
     modes: list[str] | None = None,
     sglang_profile: str | None = None,
+    hardware_profile: str | None = None,
     run_id: str | None = None,
     port: int = DEFAULT_PORT,
     output: str = "comparison-results.json",
@@ -1340,6 +1418,9 @@ def run_comparison(
         or os.environ.get("GITHUB_RUN_ID")
         or "local"
     )
+    hardware_metadata = _collect_hardware_metadata()
+    if hardware_profile:
+        hardware_metadata["hardware_profile_override"] = hardware_profile
 
     log_dir = Path("comparison-logs")
     log_dir.mkdir(exist_ok=True)
@@ -1358,7 +1439,7 @@ def run_comparison(
             if frameworks and fw_name not in frameworks:
                 continue
             resolved_fw_cfg = _resolve_framework_config(
-                fw_name, fw_cfg, sglang_profile
+                fw_name, fw_cfg, sglang_profile, hardware_metadata
             )
             if fw_name not in fw_cases:
                 fw_cases[fw_name] = []
@@ -1430,7 +1511,7 @@ def run_comparison(
         "timestamp": timestamp,
         "commit_sha": commit_sha,
         "run_id": run_id,
-        "hardware": _collect_hardware_metadata(),
+        "hardware": hardware_metadata,
         "sglang_runtime": _collect_sglang_runtime_metadata(),
         "benchmark_modes": modes,
         "requested_sglang_profile": _requested_sglang_profile(sglang_profile),
@@ -1504,7 +1585,16 @@ def main():
         help=(
             "SGLang command profile to use from each case's command_profiles. "
             "Defaults to SGLANG_BENCH_SGLANG_PROFILE, SGLANG_BENCH_PROFILE, "
-            "then 'default'."
+            "then hardware auto-selection and 'default'."
+        ),
+    )
+    parser.add_argument(
+        "--hardware-profile",
+        default=None,
+        help=(
+            "Hardware class override for SGLang profile auto-selection "
+            "(for example h100 or h200). Defaults to "
+            f"{HARDWARE_PROFILE_ENV}, GPU_CONFIG, RUNNER_LABELS, then nvidia-smi."
         ),
     )
     parser.add_argument(
@@ -1542,6 +1632,7 @@ def main():
         frameworks=args.frameworks,
         modes=args.modes,
         sglang_profile=args.sglang_profile,
+        hardware_profile=args.hardware_profile,
         run_id=args.run_id,
         port=args.port,
         output=args.output,

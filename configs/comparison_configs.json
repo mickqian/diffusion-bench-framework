@@ -384,10 +384,30 @@
                     "extra_env": {},
                     "command_profiles": {
                         "default": {
-                            "description": "Best known SGLang command for the benchmark repo default profile.",
+                            "description": "Fallback SGLang command when no hardware-specific profile matches.",
                             "sglang_ref": "current-main",
                             "serve_args": "--model-type diffusion --enable-torch-compile --warmup --pipeline-class-name LTX2TwoStagePipeline",
-                            "notes": "Keep this profile updated when the best command changes for a SGLang release or commit."
+                            "notes": "Use hardware-specific profiles for formal H100/H200 runs."
+                        },
+                        "h100-80gb-4gpu": {
+                            "description": "Stable H100 80GB command for the LTX2.3 two-stage 121-frame case.",
+                            "hardware": [
+                                "h100"
+                            ],
+                            "sglang_ref": "current-main",
+                            "num_gpus": 4,
+                            "serve_args": "--model-type diffusion --enable-torch-compile --warmup --pipeline-class-name LTX2TwoStagePipeline",
+                            "notes": "2xH100 OOMed on this case; use four H100s until the backend memory issue is fixed."
+                        },
+                        "h200-2gpu": {
+                            "description": "Best known H200 command for the LTX2.3 two-stage 121-frame case.",
+                            "hardware": [
+                                "h200"
+                            ],
+                            "sglang_ref": "current-main",
+                            "num_gpus": 2,
+                            "serve_args": "--model-type diffusion --enable-torch-compile --warmup --pipeline-class-name LTX2TwoStagePipeline",
+                            "notes": "Validated profile for H200 capacity; keep separate from H100 results."
                         }
                     }
                 }

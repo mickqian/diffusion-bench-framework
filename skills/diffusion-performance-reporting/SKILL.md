@@ -32,7 +32,7 @@ Case metadata:
 
 Framework comparison:
 
-| framework | gpus | single_e2e_s | single/sglang | single_status | throughput_p50_s | p50/sglang | throughput_p95_s | throughput_rps | rps/sglang | throughput_status |
+| framework | profile | gpus | single_e2e_s | single/sglang | single_status | throughput_p50_s | p50/sglang | throughput_p95_s | throughput_rps | rps/sglang | throughput_status |
 
 ## Interpretation
 
