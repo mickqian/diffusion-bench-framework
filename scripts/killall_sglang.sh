@@ -1,7 +1,8 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-pkill -TERM -f "sglang|sgl_diffusion|vllm serve|lightx2v.server" 2>/dev/null || true
-sleep 2
-pkill -KILL -f "sglang|sgl_diffusion|vllm serve|lightx2v.server" 2>/dev/null || true
+PATTERN="sglang serve|sglang-diffusionWorker|vllm serve|lightx2v.server|torchrun.*lightx2v.server"
 
+pkill -TERM -f "${PATTERN}" 2>/dev/null || true
+sleep 2
+pkill -KILL -f "${PATTERN}" 2>/dev/null || true
