@@ -70,6 +70,41 @@
             "height": 1024,
             "seed": 42,
             "num_gpus": 1,
+            "num_inference_steps": 50,
+            "guidance_scale": 1.0,
+            "frameworks": {
+                "sglang": {
+                    "serve_args": "--enable-torch-compile --warmup",
+                    "extra_env": {},
+                    "command_profiles": {
+                        "default": {
+                            "description": "Best known SGLang command for the benchmark repo default profile.",
+                            "sglang_ref": "current-main",
+                            "serve_args": "--enable-torch-compile --warmup",
+                            "notes": "Keep this profile updated when the best command changes for a SGLang release or commit."
+                        }
+                    }
+                },
+                "vllm-omni": {
+                    "num_gpus": 1,
+                    "serve_args": "",
+                    "extra_env": {}
+                }
+            }
+        },
+        {
+            "id": "qwen_image_2512_t2i_1024_true_cfg",
+            "model": "Qwen/Qwen-Image-2512",
+            "task": "text-to-image",
+            "prompt": "A futuristic cyberpunk city at night, neon lights reflecting on wet streets",
+            "width": 1024,
+            "height": 1024,
+            "seed": 42,
+            "num_gpus": 1,
+            "num_inference_steps": 50,
+            "negative_prompt": " ",
+            "guidance_scale": 4.0,
+            "true_cfg_scale": 4.0,
             "frameworks": {
                 "sglang": {
                     "serve_args": "--enable-torch-compile --warmup",

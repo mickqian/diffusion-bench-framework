@@ -403,6 +403,7 @@ def _build_sglang_payload(case: dict) -> dict:
     for key in (
         "num_inference_steps",
         "guidance_scale",
+        "true_cfg_scale",
         "seed",
         "num_frames",
         "fps",
@@ -696,6 +697,7 @@ def send_request_vllm_omni(base_url: str, case: dict, config: dict) -> float:
         for key in (
             "num_inference_steps",
             "guidance_scale",
+            "true_cfg_scale",
             "seed",
             "negative_prompt",
         ):
@@ -725,6 +727,8 @@ def send_request_vllm_omni(base_url: str, case: dict, config: dict) -> float:
         extra_body["fps"] = case["fps"]
     if "negative_prompt" in case:
         extra_body["negative_prompt"] = case["negative_prompt"]
+    if "true_cfg_scale" in case:
+        extra_body["true_cfg_scale"] = case["true_cfg_scale"]
 
     # Build message content (text or text+image)
     content: list[dict] | str = case["prompt"]
