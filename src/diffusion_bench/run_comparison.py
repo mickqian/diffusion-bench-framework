@@ -55,10 +55,12 @@ DEFAULT_BENCHMARK = {
     "warmup": {"num_requests": 2, "num_inference_steps": 3},
     "throughput": {"num_requests": 4, "max_concurrency": 2},
 }
+DEFAULT_SGLANG_PROFILE = "default"
 
 # Frameworks that need separate installation (conflict with sglang's deps)
 INSTALLABLE_FRAMEWORKS = {"vllm-omni", "lightx2v"}
 FRAMEWORK_ORDER = ["sglang", "vllm-omni", "lightx2v"]
+SGLANG_PROFILE_RUNTIME_KEYS = {"serve_args", "num_gpus", "extra_env", "benchmark"}
 
 # Cached reference image (downloaded once)
 _cached_ref_image: bytes | None = None
@@ -197,6 +199,60 @@ def build_server_cmd(framework: str, case: dict, fw_cfg: dict, port: int) -> lis
     if builder is None:
         raise ValueError(f"Unknown framework: {framework}")
     return builder(case, fw_cfg, port)
+
+
+def _requested_sglang_profile(profile: str | None) -> str:
+    return (
+        profile
+        or os.environ.get("SGLANG_BENCH_SGLANG_PROFILE")
+        or os.environ.get("SGLANG_BENCH_PROFILE")
+        or DEFAULT_SGLANG_PROFILE
+    )
+
+
+def _resolve_framework_config(
+    framework: str,
+    fw_cfg: dict,
+    sglang_profile: str | None = None,
+) -> dict:
+    resolved = {
+        key: value
+        for key, value in fw_cfg.items()
+        if key not in ("command_profiles", "_benchmark_metadata")
+    }
+    if framework != "sglang":
+        return resolved
+
+    profiles = fw_cfg.get("command_profiles") or {}
+    profile_name = None
+    profile_cfg = {}
+    if profiles:
+        profile_name = _requested_sglang_profile(sglang_profile)
+        if profile_name not in profiles:
+            available = ", ".join(sorted(profiles))
+            raise ValueError(
+                f"Unknown SGLang command profile '{profile_name}'. "
+                f"Available profiles: {available}"
+            )
+        profile_cfg = profiles[profile_name]
+        runtime_cfg = {
+            key: value
+            for key, value in profile_cfg.items()
+            if key in SGLANG_PROFILE_RUNTIME_KEYS
+        }
+        resolved = _merge_nested(resolved, runtime_cfg)
+
+    resolved["_benchmark_metadata"] = {
+        "sglang_profile": profile_name,
+        "sglang_profile_source": "command_profiles" if profiles else "inline",
+        "sglang_ref": profile_cfg.get("sglang_ref"),
+        "description": profile_cfg.get("description"),
+        "notes": profile_cfg.get("notes"),
+        "serve_args": resolved.get("serve_args", ""),
+        "num_gpus": resolved.get("num_gpus"),
+        "extra_env_keys": sorted((resolved.get("extra_env") or {}).keys()),
+    }
+    return resolved
 
 
 # ---------------------------------------------------------------------------
@@ -824,7 +880,7 @@ def _benchmark_config(config: dict | None, case: dict) -> dict:
 
 
 def _base_result(case: dict, framework: str, mode: str) -> dict:
-    return {
+    result = {
         "case_id": case["id"],
         "framework": framework,
         "mode": mode,
@@ -837,13 +893,22 @@ def _base_result(case: dict, framework: str, mode: str) -> dict:
         "latency_s": None,
         "error": None,
     }
+    metadata = case.get("_framework_metadata")
+    if metadata:
+        result["framework_metadata"] = metadata
+    command = case.get("_server_command")
+    if command:
+        result["server_command"] = command
+    return result
 
 
 def _case_for_framework(case: dict, fw_cfg: dict) -> dict:
     overrides = {key: fw_cfg[key] for key in ("model", "num_gpus") if key in fw_cfg}
-    if not overrides:
-        return case
-    return {**case, **overrides}
+    case_for_fw = {**case, **overrides} if overrides else dict(case)
+    metadata = fw_cfg.get("_benchmark_metadata")
+    if metadata:
+        case_for_fw["_framework_metadata"] = metadata
+    return case_for_fw
 
 
 def _current_commit_sha() -> str:
@@ -883,6 +948,36 @@ def _collect_hardware_metadata() -> dict:
                 line.strip() for line in ret.stdout.splitlines() if line.strip()
             ]
     except (FileNotFoundError, subprocess.TimeoutExpired):
+        pass
+    return metadata
+
+
+def _collect_sglang_runtime_metadata() -> dict:
+    metadata = {}
+    try:
+        from importlib.metadata import version
+
+        metadata["package_version"] = version("sglang")
+    except Exception:
+        pass
+    try:
+        import sglang  # type: ignore
+
+        module_path = Path(sglang.__file__).resolve()
+        metadata["module_path"] = str(module_path)
+        for parent in module_path.parents:
+            if (parent / ".git").exists():
+                metadata["git_root"] = str(parent)
+                ret = subprocess.run(
+                    ["git", "-C", str(parent), "rev-parse", "HEAD"],
+                    capture_output=True,
+                    text=True,
+                    timeout=10,
+                )
+                if ret.returncode == 0:
+                    metadata["git_commit"] = ret.stdout.strip()
+                break
+    except Exception:
         pass
     return metadata
 
@@ -1063,6 +1158,7 @@ def run_case_framework(
     single_result = None
     throughput_result = None
     cmd = build_server_cmd(framework, case, fw_cfg, port)
+    case["_server_command"] = " ".join(cmd)
     print(f"\n  Command: {' '.join(cmd)}")
 
     env = os.environ.copy()
@@ -1180,6 +1276,7 @@ def run_comparison(
     case_ids: list[str] | None = None,
     frameworks: list[str] | None = None,
     modes: list[str] | None = None,
+    sglang_profile: str | None = None,
     port: int = DEFAULT_PORT,
     output: str = "comparison-results.json",
     dry_run: bool = False,
@@ -1209,9 +1306,12 @@ def run_comparison(
         for fw_name, fw_cfg in case["frameworks"].items():
             if frameworks and fw_name not in frameworks:
                 continue
+            resolved_fw_cfg = _resolve_framework_config(
+                fw_name, fw_cfg, sglang_profile
+            )
             if fw_name not in fw_cases:
                 fw_cases[fw_name] = []
-            fw_cases[fw_name].append((case, fw_cfg))
+            fw_cases[fw_name].append((case, resolved_fw_cfg))
 
     results = []
     throughput_results = []
@@ -1247,6 +1347,7 @@ def run_comparison(
             if dry_run:
                 case_for_fw = _case_for_framework(case, fw_cfg)
                 cmd = build_server_cmd(fw_name, case_for_fw, fw_cfg, port)
+                case_for_fw["_server_command"] = " ".join(cmd)
                 print(f"  [DRY-RUN] Would run: {' '.join(cmd)}")
                 if fw_name in INSTALLABLE_FRAMEWORKS:
                     print(f"  [DRY-RUN] venv: {_framework_venv_path(fw_name)}")
@@ -1277,7 +1378,9 @@ def run_comparison(
         "commit_sha": commit_sha,
         "run_id": run_id,
         "hardware": _collect_hardware_metadata(),
+        "sglang_runtime": _collect_sglang_runtime_metadata(),
         "benchmark_modes": modes,
+        "requested_sglang_profile": _requested_sglang_profile(sglang_profile),
         "results": results,
         "throughput_results": throughput_results,
     }
@@ -1343,6 +1446,15 @@ def main():
         help="Benchmark modes to run",
     )
     parser.add_argument(
+        "--sglang-profile",
+        default=None,
+        help=(
+            "SGLang command profile to use from each case's command_profiles. "
+            "Defaults to SGLANG_BENCH_SGLANG_PROFILE, SGLANG_BENCH_PROFILE, "
+            "then 'default'."
+        ),
+    )
+    parser.add_argument(
         "--port",
         type=int,
         default=DEFAULT_PORT,
@@ -1371,6 +1483,7 @@ def main():
         case_ids=args.case_ids,
         frameworks=args.frameworks,
         modes=args.modes,
+        sglang_profile=args.sglang_profile,
         port=args.port,
         output=args.output,
         dry_run=args.dry_run,

@@ -39,12 +39,37 @@ diffusion-bench-compare --dry-run --modes single_e2e throughput
 ```bash
 diffusion-bench-compare \
   --config configs/comparison_configs.json \
+  --sglang-profile default \
   --case-ids qwen_image_2512_t2i_1024 qwen_image_edit_2511 \
   --frameworks sglang vllm-omni \
   --modes single_e2e throughput \
   --port 30200 \
   --output comparison-results.json
 ```
+
+## SGLang Command Profiles
+
+Each case can track version-specific best commands for the `sglang` backend:
+
+```json
+"sglang": {
+  "serve_args": "--enable-torch-compile --warmup",
+  "command_profiles": {
+    "default": {
+      "sglang_ref": "current-main",
+      "serve_args": "--enable-torch-compile --warmup",
+      "notes": "Best known command for this SGLang line."
+    },
+    "v0.5.0-h100": {
+      "sglang_ref": "v0.5.0",
+      "serve_args": "--warmup",
+      "notes": "Example: older release where compile was not the best option."
+    }
+  }
+}
+```
+
+Select a profile with `--sglang-profile <name>` or `SGLANG_BENCH_SGLANG_PROFILE=<name>`. The runner records the selected profile, `sglang_ref`, effective `serve_args`, actual server command, and best-effort SGLang runtime metadata in `comparison-results.json`.
 
 ## Generate Dashboard
 
@@ -60,4 +85,5 @@ diffusion-bench-dashboard \
 - No response cache or Cache-DiT is enabled by default.
 - The CLI bundles a default config. Pass `--config configs/comparison_configs.json` when editing the repo copy.
 - The default config uses model defaults for omitted sampling params and overrides only resolution, seed, and framework-specific launch args.
+- SGLang command profiles are per case because the best serving command can change by model and SGLang version.
 - Video models may require large GPUs and framework-specific runtime packages.
