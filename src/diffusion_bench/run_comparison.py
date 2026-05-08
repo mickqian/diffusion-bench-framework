@@ -1155,15 +1155,18 @@ def run_throughput(
     with open(metrics_path) as f:
         metrics = json.load(f)
 
+    completed_requests = int(metrics.get("completed_requests", 0) or 0)
+    failed_requests = int(metrics.get("failed_requests", 0) or 0)
+    observed_requests = completed_requests + failed_requests
+
     result.update(
         {
             "latency_s": round(metrics.get("latency_p50", 0), 3),
             "metrics": {
                 "duration_s": round(metrics.get("duration", 0), 3),
-                "num_requests": metrics.get("completed_requests", 0)
-                + metrics.get("failed_requests", 0),
-                "completed_requests": metrics.get("completed_requests", 0),
-                "failed_requests": metrics.get("failed_requests", 0),
+                "num_requests": observed_requests,
+                "completed_requests": completed_requests,
+                "failed_requests": failed_requests,
                 "max_concurrency": max_concurrency,
                 "throughput_rps": round(metrics.get("throughput_qps", 0), 4),
                 "output_throughput_ops": round(
@@ -1177,6 +1180,12 @@ def run_throughput(
             },
         }
     )
+    if failed_requests or completed_requests != num_requests:
+        result["error"] = (
+            "bench_serving partial failure "
+            f"({completed_requests}/{num_requests} completed, "
+            f"{failed_requests} failed)"
+        )
     return result
 
 
