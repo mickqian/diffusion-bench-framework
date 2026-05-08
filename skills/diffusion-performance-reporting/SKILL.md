@@ -10,9 +10,10 @@ description: Use when generating formal benchmark reports, dashboards, summaries
 A formal report should append one comment to the fixed tracker issue, not open a new issue. The comment should contain only benchmark data:
 
 - run timestamp, benchmark commit, SGLang commit/version, run id, GPU count, and GPU model
-- case, model, task, dimensions, steps, CFG fields, framework, and GPU count
+- one grouped comparison block per case, with model, task, dimensions, steps, CFG fields, framework, and GPU count
 - single-request latency and status
 - throughput p50/p95/RPS and status
+- ratio-to-SGLang columns for same-case comparison
 
 ## Issue Workflow
 
@@ -23,9 +24,15 @@ A formal report should append one comment to the fixed tracker issue, not open a
 
 ## Tables
 
-The formal issue comment uses one normalized table:
+The formal issue comment uses one grouped comparison block per case:
 
-| case | model | task | dims | steps | cfg | framework | gpus | single_e2e_s | single_status | throughput_p50_s | throughput_p95_s | throughput_rps | throughput_status |
+Case metadata:
+
+| model | task | dims | steps | cfg |
+
+Framework comparison:
+
+| framework | gpus | single_e2e_s | single/sglang | single_status | throughput_p50_s | p50/sglang | throughput_p95_s | throughput_rps | rps/sglang | throughput_status |
 
 ## Interpretation
 

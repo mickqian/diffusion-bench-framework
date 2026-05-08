@@ -640,8 +640,60 @@ def _fmt_report_float(value: object) -> str:
         return _md_cell(value)
 
 
-def _result_key(entry: dict) -> tuple[str, str]:
-    return str(entry.get("case_id") or ""), str(entry.get("framework") or "")
+def _fmt_report_rps(value: object) -> str:
+    if value is None:
+        return "-"
+    try:
+        return f"{float(value):.4f}"
+    except (TypeError, ValueError):
+        return _md_cell(value)
+
+
+def _fmt_report_ratio(value: object, baseline: object) -> str:
+    try:
+        numerator = float(value)
+        denominator = float(baseline)
+    except (TypeError, ValueError):
+        return "-"
+    if denominator <= 0:
+        return "-"
+    return f"{numerator / denominator:.3f}x"
+
+
+def _case_id(entry: dict) -> str:
+    return str(entry.get("case_id") or "")
+
+
+def _framework_name(entry: dict) -> str:
+    return str(entry.get("framework") or "")
+
+
+def _framework_sort_key(framework: str) -> tuple[int, str]:
+    preferred = {
+        "sglang": 0,
+        "vllm-omni": 1,
+        "lightx2v": 2,
+        "diffusers": 3,
+    }
+    return preferred.get(framework, 100), framework
+
+
+def _group_results_by_case(entries: list[dict]) -> dict[str, dict[str, dict]]:
+    grouped: dict[str, dict[str, dict]] = {}
+    for entry in entries:
+        grouped.setdefault(_case_id(entry), {})[_framework_name(entry)] = entry
+    return grouped
+
+
+def _ordered_case_ids(results: dict) -> list[str]:
+    ordered = []
+    seen = set()
+    for entry in results.get("results", []) + results.get("throughput_results", []):
+        case_id = _case_id(entry)
+        if case_id and case_id not in seen:
+            ordered.append(case_id)
+            seen.add(case_id)
+    return ordered
 
 
 def _format_dims(entry: dict) -> str:
@@ -671,15 +723,47 @@ def _format_cfg(entry: dict) -> str:
 def _result_status(entry: dict | None) -> str:
     if not entry:
         return "-"
-    return "failed" if entry.get("error") else "ok"
+    error = str(entry.get("error") or "")
+    if not error:
+        return "ok"
+    if "partial failure" in error:
+        return "partial"
+    return "failed"
+
+
+def _throughput_p50(entry: dict | None) -> object:
+    metrics = (entry or {}).get("metrics") or {}
+    return (
+        metrics.get("latency_p50_s")
+        or metrics.get("latency_p50")
+        or (entry or {}).get("latency_s")
+    )
+
+
+def _throughput_p95(entry: dict | None) -> object:
+    metrics = (entry or {}).get("metrics") or {}
+    return metrics.get("latency_p95_s") or metrics.get("latency_p95")
+
+
+def _throughput_rps(entry: dict | None) -> object:
+    return ((entry or {}).get("metrics") or {}).get("throughput_rps")
+
+
+def _successful_metric(entry: dict | None, key: str) -> object:
+    if _result_status(entry) != "ok":
+        return None
+    return (entry or {}).get(key)
+
+
+def _successful_throughput_metric(entry: dict | None, getter) -> object:
+    if _result_status(entry) != "ok":
+        return None
+    return getter(entry)
 
 
 def build_issue_report_comment(results: dict) -> str:
-    single = {_result_key(entry): entry for entry in results.get("results", [])}
-    throughput = {
-        _result_key(entry): entry for entry in results.get("throughput_results", [])
-    }
-    keys = sorted(set(single) | set(throughput))
+    single_by_case = _group_results_by_case(results.get("results", []))
+    throughput_by_case = _group_results_by_case(results.get("throughput_results", []))
     gpus = (results.get("hardware") or {}).get("gpus") or []
     gpu_model = "; ".join(sorted(set(gpus)))
     sglang_runtime = results.get("sglang_runtime") or {}
@@ -702,38 +786,71 @@ def build_issue_report_comment(results: dict) -> str:
         )
         + " |",
         "",
-        "| case | model | task | dims | steps | cfg | framework | gpus | single_e2e_s | single_status | throughput_p50_s | throughput_p95_s | throughput_rps | throughput_status |",
-        "| --- | --- | --- | --- | ---: | --- | --- | ---: | ---: | --- | ---: | ---: | ---: | --- |",
+        "Ratio columns are framework value divided by SGLang value for the same case.",
     ]
 
-    for key in keys:
-        single_entry = single.get(key)
-        throughput_entry = throughput.get(key)
-        entry = single_entry or throughput_entry or {}
-        metrics = (throughput_entry or {}).get("metrics") or {}
-        row = [
-            _md_cell(entry.get("case_id")),
-            _md_cell(entry.get("model")),
-            _md_cell(entry.get("task")),
-            _md_cell(_format_dims(entry)),
-            _md_cell(entry.get("num_inference_steps")),
-            _md_cell(_format_cfg(entry)),
-            _md_cell(entry.get("framework")),
-            _md_cell(entry.get("num_gpus")),
-            _fmt_report_float((single_entry or {}).get("latency_s")),
-            _result_status(single_entry),
-            _fmt_report_float(
-                metrics.get("latency_p50_s")
-                or metrics.get("latency_p50")
-                or (throughput_entry or {}).get("latency_s")
-            ),
-            _fmt_report_float(
-                metrics.get("latency_p95_s") or metrics.get("latency_p95")
-            ),
-            _fmt_report_float(metrics.get("throughput_rps")),
-            _result_status(throughput_entry),
-        ]
-        lines.append("| " + " | ".join(row) + " |")
+    for case_id in _ordered_case_ids(results):
+        single_fws = single_by_case.get(case_id, {})
+        throughput_fws = throughput_by_case.get(case_id, {})
+        frameworks = sorted(
+            set(single_fws) | set(throughput_fws), key=_framework_sort_key
+        )
+        case_entry = (
+            single_fws.get("sglang")
+            or throughput_fws.get("sglang")
+            or single_fws.get(frameworks[0])
+            or throughput_fws.get(frameworks[0])
+        )
+        sglang_single = single_fws.get("sglang")
+        sglang_throughput = throughput_fws.get("sglang")
+        sglang_single_latency = _successful_metric(sglang_single, "latency_s")
+        sglang_p50 = _successful_throughput_metric(sglang_throughput, _throughput_p50)
+        sglang_rps = _successful_throughput_metric(sglang_throughput, _throughput_rps)
+
+        lines.extend(
+            [
+                "",
+                f"### {_md_cell(case_id)}",
+                "",
+                "| model | task | dims | steps | cfg |",
+                "| --- | --- | --- | ---: | --- |",
+                "| "
+                + " | ".join(
+                    [
+                        _md_cell(case_entry.get("model")),
+                        _md_cell(case_entry.get("task")),
+                        _md_cell(_format_dims(case_entry)),
+                        _md_cell(case_entry.get("num_inference_steps")),
+                        _md_cell(_format_cfg(case_entry)),
+                    ]
+                )
+                + " |",
+                "",
+                "| framework | gpus | single_e2e_s | single/sglang | single_status | throughput_p50_s | p50/sglang | throughput_p95_s | throughput_rps | rps/sglang | throughput_status |",
+                "| --- | ---: | ---: | ---: | --- | ---: | ---: | ---: | ---: | ---: | --- |",
+            ]
+        )
+        for framework in frameworks:
+            single_entry = single_fws.get(framework)
+            throughput_entry = throughput_fws.get(framework)
+            entry = single_entry or throughput_entry or {}
+            single_latency = (single_entry or {}).get("latency_s")
+            throughput_p50 = _throughput_p50(throughput_entry)
+            throughput_rps = _throughput_rps(throughput_entry)
+            row = [
+                _md_cell(framework),
+                _md_cell(entry.get("num_gpus")),
+                _fmt_report_float(single_latency),
+                _fmt_report_ratio(single_latency, sglang_single_latency),
+                _result_status(single_entry),
+                _fmt_report_float(throughput_p50),
+                _fmt_report_ratio(throughput_p50, sglang_p50),
+                _fmt_report_float(_throughput_p95(throughput_entry)),
+                _fmt_report_rps(throughput_rps),
+                _fmt_report_ratio(throughput_rps, sglang_rps),
+                _result_status(throughput_entry),
+            ]
+            lines.append("| " + " | ".join(row) + " |")
 
     return "\n".join(lines) + "\n"
 
