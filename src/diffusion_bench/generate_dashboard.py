@@ -723,6 +723,12 @@ def _format_cfg(entry: dict) -> str:
 def _result_status(entry: dict | None) -> str:
     if not entry:
         return "-"
+    metrics = entry.get("metrics") or {}
+    failed_requests = int(metrics.get("failed_requests", 0) or 0)
+    completed_requests = int(metrics.get("completed_requests", 0) or 0)
+    num_requests = int(metrics.get("num_requests", 0) or 0)
+    if failed_requests or (num_requests and completed_requests != num_requests):
+        return "partial"
     error = str(entry.get("error") or "")
     if not error:
         return "ok"
