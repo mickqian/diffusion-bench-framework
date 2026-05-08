@@ -12,7 +12,7 @@ Usage:
     diffusion-bench-serving --dataset vbench --num-prompts 20 --port 1231
 
     # benchmark with SLO metrics enabled
-    diffusion-bench-serving --dataset vbench --num-prompts 20 --port 1231 --slo --slo-scale 3.0 --warmup-requests 2
+    diffusion-bench-serving --dataset vbench --num-prompts 20 --port 1231 --slo --slo-scale 3.0 --warmup-requests 2 --warmup-inference-steps 3
 """
 
 import argparse
@@ -792,13 +792,9 @@ async def benchmark(args):
             return await request_func(req, session, pbar)
 
     async with aiohttp.ClientSession() as session:
-        # Run warmup requests
         warmup_pairs: List[tuple] = []
         if args.warmup_requests and requests_list:
-            # The server always overrides warmup requests to use
-            # num_inference_steps=1 (see Req.set_as_warmup), so we match
-            # that here to keep the benchmark's SLO estimation consistent.
-            warmup_steps = 1
+            warmup_steps = args.warmup_inference_steps
             logger.info(
                 f"Running {args.warmup_requests} warmup request(s) with "
                 f"num_inference_steps={warmup_steps}..."
@@ -1058,6 +1054,12 @@ def main() -> None:
         help="Number of warmup requests to run before measurement.",
     )
     parser.add_argument(
+        "--warmup-inference-steps",
+        type=int,
+        default=3,
+        help="Number of inference steps for warmup requests.",
+    )
+    parser.add_argument(
         "--num-inference-steps",
         type=int,
         default=None,
@@ -1067,6 +1069,11 @@ def main() -> None:
     args = parser.parse_args()
 
     configure_logger(args)
+
+    if args.warmup_inference_steps <= 0:
+        raise ValueError(
+            f"warmup_inference_steps must be positive, got {args.warmup_inference_steps}."
+        )
 
     asyncio.run(benchmark(args))
 
