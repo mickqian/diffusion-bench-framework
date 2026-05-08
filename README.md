@@ -73,6 +73,8 @@ Each case can track version-specific best commands for the `sglang` backend:
 
 Select a profile with `--sglang-profile <name>` or `SGLANG_BENCH_SGLANG_PROFILE=<name>`. The runner records the selected profile, `sglang_ref`, effective `serve_args`, actual server command, and best-effort SGLang runtime metadata in `comparison-results.json`.
 
+Framework entries may set `model_path` when the server needs a local mirror or snapshot path while the report should keep the official `model` ID.
+
 ## Repo Skills
 
 This repo includes Codex skills that encode the operating discipline for long-term benchmark maintenance:

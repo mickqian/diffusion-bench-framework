@@ -60,7 +60,13 @@ DEFAULT_SGLANG_PROFILE = "default"
 # Frameworks that need separate installation (conflict with sglang's deps)
 INSTALLABLE_FRAMEWORKS = {"vllm-omni", "lightx2v"}
 FRAMEWORK_ORDER = ["sglang", "vllm-omni", "lightx2v"]
-SGLANG_PROFILE_RUNTIME_KEYS = {"serve_args", "num_gpus", "extra_env", "benchmark"}
+SGLANG_PROFILE_RUNTIME_KEYS = {
+    "serve_args",
+    "num_gpus",
+    "extra_env",
+    "benchmark",
+    "model_path",
+}
 
 # Cached reference image (downloaded once)
 _cached_ref_image: bytes | None = None
@@ -73,11 +79,12 @@ _cached_ref_image_path: str | None = None
 
 
 def _build_sglang_cmd(case: dict, fw_cfg: dict, port: int) -> list[str]:
+    model_path = _server_model_path(case, fw_cfg)
     cmd = [
         "sglang",
         "serve",
         "--model-path",
-        case["model"],
+        model_path,
         "--port",
         str(port),
         "--host",
@@ -91,10 +98,11 @@ def _build_sglang_cmd(case: dict, fw_cfg: dict, port: int) -> list[str]:
 
 
 def _build_vllm_cmd(case: dict, fw_cfg: dict, port: int) -> list[str]:
+    model_path = _server_model_path(case, fw_cfg)
     cmd = [
         "vllm",
         "serve",
-        case["model"],
+        model_path,
         "--omni",
         "--port",
         str(port),
@@ -168,7 +176,7 @@ def _build_lightx2v_cmd(case: dict, fw_cfg: dict, port: int) -> list[str]:
     model_cls = fw_cfg["model_cls"]
     task = fw_cfg["lightx2v_task"]
     num_gpus = case["num_gpus"]
-    model_path = case["model"]
+    model_path = _server_model_path(case, fw_cfg)
     if not fw_cfg.get("_skip_model_path_resolution"):
         model_path = _resolve_hf_model_path(model_path)
     config_path = _write_lightx2v_config(case, fw_cfg)
@@ -201,6 +209,10 @@ def _build_lightx2v_cmd(case: dict, fw_cfg: dict, port: int) -> list[str]:
         cmd = ["python3", "-m", "lightx2v.server"] + server_args
 
     return cmd
+
+
+def _server_model_path(case: dict, fw_cfg: dict) -> str:
+    return os.path.expandvars(str(fw_cfg.get("model_path") or case["model"]))
 
 
 def build_server_cmd(framework: str, case: dict, fw_cfg: dict, port: int) -> list[str]:
