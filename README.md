@@ -16,6 +16,8 @@ The repo launches one serving stack per case, sends a single end-to-end request,
 - `src/diffusion_bench/generate_dashboard.py`: Markdown dashboard generator.
 - `configs/comparison_configs.json`: editable copy of the default model, prompt, shape, seed, and framework settings.
 - `scripts/install_comparison_frameworks.sh`: isolated venv installer for vLLM-Omni and LightX2V.
+- `skills/`: repo-local Codex skills for maintaining long-term performance tracking.
+- `.github/ISSUE_TEMPLATE/performance-report.yml`: issue template for benchmark reports and blocked comparisons.
 
 ## Install
 
@@ -70,6 +72,19 @@ Each case can track version-specific best commands for the `sglang` backend:
 ```
 
 Select a profile with `--sglang-profile <name>` or `SGLANG_BENCH_SGLANG_PROFILE=<name>`. The runner records the selected profile, `sglang_ref`, effective `serve_args`, actual server command, and best-effort SGLang runtime metadata in `comparison-results.json`.
+
+## Repo Skills
+
+This repo includes Codex skills that encode the operating discipline for long-term benchmark maintenance:
+
+- `skills/diffusion-bench-maintainer`: maintain runner/config/dashboard semantics without breaking comparability.
+- `skills/diffusion-case-onboarding`: add new model/framework cases and SGLang command profiles.
+- `skills/diffusion-regression-investigator`: investigate when SGLang-Diffusion appears slower or a comparison looks unfair.
+- `skills/diffusion-performance-reporting`: file GitHub issues that separate valid performance data from blocked or invalid runs.
+
+Install or symlink them into your Codex skills directory when you want them auto-discovered.
+
+Performance reports should normally be tracked as GitHub issues using the `Performance Report` template. Use labels like `performance`, `benchmark`, `sgld`, `regression`, and `blocked` to make historical tracking searchable.
 
 ## Generate Dashboard
 
