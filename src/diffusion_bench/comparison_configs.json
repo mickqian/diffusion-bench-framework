@@ -26,13 +26,13 @@
             "guidance_scale": 3.5,
             "frameworks": {
                 "sglang": {
-                    "serve_args": "--enable-torch-compile --warmup --dit-layerwise-offload false",
+                    "serve_args": "--model-type diffusion --enable-torch-compile --warmup --dit-layerwise-offload false",
                     "extra_env": {},
                     "command_profiles": {
                         "default": {
                             "description": "Best known SGLang command for the benchmark repo default profile.",
                             "sglang_ref": "current-main",
-                            "serve_args": "--enable-torch-compile --warmup --dit-layerwise-offload false",
+                            "serve_args": "--model-type diffusion --enable-torch-compile --warmup --dit-layerwise-offload false",
                             "notes": "Keep this profile updated when the best command changes for a SGLang release or commit."
                         }
                     }
@@ -52,13 +52,13 @@
             "guidance_scale": 4.0,
             "frameworks": {
                 "sglang": {
-                    "serve_args": "--enable-torch-compile --warmup --dit-layerwise-offload false",
+                    "serve_args": "--model-type diffusion --enable-torch-compile --warmup --dit-layerwise-offload false",
                     "extra_env": {},
                     "command_profiles": {
                         "default": {
                             "description": "Best known SGLang command for the benchmark repo default profile.",
                             "sglang_ref": "current-main",
-                            "serve_args": "--enable-torch-compile --warmup --dit-layerwise-offload false",
+                            "serve_args": "--model-type diffusion --enable-torch-compile --warmup --dit-layerwise-offload false",
                             "notes": "Keep this profile updated when the best command changes for a SGLang release or commit."
                         }
                     }
@@ -78,13 +78,13 @@
             "guidance_scale": 1.0,
             "frameworks": {
                 "sglang": {
-                    "serve_args": "--enable-torch-compile --warmup",
+                    "serve_args": "--model-type diffusion --enable-torch-compile --warmup",
                     "extra_env": {},
                     "command_profiles": {
                         "default": {
                             "description": "Best known SGLang command for the benchmark repo default profile.",
                             "sglang_ref": "current-main",
-                            "serve_args": "--enable-torch-compile --warmup",
+                            "serve_args": "--model-type diffusion --enable-torch-compile --warmup",
                             "notes": "Keep this profile updated when the best command changes for a SGLang release or commit."
                         }
                     }
@@ -111,13 +111,13 @@
             "true_cfg_scale": 4.0,
             "frameworks": {
                 "sglang": {
-                    "serve_args": "--enable-torch-compile --warmup",
+                    "serve_args": "--model-type diffusion --enable-torch-compile --warmup",
                     "extra_env": {},
                     "command_profiles": {
                         "default": {
                             "description": "Best known SGLang command for the benchmark repo default profile.",
                             "sglang_ref": "current-main",
-                            "serve_args": "--enable-torch-compile --warmup",
+                            "serve_args": "--model-type diffusion --enable-torch-compile --warmup",
                             "notes": "Keep this profile updated when the best command changes for a SGLang release or commit."
                         }
                     }
@@ -143,13 +143,13 @@
             "guidance_scale": 1.0,
             "frameworks": {
                 "sglang": {
-                    "serve_args": "--enable-torch-compile --warmup",
+                    "serve_args": "--model-type diffusion --enable-torch-compile --warmup",
                     "extra_env": {},
                     "command_profiles": {
                         "default": {
                             "description": "Best known SGLang command for the benchmark repo default profile.",
                             "sglang_ref": "current-main",
-                            "serve_args": "--enable-torch-compile --warmup",
+                            "serve_args": "--model-type diffusion --enable-torch-compile --warmup",
                             "notes": "Keep this profile updated when the best command changes for a SGLang release or commit."
                         }
                     }
@@ -177,13 +177,13 @@
             "true_cfg_scale": 4.0,
             "frameworks": {
                 "sglang": {
-                    "serve_args": "--enable-torch-compile --warmup",
+                    "serve_args": "--model-type diffusion --enable-torch-compile --warmup",
                     "extra_env": {},
                     "command_profiles": {
                         "default": {
                             "description": "Best known SGLang command for the benchmark repo default profile.",
                             "sglang_ref": "current-main",
-                            "serve_args": "--enable-torch-compile --warmup",
+                            "serve_args": "--model-type diffusion --enable-torch-compile --warmup",
                             "notes": "Keep this profile updated when the best command changes for a SGLang release or commit."
                         }
                     }
@@ -206,13 +206,13 @@
             "num_gpus": 1,
             "frameworks": {
                 "sglang": {
-                    "serve_args": "--enable-torch-compile --warmup",
+                    "serve_args": "--model-type diffusion --enable-torch-compile --warmup",
                     "extra_env": {},
                     "command_profiles": {
                         "default": {
                             "description": "Best known SGLang command for the benchmark repo default profile.",
                             "sglang_ref": "current-main",
-                            "serve_args": "--enable-torch-compile --warmup",
+                            "serve_args": "--model-type diffusion --enable-torch-compile --warmup",
                             "notes": "Keep this profile updated when the best command changes for a SGLang release or commit."
                         }
                     }
@@ -235,13 +235,13 @@
             "guidance_scale_2": 3.0,
             "frameworks": {
                 "sglang": {
-                    "serve_args": "--enable-torch-compile --warmup --enable-cfg-parallel --ulysses-degree 2 --text-encoder-cpu-offload --pin-cpu-memory",
+                    "serve_args": "--model-type diffusion --enable-torch-compile --warmup --enable-cfg-parallel --ulysses-degree 2 --text-encoder-cpu-offload --pin-cpu-memory",
                     "extra_env": {},
                     "command_profiles": {
                         "default": {
                             "description": "Best known SGLang command for the benchmark repo default profile.",
                             "sglang_ref": "current-main",
-                            "serve_args": "--enable-torch-compile --warmup --enable-cfg-parallel --ulysses-degree 2 --text-encoder-cpu-offload --pin-cpu-memory",
+                            "serve_args": "--model-type diffusion --enable-torch-compile --warmup --enable-cfg-parallel --ulysses-degree 2 --text-encoder-cpu-offload --pin-cpu-memory",
                             "notes": "Keep this profile updated when the best command changes for a SGLang release or commit."
                         }
                     }
@@ -296,13 +296,13 @@
             "guidance_scale": 5.0,
             "frameworks": {
                 "sglang": {
-                    "serve_args": "--enable-torch-compile --warmup",
+                    "serve_args": "--model-type diffusion --enable-torch-compile --warmup",
                     "extra_env": {},
                     "command_profiles": {
                         "default": {
                             "description": "Best known SGLang command for the benchmark repo default profile.",
                             "sglang_ref": "current-main",
-                            "serve_args": "--enable-torch-compile --warmup",
+                            "serve_args": "--model-type diffusion --enable-torch-compile --warmup",
                             "notes": "Keep this profile updated when the best command changes for a SGLang release or commit."
                         }
                     }
@@ -351,13 +351,13 @@
             "guidance_scale": 4.0,
             "frameworks": {
                 "sglang": {
-                    "serve_args": "--enable-torch-compile --warmup --enable-cfg-parallel --pipeline-class-name LTX2TwoStagePipeline",
+                    "serve_args": "--model-type diffusion --enable-torch-compile --warmup --enable-cfg-parallel --pipeline-class-name LTX2TwoStagePipeline",
                     "extra_env": {},
                     "command_profiles": {
                         "default": {
                             "description": "Best known SGLang command for the benchmark repo default profile.",
                             "sglang_ref": "current-main",
-                            "serve_args": "--enable-torch-compile --warmup --enable-cfg-parallel --pipeline-class-name LTX2TwoStagePipeline",
+                            "serve_args": "--model-type diffusion --enable-torch-compile --warmup --enable-cfg-parallel --pipeline-class-name LTX2TwoStagePipeline",
                             "notes": "Keep this profile updated when the best command changes for a SGLang release or commit."
                         }
                     }
@@ -380,13 +380,13 @@
             "guidance_scale": 3.0,
             "frameworks": {
                 "sglang": {
-                    "serve_args": "--enable-torch-compile --warmup --pipeline-class-name LTX2TwoStagePipeline",
+                    "serve_args": "--model-type diffusion --enable-torch-compile --warmup --pipeline-class-name LTX2TwoStagePipeline",
                     "extra_env": {},
                     "command_profiles": {
                         "default": {
                             "description": "Best known SGLang command for the benchmark repo default profile.",
                             "sglang_ref": "current-main",
-                            "serve_args": "--enable-torch-compile --warmup --pipeline-class-name LTX2TwoStagePipeline",
+                            "serve_args": "--model-type diffusion --enable-torch-compile --warmup --pipeline-class-name LTX2TwoStagePipeline",
                             "notes": "Keep this profile updated when the best command changes for a SGLang release or commit."
                         }
                     }
@@ -410,13 +410,13 @@
             "guidance_scale_2": 3.5,
             "frameworks": {
                 "sglang": {
-                    "serve_args": "--enable-torch-compile --warmup --enable-cfg-parallel --ulysses-degree 2 --text-encoder-cpu-offload --pin-cpu-memory",
+                    "serve_args": "--model-type diffusion --enable-torch-compile --warmup --enable-cfg-parallel --ulysses-degree 2 --text-encoder-cpu-offload --pin-cpu-memory",
                     "extra_env": {},
                     "command_profiles": {
                         "default": {
                             "description": "Best known SGLang command for the benchmark repo default profile.",
                             "sglang_ref": "current-main",
-                            "serve_args": "--enable-torch-compile --warmup --enable-cfg-parallel --ulysses-degree 2 --text-encoder-cpu-offload --pin-cpu-memory",
+                            "serve_args": "--model-type diffusion --enable-torch-compile --warmup --enable-cfg-parallel --ulysses-degree 2 --text-encoder-cpu-offload --pin-cpu-memory",
                             "notes": "Keep this profile updated when the best command changes for a SGLang release or commit."
                         }
                     }

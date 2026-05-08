@@ -28,7 +28,13 @@ python3 -m pip install -U pip
 python3 -m pip install -e .
 ```
 
-SGLang-Diffusion must be installed in the environment if you want to run the `sglang` framework. vLLM-Omni and LightX2V are installed into isolated temporary virtualenvs by the runner because their dependencies conflict with SGLang.
+SGLang-Diffusion must be installed in the main environment if you want to run the `sglang` framework. Install it with the diffusion extra, for example:
+
+```bash
+python3 -m pip install -e /path/to/sglang/python[diffusion]
+```
+
+vLLM-Omni and LightX2V are installed into isolated temporary virtualenvs by the runner because their dependencies conflict with SGLang.
 
 ## Dry Run
 
@@ -56,11 +62,11 @@ Each case can track version-specific best commands for the `sglang` backend:
 
 ```json
 "sglang": {
-  "serve_args": "--enable-torch-compile --warmup",
+  "serve_args": "--model-type diffusion --enable-torch-compile --warmup",
   "command_profiles": {
     "default": {
       "sglang_ref": "current-main",
-      "serve_args": "--enable-torch-compile --warmup",
+      "serve_args": "--model-type diffusion --enable-torch-compile --warmup",
       "notes": "Best known command for this SGLang line."
     },
     "v0.5.0-h100": {
