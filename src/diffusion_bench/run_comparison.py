@@ -168,7 +168,9 @@ def _build_lightx2v_cmd(case: dict, fw_cfg: dict, port: int) -> list[str]:
     model_cls = fw_cfg["model_cls"]
     task = fw_cfg["lightx2v_task"]
     num_gpus = case["num_gpus"]
-    model_path = _resolve_hf_model_path(case["model"])
+    model_path = case["model"]
+    if not fw_cfg.get("_skip_model_path_resolution"):
+        model_path = _resolve_hf_model_path(model_path)
     config_path = _write_lightx2v_config(case, fw_cfg)
 
     server_args = [
@@ -1368,7 +1370,9 @@ def run_comparison(
 
             if dry_run:
                 case_for_fw = _case_for_framework(case, fw_cfg)
-                cmd = build_server_cmd(fw_name, case_for_fw, fw_cfg, port)
+                dry_fw_cfg = dict(fw_cfg)
+                dry_fw_cfg["_skip_model_path_resolution"] = True
+                cmd = build_server_cmd(fw_name, case_for_fw, dry_fw_cfg, port)
                 case_for_fw["_server_command"] = " ".join(cmd)
                 print(f"  [DRY-RUN] Would run: {' '.join(cmd)}")
                 if fw_name in INSTALLABLE_FRAMEWORKS:
