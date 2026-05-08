@@ -1,0 +1,15 @@
+__pycache__/
+*.py[cod]
+.venv/
+.mypy_cache/
+.pytest_cache/
+build/
+dist/
+*.egg-info/
+
+comparison-logs/
+comparison-charts/
+comparison-results.json
+dashboard.md
+outputs/
+

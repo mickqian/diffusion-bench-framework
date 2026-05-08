@@ -1,0 +1,8 @@
+aiohttp
+huggingface_hub
+matplotlib
+numpy
+pillow
+requests
+tqdm
+

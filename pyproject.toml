@@ -1,0 +1,30 @@
+[build-system]
+requires = ["setuptools>=77", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "diffusion-bench-framework"
+version = "0.1.0"
+description = "Cross-framework benchmark harness for diffusion serving stacks."
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = [
+  "aiohttp",
+  "huggingface_hub",
+  "matplotlib",
+  "numpy",
+  "pillow",
+  "requests",
+  "tqdm",
+]
+
+[project.scripts]
+diffusion-bench-compare = "diffusion_bench.run_comparison:main"
+diffusion-bench-serving = "diffusion_bench.bench_serving:main"
+diffusion-bench-dashboard = "diffusion_bench.generate_dashboard:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.setuptools.package-data]
+diffusion_bench = ["comparison_configs.json"]
