@@ -624,160 +624,128 @@ def generate_dashboard(
     return "\n".join(lines) + "\n", alert_reasons
 
 
-ALERT_ASSIGNEES = ["mickqian", "bbuf", "yhyang201"]
-ALERT_LABEL = "perf-regression"
+def _md_cell(value: object) -> str:
+    if value is None:
+        return "-"
+    text = str(value).replace("\n", " ").replace("|", "\\|")
+    return text if text else "-"
 
 
-ALERT_ISSUE_TITLE = "[Diffusion CI] Performance regression tracker"
-
-
-def _find_alert_issue(repo: str) -> tuple[str | None, bool]:
-    """Find the perf-regression tracker issue (open OR closed).
-
-    Returns (issue_number, is_open).  Prefers an open issue; if none,
-    returns the most recent closed one so it can be reopened.
-    """
-    import subprocess
-
-    for state in ("open", "closed"):
-        result = subprocess.run(
-            [
-                "gh",
-                "issue",
-                "list",
-                "--repo",
-                repo,
-                "--label",
-                ALERT_LABEL,
-                "--state",
-                state,
-                "--json",
-                "number",
-                "--limit",
-                "1",
-            ],
-            capture_output=True,
-            text=True,
-            timeout=30,
-        )
-        if result.returncode != 0 or not result.stdout.strip():
-            continue
-        issues = json.loads(result.stdout)
-        if issues:
-            return str(issues[0]["number"]), state == "open"
-    return None, False
-
-
-def _create_alert_issue(alert_reasons: list[str]) -> None:
-    """Create or update the single perf-regression tracker issue.
-
-    Logic:
-    - If an open issue exists  → add a comment with the new alert.
-    - If a closed issue exists → reopen it, then add a comment.
-    - If no issue exists       → create one.
-
-    This guarantees at most one tracker issue ever exists.
-
-    Uses `gh` (GitHub CLI) which is available in all GitHub Actions runners.
-    Falls back silently outside CI.
-    """
-    import subprocess
-
-    run_url = ""
-    run_id = os.environ.get("GITHUB_RUN_ID", "")
-    repo = os.environ.get("GITHUB_REPOSITORY", "sgl-project/sglang")
-    server_url = os.environ.get("GITHUB_SERVER_URL", "https://github.com")
-    if run_id:
-        run_url = f"{server_url}/{repo}/actions/runs/{run_id}"
-
-    date = datetime.now(timezone.utc).strftime("%Y-%m-%d")
-
-    body_lines = [
-        f"## Performance Alert — {date}",
-        "",
-        "The nightly diffusion benchmark detected the following issue(s):",
-        "",
-    ]
-    for reason in alert_reasons:
-        body_lines.append(f"- {reason}")
-    if run_url:
-        body_lines += ["", f"**CI Run:** {run_url}"]
-    body = "\n".join(body_lines)
-
+def _fmt_report_float(value: object) -> str:
+    if value is None:
+        return "-"
     try:
-        existing, is_open = _find_alert_issue(repo)
+        return f"{float(value):.3f}"
+    except (TypeError, ValueError):
+        return _md_cell(value)
 
-        if existing:
-            # Reopen if closed
-            if not is_open:
-                subprocess.run(
-                    [
-                        "gh",
-                        "issue",
-                        "reopen",
-                        existing,
-                        "--repo",
-                        repo,
-                    ],
-                    capture_output=True,
-                    text=True,
-                    timeout=30,
-                )
-                print(f"Reopened alert issue #{existing}")
 
-            # Add comment
-            result = subprocess.run(
-                [
-                    "gh",
-                    "issue",
-                    "comment",
-                    existing,
-                    "--repo",
-                    repo,
-                    "--body",
-                    body,
-                ],
-                capture_output=True,
-                text=True,
-                timeout=30,
-            )
-            if result.returncode == 0:
-                print(f"Commented on alert issue #{existing}")
-            else:
-                print(
-                    f"Warning: failed to comment on issue #{existing} "
-                    f"(rc={result.returncode}): {result.stderr.strip()}"
-                )
-        else:
-            # Create a new issue
-            cmd = [
-                "gh",
-                "issue",
-                "create",
-                "--repo",
-                repo,
-                "--title",
-                ALERT_ISSUE_TITLE,
-                "--body",
-                body,
-                "--label",
-                ALERT_LABEL,
+def _result_key(entry: dict) -> tuple[str, str]:
+    return str(entry.get("case_id") or ""), str(entry.get("framework") or "")
+
+
+def _format_dims(entry: dict) -> str:
+    width = entry.get("width")
+    height = entry.get("height")
+    frames = entry.get("num_frames")
+    if width and height and frames:
+        return f"{width}x{height}x{frames}"
+    if width and height:
+        return f"{width}x{height}"
+    return "-"
+
+
+def _format_cfg(entry: dict) -> str:
+    parts = []
+    if entry.get("guidance_scale") is not None:
+        parts.append(f"gs={entry['guidance_scale']}")
+    if entry.get("guidance_scale_2") is not None:
+        parts.append(f"gs2={entry['guidance_scale_2']}")
+    if entry.get("true_cfg_scale") is not None:
+        parts.append(f"true={entry['true_cfg_scale']}")
+    if entry.get("negative_prompt_set"):
+        parts.append("neg=1")
+    return ",".join(parts) if parts else "-"
+
+
+def _result_status(entry: dict | None) -> str:
+    if not entry:
+        return "-"
+    return "failed" if entry.get("error") else "ok"
+
+
+def build_issue_report_comment(results: dict) -> str:
+    single = {_result_key(entry): entry for entry in results.get("results", [])}
+    throughput = {
+        _result_key(entry): entry for entry in results.get("throughput_results", [])
+    }
+    keys = sorted(set(single) | set(throughput))
+    gpus = (results.get("hardware") or {}).get("gpus") or []
+
+    lines = [
+        f"## Diffusion Benchmark Data - {_md_cell(results.get('timestamp'))}",
+        "",
+        "| commit | run_id | gpu_count |",
+        "| --- | --- | ---: |",
+        "| "
+        + " | ".join(
+            [
+                _md_cell(results.get("commit_sha")),
+                _md_cell(results.get("run_id")),
+                str(len(gpus)),
             ]
-            for user in ALERT_ASSIGNEES:
-                cmd += ["--assignee", user]
+        )
+        + " |",
+        "",
+        "| case | model | task | dims | steps | cfg | framework | gpus | single_e2e_s | single_status | throughput_p50_s | throughput_p95_s | throughput_rps | throughput_status |",
+        "| --- | --- | --- | --- | ---: | --- | --- | ---: | ---: | --- | ---: | ---: | ---: | --- |",
+    ]
 
-            result = subprocess.run(cmd, capture_output=True, text=True, timeout=30)
-            if result.returncode == 0:
-                print(f"Created alert issue: {result.stdout.strip()}")
-            else:
-                print(
-                    f"Warning: failed to create alert issue "
-                    f"(rc={result.returncode}): {result.stderr.strip()}"
-                )
-    except FileNotFoundError:
-        print("Warning: `gh` CLI not found — skipping alert issue creation")
-    except Exception as e:
-        print(f"Warning: failed to create/update alert issue: {e}")
+    for key in keys:
+        single_entry = single.get(key)
+        throughput_entry = throughput.get(key)
+        entry = single_entry or throughput_entry or {}
+        metrics = (throughput_entry or {}).get("metrics") or {}
+        row = [
+            _md_cell(entry.get("case_id")),
+            _md_cell(entry.get("model")),
+            _md_cell(entry.get("task")),
+            _md_cell(_format_dims(entry)),
+            _md_cell(entry.get("num_inference_steps")),
+            _md_cell(_format_cfg(entry)),
+            _md_cell(entry.get("framework")),
+            _md_cell(entry.get("num_gpus")),
+            _fmt_report_float((single_entry or {}).get("latency_s")),
+            _result_status(single_entry),
+            _fmt_report_float(
+                metrics.get("latency_p50") or (throughput_entry or {}).get("latency_s")
+            ),
+            _fmt_report_float(metrics.get("latency_p95")),
+            _fmt_report_float(metrics.get("throughput_rps")),
+            _result_status(throughput_entry),
+        ]
+        lines.append("| " + " | ".join(row) + " |")
+
+    return "\n".join(lines) + "\n"
+
+
+def _append_issue_report_comment(results: dict, repo: str, issue: str) -> None:
+    import subprocess
+
+    result = subprocess.run(
+        ["gh", "issue", "comment", issue, "--repo", repo, "--body-file", "-"],
+        input=build_issue_report_comment(results),
+        capture_output=True,
+        text=True,
+        timeout=30,
+    )
+    if result.returncode == 0:
+        print(f"Appended formal benchmark report to issue #{issue}")
+    else:
+        print(
+            f"Warning: failed to append report to issue #{issue} "
+            f"(rc={result.returncode}): {result.stderr.strip()}"
+        )
 
 
 # ---------------------------------------------------------------------------
@@ -819,6 +787,17 @@ def main():
         action="store_true",
         help="Also write to $GITHUB_STEP_SUMMARY",
     )
+    parser.add_argument(
+        "--report-issue",
+        default=os.environ.get("DIFFUSION_BENCH_REPORT_ISSUE"),
+        help="Append a data-only benchmark report comment to this existing issue number",
+    )
+    parser.add_argument(
+        "--report-repo",
+        default=os.environ.get("DIFFUSION_BENCH_REPORT_REPO")
+        or os.environ.get("GITHUB_REPOSITORY"),
+        help="GitHub repo for --report-issue, e.g. owner/name",
+    )
 
     args = parser.parse_args()
 
@@ -842,7 +821,7 @@ def main():
         print(f"Loaded {len(history)} historical run(s) from {args.history_dir}")
 
     # Generate dashboard
-    markdown, alert_reasons = generate_dashboard(
+    markdown, _alert_reasons = generate_dashboard(
         current, history, charts_dir=args.charts_dir
     )
 
@@ -862,11 +841,12 @@ def main():
         else:
             print("Warning: $GITHUB_STEP_SUMMARY not set, skipping")
 
-    # Create GitHub Issue for performance alerts (so assignees get notified)
-    if alert_reasons:
-        _create_alert_issue(alert_reasons)
+    if args.report_issue:
+        if not args.report_repo:
+            raise SystemExit("--report-repo is required when --report-issue is set")
+        _append_issue_report_comment(current, args.report_repo, args.report_issue)
     else:
-        print("No performance alerts — skipping issue creation.")
+        print("No report issue configured — skipping issue comment.")
 
 
 if __name__ == "__main__":

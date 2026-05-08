@@ -124,11 +124,23 @@ def _write_lightx2v_config(case: dict, fw_cfg: dict) -> str:
     """Write a minimal LightX2V config JSON and return its path."""
     cfg = {
         "infer_steps": case.get("num_inference_steps", 50),
-        "guidance_scale": case.get("guidance_scale", 4.0),
         "seed": case.get("seed", 42),
     }
+    if "guidance_scale" in case:
+        cfg["guidance_scale"] = case["guidance_scale"]
+    if (
+        str(fw_cfg.get("model_cls", "")).startswith("wan")
+        and "guidance_scale" in case
+    ):
+        cfg["sample_guide_scale"] = (
+            [case["guidance_scale"], case["guidance_scale_2"]]
+            if "guidance_scale_2" in case
+            else case["guidance_scale"]
+        )
     if "num_frames" in case:
         cfg["target_video_length"] = case["num_frames"]
+    if "fps" in case:
+        cfg["fps"] = case["fps"]
     if "height" in case:
         cfg["height"] = case["height"]
         cfg["target_height"] = case["height"]
@@ -893,6 +905,12 @@ def _base_result(case: dict, framework: str, mode: str) -> dict:
         "width": case.get("width"),
         "height": case.get("height"),
         "num_frames": case.get("num_frames"),
+        "fps": case.get("fps"),
+        "num_inference_steps": case.get("num_inference_steps"),
+        "guidance_scale": case.get("guidance_scale"),
+        "guidance_scale_2": case.get("guidance_scale_2"),
+        "true_cfg_scale": case.get("true_cfg_scale"),
+        "negative_prompt_set": "negative_prompt" in case,
         "num_gpus": case.get("num_gpus"),
         "latency_s": None,
         "error": None,

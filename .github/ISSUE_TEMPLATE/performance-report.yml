@@ -1,90 +1,13 @@
-name: Performance Report
-description: Track a diffusion benchmark result, regression, or blocked comparison.
-title: "[perf] "
+name: Performance Tracker Bootstrap
+description: Create the fixed tracker issue for generated benchmark report comments in a new fork.
+title: "[perf] Diffusion benchmark tracker"
 labels: ["performance", "benchmark", "sgld"]
 body:
   - type: textarea
-    id: verdict
+    id: tracker-purpose
     attributes:
-      label: Verdict
-      description: State whether SGLang-Diffusion is ahead, tied, behind, or whether the run is invalid/blocked.
-      placeholder: "SGLang-Diffusion is ... because ..."
+      label: Tracker Purpose
+      description: State that generated report comments should be appended here.
+      placeholder: "Generated benchmark reports append data-only comments to this issue."
     validations:
       required: true
-  - type: textarea
-    id: scope
-    attributes:
-      label: Scope
-      description: Cases, models, frameworks, shapes, frames, and benchmark modes covered.
-      placeholder: |
-        - case:
-        - model:
-        - frameworks:
-        - shape / frames:
-        - modes:
-    validations:
-      required: true
-  - type: textarea
-    id: environment
-    attributes:
-      label: Environment
-      description: Hardware, driver, SGLang ref/profile, package versions, and server commands.
-      placeholder: |
-        - GPU:
-        - driver:
-        - repo commit:
-        - SGLang profile:
-        - actual server command:
-    validations:
-      required: true
-  - type: textarea
-    id: results
-    attributes:
-      label: Results
-      description: Keep valid performance numbers separate from invalid or blocked runs.
-      placeholder: |
-        Valid results:
-        | case | framework | single | throughput | p50 | p95 |
-        | --- | --- | ---: | ---: | ---: | ---: |
-
-        Invalid / blocked:
-        | case | framework | blocker |
-        | --- | --- | --- |
-    validations:
-      required: true
-  - type: textarea
-    id: fairness
-    attributes:
-      label: Fairness Notes
-      description: Parameter alignment, known gaps, cache policy, warmup policy, and whether numbers are comparable.
-      placeholder: "Same model/shape/steps/seed? Same GPU? Any invalid runs?"
-    validations:
-      required: true
-  - type: textarea
-    id: stage-breakdown
-    attributes:
-      label: Stage Breakdown / Bottleneck
-      description: Denoising, VAE, text/image encoding, transport, compile, OOM, or dependency diagnosis.
-    validations:
-      required: false
-  - type: textarea
-    id: artifacts
-    attributes:
-      label: Artifacts
-      description: Result JSON, logs, dashboard, py-spy output, remote paths, or local artifact paths.
-      placeholder: |
-        - results:
-        - server logs:
-        - bench logs:
-        - dashboard:
-    validations:
-      required: true
-  - type: textarea
-    id: next-action
-    attributes:
-      label: Next Action
-      description: The concrete engineering or benchmarking follow-up.
-      placeholder: "Fix ..., rerun ..., add profile ..., or close as superseded by ..."
-    validations:
-      required: true
-

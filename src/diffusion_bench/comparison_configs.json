@@ -22,6 +22,8 @@
             "height": 1024,
             "seed": 42,
             "num_gpus": 1,
+            "num_inference_steps": 50,
+            "guidance_scale": 3.5,
             "frameworks": {
                 "sglang": {
                     "serve_args": "--enable-torch-compile --warmup --dit-layerwise-offload false",
@@ -46,6 +48,8 @@
             "height": 1024,
             "seed": 42,
             "num_gpus": 1,
+            "num_inference_steps": 50,
+            "guidance_scale": 4.0,
             "frameworks": {
                 "sglang": {
                     "serve_args": "--enable-torch-compile --warmup --dit-layerwise-offload false",
@@ -225,6 +229,10 @@
             "num_frames": 81,
             "seed": 42,
             "num_gpus": 4,
+            "fps": 16,
+            "num_inference_steps": 40,
+            "guidance_scale": 4.0,
+            "guidance_scale_2": 3.0,
             "frameworks": {
                 "sglang": {
                     "serve_args": "--enable-torch-compile --warmup --enable-cfg-parallel --ulysses-degree 2 --text-encoder-cpu-offload --pin-cpu-memory",
@@ -266,6 +274,9 @@
             "num_frames": 81,
             "seed": 42,
             "num_gpus": 1,
+            "fps": 24,
+            "num_inference_steps": 50,
+            "guidance_scale": 5.0,
             "frameworks": {
                 "sglang": {
                     "serve_args": "--enable-torch-compile --warmup",
@@ -283,6 +294,16 @@
                     "num_gpus": 1,
                     "serve_args": "",
                     "extra_env": {}
+                },
+                "lightx2v": {
+                    "model": "Wan-AI/Wan2.2-TI2V-5B",
+                    "model_cls": "wan2.2",
+                    "lightx2v_task": "i2v",
+                    "serve_args": "",
+                    "extra_env": {},
+                    "lightx2v_config": {
+                        "sample_shift": 5.0
+                    }
                 }
             }
         },
@@ -296,6 +317,9 @@
             "num_frames": 121,
             "seed": 42,
             "num_gpus": 2,
+            "fps": 24,
+            "num_inference_steps": 40,
+            "guidance_scale": 4.0,
             "frameworks": {
                 "sglang": {
                     "serve_args": "--enable-torch-compile --warmup --enable-cfg-parallel --pipeline-class-name LTX2TwoStagePipeline",
@@ -322,6 +346,9 @@
             "num_frames": 121,
             "seed": 42,
             "num_gpus": 2,
+            "fps": 24,
+            "num_inference_steps": 30,
+            "guidance_scale": 3.0,
             "frameworks": {
                 "sglang": {
                     "serve_args": "--enable-torch-compile --warmup --pipeline-class-name LTX2TwoStagePipeline",
@@ -348,6 +375,10 @@
             "num_frames": 81,
             "seed": 42,
             "num_gpus": 4,
+            "fps": 16,
+            "num_inference_steps": 40,
+            "guidance_scale": 3.5,
+            "guidance_scale_2": 3.5,
             "frameworks": {
                 "sglang": {
                     "serve_args": "--enable-torch-compile --warmup --enable-cfg-parallel --ulysses-degree 2 --text-encoder-cpu-offload --pin-cpu-memory",
