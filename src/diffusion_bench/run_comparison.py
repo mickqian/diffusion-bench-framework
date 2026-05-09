@@ -45,7 +45,7 @@ INSTALL_SCRIPT = REPO_ROOT / "scripts" / "install_comparison_frameworks.sh"
 DEFAULT_HOST = "127.0.0.1"
 DEFAULT_PORT = 30000
 HEALTH_TIMEOUT = (
-    2400  # seconds (40 min — FLUX.2-dev needs ~10 min download + torch.compile)
+    2400  # seconds (40 min — large checkpoints can need long download/load time)
 )
 REQUEST_TIMEOUT = 1200  # seconds
 GPU_CLEAR_WAIT = 15  # seconds between framework runs

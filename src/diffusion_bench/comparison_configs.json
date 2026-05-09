@@ -26,13 +26,13 @@
             "guidance_scale": 3.5,
             "frameworks": {
                 "sglang": {
-                    "serve_args": "--model-type diffusion --enable-torch-compile --warmup --dit-layerwise-offload false",
+                    "serve_args": "--model-type diffusion --warmup --dit-layerwise-offload false",
                     "extra_env": {},
                     "command_profiles": {
                         "default": {
                             "description": "Best known SGLang command for the benchmark repo default profile.",
                             "sglang_ref": "current-main",
-                            "serve_args": "--model-type diffusion --enable-torch-compile --warmup --dit-layerwise-offload false",
+                            "serve_args": "--model-type diffusion --warmup --dit-layerwise-offload false",
                             "notes": "Keep this profile updated when the best command changes for a SGLang release or commit."
                         }
                     }
@@ -52,13 +52,13 @@
             "guidance_scale": 4.0,
             "frameworks": {
                 "sglang": {
-                    "serve_args": "--model-type diffusion --enable-torch-compile --warmup --dit-layerwise-offload false",
+                    "serve_args": "--model-type diffusion --warmup --dit-layerwise-offload false",
                     "extra_env": {},
                     "command_profiles": {
                         "default": {
                             "description": "Best known SGLang command for the benchmark repo default profile.",
                             "sglang_ref": "current-main",
-                            "serve_args": "--model-type diffusion --enable-torch-compile --warmup --dit-layerwise-offload false",
+                            "serve_args": "--model-type diffusion --warmup --dit-layerwise-offload false",
                             "notes": "Keep this profile updated when the best command changes for a SGLang release or commit."
                         }
                     }
@@ -78,13 +78,13 @@
             "guidance_scale": 1.0,
             "frameworks": {
                 "sglang": {
-                    "serve_args": "--model-type diffusion --enable-torch-compile --warmup",
+                    "serve_args": "--model-type diffusion --warmup",
                     "extra_env": {},
                     "command_profiles": {
                         "default": {
                             "description": "Best known SGLang command for the benchmark repo default profile.",
                             "sglang_ref": "current-main",
-                            "serve_args": "--model-type diffusion --enable-torch-compile --warmup",
+                            "serve_args": "--model-type diffusion --warmup",
                             "notes": "Keep this profile updated when the best command changes for a SGLang release or commit."
                         }
                     }
@@ -111,13 +111,13 @@
             "true_cfg_scale": 4.0,
             "frameworks": {
                 "sglang": {
-                    "serve_args": "--model-type diffusion --enable-torch-compile --warmup",
+                    "serve_args": "--model-type diffusion --warmup",
                     "extra_env": {},
                     "command_profiles": {
                         "default": {
                             "description": "Best known SGLang command for the benchmark repo default profile.",
                             "sglang_ref": "current-main",
-                            "serve_args": "--model-type diffusion --enable-torch-compile --warmup",
+                            "serve_args": "--model-type diffusion --warmup",
                             "notes": "Keep this profile updated when the best command changes for a SGLang release or commit."
                         }
                     }
@@ -143,13 +143,13 @@
             "guidance_scale": 1.0,
             "frameworks": {
                 "sglang": {
-                    "serve_args": "--model-type diffusion --enable-torch-compile --warmup",
+                    "serve_args": "--model-type diffusion --warmup",
                     "extra_env": {},
                     "command_profiles": {
                         "default": {
                             "description": "Best known SGLang command for the benchmark repo default profile.",
                             "sglang_ref": "current-main",
-                            "serve_args": "--model-type diffusion --enable-torch-compile --warmup",
+                            "serve_args": "--model-type diffusion --warmup",
                             "notes": "Keep this profile updated when the best command changes for a SGLang release or commit."
                         }
                     }
@@ -177,13 +177,13 @@
             "true_cfg_scale": 4.0,
             "frameworks": {
                 "sglang": {
-                    "serve_args": "--model-type diffusion --enable-torch-compile --warmup",
+                    "serve_args": "--model-type diffusion --warmup",
                     "extra_env": {},
                     "command_profiles": {
                         "default": {
                             "description": "Best known SGLang command for the benchmark repo default profile.",
                             "sglang_ref": "current-main",
-                            "serve_args": "--model-type diffusion --enable-torch-compile --warmup",
+                            "serve_args": "--model-type diffusion --warmup",
                             "notes": "Keep this profile updated when the best command changes for a SGLang release or commit."
                         }
                     }
@@ -206,13 +206,13 @@
             "num_gpus": 1,
             "frameworks": {
                 "sglang": {
-                    "serve_args": "--model-type diffusion --enable-torch-compile --warmup",
+                    "serve_args": "--model-type diffusion --warmup",
                     "extra_env": {},
                     "command_profiles": {
                         "default": {
                             "description": "Best known SGLang command for the benchmark repo default profile.",
                             "sglang_ref": "current-main",
-                            "serve_args": "--model-type diffusion --enable-torch-compile --warmup",
+                            "serve_args": "--model-type diffusion --warmup",
                             "notes": "Keep this profile updated when the best command changes for a SGLang release or commit."
                         }
                     }
@@ -230,13 +230,13 @@
             "num_gpus": 2,
             "frameworks": {
                 "sglang": {
-                    "serve_args": "--model-type diffusion --enable-torch-compile --warmup --ulysses-degree 2",
+                    "serve_args": "--model-type diffusion --warmup --ulysses-degree 2",
                     "extra_env": {},
                     "command_profiles": {
                         "default": {
                             "description": "Best known SGLang command for the benchmark repo default profile.",
                             "sglang_ref": "current-main",
-                            "serve_args": "--model-type diffusion --enable-torch-compile --warmup --ulysses-degree 2",
+                            "serve_args": "--model-type diffusion --warmup --ulysses-degree 2",
                             "notes": "Tracks Z-Image Ulysses performance for square image generation."
                         }
                     }
@@ -254,13 +254,13 @@
             "num_gpus": 2,
             "frameworks": {
                 "sglang": {
-                    "serve_args": "--model-type diffusion --enable-torch-compile --warmup --ulysses-degree 2",
+                    "serve_args": "--model-type diffusion --warmup --ulysses-degree 2",
                     "extra_env": {},
                     "command_profiles": {
                         "default": {
                             "description": "Best known SGLang command for the benchmark repo default profile.",
                             "sglang_ref": "current-main",
-                            "serve_args": "--model-type diffusion --enable-torch-compile --warmup --ulysses-degree 2",
+                            "serve_args": "--model-type diffusion --warmup --ulysses-degree 2",
                             "notes": "Tracks Z-Image Ulysses performance for non-square image generation."
                         }
                     }
@@ -282,13 +282,13 @@
             "guidance_scale": 6.0,
             "frameworks": {
                 "sglang": {
-                    "serve_args": "--model-type diffusion --enable-torch-compile --warmup --enable-cfg-parallel",
+                    "serve_args": "--model-type diffusion --warmup --enable-cfg-parallel",
                     "extra_env": {},
                     "command_profiles": {
                         "default": {
                             "description": "Best known SGLang command for the benchmark repo default profile.",
                             "sglang_ref": "current-main",
-                            "serve_args": "--model-type diffusion --enable-torch-compile --warmup --enable-cfg-parallel",
+                            "serve_args": "--model-type diffusion --warmup --enable-cfg-parallel",
                             "notes": "Keep this profile updated when the best command changes for a SGLang release or commit."
                         }
                     }
@@ -329,13 +329,13 @@
             "guidance_scale": 5.0,
             "frameworks": {
                 "sglang": {
-                    "serve_args": "--model-type diffusion --enable-torch-compile --warmup --enable-cfg-parallel --ulysses-degree 2 --text-encoder-cpu-offload --pin-cpu-memory",
+                    "serve_args": "--model-type diffusion --warmup --enable-cfg-parallel --ulysses-degree 2 --text-encoder-cpu-offload --pin-cpu-memory",
                     "extra_env": {},
                     "command_profiles": {
                         "default": {
                             "description": "Best known SGLang command for the benchmark repo default profile.",
                             "sglang_ref": "current-main",
-                            "serve_args": "--model-type diffusion --enable-torch-compile --warmup --enable-cfg-parallel --ulysses-degree 2 --text-encoder-cpu-offload --pin-cpu-memory",
+                            "serve_args": "--model-type diffusion --warmup --enable-cfg-parallel --ulysses-degree 2 --text-encoder-cpu-offload --pin-cpu-memory",
                             "notes": "Keep this profile updated when the best command changes for a SGLang release or commit."
                         }
                     }
@@ -378,13 +378,13 @@
             "guidance_scale_2": 3.0,
             "frameworks": {
                 "sglang": {
-                    "serve_args": "--model-type diffusion --enable-torch-compile --warmup --enable-cfg-parallel --ulysses-degree 2 --text-encoder-cpu-offload --pin-cpu-memory",
+                    "serve_args": "--model-type diffusion --warmup --enable-cfg-parallel --ulysses-degree 2 --text-encoder-cpu-offload --pin-cpu-memory",
                     "extra_env": {},
                     "command_profiles": {
                         "default": {
                             "description": "Best known SGLang command for the benchmark repo default profile.",
                             "sglang_ref": "current-main",
-                            "serve_args": "--model-type diffusion --enable-torch-compile --warmup --enable-cfg-parallel --ulysses-degree 2 --text-encoder-cpu-offload --pin-cpu-memory",
+                            "serve_args": "--model-type diffusion --warmup --enable-cfg-parallel --ulysses-degree 2 --text-encoder-cpu-offload --pin-cpu-memory",
                             "notes": "Keep this profile updated when the best command changes for a SGLang release or commit."
                         }
                     }
@@ -434,13 +434,13 @@
             "guidance_scale": 5.0,
             "frameworks": {
                 "sglang": {
-                    "serve_args": "--model-type diffusion --enable-torch-compile --warmup --enable-cfg-parallel",
+                    "serve_args": "--model-type diffusion --warmup --enable-cfg-parallel",
                     "extra_env": {},
                     "command_profiles": {
                         "default": {
                             "description": "Best known SGLang command for the benchmark repo default profile.",
                             "sglang_ref": "current-main",
-                            "serve_args": "--model-type diffusion --enable-torch-compile --warmup --enable-cfg-parallel",
+                            "serve_args": "--model-type diffusion --warmup --enable-cfg-parallel",
                             "notes": "Keep this profile updated when the best command changes for a SGLang release or commit."
                         }
                     }
@@ -487,13 +487,13 @@
             "guidance_scale": 4.0,
             "frameworks": {
                 "sglang": {
-                    "serve_args": "--model-type diffusion --enable-torch-compile --warmup --enable-cfg-parallel --pipeline-class-name LTX2TwoStagePipeline",
+                    "serve_args": "--model-type diffusion --warmup --enable-cfg-parallel --pipeline-class-name LTX2TwoStagePipeline",
                     "extra_env": {},
                     "command_profiles": {
                         "default": {
                             "description": "Best known SGLang command for the benchmark repo default profile.",
                             "sglang_ref": "current-main",
-                            "serve_args": "--model-type diffusion --enable-torch-compile --warmup --enable-cfg-parallel --pipeline-class-name LTX2TwoStagePipeline",
+                            "serve_args": "--model-type diffusion --warmup --enable-cfg-parallel --pipeline-class-name LTX2TwoStagePipeline",
                             "notes": "Keep this profile updated when the best command changes for a SGLang release or commit."
                         }
                     }
@@ -516,13 +516,13 @@
             "guidance_scale": 3.0,
             "frameworks": {
                 "sglang": {
-                    "serve_args": "--model-type diffusion --enable-torch-compile --warmup --enable-cfg-parallel --pipeline-class-name LTX2TwoStagePipeline",
+                    "serve_args": "--model-type diffusion --warmup --enable-cfg-parallel --pipeline-class-name LTX2TwoStagePipeline",
                     "extra_env": {},
                     "command_profiles": {
                         "default": {
                             "description": "Fallback SGLang command when no hardware-specific profile matches.",
                             "sglang_ref": "current-main",
-                            "serve_args": "--model-type diffusion --enable-torch-compile --warmup --enable-cfg-parallel --pipeline-class-name LTX2TwoStagePipeline",
+                            "serve_args": "--model-type diffusion --warmup --enable-cfg-parallel --pipeline-class-name LTX2TwoStagePipeline",
                             "notes": "Use hardware-specific profiles for formal H100/H200 runs."
                         },
                         "h100-80gb-2gpu": {
@@ -532,7 +532,7 @@
                             ],
                             "sglang_ref": "current-main",
                             "num_gpus": 2,
-                            "serve_args": "--model-type diffusion --enable-torch-compile --warmup --enable-cfg-parallel --pipeline-class-name LTX2TwoStagePipeline --ltx2-two-stage-device-mode snapshot",
+                            "serve_args": "--model-type diffusion --warmup --enable-cfg-parallel --pipeline-class-name LTX2TwoStagePipeline --ltx2-two-stage-device-mode snapshot",
                             "notes": "Snapshot mode avoids H100 resident VRAM pressure."
                         },
                         "h200-2gpu": {
@@ -542,14 +542,14 @@
                             ],
                             "sglang_ref": "current-main",
                             "num_gpus": 2,
-                            "serve_args": "--model-type diffusion --enable-torch-compile --warmup --enable-cfg-parallel --pipeline-class-name LTX2TwoStagePipeline --ltx2-two-stage-device-mode resident",
+                            "serve_args": "--model-type diffusion --warmup --enable-cfg-parallel --pipeline-class-name LTX2TwoStagePipeline --ltx2-two-stage-device-mode resident",
                             "notes": "Resident mode is the fastest LTX2.3 two-stage path when both DiTs fit in VRAM."
                         },
                         "official-original-2gpu": {
                             "description": "Official stage-switching semantics profile for LTX2.3 two-stage comparisons.",
                             "sglang_ref": "current-main",
                             "num_gpus": 2,
-                            "serve_args": "--model-type diffusion --enable-torch-compile --warmup --enable-cfg-parallel --pipeline-class-name LTX2TwoStagePipeline --ltx2-two-stage-device-mode original",
+                            "serve_args": "--model-type diffusion --warmup --enable-cfg-parallel --pipeline-class-name LTX2TwoStagePipeline --ltx2-two-stage-device-mode original",
                             "notes": "Use this only when official switching semantics are more important than latency."
                         }
                     }
@@ -572,13 +572,13 @@
             "guidance_scale": 3.0,
             "frameworks": {
                 "sglang": {
-                    "serve_args": "--model-type diffusion --enable-torch-compile --warmup --ulysses-degree 2 --pipeline-class-name LTX2Pipeline",
+                    "serve_args": "--model-type diffusion --warmup --ulysses-degree 2 --pipeline-class-name LTX2Pipeline",
                     "extra_env": {},
                     "command_profiles": {
                         "default": {
                             "description": "Best known SGLang command for the benchmark repo default profile.",
                             "sglang_ref": "current-main",
-                            "serve_args": "--model-type diffusion --enable-torch-compile --warmup --ulysses-degree 2 --pipeline-class-name LTX2Pipeline",
+                            "serve_args": "--model-type diffusion --warmup --ulysses-degree 2 --pipeline-class-name LTX2Pipeline",
                             "notes": "Tracks LTX2.3 one-stage TI2V performance separately from two-stage pipeline runs."
                         }
                     }
@@ -600,13 +600,13 @@
             "guidance_scale": 3.0,
             "frameworks": {
                 "sglang": {
-                    "serve_args": "--model-type diffusion --enable-torch-compile --warmup --enable-cfg-parallel --pipeline-class-name LTX2TwoStagePipeline",
+                    "serve_args": "--model-type diffusion --warmup --enable-cfg-parallel --pipeline-class-name LTX2TwoStagePipeline",
                     "extra_env": {},
                     "command_profiles": {
                         "default": {
                             "description": "Fallback SGLang command when no hardware-specific profile matches.",
                             "sglang_ref": "current-main",
-                            "serve_args": "--model-type diffusion --enable-torch-compile --warmup --enable-cfg-parallel --pipeline-class-name LTX2TwoStagePipeline",
+                            "serve_args": "--model-type diffusion --warmup --enable-cfg-parallel --pipeline-class-name LTX2TwoStagePipeline",
                             "notes": "Use hardware-specific profiles for formal H100/H200 runs."
                         },
                         "h100-80gb-2gpu": {
@@ -616,7 +616,7 @@
                             ],
                             "sglang_ref": "current-main",
                             "num_gpus": 2,
-                            "serve_args": "--model-type diffusion --enable-torch-compile --warmup --enable-cfg-parallel --pipeline-class-name LTX2TwoStagePipeline --ltx2-two-stage-device-mode snapshot",
+                            "serve_args": "--model-type diffusion --warmup --enable-cfg-parallel --pipeline-class-name LTX2TwoStagePipeline --ltx2-two-stage-device-mode snapshot",
                             "notes": "Snapshot mode avoids H100 resident VRAM pressure."
                         },
                         "h200-2gpu": {
@@ -626,14 +626,14 @@
                             ],
                             "sglang_ref": "current-main",
                             "num_gpus": 2,
-                            "serve_args": "--model-type diffusion --enable-torch-compile --warmup --enable-cfg-parallel --pipeline-class-name LTX2TwoStagePipeline --ltx2-two-stage-device-mode resident",
+                            "serve_args": "--model-type diffusion --warmup --enable-cfg-parallel --pipeline-class-name LTX2TwoStagePipeline --ltx2-two-stage-device-mode resident",
                             "notes": "Resident mode is the fastest LTX2.3 two-stage path when both DiTs fit in VRAM."
                         },
                         "official-original-2gpu": {
                             "description": "Official stage-switching semantics profile for LTX2.3 two-stage comparisons.",
                             "sglang_ref": "current-main",
                             "num_gpus": 2,
-                            "serve_args": "--model-type diffusion --enable-torch-compile --warmup --enable-cfg-parallel --pipeline-class-name LTX2TwoStagePipeline --ltx2-two-stage-device-mode original",
+                            "serve_args": "--model-type diffusion --warmup --enable-cfg-parallel --pipeline-class-name LTX2TwoStagePipeline --ltx2-two-stage-device-mode original",
                             "notes": "Use this only when official switching semantics are more important than latency."
                         }
                     }
@@ -656,13 +656,13 @@
             "guidance_scale": 5.0,
             "frameworks": {
                 "sglang": {
-                    "serve_args": "--model-type diffusion --enable-torch-compile --warmup --enable-cfg-parallel --ulysses-degree 2 --text-encoder-cpu-offload --pin-cpu-memory",
+                    "serve_args": "--model-type diffusion --warmup --enable-cfg-parallel --ulysses-degree 2 --text-encoder-cpu-offload --pin-cpu-memory",
                     "extra_env": {},
                     "command_profiles": {
                         "default": {
                             "description": "Best known SGLang command for the benchmark repo default profile.",
                             "sglang_ref": "current-main",
-                            "serve_args": "--model-type diffusion --enable-torch-compile --warmup --enable-cfg-parallel --ulysses-degree 2 --text-encoder-cpu-offload --pin-cpu-memory",
+                            "serve_args": "--model-type diffusion --warmup --enable-cfg-parallel --ulysses-degree 2 --text-encoder-cpu-offload --pin-cpu-memory",
                             "notes": "Tracks Wan2.1 720P I2V SGLang coverage; add other frameworks only after confirming compatible model support."
                         }
                     }
@@ -686,13 +686,13 @@
             "guidance_scale_2": 3.5,
             "frameworks": {
                 "sglang": {
-                    "serve_args": "--model-type diffusion --enable-torch-compile --warmup --enable-cfg-parallel --ulysses-degree 2 --text-encoder-cpu-offload --pin-cpu-memory",
+                    "serve_args": "--model-type diffusion --warmup --enable-cfg-parallel --ulysses-degree 2 --text-encoder-cpu-offload --pin-cpu-memory",
                     "extra_env": {},
                     "command_profiles": {
                         "default": {
                             "description": "Best known SGLang command for the benchmark repo default profile.",
                             "sglang_ref": "current-main",
-                            "serve_args": "--model-type diffusion --enable-torch-compile --warmup --enable-cfg-parallel --ulysses-degree 2 --text-encoder-cpu-offload --pin-cpu-memory",
+                            "serve_args": "--model-type diffusion --warmup --enable-cfg-parallel --ulysses-degree 2 --text-encoder-cpu-offload --pin-cpu-memory",
                             "notes": "Keep this profile updated when the best command changes for a SGLang release or commit."
                         }
                     }

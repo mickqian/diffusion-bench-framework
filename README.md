@@ -68,11 +68,11 @@ Each case can track version-specific best commands for the `sglang` backend:
 
 ```json
 "sglang": {
-  "serve_args": "--model-type diffusion --enable-torch-compile --warmup",
+  "serve_args": "--model-type diffusion --warmup",
   "command_profiles": {
     "default": {
       "sglang_ref": "current-main",
-      "serve_args": "--model-type diffusion --enable-torch-compile --warmup",
+      "serve_args": "--model-type diffusion --warmup",
       "notes": "Best known command for this SGLang line."
     },
     "v0.5.0-h100": {
