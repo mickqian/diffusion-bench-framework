@@ -60,7 +60,12 @@ DEFAULT_SGLANG_PROFILE = "default"
 HARDWARE_PROFILE_ENV = "SGLANG_BENCH_HARDWARE_PROFILE"
 SKIP_FRAMEWORK_INSTALL_ENV = "SGLANG_DIFFUSION_SKIP_FRAMEWORK_INSTALL"
 FORCED_BENCHMARK_ENV = {"TORCH_COMPILE_DISABLE": "1"}
-VLLM_DISABLE_TORCH_COMPILE_ARGS = ["--compilation-config", '{"mode":0}']
+VLLM_DISABLE_TORCH_COMPILE_ARGS = [
+    "--enforce-eager",
+    "--compilation-config",
+    '{"mode":0}',
+]
+LIGHTX2V_DISABLE_TORCH_COMPILE_CONFIG = {"compile": False, "compile_shapes": []}
 
 # Frameworks that need separate installation (conflict with sglang's deps)
 INSTALLABLE_FRAMEWORKS = {"vllm-omni", "lightx2v"}
@@ -163,6 +168,7 @@ def _write_lightx2v_config(case: dict, fw_cfg: dict) -> str:
         cfg["width"] = case["width"]
         cfg["target_width"] = case["width"]
     cfg.update(fw_cfg.get("lightx2v_config", {}))
+    cfg.update(LIGHTX2V_DISABLE_TORCH_COMPILE_CONFIG)
 
     config_path = os.path.join(
         tempfile.gettempdir(), f"lightx2v_config_{case['id']}.json"
@@ -1497,8 +1503,8 @@ def run_comparison(
                 dry_fw_cfg = dict(fw_cfg)
                 dry_fw_cfg["_skip_model_path_resolution"] = True
                 cmd = build_server_cmd(fw_name, case_for_fw, dry_fw_cfg, port)
-                case_for_fw["_server_command"] = " ".join(cmd)
-                print(f"  [DRY-RUN] Would run: {' '.join(cmd)}")
+                case_for_fw["_server_command"] = shlex.join(cmd)
+                print(f"  [DRY-RUN] Would run: {shlex.join(cmd)}")
                 if fw_name in INSTALLABLE_FRAMEWORKS:
                     print(f"  [DRY-RUN] venv: {_framework_venv_path(fw_name)}")
                 if MODE_SINGLE_E2E in modes:
@@ -1530,7 +1536,10 @@ def run_comparison(
         "hardware": hardware_metadata,
         "sglang_runtime": _collect_sglang_runtime_metadata(),
         "benchmark_env": FORCED_BENCHMARK_ENV,
-        "benchmark_framework_args": {"vllm-omni": VLLM_DISABLE_TORCH_COMPILE_ARGS},
+        "benchmark_framework_args": {
+            "vllm-omni": VLLM_DISABLE_TORCH_COMPILE_ARGS,
+            "lightx2v": {"config": LIGHTX2V_DISABLE_TORCH_COMPILE_CONFIG},
+        },
         "benchmark_modes": modes,
         "requested_sglang_profile": _requested_sglang_profile(sglang_profile),
         "results": results,
