@@ -220,6 +220,149 @@
             }
         },
         {
+            "id": "zimage_turbo_t2i_1024_2gpu",
+            "model": "Tongyi-MAI/Z-Image-Turbo",
+            "task": "text-to-image",
+            "prompt": "A futuristic cyberpunk city at night, neon lights reflecting on wet streets",
+            "width": 1024,
+            "height": 1024,
+            "seed": 42,
+            "num_gpus": 2,
+            "frameworks": {
+                "sglang": {
+                    "serve_args": "--model-type diffusion --enable-torch-compile --warmup --ulysses-degree 2",
+                    "extra_env": {},
+                    "command_profiles": {
+                        "default": {
+                            "description": "Best known SGLang command for the benchmark repo default profile.",
+                            "sglang_ref": "current-main",
+                            "serve_args": "--model-type diffusion --enable-torch-compile --warmup --ulysses-degree 2",
+                            "notes": "Tracks Z-Image Ulysses performance for square image generation."
+                        }
+                    }
+                }
+            }
+        },
+        {
+            "id": "zimage_turbo_t2i_1280x720_2gpu",
+            "model": "Tongyi-MAI/Z-Image-Turbo",
+            "task": "text-to-image",
+            "prompt": "A futuristic cyberpunk city at night, neon lights reflecting on wet streets",
+            "width": 1280,
+            "height": 720,
+            "seed": 42,
+            "num_gpus": 2,
+            "frameworks": {
+                "sglang": {
+                    "serve_args": "--model-type diffusion --enable-torch-compile --warmup --ulysses-degree 2",
+                    "extra_env": {},
+                    "command_profiles": {
+                        "default": {
+                            "description": "Best known SGLang command for the benchmark repo default profile.",
+                            "sglang_ref": "current-main",
+                            "serve_args": "--model-type diffusion --enable-torch-compile --warmup --ulysses-degree 2",
+                            "notes": "Tracks Z-Image Ulysses performance for non-square image generation."
+                        }
+                    }
+                }
+            }
+        },
+        {
+            "id": "wan21_t2v_1_3b_480p",
+            "model": "Wan-AI/Wan2.1-T2V-1.3B-Diffusers",
+            "task": "text-to-video",
+            "prompt": "A cat and a dog baking a cake together in a kitchen.",
+            "width": 832,
+            "height": 480,
+            "num_frames": 81,
+            "seed": 42,
+            "num_gpus": 2,
+            "fps": 16,
+            "num_inference_steps": 50,
+            "guidance_scale": 6.0,
+            "frameworks": {
+                "sglang": {
+                    "serve_args": "--model-type diffusion --enable-torch-compile --warmup --enable-cfg-parallel",
+                    "extra_env": {},
+                    "command_profiles": {
+                        "default": {
+                            "description": "Best known SGLang command for the benchmark repo default profile.",
+                            "sglang_ref": "current-main",
+                            "serve_args": "--model-type diffusion --enable-torch-compile --warmup --enable-cfg-parallel",
+                            "notes": "Keep this profile updated when the best command changes for a SGLang release or commit."
+                        }
+                    }
+                },
+                "lightx2v": {
+                    "model": "Wan-AI/Wan2.1-T2V-1.3B",
+                    "model_cls": "wan2.1",
+                    "lightx2v_task": "t2v",
+                    "serve_args": "",
+                    "extra_env": {},
+                    "lightx2v_config": {
+                        "sample_shift": 8.0,
+                        "self_attn_1_type": "flash_attn2",
+                        "cross_attn_1_type": "flash_attn2",
+                        "cross_attn_2_type": "flash_attn2",
+                        "enable_cfg": true,
+                        "parallel": {
+                            "cfg_p_size": 2
+                        },
+                        "rope_type": "torch"
+                    }
+                }
+            }
+        },
+        {
+            "id": "wan21_i2v_14b_480p",
+            "model": "Wan-AI/Wan2.1-I2V-14B-480P-Diffusers",
+            "task": "image-to-video",
+            "prompt": "The cat starts walking slowly towards the camera.",
+            "reference_image": true,
+            "width": 832,
+            "height": 480,
+            "num_frames": 81,
+            "seed": 42,
+            "num_gpus": 2,
+            "fps": 16,
+            "num_inference_steps": 40,
+            "guidance_scale": 5.0,
+            "frameworks": {
+                "sglang": {
+                    "serve_args": "--model-type diffusion --enable-torch-compile --warmup --enable-cfg-parallel --ulysses-degree 2 --text-encoder-cpu-offload --pin-cpu-memory",
+                    "extra_env": {},
+                    "command_profiles": {
+                        "default": {
+                            "description": "Best known SGLang command for the benchmark repo default profile.",
+                            "sglang_ref": "current-main",
+                            "serve_args": "--model-type diffusion --enable-torch-compile --warmup --enable-cfg-parallel --ulysses-degree 2 --text-encoder-cpu-offload --pin-cpu-memory",
+                            "notes": "Keep this profile updated when the best command changes for a SGLang release or commit."
+                        }
+                    }
+                },
+                "lightx2v": {
+                    "model": "Wan-AI/Wan2.1-I2V-14B-480P",
+                    "model_cls": "wan2.1",
+                    "lightx2v_task": "i2v",
+                    "serve_args": "",
+                    "extra_env": {},
+                    "lightx2v_config": {
+                        "sample_shift": 5.0,
+                        "self_attn_1_type": "flash_attn2",
+                        "cross_attn_1_type": "flash_attn2",
+                        "cross_attn_2_type": "flash_attn2",
+                        "enable_cfg": true,
+                        "parallel": {
+                            "cfg_p_size": 2,
+                            "seq_p_size": 2,
+                            "seq_p_attn_type": "ulysses"
+                        },
+                        "rope_type": "torch"
+                    }
+                }
+            }
+        },
+        {
             "id": "wan22_t2v_a14b_720p",
             "model": "Wan-AI/Wan2.2-T2V-A14B-Diffusers",
             "task": "text-to-video",
@@ -245,11 +388,6 @@
                             "notes": "Keep this profile updated when the best command changes for a SGLang release or commit."
                         }
                     }
-                },
-                "vllm-omni": {
-                    "num_gpus": 1,
-                    "serve_args": "",
-                    "extra_env": {}
                 },
                 "lightx2v": {
                     "model": "Wan-AI/Wan2.2-T2V-A14B",
@@ -290,27 +428,22 @@
             "height": 720,
             "num_frames": 81,
             "seed": 42,
-            "num_gpus": 1,
+            "num_gpus": 2,
             "fps": 24,
             "num_inference_steps": 50,
             "guidance_scale": 5.0,
             "frameworks": {
                 "sglang": {
-                    "serve_args": "--model-type diffusion --enable-torch-compile --warmup",
+                    "serve_args": "--model-type diffusion --enable-torch-compile --warmup --enable-cfg-parallel",
                     "extra_env": {},
                     "command_profiles": {
                         "default": {
                             "description": "Best known SGLang command for the benchmark repo default profile.",
                             "sglang_ref": "current-main",
-                            "serve_args": "--model-type diffusion --enable-torch-compile --warmup",
+                            "serve_args": "--model-type diffusion --enable-torch-compile --warmup --enable-cfg-parallel",
                             "notes": "Keep this profile updated when the best command changes for a SGLang release or commit."
                         }
                     }
-                },
-                "vllm-omni": {
-                    "num_gpus": 1,
-                    "serve_args": "",
-                    "extra_env": {}
                 },
                 "lightx2v": {
                     "model": "Wan-AI/Wan2.2-TI2V-5B",
@@ -324,6 +457,9 @@
                         "cross_attn_1_type": "flash_attn2",
                         "cross_attn_2_type": "flash_attn2",
                         "enable_cfg": true,
+                        "parallel": {
+                            "cfg_p_size": 2
+                        },
                         "rope_type": "torch",
                         "aspect_ratio": "16:9",
                         "boundary": 0.9,
@@ -380,34 +516,154 @@
             "guidance_scale": 3.0,
             "frameworks": {
                 "sglang": {
-                    "serve_args": "--model-type diffusion --enable-torch-compile --warmup --pipeline-class-name LTX2TwoStagePipeline",
+                    "serve_args": "--model-type diffusion --enable-torch-compile --warmup --enable-cfg-parallel --pipeline-class-name LTX2TwoStagePipeline",
                     "extra_env": {},
                     "command_profiles": {
                         "default": {
                             "description": "Fallback SGLang command when no hardware-specific profile matches.",
                             "sglang_ref": "current-main",
-                            "serve_args": "--model-type diffusion --enable-torch-compile --warmup --pipeline-class-name LTX2TwoStagePipeline",
+                            "serve_args": "--model-type diffusion --enable-torch-compile --warmup --enable-cfg-parallel --pipeline-class-name LTX2TwoStagePipeline",
                             "notes": "Use hardware-specific profiles for formal H100/H200 runs."
                         },
-                        "h100-80gb-4gpu": {
-                            "description": "Stable H100 80GB command for the LTX2.3 two-stage 121-frame case.",
+                        "h100-80gb-2gpu": {
+                            "description": "Cookbook-aligned H100 80GB command for the LTX2.3 two-stage 121-frame case.",
                             "hardware": [
                                 "h100"
                             ],
                             "sglang_ref": "current-main",
-                            "num_gpus": 4,
-                            "serve_args": "--model-type diffusion --enable-torch-compile --warmup --pipeline-class-name LTX2TwoStagePipeline",
-                            "notes": "2xH100 OOMed on this case; use four H100s until the backend memory issue is fixed."
+                            "num_gpus": 2,
+                            "serve_args": "--model-type diffusion --enable-torch-compile --warmup --enable-cfg-parallel --pipeline-class-name LTX2TwoStagePipeline --ltx2-two-stage-device-mode snapshot",
+                            "notes": "Snapshot mode avoids H100 resident VRAM pressure."
                         },
                         "h200-2gpu": {
-                            "description": "Best known H200 command for the LTX2.3 two-stage 121-frame case.",
+                            "description": "Cookbook-aligned H200 command for the LTX2.3 two-stage 121-frame case.",
                             "hardware": [
                                 "h200"
                             ],
                             "sglang_ref": "current-main",
                             "num_gpus": 2,
-                            "serve_args": "--model-type diffusion --enable-torch-compile --warmup --pipeline-class-name LTX2TwoStagePipeline",
-                            "notes": "Validated profile for H200 capacity; keep separate from H100 results."
+                            "serve_args": "--model-type diffusion --enable-torch-compile --warmup --enable-cfg-parallel --pipeline-class-name LTX2TwoStagePipeline --ltx2-two-stage-device-mode resident",
+                            "notes": "Resident mode is the fastest LTX2.3 two-stage path when both DiTs fit in VRAM."
+                        },
+                        "official-original-2gpu": {
+                            "description": "Official stage-switching semantics profile for LTX2.3 two-stage comparisons.",
+                            "sglang_ref": "current-main",
+                            "num_gpus": 2,
+                            "serve_args": "--model-type diffusion --enable-torch-compile --warmup --enable-cfg-parallel --pipeline-class-name LTX2TwoStagePipeline --ltx2-two-stage-device-mode original",
+                            "notes": "Use this only when official switching semantics are more important than latency."
+                        }
+                    }
+                }
+            }
+        },
+        {
+            "id": "ltx2.3_onestage_ti2v_2gpus",
+            "model": "Lightricks/LTX-2.3",
+            "task": "text-image-to-video",
+            "prompt": "The cat starts walking slowly towards the camera.",
+            "reference_image": true,
+            "width": 768,
+            "height": 512,
+            "num_frames": 121,
+            "seed": 42,
+            "num_gpus": 2,
+            "fps": 24,
+            "num_inference_steps": 30,
+            "guidance_scale": 3.0,
+            "frameworks": {
+                "sglang": {
+                    "serve_args": "--model-type diffusion --enable-torch-compile --warmup --ulysses-degree 2 --pipeline-class-name LTX2Pipeline",
+                    "extra_env": {},
+                    "command_profiles": {
+                        "default": {
+                            "description": "Best known SGLang command for the benchmark repo default profile.",
+                            "sglang_ref": "current-main",
+                            "serve_args": "--model-type diffusion --enable-torch-compile --warmup --ulysses-degree 2 --pipeline-class-name LTX2Pipeline",
+                            "notes": "Tracks LTX2.3 one-stage TI2V performance separately from two-stage pipeline runs."
+                        }
+                    }
+                }
+            }
+        },
+        {
+            "id": "ltx2.3_twostage_t2v_2gpus",
+            "model": "Lightricks/LTX-2.3",
+            "task": "text-to-video",
+            "prompt": "A cat and a dog baking a cake together in a kitchen.",
+            "width": 768,
+            "height": 512,
+            "num_frames": 121,
+            "seed": 42,
+            "num_gpus": 2,
+            "fps": 24,
+            "num_inference_steps": 30,
+            "guidance_scale": 3.0,
+            "frameworks": {
+                "sglang": {
+                    "serve_args": "--model-type diffusion --enable-torch-compile --warmup --enable-cfg-parallel --pipeline-class-name LTX2TwoStagePipeline",
+                    "extra_env": {},
+                    "command_profiles": {
+                        "default": {
+                            "description": "Fallback SGLang command when no hardware-specific profile matches.",
+                            "sglang_ref": "current-main",
+                            "serve_args": "--model-type diffusion --enable-torch-compile --warmup --enable-cfg-parallel --pipeline-class-name LTX2TwoStagePipeline",
+                            "notes": "Use hardware-specific profiles for formal H100/H200 runs."
+                        },
+                        "h100-80gb-2gpu": {
+                            "description": "Cookbook-aligned H100 80GB command for the LTX2.3 two-stage 121-frame case.",
+                            "hardware": [
+                                "h100"
+                            ],
+                            "sglang_ref": "current-main",
+                            "num_gpus": 2,
+                            "serve_args": "--model-type diffusion --enable-torch-compile --warmup --enable-cfg-parallel --pipeline-class-name LTX2TwoStagePipeline --ltx2-two-stage-device-mode snapshot",
+                            "notes": "Snapshot mode avoids H100 resident VRAM pressure."
+                        },
+                        "h200-2gpu": {
+                            "description": "Cookbook-aligned H200 command for the LTX2.3 two-stage 121-frame case.",
+                            "hardware": [
+                                "h200"
+                            ],
+                            "sglang_ref": "current-main",
+                            "num_gpus": 2,
+                            "serve_args": "--model-type diffusion --enable-torch-compile --warmup --enable-cfg-parallel --pipeline-class-name LTX2TwoStagePipeline --ltx2-two-stage-device-mode resident",
+                            "notes": "Resident mode is the fastest LTX2.3 two-stage path when both DiTs fit in VRAM."
+                        },
+                        "official-original-2gpu": {
+                            "description": "Official stage-switching semantics profile for LTX2.3 two-stage comparisons.",
+                            "sglang_ref": "current-main",
+                            "num_gpus": 2,
+                            "serve_args": "--model-type diffusion --enable-torch-compile --warmup --enable-cfg-parallel --pipeline-class-name LTX2TwoStagePipeline --ltx2-two-stage-device-mode original",
+                            "notes": "Use this only when official switching semantics are more important than latency."
+                        }
+                    }
+                }
+            }
+        },
+        {
+            "id": "wan21_i2v_14b_720p",
+            "model": "Wan-AI/Wan2.1-I2V-14B-720P-Diffusers",
+            "task": "image-to-video",
+            "prompt": "The cat starts walking slowly towards the camera.",
+            "reference_image": true,
+            "width": 1280,
+            "height": 720,
+            "num_frames": 81,
+            "seed": 42,
+            "num_gpus": 2,
+            "fps": 16,
+            "num_inference_steps": 40,
+            "guidance_scale": 5.0,
+            "frameworks": {
+                "sglang": {
+                    "serve_args": "--model-type diffusion --enable-torch-compile --warmup --enable-cfg-parallel --ulysses-degree 2 --text-encoder-cpu-offload --pin-cpu-memory",
+                    "extra_env": {},
+                    "command_profiles": {
+                        "default": {
+                            "description": "Best known SGLang command for the benchmark repo default profile.",
+                            "sglang_ref": "current-main",
+                            "serve_args": "--model-type diffusion --enable-torch-compile --warmup --enable-cfg-parallel --ulysses-degree 2 --text-encoder-cpu-offload --pin-cpu-memory",
+                            "notes": "Tracks Wan2.1 720P I2V SGLang coverage; add other frameworks only after confirming compatible model support."
                         }
                     }
                 }
@@ -440,11 +696,6 @@
                             "notes": "Keep this profile updated when the best command changes for a SGLang release or commit."
                         }
                     }
-                },
-                "vllm-omni": {
-                    "num_gpus": 1,
-                    "serve_args": "",
-                    "extra_env": {}
                 },
                 "lightx2v": {
                     "model": "Wan-AI/Wan2.2-I2V-A14B",

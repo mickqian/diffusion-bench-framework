@@ -81,6 +81,7 @@ _cached_ref_image_path: str | None = None
 
 def _build_sglang_cmd(case: dict, fw_cfg: dict, port: int) -> list[str]:
     model_path = _server_model_path(case, fw_cfg)
+    num_gpus = fw_cfg.get("num_gpus", case["num_gpus"])
     cmd = [
         "sglang",
         "serve",
@@ -91,8 +92,8 @@ def _build_sglang_cmd(case: dict, fw_cfg: dict, port: int) -> list[str]:
         "--host",
         DEFAULT_HOST,
     ]
-    if case["num_gpus"] > 1:
-        cmd += ["--num-gpus", str(case["num_gpus"])]
+    if num_gpus > 1:
+        cmd += ["--num-gpus", str(num_gpus)]
     if fw_cfg.get("serve_args", "").strip():
         cmd += fw_cfg["serve_args"].strip().split()
     return cmd
@@ -506,6 +507,7 @@ def _build_sglang_payload(case: dict) -> dict:
     for key in (
         "num_inference_steps",
         "guidance_scale",
+        "guidance_scale_2",
         "true_cfg_scale",
         "seed",
         "num_frames",
@@ -644,6 +646,8 @@ def send_image_conditioned_request_sglang(
     for key in (
         "num_inference_steps",
         "guidance_scale",
+        "guidance_scale_2",
+        "true_cfg_scale",
         "seed",
         "num_frames",
         "fps",
@@ -830,6 +834,8 @@ def send_request_vllm_omni(base_url: str, case: dict, config: dict) -> float:
         extra_body["fps"] = case["fps"]
     if "negative_prompt" in case:
         extra_body["negative_prompt"] = case["negative_prompt"]
+    if "guidance_scale_2" in case:
+        extra_body["guidance_scale_2"] = case["guidance_scale_2"]
     if "true_cfg_scale" in case:
         extra_body["true_cfg_scale"] = case["true_cfg_scale"]
 
