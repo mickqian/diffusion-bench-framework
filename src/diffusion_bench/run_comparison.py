@@ -1122,6 +1122,10 @@ def _run_warmups(
     warmup_cfg = bench_cfg.get("warmup", {})
     warmup_requests = int(warmup_cfg.get("num_requests", 0) or 0)
     warmup_steps = warmup_cfg.get("num_inference_steps")
+    if framework == "lightx2v" and warmup_requests > 0:
+        # lightx2v takes infer_steps from launch config; per-request overrides corrupt server reuse
+        warmup_requests = min(warmup_requests, 1)
+        warmup_steps = None
     if warmup_requests <= 0:
         return
     warmup_case = dict(case)
