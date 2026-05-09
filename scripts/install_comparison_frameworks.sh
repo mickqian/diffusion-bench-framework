@@ -4,8 +4,11 @@ set -euxo pipefail
 FRAMEWORK="${1:?usage: install_comparison_frameworks.sh <vllm-omni|lightx2v>}"
 VENV_ROOT="${SGLANG_DIFFUSION_FRAMEWORK_VENV_ROOT:-/tmp/sglang-diffusion-framework-venvs}"
 VENV_PATH="${VENV_ROOT}/${FRAMEWORK}"
+PIP_TMPDIR="${SGLANG_DIFFUSION_PIP_TMPDIR:-${VENV_ROOT}/pip-tmp}"
 
 mkdir -p "${VENV_ROOT}"
+mkdir -p "${PIP_TMPDIR}"
+export TMPDIR="${PIP_TMPDIR}"
 python3 -m venv --clear "${VENV_PATH}"
 # shellcheck disable=SC1091
 source "${VENV_PATH}/bin/activate"
