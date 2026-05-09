@@ -442,6 +442,17 @@
                             "sglang_ref": "current-main",
                             "serve_args": "--model-type diffusion --warmup --enable-cfg-parallel",
                             "notes": "Keep this profile updated when the best command changes for a SGLang release or commit."
+                        },
+                        "h100-h200-2gpu": {
+                            "description": "H100/H200 command for the Wan2.2 TI2V 5B 720p case.",
+                            "hardware": [
+                                "h100",
+                                "h200"
+                            ],
+                            "sglang_ref": "current-main",
+                            "num_gpus": 2,
+                            "serve_args": "--model-type diffusion --warmup --enable-cfg-parallel --dit-cpu-offload false --text-encoder-cpu-offload --pin-cpu-memory",
+                            "notes": "Keep DiT resident on high-memory GPUs to avoid CPU offload in performance runs."
                         }
                     }
                 },
