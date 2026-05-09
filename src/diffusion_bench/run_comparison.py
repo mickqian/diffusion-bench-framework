@@ -25,6 +25,7 @@ import base64
 import io
 import json
 import os
+import shlex
 import signal
 import subprocess
 import sys
@@ -58,6 +59,7 @@ DEFAULT_BENCHMARK = {
 DEFAULT_SGLANG_PROFILE = "default"
 HARDWARE_PROFILE_ENV = "SGLANG_BENCH_HARDWARE_PROFILE"
 FORCED_BENCHMARK_ENV = {"TORCH_COMPILE_DISABLE": "1"}
+VLLM_DISABLE_TORCH_COMPILE_ARGS = ["--compilation-config", '{"mode":0}']
 
 # Frameworks that need separate installation (conflict with sglang's deps)
 INSTALLABLE_FRAMEWORKS = {"vllm-omni", "lightx2v"}
@@ -114,6 +116,7 @@ def _build_vllm_cmd(case: dict, fw_cfg: dict, port: int) -> list[str]:
     ]
     if fw_cfg.get("serve_args", "").strip():
         cmd += fw_cfg["serve_args"].strip().split()
+    cmd += VLLM_DISABLE_TORCH_COMPILE_ARGS
     return cmd
 
 
@@ -1287,8 +1290,8 @@ def run_case_framework(
     single_result = None
     throughput_result = None
     cmd = build_server_cmd(framework, case, fw_cfg, port)
-    case["_server_command"] = " ".join(cmd)
-    print(f"\n  Command: {' '.join(cmd)}")
+    case["_server_command"] = shlex.join(cmd)
+    print(f"\n  Command: {shlex.join(cmd)}")
 
     env = os.environ.copy()
     env.update(fw_cfg.get("extra_env", {}))
@@ -1523,6 +1526,7 @@ def run_comparison(
         "hardware": hardware_metadata,
         "sglang_runtime": _collect_sglang_runtime_metadata(),
         "benchmark_env": FORCED_BENCHMARK_ENV,
+        "benchmark_framework_args": {"vllm-omni": VLLM_DISABLE_TORCH_COMPILE_ARGS},
         "benchmark_modes": modes,
         "requested_sglang_profile": _requested_sglang_profile(sglang_profile),
         "results": results,
