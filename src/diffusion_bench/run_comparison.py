@@ -57,6 +57,7 @@ DEFAULT_BENCHMARK = {
 }
 DEFAULT_SGLANG_PROFILE = "default"
 HARDWARE_PROFILE_ENV = "SGLANG_BENCH_HARDWARE_PROFILE"
+FORCED_BENCHMARK_ENV = {"TORCH_COMPILE_DISABLE": "1"}
 
 # Frameworks that need separate installation (conflict with sglang's deps)
 INSTALLABLE_FRAMEWORKS = {"vllm-omni", "lightx2v"}
@@ -1291,6 +1292,7 @@ def run_case_framework(
 
     env = os.environ.copy()
     env.update(fw_cfg.get("extra_env", {}))
+    env.update(FORCED_BENCHMARK_ENV)
     env = _framework_env(framework, env)
 
     log_file = log_dir / f"{case['id']}_{framework}.log"
@@ -1416,6 +1418,7 @@ def run_comparison(
     Order: sglang first (already installed), then vllm-omni, then lightx2v.
     Each non-sglang framework is installed right before its cases run.
     """
+    os.environ.update(FORCED_BENCHMARK_ENV)
     timestamp = datetime.now(timezone.utc).isoformat()
     commit_sha = _current_commit_sha()
     run_id = (
@@ -1519,6 +1522,7 @@ def run_comparison(
         "run_id": run_id,
         "hardware": hardware_metadata,
         "sglang_runtime": _collect_sglang_runtime_metadata(),
+        "benchmark_env": FORCED_BENCHMARK_ENV,
         "benchmark_modes": modes,
         "requested_sglang_profile": _requested_sglang_profile(sglang_profile),
         "results": results,

@@ -36,6 +36,8 @@ python3 -m pip install -e /path/to/sglang/python[diffusion]
 
 vLLM-Omni and LightX2V are installed into isolated temporary virtualenvs by the runner because their dependencies conflict with SGLang.
 
+`diffusion-bench-compare` forces `TORCH_COMPILE_DISABLE=1` for all benchmarked framework subprocesses so cold compile time does not leak into cross-framework runs.
+
 ## Dry Run
 
 ```bash
