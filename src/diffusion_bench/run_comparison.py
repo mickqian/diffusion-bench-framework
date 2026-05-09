@@ -58,6 +58,7 @@ DEFAULT_BENCHMARK = {
 }
 DEFAULT_SGLANG_PROFILE = "default"
 HARDWARE_PROFILE_ENV = "SGLANG_BENCH_HARDWARE_PROFILE"
+SKIP_FRAMEWORK_INSTALL_ENV = "SGLANG_DIFFUSION_SKIP_FRAMEWORK_INSTALL"
 FORCED_BENCHMARK_ENV = {"TORCH_COMPILE_DISABLE": "1"}
 VLLM_DISABLE_TORCH_COMPILE_ARGS = ["--compilation-config", '{"mode":0}']
 
@@ -1365,6 +1366,9 @@ def run_case_framework(
 def _install_framework(fw_name: str, dry_run: bool = False) -> bool:
     """Install a comparison framework via the install script. Returns True on success."""
     if fw_name not in INSTALLABLE_FRAMEWORKS:
+        return True
+    if os.environ.get(SKIP_FRAMEWORK_INSTALL_ENV) == "1":
+        print(f"  Skipping {fw_name} installation ({SKIP_FRAMEWORK_INSTALL_ENV}=1)")
         return True
     if not INSTALL_SCRIPT.exists():
         print(f"  WARNING: Install script not found at {INSTALL_SCRIPT}")
