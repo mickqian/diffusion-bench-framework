@@ -329,13 +329,13 @@
             "guidance_scale": 5.0,
             "frameworks": {
                 "sglang": {
-                    "serve_args": "--model-type diffusion --warmup --enable-cfg-parallel --ulysses-degree 2 --text-encoder-cpu-offload --pin-cpu-memory",
+                    "serve_args": "--model-type diffusion --warmup --enable-cfg-parallel --ulysses-degree 2 --dit-cpu-offload false --text-encoder-cpu-offload --pin-cpu-memory",
                     "extra_env": {},
                     "command_profiles": {
                         "default": {
                             "description": "Best known SGLang command for the benchmark repo default profile.",
                             "sglang_ref": "current-main",
-                            "serve_args": "--model-type diffusion --warmup --enable-cfg-parallel --ulysses-degree 2 --text-encoder-cpu-offload --pin-cpu-memory",
+                            "serve_args": "--model-type diffusion --warmup --enable-cfg-parallel --ulysses-degree 2 --dit-cpu-offload false --text-encoder-cpu-offload --pin-cpu-memory",
                             "notes": "Keep this profile updated when the best command changes for a SGLang release or commit."
                         }
                     }
@@ -378,13 +378,13 @@
             "guidance_scale_2": 3.0,
             "frameworks": {
                 "sglang": {
-                    "serve_args": "--model-type diffusion --warmup --enable-cfg-parallel --ulysses-degree 2 --text-encoder-cpu-offload --pin-cpu-memory",
+                    "serve_args": "--model-type diffusion --warmup --enable-cfg-parallel --ulysses-degree 2 --dit-cpu-offload false --text-encoder-cpu-offload --pin-cpu-memory",
                     "extra_env": {},
                     "command_profiles": {
                         "default": {
                             "description": "Best known SGLang command for the benchmark repo default profile.",
                             "sglang_ref": "current-main",
-                            "serve_args": "--model-type diffusion --warmup --enable-cfg-parallel --ulysses-degree 2 --text-encoder-cpu-offload --pin-cpu-memory",
+                            "serve_args": "--model-type diffusion --warmup --enable-cfg-parallel --ulysses-degree 2 --dit-cpu-offload false --text-encoder-cpu-offload --pin-cpu-memory",
                             "notes": "Keep this profile updated when the best command changes for a SGLang release or commit."
                         }
                     }
@@ -656,13 +656,13 @@
             "guidance_scale": 5.0,
             "frameworks": {
                 "sglang": {
-                    "serve_args": "--model-type diffusion --warmup --enable-cfg-parallel --ulysses-degree 2 --text-encoder-cpu-offload --pin-cpu-memory",
+                    "serve_args": "--model-type diffusion --warmup --enable-cfg-parallel --ulysses-degree 2 --dit-cpu-offload false --text-encoder-cpu-offload --pin-cpu-memory",
                     "extra_env": {},
                     "command_profiles": {
                         "default": {
                             "description": "Best known SGLang command for the benchmark repo default profile.",
                             "sglang_ref": "current-main",
-                            "serve_args": "--model-type diffusion --warmup --enable-cfg-parallel --ulysses-degree 2 --text-encoder-cpu-offload --pin-cpu-memory",
+                            "serve_args": "--model-type diffusion --warmup --enable-cfg-parallel --ulysses-degree 2 --dit-cpu-offload false --text-encoder-cpu-offload --pin-cpu-memory",
                             "notes": "Tracks Wan2.1 720P I2V SGLang coverage; add other frameworks only after confirming compatible model support."
                         }
                     }
@@ -686,13 +686,13 @@
             "guidance_scale_2": 3.5,
             "frameworks": {
                 "sglang": {
-                    "serve_args": "--model-type diffusion --warmup --enable-cfg-parallel --ulysses-degree 2 --text-encoder-cpu-offload --pin-cpu-memory",
+                    "serve_args": "--model-type diffusion --warmup --enable-cfg-parallel --ulysses-degree 2 --dit-cpu-offload false --text-encoder-cpu-offload --pin-cpu-memory",
                     "extra_env": {},
                     "command_profiles": {
                         "default": {
                             "description": "Best known SGLang command for the benchmark repo default profile.",
                             "sglang_ref": "current-main",
-                            "serve_args": "--model-type diffusion --warmup --enable-cfg-parallel --ulysses-degree 2 --text-encoder-cpu-offload --pin-cpu-memory",
+                            "serve_args": "--model-type diffusion --warmup --enable-cfg-parallel --ulysses-degree 2 --dit-cpu-offload false --text-encoder-cpu-offload --pin-cpu-memory",
                             "notes": "Keep this profile updated when the best command changes for a SGLang release or commit."
                         }
                     }
