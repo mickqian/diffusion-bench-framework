@@ -438,11 +438,8 @@ def wait_for_health(
     print(f"  Server ready in {elapsed:.1f}s")
 
 
-KILLALL_SCRIPT = REPO_ROOT / "scripts" / "killall_sglang.sh"
-
-
 def kill_server(proc: subprocess.Popen) -> None:
-    """Kill server process tree and clean up GPU processes."""
+    """Kill the server process group."""
     if proc.poll() is not None:
         return
     try:
@@ -457,13 +454,6 @@ def kill_server(proc: subprocess.Popen) -> None:
         except (ProcessLookupError, PermissionError):
             pass
         proc.wait(timeout=10)
-    # Use killall_sglang.sh for thorough cleanup (esp. multi-GPU workers)
-    if KILLALL_SCRIPT.exists():
-        subprocess.run(
-            ["bash", str(KILLALL_SCRIPT)],
-            timeout=30,
-            capture_output=True,
-        )
 
 
 # ---------------------------------------------------------------------------
