@@ -393,13 +393,13 @@
             }
         },
         {
-            "id": "wan22_ti2v_5b_720p",
+            "id": "wan22_ti2v_5b_704p",
             "model": "Wan-AI/Wan2.2-TI2V-5B-Diffusers",
             "task": "text-image-to-video",
             "prompt": "The cat starts walking slowly towards the camera.",
             "reference_image": true,
             "width": 1280,
-            "height": 720,
+            "height": 704,
             "num_frames": 81,
             "seed": 42,
             "num_gpus": 2,
@@ -418,7 +418,7 @@
                             "notes": "Keep this profile updated when the best command changes for a SGLang release or commit."
                         },
                         "h100-h200-2gpu": {
-                            "description": "H100/H200 command for the Wan2.2 TI2V 5B 720p case.",
+                            "description": "H100/H200 command for the Wan2.2 TI2V 5B 704p case.",
                             "hardware": [
                                 "h100",
                                 "h200"
