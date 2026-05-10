@@ -1219,6 +1219,8 @@ def run_throughput(
         str(max_concurrency),
         "--request-rate",
         str(throughput_cfg.get("request_rate", "inf")),
+        "--request-timeout",
+        str(REQUEST_TIMEOUT * max(1, max_concurrency)),
         "--output-file",
         str(metrics_path),
         "--disable-tqdm",
@@ -1275,6 +1277,7 @@ def run_throughput(
                 "latency_p90_s": round(metrics.get("latency_p90", 0), 3),
                 "latency_p95_s": round(metrics.get("latency_p95", 0), 3),
                 "latency_p99_s": round(metrics.get("latency_p99", 0), 3),
+                "errors": metrics.get("errors", []),
             },
         }
     )

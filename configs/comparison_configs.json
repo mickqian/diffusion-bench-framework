@@ -40,32 +40,6 @@
             }
         },
         {
-            "id": "flux2_dev_t2i_1024",
-            "model": "black-forest-labs/FLUX.2-dev",
-            "task": "text-to-image",
-            "prompt": "A futuristic cyberpunk city at night, neon lights reflecting on wet streets",
-            "width": 1024,
-            "height": 1024,
-            "seed": 42,
-            "num_gpus": 1,
-            "num_inference_steps": 50,
-            "guidance_scale": 4.0,
-            "frameworks": {
-                "sglang": {
-                    "serve_args": "--model-type diffusion --warmup --dit-layerwise-offload false",
-                    "extra_env": {},
-                    "command_profiles": {
-                        "default": {
-                            "description": "Best known SGLang command for the benchmark repo default profile.",
-                            "sglang_ref": "current-main",
-                            "serve_args": "--model-type diffusion --warmup --dit-layerwise-offload false",
-                            "notes": "Keep this profile updated when the best command changes for a SGLang release or commit."
-                        }
-                    }
-                }
-            }
-        },
-        {
             "id": "qwen_image_2512_t2i_1024",
             "model": "Qwen/Qwen-Image-2512",
             "task": "text-to-image",

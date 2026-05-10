@@ -39,6 +39,8 @@ from diffusion_bench.datasets import (
 
 logger = logging.getLogger(__name__)
 
+DEFAULT_REQUEST_TIMEOUT = 1200
+
 # Patch size used for computing area units (e.g. in latent diffusion models).
 PATCH_SIZE = 16
 PATCH_AREA = PATCH_SIZE * PATCH_SIZE
@@ -597,12 +599,22 @@ def calculate_metrics(
         for o in success_outputs
         if o.peak_memory_mb is not None and o.peak_memory_mb > 0
     ]
+    error_details = [
+        {
+            "request_id": req.request_id,
+            "latency_s": round(float(out.latency), 3),
+            "error": out.error or "unknown error",
+        }
+        for req, out in zip(requests_list, outputs)
+        if not out.success
+    ]
 
     metrics = {
         "duration": total_duration,
         "completed_requests": num_success,
         "completed_outputs": completed_outputs,
         "failed_requests": len(error_outputs),
+        "errors": error_details,
         "throughput_qps": num_success / total_duration if total_duration > 0 else 0,
         "output_throughput_ops": (
             completed_outputs / total_duration if total_duration > 0 else 0
@@ -791,7 +803,8 @@ async def benchmark(args):
         else:
             return await request_func(req, session, pbar)
 
-    async with aiohttp.ClientSession() as session:
+    timeout = aiohttp.ClientTimeout(total=args.request_timeout)
+    async with aiohttp.ClientSession(timeout=timeout) as session:
         warmup_pairs: List[tuple] = []
         if args.warmup_requests and requests_list:
             warmup_steps = args.warmup_inference_steps
@@ -882,6 +895,12 @@ async def benchmark(args):
         print_value_formatted(
             "Peak Memory Median (MB):", metrics["peak_memory_mb_median"]
         )
+
+    if metrics["errors"]:
+        print_divider(50)
+        print("Failed request errors:")
+        for item in metrics["errors"]:
+            print(f"- {item['request_id']}: {item['error']}")
 
     if args.slo and "slo_attainment_rate" in metrics:
         print_divider(50)
@@ -996,6 +1015,12 @@ def main() -> None:
         default=float("inf"),
         help="Number of requests per second. If this is inf, then all the requests are sent at time 0. "
         "Otherwise, we use Poisson process to synthesize the request arrival times. Default is inf.",
+    )
+    parser.add_argument(
+        "--request-timeout",
+        type=float,
+        default=DEFAULT_REQUEST_TIMEOUT,
+        help="Total timeout in seconds for each HTTP request.",
     )
     parser.add_argument("--width", type=int, default=None, help="Image/Video width.")
     parser.add_argument("--height", type=int, default=None, help="Image/Video height.")

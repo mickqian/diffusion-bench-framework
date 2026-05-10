@@ -62,7 +62,7 @@ diffusion-bench-compare \
 
 ## Default Coverage
 
-The bundled config currently covers FLUX.1/FLUX.2, Qwen-Image text-to-image and edit, Z-Image single- and two-GPU image generation, Wan2.1/Wan2.2 video generation, and LTX-2/LTX-2.3 video generation.
+The bundled config currently covers FLUX.1, Qwen-Image text-to-image and edit, Z-Image single- and two-GPU image generation, Wan2.1/Wan2.2 video generation, and LTX-2/LTX-2.3 video generation.
 
 Framework entries are included only when the local harness has a compatible serving path. For example, the current vLLM-Omni integration is limited to Qwen-Image cases, while LightX2V coverage is used for supported Wan video cases.
 
