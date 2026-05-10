@@ -56,6 +56,7 @@ DEFAULT_BENCHMARK = {
     "warmup": {"num_requests": 2, "num_inference_steps": 3},
     "throughput": {"num_requests": 4, "max_concurrency": 2},
 }
+SGLANG_DEFAULT_WARMUP_STEPS = 3
 DEFAULT_SGLANG_PROFILE = "default"
 HARDWARE_PROFILE_ENV = "SGLANG_BENCH_HARDWARE_PROFILE"
 SKIP_FRAMEWORK_INSTALL_ENV = "SGLANG_DIFFUSION_SKIP_FRAMEWORK_INSTALL"
@@ -105,6 +106,8 @@ def _build_sglang_cmd(case: dict, fw_cfg: dict, port: int) -> list[str]:
         cmd += ["--num-gpus", str(num_gpus)]
     if fw_cfg.get("serve_args", "").strip():
         cmd += fw_cfg["serve_args"].strip().split()
+    if "--warmup" in cmd and "--warmup-steps" not in cmd:
+        cmd += ["--warmup-steps", str(SGLANG_DEFAULT_WARMUP_STEPS)]
     return cmd
 
 
