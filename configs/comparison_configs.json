@@ -581,6 +581,51 @@
                     "extra_env": {},
                     "lightx2v_config": {
                         "sample_shift": 5.0,
+                        "resolution": "720p",
+                        "bucket_shape": {
+                            "0.667": [
+                                [
+                                    480,
+                                    832
+                                ],
+                                [
+                                    544,
+                                    960
+                                ],
+                                [
+                                    704,
+                                    1280
+                                ]
+                            ],
+                            "1.000": [
+                                [
+                                    480,
+                                    480
+                                ],
+                                [
+                                    576,
+                                    576
+                                ],
+                                [
+                                    960,
+                                    960
+                                ]
+                            ],
+                            "1.500": [
+                                [
+                                    832,
+                                    480
+                                ],
+                                [
+                                    960,
+                                    544
+                                ],
+                                [
+                                    1280,
+                                    704
+                                ]
+                            ]
+                        },
                         "num_channels_latents": 48,
                         "vae_stride": [
                             4,
@@ -776,6 +821,7 @@
                     "extra_env": {},
                     "lightx2v_config": {
                         "sample_shift": 5.0,
+                        "resolution": "720p",
                         "self_attn_1_type": "flash_attn3",
                         "cross_attn_1_type": "flash_attn3",
                         "cross_attn_2_type": "flash_attn3",
@@ -851,6 +897,7 @@
                     "extra_env": {},
                     "lightx2v_config": {
                         "sample_shift": 5.0,
+                        "resolution": "720p",
                         "self_attn_1_type": "flash_attn3",
                         "cross_attn_1_type": "flash_attn3",
                         "cross_attn_2_type": "flash_attn3",
