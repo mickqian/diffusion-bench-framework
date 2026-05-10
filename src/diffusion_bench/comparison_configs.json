@@ -36,6 +36,98 @@
                             "notes": "Keep this profile updated when the best command changes for a SGLang release or commit."
                         }
                     }
+                },
+                "vllm-omni": {
+                    "num_gpus": 1,
+                    "serve_args": "",
+                    "extra_env": {
+                        "DIFFUSION_ATTENTION_BACKEND": "FLASH_ATTN"
+                    },
+                    "command_profiles": {
+                        "default": {
+                            "description": "Best known vLLM-Omni command for aligned non-cache benchmark runs.",
+                            "framework_ref": "vllm-omni-0.18.0-cli-env",
+                            "serve_args": "",
+                            "notes": "Uses env-selected FlashAttention; torch compile is disabled by the benchmark harness.",
+                            "extra_env": {
+                                "DIFFUSION_ATTENTION_BACKEND": "FLASH_ATTN"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        {
+            "id": "flux2_dev_t2i_1024",
+            "model": "black-forest-labs/FLUX.2-dev",
+            "task": "text-to-image",
+            "prompt": "A futuristic cyberpunk city at night, neon lights reflecting on wet streets",
+            "width": 1024,
+            "height": 1024,
+            "seed": 42,
+            "num_gpus": 1,
+            "num_inference_steps": 50,
+            "guidance_scale": 4.0,
+            "frameworks": {
+                "sglang": {
+                    "serve_args": "--model-type diffusion --warmup --dit-layerwise-offload false",
+                    "extra_env": {},
+                    "command_profiles": {
+                        "default": {
+                            "description": "Best known SGLang command for the benchmark repo default profile.",
+                            "sglang_ref": "current-main",
+                            "serve_args": "--model-type diffusion --warmup --dit-layerwise-offload false",
+                            "notes": "Keep this profile updated when the best command changes for a SGLang release or commit."
+                        }
+                    }
+                },
+                "vllm-omni": {
+                    "num_gpus": 1,
+                    "serve_args": "",
+                    "extra_env": {
+                        "DIFFUSION_ATTENTION_BACKEND": "FLASH_ATTN"
+                    },
+                    "command_profiles": {
+                        "default": {
+                            "description": "Best known vLLM-Omni command for aligned non-cache benchmark runs.",
+                            "framework_ref": "vllm-omni-0.18.0-cli-env",
+                            "serve_args": "",
+                            "notes": "Uses env-selected FlashAttention; torch compile is disabled by the benchmark harness.",
+                            "extra_env": {
+                                "DIFFUSION_ATTENTION_BACKEND": "FLASH_ATTN"
+                            }
+                        }
+                    }
+                },
+                "lightx2v": {
+                    "model": "black-forest-labs/FLUX.2-dev",
+                    "model_cls": "flux2_dev",
+                    "lightx2v_task": "t2i",
+                    "num_gpus": 1,
+                    "serve_args": "",
+                    "extra_env": {},
+                    "lightx2v_config": {
+                        "sample_guide_scale": 4.0,
+                        "vae_scale_factor": 16,
+                        "feature_caching": "None",
+                        "enable_cfg": false,
+                        "patch_size": 2,
+                        "tokenizer_max_length": 512,
+                        "rope_type": "flashinfer",
+                        "text_encoder_out_layers": [
+                            10,
+                            20,
+                            30
+                        ]
+                    },
+                    "command_profiles": {
+                        "default": {
+                            "description": "Best known LightX2V command/config for aligned non-cache benchmark runs.",
+                            "framework_ref": "lightx2v-0.1.0-flux2_dev",
+                            "serve_args": "",
+                            "notes": "Uses explicit fast attention/offload settings; no cache, torch compile, or quantized model path."
+                        }
+                    }
                 }
             }
         },
@@ -66,40 +158,20 @@
                 "vllm-omni": {
                     "num_gpus": 1,
                     "serve_args": "",
-                    "extra_env": {}
-                }
-            }
-        },
-        {
-            "id": "qwen_image_2512_t2i_1024_true_cfg",
-            "model": "Qwen/Qwen-Image-2512",
-            "task": "text-to-image",
-            "prompt": "A futuristic cyberpunk city at night, neon lights reflecting on wet streets",
-            "width": 1024,
-            "height": 1024,
-            "seed": 42,
-            "num_gpus": 1,
-            "num_inference_steps": 50,
-            "negative_prompt": " ",
-            "guidance_scale": 4.0,
-            "true_cfg_scale": 4.0,
-            "frameworks": {
-                "sglang": {
-                    "serve_args": "--model-type diffusion --warmup",
-                    "extra_env": {},
+                    "extra_env": {
+                        "DIFFUSION_ATTENTION_BACKEND": "FLASH_ATTN"
+                    },
                     "command_profiles": {
                         "default": {
-                            "description": "Best known SGLang command for the benchmark repo default profile.",
-                            "sglang_ref": "current-main",
-                            "serve_args": "--model-type diffusion --warmup",
-                            "notes": "Keep this profile updated when the best command changes for a SGLang release or commit."
+                            "description": "Best known vLLM-Omni command for aligned non-cache benchmark runs.",
+                            "framework_ref": "vllm-omni-0.18.0-cli-env",
+                            "serve_args": "",
+                            "notes": "Uses env-selected FlashAttention; torch compile is disabled by the benchmark harness.",
+                            "extra_env": {
+                                "DIFFUSION_ATTENTION_BACKEND": "FLASH_ATTN"
+                            }
                         }
                     }
-                },
-                "vllm-omni": {
-                    "num_gpus": 1,
-                    "serve_args": "",
-                    "extra_env": {}
                 }
             }
         },
@@ -131,24 +203,34 @@
                 "vllm-omni": {
                     "num_gpus": 1,
                     "serve_args": "",
-                    "extra_env": {}
+                    "extra_env": {
+                        "DIFFUSION_ATTENTION_BACKEND": "FLASH_ATTN"
+                    },
+                    "command_profiles": {
+                        "default": {
+                            "description": "Best known vLLM-Omni command for aligned non-cache benchmark runs.",
+                            "framework_ref": "vllm-omni-0.18.0-cli-env",
+                            "serve_args": "",
+                            "notes": "Uses env-selected FlashAttention; torch compile is disabled by the benchmark harness.",
+                            "extra_env": {
+                                "DIFFUSION_ATTENTION_BACKEND": "FLASH_ATTN"
+                            }
+                        }
+                    }
                 }
             }
         },
         {
-            "id": "qwen_image_edit_2511_true_cfg",
-            "model": "Qwen/Qwen-Image-Edit-2511",
-            "task": "image-edit",
-            "prompt": "Make the cat wear a red hat",
-            "reference_image": true,
+            "id": "zimage_turbo_t2i_1024",
+            "model": "Tongyi-MAI/Z-Image-Turbo",
+            "task": "text-to-image",
+            "prompt": "A futuristic cyberpunk city at night, neon lights reflecting on wet streets",
             "width": 1024,
             "height": 1024,
             "seed": 42,
             "num_gpus": 1,
-            "num_inference_steps": 40,
-            "negative_prompt": " ",
-            "guidance_scale": 4.0,
-            "true_cfg_scale": 4.0,
+            "num_inference_steps": 9,
+            "guidance_scale": 0.0,
             "frameworks": {
                 "sglang": {
                     "serve_args": "--model-type diffusion --warmup",
@@ -165,77 +247,42 @@
                 "vllm-omni": {
                     "num_gpus": 1,
                     "serve_args": "",
-                    "extra_env": {}
-                }
-            }
-        },
-        {
-            "id": "zimage_turbo_t2i_1024",
-            "model": "Tongyi-MAI/Z-Image-Turbo",
-            "task": "text-to-image",
-            "prompt": "A futuristic cyberpunk city at night, neon lights reflecting on wet streets",
-            "width": 1024,
-            "height": 1024,
-            "seed": 42,
-            "num_gpus": 1,
-            "frameworks": {
-                "sglang": {
-                    "serve_args": "--model-type diffusion --warmup",
-                    "extra_env": {},
+                    "extra_env": {
+                        "DIFFUSION_ATTENTION_BACKEND": "FLASH_ATTN"
+                    },
                     "command_profiles": {
                         "default": {
-                            "description": "Best known SGLang command for the benchmark repo default profile.",
-                            "sglang_ref": "current-main",
-                            "serve_args": "--model-type diffusion --warmup",
-                            "notes": "Keep this profile updated when the best command changes for a SGLang release or commit."
+                            "description": "Best known vLLM-Omni command for aligned non-cache benchmark runs.",
+                            "framework_ref": "vllm-omni-0.18.0-cli-env",
+                            "serve_args": "",
+                            "notes": "Uses env-selected FlashAttention; torch compile is disabled by the benchmark harness.",
+                            "extra_env": {
+                                "DIFFUSION_ATTENTION_BACKEND": "FLASH_ATTN"
+                            }
                         }
                     }
-                }
-            }
-        },
-        {
-            "id": "zimage_turbo_t2i_1024_2gpu",
-            "model": "Tongyi-MAI/Z-Image-Turbo",
-            "task": "text-to-image",
-            "prompt": "A futuristic cyberpunk city at night, neon lights reflecting on wet streets",
-            "width": 1024,
-            "height": 1024,
-            "seed": 42,
-            "num_gpus": 2,
-            "frameworks": {
-                "sglang": {
-                    "serve_args": "--model-type diffusion --warmup --ulysses-degree 2",
+                },
+                "lightx2v": {
+                    "model": "Tongyi-MAI/Z-Image-Turbo",
+                    "model_cls": "z_image",
+                    "lightx2v_task": "t2i",
+                    "num_gpus": 1,
+                    "serve_args": "",
                     "extra_env": {},
+                    "lightx2v_config": {
+                        "aspect_ratio": "1:1",
+                        "num_channels_latents": 16,
+                        "attn_type": "flash_attn3",
+                        "enable_cfg": false,
+                        "sample_guide_scale": 0.0,
+                        "patch_size": 2
+                    },
                     "command_profiles": {
                         "default": {
-                            "description": "Best known SGLang command for the benchmark repo default profile.",
-                            "sglang_ref": "current-main",
-                            "serve_args": "--model-type diffusion --warmup --ulysses-degree 2",
-                            "notes": "Tracks Z-Image Ulysses performance for square image generation."
-                        }
-                    }
-                }
-            }
-        },
-        {
-            "id": "zimage_turbo_t2i_1280x720_2gpu",
-            "model": "Tongyi-MAI/Z-Image-Turbo",
-            "task": "text-to-image",
-            "prompt": "A futuristic cyberpunk city at night, neon lights reflecting on wet streets",
-            "width": 1280,
-            "height": 720,
-            "seed": 42,
-            "num_gpus": 2,
-            "frameworks": {
-                "sglang": {
-                    "serve_args": "--model-type diffusion --warmup --ulysses-degree 2",
-                    "extra_env": {},
-                    "command_profiles": {
-                        "default": {
-                            "description": "Best known SGLang command for the benchmark repo default profile.",
-                            "sglang_ref": "current-main",
-                            "serve_args": "--model-type diffusion --warmup --ulysses-degree 2",
-                            "notes": "Tracks Z-Image Ulysses performance for non-square image generation."
+                            "description": "Best known LightX2V command/config for aligned non-cache benchmark runs.",
+                            "framework_ref": "lightx2v-0.1.0-z_image",
+                            "serve_args": "",
+                            "notes": "Uses explicit fast attention/offload settings; no cache, torch compile, or quantized model path."
                         }
                     }
                 }
@@ -275,14 +322,25 @@
                     "extra_env": {},
                     "lightx2v_config": {
                         "sample_shift": 8.0,
-                        "self_attn_1_type": "flash_attn2",
-                        "cross_attn_1_type": "flash_attn2",
-                        "cross_attn_2_type": "flash_attn2",
+                        "self_attn_1_type": "flash_attn3",
+                        "cross_attn_1_type": "flash_attn3",
+                        "cross_attn_2_type": "flash_attn3",
                         "enable_cfg": true,
                         "parallel": {
                             "cfg_p_size": 2
                         },
-                        "rope_type": "torch"
+                        "rope_type": "torch",
+                        "cpu_offload": false,
+                        "t5_cpu_offload": false,
+                        "vae_cpu_offload": false
+                    },
+                    "command_profiles": {
+                        "default": {
+                            "description": "Best known LightX2V command/config for aligned non-cache benchmark runs.",
+                            "framework_ref": "lightx2v-0.1.0-configs/wan/wan_t2v.json+cfg_parallel",
+                            "serve_args": "",
+                            "notes": "Uses explicit fast attention/offload settings; no cache, torch compile, or quantized model path."
+                        }
                     }
                 }
             }
@@ -321,17 +379,28 @@
                     "serve_args": "",
                     "extra_env": {},
                     "lightx2v_config": {
-                        "sample_shift": 5.0,
-                        "self_attn_1_type": "flash_attn2",
-                        "cross_attn_1_type": "flash_attn2",
-                        "cross_attn_2_type": "flash_attn2",
+                        "sample_shift": 3.0,
+                        "self_attn_1_type": "flash_attn3",
+                        "cross_attn_1_type": "flash_attn3",
+                        "cross_attn_2_type": "flash_attn3",
                         "enable_cfg": true,
                         "parallel": {
                             "cfg_p_size": 2,
                             "seq_p_size": 2,
                             "seq_p_attn_type": "ulysses"
                         },
-                        "rope_type": "torch"
+                        "rope_type": "torch",
+                        "cpu_offload": false,
+                        "t5_cpu_offload": false,
+                        "vae_cpu_offload": false
+                    },
+                    "command_profiles": {
+                        "default": {
+                            "description": "Best known LightX2V command/config for aligned non-cache benchmark runs.",
+                            "framework_ref": "lightx2v-0.1.0-configs/wan/wan_i2v.json+cfg_parallel",
+                            "serve_args": "",
+                            "notes": "Uses explicit fast attention/offload settings; no cache, torch compile, or quantized model path."
+                        }
                     }
                 }
             }
@@ -370,10 +439,10 @@
                     "serve_args": "",
                     "extra_env": {},
                     "lightx2v_config": {
-                        "sample_shift": 5.0,
-                        "self_attn_1_type": "flash_attn2",
-                        "cross_attn_1_type": "flash_attn2",
-                        "cross_attn_2_type": "flash_attn2",
+                        "sample_shift": 12.0,
+                        "self_attn_1_type": "flash_attn3",
+                        "cross_attn_1_type": "flash_attn3",
+                        "cross_attn_2_type": "flash_attn3",
                         "enable_cfg": true,
                         "parallel": {
                             "cfg_p_size": 2,
@@ -382,13 +451,20 @@
                         },
                         "rope_type": "torch",
                         "aspect_ratio": "16:9",
-                        "boundary": 0.9,
-                        "boundary_step_index": 2,
-                        "denoising_step_list": [1000, 750, 500, 250],
-                        "audio_fps": 24000,
+                        "boundary": 0.875,
                         "use_image_encoder": false,
-                        "double_precision_rope": true,
-                        "norm_modulate_backend": "torch"
+                        "cpu_offload": false,
+                        "t5_cpu_offload": false,
+                        "vae_cpu_offload": false,
+                        "offload_granularity": "model"
+                    },
+                    "command_profiles": {
+                        "default": {
+                            "description": "Best known LightX2V command/config for aligned non-cache benchmark runs.",
+                            "framework_ref": "lightx2v-0.1.0-configs/wan22/wan_moe_t2v.json+cfg_parallel",
+                            "serve_args": "",
+                            "notes": "Uses explicit fast attention/offload settings; no cache, torch compile, or quantized model path."
+                        }
                     }
                 }
             }
@@ -440,23 +516,33 @@
                     "lightx2v_config": {
                         "sample_shift": 5.0,
                         "num_channels_latents": 48,
-                        "vae_stride": [4, 16, 16],
-                        "self_attn_1_type": "flash_attn2",
-                        "cross_attn_1_type": "flash_attn2",
-                        "cross_attn_2_type": "flash_attn2",
+                        "vae_stride": [
+                            4,
+                            16,
+                            16
+                        ],
+                        "self_attn_1_type": "flash_attn3",
+                        "cross_attn_1_type": "flash_attn3",
+                        "cross_attn_2_type": "flash_attn3",
                         "enable_cfg": true,
                         "parallel": {
                             "cfg_p_size": 2
                         },
                         "rope_type": "torch",
                         "aspect_ratio": "16:9",
-                        "boundary": 0.9,
-                        "boundary_step_index": 2,
-                        "denoising_step_list": [1000, 750, 500, 250],
-                        "audio_fps": 24000,
                         "use_image_encoder": false,
-                        "double_precision_rope": true,
-                        "norm_modulate_backend": "torch"
+                        "cpu_offload": false,
+                        "t5_cpu_offload": false,
+                        "vae_cpu_offload": false,
+                        "offload_granularity": "model"
+                    },
+                    "command_profiles": {
+                        "default": {
+                            "description": "Best known LightX2V command/config for aligned non-cache benchmark runs.",
+                            "framework_ref": "lightx2v-0.1.0-configs/wan22/wan_ti2v_i2v.json+cfg_parallel",
+                            "serve_args": "",
+                            "notes": "Uses explicit fast attention/offload settings; no cache, torch compile, or quantized model path."
+                        }
                     }
                 }
             }
@@ -496,99 +582,24 @@
                             "notes": "Resident mode keeps both stages in VRAM on H200-class GPUs."
                         }
                     }
-                }
-            }
-        },
-        {
-            "id": "ltx2.3_twostage_ti2v_2gpus",
-            "model": "Lightricks/LTX-2.3",
-            "task": "text-image-to-video",
-            "prompt": "The cat starts walking slowly towards the camera.",
-            "reference_image": true,
-            "width": 768,
-            "height": 512,
-            "num_frames": 121,
-            "seed": 42,
-            "num_gpus": 2,
-            "fps": 24,
-            "num_inference_steps": 30,
-            "guidance_scale": 3.0,
-            "frameworks": {
-                "sglang": {
-                    "serve_args": "--model-type diffusion --warmup --enable-cfg-parallel --pipeline-class-name LTX2TwoStagePipeline",
-                    "extra_env": {},
+                },
+                "vllm-omni": {
+                    "model": "rootonchair/LTX-2-19b-distilled",
+                    "num_gpus": 2,
+                    "serve_args": "--num-gpus 2 --cfg-parallel-size 2",
+                    "extra_env": {
+                        "DIFFUSION_ATTENTION_BACKEND": "FLASH_ATTN"
+                    },
                     "command_profiles": {
                         "default": {
-                            "description": "Fallback SGLang command when no hardware-specific profile matches.",
-                            "sglang_ref": "current-main",
-                            "serve_args": "--model-type diffusion --warmup --enable-cfg-parallel --pipeline-class-name LTX2TwoStagePipeline",
-                            "notes": "Use hardware-specific profiles for formal H100/H200 runs."
-                        },
-                        "h100-80gb-2gpu": {
-                            "description": "Cookbook-aligned H100 80GB command for the LTX2.3 two-stage 121-frame case.",
-                            "hardware": [
-                                "h100"
-                            ],
-                            "sglang_ref": "current-main",
+                            "description": "Best known vLLM-Omni command for the LTX-2 two-stage 2-GPU case.",
+                            "framework_ref": "vllm-omni-0.18.0-cli-env",
                             "num_gpus": 2,
-                            "serve_args": "--model-type diffusion --warmup --enable-cfg-parallel --pipeline-class-name LTX2TwoStagePipeline --ltx2-two-stage-device-mode snapshot",
-                            "notes": "Snapshot mode avoids H100 resident VRAM pressure."
-                        },
-                        "h200-2gpu": {
-                            "description": "Cookbook-aligned H200 command for the LTX2.3 two-stage 121-frame case.",
-                            "hardware": [
-                                "h200"
-                            ],
-                            "sglang_ref": "current-main",
-                            "num_gpus": 2,
-                            "serve_args": "--model-type diffusion --warmup --enable-cfg-parallel --pipeline-class-name LTX2TwoStagePipeline --ltx2-two-stage-device-mode resident",
-                            "notes": "Resident mode is the fastest LTX2.3 two-stage path when both DiTs fit in VRAM."
-                        },
-                        "official-original-2gpu": {
-                            "description": "Official stage-switching semantics profile for LTX2.3 two-stage comparisons.",
-                            "sglang_ref": "current-main",
-                            "num_gpus": 2,
-                            "serve_args": "--model-type diffusion --warmup --enable-cfg-parallel --pipeline-class-name LTX2TwoStagePipeline --ltx2-two-stage-device-mode original",
-                            "notes": "Use this only when official switching semantics are more important than latency."
-                        }
-                    }
-                }
-            }
-        },
-        {
-            "id": "ltx2.3_onestage_ti2v_2gpus",
-            "model": "Lightricks/LTX-2.3",
-            "task": "text-image-to-video",
-            "prompt": "The cat starts walking slowly towards the camera.",
-            "reference_image": true,
-            "width": 768,
-            "height": 512,
-            "num_frames": 121,
-            "seed": 42,
-            "num_gpus": 2,
-            "fps": 24,
-            "num_inference_steps": 30,
-            "guidance_scale": 3.0,
-            "frameworks": {
-                "sglang": {
-                    "serve_args": "--model-type diffusion --warmup --ulysses-degree 2 --pipeline-class-name LTX2Pipeline",
-                    "extra_env": {},
-                    "command_profiles": {
-                        "default": {
-                            "description": "Best known SGLang command for the benchmark repo default profile.",
-                            "sglang_ref": "current-main",
-                            "serve_args": "--model-type diffusion --warmup --ulysses-degree 2 --pipeline-class-name LTX2Pipeline",
-                            "notes": "Tracks LTX2.3 one-stage TI2V performance separately from two-stage pipeline runs."
-                        },
-                        "h200-2gpu": {
-                            "description": "H200 command for the LTX2.3 one-stage TI2V case.",
-                            "hardware": [
-                                "h200"
-                            ],
-                            "sglang_ref": "current-main",
-                            "num_gpus": 2,
-                            "serve_args": "--model-type diffusion --warmup --ulysses-degree 2 --pipeline-class-name LTX2Pipeline --dit-cpu-offload false --text-encoder-cpu-offload --pin-cpu-memory",
-                            "notes": "Keeps the DiT resident on high-memory GPUs."
+                            "serve_args": "--num-gpus 2 --cfg-parallel-size 2",
+                            "notes": "Uses diffusion CFG parallelism and env-selected FlashAttention; no torch compile or cache path.",
+                            "extra_env": {
+                                "DIFFUSION_ATTENTION_BACKEND": "FLASH_ATTN"
+                            }
                         }
                     }
                 }
@@ -675,6 +686,38 @@
                             "notes": "Tracks Wan2.1 720P I2V SGLang coverage; add other frameworks only after confirming compatible model support."
                         }
                     }
+                },
+                "lightx2v": {
+                    "model": "Wan-AI/Wan2.1-I2V-14B-720P",
+                    "model_cls": "wan2.1",
+                    "lightx2v_task": "i2v",
+                    "num_gpus": 4,
+                    "serve_args": "",
+                    "extra_env": {},
+                    "lightx2v_config": {
+                        "sample_shift": 5.0,
+                        "self_attn_1_type": "flash_attn3",
+                        "cross_attn_1_type": "flash_attn3",
+                        "cross_attn_2_type": "flash_attn3",
+                        "enable_cfg": true,
+                        "parallel": {
+                            "cfg_p_size": 2,
+                            "seq_p_size": 2,
+                            "seq_p_attn_type": "ulysses"
+                        },
+                        "rope_type": "torch",
+                        "cpu_offload": false,
+                        "t5_cpu_offload": false,
+                        "vae_cpu_offload": false
+                    },
+                    "command_profiles": {
+                        "default": {
+                            "description": "Best known LightX2V command/config for aligned non-cache benchmark runs.",
+                            "framework_ref": "lightx2v-0.1.0-wan2.1-i2v-720p+cfg_parallel",
+                            "serve_args": "",
+                            "notes": "Uses explicit fast attention/offload settings; no cache, torch compile, or quantized model path."
+                        }
+                    }
                 }
             }
         },
@@ -714,9 +757,9 @@
                     "extra_env": {},
                     "lightx2v_config": {
                         "sample_shift": 5.0,
-                        "self_attn_1_type": "flash_attn2",
-                        "cross_attn_1_type": "flash_attn2",
-                        "cross_attn_2_type": "flash_attn2",
+                        "self_attn_1_type": "flash_attn3",
+                        "cross_attn_1_type": "flash_attn3",
+                        "cross_attn_2_type": "flash_attn3",
                         "enable_cfg": true,
                         "parallel": {
                             "cfg_p_size": 2,
@@ -726,12 +769,19 @@
                         "rope_type": "torch",
                         "aspect_ratio": "16:9",
                         "boundary": 0.9,
-                        "boundary_step_index": 2,
-                        "denoising_step_list": [1000, 750, 500, 250],
-                        "audio_fps": 24000,
                         "use_image_encoder": false,
-                        "double_precision_rope": true,
-                        "norm_modulate_backend": "torch"
+                        "cpu_offload": false,
+                        "t5_cpu_offload": false,
+                        "vae_cpu_offload": false,
+                        "offload_granularity": "model"
+                    },
+                    "command_profiles": {
+                        "default": {
+                            "description": "Best known LightX2V command/config for aligned non-cache benchmark runs.",
+                            "framework_ref": "lightx2v-0.1.0-configs/wan22/wan_moe_i2v.json+cfg_parallel",
+                            "serve_args": "",
+                            "notes": "Uses explicit fast attention/offload settings; no cache, torch compile, or quantized model path."
+                        }
                     }
                 }
             }

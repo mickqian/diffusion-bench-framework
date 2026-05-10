@@ -12,23 +12,25 @@ Add new benchmark coverage without corrupting historical comparability. A case s
 ## Case Checklist
 
 - Use the official model ID or a clearly named local path.
+- The default tracker should include only one representative case per official model ID. Keep LTX-2.3 represented by a two-stage case; put true-CFG, alternate-shape, single-vs-multi-GPU, or non-representative pipeline variants behind explicit `--case-ids` reruns unless broader default coverage is requested.
 - Specify task, prompt, resolution, frames, seed, and reference-image behavior.
 - Keep sampling params omitted only when model defaults are intentionally being compared.
 - If a README or upstream script uses explicit sampling params, encode them in the case.
 - For video cases, always confirm `num_frames` and resolution match across frameworks.
 - Do not enable caches unless the case is explicitly a cache benchmark.
+- Use the fastest fair serving command for each framework. Do not use torch compile, response caches, Cache-DiT, quantized checkpoints, no-CFG variants, or distilled/reduced-step settings unless the case explicitly compares those semantics.
 
-## SGLang Profiles
+## Command Profiles
 
-For every `sglang` framework entry, maintain `command_profiles`:
+For every framework entry, maintain `command_profiles`:
 
-- `sglang_ref`: tag, commit, or meaningful branch line.
-- `serve_args`: full best-known SGLang serve args for that case/profile.
+- `sglang_ref` or `framework_ref`: tag, commit, package, config, or meaningful branch line.
+- `serve_args`: full best-known serve args for that case/profile.
 - `hardware`: optional hardware selector such as `["h100"]` or `["h200"]` when a command is hardware-specific.
 - `notes`: why this profile exists, especially when it differs from `default`.
 - Optional runtime overrides: `num_gpus`, `extra_env`, and `benchmark`.
 
-Do not delete old profiles just because a newer command is better. Add a new profile when the best command changes by SGLang version, hardware class, or model implementation.
+Do not delete old profiles just because a newer command is better. Add a new profile when the best command changes by framework version, hardware class, or model implementation.
 If a SGLang profile OOMs or fails on one hardware class, add a hardware-specific stable profile and rerun instead of letting the failed result stand as a valid comparison.
 
 ## Framework Checklist

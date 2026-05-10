@@ -57,7 +57,8 @@ DEFAULT_BENCHMARK = {
     "throughput": {"num_requests": 4, "max_concurrency": 2},
 }
 SGLANG_DEFAULT_WARMUP_STEPS = 3
-DEFAULT_SGLANG_PROFILE = "default"
+DEFAULT_PROFILE = "default"
+DEFAULT_SGLANG_PROFILE = DEFAULT_PROFILE
 HARDWARE_PROFILE_ENV = "SGLANG_BENCH_HARDWARE_PROFILE"
 SKIP_FRAMEWORK_INSTALL_ENV = "SGLANG_DIFFUSION_SKIP_FRAMEWORK_INSTALL"
 FORCED_BENCHMARK_ENV = {"TORCH_COMPILE_DISABLE": "1"}
@@ -76,8 +77,10 @@ SGLANG_PROFILE_RUNTIME_KEYS = {
     "num_gpus",
     "extra_env",
     "benchmark",
+    "model",
     "model_path",
 }
+FRAMEWORK_PROFILE_RUNTIME_KEYS = SGLANG_PROFILE_RUNTIME_KEYS | {"lightx2v_config"}
 
 # Cached reference image (downloaded once)
 _cached_ref_image: bytes | None = None
@@ -113,6 +116,7 @@ def _build_sglang_cmd(case: dict, fw_cfg: dict, port: int) -> list[str]:
 
 def _build_vllm_cmd(case: dict, fw_cfg: dict, port: int) -> list[str]:
     model_path = _server_model_path(case, fw_cfg)
+    num_gpus = fw_cfg.get("num_gpus", case["num_gpus"])
     cmd = [
         "vllm",
         "serve",
@@ -125,6 +129,20 @@ def _build_vllm_cmd(case: dict, fw_cfg: dict, port: int) -> list[str]:
     ]
     if fw_cfg.get("serve_args", "").strip():
         cmd += fw_cfg["serve_args"].strip().split()
+    parallel_args = {
+        "--tensor-parallel-size",
+        "--num-gpus",
+        "--cfg-parallel-size",
+        "--ulysses-degree",
+        "--ring-degree",
+        "--vae-patch-parallel-size",
+    }
+    has_parallel_arg = any(
+        arg in parallel_args or any(arg.startswith(f"{name}=") for name in parallel_args)
+        for arg in cmd
+    )
+    if num_gpus > 1 and not has_parallel_arg:
+        cmd += ["--tensor-parallel-size", str(num_gpus)]
     cmd += VLLM_DISABLE_TORCH_COMPILE_ARGS
     return cmd
 
@@ -191,7 +209,7 @@ def _build_lightx2v_cmd(case: dict, fw_cfg: dict, port: int) -> list[str]:
     """
     model_cls = fw_cfg["model_cls"]
     task = fw_cfg["lightx2v_task"]
-    num_gpus = case["num_gpus"]
+    num_gpus = fw_cfg.get("num_gpus", case["num_gpus"])
     model_path = _server_model_path(case, fw_cfg)
     if not fw_cfg.get("_skip_model_path_resolution"):
         model_path = _resolve_hf_model_path(model_path)
@@ -251,8 +269,19 @@ def _explicit_sglang_profile(profile: str | None) -> str | None:
     )
 
 
+def _explicit_framework_profile(framework: str, sglang_profile: str | None) -> str | None:
+    if framework == "sglang":
+        return _explicit_sglang_profile(sglang_profile)
+    env_key = f"DIFFUSION_BENCH_{framework.upper().replace('-', '_')}_PROFILE"
+    return os.environ.get(env_key) or os.environ.get("DIFFUSION_BENCH_FRAMEWORK_PROFILE")
+
+
 def _requested_sglang_profile(profile: str | None) -> str:
     return _explicit_sglang_profile(profile) or "auto"
+
+
+def _requested_framework_profile(framework: str, sglang_profile: str | None) -> str:
+    return _explicit_framework_profile(framework, sglang_profile) or "auto"
 
 
 def _hardware_profile_candidates(hardware_metadata: dict | None) -> list[str]:
@@ -298,7 +327,8 @@ def _profile_matches_hardware(
     return any(candidate in value for candidate in candidates for value in values)
 
 
-def _select_sglang_profile(
+def _select_command_profile(
+    framework: str,
     profiles: dict,
     explicit_profile: str | None,
     hardware_metadata: dict | None,
@@ -308,19 +338,19 @@ def _select_sglang_profile(
         if explicit_profile not in profiles:
             available = ", ".join(sorted(profiles))
             raise ValueError(
-                f"Unknown SGLang command profile '{explicit_profile}'. "
+                f"Unknown {framework} command profile '{explicit_profile}'. "
                 f"Available profiles: {available}"
             )
         return explicit_profile, "explicit", candidates
 
     for profile_name, profile_cfg in profiles.items():
-        if profile_name == DEFAULT_SGLANG_PROFILE:
+        if profile_name == DEFAULT_PROFILE:
             continue
         if _profile_matches_hardware(profile_name, profile_cfg, candidates):
             return profile_name, "hardware", candidates
 
-    if DEFAULT_SGLANG_PROFILE in profiles:
-        return DEFAULT_SGLANG_PROFILE, "default", candidates
+    if DEFAULT_PROFILE in profiles:
+        return DEFAULT_PROFILE, "default", candidates
     if profiles:
         return next(iter(profiles)), "first", candidates
     return None, "inline", candidates
@@ -337,31 +367,31 @@ def _resolve_framework_config(
         for key, value in fw_cfg.items()
         if key not in ("command_profiles", "_benchmark_metadata")
     }
-    if framework != "sglang":
-        return resolved
-
     profiles = fw_cfg.get("command_profiles") or {}
     profile_name = None
     profile_cfg = {}
     profile_source = "inline"
     hardware_candidates: list[str] = []
     if profiles:
-        profile_name, profile_source, hardware_candidates = _select_sglang_profile(
-            profiles, _explicit_sglang_profile(sglang_profile), hardware_metadata
+        profile_name, profile_source, hardware_candidates = _select_command_profile(
+            framework,
+            profiles,
+            _explicit_framework_profile(framework, sglang_profile),
+            hardware_metadata,
         )
         profile_cfg = profiles[profile_name]
         runtime_cfg = {
             key: value
             for key, value in profile_cfg.items()
-            if key in SGLANG_PROFILE_RUNTIME_KEYS
+            if key in FRAMEWORK_PROFILE_RUNTIME_KEYS
         }
         resolved = _merge_nested(resolved, runtime_cfg)
 
-    resolved["_benchmark_metadata"] = {
-        "sglang_profile": profile_name,
-        "sglang_profile_request": _requested_sglang_profile(sglang_profile),
-        "sglang_profile_source": profile_source,
-        "sglang_ref": profile_cfg.get("sglang_ref"),
+    metadata = {
+        "profile": profile_name,
+        "profile_request": _requested_framework_profile(framework, sglang_profile),
+        "profile_source": profile_source,
+        "framework_ref": profile_cfg.get("framework_ref"),
         "hardware": profile_cfg.get("hardware"),
         "hardware_candidates": hardware_candidates,
         "description": profile_cfg.get("description"),
@@ -370,6 +400,18 @@ def _resolve_framework_config(
         "num_gpus": resolved.get("num_gpus"),
         "extra_env_keys": sorted((resolved.get("extra_env") or {}).keys()),
     }
+    if framework == "sglang":
+        metadata.update(
+            {
+                "sglang_profile": profile_name,
+                "sglang_profile_request": _requested_sglang_profile(sglang_profile),
+                "sglang_profile_source": profile_source,
+                "sglang_ref": profile_cfg.get("sglang_ref"),
+            }
+        )
+    if "lightx2v_config" in resolved:
+        metadata["lightx2v_config_keys"] = sorted(resolved["lightx2v_config"])
+    resolved["_benchmark_metadata"] = metadata
     return resolved
 
 
@@ -1610,9 +1652,11 @@ def main():
         "--sglang-profile",
         default=None,
         help=(
-            "SGLang command profile to use from each case's command_profiles. "
+            "Command profile to use from each case's command_profiles. "
             "Defaults to SGLANG_BENCH_SGLANG_PROFILE, SGLANG_BENCH_PROFILE, "
-            "then hardware auto-selection and 'default'."
+            "then hardware auto-selection and 'default'. Other frameworks can "
+            "use DIFFUSION_BENCH_<FRAMEWORK>_PROFILE or "
+            "DIFFUSION_BENCH_FRAMEWORK_PROFILE."
         ),
     )
     parser.add_argument(

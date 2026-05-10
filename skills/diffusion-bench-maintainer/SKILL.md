@@ -12,18 +12,20 @@ This repo is a long-running performance guardrail for SGLang-Diffusion. Treat ev
 ## Core Rules
 
 - Preserve comparability before improving convenience.
+- Keep the formal default suite to one representative case per official model ID unless the user explicitly asks for broader coverage.
 - Do not use response caching, Cache-DiT, precomputed outputs, or hidden warm-cache shortcuts as performance wins.
 - Record enough context to explain a number later: git commits, package versions, hardware, selected command profile, actual server command, sampling params, shape, frames, concurrency, and artifacts.
 - Keep external frameworks isolated in their own envs when dependencies can conflict with SGLang.
 - Do not treat failed startup, compile stalls, OOMs, or import errors as valid latency data.
 - SGLang failures are regressions or invalid command profiles. Fix the backend or add a hardware-specific stable command profile, then rerun before using the result as a comparison baseline.
+- For non-SGLang frameworks, track the fastest fair command/config as a command profile too. Do not use torch compile, response caching, Cache-DiT, quantized models, or reduced-step/distilled paths unless the case explicitly compares those semantics.
 
 ## Maintenance Workflow
 
 1. Inspect `configs/comparison_configs.json`, `src/diffusion_bench/comparison_configs.json`, runner code, README, and recent results before editing.
 2. If changing config semantics, update both the editable config and packaged config.
 3. If changing result JSON shape, update dashboard/reporting code and README examples.
-4. For SGLang backend changes, add or update a per-case `command_profiles` entry instead of overwriting historical intent. Split H100/H200 commands with profile `hardware` selectors when capacity or best args differ.
+4. For backend command changes, add or update a per-case `command_profiles` entry instead of overwriting historical intent. Split H100/H200 commands with profile `hardware` selectors when capacity or best args differ.
 5. For runner changes, preserve fail-fast behavior and keep server logs plus bench JSON paths discoverable.
 6. After edits, inspect diffs and run only lightweight static checks unless the user asks for a real benchmark.
 

@@ -768,10 +768,10 @@ def _successful_throughput_metric(entry: dict | None, getter) -> object:
 
 
 def _profile_cell(entry: dict | None) -> str:
-    if not entry or entry.get("framework") != "sglang":
+    if not entry:
         return "-"
     metadata = entry.get("framework_metadata") or {}
-    return _md_cell(metadata.get("sglang_profile"))
+    return _md_cell(metadata.get("sglang_profile") or metadata.get("profile"))
 
 
 def build_issue_report_comment(results: dict) -> str:
@@ -839,8 +839,8 @@ def build_issue_report_comment(results: dict) -> str:
                 )
                 + " |",
                 "",
-                "| framework | profile | gpus | single_e2e_s | single/sglang | single_status | throughput_p50_s | p50/sglang | throughput_p95_s | throughput_rps | rps/sglang | throughput_status |",
-                "| --- | --- | ---: | ---: | ---: | --- | ---: | ---: | ---: | ---: | ---: | --- |",
+                "| framework | model | profile | gpus | single_e2e_s | single/sglang | single_status | throughput_p50_s | p50/sglang | throughput_p95_s | throughput_rps | rps/sglang | throughput_status |",
+                "| --- | --- | --- | ---: | ---: | ---: | --- | ---: | ---: | ---: | ---: | ---: | --- |",
             ]
         )
         for framework in frameworks:
@@ -852,6 +852,7 @@ def build_issue_report_comment(results: dict) -> str:
             throughput_rps = _throughput_rps(throughput_entry)
             row = [
                 _md_cell(framework),
+                _md_cell(entry.get("model")),
                 _profile_cell(entry),
                 _md_cell(entry.get("num_gpus")),
                 _fmt_report_float(single_latency),
