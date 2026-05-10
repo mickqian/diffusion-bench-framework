@@ -480,6 +480,16 @@
                             "sglang_ref": "current-main",
                             "serve_args": "--model-type diffusion --warmup --enable-cfg-parallel --pipeline-class-name LTX2TwoStagePipeline",
                             "notes": "Keep this profile updated when the best command changes for a SGLang release or commit."
+                        },
+                        "h200-2gpu": {
+                            "description": "H200 command for the LTX2 two-stage 121-frame case.",
+                            "hardware": [
+                                "h200"
+                            ],
+                            "sglang_ref": "current-main",
+                            "num_gpus": 2,
+                            "serve_args": "--model-type diffusion --warmup --enable-cfg-parallel --pipeline-class-name LTX2TwoStagePipeline --ltx2-two-stage-device-mode resident",
+                            "notes": "Resident mode keeps both stages in VRAM on H200-class GPUs."
                         }
                     }
                 }
@@ -565,6 +575,16 @@
                             "sglang_ref": "current-main",
                             "serve_args": "--model-type diffusion --warmup --ulysses-degree 2 --pipeline-class-name LTX2Pipeline",
                             "notes": "Tracks LTX2.3 one-stage TI2V performance separately from two-stage pipeline runs."
+                        },
+                        "h200-2gpu": {
+                            "description": "H200 command for the LTX2.3 one-stage TI2V case.",
+                            "hardware": [
+                                "h200"
+                            ],
+                            "sglang_ref": "current-main",
+                            "num_gpus": 2,
+                            "serve_args": "--model-type diffusion --warmup --ulysses-degree 2 --pipeline-class-name LTX2Pipeline --dit-cpu-offload false --text-encoder-cpu-offload --pin-cpu-memory",
+                            "notes": "Keeps the DiT resident on high-memory GPUs."
                         }
                     }
                 }
