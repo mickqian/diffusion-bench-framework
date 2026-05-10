@@ -386,6 +386,7 @@
                         "boundary_step_index": 2,
                         "denoising_step_list": [1000, 750, 500, 250],
                         "audio_fps": 24000,
+                        "use_image_encoder": false,
                         "double_precision_rope": true,
                         "norm_modulate_backend": "torch"
                     }
@@ -451,6 +452,7 @@
                         "boundary_step_index": 2,
                         "denoising_step_list": [1000, 750, 500, 250],
                         "audio_fps": 24000,
+                        "use_image_encoder": false,
                         "double_precision_rope": true,
                         "norm_modulate_backend": "torch"
                     }
