@@ -126,6 +126,18 @@
                             "framework_ref": "lightx2v-0.1.0-flux2_dev",
                             "serve_args": "",
                             "notes": "Uses explicit fast attention/offload settings; no cache, torch compile, or quantized model path."
+                        },
+                        "h200-fa2-flashinfer": {
+                            "description": "H200 fastest available LightX2V command/config for aligned non-cache benchmark runs.",
+                            "hardware": [
+                                "h200"
+                            ],
+                            "framework_ref": "lightx2v-0.1.0-flux2_dev+h200-fa2-flashinfer",
+                            "serve_args": "",
+                            "notes": "Uses FlashAttention 2 with FlashInfer RoPE in the isolated H200 LightX2V venv; no cache, torch compile, or quantized model path.",
+                            "lightx2v_config": {
+                                "attn_type": "flash_attn2"
+                            }
                         }
                     }
                 }

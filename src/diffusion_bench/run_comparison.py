@@ -927,11 +927,20 @@ def send_request_vllm_omni(base_url: str, case: dict, config: dict) -> float:
 def send_request_lightx2v(base_url: str, case: dict, config: dict) -> float:
     """Send request via LightX2V's async task API."""
     endpoint = "/v1/tasks/"
+    suffix = (
+        ".png"
+        if case["task"] in ("text-to-image", "image-edit", "image-to-image")
+        else ".mp4"
+    )
 
     payload = {
         "prompt": case["prompt"],
         "seed": case.get("seed", 42),
         "infer_steps": case.get("num_inference_steps", 50),
+        "save_result_path": os.path.join(
+            tempfile.gettempdir(),
+            f"lightx2v_{case['id']}_{int(time.time() * 1000)}{suffix}",
+        ),
     }
     # LightX2V uses target_video_length for frames, height/width directly
     if "num_frames" in case:

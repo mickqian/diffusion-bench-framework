@@ -20,6 +20,7 @@ import asyncio
 import json
 import logging
 import os
+import tempfile
 import time
 from dataclasses import replace
 from typing import Any, Dict, List, Optional
@@ -524,6 +525,11 @@ async def async_request_lightx2v(
         payload["fps"] = input.fps
     if input.image_paths:
         payload["image_path"] = input.image_paths[0]
+    suffix = ".mp4" if input.num_frames else ".png"
+    payload.setdefault(
+        "save_result_path",
+        os.path.join(tempfile.gettempdir(), f"lightx2v_{input.request_id}{suffix}"),
+    )
 
     try:
         async with session.post(input.api_url, json=payload) as response:
