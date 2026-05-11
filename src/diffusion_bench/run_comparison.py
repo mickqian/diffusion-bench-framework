@@ -1156,6 +1156,78 @@ def _collect_sglang_runtime_metadata() -> dict:
     return metadata
 
 
+def _parse_pip_show(output: str) -> dict:
+    packages = {}
+    current = {}
+    for line in output.splitlines():
+        if line.strip() == "---":
+            if current.get("Name"):
+                packages[current["Name"]] = current
+            current = {}
+            continue
+        if ": " not in line:
+            continue
+        key, value = line.split(": ", 1)
+        if key in {"Name", "Version", "Location", "Home-page"}:
+            current[key] = value
+    if current.get("Name"):
+        packages[current["Name"]] = current
+    return packages
+
+
+def _collect_framework_runtime_metadata() -> dict:
+    metadata = {
+        "venv_root": str(_framework_venv_root()),
+        "install_specs": {
+            "vllm": os.environ.get("VLLM_INSTALL_SPEC", "vllm==0.18.0"),
+            "vllm_omni": os.environ.get(
+                "VLLM_OMNI_INSTALL_SPEC", "vllm-omni==0.18.0"
+            ),
+            "lightx2v": os.environ.get(
+                "LIGHTX2V_INSTALL_SPEC",
+                "git+https://github.com/ModelTC/LightX2V.git@573b9613adb0c1d33894b0920b5e12c87e42d280",
+            ),
+            "lightx2v_flash_attn": os.environ.get(
+                "LIGHTX2V_FLASH_ATTN_INSTALL_SPEC", "flash-attn==2.8.3"
+            ),
+        },
+    }
+    packages_by_framework = {
+        "vllm-omni": ["vllm", "vllm-omni"],
+        "lightx2v": ["lightx2v", "flash-attn"],
+    }
+    for framework, packages in packages_by_framework.items():
+        venv_path = _framework_venv_path(framework)
+        framework_metadata = {"venv_path": str(venv_path)}
+        python_bin = venv_path / "bin" / "python3"
+        if python_bin.exists():
+            try:
+                ret = subprocess.run(
+                    [str(python_bin), "-m", "pip", "show", *packages],
+                    capture_output=True,
+                    text=True,
+                    timeout=20,
+                )
+                if ret.returncode == 0:
+                    framework_metadata["packages"] = _parse_pip_show(ret.stdout)
+            except (FileNotFoundError, subprocess.TimeoutExpired):
+                pass
+        site_packages = next(venv_path.glob("lib/python*/site-packages"), None)
+        if site_packages is not None:
+            direct_urls = {}
+            for direct_url in site_packages.glob("*.dist-info/direct_url.json"):
+                try:
+                    direct_urls[direct_url.parent.name] = json.loads(
+                        direct_url.read_text()
+                    )
+                except Exception:
+                    pass
+            if direct_urls:
+                framework_metadata["direct_urls"] = direct_urls
+        metadata[framework] = framework_metadata
+    return metadata
+
+
 def _run_warmups(
     base_url: str,
     case: dict,
@@ -1586,6 +1658,7 @@ def run_comparison(
         "run_id": run_id,
         "hardware": hardware_metadata,
         "sglang_runtime": _collect_sglang_runtime_metadata(),
+        "framework_runtime": _collect_framework_runtime_metadata(),
         "benchmark_env": FORCED_BENCHMARK_ENV,
         "benchmark_framework_args": {
             "vllm-omni": VLLM_DISABLE_TORCH_COMPILE_ARGS,

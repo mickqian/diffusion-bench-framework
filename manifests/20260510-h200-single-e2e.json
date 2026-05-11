@@ -1,0 +1,92 @@
+{
+  "name": "20260510-h200-single-e2e",
+  "purpose": "Formal single-request cross-framework H200 report after fixing LightX2V Wan adaptive resolution profiles.",
+  "tracker_issue": "https://github.com/mickqian/diffusion-bench-framework/issues/1",
+  "tracker_comment": "https://github.com/mickqian/diffusion-bench-framework/issues/1#issuecomment-4415916583",
+  "benchmark_repo": {
+    "report_branch": "bench-full-report-matrix",
+    "report_commit": "bf79d0b35ce094f4ddaab04a4a64f89503c31baa",
+    "result_base_commit": "be2e4d27f252e8c40f035cab9c98b3335e063b9c"
+  },
+  "sglang": {
+    "repo_path": "/sgl-workspace/sglang",
+    "commit": "028e41d6b2b0a9b12ac4466bc94f43c9ee33ae56",
+    "package_version": "0.5.12.dev174+g19afe73e0"
+  },
+  "frameworks": {
+    "vllm": {
+      "install_spec": "vllm==0.18.0",
+      "observed_version": "0.18.0"
+    },
+    "vllm_omni": {
+      "install_spec": "vllm-omni==0.18.0",
+      "observed_version": "0.18.0"
+    },
+    "lightx2v": {
+      "install_spec": "git+https://github.com/ModelTC/LightX2V.git@573b9613adb0c1d33894b0920b5e12c87e42d280",
+      "observed_version": "0.1.0",
+      "observed_commit": "573b9613adb0c1d33894b0920b5e12c87e42d280"
+    },
+    "flash_attn": {
+      "install_spec": "flash-attn==2.8.3"
+    }
+  },
+  "environment": {
+    "hardware_profile": "h200",
+    "cuda_visible_devices": "2,3,4,5,6,7",
+    "framework_venv_root": "/root/.cache/sglang-diffusion-framework-venvs",
+    "torch_compile_disable": "1"
+  },
+  "formal_cases": [
+    "flux1_dev_t2i_1024",
+    "flux2_dev_t2i_1024",
+    "qwen_image_2512_t2i_1024",
+    "qwen_image_edit_2511",
+    "zimage_turbo_t2i_1024",
+    "wan21_t2v_1_3b_480p",
+    "wan21_i2v_14b_480p",
+    "wan22_t2v_a14b_720p",
+    "wan22_ti2v_5b_704p",
+    "wan21_i2v_14b_720p",
+    "wan22_i2v_a14b_720p",
+    "ltx2_twostage_t2v",
+    "ltx2.3_twostage_t2v_2gpus"
+  ],
+  "run_sources": [
+    {
+      "run_id": "full-h200-eager-no-flux2-20260510-bench-2d4a202",
+      "role": "base SGLang and earlier full matrix source",
+      "local_copy": "tmp/results/base-full-h200-2d4a202.json",
+      "remote_path": "/root/.cache/diffusion-bench-runs/diffusion-bench-framework/runs/full-h200-eager-no-flux2-20260510-bench-2d4a202"
+    },
+    {
+      "run_id": "corrected-h200-gpu4567-20260510-bench-966b22b",
+      "role": "corrected SGLang Wan/LTX source",
+      "local_copy": "tmp/results/corrected-h200-gpu4567-966b22b.json"
+    },
+    {
+      "run_id": "h200-be2e4d2-non-sglang-20260510-161443",
+      "role": "vLLM-Omni and LightX2V non-SGLang source",
+      "local_copy": "tmp/results/h200-be2e4d2-non-sglang-20260510-161443.json",
+      "remote_path": "/root/.cache/diffusion-bench-runs/diffusion-bench-framework/runs/h200-be2e4d2-non-sglang-20260510-161443.json"
+    },
+    {
+      "run_id": "h200-a9c561f-lightx2v-wan-resfix-20260510-1701",
+      "role": "LightX2V Wan resolution fix rerun source",
+      "local_copy": "tmp/results/h200-a9c561f-lightx2v-wan-resfix-20260510-1701.json",
+      "remote_path": "/root/.cache/diffusion-bench-runs/diffusion-bench-framework/runs/h200-a9c561f-lightx2v-wan-resfix-20260510-1701.json"
+    }
+  ],
+  "known_failures": [
+    {
+      "case_id": "ltx2_twostage_t2v",
+      "framework": "vllm-omni",
+      "reason": "LTX2TextConnectors.forward() got an unexpected keyword argument 'additive_mask'"
+    }
+  ],
+  "notes": [
+    "The checked-in script scripts/run_h200_single_e2e_20260510.sh is the canonical rerun entry for the current fixed config.",
+    "The posted issue report was composed from the run_sources above because several corrective runs were done before this manifest was added.",
+    "LightX2V Wan 720p/704p results before h200-a9c561f-lightx2v-wan-resfix-20260510-1701 used the wrong adaptive 480p bucket and must not be used for 720p comparison."
+  ]
+}

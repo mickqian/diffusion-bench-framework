@@ -16,6 +16,8 @@ The repo launches one serving stack per case, sends a single end-to-end request,
 - `src/diffusion_bench/generate_dashboard.py`: Markdown dashboard generator.
 - `configs/comparison_configs.json`: editable copy of the default model, prompt, shape, seed, and framework settings.
 - `scripts/install_comparison_frameworks.sh`: isolated venv installer for vLLM-Omni and LightX2V.
+- `scripts/run_h200_single_e2e_20260510.sh`: reproducible H200 single-request run script for the 2026-05-10 report shape.
+- `manifests/`: pinned run manifests tying report data to bench, SGLang, framework, and hardware versions.
 - `skills/`: repo-local Codex skills for maintaining long-term performance tracking.
 - `.github/ISSUE_TEMPLATE/performance-report.yml`: fallback template for bootstrapping a tracker issue in a new fork.
 
@@ -39,6 +41,7 @@ vLLM-Omni and LightX2V are installed into isolated temporary virtualenvs by the 
 `diffusion-bench-compare` forces `TORCH_COMPILE_DISABLE=1` for all benchmarked framework subprocesses so cold compile time does not leak into cross-framework runs. vLLM-Omni also gets `--enforce-eager --compilation-config '{"mode":0}'` because its diffusion runner uses `enforce_eager` to skip regional torch.compile. LightX2V config files force `compile=false` and `compile_shapes=[]`.
 
 Set `SGLANG_DIFFUSION_SKIP_FRAMEWORK_INSTALL=1` only for reruns where the isolated framework venv has already been installed and should be reused.
+The default installer pins LightX2V to the commit used by the 2026-05-10 report; override `LIGHTX2V_INSTALL_SPEC` when intentionally updating that framework.
 
 ## Dry Run
 
@@ -108,6 +111,8 @@ This repo includes Codex skills that encode the operating discipline for long-te
 Install or symlink them into your Codex skills directory when you want them auto-discovered.
 
 Formal benchmark reports should append one data-only comment to the fixed tracker issue instead of opening new issues. The canonical tracker for this repo is `mickqian/diffusion-bench-framework#1`.
+
+Run manifests in `manifests/` are the source of truth for reconstructing historical reports. Each manifest records the benchmark commit, SGLang commit, framework install specs or observed commits, hardware profile, run IDs, and known framework failures.
 
 ## Generate Dashboard
 
