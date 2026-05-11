@@ -97,7 +97,7 @@ Each case can track version-specific best commands for every backend:
 
 Select a SGLang profile with `--sglang-profile <name>` or `SGLANG_BENCH_SGLANG_PROFILE=<name>`. Non-SGLang frameworks can use `DIFFUSION_BENCH_<FRAMEWORK>_PROFILE=<name>` or `DIFFUSION_BENCH_FRAMEWORK_PROFILE=<name>`. If no profile is explicit, the runner auto-selects the first profile whose `hardware` matches `--hardware-profile`, `SGLANG_BENCH_HARDWARE_PROFILE`, `GPU_CONFIG`, `RUNNER_LABELS`, or `nvidia-smi`, then falls back to `default`. Use separate profiles when H100/H200 need different GPU counts or launch args; do not reuse a profile that is known to OOM on one hardware class. The runner records the selected profile, profile source, hardware candidates, framework ref, effective `serve_args`, actual server command, and best-effort SGLang runtime metadata in `comparison-results.json`.
 
-Framework entries may set `model_path` when the server needs a local mirror or snapshot path while the report should keep the official `model` ID.
+Framework entries may set `model_path` when the server needs a local mirror or snapshot path while the report should keep the official `model` ID in the case summary.
 
 ## Repo Skills
 

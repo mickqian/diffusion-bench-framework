@@ -2,7 +2,8 @@
   "name": "20260510-h200-single-e2e",
   "purpose": "Formal single-request cross-framework H200 report after fixing LightX2V Wan adaptive resolution profiles.",
   "tracker_issue": "https://github.com/mickqian/diffusion-bench-framework/issues/1",
-  "tracker_comment": "https://github.com/mickqian/diffusion-bench-framework/issues/1#issuecomment-4415916583",
+  "tracker_comment": "https://github.com/mickqian/diffusion-bench-framework/issues/1#issuecomment-4416877437",
+  "reproduce_script": "scripts/run_h200_single_e2e_20260510.sh",
   "benchmark_repo": {
     "report_branch": "bench-full-report-matrix",
     "report_commit": "bf79d0b35ce094f4ddaab04a4a64f89503c31baa",

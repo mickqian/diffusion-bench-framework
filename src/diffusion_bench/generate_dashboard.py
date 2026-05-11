@@ -693,6 +693,30 @@ def _load_report_case_configs() -> dict[str, dict]:
     return {}
 
 
+def _load_report_manifest(results: dict) -> tuple[Path | None, dict]:
+    manifests_dir = Path.cwd() / "manifests"
+    if not manifests_dir.exists():
+        return None, {}
+    result_commit = results.get("commit_sha")
+    result_cases = set(_ordered_case_ids(results))
+    for path in sorted(manifests_dir.glob("*.json")):
+        data = json.loads(path.read_text())
+        manifest_commit = (data.get("benchmark_repo") or {}).get("result_base_commit")
+        manifest_cases = set(data.get("formal_cases") or [])
+        if manifest_commit == result_commit and result_cases <= manifest_cases:
+            return path, data
+    return None, {}
+
+
+def _report_path(path: Path | None) -> str:
+    if path is None:
+        return "-"
+    try:
+        return path.relative_to(Path.cwd()).as_posix()
+    except ValueError:
+        return path.as_posix()
+
+
 def _report_frameworks(case_configs: dict[str, dict]) -> set[str]:
     frameworks = set(DEFAULT_REPORT_FRAMEWORKS)
     for case_cfg in case_configs.values():
@@ -824,33 +848,120 @@ def _profile_cell(entry: dict | None) -> str:
     return _md_cell(metadata.get("sglang_profile") or metadata.get("profile"))
 
 
+def _result_entries(results: dict) -> list[dict]:
+    return results.get("results", []) + results.get("throughput_results", [])
+
+
+def _framework_refs(results: dict, framework: str) -> set[str]:
+    refs = set()
+    for entry in _result_entries(results):
+        if _framework_name(entry) != framework:
+            continue
+        ref = (entry.get("framework_metadata") or {}).get("framework_ref")
+        if ref:
+            refs.add(str(ref))
+    return refs
+
+
+def _version_from_ref(ref: str, prefix: str) -> str | None:
+    marker = f"{prefix}-"
+    if not ref.startswith(marker):
+        return None
+    return ref[len(marker) :].split("-", 1)[0].split("+", 1)[0]
+
+
+def _package_version(framework_runtime: dict, framework: str, package: str) -> str | None:
+    packages = (framework_runtime.get(framework) or {}).get("packages") or {}
+    package_info = packages.get(package) or packages.get(package.replace("-", "_"))
+    if package_info:
+        return package_info.get("Version")
+    return None
+
+
+def _manifest_framework_version(manifest: dict, key: str) -> str | None:
+    info = (manifest.get("frameworks") or {}).get(key) or {}
+    version = info.get("observed_version")
+    commit = info.get("observed_commit")
+    if version and commit:
+        return f"{version} ({_short_sha(commit)})"
+    return version or info.get("install_spec")
+
+
+def _framework_version(results: dict, manifest: dict, framework: str) -> str:
+    framework_runtime = results.get("framework_runtime") or {}
+    if framework == "sglang":
+        runtime = results.get("sglang_runtime") or {}
+        version = runtime.get("package_version")
+        commit = runtime.get("git_commit")
+        if version and commit:
+            return f"{version} ({_short_sha(commit)})"
+        return version or _short_sha(commit)
+    if framework == "vllm-omni":
+        vllm_omni = _package_version(framework_runtime, framework, "vllm-omni")
+        vllm = _package_version(framework_runtime, framework, "vllm")
+        if vllm_omni and vllm:
+            return f"vllm-omni {vllm_omni}; vllm {vllm}"
+        manifest_vllm_omni = _manifest_framework_version(manifest, "vllm_omni")
+        manifest_vllm = _manifest_framework_version(manifest, "vllm")
+        if manifest_vllm_omni and manifest_vllm:
+            return f"vllm-omni {manifest_vllm_omni}; vllm {manifest_vllm}"
+    elif framework == "lightx2v":
+        version = _package_version(framework_runtime, framework, "lightx2v")
+        if version:
+            return version
+        manifest_version = _manifest_framework_version(manifest, "lightx2v")
+        if manifest_version:
+            return manifest_version
+
+    for ref in sorted(_framework_refs(results, framework)):
+        version = _version_from_ref(ref, framework)
+        if version:
+            return version
+    return "-"
+
+
+def _report_data_modes(results: dict) -> str:
+    modes = []
+    if results.get("results"):
+        modes.append("single_e2e")
+    if results.get("throughput_results"):
+        modes.append("throughput")
+    return ", ".join(modes) if modes else "-"
+
+
 def build_issue_report_comment(results: dict) -> str:
     single_by_case = _group_results_by_case(results.get("results", []))
     throughput_by_case = _group_results_by_case(results.get("throughput_results", []))
     include_throughput = bool(throughput_by_case)
     case_configs = _load_report_case_configs()
     report_frameworks = _report_frameworks(case_configs)
+    manifest_path, manifest = _load_report_manifest(results)
     gpus = (results.get("hardware") or {}).get("gpus") or []
     gpu_model = "; ".join(sorted(set(gpus)))
-    sglang_runtime = results.get("sglang_runtime") or {}
+    reproduce_script = manifest.get("reproduce_script")
+    reproduce_parts = []
+    if reproduce_script:
+        reproduce_parts.append(reproduce_script)
+    if manifest_path:
+        reproduce_parts.append(_report_path(manifest_path))
 
     lines = [
         f"## Diffusion Benchmark Data - {_md_cell(results.get('timestamp'))}",
         "",
-        "| bench_commit | sglang_commit | sglang_version | run_id | gpu_count | gpu_model |",
-        "| --- | --- | --- | --- | ---: | --- |",
-        "| "
-        + " | ".join(
-            [
-                _md_cell(results.get("commit_sha")),
-                _md_cell(sglang_runtime.get("git_commit")),
-                _md_cell(sglang_runtime.get("package_version")),
-                _md_cell(results.get("run_id")),
-                str(len(gpus)),
-                _md_cell(gpu_model),
-            ]
-        )
-        + " |",
+        "| item | value |",
+        "| --- | --- |",
+        f"| run_id | {_md_cell(results.get('run_id'))} |",
+        f"| data | {_md_cell(_report_data_modes(results))} |",
+        f"| bench_commit | {_md_cell(results.get('commit_sha'))} |",
+        f"| gpu | {_md_cell(f'{len(gpus)} x {gpu_model}' if gpus else '-')} |",
+        f"| reproduce | {_md_cell('; '.join(reproduce_parts))} |",
+        "",
+        "| framework | version/ref |",
+        "| --- | --- |",
+        *[
+            f"| {framework} | {_md_cell(_framework_version(results, manifest, framework))} |"
+            for framework in sorted(report_frameworks, key=_framework_sort_key)
+        ],
         "",
         "Ratio columns are framework value divided by SGLang value for the same case.",
     ]
