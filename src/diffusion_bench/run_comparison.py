@@ -22,6 +22,7 @@ Usage:
 
 import argparse
 import base64
+import copy
 import io
 import json
 import os
@@ -1518,12 +1519,17 @@ def _install_framework(fw_name: str, dry_run: bool = False) -> bool:
     return True
 
 
-def _framework_venv_path(fw_name: str) -> str:
-    root = os.environ.get(
-        "SGLANG_DIFFUSION_FRAMEWORK_VENV_ROOT",
-        "/tmp/sglang-diffusion-framework-venvs",
+def _framework_venv_path(fw_name: str) -> Path:
+    return _framework_venv_root() / fw_name
+
+
+def _framework_venv_root() -> Path:
+    return Path(
+        os.environ.get(
+            "SGLANG_DIFFUSION_FRAMEWORK_VENV_ROOT",
+            "/tmp/sglang-diffusion-framework-venvs",
+        )
     )
-    return os.path.join(root, fw_name)
 
 
 def _framework_env(fw_name: str, env: dict[str, str]) -> dict[str, str]:
@@ -1532,7 +1538,7 @@ def _framework_env(fw_name: str, env: dict[str, str]) -> dict[str, str]:
     venv_path = _framework_venv_path(fw_name)
     bin_path = os.path.join(venv_path, "bin")
     framework_env = dict(env)
-    framework_env["VIRTUAL_ENV"] = venv_path
+    framework_env["VIRTUAL_ENV"] = str(venv_path)
     framework_env["PATH"] = f"{bin_path}:{framework_env.get('PATH', '')}"
     return framework_env
 
@@ -1697,6 +1703,27 @@ def run_comparison(
     return output_data
 
 
+def _apply_throughput_overrides(
+    config: dict,
+    num_requests: int | None,
+    max_concurrency: int | None,
+    request_rate: str | None,
+) -> dict:
+    if num_requests is None and max_concurrency is None and request_rate is None:
+        return config
+    config = copy.deepcopy(config)
+    throughput_cfg = config.setdefault("benchmark_defaults", {}).setdefault(
+        "throughput", {}
+    )
+    if num_requests is not None:
+        throughput_cfg["num_requests"] = num_requests
+    if max_concurrency is not None:
+        throughput_cfg["max_concurrency"] = max_concurrency
+    if request_rate is not None:
+        throughput_cfg["request_rate"] = request_rate
+    return config
+
+
 # ---------------------------------------------------------------------------
 # CLI
 # ---------------------------------------------------------------------------
@@ -1771,11 +1798,34 @@ def main():
         action="store_true",
         help="Parse config and print commands without launching servers",
     )
+    parser.add_argument(
+        "--throughput-num-requests",
+        type=int,
+        default=None,
+        help="Override benchmark_defaults.throughput.num_requests",
+    )
+    parser.add_argument(
+        "--throughput-max-concurrency",
+        type=int,
+        default=None,
+        help="Override benchmark_defaults.throughput.max_concurrency",
+    )
+    parser.add_argument(
+        "--throughput-request-rate",
+        default=None,
+        help="Override benchmark_defaults.throughput.request_rate",
+    )
 
     args = parser.parse_args()
 
     with open(args.config) as f:
         config = json.load(f)
+    config = _apply_throughput_overrides(
+        config,
+        args.throughput_num_requests,
+        args.throughput_max_concurrency,
+        args.throughput_request_rate,
+    )
 
     print(f"Loaded {len(config['cases'])} comparison case(s) from {args.config}")
 

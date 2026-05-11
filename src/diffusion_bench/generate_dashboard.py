@@ -825,8 +825,28 @@ def _throughput_p95(entry: dict | None) -> object:
     return metrics.get("latency_p95_s") or metrics.get("latency_p95")
 
 
+def _throughput_p99(entry: dict | None) -> object:
+    metrics = (entry or {}).get("metrics") or {}
+    return metrics.get("latency_p99_s") or metrics.get("latency_p99")
+
+
 def _throughput_rps(entry: dict | None) -> object:
     return ((entry or {}).get("metrics") or {}).get("throughput_rps")
+
+
+def _throughput_done_cell(entry: dict | None) -> str:
+    metrics = (entry or {}).get("metrics") or {}
+    num_requests = metrics.get("num_requests")
+    completed_requests = metrics.get("completed_requests")
+    if num_requests is None:
+        return "-"
+    if completed_requests is None:
+        return _md_cell(num_requests)
+    return f"{completed_requests}/{num_requests}"
+
+
+def _throughput_concurrency(entry: dict | None) -> object:
+    return ((entry or {}).get("metrics") or {}).get("max_concurrency")
 
 
 def _successful_metric(entry: dict | None, key: str) -> object:
@@ -932,6 +952,7 @@ def _report_data_modes(results: dict) -> str:
 def build_issue_report_comment(results: dict) -> str:
     single_by_case = _group_results_by_case(results.get("results", []))
     throughput_by_case = _group_results_by_case(results.get("throughput_results", []))
+    include_single = bool(single_by_case)
     include_throughput = bool(throughput_by_case)
     case_configs = _load_report_case_configs()
     report_frameworks = _report_frameworks(case_configs)
@@ -988,18 +1009,32 @@ def build_issue_report_comment(results: dict) -> str:
         sglang_rps = _successful_throughput_metric(
             throughput_fws.get("sglang"), _throughput_rps
         )
-        table_header = (
-            "| framework | profile | gpus | single_e2e_s | single/sglang | single_status | reason |"
-        )
-        table_divider = "| --- | --- | ---: | ---: | ---: | --- | --- |"
+        table_columns = ["framework", "profile", "gpus"]
+        table_align = ["---", "---", "---:"]
+        if include_single:
+            table_columns.extend(["single_e2e_s", "single/sglang", "single_status"])
+            table_align.extend(["---:", "---:", "---"])
         if include_throughput:
-            table_header = (
-                "| framework | profile | gpus | single_e2e_s | single/sglang | single_status | "
-                "throughput_p50_s | p50/sglang | throughput_p95_s | throughput_rps | rps/sglang | throughput_status | reason |"
+            table_columns.extend(
+                [
+                    "done/reqs",
+                    "concurrency",
+                    "p50_s",
+                    "p50/sglang",
+                    "p95_s",
+                    "p99_s",
+                    "qps",
+                    "qps/sglang",
+                    "throughput_status",
+                ]
             )
-            table_divider = (
-                "| --- | --- | ---: | ---: | ---: | --- | ---: | ---: | ---: | ---: | ---: | --- | --- |"
+            table_align.extend(
+                ["---", "---:", "---:", "---:", "---:", "---:", "---:", "---:", "---"]
             )
+        table_columns.append("reason")
+        table_align.append("---")
+        table_header = "| " + " | ".join(table_columns) + " |"
+        table_divider = "| " + " | ".join(table_align) + " |"
 
         lines.extend(
             [
@@ -1035,16 +1070,24 @@ def build_issue_report_comment(results: dict) -> str:
                 _md_cell(framework),
                 _profile_cell(entry),
                 _md_cell(entry.get("num_gpus")),
-                _fmt_report_float(single_latency),
-                _fmt_report_ratio(single_latency, sglang_single_latency),
-                _status_with_context(single_entry, case_cfg, framework),
             ]
+            if include_single:
+                row.extend(
+                    [
+                        _fmt_report_float(single_latency),
+                        _fmt_report_ratio(single_latency, sglang_single_latency),
+                        _status_with_context(single_entry, case_cfg, framework),
+                    ]
+                )
             if include_throughput:
                 row.extend(
                     [
+                        _throughput_done_cell(throughput_entry),
+                        _md_cell(_throughput_concurrency(throughput_entry)),
                         _fmt_report_float(throughput_p50),
                         _fmt_report_ratio(throughput_p50, sglang_p50),
                         _fmt_report_float(_throughput_p95(throughput_entry)),
+                        _fmt_report_float(_throughput_p99(throughput_entry)),
                         _fmt_report_rps(throughput_rps),
                         _fmt_report_ratio(throughput_rps, sglang_rps),
                         _status_with_context(throughput_entry, case_cfg, framework),
