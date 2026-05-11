@@ -22,13 +22,16 @@ export VLLM_OMNI_INSTALL_SPEC="${VLLM_OMNI_INSTALL_SPEC:-vllm-omni==0.18.0}"
 export LIGHTX2V_INSTALL_SPEC="${LIGHTX2V_INSTALL_SPEC:-git+https://github.com/ModelTC/LightX2V.git@573b9613adb0c1d33894b0920b5e12c87e42d280}"
 export LIGHTX2V_FLASH_ATTN_INSTALL_SPEC="${LIGHTX2V_FLASH_ATTN_INSTALL_SPEC:-flash-attn==2.8.3}"
 
-CASES=(
-  zimage_turbo_t2i_1024
-  qwen_image_2512_t2i_1024
-  qwen_image_edit_2511
-  flux1_dev_t2i_1024
-  flux2_dev_t2i_1024
-)
+if [[ -n "${THROUGHPUT_CASES:-}" ]]; then
+  read -r -a CASES <<< "${THROUGHPUT_CASES}"
+else
+  CASES=(
+    zimage_turbo_t2i_1024
+    qwen_image_2512_t2i_1024
+    qwen_image_edit_2511
+    flux1_dev_t2i_1024
+  )
+fi
 
 diffusion-bench-compare \
   --config "${CONFIG}" \
