@@ -30,6 +30,8 @@ case "${FRAMEWORK}" in
     export MAX_JOBS="${MAX_JOBS:-8}"
     export TORCH_CUDA_ARCH_LIST="${TORCH_CUDA_ARCH_LIST:-9.0}"
     python3 -m pip install --upgrade --no-build-isolation --no-deps "${LIGHTX2V_FLASH_ATTN_INSTALL_SPEC:-flash-attn==2.8.3}"
+    python3 -m pip install --upgrade --no-build-isolation --no-deps "${LIGHTX2V_FLASH_ATTN3_INSTALL_SPEC:-git+https://github.com/Dao-AILab/flash-attention.git@ab66326aaa4fe3529fbc00f3156f3a762dd3141b#subdirectory=hopper}"
+    python3 -m pip install --upgrade --force-reinstall "${LIGHTX2V_FLASHINFER_INSTALL_SPEC:-flashinfer-python==0.6.11}"
     python3 -m pip install --upgrade --force-reinstall pyzmq
     ;;
   *)

@@ -1194,11 +1194,18 @@ def _collect_framework_runtime_metadata() -> dict:
             "lightx2v_flash_attn": os.environ.get(
                 "LIGHTX2V_FLASH_ATTN_INSTALL_SPEC", "flash-attn==2.8.3"
             ),
+            "lightx2v_flash_attn3": os.environ.get(
+                "LIGHTX2V_FLASH_ATTN3_INSTALL_SPEC",
+                "git+https://github.com/Dao-AILab/flash-attention.git@ab66326aaa4fe3529fbc00f3156f3a762dd3141b#subdirectory=hopper",
+            ),
+            "lightx2v_flashinfer": os.environ.get(
+                "LIGHTX2V_FLASHINFER_INSTALL_SPEC", "flashinfer-python==0.6.11"
+            ),
         },
     }
     packages_by_framework = {
         "vllm-omni": ["vllm", "vllm-omni"],
-        "lightx2v": ["lightx2v", "flash-attn"],
+        "lightx2v": ["lightx2v", "flash-attn", "flash-attn-3", "flashinfer-python"],
     }
     for framework, packages in packages_by_framework.items():
         venv_path = _framework_venv_path(framework)
@@ -1212,7 +1219,7 @@ def _collect_framework_runtime_metadata() -> dict:
                     text=True,
                     timeout=20,
                 )
-                if ret.returncode == 0:
+                if ret.stdout:
                     framework_metadata["packages"] = _parse_pip_show(ret.stdout)
             except (FileNotFoundError, subprocess.TimeoutExpired):
                 pass
