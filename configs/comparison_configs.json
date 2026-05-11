@@ -127,16 +127,16 @@
                             "serve_args": "",
                             "notes": "Uses explicit fast attention/offload settings; no cache, torch compile, or quantized model path."
                         },
-                        "h200-fa2-flashinfer": {
+                        "h200-fa3-flashinfer": {
                             "description": "H200 fastest available LightX2V command/config for aligned non-cache benchmark runs.",
                             "hardware": [
                                 "h200"
                             ],
-                            "framework_ref": "lightx2v-0.1.0-flux2_dev+h200-fa2-flashinfer",
+                            "framework_ref": "lightx2v-0.1.0-flux2_dev+h200-fa3-flashinfer",
                             "serve_args": "",
-                            "notes": "Uses FlashAttention 2 with FlashInfer RoPE in the isolated H200 LightX2V venv; no cache, torch compile, or quantized model path.",
+                            "notes": "Uses FlashAttention 3 with FlashInfer RoPE in the isolated H200 LightX2V venv; no cache, torch compile, or quantized model path.",
                             "lightx2v_config": {
-                                "attn_type": "flash_attn2"
+                                "attn_type": "flash_attn3"
                             }
                         }
                     }
@@ -296,16 +296,16 @@
                             "serve_args": "",
                             "notes": "Uses explicit fast attention/offload settings; no cache, torch compile, or quantized model path."
                         },
-                        "h200-fa2-flashinfer": {
+                        "h200-fa3-flashinfer": {
                             "description": "H200 fastest available LightX2V command/config for aligned non-cache benchmark runs.",
                             "hardware": [
                                 "h200"
                             ],
-                            "framework_ref": "lightx2v-0.1.0-z_image+h200-fa2-flashinfer",
+                            "framework_ref": "lightx2v-0.1.0-z_image+h200-fa3-flashinfer",
                             "serve_args": "",
-                            "notes": "Uses FlashAttention 2 with FlashInfer RoPE in the isolated H200 LightX2V venv; no cache, torch compile, or quantized model path.",
+                            "notes": "Uses FlashAttention 3 with FlashInfer RoPE in the isolated H200 LightX2V venv; no cache, torch compile, or quantized model path.",
                             "lightx2v_config": {
-                                "attn_type": "flash_attn2"
+                                "attn_type": "flash_attn3"
                             }
                         }
                     }
@@ -365,18 +365,18 @@
                             "serve_args": "",
                             "notes": "Uses explicit fast attention/offload settings; no cache, torch compile, or quantized model path."
                         },
-                        "h200-fa2": {
+                        "h200-fa3": {
                             "description": "H200 fastest available LightX2V command/config for aligned non-cache benchmark runs.",
                             "hardware": [
                                 "h200"
                             ],
-                            "framework_ref": "lightx2v-0.1.0-configs/wan/wan_t2v.json+cfg_parallel+h200-fa2",
+                            "framework_ref": "lightx2v-0.1.0-configs/wan/wan_t2v.json+cfg_parallel+h200-fa3",
                             "serve_args": "",
-                            "notes": "Uses FlashAttention 2 while preserving CFG/sequence parallelism and offload settings; no cache, torch compile, or quantized model path.",
+                            "notes": "Uses FlashAttention 3 while preserving CFG/sequence parallelism and offload settings; no cache, torch compile, or quantized model path.",
                             "lightx2v_config": {
-                                "self_attn_1_type": "flash_attn2",
-                                "cross_attn_1_type": "flash_attn2",
-                                "cross_attn_2_type": "flash_attn2"
+                                "self_attn_1_type": "flash_attn3",
+                                "cross_attn_1_type": "flash_attn3",
+                                "cross_attn_2_type": "flash_attn3"
                             }
                         }
                     }
@@ -439,18 +439,18 @@
                             "serve_args": "",
                             "notes": "Uses explicit fast attention/offload settings; no cache, torch compile, or quantized model path."
                         },
-                        "h200-fa2": {
+                        "h200-fa3": {
                             "description": "H200 fastest available LightX2V command/config for aligned non-cache benchmark runs.",
                             "hardware": [
                                 "h200"
                             ],
-                            "framework_ref": "lightx2v-0.1.0-configs/wan/wan_i2v.json+cfg_parallel+h200-fa2",
+                            "framework_ref": "lightx2v-0.1.0-configs/wan/wan_i2v.json+cfg_parallel+h200-fa3",
                             "serve_args": "",
-                            "notes": "Uses FlashAttention 2 while preserving CFG/sequence parallelism and offload settings; no cache, torch compile, or quantized model path.",
+                            "notes": "Uses FlashAttention 3 while preserving CFG/sequence parallelism and offload settings; no cache, torch compile, or quantized model path.",
                             "lightx2v_config": {
-                                "self_attn_1_type": "flash_attn2",
-                                "cross_attn_1_type": "flash_attn2",
-                                "cross_attn_2_type": "flash_attn2"
+                                "self_attn_1_type": "flash_attn3",
+                                "cross_attn_1_type": "flash_attn3",
+                                "cross_attn_2_type": "flash_attn3"
                             }
                         }
                     }
@@ -517,18 +517,18 @@
                             "serve_args": "",
                             "notes": "Uses explicit fast attention/offload settings; no cache, torch compile, or quantized model path."
                         },
-                        "h200-fa2": {
+                        "h200-fa3": {
                             "description": "H200 fastest available LightX2V command/config for aligned non-cache benchmark runs.",
                             "hardware": [
                                 "h200"
                             ],
-                            "framework_ref": "lightx2v-0.1.0-configs/wan22/wan_moe_t2v.json+cfg_parallel+h200-fa2",
+                            "framework_ref": "lightx2v-0.1.0-configs/wan22/wan_moe_t2v.json+cfg_parallel+h200-fa3",
                             "serve_args": "",
-                            "notes": "Uses FlashAttention 2 while preserving CFG/sequence parallelism and offload settings; no cache, torch compile, or quantized model path.",
+                            "notes": "Uses FlashAttention 3 while preserving CFG/sequence parallelism and offload settings; no cache, torch compile, or quantized model path.",
                             "lightx2v_config": {
-                                "self_attn_1_type": "flash_attn2",
-                                "cross_attn_1_type": "flash_attn2",
-                                "cross_attn_2_type": "flash_attn2"
+                                "self_attn_1_type": "flash_attn3",
+                                "cross_attn_1_type": "flash_attn3",
+                                "cross_attn_2_type": "flash_attn3"
                             }
                         }
                     }
@@ -654,18 +654,18 @@
                             "serve_args": "",
                             "notes": "Uses explicit fast attention/offload settings; no cache, torch compile, or quantized model path."
                         },
-                        "h200-fa2": {
+                        "h200-fa3": {
                             "description": "H200 fastest available LightX2V command/config for aligned non-cache benchmark runs.",
                             "hardware": [
                                 "h200"
                             ],
-                            "framework_ref": "lightx2v-0.1.0-configs/wan22/wan_ti2v_i2v.json+cfg_parallel+h200-fa2",
+                            "framework_ref": "lightx2v-0.1.0-configs/wan22/wan_ti2v_i2v.json+cfg_parallel+h200-fa3",
                             "serve_args": "",
-                            "notes": "Uses FlashAttention 2 while preserving CFG/sequence parallelism and offload settings; no cache, torch compile, or quantized model path.",
+                            "notes": "Uses FlashAttention 3 while preserving CFG/sequence parallelism and offload settings; no cache, torch compile, or quantized model path.",
                             "lightx2v_config": {
-                                "self_attn_1_type": "flash_attn2",
-                                "cross_attn_1_type": "flash_attn2",
-                                "cross_attn_2_type": "flash_attn2"
+                                "self_attn_1_type": "flash_attn3",
+                                "cross_attn_1_type": "flash_attn3",
+                                "cross_attn_2_type": "flash_attn3"
                             }
                         }
                     }
@@ -851,18 +851,18 @@
                             "serve_args": "",
                             "notes": "Uses explicit fast attention/offload settings; no cache, torch compile, or quantized model path."
                         },
-                        "h200-fa2": {
+                        "h200-fa3": {
                             "description": "H200 fastest available LightX2V command/config for aligned non-cache benchmark runs.",
                             "hardware": [
                                 "h200"
                             ],
-                            "framework_ref": "lightx2v-0.1.0-wan2.1-i2v-720p+cfg_parallel+h200-fa2",
+                            "framework_ref": "lightx2v-0.1.0-wan2.1-i2v-720p+cfg_parallel+h200-fa3",
                             "serve_args": "",
-                            "notes": "Uses FlashAttention 2 while preserving CFG/sequence parallelism and offload settings; no cache, torch compile, or quantized model path.",
+                            "notes": "Uses FlashAttention 3 while preserving CFG/sequence parallelism and offload settings; no cache, torch compile, or quantized model path.",
                             "lightx2v_config": {
-                                "self_attn_1_type": "flash_attn2",
-                                "cross_attn_1_type": "flash_attn2",
-                                "cross_attn_2_type": "flash_attn2"
+                                "self_attn_1_type": "flash_attn3",
+                                "cross_attn_1_type": "flash_attn3",
+                                "cross_attn_2_type": "flash_attn3"
                             }
                         }
                     }
@@ -931,18 +931,18 @@
                             "serve_args": "",
                             "notes": "Uses explicit fast attention/offload settings; no cache, torch compile, or quantized model path."
                         },
-                        "h200-fa2": {
+                        "h200-fa3": {
                             "description": "H200 fastest available LightX2V command/config for aligned non-cache benchmark runs.",
                             "hardware": [
                                 "h200"
                             ],
-                            "framework_ref": "lightx2v-0.1.0-configs/wan22/wan_moe_i2v.json+cfg_parallel+h200-fa2",
+                            "framework_ref": "lightx2v-0.1.0-configs/wan22/wan_moe_i2v.json+cfg_parallel+h200-fa3",
                             "serve_args": "",
-                            "notes": "Uses FlashAttention 2 while preserving CFG/sequence parallelism and offload settings; no cache, torch compile, or quantized model path.",
+                            "notes": "Uses FlashAttention 3 while preserving CFG/sequence parallelism and offload settings; no cache, torch compile, or quantized model path.",
                             "lightx2v_config": {
-                                "self_attn_1_type": "flash_attn2",
-                                "cross_attn_1_type": "flash_attn2",
-                                "cross_attn_2_type": "flash_attn2"
+                                "self_attn_1_type": "flash_attn3",
+                                "cross_attn_1_type": "flash_attn3",
+                                "cross_attn_2_type": "flash_attn3"
                             }
                         }
                     }
