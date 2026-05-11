@@ -685,6 +685,10 @@
             "fps": 24,
             "num_inference_steps": 40,
             "guidance_scale": 4.0,
+            "report_framework_reasons": {
+                "vllm-omni": "Server log shows TypeError: LTX2TextConnectors.forward() got an unexpected keyword argument 'additive_mask'.",
+                "lightx2v": "LightX2V 0.1.0 has LTX2 audio/video runner tasks (t2av/i2av/ltx2_s2v), but no aligned two-stage text-to-video serving profile is configured."
+            },
             "frameworks": {
                 "sglang": {
                     "serve_args": "--model-type diffusion --warmup --enable-cfg-parallel --pipeline-class-name LTX2TwoStagePipeline",
@@ -743,6 +747,10 @@
             "fps": 24,
             "num_inference_steps": 30,
             "guidance_scale": 3.0,
+            "report_framework_reasons": {
+                "vllm-omni": "No compatible vLLM-Omni LTX2.3 serving profile is configured.",
+                "lightx2v": "LightX2V 0.1.0 exposes LTX2 runner code, but no validated LTX2.3 two-stage text-to-video serving profile is configured."
+            },
             "frameworks": {
                 "sglang": {
                     "serve_args": "--model-type diffusion --warmup --enable-cfg-parallel --pipeline-class-name LTX2TwoStagePipeline",

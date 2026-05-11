@@ -17,6 +17,7 @@ import json
 import os
 import sys
 from datetime import datetime, timezone
+from pathlib import Path
 
 # ---------------------------------------------------------------------------
 # History fetching (from sgl-project/ci-data repo via GitHub API)
@@ -27,6 +28,7 @@ CI_DATA_REPO_NAME = "ci-data"
 CI_DATA_BRANCH = "main"
 HISTORY_PREFIX = "diffusion-comparisons"
 MAX_HISTORY_RUNS = 14
+DEFAULT_REPORT_FRAMEWORKS = ("sglang", "vllm-omni", "lightx2v")
 
 # Base URL for chart images pushed to sgl-project/ci-data
 CHARTS_RAW_BASE_URL = (
@@ -678,6 +680,26 @@ def _framework_sort_key(framework: str) -> tuple[int, str]:
     return preferred.get(framework, 100), framework
 
 
+def _load_report_case_configs() -> dict[str, dict]:
+    candidates = [
+        Path.cwd() / "configs" / "comparison_configs.json",
+        Path(__file__).with_name("comparison_configs.json"),
+    ]
+    for path in candidates:
+        if not path.exists():
+            continue
+        data = json.loads(path.read_text())
+        return {case["id"]: case for case in data.get("cases", [])}
+    return {}
+
+
+def _report_frameworks(case_configs: dict[str, dict]) -> set[str]:
+    frameworks = set(DEFAULT_REPORT_FRAMEWORKS)
+    for case_cfg in case_configs.values():
+        frameworks.update((case_cfg.get("frameworks") or {}).keys())
+    return frameworks
+
+
 def _group_results_by_case(entries: list[dict]) -> dict[str, dict[str, dict]]:
     grouped: dict[str, dict[str, dict]] = {}
     for entry in entries:
@@ -737,6 +759,34 @@ def _result_status(entry: dict | None) -> str:
     return "failed"
 
 
+def _missing_status(case_cfg: dict | None, framework: str) -> str:
+    if case_cfg and framework in (case_cfg.get("frameworks") or {}):
+        return "not_run"
+    return "not_configured"
+
+
+def _status_with_context(entry: dict | None, case_cfg: dict | None, framework: str) -> str:
+    if entry:
+        return _result_status(entry)
+    return _missing_status(case_cfg, framework)
+
+
+def _result_reason(entry: dict | None, case_cfg: dict | None, framework: str) -> str:
+    reasons = (case_cfg or {}).get("report_framework_reasons") or {}
+    if entry and entry.get("error"):
+        reason = _md_cell(entry.get("error"))
+        if framework in reasons:
+            reason = f"{reason}; {_md_cell(reasons[framework])}"
+        return reason
+    if framework in reasons:
+        return _md_cell(reasons[framework])
+    if not entry:
+        if case_cfg and framework in (case_cfg.get("frameworks") or {}):
+            return "not run in this result"
+        return "no configured serving path"
+    return "-"
+
+
 def _throughput_p50(entry: dict | None) -> object:
     metrics = (entry or {}).get("metrics") or {}
     return (
@@ -777,6 +827,8 @@ def _profile_cell(entry: dict | None) -> str:
 def build_issue_report_comment(results: dict) -> str:
     single_by_case = _group_results_by_case(results.get("results", []))
     throughput_by_case = _group_results_by_case(results.get("throughput_results", []))
+    case_configs = _load_report_case_configs()
+    report_frameworks = _report_frameworks(case_configs)
     gpus = (results.get("hardware") or {}).get("gpus") or []
     gpu_model = "; ".join(sorted(set(gpus)))
     sglang_runtime = results.get("sglang_runtime") or {}
@@ -806,8 +858,10 @@ def build_issue_report_comment(results: dict) -> str:
         single_fws = single_by_case.get(case_id, {})
         throughput_fws = throughput_by_case.get(case_id, {})
         frameworks = sorted(
-            set(single_fws) | set(throughput_fws), key=_framework_sort_key
+            report_frameworks | set(single_fws) | set(throughput_fws),
+            key=_framework_sort_key,
         )
+        case_cfg = case_configs.get(case_id)
         case_entry = (
             single_fws.get("sglang")
             or throughput_fws.get("sglang")
@@ -839,8 +893,8 @@ def build_issue_report_comment(results: dict) -> str:
                 )
                 + " |",
                 "",
-                "| framework | model | profile | gpus | single_e2e_s | single/sglang | single_status | throughput_p50_s | p50/sglang | throughput_p95_s | throughput_rps | rps/sglang | throughput_status |",
-                "| --- | --- | --- | ---: | ---: | ---: | --- | ---: | ---: | ---: | ---: | ---: | --- |",
+                "| framework | model | profile | gpus | single_e2e_s | single/sglang | single_status | throughput_p50_s | p50/sglang | throughput_p95_s | throughput_rps | rps/sglang | throughput_status | reason |",
+                "| --- | --- | --- | ---: | ---: | ---: | --- | ---: | ---: | ---: | ---: | ---: | --- | --- |",
             ]
         )
         for framework in frameworks:
@@ -857,13 +911,16 @@ def build_issue_report_comment(results: dict) -> str:
                 _md_cell(entry.get("num_gpus")),
                 _fmt_report_float(single_latency),
                 _fmt_report_ratio(single_latency, sglang_single_latency),
-                _result_status(single_entry),
+                _status_with_context(single_entry, case_cfg, framework),
                 _fmt_report_float(throughput_p50),
                 _fmt_report_ratio(throughput_p50, sglang_p50),
                 _fmt_report_float(_throughput_p95(throughput_entry)),
                 _fmt_report_rps(throughput_rps),
                 _fmt_report_ratio(throughput_rps, sglang_rps),
-                _result_status(throughput_entry),
+                _status_with_context(throughput_entry, case_cfg, framework)
+                if throughput_fws
+                else "-",
+                _result_reason(single_entry or throughput_entry, case_cfg, framework),
             ]
             lines.append("| " + " | ".join(row) + " |")
 
