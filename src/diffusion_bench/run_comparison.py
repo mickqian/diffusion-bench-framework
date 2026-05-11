@@ -1195,8 +1195,18 @@ def _collect_framework_runtime_metadata() -> dict:
                 "LIGHTX2V_FLASH_ATTN_INSTALL_SPEC", "flash-attn==2.8.3"
             ),
             "lightx2v_flash_attn3": os.environ.get(
-                "LIGHTX2V_FLASH_ATTN3_INSTALL_SPEC",
-                "git+https://github.com/Dao-AILab/flash-attention.git@ab66326aaa4fe3529fbc00f3156f3a762dd3141b#subdirectory=hopper",
+                "LIGHTX2V_FLASH_ATTN3_INSTALL_SPEC", ""
+            ),
+            "lightx2v_fa3_hf_repo": os.environ.get(
+                "LIGHTX2V_FA3_HF_REPO", "varunneal/flash-attention-3"
+            ),
+            "lightx2v_fa3_hf_revision": os.environ.get(
+                "LIGHTX2V_FA3_HF_REVISION",
+                "de87b9b5af06dd9984df595bef90b2eba44b181a",
+            ),
+            "lightx2v_fa3_hf_subdir": os.environ.get(
+                "LIGHTX2V_FA3_HF_SUBDIR",
+                "build/torch28-cxx11-cu128-x86_64-linux/flash_attention_3",
             ),
             "lightx2v_flashinfer": os.environ.get(
                 "LIGHTX2V_FLASHINFER_INSTALL_SPEC", "flashinfer-python==0.6.11"

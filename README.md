@@ -43,7 +43,7 @@ vLLM-Omni and LightX2V are installed into isolated temporary virtualenvs by the 
 
 Set `SGLANG_DIFFUSION_SKIP_FRAMEWORK_INSTALL=1` only for reruns where the isolated framework venv has already been installed and should be reused.
 The default installer pins LightX2V to the commit used by the 2026-05-10 report; override `LIGHTX2V_INSTALL_SPEC` when intentionally updating that framework.
-The H200 LightX2V profiles use FA3/FlashInfer paths; override `LIGHTX2V_FLASH_ATTN3_INSTALL_SPEC` or `LIGHTX2V_FLASHINFER_INSTALL_SPEC` only when intentionally changing that stack.
+The H200 LightX2V profiles use FA3/FlashInfer paths. By default the installer uses a pinned torch 2.8/cu128 FA3 artifact via `LIGHTX2V_FA3_HF_REPO`, `LIGHTX2V_FA3_HF_REVISION`, and `LIGHTX2V_FA3_HF_SUBDIR`; set `LIGHTX2V_FLASH_ATTN3_INSTALL_SPEC` only when intentionally switching back to a source build.
 `scripts/run_h200_throughput_20260511.sh` sets `DIFFUSION_BENCH_SGLANG_EXTRA_SERVE_ARGS="--batching-max-size ${THROUGHPUT_MAX_CONCURRENCY} --batching-delay-ms 0"` by default so SGLang throughput runs use the same request concurrency as the benchmark client.
 Set `THROUGHPUT_FRAMEWORKS="lightx2v"` and `THROUGHPUT_CASES="zimage_turbo_t2i_1024"` to reproduce a targeted throughput rerun without rerunning the whole matrix.
 

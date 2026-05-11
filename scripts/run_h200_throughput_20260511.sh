@@ -22,7 +22,9 @@ export VLLM_INSTALL_SPEC="${VLLM_INSTALL_SPEC:-vllm==0.18.0}"
 export VLLM_OMNI_INSTALL_SPEC="${VLLM_OMNI_INSTALL_SPEC:-vllm-omni==0.18.0}"
 export LIGHTX2V_INSTALL_SPEC="${LIGHTX2V_INSTALL_SPEC:-git+https://github.com/ModelTC/LightX2V.git@573b9613adb0c1d33894b0920b5e12c87e42d280}"
 export LIGHTX2V_FLASH_ATTN_INSTALL_SPEC="${LIGHTX2V_FLASH_ATTN_INSTALL_SPEC:-flash-attn==2.8.3}"
-export LIGHTX2V_FLASH_ATTN3_INSTALL_SPEC="${LIGHTX2V_FLASH_ATTN3_INSTALL_SPEC:-git+https://github.com/Dao-AILab/flash-attention.git@ab66326aaa4fe3529fbc00f3156f3a762dd3141b#subdirectory=hopper}"
+export LIGHTX2V_FA3_HF_REPO="${LIGHTX2V_FA3_HF_REPO:-varunneal/flash-attention-3}"
+export LIGHTX2V_FA3_HF_REVISION="${LIGHTX2V_FA3_HF_REVISION:-de87b9b5af06dd9984df595bef90b2eba44b181a}"
+export LIGHTX2V_FA3_HF_SUBDIR="${LIGHTX2V_FA3_HF_SUBDIR:-build/torch28-cxx11-cu128-x86_64-linux/flash_attention_3}"
 export LIGHTX2V_FLASHINFER_INSTALL_SPEC="${LIGHTX2V_FLASHINFER_INSTALL_SPEC:-flashinfer-python==0.6.11}"
 
 if [[ -n "${THROUGHPUT_CASES:-}" ]]; then
