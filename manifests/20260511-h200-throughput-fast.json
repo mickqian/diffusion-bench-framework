@@ -1,0 +1,83 @@
+{
+  "name": "20260511-h200-throughput-fast",
+  "purpose": "Formal H200 throughput report for fast image-generation cases with 32 requests and client max concurrency 4.",
+  "tracker_issue": "https://github.com/mickqian/diffusion-bench-framework/issues/1",
+  "tracker_comment": "https://github.com/mickqian/diffusion-bench-framework/issues/1#issuecomment-4417273026",
+  "reproduce_script": "scripts/run_h200_throughput_20260511.sh",
+  "benchmark_repo": {
+    "report_branch": "bench-full-report-matrix",
+    "report_commit": "adeef6cbcdaed61b96b2d37b8e9541aa0d021d95",
+    "result_base_commit": "adeef6cbcdaed61b96b2d37b8e9541aa0d021d95",
+    "base_throughput_commit": "b00f9689b910fa6a79cedb6652d4859a7ad30a5a",
+    "lightx2v_rerun_commit": "adeef6cbcdaed61b96b2d37b8e9541aa0d021d95"
+  },
+  "sglang": {
+    "repo_path": "/sgl-workspace/sglang",
+    "commit": "028e41d6b2b0a9b12ac4466bc94f43c9ee33ae56",
+    "package_version": "0.0.0.dev12333+g028e41d6b"
+  },
+  "frameworks": {
+    "vllm": {
+      "install_spec": "vllm==0.18.0",
+      "observed_version": "0.18.0"
+    },
+    "vllm_omni": {
+      "install_spec": "vllm-omni==0.18.0",
+      "observed_version": "0.18.0"
+    },
+    "lightx2v": {
+      "install_spec": "git+https://github.com/ModelTC/LightX2V.git@573b9613adb0c1d33894b0920b5e12c87e42d280",
+      "observed_version": "0.1.0",
+      "observed_commit": "573b9613adb0c1d33894b0920b5e12c87e42d280"
+    },
+    "flash_attn": {
+      "install_spec": "flash-attn==2.8.3"
+    },
+    "lightx2v_fa3": {
+      "install_spec": "varunneal/flash-attention-3@de87b9b5af06dd9984df595bef90b2eba44b181a:build/torch28-cxx11-cu128-x86_64-linux/flash_attention_3"
+    },
+    "flashinfer": {
+      "install_spec": "flashinfer-python==0.6.11",
+      "observed_version": "0.6.11"
+    }
+  },
+  "environment": {
+    "hardware_profile": "h200",
+    "cuda_visible_devices": "4,5,6,7",
+    "framework_venv_root": "/root/.cache/sglang-diffusion-framework-venvs",
+    "torch_compile_disable": "1",
+    "throughput_num_requests": 32,
+    "throughput_max_concurrency": 4,
+    "throughput_request_rate": "inf",
+    "sglang_extra_serve_args": "--batching-max-size 4 --batching-delay-ms 0"
+  },
+  "formal_cases": [
+    "zimage_turbo_t2i_1024",
+    "qwen_image_2512_t2i_1024",
+    "qwen_image_edit_2511",
+    "flux1_dev_t2i_1024"
+  ],
+  "run_sources": [
+    {
+      "run_id": "h200-throughput-fast-20260511-b00f968",
+      "role": "base SGLang and vLLM-Omni throughput source",
+      "local_copy": "tmp/report/h200-throughput-fast-20260511-b00f968.json"
+    },
+    {
+      "run_id": "h200-throughput-lightx2v-zimage-20260511-adeef6c",
+      "role": "LightX2V Z-Image FA3 throughput source",
+      "local_copy": "tmp/report/h200-throughput-lightx2v-zimage-20260511-adeef6c.json",
+      "remote_path": "/root/diffusion-bench-framework/runs/h200-throughput-lightx2v-zimage-20260511-adeef6c.json"
+    },
+    {
+      "run_id": "h200-throughput-fast-20260511-merged-adeef6c",
+      "role": "formal merged report source",
+      "local_copy": "tmp/report/h200-throughput-fast-20260511-merged-adeef6c.json"
+    }
+  ],
+  "known_failures": [],
+  "notes": [
+    "The checked-in script can reproduce the whole fast throughput matrix with the current LightX2V FA3 artifact installer.",
+    "The merged report replaces the earlier failed LightX2V Z-Image entry from h200-throughput-fast-20260511-b00f968 with the successful h200-throughput-lightx2v-zimage-20260511-adeef6c rerun."
+  ]
+}
