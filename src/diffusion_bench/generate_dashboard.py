@@ -827,6 +827,7 @@ def _profile_cell(entry: dict | None) -> str:
 def build_issue_report_comment(results: dict) -> str:
     single_by_case = _group_results_by_case(results.get("results", []))
     throughput_by_case = _group_results_by_case(results.get("throughput_results", []))
+    include_throughput = bool(throughput_by_case)
     case_configs = _load_report_case_configs()
     report_frameworks = _report_frameworks(case_configs)
     gpus = (results.get("hardware") or {}).get("gpus") or []
@@ -869,10 +870,25 @@ def build_issue_report_comment(results: dict) -> str:
             or throughput_fws.get(frameworks[0])
         )
         sglang_single = single_fws.get("sglang")
-        sglang_throughput = throughput_fws.get("sglang")
         sglang_single_latency = _successful_metric(sglang_single, "latency_s")
-        sglang_p50 = _successful_throughput_metric(sglang_throughput, _throughput_p50)
-        sglang_rps = _successful_throughput_metric(sglang_throughput, _throughput_rps)
+        sglang_p50 = _successful_throughput_metric(
+            throughput_fws.get("sglang"), _throughput_p50
+        )
+        sglang_rps = _successful_throughput_metric(
+            throughput_fws.get("sglang"), _throughput_rps
+        )
+        table_header = (
+            "| framework | profile | gpus | single_e2e_s | single/sglang | single_status | reason |"
+        )
+        table_divider = "| --- | --- | ---: | ---: | ---: | --- | --- |"
+        if include_throughput:
+            table_header = (
+                "| framework | profile | gpus | single_e2e_s | single/sglang | single_status | "
+                "throughput_p50_s | p50/sglang | throughput_p95_s | throughput_rps | rps/sglang | throughput_status | reason |"
+            )
+            table_divider = (
+                "| --- | --- | ---: | ---: | ---: | --- | ---: | ---: | ---: | ---: | ---: | --- | --- |"
+            )
 
         lines.extend(
             [
@@ -893,8 +909,8 @@ def build_issue_report_comment(results: dict) -> str:
                 )
                 + " |",
                 "",
-                "| framework | model | profile | gpus | single_e2e_s | single/sglang | single_status | throughput_p50_s | p50/sglang | throughput_p95_s | throughput_rps | rps/sglang | throughput_status | reason |",
-                "| --- | --- | --- | ---: | ---: | ---: | --- | ---: | ---: | ---: | ---: | ---: | --- | --- |",
+                table_header,
+                table_divider,
             ]
         )
         for framework in frameworks:
@@ -906,22 +922,26 @@ def build_issue_report_comment(results: dict) -> str:
             throughput_rps = _throughput_rps(throughput_entry)
             row = [
                 _md_cell(framework),
-                _md_cell(entry.get("model")),
                 _profile_cell(entry),
                 _md_cell(entry.get("num_gpus")),
                 _fmt_report_float(single_latency),
                 _fmt_report_ratio(single_latency, sglang_single_latency),
                 _status_with_context(single_entry, case_cfg, framework),
-                _fmt_report_float(throughput_p50),
-                _fmt_report_ratio(throughput_p50, sglang_p50),
-                _fmt_report_float(_throughput_p95(throughput_entry)),
-                _fmt_report_rps(throughput_rps),
-                _fmt_report_ratio(throughput_rps, sglang_rps),
-                _status_with_context(throughput_entry, case_cfg, framework)
-                if throughput_fws
-                else "-",
-                _result_reason(single_entry or throughput_entry, case_cfg, framework),
             ]
+            if include_throughput:
+                row.extend(
+                    [
+                        _fmt_report_float(throughput_p50),
+                        _fmt_report_ratio(throughput_p50, sglang_p50),
+                        _fmt_report_float(_throughput_p95(throughput_entry)),
+                        _fmt_report_rps(throughput_rps),
+                        _fmt_report_ratio(throughput_rps, sglang_rps),
+                        _status_with_context(throughput_entry, case_cfg, framework),
+                    ]
+                )
+            row.append(
+                _result_reason(single_entry or throughput_entry, case_cfg, framework)
+            )
             lines.append("| " + " | ".join(row) + " |")
 
     return "\n".join(lines) + "\n"
