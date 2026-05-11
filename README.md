@@ -43,6 +43,7 @@ vLLM-Omni and LightX2V are installed into isolated temporary virtualenvs by the 
 
 Set `SGLANG_DIFFUSION_SKIP_FRAMEWORK_INSTALL=1` only for reruns where the isolated framework venv has already been installed and should be reused.
 The default installer pins LightX2V to the commit used by the 2026-05-10 report; override `LIGHTX2V_INSTALL_SPEC` when intentionally updating that framework.
+`scripts/run_h200_throughput_20260511.sh` sets `DIFFUSION_BENCH_SGLANG_EXTRA_SERVE_ARGS="--batching-max-size ${THROUGHPUT_MAX_CONCURRENCY} --batching-delay-ms 0"` by default so SGLang throughput runs use the same request concurrency as the benchmark client.
 
 ## Dry Run
 

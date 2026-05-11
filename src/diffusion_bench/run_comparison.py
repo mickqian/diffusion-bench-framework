@@ -61,6 +61,7 @@ SGLANG_DEFAULT_WARMUP_STEPS = 3
 DEFAULT_PROFILE = "default"
 DEFAULT_SGLANG_PROFILE = DEFAULT_PROFILE
 HARDWARE_PROFILE_ENV = "SGLANG_BENCH_HARDWARE_PROFILE"
+SGLANG_EXTRA_SERVE_ARGS_ENV = "DIFFUSION_BENCH_SGLANG_EXTRA_SERVE_ARGS"
 SKIP_FRAMEWORK_INSTALL_ENV = "SGLANG_DIFFUSION_SKIP_FRAMEWORK_INSTALL"
 FORCED_BENCHMARK_ENV = {"TORCH_COMPILE_DISABLE": "1"}
 VLLM_DISABLE_TORCH_COMPILE_ARGS = [
@@ -110,6 +111,8 @@ def _build_sglang_cmd(case: dict, fw_cfg: dict, port: int) -> list[str]:
         cmd += ["--num-gpus", str(num_gpus)]
     if fw_cfg.get("serve_args", "").strip():
         cmd += fw_cfg["serve_args"].strip().split()
+    if os.environ.get(SGLANG_EXTRA_SERVE_ARGS_ENV, "").strip():
+        cmd += shlex.split(os.environ[SGLANG_EXTRA_SERVE_ARGS_ENV])
     if "--warmup" in cmd and "--warmup-steps" not in cmd:
         cmd += ["--warmup-steps", str(SGLANG_DEFAULT_WARMUP_STEPS)]
     return cmd
