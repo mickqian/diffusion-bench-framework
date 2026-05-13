@@ -794,6 +794,9 @@
                             "framework_ref": "lightx2v-7efd05f8-ltx2+t2av+tp+h100",
                             "num_gpus": 2,
                             "serve_args": "",
+                            "extra_env": {
+                                "PYTORCH_CUDA_ALLOC_CONF": "expandable_segments:True"
+                            },
                             "lightx2v_config": {
                                 "gemma_cpu_offload": true,
                                 "vae_cpu_offload": false,
