@@ -18,7 +18,7 @@ except ImportError as exc:  # pragma: no cover - exercised by CLI environment
 
 FRAMEWORK_ORDER = ("sglang", "vllm-omni", "lightx2v")
 FRAMEWORK_LABELS = {
-    "sglang": "SGLang",
+    "sglang": "SGLang-Diffusion",
     "vllm-omni": "vLLM-Omni",
     "lightx2v": "LightX2V",
 }
@@ -89,8 +89,8 @@ METRIC_XS = {
     "lightx2v": 1376,
 }
 METRIC_W = 258
-WINNER_X = 1694
-WINNER_W = 172
+WINNER_X = 1670
+WINNER_W = 208
 ROW_SINGLE_H = 90
 ROW_THROUGHPUT_H = 118
 PANEL_HEADER_H = 102
@@ -321,18 +321,16 @@ def _draw_header(
     _rounded(draw, (0, 0, WIDTH, HEADER_H), 0, PANEL)
     draw.line((0, HEADER_H, WIDTH, HEADER_H), fill="#e5e7eb", width=1)
 
-    _draw_text(draw, (MARGIN, 32), "SGLang vs Other Frameworks", FONT_TITLE)
+    _draw_text(draw, (MARGIN, 32), "SGLang-Diffusion vs Other Frameworks", FONT_TITLE)
     subtitle = (
         f"{_hardware_label(results)} - single request latency + high-pressure "
         "throughput - no cache - torch compile disabled"
     )
     _draw_text(draw, (MARGIN, 95), subtitle, FONT_SUBTITLE, "#4b5563")
 
-    x = MARGIN
-    for framework in FRAMEWORK_ORDER:
+    for framework, x in zip(FRAMEWORK_ORDER, (MARGIN, 360, 590), strict=True):
         _rounded(draw, (x, 154, x + 24, 178), 6, FRAMEWORK_COLORS[framework])
         _draw_text(draw, (x + 36, 151), FRAMEWORK_LABELS[framework], FONT_LEGEND, "#374151")
-        x += 190
 
     wins, comparable, pending = single_summary
     qps_wins, qps_comparable = throughput_summary
@@ -588,7 +586,7 @@ def render_report_image(
         draw,
         single_y,
         "Single Request Latency",
-        "Lower is better - latency and latency/SGLang",
+        "Lower is better - latency and latency/SGLang-Diffusion",
         "Fastest",
     )
     rows_y = single_y + PANEL_HEADER_H

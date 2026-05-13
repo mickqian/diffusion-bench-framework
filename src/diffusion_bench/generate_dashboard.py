@@ -680,6 +680,14 @@ def _framework_sort_key(framework: str) -> tuple[int, str]:
     return preferred.get(framework, 100), framework
 
 
+def _framework_display_name(framework: str) -> str:
+    return {
+        "sglang": "SGLang-Diffusion",
+        "vllm-omni": "vLLM-Omni",
+        "lightx2v": "LightX2V",
+    }.get(framework, framework)
+
+
 def _load_report_case_configs() -> dict[str, dict]:
     candidates = [
         Path.cwd() / "configs" / "comparison_configs.json",
@@ -1012,11 +1020,11 @@ def build_issue_report_comment(results: dict) -> str:
         "| framework | version/ref |",
         "| --- | --- |",
         *[
-            f"| {framework} | {_md_cell(_framework_version(results, manifest, framework))} |"
+            f"| {_framework_display_name(framework)} | {_md_cell(_framework_version(results, manifest, framework))} |"
             for framework in sorted(report_frameworks, key=_framework_sort_key)
         ],
         "",
-        "Ratio columns are framework value divided by SGLang value for the same case.",
+        "Ratio columns are framework value divided by SGLang-Diffusion value for the same case.",
     ]
 
     for case_id in _ordered_case_ids(results):
@@ -1044,7 +1052,7 @@ def build_issue_report_comment(results: dict) -> str:
         table_columns = ["framework", "profile", "gpus"]
         table_align = ["---", "---", "---:"]
         if include_single:
-            table_columns.extend(["single_e2e_s", "single/sglang", "single_status"])
+            table_columns.extend(["single_e2e_s", "single/SGLang-Diffusion", "single_status"])
             table_align.extend(["---:", "---:", "---"])
         if include_throughput:
             table_columns.extend(
@@ -1052,11 +1060,11 @@ def build_issue_report_comment(results: dict) -> str:
                     "done/reqs",
                     "concurrency",
                     "p50_s",
-                    "p50/sglang",
+                    "p50/SGLang-Diffusion",
                     "p95_s",
                     "p99_s",
                     "qps",
-                    "qps/sglang",
+                    "qps/SGLang-Diffusion",
                     "throughput_status",
                 ]
             )
@@ -1099,7 +1107,7 @@ def build_issue_report_comment(results: dict) -> str:
             throughput_p50 = _throughput_p50(throughput_entry)
             throughput_rps = _throughput_rps(throughput_entry)
             row = [
-                _md_cell(framework),
+                _md_cell(_framework_display_name(framework)),
                 _profile_cell(entry),
                 _md_cell(entry.get("num_gpus")),
             ]
