@@ -786,25 +786,21 @@
                             },
                             "notes": "Matches upstream scripts/ltx2/run_ltx2_t2av_cfg_parallel.sh semantics with compile disabled by the benchmark harness."
                         },
-                        "h100-2gpu": {
-                            "description": "H100 LightX2V LTX-2 t2av tensor-parallel command/config.",
+                        "h100-1gpu": {
+                            "description": "H100 LightX2V LTX-2 t2av block-offload command/config.",
                             "hardware": [
                                 "h100"
                             ],
-                            "framework_ref": "lightx2v-7efd05f8-ltx2+t2av+tp+h100",
-                            "num_gpus": 2,
+                            "framework_ref": "lightx2v-7efd05f8-ltx2+t2av+offload+h100",
+                            "num_gpus": 1,
                             "serve_args": "",
-                            "extra_env": {
-                                "PYTORCH_CUDA_ALLOC_CONF": "expandable_segments:True"
-                            },
                             "lightx2v_config": {
+                                "cpu_offload": true,
+                                "offload_granularity": "block",
                                 "gemma_cpu_offload": true,
-                                "vae_cpu_offload": false,
-                                "parallel": {
-                                    "tensor_p_size": 2
-                                }
+                                "vae_cpu_offload": false
                             },
-                            "notes": "Uses upstream tensor-parallel DiT plus Gemma offload; TP-only keeps Gemma resident on rank0 and OOMs on H100 80GB."
+                            "notes": "Uses upstream block offload because TP keeps Gemma and one DiT shard resident on rank0 and OOMs on H100 80GB."
                         }
                     }
                 }
