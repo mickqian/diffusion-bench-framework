@@ -777,6 +777,16 @@
                             "num_gpus": 2,
                             "serve_args": "",
                             "notes": "Matches upstream scripts/ltx2/run_ltx2_t2av_cfg_parallel.sh semantics with compile disabled by the benchmark harness."
+                        },
+                        "h100-2gpu": {
+                            "description": "H100 LightX2V LTX-2 t2av command/config.",
+                            "hardware": [
+                                "h100"
+                            ],
+                            "framework_ref": "lightx2v-7efd05f8-ltx2+t2av+cfg_parallel+h100",
+                            "num_gpus": 2,
+                            "serve_args": "",
+                            "notes": "Same upstream LTX-2 t2av CFG-parallel path as H200, recorded separately because hardware-specific best commands can diverge."
                         }
                     }
                 }
@@ -907,6 +917,16 @@
                             "num_gpus": 1,
                             "serve_args": "",
                             "notes": "Single-GPU profile follows current upstream LTX-2.3 scripts; no cache, torch compile, or quantized model path."
+                        },
+                        "h100-1gpu": {
+                            "description": "H100 LightX2V LTX-2.3 t2av command/config.",
+                            "hardware": [
+                                "h100"
+                            ],
+                            "framework_ref": "lightx2v-7efd05f8-ltx2.3+t2av+h100",
+                            "num_gpus": 1,
+                            "serve_args": "",
+                            "notes": "Same current upstream LTX-2.3 single-GPU path as H200, recorded separately because hardware-specific best commands can diverge."
                         }
                     }
                 }

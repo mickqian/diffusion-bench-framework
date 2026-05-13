@@ -21,6 +21,7 @@ The repo launches one serving stack per case, sends a single end-to-end request,
 - `scripts/run_h200_single_e2e_20260510.sh`: reproducible H200 single-request run script for the 2026-05-10 report shape.
 - `scripts/run_h200_throughput_20260511.sh`: reproducible H200 throughput run script for faster image cases.
 - `scripts/run_h200_ltx_lightx2v_20260513.sh`: targeted H200 LightX2V LTX-2/LTX-2.3 rerun with the latest tracked upstream commit.
+- `scripts/run_h100_ltx_lightx2v_20260513.sh`: targeted H100 LightX2V LTX-2/LTX-2.3 rerun when H200 is unavailable.
 - `scripts/generate_h200_report_artifacts.sh`: fixed local entrypoint for merged JSON, issue Markdown, dashboard Markdown, and image output.
 - `manifests/`: pinned run manifests tying report data to bench, SGLang, framework, and hardware versions.
 - `skills/`: repo-local Codex skills for maintaining long-term performance tracking.
