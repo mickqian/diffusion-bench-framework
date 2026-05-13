@@ -756,10 +756,7 @@
                         "audio_mel_bins": 16,
                         "double_precision_rope": true,
                         "use_tiling_vae": false,
-                        "dit_original_ckpt": "Lightricks/LTX-2/ltx-2-19b-dev.safetensors",
-                        "parallel": {
-                            "cfg_p_size": 2
-                        }
+                        "dit_original_ckpt": "Lightricks/LTX-2/ltx-2-19b-dev.safetensors"
                     },
                     "command_profiles": {
                         "default": {
@@ -767,6 +764,11 @@
                             "framework_ref": "lightx2v-7efd05f8-ltx2+t2av+cfg_parallel",
                             "num_gpus": 2,
                             "serve_args": "",
+                            "lightx2v_config": {
+                                "parallel": {
+                                    "cfg_p_size": 2
+                                }
+                            },
                             "notes": "Uses upstream LTX-2 audio-video t2av runner with CFG parallelism; no cache, torch compile, or quantized model path."
                         },
                         "h200-2gpu": {
@@ -777,17 +779,27 @@
                             "framework_ref": "lightx2v-7efd05f8-ltx2+t2av+cfg_parallel+h200",
                             "num_gpus": 2,
                             "serve_args": "",
+                            "lightx2v_config": {
+                                "parallel": {
+                                    "cfg_p_size": 2
+                                }
+                            },
                             "notes": "Matches upstream scripts/ltx2/run_ltx2_t2av_cfg_parallel.sh semantics with compile disabled by the benchmark harness."
                         },
                         "h100-2gpu": {
-                            "description": "H100 LightX2V LTX-2 t2av command/config.",
+                            "description": "H100 LightX2V LTX-2 t2av tensor-parallel command/config.",
                             "hardware": [
                                 "h100"
                             ],
-                            "framework_ref": "lightx2v-7efd05f8-ltx2+t2av+cfg_parallel+h100",
+                            "framework_ref": "lightx2v-7efd05f8-ltx2+t2av+tp+h100",
                             "num_gpus": 2,
                             "serve_args": "",
-                            "notes": "Same upstream LTX-2 t2av CFG-parallel path as H200, recorded separately because hardware-specific best commands can diverge."
+                            "lightx2v_config": {
+                                "parallel": {
+                                    "tensor_p_size": 2
+                                }
+                            },
+                            "notes": "Matches upstream scripts/ltx2/run_ltx2_t2av_tp.sh because cfg-parallel duplicates the 19B model on each H100 and OOMs."
                         }
                     }
                 }
@@ -921,14 +933,19 @@
                             "notes": "Single-GPU profile follows current upstream LTX-2.3 scripts; no cache, torch compile, or quantized model path."
                         },
                         "h100-1gpu": {
-                            "description": "H100 LightX2V LTX-2.3 t2av command/config.",
+                            "description": "H100 LightX2V LTX-2.3 t2av block-offload command/config.",
                             "hardware": [
                                 "h100"
                             ],
-                            "framework_ref": "lightx2v-7efd05f8-ltx2.3+t2av+h100",
+                            "framework_ref": "lightx2v-7efd05f8-ltx2.3+t2av+offload+h100",
                             "num_gpus": 1,
                             "serve_args": "",
-                            "notes": "Same current upstream LTX-2.3 single-GPU path as H200, recorded separately because hardware-specific best commands can diverge."
+                            "lightx2v_config": {
+                                "cpu_offload": true,
+                                "offload_granularity": "block",
+                                "vae_cpu_offload": false
+                            },
+                            "notes": "Matches upstream configs/ltx2/ltx2_3_offload.json because the full 22B checkpoint OOMs on one H100 80GB."
                         }
                     }
                 }
