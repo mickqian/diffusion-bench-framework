@@ -172,11 +172,25 @@ def _resolve_hf_model_path(model_id: str, *, required: bool = False) -> str:
         return model_id
 
 
+def _hf_file_ref(value: str) -> tuple[str, str] | None:
+    parts = value.split("/")
+    if len(parts) < 3 or parts[0] in ("", ".", ".."):
+        return None
+    return "/".join(parts[:2]), "/".join(parts[2:])
+
+
 def _resolve_lightx2v_ckpt_path(value: str, model_path: str, model_id: str) -> str:
     if not value or os.path.isabs(value) or not os.path.isdir(model_path):
         return value
     prefix = model_id.rstrip("/") + "/"
-    relative = value[len(prefix) :] if value.startswith(prefix) else value
+    if value.startswith(prefix):
+        relative = value[len(prefix) :]
+        return str(Path(model_path) / relative)
+    hf_ref = _hf_file_ref(value)
+    if hf_ref is not None:
+        repo_id, relative = hf_ref
+        return str(Path(_resolve_hf_model_path(repo_id, required=True)) / relative)
+    relative = value
     return str(Path(model_path) / relative)
 
 
@@ -264,7 +278,9 @@ def _merge_ltx2_single_file_metadata(cfg: dict) -> None:
     cfg.setdefault("vae_scale_factors", [8, 32, 32])
 
 
-def _write_lightx2v_config(case: dict, fw_cfg: dict, model_path: str) -> str:
+def _write_lightx2v_config(
+    case: dict, fw_cfg: dict, model_path: str, server_model_id: str
+) -> str:
     """Write a minimal LightX2V config JSON and return its path."""
     cfg = {
         "infer_steps": case.get("num_inference_steps", 50),
@@ -296,7 +312,7 @@ def _write_lightx2v_config(case: dict, fw_cfg: dict, model_path: str) -> str:
         cfg["dit_original_ckpt"] = _resolve_lightx2v_ckpt_path(
             str(cfg["dit_original_ckpt"]),
             model_path,
-            str(fw_cfg.get("model") or case["model"]),
+            server_model_id,
         )
     if fw_cfg.get("model_cls") == "ltx2":
         _merge_ltx2_single_file_metadata(cfg)
@@ -324,7 +340,9 @@ def _build_lightx2v_cmd(case: dict, fw_cfg: dict, port: int) -> list[str]:
     model_path = _server_model_path(case, fw_cfg)
     if not fw_cfg.get("_skip_model_path_resolution"):
         model_path = _resolve_hf_model_path(model_path, required=True)
-    config_path = _write_lightx2v_config(case, fw_cfg, model_path)
+    config_path = _write_lightx2v_config(
+        case, fw_cfg, model_path, _server_model_path(case, fw_cfg)
+    )
 
     server_args = [
         "--model_path",

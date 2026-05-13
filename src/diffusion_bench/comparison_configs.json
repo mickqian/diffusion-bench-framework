@@ -863,6 +863,7 @@
                 },
                 "lightx2v": {
                     "model": "Lightricks/LTX-2.3",
+                    "model_path": "Lightricks/LTX-2",
                     "model_cls": "ltx2",
                     "lightx2v_task": "t2av",
                     "num_gpus": 1,
