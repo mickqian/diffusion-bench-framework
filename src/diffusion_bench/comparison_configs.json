@@ -948,7 +948,7 @@
                                 "gemma_cpu_offload": true,
                                 "vae_cpu_offload": true
                             },
-                            "notes": "Uses full Gemma/VAE offload because upstream ltx2_3_offload is a one-shot H100 path and OOMs after warmup in a reused server."
+                            "notes": "Best attempted H100 server profile. Upstream ltx2_3_offload and this full Gemma/VAE offload path still OOM after warmup on 80GB GPUs."
                         }
                     }
                 }
