@@ -34,7 +34,7 @@ case "${FRAMEWORK}" in
     if [[ -n "${LIGHTX2V_FLASH_ATTN3_INSTALL_SPEC:-}" ]]; then
       python3 -m pip install --upgrade --no-build-isolation --no-deps "${LIGHTX2V_FLASH_ATTN3_INSTALL_SPEC}"
     else
-      python3 -m pip install --upgrade "huggingface_hub[hf_xet]"
+      python3 -m pip install --upgrade --upgrade-strategy only-if-needed "${LIGHTX2V_HF_XET_INSTALL_SPEC:-hf-xet}"
       python3 - <<'PY'
 import os
 import shutil
