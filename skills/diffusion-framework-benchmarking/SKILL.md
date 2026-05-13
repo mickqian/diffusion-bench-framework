@@ -36,9 +36,18 @@ Every framework entry should carry `command_profiles`, not just inline args.
 
 - Use `sglang_ref` or `framework_ref` to pin the release, commit, package version, or meaningful upstream line.
 - Split profiles by hardware when best commands differ, for example `h100-80gb-2gpu` vs `h200-2gpu`.
+- Split profiles by framework version when the best command changes across releases.
 - For SGLang failures, fix the backend or add a stable hardware-specific profile before using the comparison.
 - For non-SGLang frameworks, seek the fastest fair command too; do not leave a slow default if upstream has a documented faster path.
 - When upstream support changes, update install specs and profiles before claiming unsupported. Example: latest LightX2V supports LTX-2/LTX-2.3 even if an older pinned commit did not.
+
+## Framework-Specific Pitfalls
+
+- SGLang-Diffusion should not have failed cells in the final matrix. Treat SGLang import errors, NaNs, wrong scheduler behavior, OOMs, or request failures as bugs or bad profiles to fix before publishing.
+- vLLM-Omni diffusion paths are usually single-GPU. Do not make SGLang multi-GPU only because another framework is slower; compare same-GPU-count data when possible and label intentional differences.
+- LightX2V often needs model-specific attention, parallelism, and offload settings. Check upstream cookbook/configs before marking a case unsupported or before accepting FA2/SDPA when FA3/SageAttention is available and fair.
+- diffusers is useful as a correctness and baseline reference, but it is not always a serving-optimized framework. Label it clearly and still use its fastest fair non-compile path.
+- For Wan, LTX, Flux, Qwen-Image, and Z-Image, verify official model-family semantics first: scheduler, frame count, guidance fields, VAE dtype/offload, and whether the upstream implementation is one-stage or two-stage.
 
 ## Running Benchmarks
 
@@ -47,6 +56,13 @@ Use repo scripts when available instead of ad hoc one-liners:
 - single request: `scripts/run_h200_single_e2e_*.sh`
 - throughput: `scripts/run_h200_throughput_*.sh`
 - targeted reruns: set `CASES` / `FRAMEWORKS` env vars when the script supports them, or add a dedicated script for repeatable reruns
+
+Before running:
+
+- Use isolated pyvenvs for conflicting frameworks, and record the install spec plus observed version/commit.
+- Keep H100 and H200 data separate unless a report explicitly compares hardware.
+- Confirm generated commands before expensive runs, especially `num_frames`, resolution, steps, dtype, attention backend, GPU count, and selected command profile.
+- Warm up long enough to remove first-request artifacts, but do not hide compile, cache, or model-download effects inside reported latency.
 
 For throughput, use enough warmup to avoid first-request artifacts, then record at least:
 
@@ -57,7 +73,9 @@ For throughput, use enough warmup to avoid first-request artifacts, then record 
 - QPS
 - failure count
 
-For fast image models, throughput is often more informative than a single request. For long video models, one single request per model can be enough unless the user asks for concurrency data.
+Also record p95 latency when available. For very fast image cases, run multiple requests at realistic concurrency; for long video cases, one single request per model is acceptable unless throughput behavior is the question.
+
+Use `py-spy` only for diagnosis, not as part of the benchmark timing path.
 
 ## Failure Classification
 
@@ -83,6 +101,7 @@ For comparison images:
 - show ratios relative to SGLang for the same case
 - include source result JSON names and filter rules in the footer
 - regenerate from a fixed script so future reports are reproducible
+- include every framework in scope, even when the cell is `unsupported`, `failed`, `not_configured`, or `supported_not_run`
 
 ## Output Discipline
 
