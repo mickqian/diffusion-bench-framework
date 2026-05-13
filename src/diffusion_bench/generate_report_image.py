@@ -137,6 +137,13 @@ def _throughput_metrics(entry: dict | None) -> tuple[float | None, float | None,
     )
 
 
+def _gpu_label(entry: dict | None) -> str:
+    if not entry:
+        return ""
+    num_gpus = entry.get("num_gpus")
+    return f" | {num_gpus}GPU" if num_gpus else ""
+
+
 def _status_text(entry: dict | None, case_cfg: dict | None, framework: str) -> str:
     if entry and entry.get("error"):
         return "failed"
@@ -209,7 +216,7 @@ def _single_cell(entry: dict | None, sg_latency: float | None) -> tuple[str, flo
         return "", None
     ratio = latency / sg_latency if sg_latency and sg_latency > 0 else None
     ratio_text = f"\n{ratio:.2f}x vs SG" if ratio is not None and entry.get("framework") != "sglang" else "\n1.00x baseline"
-    return f"{latency:.3f}s{ratio_text}", latency
+    return f"{latency:.3f}s{_gpu_label(entry)}{ratio_text}", latency
 
 
 def _throughput_cell(entry: dict | None, sg_qps: float | None) -> tuple[str, float | None]:
@@ -220,7 +227,7 @@ def _throughput_cell(entry: dict | None, sg_qps: float | None) -> tuple[str, flo
     ratio_text = f" ({ratio:.2f}x)" if ratio is not None and entry and entry.get("framework") != "sglang" else ""
     parts = []
     if p50 is not None:
-        parts.append(f"p50 {p50:.3f}s")
+        parts.append(f"p50 {p50:.3f}s{_gpu_label(entry)}")
     if p99 is not None:
         parts.append(f"p99 {p99:.3f}s")
     if qps is not None:
