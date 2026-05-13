@@ -924,6 +924,21 @@
                             "serve_args": "",
                             "notes": "Uses upstream LTX-2.3 audio-video runner. CFG parallel is not enabled because upstream mm_guider and cfg_parallel are not compatible."
                         },
+                        "h200-2gpu-tp": {
+                            "description": "H200 same-GPU LightX2V LTX-2.3 t2av tensor-parallel command/config.",
+                            "hardware": [
+                                "h200"
+                            ],
+                            "framework_ref": "lightx2v-7efd05f8-ltx2.3+t2av+h200+tensor_parallel",
+                            "num_gpus": 2,
+                            "serve_args": "",
+                            "lightx2v_config": {
+                                "parallel": {
+                                    "tensor_p_size": 2
+                                }
+                            },
+                            "notes": "Use tensor parallelism for same-GPU comparison because upstream mm_guider raises when combined with cfg_parallel."
+                        },
                         "h200-1gpu": {
                             "description": "H200 LightX2V LTX-2.3 t2av command/config.",
                             "hardware": [

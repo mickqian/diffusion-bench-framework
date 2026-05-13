@@ -50,11 +50,25 @@
       "role": "LightX2V H200 LTX source for merged report artifacts",
       "local_copy": "tmp/report/h200-ltx-lightx2v-20260513-6ee98c7.json",
       "remote_path": "/root/diffusion-bench-framework/runs/h200-ltx-lightx2v-20260513-6ee98c7.json"
+    },
+    {
+      "run_id": "h200-ltx23-lightx2v-2gpu-tp-20260513-6e6ae7e",
+      "role": "LightX2V H200 same-GPU LTX-2.3 failure override for merged report artifacts",
+      "local_copy": "tmp/report/h200-ltx23-lightx2v-2gpu-tp-20260513-6e6ae7e.json",
+      "remote_path": "/root/diffusion-bench-framework/runs/h200-ltx23-lightx2v-2gpu-tp-20260513-6e6ae7e.json"
     }
   ],
-  "known_failures": [],
+  "known_failures": [
+    {
+      "case_id": "ltx2.3_twostage_t2v_2gpus",
+      "framework": "lightx2v",
+      "profile": "h200-2gpu-tp",
+      "reason": "Upstream LTX2AttentionTP does not expose to_gate_logits for LTX-2.3 gated attention."
+    }
+  ],
   "notes": [
     "LTX-2 uses the H200 cfg_parallel profile with two LightX2V ranks.",
-    "LTX-2.3 uses the current upstream H200 single-GPU profile because mm_guider and cfg_parallel are not compatible."
+    "LTX-2.3 same-GPU comparison uses the H200 tensor-parallel profile because upstream mm_guider and cfg_parallel are not compatible.",
+    "The previous H200 single-GPU LTX-2.3 LightX2V success result is excluded from formal same-GPU comparison."
   ]
 }

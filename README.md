@@ -52,6 +52,7 @@ The LightX2V isolated venv also pins `transformers<5` by default because the tra
 Set `DIFFUSION_BENCH_HF_CACHE_DIR` or `HF_HOME` when the default HuggingFace cache filesystem is small or full. The fixed run scripts default to `/root/diffusion-bench-hf-cache/hub` so model downloads are kept separate from isolated framework venvs.
 The H200 LightX2V profiles use FA3/FlashInfer paths. By default the installer rebuilds flash-attn from source for the isolated torch version, then uses a pinned torch 2.8/cu128 FA3 artifact via `LIGHTX2V_FA3_HF_REPO`, `LIGHTX2V_FA3_HF_REVISION`, and `LIGHTX2V_FA3_HF_SUBDIR`; set `LIGHTX2V_FLASH_ATTN3_INSTALL_SPEC` only when intentionally switching back to a source build. It also installs `sageattention` for upstream LTX configs that select `sage_attn2`, and installs `hf-xet` without upgrading `huggingface_hub` past the Transformers 4.x constraint.
 For single-file LTX checkpoints such as LTX-2.3, the harness projects transformer metadata from the safetensors header into the generated LightX2V config so server runs match upstream inference config semantics.
+H200 LTX-2.3 LightX2V reporting uses the same 2GPU budget as SGLang; the previous single-GPU success result is excluded from formal same-GPU comparisons.
 H100 LTX LightX2V profiles are hardware-specific: LTX-2 uses upstream block offload; LTX-2.3 keeps the best attempted full-offload profile, but currently still fails after warmup on 80GB GPUs and should be reported as no stable H100 server data.
 `scripts/run_h200_throughput_20260511.sh` sets `DIFFUSION_BENCH_SGLANG_EXTRA_SERVE_ARGS="--batching-max-size ${THROUGHPUT_MAX_CONCURRENCY} --batching-delay-ms 0"` by default so SGLang throughput runs use the same request concurrency as the benchmark client.
 Set `THROUGHPUT_FRAMEWORKS="lightx2v"` and `THROUGHPUT_CASES="zimage_turbo_t2i_1024"` to reproduce a targeted throughput rerun without rerunning the whole matrix.
@@ -152,7 +153,7 @@ OUTPUT_JSON=tmp/report/h200-framework-comparison-merged.json \
 scripts/generate_h200_report_artifacts.sh
 ```
 
-This writes a merged JSON, dashboard Markdown, data-only issue Markdown, and PNG/SVG comparison image from the same input JSONs. The default inputs are the local H200 single-request, throughput, and LightX2V LTX rerun artifacts under `tmp/report`.
+This writes a merged JSON, dashboard Markdown, data-only issue Markdown, and PNG/SVG comparison image from the same input JSONs. The default inputs are the local H200 single-request, throughput, LightX2V LTX rerun, and same-GPU LTX-2.3 override artifacts under `tmp/report`.
 
 ## Notes
 
