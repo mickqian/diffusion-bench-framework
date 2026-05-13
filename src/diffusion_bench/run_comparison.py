@@ -165,7 +165,15 @@ def _resolve_hf_model_path(model_id: str) -> str:
         return model_id
 
 
-def _write_lightx2v_config(case: dict, fw_cfg: dict) -> str:
+def _resolve_lightx2v_ckpt_path(value: str, model_path: str, model_id: str) -> str:
+    if not value or os.path.isabs(value) or not os.path.isdir(model_path):
+        return value
+    prefix = model_id.rstrip("/") + "/"
+    relative = value[len(prefix) :] if value.startswith(prefix) else value
+    return str(Path(model_path) / relative)
+
+
+def _write_lightx2v_config(case: dict, fw_cfg: dict, model_path: str) -> str:
     """Write a minimal LightX2V config JSON and return its path."""
     cfg = {
         "infer_steps": case.get("num_inference_steps", 50),
@@ -193,6 +201,12 @@ def _write_lightx2v_config(case: dict, fw_cfg: dict) -> str:
         cfg["width"] = case["width"]
         cfg["target_width"] = case["width"]
     cfg.update(fw_cfg.get("lightx2v_config", {}))
+    if cfg.get("dit_original_ckpt"):
+        cfg["dit_original_ckpt"] = _resolve_lightx2v_ckpt_path(
+            str(cfg["dit_original_ckpt"]),
+            model_path,
+            str(fw_cfg.get("model") or case["model"]),
+        )
     cfg.update(LIGHTX2V_DISABLE_TORCH_COMPILE_CONFIG)
 
     config_path = os.path.join(
@@ -217,7 +231,7 @@ def _build_lightx2v_cmd(case: dict, fw_cfg: dict, port: int) -> list[str]:
     model_path = _server_model_path(case, fw_cfg)
     if not fw_cfg.get("_skip_model_path_resolution"):
         model_path = _resolve_hf_model_path(model_path)
-    config_path = _write_lightx2v_config(case, fw_cfg)
+    config_path = _write_lightx2v_config(case, fw_cfg, model_path)
 
     server_args = [
         "--model_path",
