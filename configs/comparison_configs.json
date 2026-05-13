@@ -945,9 +945,10 @@
                             "lightx2v_config": {
                                 "cpu_offload": true,
                                 "offload_granularity": "block",
-                                "vae_cpu_offload": false
+                                "gemma_cpu_offload": true,
+                                "vae_cpu_offload": true
                             },
-                            "notes": "Matches upstream configs/ltx2/ltx2_3_offload.json because the full 22B checkpoint OOMs on one H100 80GB."
+                            "notes": "Uses full Gemma/VAE offload because upstream ltx2_3_offload is a one-shot H100 path and OOMs after warmup in a reused server."
                         }
                     }
                 }
