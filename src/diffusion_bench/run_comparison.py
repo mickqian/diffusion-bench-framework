@@ -189,7 +189,7 @@ def _merge_ltx2_single_file_metadata(cfg: dict) -> None:
 
     from safetensors import safe_open
 
-    with safe_open(str(ckpt), framework="pt") as f:
+    with safe_open(str(ckpt), framework="numpy") as f:
         raw_config = (f.metadata() or {}).get("config")
     if not raw_config:
         return
