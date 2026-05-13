@@ -22,6 +22,8 @@ dependencies = [
 diffusion-bench-compare = "diffusion_bench.run_comparison:main"
 diffusion-bench-serving = "diffusion_bench.bench_serving:main"
 diffusion-bench-dashboard = "diffusion_bench.generate_dashboard:main"
+diffusion-bench-report-artifacts = "diffusion_bench.build_report_artifacts:main"
+diffusion-bench-report-image = "diffusion_bench.generate_report_image:main"
 
 [tool.setuptools.packages.find]
 where = ["src"]

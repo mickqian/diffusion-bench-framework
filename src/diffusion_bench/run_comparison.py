@@ -1189,7 +1189,7 @@ def _collect_framework_runtime_metadata() -> dict:
             ),
             "lightx2v": os.environ.get(
                 "LIGHTX2V_INSTALL_SPEC",
-                "git+https://github.com/ModelTC/LightX2V.git@573b9613adb0c1d33894b0920b5e12c87e42d280",
+                "git+https://github.com/ModelTC/LightX2V.git@7efd05f8e1425b83321fd4f1cef779ef6504076f",
             ),
             "lightx2v_flash_attn": os.environ.get(
                 "LIGHTX2V_FLASH_ATTN_INSTALL_SPEC", "flash-attn==2.8.3"

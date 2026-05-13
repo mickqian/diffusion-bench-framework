@@ -898,6 +898,24 @@ def _package_version(framework_runtime: dict, framework: str, package: str) -> s
     return None
 
 
+def _package_direct_url_commit(
+    framework_runtime: dict, framework: str, package: str
+) -> str | None:
+    direct_urls = (framework_runtime.get(framework) or {}).get("direct_urls") or {}
+    normalized = package.replace("-", "_")
+    for dist_info, direct_url in direct_urls.items():
+        dist_name = dist_info.rsplit(".dist-info", 1)[0].lower()
+        if not (
+            dist_name.startswith(package.lower())
+            or dist_name.startswith(normalized.lower())
+        ):
+            continue
+        commit = ((direct_url.get("vcs_info") or {}).get("commit_id"))
+        if commit:
+            return str(commit)
+    return None
+
+
 def _manifest_framework_version(manifest: dict, key: str) -> str | None:
     info = (manifest.get("frameworks") or {}).get(key) or {}
     version = info.get("observed_version")
@@ -927,6 +945,9 @@ def _framework_version(results: dict, manifest: dict, framework: str) -> str:
             return f"vllm-omni {manifest_vllm_omni}; vllm {manifest_vllm}"
     elif framework == "lightx2v":
         version = _package_version(framework_runtime, framework, "lightx2v")
+        commit = _package_direct_url_commit(framework_runtime, framework, "lightx2v")
+        if version and commit:
+            return f"{version} ({_short_sha(commit)})"
         if version:
             return version
         manifest_version = _manifest_framework_version(manifest, "lightx2v")
@@ -959,12 +980,23 @@ def build_issue_report_comment(results: dict) -> str:
     manifest_path, manifest = _load_report_manifest(results)
     gpus = (results.get("hardware") or {}).get("gpus") or []
     gpu_model = "; ".join(sorted(set(gpus)))
-    reproduce_script = manifest.get("reproduce_script")
+    reproduce_script = manifest.get("reproduce_script") or results.get(
+        "reproduce_script"
+    )
     reproduce_parts = []
     if reproduce_script:
         reproduce_parts.append(reproduce_script)
     if manifest_path:
         reproduce_parts.append(_report_path(manifest_path))
+    source_results = results.get("source_results") or []
+    if source_results:
+        source_names = [
+            Path(str(source.get("path") or "")).name
+            for source in source_results
+            if source.get("path")
+        ]
+        if source_names:
+            reproduce_parts.append("inputs: " + ", ".join(source_names))
 
     lines = [
         f"## Diffusion Benchmark Data - {_md_cell(results.get('timestamp'))}",

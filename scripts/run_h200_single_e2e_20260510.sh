@@ -16,29 +16,39 @@ export SGLANG_DIFFUSION_SKIP_FRAMEWORK_INSTALL="${SGLANG_DIFFUSION_SKIP_FRAMEWOR
 
 export VLLM_INSTALL_SPEC="${VLLM_INSTALL_SPEC:-vllm==0.18.0}"
 export VLLM_OMNI_INSTALL_SPEC="${VLLM_OMNI_INSTALL_SPEC:-vllm-omni==0.18.0}"
-export LIGHTX2V_INSTALL_SPEC="${LIGHTX2V_INSTALL_SPEC:-git+https://github.com/ModelTC/LightX2V.git@573b9613adb0c1d33894b0920b5e12c87e42d280}"
+export LIGHTX2V_INSTALL_SPEC="${LIGHTX2V_INSTALL_SPEC:-git+https://github.com/ModelTC/LightX2V.git@7efd05f8e1425b83321fd4f1cef779ef6504076f}"
 export LIGHTX2V_FLASH_ATTN_INSTALL_SPEC="${LIGHTX2V_FLASH_ATTN_INSTALL_SPEC:-flash-attn==2.8.3}"
 
-CASES=(
-  flux1_dev_t2i_1024
-  flux2_dev_t2i_1024
-  qwen_image_2512_t2i_1024
-  qwen_image_edit_2511
-  zimage_turbo_t2i_1024
-  wan21_t2v_1_3b_480p
-  wan21_i2v_14b_480p
-  wan22_t2v_a14b_720p
-  wan22_ti2v_5b_704p
-  wan21_i2v_14b_720p
-  wan22_i2v_a14b_720p
-  ltx2_twostage_t2v
-  ltx2.3_twostage_t2v_2gpus
-)
+if [[ -n "${SINGLE_E2E_CASES:-}" ]]; then
+  read -r -a CASES <<< "${SINGLE_E2E_CASES}"
+else
+  CASES=(
+    flux1_dev_t2i_1024
+    flux2_dev_t2i_1024
+    qwen_image_2512_t2i_1024
+    qwen_image_edit_2511
+    zimage_turbo_t2i_1024
+    wan21_t2v_1_3b_480p
+    wan21_i2v_14b_480p
+    wan22_t2v_a14b_720p
+    wan22_ti2v_5b_704p
+    wan21_i2v_14b_720p
+    wan22_i2v_a14b_720p
+    ltx2_twostage_t2v
+    ltx2.3_twostage_t2v_2gpus
+  )
+fi
+
+if [[ -n "${SINGLE_E2E_FRAMEWORKS:-}" ]]; then
+  read -r -a FRAMEWORKS <<< "${SINGLE_E2E_FRAMEWORKS}"
+else
+  FRAMEWORKS=(sglang vllm-omni lightx2v)
+fi
 
 diffusion-bench-compare \
   --config "${CONFIG}" \
   --modes single_e2e \
-  --frameworks sglang vllm-omni lightx2v \
+  --frameworks "${FRAMEWORKS[@]}" \
   --case-ids "${CASES[@]}" \
   --hardware-profile h200 \
   --run-id "${RUN_ID}" \

@@ -686,8 +686,7 @@
             "num_inference_steps": 40,
             "guidance_scale": 4.0,
             "report_framework_reasons": {
-                "vllm-omni": "Server log shows TypeError: LTX2TextConnectors.forward() got an unexpected keyword argument 'additive_mask'.",
-                "lightx2v": "LightX2V 0.1.0 has LTX2 audio/video runner tasks (t2av/i2av/ltx2_s2v), but no aligned two-stage text-to-video serving profile is configured."
+                "vllm-omni": "Server log shows TypeError: LTX2TextConnectors.forward() got an unexpected keyword argument 'additive_mask'."
             },
             "frameworks": {
                 "sglang": {
@@ -731,6 +730,55 @@
                             }
                         }
                     }
+                },
+                "lightx2v": {
+                    "model": "Lightricks/LTX-2",
+                    "model_cls": "ltx2",
+                    "lightx2v_task": "t2av",
+                    "num_gpus": 2,
+                    "serve_args": "",
+                    "extra_env": {
+                        "DTYPE": "BF16",
+                        "SENSITIVE_LAYER_DTYPE": "None",
+                        "PROFILING_DEBUG_LEVEL": "0"
+                    },
+                    "lightx2v_config": {
+                        "sample_guide_scale": 4.0,
+                        "sample_shift": [
+                            2.05,
+                            0.95
+                        ],
+                        "enable_cfg": true,
+                        "cpu_offload": false,
+                        "num_channels_latents": 128,
+                        "audio_fps": 24000,
+                        "audio_mel_bins": 16,
+                        "double_precision_rope": true,
+                        "use_tiling_vae": false,
+                        "dit_original_ckpt": "Lightricks/LTX-2/ltx-2-19b-dev.safetensors",
+                        "parallel": {
+                            "cfg_p_size": 2
+                        }
+                    },
+                    "command_profiles": {
+                        "default": {
+                            "description": "LightX2V upstream LTX-2 t2av path for the LTX-2 121-frame case.",
+                            "framework_ref": "lightx2v-7efd05f8-ltx2+t2av+cfg_parallel",
+                            "num_gpus": 2,
+                            "serve_args": "",
+                            "notes": "Uses upstream LTX-2 audio-video t2av runner with CFG parallelism; no cache, torch compile, or quantized model path."
+                        },
+                        "h200-2gpu": {
+                            "description": "H200 LightX2V LTX-2 t2av command/config.",
+                            "hardware": [
+                                "h200"
+                            ],
+                            "framework_ref": "lightx2v-7efd05f8-ltx2+t2av+cfg_parallel+h200",
+                            "num_gpus": 2,
+                            "serve_args": "",
+                            "notes": "Matches upstream scripts/ltx2/run_ltx2_t2av_cfg_parallel.sh semantics with compile disabled by the benchmark harness."
+                        }
+                    }
                 }
             }
         },
@@ -748,8 +796,7 @@
             "num_inference_steps": 30,
             "guidance_scale": 3.0,
             "report_framework_reasons": {
-                "vllm-omni": "No compatible vLLM-Omni LTX2.3 serving profile is configured.",
-                "lightx2v": "LightX2V 0.1.0 exposes LTX2 runner code, but no validated LTX2.3 two-stage text-to-video serving profile is configured."
+                "vllm-omni": "No compatible vLLM-Omni LTX2.3 serving profile is configured."
             },
             "frameworks": {
                 "sglang": {
@@ -788,6 +835,78 @@
                             "num_gpus": 2,
                             "serve_args": "--model-type diffusion --warmup --enable-cfg-parallel --pipeline-class-name LTX2TwoStagePipeline --ltx2-two-stage-device-mode original",
                             "notes": "Use this only when official switching semantics are more important than latency."
+                        }
+                    }
+                },
+                "lightx2v": {
+                    "model": "Lightricks/LTX-2.3",
+                    "model_cls": "ltx2",
+                    "lightx2v_task": "t2av",
+                    "num_gpus": 1,
+                    "serve_args": "",
+                    "extra_env": {
+                        "DTYPE": "BF16",
+                        "SENSITIVE_LAYER_DTYPE": "None",
+                        "PROFILING_DEBUG_LEVEL": "0"
+                    },
+                    "lightx2v_config": {
+                        "sample_guide_scale": 3.0,
+                        "sample_shift": [
+                            2.05,
+                            0.95
+                        ],
+                        "enable_cfg": true,
+                        "cpu_offload": false,
+                        "num_channels_latents": 128,
+                        "audio_fps": 24000,
+                        "audio_mel_bins": 16,
+                        "double_precision_rope": true,
+                        "use_tiling_vae": false,
+                        "dit_original_ckpt": "Lightricks/LTX-2.3/ltx-2.3-22b-dev.safetensors",
+                        "caption_proj_before_connector": true,
+                        "cross_attention_adaln": true,
+                        "apply_gated_attention": true,
+                        "mm_guider": {
+                            "enabled": true,
+                            "video": {
+                                "cfg_scale": 3.0,
+                                "stg_scale": 1.0,
+                                "stg_blocks": [
+                                    28
+                                ],
+                                "modality_scale": 3.0,
+                                "rescale_scale": 0.7,
+                                "skip_step": 0
+                            },
+                            "audio": {
+                                "cfg_scale": 7.0,
+                                "stg_scale": 1.0,
+                                "stg_blocks": [
+                                    28
+                                ],
+                                "modality_scale": 3.0,
+                                "rescale_scale": 0.7,
+                                "skip_step": 0
+                            }
+                        }
+                    },
+                    "command_profiles": {
+                        "default": {
+                            "description": "LightX2V upstream LTX-2.3 t2av path for the LTX-2.3 121-frame case.",
+                            "framework_ref": "lightx2v-7efd05f8-ltx2.3+t2av",
+                            "num_gpus": 1,
+                            "serve_args": "",
+                            "notes": "Uses upstream LTX-2.3 audio-video runner. CFG parallel is not enabled because upstream mm_guider and cfg_parallel are not compatible."
+                        },
+                        "h200-1gpu": {
+                            "description": "H200 LightX2V LTX-2.3 t2av command/config.",
+                            "hardware": [
+                                "h200"
+                            ],
+                            "framework_ref": "lightx2v-7efd05f8-ltx2.3+t2av+h200",
+                            "num_gpus": 1,
+                            "serve_args": "",
+                            "notes": "Single-GPU profile follows current upstream LTX-2.3 scripts; no cache, torch compile, or quantized model path."
                         }
                     }
                 }
