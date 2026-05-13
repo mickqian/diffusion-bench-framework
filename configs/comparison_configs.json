@@ -795,11 +795,13 @@
                             "num_gpus": 2,
                             "serve_args": "",
                             "lightx2v_config": {
+                                "gemma_cpu_offload": true,
+                                "vae_cpu_offload": false,
                                 "parallel": {
                                     "tensor_p_size": 2
                                 }
                             },
-                            "notes": "Matches upstream scripts/ltx2/run_ltx2_t2av_tp.sh because cfg-parallel duplicates the 19B model on each H100 and OOMs."
+                            "notes": "Uses upstream tensor-parallel DiT plus Gemma offload; TP-only keeps Gemma resident on rank0 and OOMs on H100 80GB."
                         }
                     }
                 }
