@@ -1,4 +1,4 @@
-"""Render a compact PNG/SVG comparison image from merged benchmark results."""
+"""Render a compact PNG/SVG comparison poster from merged benchmark results."""
 
 from __future__ import annotations
 
@@ -6,7 +6,6 @@ import argparse
 import base64
 import html
 import json
-import textwrap
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Iterable
@@ -17,25 +16,85 @@ except ImportError as exc:  # pragma: no cover - exercised by CLI environment
     raise SystemExit("Pillow is required to generate report images") from exc
 
 
-FRAMEWORK_ORDER = ("sglang", "vllm-omni", "lightx2v", "diffusers")
+FRAMEWORK_ORDER = ("sglang", "vllm-omni", "lightx2v")
 FRAMEWORK_LABELS = {
     "sglang": "SGLang",
     "vllm-omni": "vLLM-Omni",
     "lightx2v": "LightX2V",
-    "diffusers": "diffusers",
+}
+FRAMEWORK_COLORS = {
+    "sglang": "#e8524d",
+    "vllm-omni": "#4f7fad",
+    "lightx2v": "#59a14f",
+}
+FRAMEWORK_TINTS = {
+    "sglang": "#fde5e3",
+    "vllm-omni": "#e6eef7",
+    "lightx2v": "#eaf7ed",
 }
 
-BG = "#f7f8fb"
-TEXT = "#172033"
-MUTED = "#667085"
-BORDER = "#d8dee9"
-HEADER = "#e7edf7"
-ROW_ALT = "#ffffff"
-ROW = "#fdfefe"
-OK = "#d9f2e6"
-WARN = "#fff4ce"
-BAD = "#ffe1df"
-BEST = "#bce8d1"
+PREFERRED_CASE_ORDER = (
+    "flux1_dev_t2i_1024",
+    "flux2_dev_t2i_1024",
+    "qwen_image_2512_t2i_1024",
+    "qwen_image_edit_2511",
+    "zimage_turbo_t2i_1024",
+    "ltx2_twostage_t2v",
+    "ltx2.3_twostage_t2v_2gpus",
+    "wan21_t2v_1_3b_480p",
+    "wan21_i2v_14b_480p",
+    "wan22_ti2v_5b_704p",
+    "wan21_i2v_14b_720p",
+    "wan22_t2v_a14b_720p",
+    "wan22_i2v_a14b_720p",
+)
+CASE_LABELS = {
+    "flux1_dev_t2i_1024": "FLUX.1-dev T2I",
+    "flux2_dev_t2i_1024": "FLUX.2-dev T2I",
+    "qwen_image_2512_t2i_1024": "Qwen-Image-2512 T2I",
+    "qwen_image_edit_2511": "Qwen-Image-Edit-2511",
+    "zimage_turbo_t2i_1024": "Z-Image-Turbo T2I",
+    "ltx2_twostage_t2v": "LTX-2 two-stage T2V",
+    "ltx2.3_twostage_t2v_2gpus": "LTX-2.3 two-stage T2V",
+    "wan21_t2v_1_3b_480p": "Wan2.1 T2V 1.3B 480p",
+    "wan21_i2v_14b_480p": "Wan2.1 I2V 14B 480p",
+    "wan22_ti2v_5b_704p": "Wan2.2 TI2V 5B 704p",
+    "wan21_i2v_14b_720p": "Wan2.1 I2V 14B 720p",
+    "wan22_t2v_a14b_720p": "Wan2.2 T2V A14B 720p",
+    "wan22_i2v_a14b_720p": "Wan2.2 I2V A14B 720p",
+}
+
+BG = "#f6f8fb"
+PANEL = "#ffffff"
+TEXT = "#111827"
+MUTED = "#6b7280"
+BORDER = "#dfe4ea"
+GRID = "#eef1f5"
+DANGER = "#b91c1c"
+GOOD = "#166534"
+PENDING = "#f3f4f6"
+FAIL_BG = "#fff1f2"
+SUPPORTED_BG = "#f0fdf4"
+CARD_DARK = "#111827"
+
+WIDTH = 2000
+MARGIN = 72
+PANEL_X = 72
+PANEL_W = 1856
+PAD = 32
+CASE_X = PANEL_X + PAD
+METRIC_XS = {
+    "sglang": 780,
+    "vllm-omni": 1078,
+    "lightx2v": 1376,
+}
+METRIC_W = 258
+WINNER_X = 1694
+WINNER_W = 172
+ROW_SINGLE_H = 90
+ROW_THROUGHPUT_H = 118
+PANEL_HEADER_H = 102
+HEADER_H = 190
 
 
 def _load_json(path: Path) -> dict:
@@ -58,21 +117,21 @@ def _font(size: int, bold: bool = False) -> ImageFont.ImageFont:
     return ImageFont.load_default()
 
 
-FONT_TITLE = _font(34, bold=True)
-FONT_SUBTITLE = _font(18)
-FONT_SECTION = _font(23, bold=True)
+FONT_TITLE = _font(48, bold=True)
+FONT_SUBTITLE = _font(27)
+FONT_LEGEND = _font(23, bold=True)
+FONT_STAT_NUM = _font(34, bold=True)
+FONT_STAT_LABEL = _font(22, bold=True)
+FONT_STAT_META = _font(17)
+FONT_SECTION = _font(31, bold=True)
 FONT_HEADER = _font(18, bold=True)
-FONT_CELL = _font(17)
-FONT_CELL_BOLD = _font(17, bold=True)
-FONT_SMALL = _font(14)
-FONT_SMALL_BOLD = _font(14, bold=True)
-
-
-def _framework_sort(framework: str) -> tuple[int, str]:
-    try:
-        return FRAMEWORK_ORDER.index(framework), framework
-    except ValueError:
-        return len(FRAMEWORK_ORDER), framework
+FONT_CASE = _font(22, bold=True)
+FONT_META = _font(16, bold=True)
+FONT_VALUE = _font(22, bold=True)
+FONT_RATIO = _font(17, bold=True)
+FONT_STATUS = _font(18, bold=True)
+FONT_STATUS_SMALL = _font(15, bold=True)
+FONT_FOOTER = _font(18, bold=True)
 
 
 def _case_configs(config: dict) -> dict[str, dict]:
@@ -80,35 +139,33 @@ def _case_configs(config: dict) -> dict[str, dict]:
 
 
 def _ordered_cases(config: dict, results: dict) -> list[str]:
-    configured = []
-    for case in config.get("cases", []):
-        frameworks = case.get("frameworks") or {}
-        if "sglang" in frameworks and len(frameworks) >= 2:
-            configured.append(case["id"])
-
-    seen = set(configured)
+    available = set()
     for entry in results.get("results", []) + results.get("throughput_results", []):
         case_id = entry.get("case_id")
-        if case_id and case_id not in seen:
-            configured.append(case_id)
-            seen.add(case_id)
-    return configured
-
-
-def _frameworks_for_report(config: dict, results: dict) -> list[str]:
-    frameworks = set(FRAMEWORK_ORDER[:3])
+        if case_id:
+            available.add(case_id)
     for case in config.get("cases", []):
-        frameworks.update((case.get("frameworks") or {}).keys())
-    for entry in results.get("results", []) + results.get("throughput_results", []):
-        if entry.get("framework"):
-            frameworks.add(entry["framework"])
-    return sorted(frameworks, key=_framework_sort)
+        case_id = case.get("id")
+        frameworks = case.get("frameworks") or {}
+        if case_id and "sglang" in frameworks and len(frameworks) >= 2:
+            available.add(case_id)
+
+    ordered = [case_id for case_id in PREFERRED_CASE_ORDER if case_id in available]
+    seen = set(ordered)
+    for case in config.get("cases", []):
+        case_id = case.get("id")
+        if case_id in available and case_id not in seen:
+            ordered.append(case_id)
+            seen.add(case_id)
+    return ordered
 
 
 def _by_case(entries: Iterable[dict]) -> dict[str, dict[str, dict]]:
     grouped: dict[str, dict[str, dict]] = {}
     for entry in entries:
-        grouped.setdefault(entry.get("case_id", ""), {})[entry.get("framework", "")] = entry
+        framework = entry.get("framework")
+        if framework in FRAMEWORK_ORDER:
+            grouped.setdefault(entry.get("case_id", ""), {})[framework] = entry
     return grouped
 
 
@@ -116,14 +173,16 @@ def _ok(entry: dict | None) -> bool:
     return bool(entry) and not entry.get("error")
 
 
-def _single_latency(entry: dict | None) -> float | None:
+def _successful_latency(entry: dict | None) -> float | None:
     if not _ok(entry):
         return None
     value = entry.get("latency_s")
     return float(value) if value is not None else None
 
 
-def _throughput_metrics(entry: dict | None) -> tuple[float | None, float | None, float | None]:
+def _throughput_metrics(
+    entry: dict | None,
+) -> tuple[float | None, float | None, float | None]:
     if not _ok(entry):
         return None, None, None
     metrics = entry.get("metrics") or {}
@@ -137,260 +196,481 @@ def _throughput_metrics(entry: dict | None) -> tuple[float | None, float | None,
     )
 
 
-def _gpu_label(entry: dict | None) -> str:
-    if not entry:
+def _case_entry(case_id: str, entries: dict[str, dict], case_cfg: dict | None) -> dict:
+    if entries.get("sglang"):
+        return entries["sglang"]
+    if entries:
+        return next(iter(entries.values()))
+    return case_cfg or {}
+
+
+def _clean_number(value: object) -> str:
+    if value is None:
         return ""
-    num_gpus = entry.get("num_gpus")
-    return f" | {num_gpus}GPU" if num_gpus else ""
+    try:
+        number = float(value)
+    except (TypeError, ValueError):
+        return str(value)
+    return str(int(number)) if number.is_integer() else f"{number:g}"
 
 
-def _status_text(entry: dict | None, case_cfg: dict | None, framework: str) -> str:
-    if entry and entry.get("error"):
-        return "failed"
-    if entry:
-        return "ok"
-    if case_cfg and framework in (case_cfg.get("frameworks") or {}):
-        return "not run"
-    return "not configured"
+def _case_title(case_id: str) -> str:
+    if case_id in CASE_LABELS:
+        return CASE_LABELS[case_id]
+    return case_id.replace("_", " ")
 
 
-def _cell_fill(status: str, is_best: bool = False) -> str:
-    if is_best:
-        return BEST
-    if status == "ok":
-        return OK
-    if status == "not run":
-        return WARN
-    if status == "failed":
-        return BAD
-    return ROW_ALT
-
-
-def _draw_rect(draw: ImageDraw.ImageDraw, xy: tuple[int, int, int, int], fill: str, outline: str = BORDER) -> None:
-    draw.rounded_rectangle(xy, radius=8, fill=fill, outline=outline, width=1)
-
-
-def _draw_wrapped(
-    draw: ImageDraw.ImageDraw,
-    text: str,
-    x: int,
-    y: int,
-    width: int,
-    font: ImageFont.ImageFont,
-    fill: str = TEXT,
-    max_lines: int = 2,
-    line_gap: int = 4,
-) -> int:
-    if not text:
-        return y
-    avg_chars = max(8, int(width / max(8, font.size * 0.55)))
-    wrapped: list[str] = []
-    for raw_line in text.splitlines():
-        wrapped.extend(textwrap.wrap(raw_line, width=avg_chars) or [""])
-    if len(wrapped) > max_lines:
-        wrapped = wrapped[: max_lines - 1] + [wrapped[max_lines - 1].rstrip(".") + "..."]
-    line_height = int(font.size * 1.25)
-    for line in wrapped:
-        draw.text((x, y), line, font=font, fill=fill)
-        y += line_height + line_gap
-    return y
-
-
-def _draw_centered(
-    draw: ImageDraw.ImageDraw,
-    text: str,
-    box: tuple[int, int, int, int],
-    font: ImageFont.ImageFont,
-    fill: str = TEXT,
-) -> None:
-    bbox = draw.textbbox((0, 0), text, font=font)
-    tw = bbox[2] - bbox[0]
-    th = bbox[3] - bbox[1]
-    x1, y1, x2, y2 = box
-    draw.text((x1 + (x2 - x1 - tw) / 2, y1 + (y2 - y1 - th) / 2), text, font=font, fill=fill)
-
-
-def _single_cell(entry: dict | None, sg_latency: float | None) -> tuple[str, float | None]:
-    latency = _single_latency(entry)
-    if latency is None:
-        return "", None
-    ratio = latency / sg_latency if sg_latency and sg_latency > 0 else None
-    ratio_text = f"\n{ratio:.2f}x vs SG" if ratio is not None and entry.get("framework") != "sglang" else "\n1.00x baseline"
-    return f"{latency:.3f}s{_gpu_label(entry)}{ratio_text}", latency
-
-
-def _throughput_cell(entry: dict | None, sg_qps: float | None) -> tuple[str, float | None]:
-    p50, p99, qps = _throughput_metrics(entry)
-    if p50 is None and qps is None:
-        return "", None
-    ratio = qps / sg_qps if qps is not None and sg_qps and sg_qps > 0 else None
-    ratio_text = f" ({ratio:.2f}x)" if ratio is not None and entry and entry.get("framework") != "sglang" else ""
+def _case_meta(entry: dict, case_cfg: dict | None) -> str:
     parts = []
-    if p50 is not None:
-        parts.append(f"p50 {p50:.3f}s{_gpu_label(entry)}")
-    if p99 is not None:
-        parts.append(f"p99 {p99:.3f}s")
-    if qps is not None:
-        parts.append(f"{qps:.4f} qps{ratio_text}")
-    return "\n".join(parts), qps
+    width = entry.get("width") or (case_cfg or {}).get("width")
+    height = entry.get("height") or (case_cfg or {}).get("height")
+    frames = entry.get("num_frames") or (case_cfg or {}).get("num_frames")
+    if width and height and frames:
+        parts.append(f"{width}x{height}x{frames}f")
+    elif width and height:
+        parts.append(f"{width}x{height}")
+
+    steps = entry.get("num_inference_steps") or (case_cfg or {}).get("num_inference_steps")
+    if steps is not None:
+        parts.append(f"{_clean_number(steps)} steps")
+
+    guidance = entry.get("guidance_scale")
+    if guidance is None:
+        guidance = (case_cfg or {}).get("guidance_scale")
+    guidance2 = entry.get("guidance_scale_2")
+    if guidance2 is None:
+        guidance2 = (case_cfg or {}).get("guidance_scale_2")
+    true_cfg = entry.get("true_cfg_scale")
+    if true_cfg is None:
+        true_cfg = (case_cfg or {}).get("true_cfg_scale")
+    if guidance is not None and guidance2 is not None:
+        parts.append(f"cfg {_clean_number(guidance)}/cfg2 {_clean_number(guidance2)}")
+    elif guidance is not None:
+        parts.append(f"cfg {_clean_number(guidance)}")
+    elif true_cfg is not None:
+        parts.append(f"true cfg {_clean_number(true_cfg)}")
+
+    num_gpus = entry.get("num_gpus") or (case_cfg or {}).get("num_gpus")
+    if num_gpus:
+        parts.append(f"{num_gpus} GPU")
+    return " - ".join(parts) if parts else "-"
 
 
-def _source_footer(results: dict, results_path: Path) -> str:
-    sources = results.get("source_results") or []
-    if sources:
-        names = [Path(str(item.get("path") or "")).name for item in sources if item.get("path")]
+def _hardware_label(results: dict) -> str:
+    override = (results.get("hardware") or {}).get("hardware_profile_override")
+    if override:
+        return str(override).upper()
+    gpus = (results.get("hardware") or {}).get("gpus") or []
+    if gpus and "H200" in str(gpus[0]):
+        return "H200"
+    if gpus and "H100" in str(gpus[0]):
+        return "H100"
+    return "GPU"
+
+
+def _single_winner(case_entries: dict[str, dict]) -> str | None:
+    values = {
+        framework: _successful_latency(case_entries.get(framework))
+        for framework in FRAMEWORK_ORDER
+    }
+    values = {key: value for key, value in values.items() if value is not None}
+    if len(values) < 2:
+        return None
+    return min(values, key=lambda key: values[key])
+
+
+def _throughput_winner(case_entries: dict[str, dict]) -> str | None:
+    values = {
+        framework: _throughput_metrics(case_entries.get(framework))[2]
+        for framework in FRAMEWORK_ORDER
+    }
+    values = {key: value for key, value in values.items() if value is not None}
+    if len(values) < 2:
+        return None
+    return max(values, key=lambda key: values[key])
+
+
+def _draw_text(
+    draw: ImageDraw.ImageDraw,
+    xy: tuple[float, float],
+    text: str,
+    font: ImageFont.ImageFont,
+    fill: str = TEXT,
+    anchor: str | None = None,
+) -> None:
+    draw.text(xy, text, font=font, fill=fill, anchor=anchor)
+
+
+def _rounded(
+    draw: ImageDraw.ImageDraw,
+    xy: tuple[float, float, float, float],
+    radius: int,
+    fill: str,
+    outline: str | None = None,
+    width: int = 1,
+) -> None:
+    draw.rounded_rectangle(xy, radius=radius, fill=fill, outline=outline, width=width)
+
+
+def _draw_header(
+    draw: ImageDraw.ImageDraw,
+    results: dict,
+    single_summary: tuple[int, int, int],
+    throughput_summary: tuple[int, int],
+) -> None:
+    _rounded(draw, (0, 0, WIDTH, HEADER_H), 0, PANEL)
+    draw.line((0, HEADER_H, WIDTH, HEADER_H), fill="#e5e7eb", width=1)
+
+    _draw_text(draw, (MARGIN, 32), "SGLang vs Other Frameworks", FONT_TITLE)
+    subtitle = (
+        f"{_hardware_label(results)} - single request latency + high-pressure "
+        "throughput - no cache - torch compile disabled"
+    )
+    _draw_text(draw, (MARGIN, 95), subtitle, FONT_SUBTITLE, "#4b5563")
+
+    x = MARGIN
+    for framework in FRAMEWORK_ORDER:
+        _rounded(draw, (x, 154, x + 24, 178), 6, FRAMEWORK_COLORS[framework])
+        _draw_text(draw, (x + 36, 151), FRAMEWORK_LABELS[framework], FONT_LEGEND, "#374151")
+        x += 190
+
+    wins, comparable, pending = single_summary
+    qps_wins, qps_comparable = throughput_summary
+    _draw_stat_card(
+        draw,
+        1308,
+        f"{wins}/{comparable}" if comparable else "0/0",
+        "single req wins",
+        f"{comparable + pending} rows - {pending} pending",
+    )
+    _draw_stat_card(
+        draw,
+        1626,
+        f"{qps_wins}/{qps_comparable}" if qps_comparable else "0/0",
+        "QPS wins",
+        "32 requests - max concurrency 4",
+    )
+
+
+def _draw_stat_card(
+    draw: ImageDraw.ImageDraw,
+    x: int,
+    value: str,
+    label: str,
+    meta: str,
+) -> None:
+    _rounded(draw, (x, 46, x + 288, 150), 18, CARD_DARK)
+    _draw_text(draw, (x + 30, 58), value, FONT_STAT_NUM, "#ffffff")
+    _draw_text(draw, (x + 30, 96), label, FONT_STAT_LABEL, "#ffffff")
+    _draw_text(draw, (x + 30, 125), meta, FONT_STAT_META, "#d1d5db")
+
+
+def _draw_panel_header(
+    draw: ImageDraw.ImageDraw,
+    y: int,
+    title: str,
+    hint: str,
+    winner_header: str,
+) -> None:
+    _draw_text(draw, (PANEL_X + PAD, y + 26), title, FONT_SECTION)
+    _draw_text(draw, (PANEL_X + PANEL_W - PAD, y + 33), hint, FONT_HEADER, MUTED, anchor="ra")
+    header_y = y + 74
+    _draw_text(draw, (CASE_X, header_y), "Case", FONT_HEADER, MUTED)
+    for framework, x in METRIC_XS.items():
+        _draw_text(draw, (x + 12, header_y), FRAMEWORK_LABELS[framework], FONT_HEADER, MUTED)
+    _draw_text(draw, (WINNER_X + 8, header_y), winner_header, FONT_HEADER, MUTED)
+    draw.line((CASE_X, y + PANEL_HEADER_H, PANEL_X + PANEL_W - PAD, y + PANEL_HEADER_H), fill="#e5e7eb", width=1)
+
+
+def _draw_case_cell(
+    draw: ImageDraw.ImageDraw,
+    case_id: str,
+    entry: dict,
+    case_cfg: dict | None,
+    y: int,
+) -> None:
+    _draw_text(draw, (CASE_X, y + 18), _case_title(case_id), FONT_CASE)
+    _draw_text(draw, (CASE_X, y + 49), _case_meta(entry, case_cfg), FONT_META, MUTED)
+
+
+def _format_seconds(value: float) -> str:
+    return f"{value:.3f}s" if value < 10 else f"{value:.2f}s"
+
+
+def _draw_missing(draw: ImageDraw.ImageDraw, framework: str, y: int, row_h: int) -> None:
+    x = METRIC_XS[framework]
+    _draw_text(draw, (x + METRIC_W / 2, y + row_h / 2 - 2), "-", FONT_VALUE, "#9ca3af", anchor="mm")
+
+
+def _short_error_label(entry: dict) -> str:
+    error = str(entry.get("error") or "")
+    if "server exited" in error or "health check" in error:
+        return "server failed"
+    if "task FAILED" in error or "task failed" in error:
+        return "task failed"
+    return "failed"
+
+
+def _draw_status_cell(
+    draw: ImageDraw.ImageDraw,
+    framework: str,
+    y: int,
+    row_h: int,
+    title: str,
+    detail: str | None,
+    kind: str,
+) -> None:
+    x = METRIC_XS[framework]
+    fill = FAIL_BG if kind == "fail" else SUPPORTED_BG
+    color = DANGER if kind == "fail" else GOOD
+    box_h = 48
+    _rounded(draw, (x, y + (row_h - box_h) / 2, x + METRIC_W, y + (row_h + box_h) / 2), 10, fill)
+    if detail:
+        _draw_text(draw, (x + 12, y + row_h / 2 - 2), title, FONT_STATUS_SMALL, color, anchor="lm")
+        _draw_text(draw, (x + 12, y + row_h / 2 + 20), detail, FONT_STATUS_SMALL, "#4b5563", anchor="lm")
     else:
-        names = [results_path.name]
-    return "Sources: " + ", ".join(names[:4]) + (" ..." if len(names) > 4 else "")
+        _draw_text(draw, (x + 12, y + row_h / 2 + 1), title, FONT_STATUS, color, anchor="lm")
 
 
-def render_report_image(results_path: Path, config_path: Path, output_png: Path, output_svg: Path | None = None) -> None:
+def _draw_single_metric(
+    draw: ImageDraw.ImageDraw,
+    framework: str,
+    entry: dict | None,
+    case_cfg: dict | None,
+    y: int,
+    sglang_latency: float | None,
+    winner: str | None,
+) -> None:
+    x = METRIC_XS[framework]
+    value = _successful_latency(entry)
+    if value is None:
+        if entry and entry.get("error"):
+            _draw_status_cell(draw, framework, y, ROW_SINGLE_H, _short_error_label(entry), None, "fail")
+        elif case_cfg and framework in (case_cfg.get("frameworks") or {}):
+            _draw_status_cell(draw, framework, y, ROW_SINGLE_H, "supported", "not run", "supported")
+        else:
+            _draw_missing(draw, framework, y, ROW_SINGLE_H)
+        return
+
+    if framework == "sglang" or framework == winner:
+        _rounded(draw, (x, y + 5, x + METRIC_W, y + 63), 10, FRAMEWORK_TINTS[framework])
+    ratio = value / sglang_latency if sglang_latency else None
+    ratio_text = f"{ratio:.3f}x" if ratio is not None else "-"
+    ratio_color = TEXT if framework == "sglang" else DANGER if ratio and ratio >= 1 else GOOD
+    _draw_text(draw, (x + 12, y + 18), _format_seconds(value), FONT_VALUE)
+    _draw_text(draw, (x + 12, y + 45), ratio_text, FONT_RATIO, ratio_color)
+
+
+def _draw_throughput_metric(
+    draw: ImageDraw.ImageDraw,
+    framework: str,
+    entry: dict | None,
+    case_cfg: dict | None,
+    y: int,
+    sglang_qps: float | None,
+    winner: str | None,
+) -> None:
+    x = METRIC_XS[framework]
+    p50, p99, qps = _throughput_metrics(entry)
+    if qps is None:
+        if entry and entry.get("error"):
+            _draw_status_cell(draw, framework, y, ROW_THROUGHPUT_H, _short_error_label(entry), None, "fail")
+        elif case_cfg and framework in (case_cfg.get("frameworks") or {}):
+            _draw_status_cell(draw, framework, y, ROW_THROUGHPUT_H, "supported", "not run", "supported")
+        else:
+            _draw_missing(draw, framework, y, ROW_THROUGHPUT_H)
+        return
+
+    if framework == "sglang" or framework == winner:
+        _rounded(draw, (x, y + 11, x + METRIC_W, y + 89), 10, FRAMEWORK_TINTS[framework])
+    ratio = qps / sglang_qps if sglang_qps else None
+    ratio_text = f"{ratio:.3f}x qps" if ratio is not None else "-"
+    ratio_color = TEXT if framework == "sglang" else GOOD if ratio and ratio >= 1 else DANGER
+    _draw_text(draw, (x + 12, y + 27), f"{qps:.4f} qps", FONT_VALUE)
+    _draw_text(draw, (x + 12, y + 54), ratio_text, FONT_RATIO, ratio_color)
+    if p50 is not None and p99 is not None:
+        _draw_text(draw, (x + 12, y + 80), f"p50/p99 {p50:.2f}s/{p99:.2f}s", FONT_META, MUTED)
+
+
+def _draw_winner_pill(
+    draw: ImageDraw.ImageDraw,
+    winner: str | None,
+    y: int,
+    row_h: int,
+) -> None:
+    pill_y = y + 18 if row_h == ROW_SINGLE_H else y + 28
+    if not winner:
+        _rounded(draw, (WINNER_X, pill_y, WINNER_X + WINNER_W, pill_y + 42), 21, PENDING)
+        _draw_text(draw, (WINNER_X + WINNER_W / 2, pill_y + 27), "pending", FONT_STATUS_SMALL, MUTED, anchor="mm")
+        return
+    _rounded(draw, (WINNER_X, pill_y, WINNER_X + WINNER_W, pill_y + 42), 21, FRAMEWORK_TINTS[winner])
+    _rounded(draw, (WINNER_X + 16, pill_y + 14, WINNER_X + 30, pill_y + 28), 4, FRAMEWORK_COLORS[winner])
+    _draw_text(draw, (WINNER_X + 46, pill_y + 27), FRAMEWORK_LABELS[winner], FONT_STATUS, TEXT, anchor="lm")
+
+
+def _single_summary(cases: list[str], single: dict[str, dict[str, dict]]) -> tuple[int, int, int]:
+    comparable = 0
+    wins = 0
+    for case_id in cases:
+        winner = _single_winner(single.get(case_id, {}))
+        if not winner:
+            continue
+        comparable += 1
+        if winner == "sglang":
+            wins += 1
+    return wins, comparable, len(cases) - comparable
+
+
+def _throughput_summary(
+    throughput_cases: list[str], throughput: dict[str, dict[str, dict]]
+) -> tuple[int, int]:
+    comparable = 0
+    wins = 0
+    for case_id in throughput_cases:
+        winner = _throughput_winner(throughput.get(case_id, {}))
+        if not winner:
+            continue
+        comparable += 1
+        if winner == "sglang":
+            wins += 1
+    return wins, comparable
+
+
+def _source_footer(results: dict) -> list[str]:
+    sources = results.get("source_results") or []
+    names = [Path(str(item.get("path") or "")).name for item in sources if item.get("path")]
+    if not names:
+        return [f"Data: {results.get('run_id', '-')}."]
+    single = names[0] if names else "-"
+    throughput = next((name for name in names if "throughput" in name), "-")
+    extra = ", ".join(names[2:]) if len(names) > 2 else "-"
+    return [
+        f"Data: single-e2e {single}; throughput {throughput}.",
+        f"Additional inputs: {extra}.",
+        "Comparable win ratios exclude failed, no-data, and supported/not-run cells.",
+    ]
+
+
+def render_report_image(
+    results_path: Path,
+    config_path: Path,
+    output_png: Path,
+    output_svg: Path | None = None,
+) -> None:
     results = _load_json(results_path)
     config = _load_json(config_path)
     case_cfgs = _case_configs(config)
     cases = _ordered_cases(config, results)
-    frameworks = _frameworks_for_report(config, results)
     single = _by_case(results.get("results", []))
     throughput = _by_case(results.get("throughput_results", []))
     throughput_cases = [case_id for case_id in cases if case_id in throughput]
 
-    width = 1720
-    margin = 42
-    case_w = 360
-    gap = 12
-    fw_w = int((width - margin * 2 - case_w - gap * len(frameworks)) / len(frameworks))
-    title_h = 126
-    section_h = 46
-    header_h = 42
-    single_row_h = 72
-    throughput_row_h = 92
-    footer_h = 56
-    height = (
-        margin
-        + title_h
-        + section_h
-        + header_h
-        + len(cases) * single_row_h
-        + 28
-        + section_h
-        + header_h
-        + max(1, len(throughput_cases)) * throughput_row_h
-        + footer_h
-    )
+    single_panel_h = PANEL_HEADER_H + len(cases) * ROW_SINGLE_H + 14
+    throughput_panel_h = PANEL_HEADER_H + max(1, len(throughput_cases)) * ROW_THROUGHPUT_H + 14
+    footer_h = 112
+    single_y = 250
+    throughput_y = single_y + single_panel_h + 54
+    footer_y = throughput_y + throughput_panel_h + 40
+    height = footer_y + footer_h + 44
 
-    img = Image.new("RGB", (width, height), BG)
+    img = Image.new("RGB", (WIDTH, height), BG)
     draw = ImageDraw.Draw(img)
 
-    y = margin
-    draw.text((margin, y), "Diffusion Framework Benchmark", font=FONT_TITLE, fill=TEXT)
-    y += 44
-    subtitle = "H200 comparison: single-request latency and throughput. Lower latency is better; higher QPS is better."
-    draw.text((margin, y), subtitle, font=FONT_SUBTITLE, fill=MUTED)
-    y += 28
-    meta = f"run_id: {results.get('run_id', '-')}   generated: {datetime.now(timezone.utc).strftime('%Y-%m-%d %H:%M UTC')}"
-    draw.text((margin, y), meta, font=FONT_SMALL, fill=MUTED)
-    y += 54
+    _draw_header(
+        draw,
+        results,
+        _single_summary(cases, single),
+        _throughput_summary(throughput_cases, throughput),
+    )
 
-    def draw_table_header(y0: int, section: str, row_h: int) -> int:
-        draw.text((margin, y0 + 8), section, font=FONT_SECTION, fill=TEXT)
-        y0 += section_h
-        x = margin
-        _draw_rect(draw, (x, y0, x + case_w, y0 + header_h), HEADER)
-        _draw_centered(draw, "case", (x, y0, x + case_w, y0 + header_h), FONT_HEADER)
-        x += case_w + gap
-        for framework in frameworks:
-            _draw_rect(draw, (x, y0, x + fw_w, y0 + header_h), HEADER)
-            _draw_centered(
-                draw,
-                FRAMEWORK_LABELS.get(framework, framework),
-                (x, y0, x + fw_w, y0 + header_h),
-                FONT_HEADER,
-            )
-            x += fw_w + gap
-        return y0 + header_h
-
-    y = draw_table_header(y, "Single Request Latency", single_row_h)
+    _rounded(draw, (PANEL_X, single_y, PANEL_X + PANEL_W, single_y + single_panel_h), 18, PANEL, BORDER)
+    _draw_panel_header(
+        draw,
+        single_y,
+        "Single Request Latency",
+        "Lower is better - latency and latency/SGLang",
+        "Fastest",
+    )
+    rows_y = single_y + PANEL_HEADER_H
     for idx, case_id in enumerate(cases):
-        row_y = y + idx * single_row_h
+        row_y = rows_y + idx * ROW_SINGLE_H
+        if idx:
+            draw.line((CASE_X, row_y, PANEL_X + PANEL_W - PAD, row_y), fill=GRID, width=1)
         case_cfg = case_cfgs.get(case_id)
-        row_fill = ROW_ALT if idx % 2 else ROW
-        x = margin
-        _draw_rect(draw, (x, row_y, x + case_w, row_y + single_row_h - 8), row_fill)
-        _draw_wrapped(draw, case_id, x + 14, row_y + 13, case_w - 28, FONT_CELL_BOLD, max_lines=2)
+        case_entries = single.get(case_id, {})
+        entry = _case_entry(case_id, case_entries, case_cfg)
+        winner = _single_winner(case_entries)
+        _draw_case_cell(draw, case_id, entry, case_cfg, row_y)
+        sglang_latency = _successful_latency(case_entries.get("sglang"))
+        for framework in FRAMEWORK_ORDER:
+            _draw_single_metric(
+                draw,
+                framework,
+                case_entries.get(framework),
+                case_cfg,
+                row_y,
+                sglang_latency,
+                winner,
+            )
+        _draw_winner_pill(draw, winner, row_y, ROW_SINGLE_H)
 
-        sg_latency = _single_latency(single.get(case_id, {}).get("sglang"))
-        values = {
-            fw: _single_latency(single.get(case_id, {}).get(fw))
-            for fw in frameworks
-        }
-        valid = [value for value in values.values() if value is not None]
-        best = min(valid) if valid else None
-
-        x += case_w + gap
-        for fw in frameworks:
-            entry = single.get(case_id, {}).get(fw)
-            status = _status_text(entry, case_cfg, fw)
-            is_best = values.get(fw) is not None and best is not None and values[fw] == best
-            _draw_rect(draw, (x, row_y, x + fw_w, row_y + single_row_h - 8), _cell_fill(status, is_best))
-            text, _ = _single_cell(entry, sg_latency)
-            if text:
-                _draw_wrapped(draw, text, x + 12, row_y + 12, fw_w - 24, FONT_CELL_BOLD if is_best else FONT_CELL, max_lines=2)
-            else:
-                _draw_centered(draw, status, (x, row_y, x + fw_w, row_y + single_row_h - 8), FONT_SMALL, MUTED)
-            x += fw_w + gap
-
-    y += len(cases) * single_row_h + 28
-    y = draw_table_header(y, "Throughput: p50 / p99 / QPS", throughput_row_h)
+    _rounded(
+        draw,
+        (PANEL_X, throughput_y, PANEL_X + PANEL_W, throughput_y + throughput_panel_h),
+        18,
+        PANEL,
+        BORDER,
+    )
+    _draw_panel_header(
+        draw,
+        throughput_y,
+        "High-Pressure Throughput",
+        "Higher QPS is better - qps ratio plus p50/p99 latency",
+        "Highest QPS",
+    )
+    rows_y = throughput_y + PANEL_HEADER_H
     if throughput_cases:
         for idx, case_id in enumerate(throughput_cases):
-            row_y = y + idx * throughput_row_h
+            row_y = rows_y + idx * ROW_THROUGHPUT_H
+            if idx:
+                draw.line((CASE_X, row_y, PANEL_X + PANEL_W - PAD, row_y), fill=GRID, width=1)
             case_cfg = case_cfgs.get(case_id)
-            row_fill = ROW_ALT if idx % 2 else ROW
-            x = margin
-            _draw_rect(draw, (x, row_y, x + case_w, row_y + throughput_row_h - 8), row_fill)
-            _draw_wrapped(draw, case_id, x + 14, row_y + 16, case_w - 28, FONT_CELL_BOLD, max_lines=2)
-
-            sg_qps = _throughput_metrics(throughput.get(case_id, {}).get("sglang"))[2]
-            qps_values = {
-                fw: _throughput_metrics(throughput.get(case_id, {}).get(fw))[2]
-                for fw in frameworks
-            }
-            valid_qps = [value for value in qps_values.values() if value is not None]
-            best_qps = max(valid_qps) if valid_qps else None
-
-            x += case_w + gap
-            for fw in frameworks:
-                entry = throughput.get(case_id, {}).get(fw)
-                status = _status_text(entry, case_cfg, fw)
-                is_best = qps_values.get(fw) is not None and best_qps is not None and qps_values[fw] == best_qps
-                _draw_rect(draw, (x, row_y, x + fw_w, row_y + throughput_row_h - 8), _cell_fill(status, is_best))
-                text, _ = _throughput_cell(entry, sg_qps)
-                if text:
-                    _draw_wrapped(draw, text, x + 12, row_y + 10, fw_w - 24, FONT_SMALL_BOLD if is_best else FONT_SMALL, max_lines=3)
-                else:
-                    _draw_centered(draw, status, (x, row_y, x + fw_w, row_y + throughput_row_h - 8), FONT_SMALL, MUTED)
-                x += fw_w + gap
+            case_entries = throughput.get(case_id, {})
+            entry = _case_entry(case_id, case_entries, case_cfg)
+            winner = _throughput_winner(case_entries)
+            _draw_case_cell(draw, case_id, entry, case_cfg, row_y + 8)
+            sglang_qps = _throughput_metrics(case_entries.get("sglang"))[2]
+            for framework in FRAMEWORK_ORDER:
+                _draw_throughput_metric(
+                    draw,
+                    framework,
+                    case_entries.get(framework),
+                    case_cfg,
+                    row_y,
+                    sglang_qps,
+                    winner,
+                )
+            _draw_winner_pill(draw, winner, row_y, ROW_THROUGHPUT_H)
     else:
-        _draw_wrapped(draw, "No throughput results in this artifact.", margin + 14, y + 14, width - margin * 2 - 28, FONT_CELL, MUTED, max_lines=1)
+        _draw_text(draw, (CASE_X, rows_y + 48), "No throughput results in this artifact.", FONT_VALUE, MUTED)
 
-    footer_y = height - footer_h + 12
-    footer = _source_footer(results, results_path)
-    draw.text((margin, footer_y), footer, font=FONT_SMALL, fill=MUTED)
-    draw.text((margin, footer_y + 20), "Generated by diffusion-bench-report-image.", font=FONT_SMALL, fill=MUTED)
+    _rounded(draw, (PANEL_X, footer_y, PANEL_X + PANEL_W, footer_y + footer_h), 14, "#eef3f8", BORDER)
+    for idx, line in enumerate(_source_footer(results)):
+        _draw_text(draw, (PANEL_X + 28, footer_y + 22 + idx * 30), line, FONT_FOOTER, "#4b5563")
 
     output_png.parent.mkdir(parents=True, exist_ok=True)
     img.save(output_png)
 
     if output_svg:
         output_svg.parent.mkdir(parents=True, exist_ok=True)
-        escaped_footer = html.escape(footer)
         embedded_png = base64.b64encode(output_png.read_bytes()).decode("ascii")
+        title = html.escape(f"Diffusion benchmark report: {results.get('run_id', '-')}")
         output_svg.write_text(
             "\n".join(
                 [
-                    f'<svg xmlns="http://www.w3.org/2000/svg" width="{width}" height="{height}">',
-                    f'<title>{escaped_footer}</title>',
-                    f'<image href="data:image/png;base64,{embedded_png}" width="{width}" height="{height}"/>',
+                    f'<svg xmlns="http://www.w3.org/2000/svg" width="{WIDTH}" height="{height}">',
+                    f"<title>{title}</title>",
+                    f'<image href="data:image/png;base64,{embedded_png}" width="{WIDTH}" height="{height}"/>',
                     "</svg>",
                 ]
             ),
