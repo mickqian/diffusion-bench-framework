@@ -173,6 +173,90 @@ def _resolve_lightx2v_ckpt_path(value: str, model_path: str, model_id: str) -> s
     return str(Path(model_path) / relative)
 
 
+def _set_first_present(cfg: dict, target: str, source: dict, *keys: str) -> None:
+    if target in cfg:
+        return
+    for key in keys:
+        if key in source:
+            cfg[target] = source[key]
+            return
+
+
+def _merge_ltx2_single_file_metadata(cfg: dict) -> None:
+    ckpt = cfg.get("dit_original_ckpt") or cfg.get("dit_quantized_ckpt")
+    if not ckpt or not Path(ckpt).is_file():
+        return
+
+    from safetensors import safe_open
+
+    with safe_open(str(ckpt), framework="pt") as f:
+        raw_config = (f.metadata() or {}).get("config")
+    if not raw_config:
+        return
+
+    metadata = json.loads(raw_config)
+    transformer = metadata.get("transformer", {})
+    if not isinstance(transformer, dict):
+        return
+
+    cfg.setdefault("transformer", transformer)
+    for key in (
+        "attention_head_dim",
+        "audio_attention_head_dim",
+        "audio_cross_attention_dim",
+        "audio_num_attention_heads",
+        "caption_channels",
+        "cross_attention_dim",
+        "in_channels",
+        "norm_elementwise_affine",
+        "norm_eps",
+        "num_attention_heads",
+        "num_layers",
+        "out_channels",
+        "qk_norm",
+        "rope_type",
+        "timestep_scale_multiplier",
+    ):
+        _set_first_present(cfg, key, transformer, key)
+
+    _set_first_present(cfg, "audio_pos_embed_max_pos", transformer, "audio_pos_embed_max_pos")
+    if "audio_pos_embed_max_pos" not in cfg:
+        audio_pos = transformer.get("audio_positional_embedding_max_pos")
+        if isinstance(audio_pos, list) and audio_pos:
+            cfg["audio_pos_embed_max_pos"] = audio_pos[0]
+    _set_first_present(
+        cfg,
+        "cross_attn_timestep_scale_multiplier",
+        transformer,
+        "cross_attn_timestep_scale_multiplier",
+        "av_ca_timestep_scale_multiplier",
+    )
+    _set_first_present(cfg, "rope_theta", transformer, "rope_theta", "positional_embedding_theta")
+    if "pos_embed_max_pos" not in cfg:
+        pos = transformer.get("positional_embedding_max_pos")
+        if isinstance(pos, list) and pos:
+            cfg["pos_embed_max_pos"] = pos[0]
+    if "rope_double_precision" not in cfg:
+        cfg["rope_double_precision"] = transformer.get("frequencies_precision") == "float64"
+
+    audio = metadata.get("audio_vae", {})
+    preprocessing = audio.get("preprocessing", {}) if isinstance(audio, dict) else {}
+    audio_pre = preprocessing.get("audio", {}) if isinstance(preprocessing, dict) else {}
+    stft_pre = preprocessing.get("stft", {}) if isinstance(preprocessing, dict) else {}
+    _set_first_present(cfg, "audio_sampling_rate", audio_pre, "sampling_rate")
+    _set_first_present(cfg, "audio_hop_length", stft_pre, "hop_length")
+
+    cfg.setdefault("audio_scale_factor", 4)
+    cfg.setdefault("base_height", 2048)
+    cfg.setdefault("base_width", 2048)
+    cfg.setdefault("causal_offset", 1)
+    cfg.setdefault("patch_size", 1)
+    cfg.setdefault("patch_size_t", 1)
+    cfg.setdefault("audio_patch_size", 1)
+    cfg.setdefault("audio_patch_size_t", 1)
+    cfg.setdefault("vae_scale_factors", [8, 32, 32])
+
+
 def _write_lightx2v_config(case: dict, fw_cfg: dict, model_path: str) -> str:
     """Write a minimal LightX2V config JSON and return its path."""
     cfg = {
@@ -207,6 +291,8 @@ def _write_lightx2v_config(case: dict, fw_cfg: dict, model_path: str) -> str:
             model_path,
             str(fw_cfg.get("model") or case["model"]),
         )
+    if fw_cfg.get("model_cls") == "ltx2":
+        _merge_ltx2_single_file_metadata(cfg)
     cfg.update(LIGHTX2V_DISABLE_TORCH_COMPILE_CONFIG)
 
     config_path = os.path.join(

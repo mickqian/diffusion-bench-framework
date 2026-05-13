@@ -63,6 +63,7 @@ shutil.copytree(snapshot / subdir, dst, symlinks=False)
 )
 PY
     fi
+    python3 -m pip install --upgrade --upgrade-strategy only-if-needed "${LIGHTX2V_SAGEATTENTION_INSTALL_SPEC:-sageattention==1.0.6}"
     python3 -m pip install --upgrade --upgrade-strategy only-if-needed "${LIGHTX2V_FLASHINFER_INSTALL_SPEC:-flashinfer-python==0.6.11}"
     python3 -m pip install --upgrade --force-reinstall pyzmq
     ;;

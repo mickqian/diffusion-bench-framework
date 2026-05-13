@@ -744,6 +744,7 @@
                     },
                     "lightx2v_config": {
                         "sample_guide_scale": 4.0,
+                        "attn_type": "sage_attn2",
                         "sample_shift": [
                             2.05,
                             0.95
@@ -861,6 +862,7 @@
                     },
                     "lightx2v_config": {
                         "sample_guide_scale": 3.0,
+                        "attn_type": "sage_attn2",
                         "sample_shift": [
                             2.05,
                             0.95
