@@ -62,6 +62,7 @@ DEFAULT_PROFILE = "default"
 DEFAULT_SGLANG_PROFILE = DEFAULT_PROFILE
 HARDWARE_PROFILE_ENV = "SGLANG_BENCH_HARDWARE_PROFILE"
 SGLANG_EXTRA_SERVE_ARGS_ENV = "DIFFUSION_BENCH_SGLANG_EXTRA_SERVE_ARGS"
+HF_CACHE_DIR_ENV = "DIFFUSION_BENCH_HF_CACHE_DIR"
 SKIP_FRAMEWORK_INSTALL_ENV = "SGLANG_DIFFUSION_SKIP_FRAMEWORK_INSTALL"
 FORCED_BENCHMARK_ENV = {"TORCH_COMPILE_DISABLE": "1"}
 VLLM_DISABLE_TORCH_COMPILE_ARGS = [
@@ -151,17 +152,23 @@ def _build_vllm_cmd(case: dict, fw_cfg: dict, port: int) -> list[str]:
     return cmd
 
 
-def _resolve_hf_model_path(model_id: str) -> str:
+def _resolve_hf_model_path(model_id: str, *, required: bool = False) -> str:
     """Resolve a HuggingFace model ID to a local cache path, or return as-is."""
     if os.path.isdir(model_id):
         return model_id
     try:
         from huggingface_hub import snapshot_download
 
-        path = snapshot_download(model_id)
+        cache_dir = os.environ.get(HF_CACHE_DIR_ENV) or None
+        path = snapshot_download(model_id, cache_dir=cache_dir)
         print(f"  Resolved {model_id} -> {path}")
         return path
-    except Exception:
+    except Exception as exc:
+        if required:
+            raise RuntimeError(
+                f"Failed to resolve HuggingFace model '{model_id}' to a local path. "
+                f"Set {HF_CACHE_DIR_ENV} or HF_HOME to a filesystem with enough space."
+            ) from exc
         return model_id
 
 
@@ -316,7 +323,7 @@ def _build_lightx2v_cmd(case: dict, fw_cfg: dict, port: int) -> list[str]:
     num_gpus = fw_cfg.get("num_gpus", case["num_gpus"])
     model_path = _server_model_path(case, fw_cfg)
     if not fw_cfg.get("_skip_model_path_resolution"):
-        model_path = _resolve_hf_model_path(model_path)
+        model_path = _resolve_hf_model_path(model_path, required=True)
     config_path = _write_lightx2v_config(case, fw_cfg, model_path)
 
     server_args = [

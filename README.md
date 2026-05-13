@@ -48,6 +48,7 @@ vLLM-Omni and LightX2V are installed into isolated temporary virtualenvs by the 
 
 Set `SGLANG_DIFFUSION_SKIP_FRAMEWORK_INSTALL=1` only for reruns where the isolated framework venv has already been installed and should be reused.
 The default installer pins LightX2V to the latest tracked upstream commit with LTX-2/LTX-2.3 runner support; override `LIGHTX2V_INSTALL_SPEC` only when intentionally changing that framework ref.
+Set `DIFFUSION_BENCH_HF_CACHE_DIR` or `HF_HOME` when the default HuggingFace cache filesystem is small or full. The fixed run scripts default to `/root/diffusion-bench-hf-cache/hub` so model downloads are kept separate from isolated framework venvs.
 The H200 LightX2V profiles use FA3/FlashInfer paths. By default the installer rebuilds flash-attn from source for the isolated torch version, then uses a pinned torch 2.8/cu128 FA3 artifact via `LIGHTX2V_FA3_HF_REPO`, `LIGHTX2V_FA3_HF_REVISION`, and `LIGHTX2V_FA3_HF_SUBDIR`; set `LIGHTX2V_FLASH_ATTN3_INSTALL_SPEC` only when intentionally switching back to a source build. It also installs `sageattention` for upstream LTX configs that select `sage_attn2`.
 For single-file LTX checkpoints such as LTX-2.3, the harness projects transformer metadata from the safetensors header into the generated LightX2V config so server runs match upstream inference config semantics.
 H100 LTX LightX2V profiles are hardware-specific: LTX-2 uses upstream tensor parallelism, and LTX-2.3 uses upstream block offload because the full checkpoints OOM under the H200-oriented profiles on 80GB GPUs.
