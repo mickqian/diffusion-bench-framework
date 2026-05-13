@@ -111,6 +111,7 @@ This repo includes Codex skills that encode the operating discipline for long-te
 
 - `skills/diffusion-bench-maintainer`: maintain runner/config/dashboard semantics without breaking comparability.
 - `skills/diffusion-case-onboarding`: add new model/framework cases and command profiles.
+- `skills/diffusion-framework-benchmarking`: plan, run, and interpret fair cross-framework diffusion benchmark data.
 - `skills/diffusion-regression-investigator`: investigate when SGLang-Diffusion appears slower or a comparison looks unfair.
 - `skills/diffusion-performance-reporting`: append data-only comments to the fixed performance tracker issue.
 
