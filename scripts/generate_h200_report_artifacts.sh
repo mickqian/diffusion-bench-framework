@@ -18,6 +18,7 @@ else
   RESULT_FILES=(
     tmp/report/combined-h200-20260510-single-e2e-be2e4d2-resfix.json
     tmp/report/h200-throughput-fast-20260511-merged-adeef6c.json
+    tmp/report/h200-ltx-lightx2v-20260513-6ee98c7.json
   )
 fi
 

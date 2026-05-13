@@ -1,0 +1,60 @@
+{
+  "name": "20260513-h200-ltx-lightx2v",
+  "purpose": "Targeted H200 LightX2V rerun for LTX-2 and LTX-2.3 two-stage report coverage.",
+  "tracker_issue": "https://github.com/mickqian/diffusion-bench-framework/issues/1",
+  "reproduce_script": "scripts/run_h200_ltx_lightx2v_20260513.sh",
+  "benchmark_repo": {
+    "report_branch": "bench-full-report-matrix",
+    "result_base_commit": "6ee98c790f0fa36c1fad11b75cdca6d22c539837"
+  },
+  "frameworks": {
+    "lightx2v": {
+      "install_spec": "git+https://github.com/ModelTC/LightX2V.git@7efd05f8e1425b83321fd4f1cef779ef6504076f",
+      "observed_version": "0.1.0",
+      "observed_commit": "7efd05f8e1425b83321fd4f1cef779ef6504076f"
+    },
+    "flash_attn": {
+      "install_spec": "flash-attn==2.8.3"
+    },
+    "lightx2v_fa3": {
+      "install_spec": "varunneal/flash-attention-3@de87b9b5af06dd9984df595bef90b2eba44b181a:build/torch28-cxx11-cu128-x86_64-linux/flash_attention_3"
+    },
+    "flashinfer": {
+      "install_spec": "flashinfer-python==0.6.11",
+      "observed_version": "0.6.11"
+    },
+    "transformers": {
+      "observed_version": "4.57.6"
+    },
+    "huggingface_hub": {
+      "observed_version": "0.36.2"
+    },
+    "safetensors": {
+      "observed_version": "0.8.0-rc.0"
+    }
+  },
+  "environment": {
+    "hardware_profile": "h200",
+    "cuda_visible_devices": "0,1",
+    "framework_venv_root": "/root/.cache/sglang-diffusion-framework-venvs",
+    "hf_cache": "/root/.cache/huggingface/hub",
+    "torch_compile_disable": "1"
+  },
+  "formal_cases": [
+    "ltx2_twostage_t2v",
+    "ltx2.3_twostage_t2v_2gpus"
+  ],
+  "run_sources": [
+    {
+      "run_id": "h200-ltx-lightx2v-20260513-6ee98c7",
+      "role": "LightX2V H200 LTX source for merged report artifacts",
+      "local_copy": "tmp/report/h200-ltx-lightx2v-20260513-6ee98c7.json",
+      "remote_path": "/root/diffusion-bench-framework/runs/h200-ltx-lightx2v-20260513-6ee98c7.json"
+    }
+  ],
+  "known_failures": [],
+  "notes": [
+    "LTX-2 uses the H200 cfg_parallel profile with two LightX2V ranks.",
+    "LTX-2.3 uses the current upstream H200 single-GPU profile because mm_guider and cfg_parallel are not compatible."
+  ]
+}

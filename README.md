@@ -152,7 +152,7 @@ OUTPUT_JSON=tmp/report/h200-framework-comparison-merged.json \
 scripts/generate_h200_report_artifacts.sh
 ```
 
-This writes a merged JSON, dashboard Markdown, data-only issue Markdown, and PNG/SVG comparison image from the same input JSONs. The default inputs are the local H200 single-request and throughput report artifacts under `tmp/report`.
+This writes a merged JSON, dashboard Markdown, data-only issue Markdown, and PNG/SVG comparison image from the same input JSONs. The default inputs are the local H200 single-request, throughput, and LightX2V LTX rerun artifacts under `tmp/report`.
 
 ## Notes
 
