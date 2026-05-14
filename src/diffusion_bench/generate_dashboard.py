@@ -792,9 +792,12 @@ def _result_status(entry: dict | None) -> str:
 
 
 def _missing_status(case_cfg: dict | None, framework: str) -> str:
+    statuses = (case_cfg or {}).get("report_framework_statuses") or {}
+    if framework in statuses:
+        return str(statuses[framework])
     if case_cfg and framework in (case_cfg.get("frameworks") or {}):
         return "not_run"
-    return "not_configured"
+    return "no_profile"
 
 
 def _status_with_context(entry: dict | None, case_cfg: dict | None, framework: str) -> str:
@@ -814,8 +817,13 @@ def _result_reason(entry: dict | None, case_cfg: dict | None, framework: str) ->
         return _md_cell(reasons[framework])
     if not entry:
         if case_cfg and framework in (case_cfg.get("frameworks") or {}):
-            return "not run in this result"
-        return "no configured serving path"
+            return "configured framework entry, but no result in this artifact"
+        status = _missing_status(case_cfg, framework)
+        if status == "unsupported":
+            return "unsupported by the tracked framework/version"
+        if status == "no_profile":
+            return "no validated aligned serving profile in this benchmark"
+        return status
     return "-"
 
 
@@ -1025,6 +1033,7 @@ def build_issue_report_comment(results: dict) -> str:
         ],
         "",
         "Ratio columns are framework value divided by SGLang-Diffusion value for the same case.",
+        "Statuses: `not_run` means configured but absent from this artifact; `unsupported` means unsupported by the tracked framework/version; `no_profile` means no validated aligned serving profile is tracked.",
     ]
 
     for case_id in _ordered_case_ids(results):

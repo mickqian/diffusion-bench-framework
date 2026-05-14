@@ -75,6 +75,7 @@ GOOD = "#166534"
 PENDING = "#f3f4f6"
 FAIL_BG = "#fff1f2"
 SUPPORTED_BG = "#f0fdf4"
+NO_PROFILE_BG = "#eef2ff"
 CARD_DARK = "#111827"
 
 WIDTH = 2000
@@ -400,6 +401,15 @@ def _draw_missing(draw: ImageDraw.ImageDraw, framework: str, y: int, row_h: int)
     _draw_text(draw, (x + METRIC_W / 2, y + row_h / 2 - 2), "-", FONT_VALUE, "#9ca3af", anchor="mm")
 
 
+def _missing_status(case_cfg: dict | None, framework: str) -> str:
+    statuses = (case_cfg or {}).get("report_framework_statuses") or {}
+    if framework in statuses:
+        return str(statuses[framework])
+    if case_cfg and framework in (case_cfg.get("frameworks") or {}):
+        return "not_run"
+    return "no_profile"
+
+
 def _short_error_label(entry: dict) -> str:
     error = str(entry.get("error") or "")
     if "server exited" in error or "health check" in error:
@@ -419,8 +429,14 @@ def _draw_status_cell(
     kind: str,
 ) -> None:
     x = METRIC_XS[framework]
-    fill = FAIL_BG if kind == "fail" else SUPPORTED_BG
-    color = DANGER if kind == "fail" else GOOD
+    if kind == "fail":
+        fill, color = FAIL_BG, DANGER
+    elif kind == "unsupported":
+        fill, color = PENDING, MUTED
+    elif kind == "no_profile":
+        fill, color = NO_PROFILE_BG, "#3730a3"
+    else:
+        fill, color = SUPPORTED_BG, GOOD
     box_h = 48
     _rounded(draw, (x, y + (row_h - box_h) / 2, x + METRIC_W, y + (row_h + box_h) / 2), 10, fill)
     if detail:
@@ -428,6 +444,22 @@ def _draw_status_cell(
         _draw_text(draw, (x + 12, y + row_h / 2 + 20), detail, FONT_STATUS_SMALL, "#4b5563", anchor="lm")
     else:
         _draw_text(draw, (x + 12, y + row_h / 2 + 1), title, FONT_STATUS, color, anchor="lm")
+
+
+def _draw_missing_status_cell(
+    draw: ImageDraw.ImageDraw,
+    framework: str,
+    case_cfg: dict | None,
+    y: int,
+    row_h: int,
+) -> None:
+    status = _missing_status(case_cfg, framework)
+    if status == "unsupported":
+        _draw_status_cell(draw, framework, y, row_h, "unsupported", None, "unsupported")
+    elif status == "no_profile":
+        _draw_status_cell(draw, framework, y, row_h, "no profile", "not run", "no_profile")
+    else:
+        _draw_status_cell(draw, framework, y, row_h, "not run", "configured", "supported")
 
 
 def _draw_single_metric(
@@ -444,10 +476,8 @@ def _draw_single_metric(
     if value is None:
         if entry and entry.get("error"):
             _draw_status_cell(draw, framework, y, ROW_SINGLE_H, _short_error_label(entry), None, "fail")
-        elif case_cfg and framework in (case_cfg.get("frameworks") or {}):
-            _draw_status_cell(draw, framework, y, ROW_SINGLE_H, "supported", "not run", "supported")
         else:
-            _draw_missing(draw, framework, y, ROW_SINGLE_H)
+            _draw_missing_status_cell(draw, framework, case_cfg, y, ROW_SINGLE_H)
         return
 
     if framework == "sglang" or framework == winner:
@@ -473,10 +503,8 @@ def _draw_throughput_metric(
     if qps is None:
         if entry and entry.get("error"):
             _draw_status_cell(draw, framework, y, ROW_THROUGHPUT_H, _short_error_label(entry), None, "fail")
-        elif case_cfg and framework in (case_cfg.get("frameworks") or {}):
-            _draw_status_cell(draw, framework, y, ROW_THROUGHPUT_H, "supported", "not run", "supported")
         else:
-            _draw_missing(draw, framework, y, ROW_THROUGHPUT_H)
+            _draw_missing_status_cell(draw, framework, case_cfg, y, ROW_THROUGHPUT_H)
         return
 
     if framework == "sglang" or framework == winner:
@@ -549,7 +577,7 @@ def _source_footer(results: dict) -> list[str]:
     return [
         f"Data: single-e2e {single}; throughput {throughput}.",
         f"Additional inputs: {extra}.",
-        "Comparable win ratios exclude failed, no-data, and supported/not-run cells.",
+        "Comparable win ratios exclude failed, unsupported, no-profile, and not-run cells.",
     ]
 
 

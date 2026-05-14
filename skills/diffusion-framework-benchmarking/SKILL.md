@@ -81,9 +81,9 @@ Use `py-spy` only for diagnosis, not as part of the benchmark timing path.
 
 Classify every failed or missing cell:
 
-- `not_configured`: framework has no harness entry for this case
 - `unsupported`: upstream does not support this model/task
-- `supported_not_run`: upstream supports it, but this benchmark version/profile has not run it yet
+- `no_profile`: upstream support is unknown or possible, but this benchmark has no validated aligned serving profile
+- `not_run`: framework is configured for the case, but this result artifact does not include a run
 - `failed`: server or request failed; include the short root cause
 - `invalid`: command used wrong shape, frames, model, dtype, cache, compile, or sampling params
 
@@ -101,7 +101,7 @@ For comparison images:
 - show ratios relative to SGLang for the same case
 - include source result JSON names and filter rules in the footer
 - regenerate from a fixed script so future reports are reproducible
-- include every framework in scope, even when the cell is `unsupported`, `failed`, `not_configured`, or `supported_not_run`
+- include every framework in scope, even when the cell is `unsupported`, `no_profile`, `failed`, or `not_run`
 
 ## Output Discipline
 

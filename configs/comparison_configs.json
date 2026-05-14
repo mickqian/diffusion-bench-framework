@@ -24,6 +24,12 @@
             "num_gpus": 1,
             "num_inference_steps": 50,
             "guidance_scale": 3.5,
+            "report_framework_statuses": {
+                "lightx2v": "unsupported"
+            },
+            "report_framework_reasons": {
+                "lightx2v": "Tracked LightX2V version has no FLUX.1 serving path; FLUX coverage starts at FLUX.2."
+            },
             "frameworks": {
                 "sglang": {
                     "serve_args": "--model-type diffusion --warmup --dit-layerwise-offload false",
@@ -154,6 +160,12 @@
             "num_gpus": 1,
             "num_inference_steps": 50,
             "guidance_scale": 1.0,
+            "report_framework_statuses": {
+                "lightx2v": "unsupported"
+            },
+            "report_framework_reasons": {
+                "lightx2v": "Tracked LightX2V version has no Qwen-Image text-to-image serving path."
+            },
             "frameworks": {
                 "sglang": {
                     "serve_args": "--model-type diffusion --warmup",
@@ -199,6 +211,12 @@
             "num_gpus": 1,
             "num_inference_steps": 40,
             "guidance_scale": 1.0,
+            "report_framework_statuses": {
+                "lightx2v": "unsupported"
+            },
+            "report_framework_reasons": {
+                "lightx2v": "Tracked LightX2V version has no Qwen-Image-Edit serving path."
+            },
             "frameworks": {
                 "sglang": {
                     "serve_args": "--model-type diffusion --warmup",
@@ -947,6 +965,9 @@
             "fps": 24,
             "num_inference_steps": 30,
             "guidance_scale": 3.0,
+            "report_framework_statuses": {
+                "vllm-omni": "no_profile"
+            },
             "report_framework_reasons": {
                 "vllm-omni": "No compatible vLLM-Omni LTX2.3 serving profile is configured."
             },

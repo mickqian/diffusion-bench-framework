@@ -1,6 +1,6 @@
 {
   "name": "20260514-h200-wan-vllm-omni",
-  "purpose": "Targeted H200 vLLM-Omni rerun for Wan cells that were previously not_configured in the formal comparison report.",
+  "purpose": "Targeted H200 vLLM-Omni rerun for Wan cells that previously had no report data.",
   "tracker_issue": "https://github.com/mickqian/diffusion-bench-framework/issues/1",
   "reproduce_script": "scripts/run_h200_wan_vllm_omni_20260514.sh",
   "benchmark_repo": {

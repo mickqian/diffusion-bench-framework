@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-# Targeted H200 rerun for Wan cells that used to be not_configured in vLLM-Omni.
+# Targeted H200 rerun for Wan cells that previously had no vLLM-Omni data.
 
 RUN_ID="${RUN_ID:-h200-wan-vllm-omni-20260514-$(date -u +%Y%m%d-%H%M%S)}"
 PORT="${PORT:-30420}"
