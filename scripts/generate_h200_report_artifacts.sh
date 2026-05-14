@@ -17,6 +17,7 @@ if [[ -n "${RESULTS:-}" ]]; then
 else
   RESULT_FILES=(
     tmp/report/combined-h200-20260510-single-e2e-be2e4d2-resfix.json
+    tmp/report/h200-wan-vllm-omni-20260514-c7916aa-ion7.json
     tmp/report/h200-throughput-fast-20260511-merged-adeef6c.json
     tmp/report/h200-ltx-lightx2v-20260513-6ee98c7.json
     tmp/report/h200-ltx23-lightx2v-2gpu-tp-20260513-6e6ae7e.json

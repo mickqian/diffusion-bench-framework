@@ -88,7 +88,7 @@ The bundled config is the formal tracking plan and keeps one representative case
 
 Extra variants such as true-CFG, alternate resolutions, non-representative LTX-2.3 pipeline/task variants, or single-GPU vs multi-GPU image runs should be added only for targeted investigations or explicit reruns, not as default tracker coverage. The representative LTX-2.3 default case is the two-stage pipeline.
 
-Framework entries are included only when the local harness has a compatible serving path. Current coverage includes vLLM-Omni for supported image and LTX cases, and LightX2V for supported Wan, FLUX.2, and Z-Image cases.
+Framework entries are included only when the local harness has a compatible serving path. Current coverage includes vLLM-Omni for supported image, Wan, and LTX cases, and LightX2V for supported Wan, FLUX.2, Z-Image, and LTX cases.
 If a framework needs a repackaged model ID for the same case, the formal report shows the actual per-framework model in the comparison table.
 
 ## Command Profiles

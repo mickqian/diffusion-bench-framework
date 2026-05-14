@@ -1,0 +1,89 @@
+{
+  "name": "20260514-h200-wan-vllm-omni",
+  "purpose": "Targeted H200 vLLM-Omni rerun for Wan cells that were previously not_configured in the formal comparison report.",
+  "tracker_issue": "https://github.com/mickqian/diffusion-bench-framework/issues/1",
+  "reproduce_script": "scripts/run_h200_wan_vllm_omni_20260514.sh",
+  "benchmark_repo": {
+    "report_branch": "bench-full-report-matrix",
+    "result_base_commit": "c7916aa581aa2076384a4e43ec30e80d786c5cd3"
+  },
+  "frameworks": {
+    "vllm": {
+      "install_spec": "vllm==0.18.0",
+      "observed_version": "0.18.0"
+    },
+    "vllm_omni": {
+      "install_spec": "vllm-omni==0.18.0",
+      "observed_version": "0.18.0"
+    }
+  },
+  "environment": {
+    "host": "ion-h200-7",
+    "container": "sglang_mick",
+    "hardware_profile": "h200",
+    "cuda_visible_devices": "0,1,2,3",
+    "framework_venv_root": "/root/.cache/sglang-diffusion-framework-venvs",
+    "hf_cache": "/root/.cache/huggingface/hub",
+    "torch_compile_disable": "1",
+    "vllm_extra_args": "--enforce-eager --compilation-config '{\"mode\":0}'"
+  },
+  "formal_cases": [
+    "wan21_t2v_1_3b_480p",
+    "wan21_i2v_14b_480p",
+    "wan22_t2v_a14b_720p",
+    "wan22_ti2v_5b_704p",
+    "wan21_i2v_14b_720p",
+    "wan22_i2v_a14b_720p"
+  ],
+  "run_sources": [
+    {
+      "run_id": "h200-wan-vllm-omni-20260514-c7916aa-ion7",
+      "role": "vLLM-Omni H200 Wan source for merged report artifacts",
+      "local_copy": "tmp/report/h200-wan-vllm-omni-20260514-c7916aa-ion7.json",
+      "remote_path": "/root/diffusion-bench-framework/runs/h200-wan-vllm-omni-20260514-c7916aa-ion7.json"
+    }
+  ],
+  "case_profiles": {
+    "wan21_t2v_1_3b_480p": {
+      "profile": "h200-2gpu-tp",
+      "num_gpus": 2
+    },
+    "wan21_i2v_14b_480p": {
+      "profile": "h200-4gpu-tp",
+      "num_gpus": 4
+    },
+    "wan22_t2v_a14b_720p": {
+      "profile": "h200-4gpu-tp",
+      "num_gpus": 4
+    },
+    "wan22_ti2v_5b_704p": {
+      "profile": "h200-2gpu-tp",
+      "num_gpus": 2
+    },
+    "wan21_i2v_14b_720p": {
+      "profile": "h200-4gpu-tp",
+      "num_gpus": 4
+    },
+    "wan22_i2v_a14b_720p": {
+      "profile": "h200-4gpu-tp",
+      "num_gpus": 4
+    }
+  },
+  "warnings": [
+    {
+      "case_id": "wan21_i2v_14b_480p",
+      "framework": "vllm-omni",
+      "reason": "Server loaded and generated successfully, but logs repeatedly warned that blocks.*.attn2.norm_added_q.weight was skipped by wan2_2_transformer.py."
+    },
+    {
+      "case_id": "wan21_i2v_14b_720p",
+      "framework": "vllm-omni",
+      "reason": "Server loaded and generated successfully, but logs repeatedly warned that blocks.*.attn2.norm_added_q.weight was skipped by wan2_2_transformer.py."
+    }
+  ],
+  "notes": [
+    "The run used a non-CI H200 user machine. CI, runner, build, GitHub Actions, Jenkins, and similar shared automation machines were not used for this benchmark.",
+    "No cache acceleration path was enabled; vLLM-Omni was launched eager with compilation mode 0.",
+    "Wan2.1 I2V numbers are retained as measured framework behavior but should be interpreted with the logged skipped-weight warning."
+  ]
+}

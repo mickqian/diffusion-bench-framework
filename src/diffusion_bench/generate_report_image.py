@@ -540,8 +540,12 @@ def _source_footer(results: dict) -> list[str]:
     if not names:
         return [f"Data: {results.get('run_id', '-')}."]
     single = names[0] if names else "-"
-    throughput = next((name for name in names if "throughput" in name), "-")
-    extra = ", ".join(names[2:]) if len(names) > 2 else "-"
+    throughput = next((name for name in names[1:] if "throughput" in name), "-")
+    primary = {single}
+    if throughput != "-":
+        primary.add(throughput)
+    extra_names = [name for name in names if name not in primary]
+    extra = ", ".join(extra_names) if extra_names else "-"
     return [
         f"Data: single-e2e {single}; throughput {throughput}.",
         f"Additional inputs: {extra}.",
