@@ -92,7 +92,16 @@ If the failure is SGLang, treat it as a bug or bad profile and fix before finali
 
 ## Reports And Images
 
+Formal reports use the fixed tracker issue, not ad hoc issues. For this repo, keep `mickqian/diffusion-bench-framework#1` as the canonical tracker and maintain one latest data-only formal report comment there.
+
 Formal issue comments should be data-only: run metadata, framework versions, case tables, ratios, statuses, and reasons. Put debug analysis elsewhere.
+
+Use the fixed artifact workflow for future reports:
+
+- regenerate merged JSON, issue Markdown, dashboard Markdown, PNG, and SVG from `scripts/generate_h200_report_artifacts.sh`
+- review `tmp/report/h200-framework-comparison-merged-local.issue.md` and `.png`
+- delete stale formal tracker comments before appending the new generated issue Markdown
+- keep the report shape stable so historical comments/images are comparable
 
 For comparison images:
 

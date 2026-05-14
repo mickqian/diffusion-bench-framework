@@ -17,14 +17,23 @@ A formal report should append one comment to the fixed tracker issue, not open a
 
 ## Issue Workflow
 
-1. Generate `comparison-results.json`.
-2. Run `diffusion-bench-dashboard --results comparison-results.json --report-repo <owner/repo> --report-issue <fixed-number>`.
-3. Keep the generated issue comment data-only.
-4. Put debug analysis, root-cause notes, blocked-run details, and action items outside the tracker issue.
+Use the fixed tracker issue for formal reports. For this repo the canonical tracker is `mickqian/diffusion-bench-framework#1`.
+
+1. Generate or collect the source result JSONs.
+2. Regenerate merged artifacts from a fixed script, for example `scripts/generate_h200_report_artifacts.sh`.
+3. Review the generated issue Markdown and PNG/SVG image locally.
+4. Delete stale formal report comments on the fixed tracker issue, then append exactly one new data-only comment.
+5. Put debug analysis, root-cause notes, blocked-run details, and action items outside the tracker issue.
+
+The preferred H200 artifact set is:
+
+- merged JSON: `tmp/report/h200-framework-comparison-merged-local.json`
+- data-only issue Markdown: `tmp/report/h200-framework-comparison-merged-local.issue.md`
+- image report: `tmp/report/h200-framework-comparison-merged-local.png` and `.svg`
 
 ## Tables
 
-The formal issue comment uses one grouped comparison block per case:
+The formal issue comment uses one grouped comparison block per case and the same table layout across runs.
 
 Case metadata:
 
@@ -32,7 +41,7 @@ Case metadata:
 
 Framework comparison:
 
-| framework | profile | gpus | single_e2e_s | single/sglang | single_status | throughput_p50_s | p50/sglang | throughput_p95_s | throughput_rps | rps/sglang | throughput_status |
+| framework | profile | gpus | single_e2e_s | single/SGLang-Diffusion | single_status | done/reqs | concurrency | p50_s | p50/SGLang-Diffusion | p95_s | p99_s | qps | qps/SGLang-Diffusion | throughput_status | reason |
 
 ## Interpretation
 
@@ -43,4 +52,4 @@ Framework comparison:
 
 ## Final Output
 
-Return the fixed issue URL, the commit that produced the framework/reporting change, and any verification that was actually run.
+Return the fixed issue comment URL, generated artifact paths, the commit that produced the framework/reporting change, and any verification that was actually run.
