@@ -22,7 +22,7 @@ PYTHON_BIN="${PYTHON_BIN:-python3}"
 
 export CUDA_VISIBLE_DEVICES="${CUDA_VISIBLE_DEVICES:-2,3,4,5,6,7}"
 export SGLANG_DIFFUSION_FRAMEWORK_VENV_ROOT="${SGLANG_DIFFUSION_FRAMEWORK_VENV_ROOT:-/root/.cache/sglang-diffusion-framework-venvs}"
-export SGLANG_DIFFUSION_SKIP_FRAMEWORK_INSTALL="${SGLANG_DIFFUSION_SKIP_FRAMEWORK_INSTALL:-1}"
+export SGLANG_DIFFUSION_SKIP_FRAMEWORK_INSTALL="${SGLANG_DIFFUSION_SKIP_FRAMEWORK_INSTALL:-0}"
 export HF_HOME="${HF_HOME:-/root/diffusion-bench-hf-cache}"
 export DIFFUSION_BENCH_HF_CACHE_DIR="${DIFFUSION_BENCH_HF_CACHE_DIR:-${HF_HOME}/hub}"
 
@@ -83,12 +83,45 @@ run_group() {
     --output "${output}"
 }
 
-run_group "${IMAGE_OUTPUT}" "${RUN_ID}-image" "${IMAGE_NUM_REQUESTS}" "${IMAGE_MAX_CONCURRENCY}" "${IMAGE_CASES[@]}"
-run_group "${VIDEO_OUTPUT}" "${RUN_ID}-video" "${VIDEO_NUM_REQUESTS}" "${VIDEO_MAX_CONCURRENCY}" "${VIDEO_CASES[@]}"
+status=0
+for group in image video; do
+  if [[ "${group}" == "image" ]]; then
+    output="${IMAGE_OUTPUT}"
+    group_run_id="${RUN_ID}-image"
+    num_requests="${IMAGE_NUM_REQUESTS}"
+    max_concurrency="${IMAGE_MAX_CONCURRENCY}"
+    cases=("${IMAGE_CASES[@]}")
+  else
+    output="${VIDEO_OUTPUT}"
+    group_run_id="${RUN_ID}-video"
+    num_requests="${VIDEO_NUM_REQUESTS}"
+    max_concurrency="${VIDEO_MAX_CONCURRENCY}"
+    cases=("${VIDEO_CASES[@]}")
+  fi
+
+  set +e
+  run_group "${output}" "${group_run_id}" "${num_requests}" "${max_concurrency}" "${cases[@]}"
+  group_status=$?
+  set -e
+  if [[ "${group_status}" -ne 0 ]]; then
+    status="${group_status}"
+  fi
+done
+
+RESULT_FILES=()
+for result_file in "${IMAGE_OUTPUT}" "${VIDEO_OUTPUT}"; do
+  if [[ -f "${result_file}" ]]; then
+    RESULT_FILES+=("${result_file}")
+  fi
+done
+
+if [[ "${#RESULT_FILES[@]}" -eq 0 ]]; then
+  exit "${status}"
+fi
 
 "${PYTHON_BIN}" -m diffusion_bench.build_report_artifacts \
   --config "${CONFIG}" \
-  --results "${IMAGE_OUTPUT}" "${VIDEO_OUTPUT}" \
+  --results "${RESULT_FILES[@]}" \
   --output-json "${OUTPUT}" \
   --dashboard-md "${DASHBOARD}" \
   --issue-md "${ISSUE_MD}" \
@@ -103,3 +136,5 @@ if [[ "${PUBLISH_ISSUE:-0}" == "1" ]]; then
     --report-repo mickqian/diffusion-bench-framework \
     --report-issue 1
 fi
+
+exit "${status}"
