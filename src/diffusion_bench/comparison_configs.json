@@ -338,6 +338,38 @@
                         }
                     }
                 },
+                "vllm-omni": {
+                    "num_gpus": 2,
+                    "serve_args": "--tensor-parallel-size 2",
+                    "extra_env": {
+                        "DIFFUSION_ATTENTION_BACKEND": "FLASH_ATTN"
+                    },
+                    "command_profiles": {
+                        "default": {
+                            "description": "Best known vLLM-Omni Wan command for aligned non-cache benchmark runs.",
+                            "framework_ref": "vllm-omni-0.18.0-wan+tp2",
+                            "num_gpus": 2,
+                            "serve_args": "--tensor-parallel-size 2",
+                            "notes": "Uses vLLM-Omni's Wan /v1/videos path with same GPU budget; torch compile is disabled by the benchmark harness.",
+                            "extra_env": {
+                                "DIFFUSION_ATTENTION_BACKEND": "FLASH_ATTN"
+                            }
+                        },
+                        "h200-2gpu-tp": {
+                            "description": "H200 vLLM-Omni Wan tensor-parallel command.",
+                            "hardware": [
+                                "h200"
+                            ],
+                            "framework_ref": "vllm-omni-0.18.0-wan+h200-tp2",
+                            "num_gpus": 2,
+                            "serve_args": "--tensor-parallel-size 2",
+                            "notes": "Same-GPU H200 comparison profile; no cache or torch compile path.",
+                            "extra_env": {
+                                "DIFFUSION_ATTENTION_BACKEND": "FLASH_ATTN"
+                            }
+                        }
+                    }
+                },
                 "lightx2v": {
                     "model": "Wan-AI/Wan2.1-T2V-1.3B",
                     "model_cls": "wan2.1",
@@ -407,6 +439,38 @@
                             "sglang_ref": "current-main",
                             "serve_args": "--model-type diffusion --warmup --enable-cfg-parallel --ulysses-degree 2 --dit-cpu-offload false --text-encoder-cpu-offload --pin-cpu-memory",
                             "notes": "Keep this profile updated when the best command changes for a SGLang release or commit."
+                        }
+                    }
+                },
+                "vllm-omni": {
+                    "num_gpus": 4,
+                    "serve_args": "--tensor-parallel-size 4",
+                    "extra_env": {
+                        "DIFFUSION_ATTENTION_BACKEND": "FLASH_ATTN"
+                    },
+                    "command_profiles": {
+                        "default": {
+                            "description": "Best known vLLM-Omni Wan command for aligned non-cache benchmark runs.",
+                            "framework_ref": "vllm-omni-0.18.0-wan+tp4",
+                            "num_gpus": 4,
+                            "serve_args": "--tensor-parallel-size 4",
+                            "notes": "Uses vLLM-Omni's Wan /v1/videos path with same GPU budget; torch compile is disabled by the benchmark harness.",
+                            "extra_env": {
+                                "DIFFUSION_ATTENTION_BACKEND": "FLASH_ATTN"
+                            }
+                        },
+                        "h200-4gpu-tp": {
+                            "description": "H200 vLLM-Omni Wan tensor-parallel command.",
+                            "hardware": [
+                                "h200"
+                            ],
+                            "framework_ref": "vllm-omni-0.18.0-wan+h200-tp4",
+                            "num_gpus": 4,
+                            "serve_args": "--tensor-parallel-size 4",
+                            "notes": "Same-GPU H200 comparison profile; no cache or torch compile path.",
+                            "extra_env": {
+                                "DIFFUSION_ATTENTION_BACKEND": "FLASH_ATTN"
+                            }
                         }
                     }
                 },
@@ -481,6 +545,38 @@
                             "sglang_ref": "current-main",
                             "serve_args": "--model-type diffusion --warmup --enable-cfg-parallel --ulysses-degree 2 --dit-cpu-offload false --text-encoder-cpu-offload --pin-cpu-memory",
                             "notes": "Keep this profile updated when the best command changes for a SGLang release or commit."
+                        }
+                    }
+                },
+                "vllm-omni": {
+                    "num_gpus": 4,
+                    "serve_args": "--tensor-parallel-size 4",
+                    "extra_env": {
+                        "DIFFUSION_ATTENTION_BACKEND": "FLASH_ATTN"
+                    },
+                    "command_profiles": {
+                        "default": {
+                            "description": "Best known vLLM-Omni Wan command for aligned non-cache benchmark runs.",
+                            "framework_ref": "vllm-omni-0.18.0-wan+tp4",
+                            "num_gpus": 4,
+                            "serve_args": "--tensor-parallel-size 4",
+                            "notes": "Uses vLLM-Omni's Wan /v1/videos path with same GPU budget; torch compile is disabled by the benchmark harness.",
+                            "extra_env": {
+                                "DIFFUSION_ATTENTION_BACKEND": "FLASH_ATTN"
+                            }
+                        },
+                        "h200-4gpu-tp": {
+                            "description": "H200 vLLM-Omni Wan tensor-parallel command.",
+                            "hardware": [
+                                "h200"
+                            ],
+                            "framework_ref": "vllm-omni-0.18.0-wan+h200-tp4",
+                            "num_gpus": 4,
+                            "serve_args": "--tensor-parallel-size 4",
+                            "notes": "Same-GPU H200 comparison profile; no cache or torch compile path.",
+                            "extra_env": {
+                                "DIFFUSION_ATTENTION_BACKEND": "FLASH_ATTN"
+                            }
                         }
                     }
                 },
@@ -570,6 +666,38 @@
                             "num_gpus": 2,
                             "serve_args": "--model-type diffusion --warmup --enable-cfg-parallel --dit-cpu-offload false --text-encoder-cpu-offload --pin-cpu-memory",
                             "notes": "Keep DiT resident on high-memory GPUs to avoid CPU offload in performance runs."
+                        }
+                    }
+                },
+                "vllm-omni": {
+                    "num_gpus": 2,
+                    "serve_args": "--tensor-parallel-size 2",
+                    "extra_env": {
+                        "DIFFUSION_ATTENTION_BACKEND": "FLASH_ATTN"
+                    },
+                    "command_profiles": {
+                        "default": {
+                            "description": "Best known vLLM-Omni Wan command for aligned non-cache benchmark runs.",
+                            "framework_ref": "vllm-omni-0.18.0-wan+tp2",
+                            "num_gpus": 2,
+                            "serve_args": "--tensor-parallel-size 2",
+                            "notes": "Uses vLLM-Omni's Wan /v1/videos path with same GPU budget; torch compile is disabled by the benchmark harness.",
+                            "extra_env": {
+                                "DIFFUSION_ATTENTION_BACKEND": "FLASH_ATTN"
+                            }
+                        },
+                        "h200-2gpu-tp": {
+                            "description": "H200 vLLM-Omni Wan tensor-parallel command.",
+                            "hardware": [
+                                "h200"
+                            ],
+                            "framework_ref": "vllm-omni-0.18.0-wan+h200-tp2",
+                            "num_gpus": 2,
+                            "serve_args": "--tensor-parallel-size 2",
+                            "notes": "Same-GPU H200 comparison profile; no cache or torch compile path.",
+                            "extra_env": {
+                                "DIFFUSION_ATTENTION_BACKEND": "FLASH_ATTN"
+                            }
                         }
                     }
                 },
@@ -996,6 +1124,38 @@
                         }
                     }
                 },
+                "vllm-omni": {
+                    "num_gpus": 4,
+                    "serve_args": "--tensor-parallel-size 4",
+                    "extra_env": {
+                        "DIFFUSION_ATTENTION_BACKEND": "FLASH_ATTN"
+                    },
+                    "command_profiles": {
+                        "default": {
+                            "description": "Best known vLLM-Omni Wan command for aligned non-cache benchmark runs.",
+                            "framework_ref": "vllm-omni-0.18.0-wan+tp4",
+                            "num_gpus": 4,
+                            "serve_args": "--tensor-parallel-size 4",
+                            "notes": "Uses vLLM-Omni's Wan /v1/videos path with same GPU budget; torch compile is disabled by the benchmark harness.",
+                            "extra_env": {
+                                "DIFFUSION_ATTENTION_BACKEND": "FLASH_ATTN"
+                            }
+                        },
+                        "h200-4gpu-tp": {
+                            "description": "H200 vLLM-Omni Wan tensor-parallel command.",
+                            "hardware": [
+                                "h200"
+                            ],
+                            "framework_ref": "vllm-omni-0.18.0-wan+h200-tp4",
+                            "num_gpus": 4,
+                            "serve_args": "--tensor-parallel-size 4",
+                            "notes": "Same-GPU H200 comparison profile; no cache or torch compile path.",
+                            "extra_env": {
+                                "DIFFUSION_ATTENTION_BACKEND": "FLASH_ATTN"
+                            }
+                        }
+                    }
+                },
                 "lightx2v": {
                     "model": "Wan-AI/Wan2.1-I2V-14B-720P",
                     "model_cls": "wan2.1",
@@ -1070,6 +1230,38 @@
                             "sglang_ref": "current-main",
                             "serve_args": "--model-type diffusion --warmup --enable-cfg-parallel --ulysses-degree 2 --dit-cpu-offload false --text-encoder-cpu-offload --pin-cpu-memory",
                             "notes": "Keep this profile updated when the best command changes for a SGLang release or commit."
+                        }
+                    }
+                },
+                "vllm-omni": {
+                    "num_gpus": 4,
+                    "serve_args": "--tensor-parallel-size 4",
+                    "extra_env": {
+                        "DIFFUSION_ATTENTION_BACKEND": "FLASH_ATTN"
+                    },
+                    "command_profiles": {
+                        "default": {
+                            "description": "Best known vLLM-Omni Wan command for aligned non-cache benchmark runs.",
+                            "framework_ref": "vllm-omni-0.18.0-wan+tp4",
+                            "num_gpus": 4,
+                            "serve_args": "--tensor-parallel-size 4",
+                            "notes": "Uses vLLM-Omni's Wan /v1/videos path with same GPU budget; torch compile is disabled by the benchmark harness.",
+                            "extra_env": {
+                                "DIFFUSION_ATTENTION_BACKEND": "FLASH_ATTN"
+                            }
+                        },
+                        "h200-4gpu-tp": {
+                            "description": "H200 vLLM-Omni Wan tensor-parallel command.",
+                            "hardware": [
+                                "h200"
+                            ],
+                            "framework_ref": "vllm-omni-0.18.0-wan+h200-tp4",
+                            "num_gpus": 4,
+                            "serve_args": "--tensor-parallel-size 4",
+                            "notes": "Same-GPU H200 comparison profile; no cache or torch compile path.",
+                            "extra_env": {
+                                "DIFFUSION_ATTENTION_BACKEND": "FLASH_ATTN"
+                            }
                         }
                     }
                 },
