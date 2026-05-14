@@ -877,11 +877,20 @@ def _successful_throughput_metric(entry: dict | None, getter) -> object:
     return getter(entry)
 
 
-def _profile_cell(entry: dict | None) -> str:
+def _profile_value(entry: dict | None) -> str | None:
     if not entry:
-        return "-"
+        return None
     metadata = entry.get("framework_metadata") or {}
-    return _md_cell(metadata.get("sglang_profile") or metadata.get("profile"))
+    profile = metadata.get("sglang_profile") or metadata.get("profile")
+    return str(profile) if profile else None
+
+
+def _profile_cell(single_entry: dict | None, throughput_entry: dict | None) -> str:
+    single_profile = _profile_value(single_entry)
+    throughput_profile = _profile_value(throughput_entry)
+    if single_profile and throughput_profile and single_profile != throughput_profile:
+        return _md_cell(f"single:{single_profile}; throughput:{throughput_profile}")
+    return _md_cell(single_profile or throughput_profile)
 
 
 def _result_entries(results: dict) -> list[dict]:
@@ -1117,7 +1126,7 @@ def build_issue_report_comment(results: dict) -> str:
             throughput_rps = _throughput_rps(throughput_entry)
             row = [
                 _md_cell(_framework_display_name(framework)),
-                _profile_cell(entry),
+                _profile_cell(single_entry, throughput_entry),
                 _md_cell(entry.get("num_gpus")),
             ]
             if include_single:

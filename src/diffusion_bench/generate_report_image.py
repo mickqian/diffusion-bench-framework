@@ -318,6 +318,7 @@ def _draw_header(
     results: dict,
     single_summary: tuple[int, int, int],
     throughput_summary: tuple[int, int],
+    throughput_meta: str,
 ) -> None:
     _rounded(draw, (0, 0, WIDTH, HEADER_H), 0, PANEL)
     draw.line((0, HEADER_H, WIDTH, HEADER_H), fill="#e5e7eb", width=1)
@@ -347,7 +348,7 @@ def _draw_header(
         1626,
         f"{qps_wins}/{qps_comparable}" if qps_comparable else "0/0",
         "QPS wins",
-        "32 requests - max concurrency 4",
+        throughput_meta,
     )
 
 
@@ -562,6 +563,28 @@ def _throughput_summary(
     return wins, comparable
 
 
+def _throughput_run_meta(
+    throughput_cases: list[str], throughput: dict[str, dict[str, dict]]
+) -> str:
+    pairs = set()
+    for case_id in throughput_cases:
+        for entry in throughput.get(case_id, {}).values():
+            metrics = entry.get("metrics") or {}
+            requests = metrics.get("num_requests")
+            concurrency = metrics.get("max_concurrency")
+            if requests is not None and concurrency is not None:
+                pairs.add((int(requests), int(concurrency)))
+    if not pairs:
+        return "-"
+    if len(pairs) == 1:
+        requests, concurrency = next(iter(pairs))
+        return f"{requests} requests - max concurrency {concurrency}"
+    return "; ".join(
+        f"{requests} req @ c{concurrency}"
+        for requests, concurrency in sorted(pairs, reverse=True)
+    )
+
+
 def _source_footer(results: dict) -> list[str]:
     sources = results.get("source_results") or []
     names = [Path(str(item.get("path") or "")).name for item in sources if item.get("path")]
@@ -611,6 +634,7 @@ def render_report_image(
         results,
         _single_summary(cases, single),
         _throughput_summary(throughput_cases, throughput),
+        _throughput_run_meta(throughput_cases, throughput),
     )
 
     _rounded(draw, (PANEL_X, single_y, PANEL_X + PANEL_W, single_y + single_panel_h), 18, PANEL, BORDER)
