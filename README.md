@@ -20,9 +20,10 @@ The repo launches one serving stack per case, sends a single end-to-end request,
 - `scripts/install_comparison_frameworks.sh`: isolated venv installer for vLLM-Omni and LightX2V.
 - `scripts/run_h200_single_e2e_20260510.sh`: reproducible H200 single-request run script for the 2026-05-10 report shape.
 - `scripts/run_h200_throughput_20260511.sh`: reproducible H200 throughput run script for faster image cases.
+- `scripts/run_h200_throughput_common_20260514.sh`: H200 throughput run script for cases with SGLang-Diffusion, vLLM-Omni, and LightX2V profiles.
 - `scripts/run_h200_ltx_lightx2v_20260513.sh`: targeted H200 LightX2V LTX-2/LTX-2.3 rerun with the latest tracked upstream commit.
 - `scripts/run_h100_ltx_lightx2v_20260513.sh`: targeted H100 LightX2V LTX-2/LTX-2.3 rerun when H200 is unavailable.
-- `scripts/run_h200_wan_vllm_omni_20260514.sh`: targeted H200 vLLM-Omni Wan rerun for cells that were previously not configured.
+- `scripts/run_h200_wan_vllm_omni_20260514.sh`: targeted H200 vLLM-Omni Wan rerun for cells that previously had no report data.
 - `scripts/generate_h200_report_artifacts.sh`: fixed local entrypoint for merged JSON, issue Markdown, dashboard Markdown, and image output.
 - `manifests/`: pinned run manifests tying report data to bench, SGLang, framework, and hardware versions.
 - `skills/`: repo-local Codex skills for maintaining long-term performance tracking.
@@ -57,6 +58,7 @@ H200 LTX-2.3 LightX2V reporting uses the same 2GPU budget as SGLang; the previou
 H100 LTX LightX2V profiles are hardware-specific: LTX-2 uses upstream block offload; LTX-2.3 keeps the best attempted full-offload profile, but currently still fails after warmup on 80GB GPUs and should be reported as no stable H100 server data.
 `scripts/run_h200_throughput_20260511.sh` sets `DIFFUSION_BENCH_SGLANG_EXTRA_SERVE_ARGS="--batching-max-size ${THROUGHPUT_MAX_CONCURRENCY} --batching-delay-ms 0"` by default so SGLang throughput runs use the same request concurrency as the benchmark client.
 Set `THROUGHPUT_FRAMEWORKS="lightx2v"` and `THROUGHPUT_CASES="zimage_turbo_t2i_1024"` to reproduce a targeted throughput rerun without rerunning the whole matrix.
+Use `scripts/run_h200_throughput_common_20260514.sh` for the preferred three-framework throughput suite. It defaults to all-supported image cases `zimage_turbo_t2i_1024` and `flux2_dev_t2i_1024` at 32 requests / concurrency 4, plus all-supported video cases `wan21_t2v_1_3b_480p` and `wan22_ti2v_5b_704p` at 8 requests / concurrency 2. Override `THROUGHPUT_IMAGE_CASES`, `THROUGHPUT_VIDEO_CASES`, `IMAGE_NUM_REQUESTS`, `IMAGE_MAX_CONCURRENCY`, `VIDEO_NUM_REQUESTS`, or `VIDEO_MAX_CONCURRENCY` for targeted reruns.
 Set `SINGLE_E2E_FRAMEWORKS` and `SINGLE_E2E_CASES` the same way for targeted single-request reruns.
 Use `scripts/run_h200_wan_vllm_omni_20260514.sh` to reproduce the vLLM-Omni Wan coverage rerun. It defaults to a fresh isolated vLLM-Omni install, `CUDA_VISIBLE_DEVICES=0,1,2,3`, H200 profile selection, and the six Wan cases that previously had no report data.
 

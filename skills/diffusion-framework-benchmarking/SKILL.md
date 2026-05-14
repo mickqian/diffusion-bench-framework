@@ -74,6 +74,7 @@ For throughput, use enough warmup to avoid first-request artifacts, then record 
 - failure count
 
 Also record p95 latency when available. For very fast image cases, run multiple requests at realistic concurrency; for long video cases, one single request per model is acceptable unless throughput behavior is the question.
+For high-pressure cross-framework throughput reports, prefer cases supported by every framework in scope. It is fine to include one or two video cases, but use a smaller request/concurrency budget than fast image cases and keep the image/video budgets explicit in the reproduce script.
 
 Use `py-spy` only for diagnosis, not as part of the benchmark timing path.
 
