@@ -83,7 +83,12 @@ SGLANG_PROFILE_RUNTIME_KEYS = {
     "model",
     "model_path",
 }
-FRAMEWORK_PROFILE_RUNTIME_KEYS = SGLANG_PROFILE_RUNTIME_KEYS | {"lightx2v_config"}
+FRAMEWORK_PROFILE_RUNTIME_KEYS = SGLANG_PROFILE_RUNTIME_KEYS | {
+    "lightx2v_config",
+    "server_bin",
+    "use_omni_arg",
+    "required_help_args",
+}
 
 # Cached reference images keyed by URL.
 _cached_ref_images: dict[str, bytes] = {}
@@ -123,15 +128,16 @@ def _build_vllm_cmd(case: dict, fw_cfg: dict, port: int) -> list[str]:
     model_path = _server_model_path(case, fw_cfg)
     num_gpus = fw_cfg.get("num_gpus", case["num_gpus"])
     cmd = [
-        "vllm",
+        fw_cfg.get("server_bin") or os.environ.get("VLLM_OMNI_SERVER_BIN", "vllm"),
         "serve",
         model_path,
-        "--omni",
         "--port",
         str(port),
         "--host",
         DEFAULT_HOST,
     ]
+    if fw_cfg.get("use_omni_arg", True):
+        cmd.append("--omni")
     if fw_cfg.get("serve_args", "").strip():
         cmd += fw_cfg["serve_args"].strip().split()
     parallel_args = {
@@ -525,6 +531,10 @@ def _resolve_framework_config(
         "hardware_candidates": hardware_candidates,
         "description": profile_cfg.get("description"),
         "notes": profile_cfg.get("notes"),
+        "install_specs": profile_cfg.get("install_specs") or fw_cfg.get("install_specs"),
+        "server_bin": resolved.get("server_bin"),
+        "use_omni_arg": resolved.get("use_omni_arg"),
+        "required_help_args": resolved.get("required_help_args"),
         "serve_args": resolved.get("serve_args", ""),
         "num_gpus": resolved.get("num_gpus"),
         "extra_env_keys": sorted((resolved.get("extra_env") or {}).keys()),
@@ -1377,6 +1387,12 @@ def _collect_framework_runtime_metadata() -> dict:
                 "LIGHTX2V_FLASHINFER_INSTALL_SPEC", "flashinfer-python==0.6.11"
             ),
         },
+        "launchers": {
+            "vllm_omni_server_bin": os.environ.get("VLLM_OMNI_SERVER_BIN", "vllm"),
+            "vllm_omni_required_help_args": os.environ.get(
+                "VLLM_OMNI_REQUIRED_HELP_ARGS", "--omni"
+            ),
+        },
     }
     packages_by_framework = {
         "vllm-omni": ["vllm", "vllm-omni"],
@@ -1614,6 +1630,7 @@ def run_case_framework(
     env.update(fw_cfg.get("extra_env", {}))
     env.update(FORCED_BENCHMARK_ENV)
     env = _framework_env(framework, env)
+    _preflight_framework_command(framework, fw_cfg, env)
 
     log_file = log_dir / f"{case['id']}_{framework}.log"
     log_fh = open(log_file, "w", encoding="utf-8", buffering=1)
@@ -1727,6 +1744,31 @@ def _framework_env(fw_name: str, env: dict[str, str]) -> dict[str, str]:
     framework_env["VIRTUAL_ENV"] = str(venv_path)
     framework_env["PATH"] = f"{bin_path}:{framework_env.get('PATH', '')}"
     return framework_env
+
+
+def _preflight_framework_command(
+    framework: str, fw_cfg: dict, env: dict[str, str]
+) -> None:
+    required_args = fw_cfg.get("required_help_args") or []
+    if framework != "vllm-omni" or not required_args:
+        return
+    server_bin = fw_cfg.get("server_bin") or env.get("VLLM_OMNI_SERVER_BIN") or "vllm"
+    ret = subprocess.run(
+        [server_bin, "serve", "--help"],
+        capture_output=True,
+        text=True,
+        timeout=60,
+        env=env,
+    )
+    output = f"{ret.stdout}\n{ret.stderr}"
+    if ret.returncode != 0:
+        tail = "\n".join(output.splitlines()[-20:])
+        raise RuntimeError(f"{framework} CLI preflight failed: {tail}")
+    missing = [arg for arg in required_args if arg not in output]
+    if missing:
+        raise RuntimeError(
+            f"{framework} CLI preflight missing expected args: {', '.join(missing)}"
+        )
 
 
 def run_comparison(

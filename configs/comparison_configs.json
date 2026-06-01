@@ -1403,6 +1403,22 @@
                 },
                 "vllm-omni": {
                     "num_gpus": 1,
+                    "install_specs": {
+                        "vllm": "vllm==0.21.0",
+                        "vllm_omni": "git+https://github.com/MaciejBalaNV/vllm-omni.git@453bd09ab3d1e2f10e3d1b63ff05f090ab49a7cc"
+                    },
+                    "server_bin": "vllm",
+                    "use_omni_arg": true,
+                    "required_help_args": [
+                        "--omni",
+                        "--model-class-name",
+                        "--stage-init-timeout",
+                        "--no-guardrails",
+                        "--diffusion-attention-backend",
+                        "--cache-backend",
+                        "--cfg-parallel-size",
+                        "--ulysses-degree"
+                    ],
                     "serve_args": "--model-class-name Cosmos3OmniDiffusersPipeline --stage-init-timeout 900 --init-timeout 1800 --no-guardrails --diffusion-attention-backend FLASH_ATTN --cache-backend none",
                     "extra_env": {},
                     "command_profiles": {
@@ -1488,6 +1504,22 @@
                 },
                 "vllm-omni": {
                     "num_gpus": 4,
+                    "install_specs": {
+                        "vllm": "vllm==0.21.0",
+                        "vllm_omni": "git+https://github.com/MaciejBalaNV/vllm-omni.git@453bd09ab3d1e2f10e3d1b63ff05f090ab49a7cc"
+                    },
+                    "server_bin": "vllm",
+                    "use_omni_arg": true,
+                    "required_help_args": [
+                        "--omni",
+                        "--model-class-name",
+                        "--stage-init-timeout",
+                        "--no-guardrails",
+                        "--diffusion-attention-backend",
+                        "--cache-backend",
+                        "--cfg-parallel-size",
+                        "--ulysses-degree"
+                    ],
                     "serve_args": "--num-gpus 4 --cfg-parallel-size 2 --ulysses-degree 2 --model-class-name Cosmos3OmniDiffusersPipeline --stage-init-timeout 900 --init-timeout 1800 --no-guardrails --diffusion-attention-backend FLASH_ATTN --cache-backend none",
                     "extra_env": {},
                     "command_profiles": {
@@ -1575,6 +1607,22 @@
                 },
                 "vllm-omni": {
                     "num_gpus": 4,
+                    "install_specs": {
+                        "vllm": "vllm==0.21.0",
+                        "vllm_omni": "git+https://github.com/MaciejBalaNV/vllm-omni.git@453bd09ab3d1e2f10e3d1b63ff05f090ab49a7cc"
+                    },
+                    "server_bin": "vllm",
+                    "use_omni_arg": true,
+                    "required_help_args": [
+                        "--omni",
+                        "--model-class-name",
+                        "--stage-init-timeout",
+                        "--no-guardrails",
+                        "--diffusion-attention-backend",
+                        "--cache-backend",
+                        "--cfg-parallel-size",
+                        "--ulysses-degree"
+                    ],
                     "serve_args": "--num-gpus 4 --cfg-parallel-size 2 --ulysses-degree 2 --model-class-name Cosmos3OmniDiffusersPipeline --stage-init-timeout 900 --init-timeout 1800 --no-guardrails --diffusion-attention-backend FLASH_ATTN --cache-backend none",
                     "extra_env": {},
                     "command_profiles": {

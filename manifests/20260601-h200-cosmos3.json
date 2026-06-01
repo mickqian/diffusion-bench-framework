@@ -13,12 +13,23 @@
   },
   "frameworks": {
     "vllm": {
-      "install_spec": "vllm==0.18.0"
+      "install_spec": "vllm==0.21.0"
     },
     "vllm_omni": {
       "install_spec": "git+https://github.com/MaciejBalaNV/vllm-omni.git@453bd09ab3d1e2f10e3d1b63ff05f090ab49a7cc",
       "expected_ref": "vllm-project/vllm-omni#3454",
-      "expected_commit": "453bd09ab3d1e2f10e3d1b63ff05f090ab49a7cc"
+      "expected_commit": "453bd09ab3d1e2f10e3d1b63ff05f090ab49a7cc",
+      "server_bin": "vllm",
+      "required_help_args": [
+        "--omni",
+        "--model-class-name",
+        "--stage-init-timeout",
+        "--no-guardrails",
+        "--diffusion-attention-backend",
+        "--cache-backend",
+        "--cfg-parallel-size",
+        "--ulysses-degree"
+      ]
     }
   },
   "environment": {

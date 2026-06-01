@@ -36,6 +36,8 @@ write_desired_stamp() {
       vllm-omni)
         echo "vllm_install_spec=${VLLM_INSTALL_SPEC:-vllm==0.18.0}"
         echo "vllm_omni_install_spec=${VLLM_OMNI_INSTALL_SPEC:-vllm-omni==0.18.0}"
+        echo "vllm_omni_server_bin=${VLLM_OMNI_SERVER_BIN:-vllm}"
+        echo "vllm_omni_required_help_args=${VLLM_OMNI_REQUIRED_HELP_ARGS:---omni}"
         ;;
       lightx2v)
         echo "lightx2v_install_spec=${LIGHTX2V_INSTALL_SPEC:-git+https://github.com/ModelTC/LightX2V.git@7efd05f8e1425b83321fd4f1cef779ef6504076f}"
@@ -58,7 +60,13 @@ framework_health_check() {
   [[ -x "${VENV_PATH}/bin/python3" ]] || return 1
   case "${FRAMEWORK}" in
     vllm-omni)
-      "${VENV_PATH}/bin/python3" -c 'import importlib.metadata as m; import vllm; m.version("vllm"); m.version("vllm-omni")'
+      "${VENV_PATH}/bin/python3" -c 'import importlib.metadata as m; import vllm, vllm_omni; m.version("vllm"); m.version("vllm-omni")'
+      local server_bin="${VLLM_OMNI_SERVER_BIN:-vllm}"
+      local help_output
+      help_output="$("${VENV_PATH}/bin/${server_bin}" serve --help 2>&1)"
+      for required_arg in ${VLLM_OMNI_REQUIRED_HELP_ARGS:---omni}; do
+        grep -q -- "${required_arg}" <<< "${help_output}" || return 1
+      done
       ;;
     lightx2v)
       "${VENV_PATH}/bin/python3" -c 'import importlib.util; assert importlib.util.find_spec("lightx2v"); import flash_attn_interface; assert hasattr(flash_attn_interface, "flash_attn_func")'
