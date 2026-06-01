@@ -63,7 +63,7 @@ framework_health_check() {
       "${VENV_PATH}/bin/python3" -c 'import importlib.metadata as m; import vllm, vllm_omni; m.version("vllm"); m.version("vllm-omni")'
       local server_bin="${VLLM_OMNI_SERVER_BIN:-vllm}"
       local help_output
-      help_output="$("${VENV_PATH}/bin/${server_bin}" serve --help 2>&1)"
+      help_output="$("${VENV_PATH}/bin/${server_bin}" serve --omni --help=all 2>&1)"
       for required_arg in ${VLLM_OMNI_REQUIRED_HELP_ARGS:---omni}; do
         grep -q -- "${required_arg}" <<< "${help_output}" || return 1
       done

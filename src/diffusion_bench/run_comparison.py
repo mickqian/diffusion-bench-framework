@@ -1753,8 +1753,12 @@ def _preflight_framework_command(
     if framework != "vllm-omni" or not required_args:
         return
     server_bin = fw_cfg.get("server_bin") or env.get("VLLM_OMNI_SERVER_BIN") or "vllm"
+    help_cmd = [server_bin, "serve"]
+    if fw_cfg.get("use_omni_arg", True):
+        help_cmd.append("--omni")
+    help_cmd.append("--help=all")
     ret = subprocess.run(
-        [server_bin, "serve", "--help"],
+        help_cmd,
         capture_output=True,
         text=True,
         timeout=60,
