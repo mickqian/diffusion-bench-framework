@@ -1337,6 +1337,267 @@
                     }
                 }
             }
+        },
+        {
+            "id": "cosmos3_nano_t2i_720p",
+            "model": "nvidia/Cosmos3-Nano",
+            "task": "text-to-image",
+            "prompt": "A warehouse robot folds a blue cloth on a clean workbench.",
+            "width": 1280,
+            "height": 720,
+            "seed": 0,
+            "num_gpus": 1,
+            "num_inference_steps": 35,
+            "guidance_scale": 6.0,
+            "request_extra": {
+                "flow_shift": 10.0,
+                "extra_params": {
+                    "max_sequence_length": 4096,
+                    "use_resolution_template": false,
+                    "guardrails": false
+                }
+            },
+            "benchmark": {
+                "throughput": {
+                    "num_requests": 8,
+                    "max_concurrency": 2,
+                    "request_rate": "inf"
+                }
+            },
+            "report_framework_statuses": {
+                "lightx2v": "unsupported"
+            },
+            "report_framework_reasons": {
+                "lightx2v": "No tracked LightX2V Cosmos3 serving path in this benchmark."
+            },
+            "frameworks": {
+                "sglang": {
+                    "serve_args": "--model-type diffusion --warmup --attention-backend fa",
+                    "extra_env": {
+                        "SGLANG_DISABLE_COSMOS3_GUARDRAILS": "1"
+                    },
+                    "command_profiles": {
+                        "default": {
+                            "description": "Cosmos3 Nano T2I profile for SGLang-Diffusion PR #26926.",
+                            "sglang_ref": "sgl-project/sglang#26926@00ffb2d9957e44a2d5640925124c38a688033c74",
+                            "serve_args": "--model-type diffusion --warmup --attention-backend fa",
+                            "notes": "Guardrails disabled for framework-only serving performance; no cache or torch compile path.",
+                            "extra_env": {
+                                "SGLANG_DISABLE_COSMOS3_GUARDRAILS": "1"
+                            }
+                        },
+                        "h200-1gpu-fa": {
+                            "description": "H200 single-GPU Cosmos3 Nano T2I profile.",
+                            "hardware": [
+                                "h200"
+                            ],
+                            "sglang_ref": "sgl-project/sglang#26926@00ffb2d9957e44a2d5640925124c38a688033c74",
+                            "num_gpus": 1,
+                            "serve_args": "--model-type diffusion --warmup --attention-backend fa",
+                            "notes": "Single-card image serving profile; guardrails disabled, no cache, torch compile disabled by harness.",
+                            "extra_env": {
+                                "SGLANG_DISABLE_COSMOS3_GUARDRAILS": "1"
+                            }
+                        }
+                    }
+                },
+                "vllm-omni": {
+                    "num_gpus": 1,
+                    "serve_args": "--model-class-name Cosmos3OmniDiffusersPipeline --stage-init-timeout 900 --init-timeout 1800 --no-guardrails --diffusion-attention-backend FLASH_ATTN --cache-backend none",
+                    "extra_env": {},
+                    "command_profiles": {
+                        "default": {
+                            "description": "Cosmos3 Nano T2I profile for vLLM-Omni PR #3454.",
+                            "framework_ref": "vllm-project/vllm-omni#3454@453bd09ab3d1e2f10e3d1b63ff05f090ab49a7cc",
+                            "num_gpus": 1,
+                            "serve_args": "--model-class-name Cosmos3OmniDiffusersPipeline --stage-init-timeout 900 --init-timeout 1800 --no-guardrails --diffusion-attention-backend FLASH_ATTN --cache-backend none",
+                            "notes": "Uses vLLM-Omni Cosmos3 native pipeline, FlashAttention, no cache, eager/compile-off harness args."
+                        },
+                        "h200-1gpu-fa": {
+                            "description": "H200 single-GPU Cosmos3 Nano T2I profile.",
+                            "hardware": [
+                                "h200"
+                            ],
+                            "framework_ref": "vllm-project/vllm-omni#3454@453bd09ab3d1e2f10e3d1b63ff05f090ab49a7cc",
+                            "num_gpus": 1,
+                            "serve_args": "--model-class-name Cosmos3OmniDiffusersPipeline --stage-init-timeout 900 --init-timeout 1800 --no-guardrails --diffusion-attention-backend FLASH_ATTN --cache-backend none",
+                            "notes": "Single-card image serving profile; guardrails disabled, no cache, torch compile disabled by harness."
+                        }
+                    }
+                }
+            }
+        },
+        {
+            "id": "cosmos3_nano_t2v_720p_189f",
+            "model": "nvidia/Cosmos3-Nano",
+            "task": "text-to-video",
+            "prompt": "A small warehouse robot moves a blue box across a clean floor.",
+            "negative_prompt": "blurry, distorted, low quality",
+            "width": 1280,
+            "height": 720,
+            "num_frames": 189,
+            "fps": 24,
+            "seed": 123,
+            "num_gpus": 4,
+            "num_inference_steps": 35,
+            "guidance_scale": 6.0,
+            "request_extra": {
+                "flow_shift": 10.0,
+                "extra_params": {
+                    "max_sequence_length": 4096,
+                    "use_resolution_template": false,
+                    "use_duration_template": false,
+                    "guardrails": false
+                }
+            },
+            "report_framework_statuses": {
+                "lightx2v": "unsupported"
+            },
+            "report_framework_reasons": {
+                "lightx2v": "No tracked LightX2V Cosmos3 serving path in this benchmark."
+            },
+            "frameworks": {
+                "sglang": {
+                    "num_gpus": 4,
+                    "serve_args": "--model-type diffusion --warmup --attention-backend fa --cfg-parallel-size 2 --ulysses-degree 2",
+                    "extra_env": {
+                        "SGLANG_DISABLE_COSMOS3_GUARDRAILS": "1"
+                    },
+                    "command_profiles": {
+                        "default": {
+                            "description": "Cosmos3 Nano T2V profile for SGLang-Diffusion PR #26926.",
+                            "sglang_ref": "sgl-project/sglang#26926@00ffb2d9957e44a2d5640925124c38a688033c74",
+                            "num_gpus": 4,
+                            "serve_args": "--model-type diffusion --warmup --attention-backend fa --cfg-parallel-size 2 --ulysses-degree 2",
+                            "notes": "4-GPU CFG parallel plus Ulysses SP for long-video H200 serving; guardrails disabled, no cache."
+                        },
+                        "h200-4gpu-cfg-ulysses": {
+                            "description": "H200 4-GPU Cosmos3 Nano video profile.",
+                            "hardware": [
+                                "h200"
+                            ],
+                            "sglang_ref": "sgl-project/sglang#26926@00ffb2d9957e44a2d5640925124c38a688033c74",
+                            "num_gpus": 4,
+                            "serve_args": "--model-type diffusion --warmup --attention-backend fa --cfg-parallel-size 2 --ulysses-degree 2",
+                            "notes": "Same 4-GPU budget as vLLM-Omni; combines CFG parallel and sequence parallel for the 189-frame 720p case.",
+                            "extra_env": {
+                                "SGLANG_DISABLE_COSMOS3_GUARDRAILS": "1"
+                            }
+                        }
+                    }
+                },
+                "vllm-omni": {
+                    "num_gpus": 4,
+                    "serve_args": "--num-gpus 4 --cfg-parallel-size 2 --ulysses-degree 2 --model-class-name Cosmos3OmniDiffusersPipeline --stage-init-timeout 900 --init-timeout 1800 --no-guardrails --diffusion-attention-backend FLASH_ATTN --cache-backend none",
+                    "extra_env": {},
+                    "command_profiles": {
+                        "default": {
+                            "description": "Cosmos3 Nano T2V profile for vLLM-Omni PR #3454.",
+                            "framework_ref": "vllm-project/vllm-omni#3454@453bd09ab3d1e2f10e3d1b63ff05f090ab49a7cc",
+                            "num_gpus": 4,
+                            "serve_args": "--num-gpus 4 --cfg-parallel-size 2 --ulysses-degree 2 --model-class-name Cosmos3OmniDiffusersPipeline --stage-init-timeout 900 --init-timeout 1800 --no-guardrails --diffusion-attention-backend FLASH_ATTN --cache-backend none",
+                            "notes": "Uses vLLM-Omni recommended context parallelism for extra GPUs plus CFG parallel; no cache, eager/compile-off harness args."
+                        },
+                        "h200-4gpu-cfg-ulysses": {
+                            "description": "H200 4-GPU Cosmos3 Nano video profile.",
+                            "hardware": [
+                                "h200"
+                            ],
+                            "framework_ref": "vllm-project/vllm-omni#3454@453bd09ab3d1e2f10e3d1b63ff05f090ab49a7cc",
+                            "num_gpus": 4,
+                            "serve_args": "--num-gpus 4 --cfg-parallel-size 2 --ulysses-degree 2 --model-class-name Cosmos3OmniDiffusersPipeline --stage-init-timeout 900 --init-timeout 1800 --no-guardrails --diffusion-attention-backend FLASH_ATTN --cache-backend none",
+                            "notes": "Same 4-GPU budget as SGLang-Diffusion; no cache or torch compile path."
+                        }
+                    }
+                }
+            }
+        },
+        {
+            "id": "cosmos3_nano_i2v_720p_189f",
+            "model": "nvidia/Cosmos3-Nano",
+            "task": "image-to-video",
+            "prompt": "A dashcam car drives along a coastal mountain road and brakes as rocks fall ahead.",
+            "negative_prompt": "blurry, distorted, low quality",
+            "reference_image": true,
+            "reference_image_url": "https://huggingface.co/nvidia/Cosmos3-Nano/resolve/main/assets/example_i2v_input.jpg",
+            "width": 1280,
+            "height": 720,
+            "num_frames": 189,
+            "fps": 24,
+            "seed": 1111,
+            "num_gpus": 4,
+            "num_inference_steps": 35,
+            "guidance_scale": 6.0,
+            "request_extra": {
+                "flow_shift": 10.0,
+                "extra_params": {
+                    "max_sequence_length": 4096,
+                    "use_resolution_template": false,
+                    "use_duration_template": false,
+                    "guardrails": false
+                }
+            },
+            "report_framework_statuses": {
+                "lightx2v": "unsupported"
+            },
+            "report_framework_reasons": {
+                "lightx2v": "No tracked LightX2V Cosmos3 serving path in this benchmark."
+            },
+            "frameworks": {
+                "sglang": {
+                    "num_gpus": 4,
+                    "serve_args": "--model-type diffusion --warmup --attention-backend fa --cfg-parallel-size 2 --ulysses-degree 2",
+                    "extra_env": {
+                        "SGLANG_DISABLE_COSMOS3_GUARDRAILS": "1"
+                    },
+                    "command_profiles": {
+                        "default": {
+                            "description": "Cosmos3 Nano I2V profile for SGLang-Diffusion PR #26926.",
+                            "sglang_ref": "sgl-project/sglang#26926@00ffb2d9957e44a2d5640925124c38a688033c74",
+                            "num_gpus": 4,
+                            "serve_args": "--model-type diffusion --warmup --attention-backend fa --cfg-parallel-size 2 --ulysses-degree 2",
+                            "notes": "4-GPU CFG parallel plus Ulysses SP for long-video H200 serving; guardrails disabled, no cache."
+                        },
+                        "h200-4gpu-cfg-ulysses": {
+                            "description": "H200 4-GPU Cosmos3 Nano I2V profile.",
+                            "hardware": [
+                                "h200"
+                            ],
+                            "sglang_ref": "sgl-project/sglang#26926@00ffb2d9957e44a2d5640925124c38a688033c74",
+                            "num_gpus": 4,
+                            "serve_args": "--model-type diffusion --warmup --attention-backend fa --cfg-parallel-size 2 --ulysses-degree 2",
+                            "notes": "Same 4-GPU budget as vLLM-Omni; combines CFG parallel and sequence parallel for the 189-frame 720p I2V case.",
+                            "extra_env": {
+                                "SGLANG_DISABLE_COSMOS3_GUARDRAILS": "1"
+                            }
+                        }
+                    }
+                },
+                "vllm-omni": {
+                    "num_gpus": 4,
+                    "serve_args": "--num-gpus 4 --cfg-parallel-size 2 --ulysses-degree 2 --model-class-name Cosmos3OmniDiffusersPipeline --stage-init-timeout 900 --init-timeout 1800 --no-guardrails --diffusion-attention-backend FLASH_ATTN --cache-backend none",
+                    "extra_env": {},
+                    "command_profiles": {
+                        "default": {
+                            "description": "Cosmos3 Nano I2V profile for vLLM-Omni PR #3454.",
+                            "framework_ref": "vllm-project/vllm-omni#3454@453bd09ab3d1e2f10e3d1b63ff05f090ab49a7cc",
+                            "num_gpus": 4,
+                            "serve_args": "--num-gpus 4 --cfg-parallel-size 2 --ulysses-degree 2 --model-class-name Cosmos3OmniDiffusersPipeline --stage-init-timeout 900 --init-timeout 1800 --no-guardrails --diffusion-attention-backend FLASH_ATTN --cache-backend none",
+                            "notes": "Uses vLLM-Omni recommended context parallelism for extra GPUs plus CFG parallel; no cache, eager/compile-off harness args."
+                        },
+                        "h200-4gpu-cfg-ulysses": {
+                            "description": "H200 4-GPU Cosmos3 Nano I2V profile.",
+                            "hardware": [
+                                "h200"
+                            ],
+                            "framework_ref": "vllm-project/vllm-omni#3454@453bd09ab3d1e2f10e3d1b63ff05f090ab49a7cc",
+                            "num_gpus": 4,
+                            "serve_args": "--num-gpus 4 --cfg-parallel-size 2 --ulysses-degree 2 --model-class-name Cosmos3OmniDiffusersPipeline --stage-init-timeout 900 --init-timeout 1800 --no-guardrails --diffusion-attention-backend FLASH_ATTN --cache-backend none",
+                            "notes": "Same 4-GPU budget as SGLang-Diffusion; no cache or torch compile path."
+                        }
+                    }
+                }
+            }
         }
     ]
 }

@@ -1,0 +1,63 @@
+{
+  "name": "20260601-h200-cosmos3",
+  "purpose": "Targeted H200 Cosmos3 Nano comparison between SGLang-Diffusion PR #26926 and vLLM-Omni PR #3454.",
+  "tracker_issue": "https://github.com/mickqian/diffusion-bench-framework/issues/1",
+  "reproduce_script": "scripts/run_h200_cosmos3_20260601.sh",
+  "benchmark_repo": {
+    "report_branch": "bench-full-report-matrix"
+  },
+  "sglang": {
+    "repo_path": "/sgl-workspace/sglang",
+    "expected_ref": "sgl-project/sglang#26926",
+    "expected_commit": "00ffb2d9957e44a2d5640925124c38a688033c74"
+  },
+  "frameworks": {
+    "vllm": {
+      "install_spec": "vllm==0.18.0"
+    },
+    "vllm_omni": {
+      "install_spec": "git+https://github.com/MaciejBalaNV/vllm-omni.git@453bd09ab3d1e2f10e3d1b63ff05f090ab49a7cc",
+      "expected_ref": "vllm-project/vllm-omni#3454",
+      "expected_commit": "453bd09ab3d1e2f10e3d1b63ff05f090ab49a7cc"
+    }
+  },
+  "environment": {
+    "hardware_profile": "h200",
+    "cuda_visible_devices": "0,1,2,3",
+    "framework_venv_root": "/root/.cache/sglang-diffusion-framework-venvs",
+    "hf_cache": "/root/diffusion-bench-hf-cache/hub",
+    "torch_compile_disable": "1",
+    "vllm_extra_args": "--enforce-eager --compilation-config '{\"mode\":0}'",
+    "non_ci_requirement": "Do not run this benchmark on CI, runner, build, GitHub Actions, Jenkins, or similar shared automation machines."
+  },
+  "formal_cases": [
+    "cosmos3_nano_t2i_720p",
+    "cosmos3_nano_t2v_720p_189f",
+    "cosmos3_nano_i2v_720p_189f"
+  ],
+  "throughput_cases": [
+    "cosmos3_nano_t2i_720p"
+  ],
+  "case_profiles": {
+    "cosmos3_nano_t2i_720p": {
+      "sglang_profile": "h200-1gpu-fa",
+      "vllm_omni_profile": "h200-1gpu-fa",
+      "num_gpus": 1
+    },
+    "cosmos3_nano_t2v_720p_189f": {
+      "sglang_profile": "h200-4gpu-cfg-ulysses",
+      "vllm_omni_profile": "h200-4gpu-cfg-ulysses",
+      "num_gpus": 4
+    },
+    "cosmos3_nano_i2v_720p_189f": {
+      "sglang_profile": "h200-4gpu-cfg-ulysses",
+      "vllm_omni_profile": "h200-4gpu-cfg-ulysses",
+      "num_gpus": 4
+    }
+  },
+  "notes": [
+    "Guardrails are disabled for both frameworks to measure framework/model serving performance without safety-model overhead.",
+    "No response cache, Cache-DiT, quantized checkpoint, reduced-step model, or torch compile path is enabled.",
+    "Video cases use the same 4-GPU budget and the same 1280x720, 189-frame, 35-step, CFG 6.0 request parameters."
+  ]
+}

@@ -85,9 +85,9 @@ SGLANG_PROFILE_RUNTIME_KEYS = {
 }
 FRAMEWORK_PROFILE_RUNTIME_KEYS = SGLANG_PROFILE_RUNTIME_KEYS | {"lightx2v_config"}
 
-# Cached reference image (downloaded once)
-_cached_ref_image: bytes | None = None
-_cached_ref_image_path: str | None = None
+# Cached reference images keyed by URL.
+_cached_ref_images: dict[str, bytes] = {}
+_cached_ref_image_paths: dict[str, str] = {}
 
 
 # ---------------------------------------------------------------------------
@@ -632,37 +632,72 @@ def kill_server(proc: subprocess.Popen) -> None:
 # ---------------------------------------------------------------------------
 
 
-def _get_ref_image_bytes(config: dict) -> bytes:
-    """Download and cache the shared test reference image."""
-    global _cached_ref_image
-    if _cached_ref_image is not None:
-        return _cached_ref_image
-    url = config.get("test_image_url", "")
+def _reference_image_url(config: dict, case: dict | None = None) -> str:
+    if case and case.get("reference_image_url"):
+        return str(case["reference_image_url"])
+    return str(config.get("test_image_url", ""))
+
+
+def _get_ref_image_bytes(config: dict, case: dict | None = None) -> bytes:
+    """Download and cache a case-specific or shared test reference image."""
+    url = _reference_image_url(config, case)
     if not url:
         raise RuntimeError("No test_image_url in config for image-conditioned case")
+    if url in _cached_ref_images:
+        return _cached_ref_images[url]
     print(f"  Downloading reference image from {url} ...")
     resp = requests.get(url, timeout=60)
     resp.raise_for_status()
-    _cached_ref_image = resp.content
-    return _cached_ref_image
+    _cached_ref_images[url] = resp.content
+    return _cached_ref_images[url]
 
 
-def _get_ref_image_b64(config: dict) -> str:
+def _get_ref_image_b64(config: dict, case: dict | None = None) -> str:
     """Get reference image as base64 string."""
-    return base64.b64encode(_get_ref_image_bytes(config)).decode("utf-8")
+    return base64.b64encode(_get_ref_image_bytes(config, case)).decode("utf-8")
 
 
-def _get_ref_image_path(config: dict) -> str:
+def _get_ref_image_path(config: dict, case: dict | None = None) -> str:
     """Save reference image to a temp file and return path."""
-    global _cached_ref_image_path
-    if _cached_ref_image_path and os.path.exists(_cached_ref_image_path):
-        return _cached_ref_image_path
-    data = _get_ref_image_bytes(config)
+    url = _reference_image_url(config, case)
+    cached_path = _cached_ref_image_paths.get(url)
+    if cached_path and os.path.exists(cached_path):
+        return cached_path
+    data = _get_ref_image_bytes(config, case)
     fd, path = tempfile.mkstemp(suffix=".png")
     with os.fdopen(fd, "wb") as f:
         f.write(data)
-    _cached_ref_image_path = path
+    _cached_ref_image_paths[url] = path
     return path
+
+
+def _deep_merge(base: dict, override: dict) -> dict:
+    merged = copy.deepcopy(base)
+    for key, value in override.items():
+        if isinstance(value, dict) and isinstance(merged.get(key), dict):
+            merged[key] = _deep_merge(merged[key], value)
+        else:
+            merged[key] = copy.deepcopy(value)
+    return merged
+
+
+def _request_extra(case: dict, framework: str) -> dict:
+    extras = copy.deepcopy(case.get("request_extra", {}))
+    framework_extras = (case.get("framework_request_extra") or {}).get(framework, {})
+    return _deep_merge(extras, framework_extras)
+
+
+def _form_value(value: object) -> str:
+    if isinstance(value, (dict, list)):
+        return json.dumps(value)
+    if isinstance(value, bool):
+        return "true" if value else "false"
+    return str(value)
+
+
+def _update_form_data(data: dict, values: dict) -> None:
+    for key, value in values.items():
+        data[key] = _form_value(value)
 
 
 # ---------------------------------------------------------------------------
@@ -691,6 +726,7 @@ def _build_sglang_payload(case: dict) -> dict:
     ):
         if key in case:
             payload[key] = case[key]
+    payload.update(_request_extra(case, "sglang"))
     return payload
 
 
@@ -802,7 +838,7 @@ def send_image_conditioned_request_sglang(
 ) -> float:
     """Send an image-conditioned request (edit/I2V/TI2V) via SGLang multipart API."""
     task = case["task"]
-    ref_bytes = _get_ref_image_bytes(config)
+    ref_bytes = _get_ref_image_bytes(config, case)
 
     # Build multipart form — field name depends on endpoint:
     # image edits use "image", video (I2V/TI2V) uses "input_reference"
@@ -832,6 +868,7 @@ def send_image_conditioned_request_sglang(
             data[key] = str(case[key])
     if perf_dump_path:
         data["perf_dump_path"] = perf_dump_path
+    _update_form_data(data, _request_extra(case, "sglang"))
     # Choose endpoint based on task
     if task in ("image-edit", "image-to-image"):
         endpoint = "/v1/images/edits"
@@ -911,12 +948,13 @@ def send_request_vllm_omni(base_url: str, case: dict, config: dict) -> float:
         ):
             if key in case:
                 data[key] = str(case[key])
+        _update_form_data(data, _request_extra(case, "vllm-omni"))
         files = None
         if case.get("reference_image"):
             files = {
                 "input_reference": (
                     "ref.png",
-                    io.BytesIO(_get_ref_image_bytes(config)),
+                    io.BytesIO(_get_ref_image_bytes(config, case)),
                     "image/png",
                 )
             }
@@ -956,6 +994,7 @@ def send_request_vllm_omni(base_url: str, case: dict, config: dict) -> float:
 
     if task == "text-to-image":
         payload = _build_sglang_payload(case)
+        payload.update(_request_extra(case, "vllm-omni"))
         start = time.time()
         resp = requests.post(
             f"{base_url}/v1/images/generations",
@@ -967,7 +1006,7 @@ def send_request_vllm_omni(base_url: str, case: dict, config: dict) -> float:
         return latency
     if task in ("image-edit", "image-to-image"):
         files = {
-            "image": ("ref.png", io.BytesIO(_get_ref_image_bytes(config)), "image/png")
+            "image": ("ref.png", io.BytesIO(_get_ref_image_bytes(config, case)), "image/png")
         }
         data = {
             "model": case["model"],
@@ -985,6 +1024,7 @@ def send_request_vllm_omni(base_url: str, case: dict, config: dict) -> float:
         ):
             if key in case:
                 data[key] = str(case[key])
+        _update_form_data(data, _request_extra(case, "vllm-omni"))
         start = time.time()
         resp = requests.post(
             f"{base_url}/v1/images/edits",
@@ -1017,7 +1057,7 @@ def send_request_vllm_omni(base_url: str, case: dict, config: dict) -> float:
     # Build message content (text or text+image)
     content: list[dict] | str = case["prompt"]
     if case.get("reference_image"):
-        ref_b64 = _get_ref_image_b64(config)
+        ref_b64 = _get_ref_image_b64(config, case)
         content = [
             {
                 "type": "image_url",
@@ -1087,7 +1127,7 @@ def send_request_lightx2v(base_url: str, case: dict, config: dict) -> float:
     if "negative_prompt" in case:
         payload["negative_prompt"] = case["negative_prompt"]
     if case.get("reference_image"):
-        payload["image_path"] = _get_ref_image_path(config)
+        payload["image_path"] = _get_ref_image_path(config, case)
 
     start = time.time()
 
@@ -1430,7 +1470,7 @@ def _bench_serving_task(task: str) -> str:
     }.get(task, task)
 
 
-def _bench_extra_body(case: dict) -> dict:
+def _bench_extra_body(case: dict, framework: str) -> dict:
     extra_body = {}
     for key in (
         "guidance_scale",
@@ -1441,6 +1481,7 @@ def _bench_extra_body(case: dict) -> dict:
     ):
         if key in case:
             extra_body[key] = case[key]
+    extra_body = _deep_merge(extra_body, _request_extra(case, framework))
     return extra_body
 
 
@@ -1490,11 +1531,11 @@ def run_throughput(
     for key in ("width", "height", "num_frames", "fps", "num_inference_steps"):
         if key in case:
             cmd.extend([f"--{key.replace('_', '-')}", str(case[key])])
-    extra_body = _bench_extra_body(case)
+    extra_body = _bench_extra_body(case, framework)
     if extra_body:
         cmd.extend(["--extra-body", json.dumps(extra_body)])
     if case.get("reference_image"):
-        cmd.extend(["--image-path", _get_ref_image_path(config or {})])
+        cmd.extend(["--image-path", _get_ref_image_path(config or {}, case)])
 
     print(
         f"  Running bench_serving throughput: requests={num_requests}, "

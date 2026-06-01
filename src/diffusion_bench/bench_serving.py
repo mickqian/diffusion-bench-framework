@@ -76,6 +76,14 @@ def _get_response_output_count(resp_json: Dict[str, Any]) -> int:
     return 0
 
 
+def _form_value(value: Any) -> str:
+    if isinstance(value, (dict, list)):
+        return json.dumps(value)
+    if isinstance(value, bool):
+        return "true" if value else "false"
+    return str(value)
+
+
 def _compute_scale_factor(req: RequestFuncInput, args) -> Optional[float]:
     """Computes the composite scale factor (area × frames × steps) for a request."""
     width = req.width or args.width
@@ -177,7 +185,7 @@ async def async_request_image_sglang(
 
         # Merge extra parameters
         for key, value in input.extra_body.items():
-            data.add_field(key, str(value))
+            data.add_field(key, _form_value(value))
 
         # Add image file(s)
         for idx, img_path in enumerate(input.image_paths):
@@ -276,7 +284,7 @@ async def async_request_video_sglang(
             data.add_field("size", f"{input.width}x{input.height}")
 
         for key, value in input.extra_body.items():
-            data.add_field(key, str(value))
+            data.add_field(key, _form_value(value))
 
         # Explicitly add fps/num_frames if they are not in extra_body (bench_serving logic overrides)
         if input.num_frames:
@@ -435,7 +443,7 @@ async def async_request_vllm_omni(
     if input.fps:
         data.add_field("fps", str(input.fps))
     for key, value in input.extra_body.items():
-        data.add_field(key, str(value))
+        data.add_field(key, _form_value(value))
     if input.image_paths:
         data.add_field(
             "input_reference",

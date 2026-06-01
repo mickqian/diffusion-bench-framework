@@ -24,6 +24,7 @@ The repo launches one serving stack per case, sends a single end-to-end request,
 - `scripts/run_h200_ltx_lightx2v_20260513.sh`: targeted H200 LightX2V LTX-2/LTX-2.3 rerun with the latest tracked upstream commit.
 - `scripts/run_h100_ltx_lightx2v_20260513.sh`: targeted H100 LightX2V LTX-2/LTX-2.3 rerun when H200 is unavailable.
 - `scripts/run_h200_wan_vllm_omni_20260514.sh`: targeted H200 vLLM-Omni Wan rerun for cells that previously had no report data.
+- `scripts/run_h200_cosmos3_20260601.sh`: H200 Cosmos3 Nano rerun for SGLang-Diffusion PR #26926 vs vLLM-Omni PR #3454.
 - `scripts/generate_h200_report_artifacts.sh`: fixed local entrypoint for merged JSON, issue Markdown, dashboard Markdown, and image output.
 - `manifests/`: pinned run manifests tying report data to bench, SGLang, framework, and hardware versions.
 - `skills/`: repo-local Codex skills for maintaining long-term performance tracking.
@@ -61,6 +62,7 @@ Set `THROUGHPUT_FRAMEWORKS="lightx2v"` and `THROUGHPUT_CASES="zimage_turbo_t2i_1
 Use `scripts/run_h200_throughput_common_20260514.sh` for the preferred three-framework throughput suite. It defaults to all-supported image cases `zimage_turbo_t2i_1024` and `flux2_dev_t2i_1024` at 32 requests / concurrency 4, plus all-supported video cases `wan21_t2v_1_3b_480p` and `wan22_ti2v_5b_704p` at 8 requests / concurrency 2. Override `THROUGHPUT_IMAGE_CASES`, `THROUGHPUT_VIDEO_CASES`, `IMAGE_NUM_REQUESTS`, `IMAGE_MAX_CONCURRENCY`, `VIDEO_NUM_REQUESTS`, or `VIDEO_MAX_CONCURRENCY` for targeted reruns.
 Set `SINGLE_E2E_FRAMEWORKS` and `SINGLE_E2E_CASES` the same way for targeted single-request reruns.
 Use `scripts/run_h200_wan_vllm_omni_20260514.sh` to reproduce the vLLM-Omni Wan coverage rerun. It defaults to a fresh isolated vLLM-Omni install, `CUDA_VISIBLE_DEVICES=0,1,2,3`, H200 profile selection, and the six Wan cases that previously had no report data.
+Use `scripts/run_h200_cosmos3_20260601.sh` to reproduce the Cosmos3 Nano comparison. It pins vLLM-Omni to `vllm-project/vllm-omni#3454` through an isolated venv stamp, expects SGLang-Diffusion `sgl-project/sglang#26926`, disables torch compile and guardrails, runs T2I/T2V/I2V single-request cases, and runs throughput only for the T2I case by default.
 
 ## Dry Run
 
@@ -86,7 +88,7 @@ diffusion-bench-compare \
 
 ## Default Coverage
 
-The bundled config is the formal tracking plan and keeps one representative case per official model ID. It currently covers FLUX.1, FLUX.2, Qwen-Image text-to-image and edit, Z-Image image generation, Wan2.1/Wan2.2 video generation, and LTX-2/LTX-2.3 video generation.
+The bundled config is the formal tracking plan and keeps one representative case per official model ID. It currently covers FLUX.1, FLUX.2, Qwen-Image text-to-image and edit, Z-Image image generation, Wan2.1/Wan2.2 video generation, LTX-2/LTX-2.3 video generation, and targeted Cosmos3 Nano image/video generation.
 
 Extra variants such as true-CFG, alternate resolutions, non-representative LTX-2.3 pipeline/task variants, or single-GPU vs multi-GPU image runs should be added only for targeted investigations or explicit reruns, not as default tracker coverage. The representative LTX-2.3 default case is the two-stage pipeline.
 
