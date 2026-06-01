@@ -2,6 +2,7 @@
   "name": "20260601-h200-cosmos3",
   "purpose": "Targeted H200 Cosmos3 Nano comparison between SGLang-Diffusion PR #26926 and vLLM-Omni PR #3454.",
   "tracker_issue": "https://github.com/mickqian/diffusion-bench-framework/issues/1",
+  "tracker_comment": "https://github.com/mickqian/diffusion-bench-framework/issues/1#issuecomment-4594218683",
   "reproduce_script": "scripts/run_h200_cosmos3_20260601.sh",
   "probe_scripts": [
     "scripts/probe_h200_cosmos3_sglang_profiles_20260601.sh",
