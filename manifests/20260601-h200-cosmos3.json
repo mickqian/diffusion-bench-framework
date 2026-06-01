@@ -10,7 +10,7 @@
   ],
   "benchmark_repo": {
     "report_branch": "main",
-    "result_harness_commit": "24f36206a6eb1cf8e1912ad78d77417b6cbc3782"
+    "result_harness_commit": "10228c7a602047c049c111de22cbff5b7b70e2c9"
   },
   "sglang": {
     "repo_path": "/sgl-workspace/sglang",
@@ -104,9 +104,22 @@
       "reason": "vLLM-Omni 4-GPU Ulysses and CFG+Ulysses profiles fail before health check; the fastest successful video profile observed is 2-GPU CFG-only."
     }
   },
+  "same_setup_video_profiles": {
+    "cosmos3_nano_t2v_720p_189f": {
+      "sglang_profile": "h200-2gpu-cfg",
+      "vllm_omni_profile": "h200-2gpu-cfg",
+      "num_gpus": 2
+    },
+    "cosmos3_nano_i2v_720p_189f": {
+      "sglang_profile": "h200-2gpu-cfg",
+      "vllm_omni_profile": "h200-2gpu-cfg",
+      "num_gpus": 2
+    }
+  },
   "result_files": {
     "single_formal": "runs/h200-cosmos3-20260601-fb91e53-b7718f8-vllm021-ion7-single.json",
     "sglang_speed_probe": "runs/h200-cosmos3-sglang-profile-probe-ade55a7-b7718f8-*.json",
+    "sglang_2gpu_cfg_probe": "runs/h200-cosmos3-sglang-2gpu-cfg-10228c7-b7718f8-*.json",
     "vllm_omni_video_probe": "runs/h200-cosmos3-vllm-omni-video-probe-efc4998-vllm021-cosmos3_nano_t2v_720p_189f-h200-*.json",
     "vllm_omni_i2v_best_effort": "runs/h200-cosmos3-vllm-omni-i2v-best-effort-efc4998-vllm021-cosmos3_nano_i2v_720p_189f-h200-2gpu-cfg.json",
     "t2i_throughput_c4": "runs/h200-cosmos3-t2i-throughput-c4-efc4998-b7718f8-vllm021.json"
