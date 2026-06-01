@@ -1525,6 +1525,19 @@
                             "extra_env": {
                                 "SGLANG_DISABLE_COSMOS3_GUARDRAILS": "1"
                             }
+                        },
+                        "h200-2gpu-cfg": {
+                            "description": "H200 2-GPU Cosmos3 Nano video profile using CFG parallelism only.",
+                            "hardware": [
+                                "h200"
+                            ],
+                            "sglang_ref": "sgl-project/sglang#26926@b7718f8bf87cb676802c60fcf3c71664d243d9c7",
+                            "num_gpus": 2,
+                            "serve_args": "--model-type diffusion --warmup --attention-backend fa --cfg-parallel-size 2 --sp-degree 1",
+                            "notes": "Uses the two GPUs for CFG parallelism only; sp_degree is pinned to 1 to avoid automatic sequence-parallel inference.",
+                            "extra_env": {
+                                "SGLANG_DISABLE_COSMOS3_GUARDRAILS": "1"
+                            }
                         }
                     }
                 },
@@ -1708,6 +1721,19 @@
                             "num_gpus": 4,
                             "serve_args": "--model-type diffusion --warmup --attention-backend fa --cfg-parallel-size 2 --ulysses-degree 2 --performance-mode speed",
                             "notes": "Same as the formal 4-GPU CFG+Ulysses profile plus explicit speed mode; guardrails disabled, no cache, torch compile disabled by harness.",
+                            "extra_env": {
+                                "SGLANG_DISABLE_COSMOS3_GUARDRAILS": "1"
+                            }
+                        },
+                        "h200-2gpu-cfg": {
+                            "description": "H200 2-GPU Cosmos3 Nano video profile using CFG parallelism only.",
+                            "hardware": [
+                                "h200"
+                            ],
+                            "sglang_ref": "sgl-project/sglang#26926@b7718f8bf87cb676802c60fcf3c71664d243d9c7",
+                            "num_gpus": 2,
+                            "serve_args": "--model-type diffusion --warmup --attention-backend fa --cfg-parallel-size 2 --sp-degree 1",
+                            "notes": "Uses the two GPUs for CFG parallelism only; sp_degree is pinned to 1 to avoid automatic sequence-parallel inference.",
                             "extra_env": {
                                 "SGLANG_DISABLE_COSMOS3_GUARDRAILS": "1"
                             }

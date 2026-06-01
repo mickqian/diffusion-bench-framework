@@ -77,7 +77,8 @@
     ],
     "video": [
       "h200-4gpu-cfg-ulysses",
-      "h200-4gpu-cfg-ulysses-speed"
+      "h200-4gpu-cfg-ulysses-speed",
+      "h200-2gpu-cfg"
     ]
   },
   "case_profiles": {
