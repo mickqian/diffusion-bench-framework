@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-# Reproduce the H200 Cosmos3 Nano comparison between SGLang-Diffusion PR #26926
+# Reproduce the H200 Cosmos3 Nano comparison between SGLang-Diffusion main 9a8ab2d
 # and vLLM-Omni PR #3454. Run inside the benchmark repo on a non-CI H200/H100
 # container where the selected SGLang checkout is installed.
 
@@ -27,7 +27,7 @@ export VLLM_INSTALL_SPEC="${VLLM_INSTALL_SPEC:-vllm==0.21.0}"
 export VLLM_OMNI_INSTALL_SPEC="${VLLM_OMNI_INSTALL_SPEC:-git+https://github.com/MaciejBalaNV/vllm-omni.git@453bd09ab3d1e2f10e3d1b63ff05f090ab49a7cc}"
 export VLLM_OMNI_SERVER_BIN="${VLLM_OMNI_SERVER_BIN:-vllm}"
 export VLLM_OMNI_REQUIRED_HELP_ARGS="${VLLM_OMNI_REQUIRED_HELP_ARGS:---omni --model-class-name --stage-init-timeout --no-guardrails --diffusion-attention-backend --cache-backend --cfg-parallel-size --ulysses-degree}"
-export SGLANG_COSMOS3_EXPECTED_REF="${SGLANG_COSMOS3_EXPECTED_REF:-sgl-project/sglang#26926@b7718f8bf87cb676802c60fcf3c71664d243d9c7}"
+export SGLANG_COSMOS3_EXPECTED_REF="${SGLANG_COSMOS3_EXPECTED_REF:-sgl-project/sglang@9a8ab2d22b4f85f840701e8ed717f663e1c4662b}"
 
 if [[ -n "${COSMOS3_SINGLE_CASES:-}" ]]; then
   read -r -a SINGLE_CASES <<< "${COSMOS3_SINGLE_CASES}"

@@ -1,6 +1,6 @@
 {
   "name": "20260601-h200-cosmos3",
-  "purpose": "Targeted H200 Cosmos3 Nano comparison between SGLang-Diffusion PR #26926 and vLLM-Omni PR #3454.",
+  "purpose": "Targeted H200 Cosmos3 Nano comparison between SGLang-Diffusion main 9a8ab2d and vLLM-Omni PR #3454.",
   "tracker_issue": "https://github.com/mickqian/diffusion-bench-framework/issues/1",
   "tracker_comment": "https://github.com/mickqian/diffusion-bench-framework/issues/1#issuecomment-4594218683",
   "reproduce_script": "scripts/run_h200_cosmos3_20260601.sh",
@@ -14,8 +14,8 @@
   },
   "sglang": {
     "repo_path": "/sgl-workspace/sglang",
-    "expected_ref": "sgl-project/sglang#26926",
-    "expected_commit": "b7718f8bf87cb676802c60fcf3c71664d243d9c7"
+    "expected_ref": "sgl-project/sglang main",
+    "expected_commit": "9a8ab2d22b4f85f840701e8ed717f663e1c4662b"
   },
   "frameworks": {
     "vllm": {
