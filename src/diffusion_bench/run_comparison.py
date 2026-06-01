@@ -1944,15 +1944,26 @@ def _apply_throughput_overrides(
     if num_requests is None and max_concurrency is None and request_rate is None:
         return config
     config = copy.deepcopy(config)
+    throughput_overrides = {}
+    if num_requests is not None:
+        throughput_overrides["num_requests"] = num_requests
+    if max_concurrency is not None:
+        throughput_overrides["max_concurrency"] = max_concurrency
+    if request_rate is not None:
+        throughput_overrides["request_rate"] = request_rate
+
     throughput_cfg = config.setdefault("benchmark_defaults", {}).setdefault(
         "throughput", {}
     )
-    if num_requests is not None:
-        throughput_cfg["num_requests"] = num_requests
-    if max_concurrency is not None:
-        throughput_cfg["max_concurrency"] = max_concurrency
-    if request_rate is not None:
-        throughput_cfg["request_rate"] = request_rate
+    throughput_cfg.update(throughput_overrides)
+    for case in config.get("cases", []):
+        case.setdefault("benchmark", {}).setdefault("throughput", {}).update(
+            throughput_overrides
+        )
+        for fw_cfg in case.get("frameworks", {}).values():
+            fw_cfg.setdefault("benchmark", {}).setdefault("throughput", {}).update(
+                throughput_overrides
+            )
     return config
 
 
