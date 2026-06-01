@@ -3,6 +3,10 @@
   "purpose": "Targeted H200 Cosmos3 Nano comparison between SGLang-Diffusion PR #26926 and vLLM-Omni PR #3454.",
   "tracker_issue": "https://github.com/mickqian/diffusion-bench-framework/issues/1",
   "reproduce_script": "scripts/run_h200_cosmos3_20260601.sh",
+  "probe_scripts": [
+    "scripts/probe_h200_cosmos3_sglang_profiles_20260601.sh",
+    "scripts/probe_h200_cosmos3_vllm_omni_video_profiles_20260601.sh"
+  ],
   "benchmark_repo": {
     "report_branch": "bench-full-report-matrix"
   },
@@ -49,6 +53,26 @@
   "throughput_cases": [
     "cosmos3_nano_t2i_720p"
   ],
+  "vllm_omni_video_probe_profiles": [
+    "h200-4gpu-cfg-ulysses",
+    "h200-4gpu-ulysses",
+    "h200-4gpu-cfg",
+    "h200-4gpu-auto",
+    "h200-2gpu-cfg",
+    "h200-2gpu-ulysses",
+    "h200-2gpu-auto",
+    "h200-1gpu-fa"
+  ],
+  "sglang_probe_profiles": {
+    "image": [
+      "h200-1gpu-fa",
+      "h200-1gpu-fa-speed"
+    ],
+    "video": [
+      "h200-4gpu-cfg-ulysses",
+      "h200-4gpu-cfg-ulysses-speed"
+    ]
+  },
   "case_profiles": {
     "cosmos3_nano_t2i_720p": {
       "sglang_profile": "h200-1gpu-fa",
