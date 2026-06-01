@@ -1411,6 +1411,19 @@
                             "extra_env": {
                                 "SGLANG_DISABLE_COSMOS3_GUARDRAILS": "1"
                             }
+                        },
+                        "h200-1gpu-fa-batch4": {
+                            "description": "H200 single-GPU Cosmos3 Nano T2I batch-size-4 probe profile.",
+                            "hardware": [
+                                "h200"
+                            ],
+                            "sglang_ref": "sgl-project/sglang@9a8ab2d22b4f85f840701e8ed717f663e1c4662b",
+                            "num_gpus": 1,
+                            "serve_args": "--model-type diffusion --warmup --attention-backend fa --batching-max-size 4 --enable-batching-metrics",
+                            "notes": "Batching probe for high-pressure throughput; guardrails disabled, no cache, torch compile disabled by harness.",
+                            "extra_env": {
+                                "SGLANG_DISABLE_COSMOS3_GUARDRAILS": "1"
+                            }
                         }
                     }
                 },

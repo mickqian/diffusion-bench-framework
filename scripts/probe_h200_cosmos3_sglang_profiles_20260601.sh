@@ -36,7 +36,7 @@ status=0
 next_port="${PORT}"
 for case_id in "${PROBE_CASES[@]}"; do
   if [[ "${case_id}" == "cosmos3_nano_t2i_720p" ]]; then
-    profiles="${COSMOS3_SGLANG_IMAGE_PROBE_PROFILES:-h200-1gpu-fa h200-1gpu-fa-speed}"
+    profiles="${COSMOS3_SGLANG_IMAGE_PROBE_PROFILES:-h200-1gpu-fa h200-1gpu-fa-speed h200-1gpu-fa-batch4}"
   else
     profiles="${COSMOS3_SGLANG_VIDEO_PROBE_PROFILES:-h200-4gpu-cfg-ulysses h200-4gpu-cfg-ulysses-speed}"
   fi

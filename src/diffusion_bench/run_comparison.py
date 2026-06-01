@@ -33,6 +33,7 @@ import sys
 import tempfile
 import threading
 import time
+from dataclasses import dataclass
 from datetime import datetime, timezone
 from pathlib import Path
 
@@ -71,6 +72,13 @@ VLLM_DISABLE_TORCH_COMPILE_ARGS = [
     '{"mode":0}',
 ]
 LIGHTX2V_DISABLE_TORCH_COMPILE_CONFIG = {"compile": False, "compile_shapes": []}
+
+
+@dataclass(frozen=True)
+class LatencyBreakdown:
+    client_s: float
+    server_s: float | None = None
+
 
 # Frameworks that need separate installation (conflict with sglang's deps)
 INSTALLABLE_FRAMEWORKS = {"vllm-omni", "lightx2v"}
@@ -762,7 +770,7 @@ def _read_perf_dump(perf_dump_path: str, timeout: float = 10.0) -> float | None:
 
 def send_image_request_sglang(
     base_url: str, case: dict, perf_dump_path: str | None = None
-) -> float:
+) -> LatencyBreakdown:
     """Send a single T2I request via SGLang's /v1/images/generations."""
     payload = _build_sglang_payload(case)
     if perf_dump_path:
@@ -787,14 +795,14 @@ def send_image_request_sglang(
                 f"  Image generated in {server_latency:.2f}s (server-side), "
                 f"client={client_latency:.2f}s"
             )
-            return server_latency
+            return LatencyBreakdown(client_s=client_latency, server_s=server_latency)
     print(f"  Image generated in {client_latency:.2f}s")
-    return client_latency
+    return LatencyBreakdown(client_s=client_latency)
 
 
 def send_video_request_sglang(
     base_url: str, case: dict, perf_dump_path: str | None = None
-) -> float:
+) -> LatencyBreakdown:
     """Send a single T2V request via SGLang's /v1/videos (async)."""
     payload = _build_sglang_payload(case)
     if perf_dump_path:
@@ -838,14 +846,14 @@ def send_video_request_sglang(
                 f"  Video generated in {server_latency:.2f}s (server-side), "
                 f"client={client_latency:.2f}s"
             )
-            return server_latency
+            return LatencyBreakdown(client_s=client_latency, server_s=server_latency)
     print(f"  Video generated in {client_latency:.2f}s")
-    return client_latency
+    return LatencyBreakdown(client_s=client_latency)
 
 
 def send_image_conditioned_request_sglang(
     base_url: str, case: dict, config: dict, perf_dump_path: str | None = None
-) -> float:
+) -> LatencyBreakdown:
     """Send an image-conditioned request (edit/I2V/TI2V) via SGLang multipart API."""
     task = case["task"]
     ref_bytes = _get_ref_image_bytes(config, case)
@@ -927,9 +935,9 @@ def send_image_conditioned_request_sglang(
                 f"  Generated in {server_latency:.2f}s (server-side), "
                 f"client={client_latency:.2f}s"
             )
-            return server_latency
+            return LatencyBreakdown(client_s=client_latency, server_s=server_latency)
     print(f"  Generated in {client_latency:.2f}s (sglang, image-conditioned)")
-    return client_latency
+    return LatencyBreakdown(client_s=client_latency)
 
 
 # ---------------------------------------------------------------------------
@@ -1186,12 +1194,16 @@ def send_request(
     framework: str = "sglang",
     config: dict | None = None,
     perf_dump_path: str | None = None,
-) -> float:
+) -> LatencyBreakdown:
     config = config or {}
     if framework == "vllm-omni":
-        return send_request_vllm_omni(base_url, case, config)
+        return LatencyBreakdown(
+            client_s=send_request_vllm_omni(base_url, case, config)
+        )
     elif framework == "lightx2v":
-        return send_request_lightx2v(base_url, case, config)
+        return LatencyBreakdown(
+            client_s=send_request_lightx2v(base_url, case, config)
+        )
     # SGLang — use OpenAI-compatible endpoints with optional perf log
     task = case["task"]
     if case.get("reference_image"):
@@ -1204,6 +1216,14 @@ def send_request(
         return send_video_request_sglang(base_url, case, perf_dump_path)
     else:
         raise ValueError(f"Unknown task type: {task}")
+
+
+def _single_request_metrics(latency: LatencyBreakdown) -> dict:
+    metrics = {"client_latency_s": round(latency.client_s, 3)}
+    if latency.server_s is not None:
+        metrics["server_latency_s"] = round(latency.server_s, 3)
+        metrics["client_overhead_s"] = round(latency.client_s - latency.server_s, 3)
+    return metrics
 
 
 # ---------------------------------------------------------------------------
@@ -1475,7 +1495,8 @@ def run_single_request(
     latency = send_request(
         base_url, case, framework, config, perf_dump_path=perf_dump_path
     )
-    result["latency_s"] = round(latency, 3)
+    result["latency_s"] = round(latency.client_s, 3)
+    result["metrics"] = _single_request_metrics(latency)
     return result
 
 

@@ -51,6 +51,16 @@ else
   FRAMEWORKS=(sglang vllm-omni)
 fi
 
+SINGLE_PROFILE_ARGS=()
+if [[ -n "${COSMOS3_SGLANG_SINGLE_PROFILE:-}" ]]; then
+  SINGLE_PROFILE_ARGS=(--sglang-profile "${COSMOS3_SGLANG_SINGLE_PROFILE}")
+fi
+
+THROUGHPUT_PROFILE_ARGS=()
+if [[ -n "${COSMOS3_SGLANG_THROUGHPUT_PROFILE:-}" ]]; then
+  THROUGHPUT_PROFILE_ARGS=(--sglang-profile "${COSMOS3_SGLANG_THROUGHPUT_PROFILE}")
+fi
+
 mkdir -p "${OUTPUT_DIR}" "${REPORT_DIR}"
 
 diffusion-bench-compare \
@@ -61,6 +71,7 @@ diffusion-bench-compare \
   --hardware-profile h200 \
   --run-id "${RUN_ID}-single" \
   --port "${PORT}" \
+  "${SINGLE_PROFILE_ARGS[@]}" \
   --output "${SINGLE_OUTPUT}"
 
 RESULT_FILES=("${SINGLE_OUTPUT}")
@@ -77,6 +88,7 @@ if [[ "${COSMOS3_RUN_THROUGHPUT:-1}" == "1" ]]; then
     --throughput-request-rate "${THROUGHPUT_REQUEST_RATE}" \
     --run-id "${RUN_ID}-throughput" \
     --port "$((PORT + 10))" \
+    "${THROUGHPUT_PROFILE_ARGS[@]}" \
     --output "${THROUGHPUT_OUTPUT}"
   RESULT_FILES+=("${THROUGHPUT_OUTPUT}")
 fi
