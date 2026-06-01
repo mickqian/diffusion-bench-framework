@@ -65,6 +65,7 @@ Use `scripts/run_h200_wan_vllm_omni_20260514.sh` to reproduce the vLLM-Omni Wan 
 Use `scripts/run_h200_cosmos3_20260601.sh` to reproduce the Cosmos3 Nano comparison. It pins vLLM to `vllm==0.21.0` and vLLM-Omni to `vllm-project/vllm-omni#3454` through an isolated venv stamp, expects SGLang-Diffusion `sgl-project/sglang#26926`, disables torch compile and guardrails, runs T2I/T2V/I2V single-request cases, and runs throughput only for the T2I case by default.
 Use `scripts/probe_h200_cosmos3_sglang_profiles_20260601.sh` to reproduce SGLang-Diffusion Cosmos3 formal-vs-speed profile probes before changing the formal comparison profile.
 Use `scripts/probe_h200_cosmos3_vllm_omni_video_profiles_20260601.sh` to reproduce vLLM-Omni Cosmos3 video launch-profile probes before changing the formal comparison profile. It writes one JSON per case/profile and defaults to the tracked 1GPU, 2GPU, and 4GPU no-cache/compile-off video profiles.
+Use `scripts/summarize_result_jsons.py runs/*.json` for a compact case/framework/profile latency and failure table from probe or formal result JSONs.
 
 ## Dry Run
 
