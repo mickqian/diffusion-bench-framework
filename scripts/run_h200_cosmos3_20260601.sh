@@ -13,6 +13,9 @@ SINGLE_OUTPUT="${SINGLE_OUTPUT:-${OUTPUT_DIR}/${RUN_ID}-single.json}"
 THROUGHPUT_OUTPUT="${THROUGHPUT_OUTPUT:-${OUTPUT_DIR}/${RUN_ID}-throughput.json}"
 REPORT_DIR="${REPORT_DIR:-tmp/report}"
 MERGED_OUTPUT="${MERGED_OUTPUT:-${REPORT_DIR}/${RUN_ID}.json}"
+THROUGHPUT_NUM_REQUESTS="${THROUGHPUT_NUM_REQUESTS:-8}"
+THROUGHPUT_MAX_CONCURRENCY="${THROUGHPUT_MAX_CONCURRENCY:-4}"
+THROUGHPUT_REQUEST_RATE="${THROUGHPUT_REQUEST_RATE:-inf}"
 
 export CUDA_VISIBLE_DEVICES="${CUDA_VISIBLE_DEVICES:-0,1,2,3}"
 export SGLANG_DIFFUSION_FRAMEWORK_VENV_ROOT="${SGLANG_DIFFUSION_FRAMEWORK_VENV_ROOT:-/root/.cache/sglang-diffusion-framework-venvs}"
@@ -69,6 +72,9 @@ if [[ "${COSMOS3_RUN_THROUGHPUT:-1}" == "1" ]]; then
     --frameworks "${FRAMEWORKS[@]}" \
     --case-ids "${THROUGHPUT_CASES[@]}" \
     --hardware-profile h200 \
+    --throughput-num-requests "${THROUGHPUT_NUM_REQUESTS}" \
+    --throughput-max-concurrency "${THROUGHPUT_MAX_CONCURRENCY}" \
+    --throughput-request-rate "${THROUGHPUT_REQUEST_RATE}" \
     --run-id "${RUN_ID}-throughput" \
     --port "$((PORT + 10))" \
     --output "${THROUGHPUT_OUTPUT}"

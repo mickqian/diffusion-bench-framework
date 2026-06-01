@@ -8,7 +8,8 @@
     "scripts/probe_h200_cosmos3_vllm_omni_video_profiles_20260601.sh"
   ],
   "benchmark_repo": {
-    "report_branch": "bench-full-report-matrix"
+    "report_branch": "main",
+    "result_harness_commit": "24f36206a6eb1cf8e1912ad78d77417b6cbc3782"
   },
   "sglang": {
     "repo_path": "/sgl-workspace/sglang",
@@ -53,6 +54,11 @@
   "throughput_cases": [
     "cosmos3_nano_t2i_720p"
   ],
+  "throughput_profile": {
+    "num_requests": 8,
+    "max_concurrency": 4,
+    "request_rate": "inf"
+  },
   "vllm_omni_video_probe_profiles": [
     "h200-4gpu-cfg-ulysses",
     "h200-4gpu-ulysses",
@@ -90,9 +96,23 @@
       "num_gpus": 4
     }
   },
+  "best_effort_video_profiles": {
+    "vllm_omni": {
+      "profile": "h200-2gpu-cfg",
+      "reason": "vLLM-Omni 4-GPU Ulysses and CFG+Ulysses profiles fail before health check; the fastest successful video profile observed is 2-GPU CFG-only."
+    }
+  },
+  "result_files": {
+    "single_formal": "runs/h200-cosmos3-20260601-fb91e53-b7718f8-vllm021-ion7-single.json",
+    "sglang_speed_probe": "runs/h200-cosmos3-sglang-profile-probe-ade55a7-b7718f8-*.json",
+    "vllm_omni_video_probe": "runs/h200-cosmos3-vllm-omni-video-probe-efc4998-vllm021-cosmos3_nano_t2v_720p_189f-h200-*.json",
+    "vllm_omni_i2v_best_effort": "runs/h200-cosmos3-vllm-omni-i2v-best-effort-efc4998-vllm021-cosmos3_nano_i2v_720p_189f-h200-2gpu-cfg.json",
+    "t2i_throughput_c4": "runs/h200-cosmos3-t2i-throughput-c4-efc4998-b7718f8-vllm021.json"
+  },
   "notes": [
     "Guardrails are disabled for both frameworks to measure framework/model serving performance without safety-model overhead.",
     "No response cache, Cache-DiT, quantized checkpoint, reduced-step model, or torch compile path is enabled.",
-    "Video cases use the same 4-GPU budget and the same 1280x720, 189-frame, 35-step, CFG 6.0 request parameters."
+    "Video cases use the same 4-GPU budget and the same 1280x720, 189-frame, 35-step, CFG 6.0 request parameters.",
+    "The formal vLLM-Omni video profile is 4-GPU CFG+Ulysses for fairness; best-effort successful video rows are reported separately because they use fewer effective GPUs."
   ]
 }
