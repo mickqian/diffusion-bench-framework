@@ -9,7 +9,7 @@
   "sglang": {
     "repo_path": "/sgl-workspace/sglang",
     "expected_ref": "sgl-project/sglang#26926",
-    "expected_commit": "00ffb2d9957e44a2d5640925124c38a688033c74"
+    "expected_commit": "b7718f8bf87cb676802c60fcf3c71664d243d9c7"
   },
   "frameworks": {
     "vllm": {

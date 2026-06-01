@@ -1379,7 +1379,7 @@
                     "command_profiles": {
                         "default": {
                             "description": "Cosmos3 Nano T2I profile for SGLang-Diffusion PR #26926.",
-                            "sglang_ref": "sgl-project/sglang#26926@00ffb2d9957e44a2d5640925124c38a688033c74",
+                            "sglang_ref": "sgl-project/sglang#26926@b7718f8bf87cb676802c60fcf3c71664d243d9c7",
                             "serve_args": "--model-type diffusion --warmup --attention-backend fa",
                             "notes": "Guardrails disabled for framework-only serving performance; no cache or torch compile path.",
                             "extra_env": {
@@ -1391,7 +1391,7 @@
                             "hardware": [
                                 "h200"
                             ],
-                            "sglang_ref": "sgl-project/sglang#26926@00ffb2d9957e44a2d5640925124c38a688033c74",
+                            "sglang_ref": "sgl-project/sglang#26926@b7718f8bf87cb676802c60fcf3c71664d243d9c7",
                             "num_gpus": 1,
                             "serve_args": "--model-type diffusion --warmup --attention-backend fa",
                             "notes": "Single-card image serving profile; guardrails disabled, no cache, torch compile disabled by harness.",
@@ -1466,7 +1466,7 @@
                     "command_profiles": {
                         "default": {
                             "description": "Cosmos3 Nano T2V profile for SGLang-Diffusion PR #26926.",
-                            "sglang_ref": "sgl-project/sglang#26926@00ffb2d9957e44a2d5640925124c38a688033c74",
+                            "sglang_ref": "sgl-project/sglang#26926@b7718f8bf87cb676802c60fcf3c71664d243d9c7",
                             "num_gpus": 4,
                             "serve_args": "--model-type diffusion --warmup --attention-backend fa --cfg-parallel-size 2 --ulysses-degree 2",
                             "notes": "4-GPU CFG parallel plus Ulysses SP for long-video H200 serving; guardrails disabled, no cache."
@@ -1476,7 +1476,7 @@
                             "hardware": [
                                 "h200"
                             ],
-                            "sglang_ref": "sgl-project/sglang#26926@00ffb2d9957e44a2d5640925124c38a688033c74",
+                            "sglang_ref": "sgl-project/sglang#26926@b7718f8bf87cb676802c60fcf3c71664d243d9c7",
                             "num_gpus": 4,
                             "serve_args": "--model-type diffusion --warmup --attention-backend fa --cfg-parallel-size 2 --ulysses-degree 2",
                             "notes": "Same 4-GPU budget as vLLM-Omni; combines CFG parallel and sequence parallel for the 189-frame 720p case.",
@@ -1553,7 +1553,7 @@
                     "command_profiles": {
                         "default": {
                             "description": "Cosmos3 Nano I2V profile for SGLang-Diffusion PR #26926.",
-                            "sglang_ref": "sgl-project/sglang#26926@00ffb2d9957e44a2d5640925124c38a688033c74",
+                            "sglang_ref": "sgl-project/sglang#26926@b7718f8bf87cb676802c60fcf3c71664d243d9c7",
                             "num_gpus": 4,
                             "serve_args": "--model-type diffusion --warmup --attention-backend fa --cfg-parallel-size 2 --ulysses-degree 2",
                             "notes": "4-GPU CFG parallel plus Ulysses SP for long-video H200 serving; guardrails disabled, no cache."
@@ -1563,7 +1563,7 @@
                             "hardware": [
                                 "h200"
                             ],
-                            "sglang_ref": "sgl-project/sglang#26926@00ffb2d9957e44a2d5640925124c38a688033c74",
+                            "sglang_ref": "sgl-project/sglang#26926@b7718f8bf87cb676802c60fcf3c71664d243d9c7",
                             "num_gpus": 4,
                             "serve_args": "--model-type diffusion --warmup --attention-backend fa --cfg-parallel-size 2 --ulysses-degree 2",
                             "notes": "Same 4-GPU budget as vLLM-Omni; combines CFG parallel and sequence parallel for the 189-frame 720p I2V case.",
