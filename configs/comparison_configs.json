@@ -1445,15 +1445,15 @@
                         "--cfg-parallel-size",
                         "--ulysses-degree"
                     ],
-                    "serve_args": "--model-class-name Cosmos3OmniDiffusersPipeline --stage-init-timeout 900 --init-timeout 1800 --no-guardrails --diffusion-attention-backend FLASH_ATTN --cache-backend none",
+                    "serve_args": "--stage-configs-path configs/vllm_omni_cosmos3_h200_1gpu_guardrails_off.yaml --stage-init-timeout 900 --init-timeout 1800",
                     "extra_env": {},
                     "command_profiles": {
                         "default": {
                             "description": "Cosmos3 Nano T2I profile for vLLM-Omni main 40b2959.",
                             "framework_ref": "vllm-project/vllm-omni@40b2959183d7043cd9d35f5f6387fbb8d1375c57",
                             "num_gpus": 1,
-                            "serve_args": "--model-class-name Cosmos3OmniDiffusersPipeline --stage-init-timeout 900 --init-timeout 1800 --no-guardrails --diffusion-attention-backend FLASH_ATTN --cache-backend none",
-                            "notes": "Uses vLLM-Omni Cosmos3 native pipeline, FlashAttention, no cache, eager/compile-off harness args."
+                            "serve_args": "--stage-configs-path configs/vllm_omni_cosmos3_h200_1gpu_guardrails_off.yaml --stage-init-timeout 900 --init-timeout 1800",
+                            "notes": "Uses a legacy stage config to set Cosmos3 guardrails=false at the diffusion stage; FlashAttention, no cache, eager/compile-off harness args."
                         },
                         "h200-1gpu-fa": {
                             "description": "H200 single-GPU Cosmos3 Nano T2I profile.",
@@ -1462,8 +1462,8 @@
                             ],
                             "framework_ref": "vllm-project/vllm-omni@40b2959183d7043cd9d35f5f6387fbb8d1375c57",
                             "num_gpus": 1,
-                            "serve_args": "--model-class-name Cosmos3OmniDiffusersPipeline --stage-init-timeout 900 --init-timeout 1800 --no-guardrails --diffusion-attention-backend FLASH_ATTN --cache-backend none",
-                            "notes": "Single-card image serving profile; guardrails disabled, no cache, torch compile disabled by harness."
+                            "serve_args": "--stage-configs-path configs/vllm_omni_cosmos3_h200_1gpu_guardrails_off.yaml --stage-init-timeout 900 --init-timeout 1800",
+                            "notes": "Single-card image serving profile; guardrails disabled via legacy stage config, no cache, torch compile disabled by harness."
                         }
                     }
                 }
@@ -1619,8 +1619,8 @@
                             ],
                             "framework_ref": "vllm-project/vllm-omni@40b2959183d7043cd9d35f5f6387fbb8d1375c57",
                             "num_gpus": 2,
-                            "serve_args": "--num-gpus 2 --cfg-parallel-size 2 --model-class-name Cosmos3OmniDiffusersPipeline --stage-init-timeout 900 --init-timeout 1800 --no-guardrails --diffusion-attention-backend FLASH_ATTN --cache-backend none",
-                            "notes": "Uses the two GPUs for CFG parallelism; no cache or torch compile path."
+                            "serve_args": "--stage-configs-path configs/vllm_omni_cosmos3_h200_2gpu_cfg_guardrails_off.yaml --stage-init-timeout 900 --init-timeout 1800",
+                            "notes": "Uses the two GPUs for CFG parallelism with guardrails disabled via legacy stage config; no cache or torch compile path."
                         },
                         "h200-2gpu-ulysses": {
                             "description": "H200 2-GPU Cosmos3 Nano video probe profile using Ulysses sequence parallelism.",
@@ -1818,8 +1818,8 @@
                             ],
                             "framework_ref": "vllm-project/vllm-omni@40b2959183d7043cd9d35f5f6387fbb8d1375c57",
                             "num_gpus": 2,
-                            "serve_args": "--num-gpus 2 --cfg-parallel-size 2 --model-class-name Cosmos3OmniDiffusersPipeline --stage-init-timeout 900 --init-timeout 1800 --no-guardrails --diffusion-attention-backend FLASH_ATTN --cache-backend none",
-                            "notes": "Uses the two GPUs for CFG parallelism; no cache or torch compile path."
+                            "serve_args": "--stage-configs-path configs/vllm_omni_cosmos3_h200_2gpu_cfg_guardrails_off.yaml --stage-init-timeout 900 --init-timeout 1800",
+                            "notes": "Uses the two GPUs for CFG parallelism with guardrails disabled via legacy stage config; no cache or torch compile path."
                         },
                         "h200-2gpu-ulysses": {
                             "description": "H200 2-GPU Cosmos3 Nano video probe profile using Ulysses sequence parallelism.",
