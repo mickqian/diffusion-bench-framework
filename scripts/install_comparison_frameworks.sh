@@ -98,7 +98,7 @@ case "${FRAMEWORK}" in
     python3 -m pip install --upgrade --force-reinstall "${VLLM_INSTALL_SPEC:-vllm==0.18.0}"
     constraints="${VENV_PATH}/vllm_omni_constraints.txt"
     python3 -m pip freeze \
-      | grep -E '^(llvmlite|numba|numpy|setuptools|tokenizers|torch|torchaudio|torchvision|transformers|triton)==' \
+      | grep -E '^(llvmlite|numba|numpy|setuptools|tokenizers|torch|torchaudio|torchvision|triton)==' \
       > "${constraints}"
     python3 -m pip install --upgrade --force-reinstall -c "${constraints}" "${VLLM_OMNI_INSTALL_SPEC:-vllm-omni==0.18.0}"
     ;;
