@@ -1378,8 +1378,8 @@
                     },
                     "command_profiles": {
                         "default": {
-                            "description": "Cosmos3 Nano T2I profile for SGLang-Diffusion main 9a8ab2d.",
-                            "sglang_ref": "sgl-project/sglang@9a8ab2d22b4f85f840701e8ed717f663e1c4662b",
+                            "description": "Cosmos3 Nano T2I profile for SGLang-Diffusion main 3d540563.",
+                            "sglang_ref": "sgl-project/sglang@3d540563916394115f9612f30601ae3fa97ada7c",
                             "serve_args": "--model-type diffusion --warmup --attention-backend fa",
                             "notes": "Guardrails disabled for framework-only serving performance; no cache or torch compile path.",
                             "extra_env": {
@@ -1391,7 +1391,7 @@
                             "hardware": [
                                 "h200"
                             ],
-                            "sglang_ref": "sgl-project/sglang@9a8ab2d22b4f85f840701e8ed717f663e1c4662b",
+                            "sglang_ref": "sgl-project/sglang@3d540563916394115f9612f30601ae3fa97ada7c",
                             "num_gpus": 1,
                             "serve_args": "--model-type diffusion --warmup --attention-backend fa",
                             "notes": "Single-card image serving profile; guardrails disabled, no cache, torch compile disabled by harness.",
@@ -1404,7 +1404,7 @@
                             "hardware": [
                                 "h200"
                             ],
-                            "sglang_ref": "sgl-project/sglang@9a8ab2d22b4f85f840701e8ed717f663e1c4662b",
+                            "sglang_ref": "sgl-project/sglang@3d540563916394115f9612f30601ae3fa97ada7c",
                             "num_gpus": 1,
                             "serve_args": "--model-type diffusion --warmup --attention-backend fa --performance-mode speed",
                             "notes": "Same as the formal single-card profile plus explicit speed mode; guardrails disabled, no cache, torch compile disabled by harness.",
@@ -1417,7 +1417,7 @@
                             "hardware": [
                                 "h200"
                             ],
-                            "sglang_ref": "sgl-project/sglang@9a8ab2d22b4f85f840701e8ed717f663e1c4662b",
+                            "sglang_ref": "sgl-project/sglang@3d540563916394115f9612f30601ae3fa97ada7c",
                             "num_gpus": 1,
                             "serve_args": "--model-type diffusion --warmup --attention-backend fa --batching-max-size 4 --enable-batching-metrics",
                             "notes": "Batching probe for high-pressure throughput; guardrails disabled, no cache, torch compile disabled by harness.",
@@ -1430,8 +1430,8 @@
                 "vllm-omni": {
                     "num_gpus": 1,
                     "install_specs": {
-                        "vllm": "vllm==0.21.0",
-                        "vllm_omni": "git+https://github.com/MaciejBalaNV/vllm-omni.git@453bd09ab3d1e2f10e3d1b63ff05f090ab49a7cc"
+                        "vllm": "vllm==0.22.0",
+                        "vllm_omni": "git+https://github.com/vllm-project/vllm-omni.git@40b2959183d7043cd9d35f5f6387fbb8d1375c57"
                     },
                     "server_bin": "vllm",
                     "use_omni_arg": true,
@@ -1449,8 +1449,8 @@
                     "extra_env": {},
                     "command_profiles": {
                         "default": {
-                            "description": "Cosmos3 Nano T2I profile for vLLM-Omni PR #3454.",
-                            "framework_ref": "vllm-project/vllm-omni#3454@453bd09ab3d1e2f10e3d1b63ff05f090ab49a7cc",
+                            "description": "Cosmos3 Nano T2I profile for vLLM-Omni main 40b2959.",
+                            "framework_ref": "vllm-project/vllm-omni@40b2959183d7043cd9d35f5f6387fbb8d1375c57",
                             "num_gpus": 1,
                             "serve_args": "--model-class-name Cosmos3OmniDiffusersPipeline --stage-init-timeout 900 --init-timeout 1800 --no-guardrails --diffusion-attention-backend FLASH_ATTN --cache-backend none",
                             "notes": "Uses vLLM-Omni Cosmos3 native pipeline, FlashAttention, no cache, eager/compile-off harness args."
@@ -1460,7 +1460,7 @@
                             "hardware": [
                                 "h200"
                             ],
-                            "framework_ref": "vllm-project/vllm-omni#3454@453bd09ab3d1e2f10e3d1b63ff05f090ab49a7cc",
+                            "framework_ref": "vllm-project/vllm-omni@40b2959183d7043cd9d35f5f6387fbb8d1375c57",
                             "num_gpus": 1,
                             "serve_args": "--model-class-name Cosmos3OmniDiffusersPipeline --stage-init-timeout 900 --init-timeout 1800 --no-guardrails --diffusion-attention-backend FLASH_ATTN --cache-backend none",
                             "notes": "Single-card image serving profile; guardrails disabled, no cache, torch compile disabled by harness."
@@ -1507,8 +1507,8 @@
                     },
                     "command_profiles": {
                         "default": {
-                            "description": "Cosmos3 Nano T2V profile for SGLang-Diffusion main 9a8ab2d.",
-                            "sglang_ref": "sgl-project/sglang@9a8ab2d22b4f85f840701e8ed717f663e1c4662b",
+                            "description": "Cosmos3 Nano T2V profile for SGLang-Diffusion main 3d540563.",
+                            "sglang_ref": "sgl-project/sglang@3d540563916394115f9612f30601ae3fa97ada7c",
                             "num_gpus": 4,
                             "serve_args": "--model-type diffusion --warmup --attention-backend fa --cfg-parallel-size 2 --ulysses-degree 2",
                             "notes": "4-GPU CFG parallel plus Ulysses SP for long-video H200 serving; guardrails disabled, no cache."
@@ -1518,7 +1518,7 @@
                             "hardware": [
                                 "h200"
                             ],
-                            "sglang_ref": "sgl-project/sglang@9a8ab2d22b4f85f840701e8ed717f663e1c4662b",
+                            "sglang_ref": "sgl-project/sglang@3d540563916394115f9612f30601ae3fa97ada7c",
                             "num_gpus": 4,
                             "serve_args": "--model-type diffusion --warmup --attention-backend fa --cfg-parallel-size 2 --ulysses-degree 2",
                             "notes": "Same 4-GPU budget as vLLM-Omni; combines CFG parallel and sequence parallel for the 189-frame 720p case.",
@@ -1531,7 +1531,7 @@
                             "hardware": [
                                 "h200"
                             ],
-                            "sglang_ref": "sgl-project/sglang@9a8ab2d22b4f85f840701e8ed717f663e1c4662b",
+                            "sglang_ref": "sgl-project/sglang@3d540563916394115f9612f30601ae3fa97ada7c",
                             "num_gpus": 4,
                             "serve_args": "--model-type diffusion --warmup --attention-backend fa --cfg-parallel-size 2 --ulysses-degree 2 --performance-mode speed",
                             "notes": "Same as the formal 4-GPU CFG+Ulysses profile plus explicit speed mode; guardrails disabled, no cache, torch compile disabled by harness.",
@@ -1544,7 +1544,7 @@
                             "hardware": [
                                 "h200"
                             ],
-                            "sglang_ref": "sgl-project/sglang@9a8ab2d22b4f85f840701e8ed717f663e1c4662b",
+                            "sglang_ref": "sgl-project/sglang@3d540563916394115f9612f30601ae3fa97ada7c",
                             "num_gpus": 2,
                             "serve_args": "--model-type diffusion --warmup --attention-backend fa --cfg-parallel-size 2 --sp-degree 1",
                             "notes": "Uses the two GPUs for CFG parallelism only; sp_degree is pinned to 1 to avoid automatic sequence-parallel inference.",
@@ -1557,8 +1557,8 @@
                 "vllm-omni": {
                     "num_gpus": 4,
                     "install_specs": {
-                        "vllm": "vllm==0.21.0",
-                        "vllm_omni": "git+https://github.com/MaciejBalaNV/vllm-omni.git@453bd09ab3d1e2f10e3d1b63ff05f090ab49a7cc"
+                        "vllm": "vllm==0.22.0",
+                        "vllm_omni": "git+https://github.com/vllm-project/vllm-omni.git@40b2959183d7043cd9d35f5f6387fbb8d1375c57"
                     },
                     "server_bin": "vllm",
                     "use_omni_arg": true,
@@ -1576,8 +1576,8 @@
                     "extra_env": {},
                     "command_profiles": {
                         "default": {
-                            "description": "Cosmos3 Nano T2V profile for vLLM-Omni PR #3454.",
-                            "framework_ref": "vllm-project/vllm-omni#3454@453bd09ab3d1e2f10e3d1b63ff05f090ab49a7cc",
+                            "description": "Cosmos3 Nano T2V profile for vLLM-Omni main 40b2959.",
+                            "framework_ref": "vllm-project/vllm-omni@40b2959183d7043cd9d35f5f6387fbb8d1375c57",
                             "num_gpus": 4,
                             "serve_args": "--num-gpus 4 --cfg-parallel-size 2 --ulysses-degree 2 --model-class-name Cosmos3OmniDiffusersPipeline --stage-init-timeout 900 --init-timeout 1800 --no-guardrails --diffusion-attention-backend FLASH_ATTN --cache-backend none",
                             "notes": "Uses vLLM-Omni recommended context parallelism for extra GPUs plus CFG parallel; no cache, eager/compile-off harness args."
@@ -1587,7 +1587,7 @@
                             "hardware": [
                                 "h200"
                             ],
-                            "framework_ref": "vllm-project/vllm-omni#3454@453bd09ab3d1e2f10e3d1b63ff05f090ab49a7cc",
+                            "framework_ref": "vllm-project/vllm-omni@40b2959183d7043cd9d35f5f6387fbb8d1375c57",
                             "num_gpus": 4,
                             "serve_args": "--num-gpus 4 --cfg-parallel-size 2 --ulysses-degree 2 --model-class-name Cosmos3OmniDiffusersPipeline --stage-init-timeout 900 --init-timeout 1800 --no-guardrails --diffusion-attention-backend FLASH_ATTN --cache-backend none",
                             "notes": "Same 4-GPU budget as SGLang-Diffusion; no cache or torch compile path."
@@ -1597,7 +1597,7 @@
                             "hardware": [
                                 "h200"
                             ],
-                            "framework_ref": "vllm-project/vllm-omni#3454@453bd09ab3d1e2f10e3d1b63ff05f090ab49a7cc",
+                            "framework_ref": "vllm-project/vllm-omni@40b2959183d7043cd9d35f5f6387fbb8d1375c57",
                             "num_gpus": 1,
                             "serve_args": "--model-class-name Cosmos3OmniDiffusersPipeline --stage-init-timeout 900 --init-timeout 1800 --no-guardrails --diffusion-attention-backend FLASH_ATTN --cache-backend none",
                             "notes": "Official single-server path with FlashAttention, guardrails disabled, no cache, torch compile disabled by harness."
@@ -1607,7 +1607,7 @@
                             "hardware": [
                                 "h200"
                             ],
-                            "framework_ref": "vllm-project/vllm-omni#3454@453bd09ab3d1e2f10e3d1b63ff05f090ab49a7cc",
+                            "framework_ref": "vllm-project/vllm-omni@40b2959183d7043cd9d35f5f6387fbb8d1375c57",
                             "num_gpus": 2,
                             "serve_args": "--num-gpus 2 --model-class-name Cosmos3OmniDiffusersPipeline --stage-init-timeout 900 --init-timeout 1800 --no-guardrails --diffusion-attention-backend FLASH_ATTN --cache-backend none",
                             "notes": "Tracks whether vLLM-Omni can choose its own 2-GPU video layout; no cache or torch compile path."
@@ -1617,7 +1617,7 @@
                             "hardware": [
                                 "h200"
                             ],
-                            "framework_ref": "vllm-project/vllm-omni#3454@453bd09ab3d1e2f10e3d1b63ff05f090ab49a7cc",
+                            "framework_ref": "vllm-project/vllm-omni@40b2959183d7043cd9d35f5f6387fbb8d1375c57",
                             "num_gpus": 2,
                             "serve_args": "--num-gpus 2 --cfg-parallel-size 2 --model-class-name Cosmos3OmniDiffusersPipeline --stage-init-timeout 900 --init-timeout 1800 --no-guardrails --diffusion-attention-backend FLASH_ATTN --cache-backend none",
                             "notes": "Uses the two GPUs for CFG parallelism; no cache or torch compile path."
@@ -1627,7 +1627,7 @@
                             "hardware": [
                                 "h200"
                             ],
-                            "framework_ref": "vllm-project/vllm-omni#3454@453bd09ab3d1e2f10e3d1b63ff05f090ab49a7cc",
+                            "framework_ref": "vllm-project/vllm-omni@40b2959183d7043cd9d35f5f6387fbb8d1375c57",
                             "num_gpus": 2,
                             "serve_args": "--num-gpus 2 --ulysses-degree 2 --model-class-name Cosmos3OmniDiffusersPipeline --stage-init-timeout 900 --init-timeout 1800 --no-guardrails --diffusion-attention-backend FLASH_ATTN --cache-backend none",
                             "notes": "Uses the two GPUs for Ulysses sequence parallelism; no cache or torch compile path."
@@ -1637,7 +1637,7 @@
                             "hardware": [
                                 "h200"
                             ],
-                            "framework_ref": "vllm-project/vllm-omni#3454@453bd09ab3d1e2f10e3d1b63ff05f090ab49a7cc",
+                            "framework_ref": "vllm-project/vllm-omni@40b2959183d7043cd9d35f5f6387fbb8d1375c57",
                             "num_gpus": 4,
                             "serve_args": "--num-gpus 4 --model-class-name Cosmos3OmniDiffusersPipeline --stage-init-timeout 900 --init-timeout 1800 --no-guardrails --diffusion-attention-backend FLASH_ATTN --cache-backend none",
                             "notes": "Tracks whether vLLM-Omni can choose its own 4-GPU video layout; no cache or torch compile path."
@@ -1647,7 +1647,7 @@
                             "hardware": [
                                 "h200"
                             ],
-                            "framework_ref": "vllm-project/vllm-omni#3454@453bd09ab3d1e2f10e3d1b63ff05f090ab49a7cc",
+                            "framework_ref": "vllm-project/vllm-omni@40b2959183d7043cd9d35f5f6387fbb8d1375c57",
                             "num_gpus": 4,
                             "serve_args": "--num-gpus 4 --cfg-parallel-size 2 --model-class-name Cosmos3OmniDiffusersPipeline --stage-init-timeout 900 --init-timeout 1800 --no-guardrails --diffusion-attention-backend FLASH_ATTN --cache-backend none",
                             "notes": "Uses CFG parallelism within a 4-GPU budget; no cache or torch compile path."
@@ -1657,7 +1657,7 @@
                             "hardware": [
                                 "h200"
                             ],
-                            "framework_ref": "vllm-project/vllm-omni#3454@453bd09ab3d1e2f10e3d1b63ff05f090ab49a7cc",
+                            "framework_ref": "vllm-project/vllm-omni@40b2959183d7043cd9d35f5f6387fbb8d1375c57",
                             "num_gpus": 4,
                             "serve_args": "--num-gpus 4 --ulysses-degree 4 --model-class-name Cosmos3OmniDiffusersPipeline --stage-init-timeout 900 --init-timeout 1800 --no-guardrails --diffusion-attention-backend FLASH_ATTN --cache-backend none",
                             "notes": "Uses all four GPUs for Ulysses sequence parallelism; no cache or torch compile path."
@@ -1706,8 +1706,8 @@
                     },
                     "command_profiles": {
                         "default": {
-                            "description": "Cosmos3 Nano I2V profile for SGLang-Diffusion main 9a8ab2d.",
-                            "sglang_ref": "sgl-project/sglang@9a8ab2d22b4f85f840701e8ed717f663e1c4662b",
+                            "description": "Cosmos3 Nano I2V profile for SGLang-Diffusion main 3d540563.",
+                            "sglang_ref": "sgl-project/sglang@3d540563916394115f9612f30601ae3fa97ada7c",
                             "num_gpus": 4,
                             "serve_args": "--model-type diffusion --warmup --attention-backend fa --cfg-parallel-size 2 --ulysses-degree 2",
                             "notes": "4-GPU CFG parallel plus Ulysses SP for long-video H200 serving; guardrails disabled, no cache."
@@ -1717,7 +1717,7 @@
                             "hardware": [
                                 "h200"
                             ],
-                            "sglang_ref": "sgl-project/sglang@9a8ab2d22b4f85f840701e8ed717f663e1c4662b",
+                            "sglang_ref": "sgl-project/sglang@3d540563916394115f9612f30601ae3fa97ada7c",
                             "num_gpus": 4,
                             "serve_args": "--model-type diffusion --warmup --attention-backend fa --cfg-parallel-size 2 --ulysses-degree 2",
                             "notes": "Same 4-GPU budget as vLLM-Omni; combines CFG parallel and sequence parallel for the 189-frame 720p I2V case.",
@@ -1730,7 +1730,7 @@
                             "hardware": [
                                 "h200"
                             ],
-                            "sglang_ref": "sgl-project/sglang@9a8ab2d22b4f85f840701e8ed717f663e1c4662b",
+                            "sglang_ref": "sgl-project/sglang@3d540563916394115f9612f30601ae3fa97ada7c",
                             "num_gpus": 4,
                             "serve_args": "--model-type diffusion --warmup --attention-backend fa --cfg-parallel-size 2 --ulysses-degree 2 --performance-mode speed",
                             "notes": "Same as the formal 4-GPU CFG+Ulysses profile plus explicit speed mode; guardrails disabled, no cache, torch compile disabled by harness.",
@@ -1743,7 +1743,7 @@
                             "hardware": [
                                 "h200"
                             ],
-                            "sglang_ref": "sgl-project/sglang@9a8ab2d22b4f85f840701e8ed717f663e1c4662b",
+                            "sglang_ref": "sgl-project/sglang@3d540563916394115f9612f30601ae3fa97ada7c",
                             "num_gpus": 2,
                             "serve_args": "--model-type diffusion --warmup --attention-backend fa --cfg-parallel-size 2 --sp-degree 1",
                             "notes": "Uses the two GPUs for CFG parallelism only; sp_degree is pinned to 1 to avoid automatic sequence-parallel inference.",
@@ -1756,8 +1756,8 @@
                 "vllm-omni": {
                     "num_gpus": 4,
                     "install_specs": {
-                        "vllm": "vllm==0.21.0",
-                        "vllm_omni": "git+https://github.com/MaciejBalaNV/vllm-omni.git@453bd09ab3d1e2f10e3d1b63ff05f090ab49a7cc"
+                        "vllm": "vllm==0.22.0",
+                        "vllm_omni": "git+https://github.com/vllm-project/vllm-omni.git@40b2959183d7043cd9d35f5f6387fbb8d1375c57"
                     },
                     "server_bin": "vllm",
                     "use_omni_arg": true,
@@ -1775,8 +1775,8 @@
                     "extra_env": {},
                     "command_profiles": {
                         "default": {
-                            "description": "Cosmos3 Nano I2V profile for vLLM-Omni PR #3454.",
-                            "framework_ref": "vllm-project/vllm-omni#3454@453bd09ab3d1e2f10e3d1b63ff05f090ab49a7cc",
+                            "description": "Cosmos3 Nano I2V profile for vLLM-Omni main 40b2959.",
+                            "framework_ref": "vllm-project/vllm-omni@40b2959183d7043cd9d35f5f6387fbb8d1375c57",
                             "num_gpus": 4,
                             "serve_args": "--num-gpus 4 --cfg-parallel-size 2 --ulysses-degree 2 --model-class-name Cosmos3OmniDiffusersPipeline --stage-init-timeout 900 --init-timeout 1800 --no-guardrails --diffusion-attention-backend FLASH_ATTN --cache-backend none",
                             "notes": "Uses vLLM-Omni recommended context parallelism for extra GPUs plus CFG parallel; no cache, eager/compile-off harness args."
@@ -1786,7 +1786,7 @@
                             "hardware": [
                                 "h200"
                             ],
-                            "framework_ref": "vllm-project/vllm-omni#3454@453bd09ab3d1e2f10e3d1b63ff05f090ab49a7cc",
+                            "framework_ref": "vllm-project/vllm-omni@40b2959183d7043cd9d35f5f6387fbb8d1375c57",
                             "num_gpus": 4,
                             "serve_args": "--num-gpus 4 --cfg-parallel-size 2 --ulysses-degree 2 --model-class-name Cosmos3OmniDiffusersPipeline --stage-init-timeout 900 --init-timeout 1800 --no-guardrails --diffusion-attention-backend FLASH_ATTN --cache-backend none",
                             "notes": "Same 4-GPU budget as SGLang-Diffusion; no cache or torch compile path."
@@ -1796,7 +1796,7 @@
                             "hardware": [
                                 "h200"
                             ],
-                            "framework_ref": "vllm-project/vllm-omni#3454@453bd09ab3d1e2f10e3d1b63ff05f090ab49a7cc",
+                            "framework_ref": "vllm-project/vllm-omni@40b2959183d7043cd9d35f5f6387fbb8d1375c57",
                             "num_gpus": 1,
                             "serve_args": "--model-class-name Cosmos3OmniDiffusersPipeline --stage-init-timeout 900 --init-timeout 1800 --no-guardrails --diffusion-attention-backend FLASH_ATTN --cache-backend none",
                             "notes": "Official single-server path with FlashAttention, guardrails disabled, no cache, torch compile disabled by harness."
@@ -1806,7 +1806,7 @@
                             "hardware": [
                                 "h200"
                             ],
-                            "framework_ref": "vllm-project/vllm-omni#3454@453bd09ab3d1e2f10e3d1b63ff05f090ab49a7cc",
+                            "framework_ref": "vllm-project/vllm-omni@40b2959183d7043cd9d35f5f6387fbb8d1375c57",
                             "num_gpus": 2,
                             "serve_args": "--num-gpus 2 --model-class-name Cosmos3OmniDiffusersPipeline --stage-init-timeout 900 --init-timeout 1800 --no-guardrails --diffusion-attention-backend FLASH_ATTN --cache-backend none",
                             "notes": "Tracks whether vLLM-Omni can choose its own 2-GPU video layout; no cache or torch compile path."
@@ -1816,7 +1816,7 @@
                             "hardware": [
                                 "h200"
                             ],
-                            "framework_ref": "vllm-project/vllm-omni#3454@453bd09ab3d1e2f10e3d1b63ff05f090ab49a7cc",
+                            "framework_ref": "vllm-project/vllm-omni@40b2959183d7043cd9d35f5f6387fbb8d1375c57",
                             "num_gpus": 2,
                             "serve_args": "--num-gpus 2 --cfg-parallel-size 2 --model-class-name Cosmos3OmniDiffusersPipeline --stage-init-timeout 900 --init-timeout 1800 --no-guardrails --diffusion-attention-backend FLASH_ATTN --cache-backend none",
                             "notes": "Uses the two GPUs for CFG parallelism; no cache or torch compile path."
@@ -1826,7 +1826,7 @@
                             "hardware": [
                                 "h200"
                             ],
-                            "framework_ref": "vllm-project/vllm-omni#3454@453bd09ab3d1e2f10e3d1b63ff05f090ab49a7cc",
+                            "framework_ref": "vllm-project/vllm-omni@40b2959183d7043cd9d35f5f6387fbb8d1375c57",
                             "num_gpus": 2,
                             "serve_args": "--num-gpus 2 --ulysses-degree 2 --model-class-name Cosmos3OmniDiffusersPipeline --stage-init-timeout 900 --init-timeout 1800 --no-guardrails --diffusion-attention-backend FLASH_ATTN --cache-backend none",
                             "notes": "Uses the two GPUs for Ulysses sequence parallelism; no cache or torch compile path."
@@ -1836,7 +1836,7 @@
                             "hardware": [
                                 "h200"
                             ],
-                            "framework_ref": "vllm-project/vllm-omni#3454@453bd09ab3d1e2f10e3d1b63ff05f090ab49a7cc",
+                            "framework_ref": "vllm-project/vllm-omni@40b2959183d7043cd9d35f5f6387fbb8d1375c57",
                             "num_gpus": 4,
                             "serve_args": "--num-gpus 4 --model-class-name Cosmos3OmniDiffusersPipeline --stage-init-timeout 900 --init-timeout 1800 --no-guardrails --diffusion-attention-backend FLASH_ATTN --cache-backend none",
                             "notes": "Tracks whether vLLM-Omni can choose its own 4-GPU video layout; no cache or torch compile path."
@@ -1846,7 +1846,7 @@
                             "hardware": [
                                 "h200"
                             ],
-                            "framework_ref": "vllm-project/vllm-omni#3454@453bd09ab3d1e2f10e3d1b63ff05f090ab49a7cc",
+                            "framework_ref": "vllm-project/vllm-omni@40b2959183d7043cd9d35f5f6387fbb8d1375c57",
                             "num_gpus": 4,
                             "serve_args": "--num-gpus 4 --cfg-parallel-size 2 --model-class-name Cosmos3OmniDiffusersPipeline --stage-init-timeout 900 --init-timeout 1800 --no-guardrails --diffusion-attention-backend FLASH_ATTN --cache-backend none",
                             "notes": "Uses CFG parallelism within a 4-GPU budget; no cache or torch compile path."
@@ -1856,7 +1856,7 @@
                             "hardware": [
                                 "h200"
                             ],
-                            "framework_ref": "vllm-project/vllm-omni#3454@453bd09ab3d1e2f10e3d1b63ff05f090ab49a7cc",
+                            "framework_ref": "vllm-project/vllm-omni@40b2959183d7043cd9d35f5f6387fbb8d1375c57",
                             "num_gpus": 4,
                             "serve_args": "--num-gpus 4 --ulysses-degree 4 --model-class-name Cosmos3OmniDiffusersPipeline --stage-init-timeout 900 --init-timeout 1800 --no-guardrails --diffusion-attention-backend FLASH_ATTN --cache-backend none",
                             "notes": "Uses all four GPUs for Ulysses sequence parallelism; no cache or torch compile path."
