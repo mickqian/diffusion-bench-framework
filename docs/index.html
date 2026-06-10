@@ -6,28 +6,28 @@
     <title>SGLang-Diffusion</title>
     <meta
       name="description"
-      content="SGLang-Diffusion customer-facing one-pager: performance, serving design, model coverage, and cross-framework benchmarks."
+      content="SGLang-Diffusion customer-facing one-pager: performance gains, inference stack design, lossy optimization evaluation, and cross-framework benchmarks."
     />
     <style>
       :root {
         color-scheme: light;
-        --bg: #f5f7fb;
-        --bg-2: #edf2f7;
-        --ink: #111827;
-        --body: #3f4856;
-        --muted: #6b7280;
-        --hairline: rgba(17, 24, 39, 0.11);
+        --paper: #f7f6f2;
+        --paper-2: #eeeee9;
+        --ink: #111113;
+        --body: #3d4148;
+        --muted: #717782;
+        --hair: rgba(18, 20, 24, 0.12);
+        --hair-strong: rgba(18, 20, 24, 0.22);
         --glass: rgba(255, 255, 255, 0.68);
-        --glass-strong: rgba(255, 255, 255, 0.82);
-        --glass-dark: rgba(17, 24, 39, 0.88);
-        --red: #ef5555;
-        --blue: #4f7eb3;
-        --green: #4f9d5d;
-        --violet: #7663d9;
-        --amber: #c9852d;
-        --shadow: 0 24px 70px rgba(20, 31, 54, 0.12);
-        --shadow-soft: 0 10px 40px rgba(20, 31, 54, 0.08);
-        --radius: 22px;
+        --glass-strong: rgba(255, 255, 255, 0.86);
+        --dark: #191b1f;
+        --red: #ed5555;
+        --blue: #4d7fb4;
+        --green: #4d9a63;
+        --amber: #b98735;
+        --shadow: 0 24px 80px rgba(20, 24, 32, 0.11);
+        --soft-shadow: 0 12px 40px rgba(20, 24, 32, 0.08);
+        --radius: 20px;
         --sans: ui-sans-serif, -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Segoe UI", sans-serif;
       }
 
@@ -43,24 +43,11 @@
         margin: 0;
         min-height: 100vh;
         background:
-          linear-gradient(130deg, rgba(235, 244, 255, 0.86), rgba(255, 255, 255, 0) 36%),
-          linear-gradient(220deg, rgba(241, 239, 255, 0.7), rgba(255, 255, 255, 0) 44%),
-          linear-gradient(180deg, var(--bg), var(--bg-2));
+          linear-gradient(180deg, rgba(255, 255, 255, 0.76), rgba(255, 255, 255, 0) 34%),
+          linear-gradient(180deg, var(--paper), var(--paper-2));
         color: var(--ink);
         font-family: var(--sans);
-        line-height: 1.45;
-      }
-
-      body::before {
-        content: "";
-        position: fixed;
-        inset: 0;
-        pointer-events: none;
-        background-image:
-          linear-gradient(rgba(17, 24, 39, 0.035) 1px, transparent 1px),
-          linear-gradient(90deg, rgba(17, 24, 39, 0.035) 1px, transparent 1px);
-        background-size: 44px 44px;
-        mask-image: linear-gradient(180deg, rgba(0, 0, 0, 0.75), transparent 72%);
+        line-height: 1.42;
       }
 
       a {
@@ -69,31 +56,34 @@
       }
 
       button,
-      input,
       table {
         font: inherit;
       }
 
+      button {
+        color: inherit;
+      }
+
       .shell {
-        width: min(1180px, calc(100vw - 40px));
+        width: min(1160px, calc(100vw - 40px));
         margin: 0 auto;
       }
 
-      .nav {
+      .topbar {
         position: sticky;
         top: 12px;
-        z-index: 20;
+        z-index: 30;
         display: flex;
         align-items: center;
         justify-content: space-between;
         gap: 18px;
         margin-top: 12px;
         padding: 10px 12px;
-        border: 1px solid var(--hairline);
+        border: 1px solid var(--hair);
         border-radius: 999px;
-        background: rgba(255, 255, 255, 0.66);
-        backdrop-filter: blur(22px) saturate(1.3);
-        box-shadow: var(--shadow-soft);
+        background: rgba(248, 248, 245, 0.72);
+        backdrop-filter: blur(24px) saturate(1.35);
+        box-shadow: var(--soft-shadow);
       }
 
       .brand {
@@ -101,28 +91,28 @@
         align-items: center;
         gap: 10px;
         min-width: 0;
-        font-weight: 700;
-        letter-spacing: 0;
+        font-size: 14px;
+        font-weight: 760;
       }
 
       .brand-mark {
-        width: 30px;
-        height: 30px;
         display: grid;
         place-items: center;
-        border-radius: 9px;
+        width: 30px;
+        height: 30px;
+        border-radius: 10px;
         background: var(--ink);
-        color: white;
+        color: var(--paper);
         font-size: 11px;
-        font-weight: 800;
+        font-weight: 850;
       }
 
       .nav-links {
         display: flex;
         align-items: center;
-        gap: 4px;
-        flex-wrap: wrap;
         justify-content: flex-end;
+        gap: 3px;
+        flex-wrap: wrap;
       }
 
       .nav-links a {
@@ -134,24 +124,24 @@
       }
 
       .nav-links a:hover {
-        background: rgba(17, 24, 39, 0.06);
+        background: rgba(18, 20, 24, 0.06);
         color: var(--ink);
       }
 
       .hero {
-        min-height: calc(100vh - 82px);
+        min-height: calc(100vh - 78px);
         display: grid;
-        grid-template-columns: minmax(0, 1.02fr) minmax(390px, 0.82fr);
+        grid-template-columns: minmax(0, 1fr) minmax(360px, 0.62fr);
         align-items: center;
-        gap: clamp(28px, 6vw, 88px);
-        padding: clamp(56px, 8vw, 104px) 0 clamp(42px, 6vw, 72px);
+        gap: clamp(34px, 7vw, 108px);
+        padding: clamp(64px, 9vw, 118px) 0 clamp(42px, 7vw, 86px);
       }
 
       .eyebrow {
         display: inline-flex;
         align-items: center;
         gap: 10px;
-        margin: 0 0 20px;
+        margin: 0 0 22px;
         color: var(--muted);
         font-size: 12px;
         font-weight: 800;
@@ -161,27 +151,24 @@
 
       .eyebrow::before {
         content: "";
-        width: 8px;
+        width: 26px;
         height: 8px;
-        border-radius: 50%;
-        background: var(--red);
-        box-shadow:
-          14px 0 0 var(--blue),
-          28px 0 0 var(--green);
+        border-radius: 999px;
+        background: linear-gradient(90deg, var(--red), var(--blue), var(--green));
       }
 
       h1 {
         margin: 0;
-        max-width: 760px;
-        font-size: clamp(56px, 9vw, 112px);
+        max-width: 900px;
+        font-size: clamp(54px, 9.5vw, 116px);
         line-height: 0.92;
         letter-spacing: 0;
-        font-weight: 760;
+        font-weight: 780;
       }
 
-      .lead {
-        max-width: 760px;
-        margin: 28px 0 0;
+      .hero-copy {
+        max-width: 790px;
+        margin: 26px 0 0;
         color: var(--body);
         font-size: clamp(18px, 2vw, 23px);
       }
@@ -190,47 +177,63 @@
         display: flex;
         flex-wrap: wrap;
         gap: 10px;
-        margin-top: 34px;
+        margin-top: 32px;
       }
 
-      .pill-link {
+      .pill {
         display: inline-flex;
         align-items: center;
         justify-content: center;
         min-height: 40px;
-        padding: 10px 15px;
-        border: 1px solid var(--hairline);
+        padding: 9px 14px;
+        border: 1px solid var(--hair);
         border-radius: 999px;
-        background: var(--glass);
+        background: rgba(255, 255, 255, 0.62);
         color: var(--ink);
-        backdrop-filter: blur(18px) saturate(1.3);
+        backdrop-filter: blur(16px) saturate(1.2);
         font-size: 14px;
-        font-weight: 700;
+        font-weight: 720;
+        transition:
+          transform 180ms ease,
+          background 180ms ease,
+          border-color 180ms ease;
       }
 
-      .pill-link.primary {
+      .pill:hover {
+        transform: translateY(-1px);
+        background: rgba(255, 255, 255, 0.86);
+        border-color: var(--hair-strong);
+      }
+
+      .pill.primary {
         background: var(--ink);
         color: white;
       }
 
       .hero-panel,
       .glass-panel {
-        border: 1px solid var(--hairline);
+        border: 1px solid var(--hair);
         border-radius: var(--radius);
         background: var(--glass);
-        backdrop-filter: blur(24px) saturate(1.35);
+        backdrop-filter: blur(24px) saturate(1.32);
         box-shadow: var(--shadow);
       }
 
       .hero-panel {
-        padding: clamp(18px, 3vw, 26px);
+        padding: clamp(20px, 3vw, 28px);
+      }
+
+      .hero-panel h2 {
+        margin: 22px 0 0;
+        font-size: clamp(30px, 4vw, 46px);
+        line-height: 0.98;
+        letter-spacing: 0;
       }
 
       .panel-label {
         display: flex;
-        align-items: center;
         justify-content: space-between;
-        gap: 12px;
+        gap: 14px;
         color: var(--muted);
         font-size: 12px;
         font-weight: 800;
@@ -238,101 +241,409 @@
         text-transform: uppercase;
       }
 
-      .panel-label span:last-child {
-        color: var(--ink);
-        letter-spacing: 0;
-        text-transform: none;
-      }
-
-      .headline-stat {
-        margin: 28px 0 8px;
-        font-size: clamp(56px, 8vw, 92px);
-        line-height: 0.92;
-        font-weight: 780;
-        letter-spacing: 0;
-      }
-
-      .headline-stat span {
-        color: var(--red);
-      }
-
-      .hero-panel p {
-        margin: 0;
-        color: var(--body);
-        font-size: 16px;
-      }
-
-      .metric-strip {
+      .system-lines {
         display: grid;
-        grid-template-columns: repeat(3, minmax(0, 1fr));
         gap: 10px;
-        margin-top: 24px;
+        margin-top: 26px;
       }
 
-      .metric {
-        min-height: 112px;
-        padding: 14px;
-        border: 1px solid rgba(17, 24, 39, 0.08);
-        border-radius: 17px;
-        background: rgba(255, 255, 255, 0.55);
+      .system-line {
+        display: grid;
+        grid-template-columns: 86px 1fr;
+        gap: 14px;
+        align-items: start;
+        padding: 13px 0;
+        border-top: 1px solid var(--hair);
       }
 
-      .metric b {
-        display: block;
-        font-size: 25px;
-        line-height: 1;
-        letter-spacing: 0;
+      .system-line b {
+        color: var(--ink);
+        font-size: 13px;
       }
 
-      .metric span {
-        display: block;
-        margin-top: 10px;
-        color: var(--muted);
-        font-size: 12px;
-        font-weight: 700;
+      .system-line span {
+        color: var(--body);
+        font-size: 14px;
       }
 
       .section {
-        padding: clamp(46px, 7vw, 92px) 0;
+        padding: clamp(54px, 8vw, 104px) 0;
       }
 
       .section-head {
         display: grid;
-        grid-template-columns: minmax(240px, 0.78fr) minmax(0, 1.22fr);
-        gap: clamp(22px, 5vw, 70px);
+        grid-template-columns: minmax(250px, 0.72fr) minmax(0, 1.28fr);
+        gap: clamp(22px, 5vw, 72px);
         align-items: end;
-        margin-bottom: 24px;
+        margin-bottom: 28px;
       }
 
       h2 {
         margin: 0;
-        font-size: clamp(34px, 5vw, 62px);
-        line-height: 1;
+        font-size: clamp(38px, 5.7vw, 70px);
+        line-height: 0.98;
         letter-spacing: 0;
-        font-weight: 740;
+        font-weight: 760;
       }
 
-      .section-head p,
-      .section-copy {
+      .section-head p {
         margin: 0;
+        max-width: 780px;
         color: var(--body);
         font-size: 18px;
       }
 
-      .benchmark-panel {
+      .split-summary {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+        gap: 12px;
+        margin-bottom: 14px;
+      }
+
+      .summary-card {
+        min-height: 180px;
+        padding: 24px;
+        border: 1px solid var(--hair);
+        border-radius: var(--radius);
+        background: rgba(255, 255, 255, 0.52);
+      }
+
+      .summary-card b {
+        display: block;
+        margin-bottom: 12px;
+        font-size: 22px;
+        line-height: 1;
+      }
+
+      .summary-card p {
+        margin: 0;
+        color: var(--body);
+      }
+
+      .explorer {
+        display: grid;
+        grid-template-columns: 330px minmax(0, 1fr);
+        gap: 14px;
+        min-height: 600px;
+        padding: 14px;
+      }
+
+      .control-panel {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+      }
+
+      .mode-toggle {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 6px;
+        padding: 5px;
+        border: 1px solid var(--hair);
+        border-radius: 16px;
+        background: rgba(255, 255, 255, 0.58);
+      }
+
+      .mode-toggle button,
+      .capability-button {
+        border: 0;
+        cursor: pointer;
+      }
+
+      .mode-toggle button {
+        min-height: 42px;
+        border-radius: 12px;
+        background: transparent;
+        color: var(--muted);
+        font-size: 13px;
+        font-weight: 800;
+        transition:
+          background 160ms ease,
+          color 160ms ease,
+          transform 160ms ease;
+      }
+
+      .mode-toggle button[aria-pressed="true"] {
+        background: var(--ink);
+        color: white;
+        box-shadow: 0 8px 22px rgba(18, 20, 24, 0.16);
+      }
+
+      .capability-list {
+        display: grid;
+        gap: 8px;
+      }
+
+      .capability-button {
+        width: 100%;
+        min-height: 78px;
+        padding: 13px 14px;
+        border: 1px solid var(--hair);
+        border-radius: 16px;
+        background: rgba(255, 255, 255, 0.46);
+        text-align: left;
+        transition:
+          transform 160ms ease,
+          background 160ms ease,
+          border-color 160ms ease;
+      }
+
+      .capability-button:hover {
+        transform: translateX(2px);
+        background: rgba(255, 255, 255, 0.74);
+        border-color: var(--hair-strong);
+      }
+
+      .capability-button[aria-pressed="true"] {
+        background: var(--glass-strong);
+        border-color: rgba(18, 20, 24, 0.34);
+      }
+
+      .capability-button span {
+        display: block;
+        color: var(--muted);
+        font-size: 11px;
+        font-weight: 850;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+      }
+
+      .capability-button b {
+        display: block;
+        margin-top: 6px;
+        font-size: 15px;
+        line-height: 1.12;
+      }
+
+      .detail-panel {
+        display: grid;
+        grid-template-rows: auto 1fr auto;
+        min-height: 570px;
+        padding: clamp(22px, 4vw, 36px);
+        border-radius: calc(var(--radius) - 6px);
+        background: rgba(255, 255, 255, 0.72);
+        border: 1px solid rgba(18, 20, 24, 0.08);
+      }
+
+      .detail-top {
+        display: flex;
+        justify-content: space-between;
+        gap: 18px;
+        align-items: flex-start;
+      }
+
+      .status {
+        display: inline-flex;
+        align-items: center;
+        min-height: 26px;
+        padding: 5px 9px;
+        border-radius: 999px;
+        background: rgba(77, 154, 99, 0.12);
+        color: #26643a;
+        font-size: 11px;
+        font-weight: 850;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        white-space: nowrap;
+      }
+
+      .status.wip {
+        background: rgba(113, 119, 130, 0.14);
+        color: #5a616b;
+      }
+
+      .status.tradeoff {
+        background: rgba(185, 135, 53, 0.14);
+        color: #7d5a22;
+      }
+
+      .status.method {
+        background: rgba(77, 127, 180, 0.12);
+        color: #285e96;
+      }
+
+      .detail-panel h3 {
+        margin: 0;
+        max-width: 720px;
+        font-size: clamp(32px, 5vw, 58px);
+        line-height: 0.98;
+        letter-spacing: 0;
+      }
+
+      .detail-summary {
+        max-width: 760px;
+        margin: 18px 0 0;
+        color: var(--body);
+        font-size: 18px;
+      }
+
+      .detail-grid {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 12px;
+        margin-top: 34px;
+      }
+
+      .detail-card {
+        min-height: 172px;
+        padding: 18px;
+        border: 1px solid var(--hair);
+        border-radius: 17px;
+        background: rgba(247, 246, 242, 0.62);
+      }
+
+      .detail-card span {
+        display: block;
+        color: var(--muted);
+        font-size: 11px;
+        font-weight: 850;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+      }
+
+      .detail-card p {
+        margin: 12px 0 0;
+        color: var(--body);
+        font-size: 14px;
+      }
+
+      .detail-links {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        margin-top: 26px;
+      }
+
+      .detail-link {
+        display: inline-flex;
+        align-items: center;
+        min-height: 34px;
+        padding: 7px 11px;
+        border: 1px solid var(--hair);
+        border-radius: 999px;
+        background: rgba(255, 255, 255, 0.72);
+        color: var(--ink);
+        font-size: 13px;
+        font-weight: 760;
+      }
+
+      .lesson-band {
+        display: grid;
+        grid-template-columns: 0.86fr 1.14fr;
+        gap: 14px;
+        align-items: stretch;
+      }
+
+      .lesson-lead {
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        min-height: 370px;
+        padding: 28px;
+        border-radius: var(--radius);
+        background: var(--dark);
+        color: white;
+      }
+
+      .lesson-lead h2 {
+        color: white;
+      }
+
+      .lesson-lead p {
+        margin: 22px 0 0;
+        color: rgba(255, 255, 255, 0.74);
+        font-size: 18px;
+      }
+
+      .lesson-grid {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 12px;
+      }
+
+      .lesson {
+        min-height: 178px;
+        padding: 22px;
+        border: 1px solid var(--hair);
+        border-radius: var(--radius);
+        background: rgba(255, 255, 255, 0.58);
+      }
+
+      .lesson b {
+        display: block;
+        margin-bottom: 10px;
+        font-size: 18px;
+      }
+
+      .lesson p {
+        margin: 0;
+        color: var(--body);
+        font-size: 14px;
+      }
+
+      details.benchmark-shell {
+        border: 1px solid var(--hair);
+        border-radius: var(--radius);
+        background: var(--glass);
+        backdrop-filter: blur(22px) saturate(1.25);
+        box-shadow: var(--shadow);
         overflow: hidden;
-        padding: 0;
+      }
+
+      details.benchmark-shell > summary {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) auto;
+        gap: 18px;
+        align-items: center;
+        padding: 24px;
+        cursor: pointer;
+        list-style: none;
+      }
+
+      details.benchmark-shell > summary::-webkit-details-marker {
+        display: none;
+      }
+
+      .summary-title {
+        display: block;
+        font-size: clamp(24px, 3vw, 34px);
+        font-weight: 780;
+        line-height: 1.05;
+      }
+
+      .summary-copy {
+        display: block;
+        margin-top: 8px;
+        color: var(--body);
+        font-size: 15px;
+      }
+
+      .chevron {
+        display: grid;
+        place-items: center;
+        width: 38px;
+        height: 38px;
+        border-radius: 999px;
+        background: var(--ink);
+        color: white;
+        transition: transform 180ms ease;
+      }
+
+      details[open] .chevron {
+        transform: rotate(45deg);
       }
 
       .benchmark-meta {
         display: grid;
         grid-template-columns: repeat(4, minmax(0, 1fr));
-        border-bottom: 1px solid var(--hairline);
+        border-top: 1px solid var(--hair);
+        border-bottom: 1px solid var(--hair);
       }
 
       .meta-cell {
+        min-height: 96px;
         padding: 18px 20px;
-        border-right: 1px solid var(--hairline);
+        border-right: 1px solid var(--hair);
       }
 
       .meta-cell:last-child {
@@ -341,12 +652,12 @@
 
       .meta-cell b {
         display: block;
-        font-size: 16px;
+        font-size: 15px;
       }
 
       .meta-cell span {
         display: block;
-        margin-top: 5px;
+        margin-top: 6px;
         color: var(--muted);
         font-size: 13px;
       }
@@ -357,14 +668,14 @@
 
       table {
         width: 100%;
-        border-collapse: collapse;
         min-width: 860px;
+        border-collapse: collapse;
       }
 
       th,
       td {
-        padding: 18px 20px;
-        border-bottom: 1px solid rgba(17, 24, 39, 0.08);
+        padding: 17px 20px;
+        border-bottom: 1px solid rgba(18, 20, 24, 0.08);
         text-align: left;
         vertical-align: top;
       }
@@ -372,7 +683,7 @@
       th {
         color: var(--muted);
         font-size: 12px;
-        font-weight: 800;
+        font-weight: 850;
         letter-spacing: 0.08em;
         text-transform: uppercase;
       }
@@ -386,32 +697,27 @@
         border-bottom: 0;
       }
 
-      .case-name {
-        display: block;
-        color: var(--ink);
-        font-size: 16px;
-        font-weight: 760;
-      }
-
-      .case-detail {
-        display: block;
-        margin-top: 4px;
-        color: var(--muted);
-        font-size: 13px;
-      }
-
+      .case-name,
       .latency {
         display: block;
         color: var(--ink);
-        font-size: 17px;
-        font-weight: 760;
+        font-weight: 780;
       }
 
+      .case-name {
+        font-size: 16px;
+      }
+
+      .case-detail,
       .server-time {
         display: block;
         margin-top: 4px;
         color: var(--muted);
         font-size: 12px;
+      }
+
+      .latency {
+        font-size: 17px;
       }
 
       .winner {
@@ -420,16 +726,16 @@
         gap: 8px;
         padding: 8px 10px;
         border-radius: 999px;
-        background: rgba(239, 85, 85, 0.12);
-        color: #b91c1c;
+        background: rgba(237, 85, 85, 0.12);
+        color: #b72b2b;
         font-size: 13px;
-        font-weight: 800;
+        font-weight: 850;
         white-space: nowrap;
       }
 
       .winner.vllm {
-        background: rgba(79, 126, 179, 0.12);
-        color: #245b93;
+        background: rgba(77, 127, 180, 0.13);
+        color: #285e96;
       }
 
       .winner::before {
@@ -441,141 +747,11 @@
       }
 
       .note-row {
-        padding: 18px 20px 20px;
-        border-top: 1px solid var(--hairline);
-        background: rgba(255, 255, 255, 0.42);
+        padding: 18px 20px 22px;
+        border-top: 1px solid var(--hair);
+        background: rgba(255, 255, 255, 0.38);
         color: var(--muted);
         font-size: 13px;
-      }
-
-      .stack-grid {
-        display: grid;
-        grid-template-columns: repeat(4, minmax(0, 1fr));
-        gap: 12px;
-      }
-
-      .stack-item {
-        min-height: 250px;
-        padding: 22px;
-        border: 1px solid var(--hairline);
-        border-radius: var(--radius);
-        background: rgba(255, 255, 255, 0.58);
-        backdrop-filter: blur(20px) saturate(1.25);
-      }
-
-      .stack-index {
-        display: inline-grid;
-        place-items: center;
-        width: 34px;
-        height: 34px;
-        margin-bottom: 24px;
-        border-radius: 11px;
-        background: var(--ink);
-        color: white;
-        font-size: 12px;
-        font-weight: 800;
-      }
-
-      .stack-item h3,
-      .coverage-item h3 {
-        margin: 0 0 10px;
-        color: var(--ink);
-        font-size: 20px;
-        line-height: 1.08;
-        letter-spacing: 0;
-      }
-
-      .stack-item p,
-      .coverage-item p {
-        margin: 0;
-        color: var(--body);
-        font-size: 14px;
-      }
-
-      .coverage-layout {
-        display: grid;
-        grid-template-columns: minmax(0, 0.92fr) minmax(0, 1.08fr);
-        gap: 14px;
-      }
-
-      .coverage-hero {
-        display: flex;
-        flex-direction: column;
-        justify-content: space-between;
-        min-height: 420px;
-        padding: 28px;
-        border-radius: var(--radius);
-        background: var(--glass-dark);
-        color: white;
-        box-shadow: var(--shadow);
-      }
-
-      .coverage-hero h2 {
-        color: white;
-      }
-
-      .coverage-hero p {
-        margin: 22px 0 0;
-        color: rgba(255, 255, 255, 0.72);
-        font-size: 18px;
-      }
-
-      .coverage-tags {
-        display: flex;
-        flex-wrap: wrap;
-        gap: 8px;
-        margin-top: 28px;
-      }
-
-      .tag {
-        display: inline-flex;
-        align-items: center;
-        min-height: 30px;
-        padding: 6px 10px;
-        border-radius: 999px;
-        background: rgba(255, 255, 255, 0.12);
-        color: inherit;
-        font-size: 12px;
-        font-weight: 800;
-      }
-
-      .coverage-grid {
-        display: grid;
-        grid-template-columns: repeat(2, minmax(0, 1fr));
-        gap: 12px;
-      }
-
-      .coverage-item {
-        min-height: 204px;
-        padding: 22px;
-        border: 1px solid var(--hairline);
-        border-radius: var(--radius);
-        background: rgba(255, 255, 255, 0.62);
-        backdrop-filter: blur(20px) saturate(1.25);
-      }
-
-      .feature-band {
-        display: grid;
-        grid-template-columns: repeat(3, minmax(0, 1fr));
-        gap: 12px;
-      }
-
-      .feature {
-        min-height: 180px;
-        padding: 22px;
-        border-top: 1px solid var(--hairline);
-      }
-
-      .feature b {
-        display: block;
-        color: var(--ink);
-        font-size: 17px;
-      }
-
-      .feature p {
-        margin: 10px 0 0;
-        color: var(--body);
-        font-size: 14px;
       }
 
       .footer {
@@ -586,10 +762,10 @@
 
       .footer-inner {
         display: flex;
-        align-items: flex-start;
         justify-content: space-between;
+        align-items: flex-start;
         gap: 20px;
-        border-top: 1px solid var(--hairline);
+        border-top: 1px solid var(--hair);
         padding-top: 22px;
       }
 
@@ -602,21 +778,35 @@
 
       .footer a {
         color: var(--body);
-        font-weight: 700;
+        font-weight: 730;
+      }
+
+      @media (prefers-reduced-motion: reduce) {
+        *,
+        *::before,
+        *::after {
+          scroll-behavior: auto !important;
+          transition: none !important;
+        }
       }
 
       @media (max-width: 980px) {
         .hero,
         .section-head,
-        .coverage-layout {
+        .explorer,
+        .lesson-band {
           grid-template-columns: 1fr;
         }
 
-        .stack-grid,
-        .feature-band {
-          grid-template-columns: repeat(2, minmax(0, 1fr));
+        .hero {
+          min-height: auto;
         }
 
+        .detail-panel {
+          min-height: auto;
+        }
+
+        .detail-grid,
         .benchmark-meta {
           grid-template-columns: repeat(2, minmax(0, 1fr));
         }
@@ -624,14 +814,14 @@
 
       @media (max-width: 680px) {
         .shell {
-          width: min(100vw - 24px, 1180px);
+          width: min(100vw - 24px, 1160px);
         }
 
-        .nav {
+        .topbar {
           position: static;
           align-items: flex-start;
-          border-radius: 18px;
           flex-direction: column;
+          border-radius: 18px;
         }
 
         .nav-links {
@@ -639,23 +829,24 @@
         }
 
         .hero {
-          min-height: auto;
-          padding-top: 52px;
+          padding-top: 54px;
         }
 
-        .hero-panel {
-          border-radius: 18px;
-        }
-
-        .metric-strip,
+        .split-summary,
+        .detail-grid,
+        .lesson-grid,
         .benchmark-meta,
-        .stack-grid,
-        .coverage-grid,
-        .feature-band,
         .footer-inner {
           grid-template-columns: 1fr;
         }
 
+        .system-line {
+          grid-template-columns: 1fr;
+          gap: 6px;
+        }
+
+        .detail-top,
+        details.benchmark-shell > summary,
         .footer-inner {
           display: grid;
         }
@@ -667,16 +858,16 @@
     </style>
   </head>
   <body>
-    <header class="shell nav" aria-label="SGLang-Diffusion navigation">
+    <header class="shell topbar" aria-label="SGLang-Diffusion navigation">
       <a class="brand" href="#top" aria-label="SGLang-Diffusion home">
         <span class="brand-mark">SG</span>
         <span>SGLang-Diffusion</span>
       </a>
       <nav class="nav-links">
-        <a href="#benchmark">Benchmark</a>
-        <a href="#design">Design</a>
-        <a href="#coverage">Coverage</a>
-        <a href="#features">Features</a>
+        <a href="#performance">Performance gains</a>
+        <a href="#lessons">What we learn</a>
+        <a href="#benchmarks">Benchmarks</a>
+        <a href="https://docs.sglang.io/docs/sglang-diffusion/" target="_blank" rel="noreferrer">Docs</a>
       </nav>
     </header>
 
@@ -685,53 +876,123 @@
         <div>
           <p class="eyebrow">Native image and video serving</p>
           <h1>SGLang-Diffusion</h1>
-          <p class="lead">
-            A production serving stack for diffusion models. It keeps the generation recipe intact while improving
-            scheduling, memory residency, multi-GPU execution, kernels, and measured end-to-end latency.
+          <p class="hero-copy">
+            A native serving stack for image and video generation. The main performance gains come from the
+            inference system around the model: batching, disaggregation, memory residency, parallel execution,
+            kernel paths, and carefully measured lossy acceleration.
           </p>
           <div class="hero-actions">
-            <a class="pill-link primary" href="#benchmark">View latest benchmark</a>
-            <a class="pill-link" href="https://docs.sglang.io/docs/sglang-diffusion/" target="_blank" rel="noreferrer">Docs</a>
-            <a class="pill-link" href="https://github.com/sgl-project/sglang" target="_blank" rel="noreferrer">GitHub</a>
+            <a class="pill primary" href="#performance">Explore the stack</a>
+            <a class="pill" href="#benchmarks">View benchmark data</a>
+            <a class="pill" href="https://github.com/sgl-project/sglang" target="_blank" rel="noreferrer">GitHub</a>
           </div>
         </div>
 
-        <aside class="hero-panel" aria-label="Latest benchmark summary">
+        <aside class="hero-panel" aria-label="Performance thesis">
           <div class="panel-label">
-            <span>H200 cross-framework</span>
-            <span id="updatedAt">2026-06-10</span>
+            <span>Customer conversation</span>
+            <span>lossless + lossy</span>
           </div>
-          <div class="headline-stat"><span id="winCount">3</span>/4</div>
-          <p id="headlineCopy">
-            SGLang-Diffusion wins 3 of 4 aligned same-GPU cases against vLLM-Omni on latest H200 data.
-          </p>
-          <div class="metric-strip" aria-label="Benchmark highlights">
-            <div class="metric">
-              <b>1.11x</b>
-              <span>FLUX.1 1GPU vs vLLM-Omni</span>
+          <h2>Performance is a stack, not a single trick.</h2>
+          <div class="system-lines">
+            <div class="system-line">
+              <b>Serving</b>
+              <span>Queue compatible work, split stages, and move tensors without turning every request into a script.</span>
             </div>
-            <div class="metric">
-              <b>1.10x</b>
-              <span>Cosmos3 video 2GPU CFG</span>
+            <div class="system-line">
+              <b>Runtime</b>
+              <span>Keep residency, parallelism, decoder work, and attention paths explicit per model and hardware.</span>
             </div>
-            <div class="metric">
-              <b>1.08x gap</b>
-              <span>vLLM wins FLUX.1 2GPU TP</span>
+            <div class="system-line">
+              <b>Quality</b>
+              <span>Use cache, quantization, and progressive resolution only with visible quality-drift evaluation.</span>
             </div>
           </div>
         </aside>
       </section>
 
-      <section class="shell section" id="benchmark">
+      <section class="shell section" id="performance">
         <div class="section-head">
-          <h2>Latest aligned benchmark</h2>
+          <h2>Where the gains come from</h2>
           <p>
-            Same model, same sampling recipe, same GPU count. The table uses client-side latency as the comparison
-            source and shows server-side time for SGLang-Diffusion where available.
+            The clean way to discuss SGLang-Diffusion is to separate output-preserving inference-stack gains from
+            lossy optimizations that trade computation for measured quality drift.
           </p>
         </div>
 
-        <div class="glass-panel benchmark-panel">
+        <div class="split-summary" aria-label="Lossless and lossy optimization split">
+          <article class="summary-card">
+            <b>Lossless inference-stack gains</b>
+            <p>
+              Preserve the generation recipe. Improve throughput, latency, and memory by changing how the serving
+              stack schedules, places, parallelizes, and executes the pipeline.
+            </p>
+          </article>
+          <article class="summary-card">
+            <b>Lossy acceleration frontier</b>
+            <p>
+              Change the amount or precision of computation. Report speed only together with quality drift,
+              artifact checks, and an explicit acceptance threshold.
+            </p>
+          </article>
+        </div>
+
+        <section class="glass-panel explorer" aria-label="Interactive performance explorer">
+          <div class="control-panel">
+            <div class="mode-toggle" aria-label="Optimization mode">
+              <button type="button" data-mode="lossless" aria-pressed="true">Lossless</button>
+              <button type="button" data-mode="lossy" aria-pressed="false">Lossy</button>
+            </div>
+            <div class="capability-list" id="capabilityList" role="tablist" aria-label="Performance capabilities"></div>
+          </div>
+          <article class="detail-panel" id="capabilityDetail" aria-live="polite"></article>
+        </section>
+      </section>
+
+      <section class="shell section" id="lessons">
+        <div class="lesson-band">
+          <article class="lesson-lead">
+            <div>
+              <p class="eyebrow">What transfers</p>
+              <h2>Lessons from optimizing diffusion inference</h2>
+              <p>
+                The useful lesson is stack co-design. Diffusion serving needs coordination between requests,
+                stages, memory, communication, kernels, and quality evaluation.
+              </p>
+            </div>
+          </article>
+          <div class="lesson-grid">
+            <article class="lesson">
+              <b>Benchmark like traffic, not demos</b>
+              <p>Single-request latency matters, but throughput, p50/p99, memory envelope, and warmup policy decide production behavior.</p>
+            </article>
+            <article class="lesson">
+              <b>Track commands by version</b>
+              <p>The fastest command changes across framework versions and hardware. Keep best-known profiles pinned and reproducible.</p>
+            </article>
+            <article class="lesson">
+              <b>Make WIP explicit</b>
+              <p>Roadmap work is useful in customer discussions when it is labeled clearly and separated from shipped benchmark claims.</p>
+            </article>
+            <article class="lesson">
+              <b>Treat lossy speed as a contract</b>
+              <p>A 2x speedup is not a result until the acceptable quality-drift boundary is visible.</p>
+            </article>
+          </div>
+        </div>
+      </section>
+
+      <section class="shell section" id="benchmarks">
+        <details class="benchmark-shell" open>
+          <summary>
+            <span>
+              <span class="summary-title">Cross-framework benchmark data</span>
+              <span class="summary-copy">
+                More cross-framework data will be added here; current rows are aligned H200 spot-checks against vLLM-Omni.
+              </span>
+            </span>
+            <span class="chevron" aria-hidden="true">+</span>
+          </summary>
           <div class="benchmark-meta" aria-label="Benchmark policy">
             <div class="meta-cell">
               <b>Hardware</b>
@@ -765,107 +1026,9 @@
             </table>
           </div>
           <div class="note-row" id="benchmarkNote">
-            SGLang-Diffusion commit b0d888a; vLLM-Omni commit 73df8326. Data is generated from the benchmark repo manifest.
+            SGLang-Diffusion commit b0d888a; vLLM-Omni commit 73df8326. Client-side latency is the comparison source.
           </div>
-        </div>
-      </section>
-
-      <section class="shell section" id="design">
-        <div class="section-head">
-          <h2>Serving-first design</h2>
-          <p>
-            Diffusion performance is not a single kernel story. SGLang-Diffusion exposes the production controls
-            that decide whether image and video generation can be served predictably at scale.
-          </p>
-        </div>
-
-        <div class="stack-grid">
-          <article class="stack-item">
-            <span class="stack-index">01</span>
-            <h3>Native pipeline ownership</h3>
-            <p>Stages, tensors, schedulers, encoders, denoisers, and decoders are represented directly instead of wrapped as opaque scripts.</p>
-          </article>
-          <article class="stack-item">
-            <span class="stack-index">02</span>
-            <h3>Batching and placement</h3>
-            <p>Dynamic batching, performance mode, and layerwise offload keep GPU residency explicit under real traffic.</p>
-          </article>
-          <article class="stack-item">
-            <span class="stack-index">03</span>
-            <h3>Parallel execution</h3>
-            <p>TP, SP, Ulysses/Ring, and CFG parallel paths are tracked per model and hardware profile instead of guessed at runtime.</p>
-          </article>
-          <article class="stack-item">
-            <span class="stack-index">04</span>
-            <h3>Measured tradeoffs</h3>
-            <p>Approximate acceleration is opt-in and paired with quality drift, artifact checks, and customer-facing acceptance thresholds.</p>
-          </article>
-        </div>
-      </section>
-
-      <section class="shell section" id="coverage">
-        <div class="coverage-layout">
-          <div class="coverage-hero">
-            <div>
-              <p class="eyebrow">Model surface</p>
-              <h2>One serving layer for image and video.</h2>
-              <p>
-                The benchmark framework tracks command profiles, versions, and failure reasons so coverage expands without losing reproducibility.
-              </p>
-            </div>
-            <div class="coverage-tags" aria-label="Tracked model families">
-              <span class="tag">FLUX.1 / FLUX.2</span>
-              <span class="tag">Qwen-Image</span>
-              <span class="tag">Z-Image</span>
-              <span class="tag">Cosmos3</span>
-              <span class="tag">Wan 2.1 / 2.2</span>
-              <span class="tag">LTX 2 / 2.3</span>
-            </div>
-          </div>
-
-          <div class="coverage-grid">
-            <article class="coverage-item">
-              <h3>Text-to-image</h3>
-              <p>FLUX, Qwen-Image, Z-Image, Cosmos3, and other image families with tracked single-GPU and TP profiles.</p>
-            </article>
-            <article class="coverage-item">
-              <h3>Text-to-video</h3>
-              <p>Wan, Cosmos3, and LTX style workloads where sequence length, decoder cost, and CFG parallelism dominate.</p>
-            </article>
-            <article class="coverage-item">
-              <h3>Image editing</h3>
-              <p>Editing pipelines reuse the same serving controls while preserving model-specific prompts, image inputs, and recipes.</p>
-            </article>
-            <article class="coverage-item">
-              <h3>Framework tracking</h3>
-              <p>Best commands are versioned per framework and hardware, including SGLang-Diffusion, vLLM-Omni, LightX2V, and diffusers baselines.</p>
-            </article>
-          </div>
-        </div>
-      </section>
-
-      <section class="shell section" id="features">
-        <div class="section-head">
-          <h2>What users get</h2>
-          <p>
-            The goal is not only faster demos. The goal is a repeatable serving surface where model teams can ship,
-            compare, and tune diffusion workloads without rebuilding the runtime per model.
-          </p>
-        </div>
-        <div class="feature-band">
-          <div class="feature">
-            <b>Cross-framework truth</b>
-            <p>Formal reports keep raw data, exact commands, framework versions, hardware, and benchmark policy together.</p>
-          </div>
-          <div class="feature">
-            <b>Production controls</b>
-            <p>Serving knobs are first-class: dynamic batching, offload, parallelism, attention backend, compile, and postprocess placement.</p>
-          </div>
-          <div class="feature">
-            <b>Quality-aware speed</b>
-            <p>Lossy paths such as cache, quantization, or progressive resolution are evaluated as speed-quality frontiers.</p>
-          </div>
-        </div>
+        </details>
       </section>
     </main>
 
@@ -877,14 +1040,147 @@
         </div>
         <div class="footer-links">
           <a href="https://docs.sglang.io/docs/sglang-diffusion/dynamic_batching" target="_blank" rel="noreferrer">Dynamic batching</a>
-          <a href="https://docs.sglang.io/docs/sglang-diffusion/deployment_cookbook" target="_blank" rel="noreferrer">Performance mode</a>
-          <a href="https://docs.sglang.io/docs/sglang-diffusion/ring_sp_performance" target="_blank" rel="noreferrer">Parallelism</a>
+          <a href="https://docs.sglang.io/docs/sglang-diffusion/disaggregation" target="_blank" rel="noreferrer">Disaggregation</a>
+          <a href="https://docs.sglang.io/docs/sglang-diffusion/ring_sp_performance" target="_blank" rel="noreferrer">Sequence parallelism</a>
+          <a href="https://docs.sglang.io/docs/sglang-diffusion/caching-acceleration" target="_blank" rel="noreferrer">Caching</a>
           <a href="https://docs.sglang.io/docs/sglang-diffusion/quantization" target="_blank" rel="noreferrer">Quantization</a>
         </div>
       </div>
     </footer>
 
     <script>
+      const capabilities = {
+        lossless: [
+          {
+            label: "Serving",
+            title: "Dynamic batching",
+            status: "shipped",
+            summary:
+              "Batch compatible queued native diffusion requests so the GPU sees useful work instead of isolated scripts.",
+            optimizes: "Throughput and GPU utilization under concurrent image and video workloads.",
+            matters:
+              "Diffusion requests have repeated stage structure. Batching at the serving layer raises utilization without changing the output recipe.",
+            helps:
+              "High request pressure, similar model paths, and production traffic where single-request latency is not the only objective.",
+            links: [["Docs", "https://docs.sglang.io/docs/sglang-diffusion/dynamic_batching"]]
+          },
+          {
+            label: "Serving",
+            title: "Disaggregation with Mooncake",
+            status: "shipped",
+            summary:
+              "Split Encoder, Denoiser, and Decoder roles and transfer tensors directly between stages instead of forcing one monolithic worker.",
+            optimizes: "Stage-level scaling, mixed workload placement, and throughput when pipeline stages bottleneck differently.",
+            matters:
+              "The expensive stage changes across models and traffic. Disaggregation lets the serving topology follow the pipeline.",
+            helps:
+              "Deployments where text encoders, denoisers, or decoders need different GPU allocation or independent scaling.",
+            links: [["Docs", "https://docs.sglang.io/docs/sglang-diffusion/disaggregation"]]
+          },
+          {
+            label: "Memory",
+            title: "Encoder layerwise offload",
+            status: "shipped",
+            summary:
+              "Automatically place encoder layers to reduce peak memory while keeping hot execution paths practical for serving.",
+            optimizes: "Memory envelope, model fit, and latency stability when encoders are large but not always the dominant hot loop.",
+            matters:
+              "Lower memory pressure can avoid forced offload patterns, OOM retries, or smaller serving envelopes.",
+            helps:
+              "Large text or vision encoders, multi-encoder pipelines, and high-resolution image/video generation.",
+            links: [["Performance mode", "https://docs.sglang.io/docs/sglang-diffusion/deployment_cookbook"]]
+          },
+          {
+            label: "Parallel",
+            title: "Sequence parallelism and postprocess optimization",
+            status: "shipped",
+            summary:
+              "Use SP, TP, CFG parallelism, and decoder/postprocess placement as model-dependent levers instead of treating them as afterthoughts.",
+            optimizes: "Long latent sequences, video attention cost, VAE/decode cost, and multi-GPU utilization.",
+            matters:
+              "For video and high-resolution generation, postprocess and communication can be as visible as denoising kernels.",
+            helps:
+              "Wan, Cosmos, LTX-style video paths, high-resolution image models, and requests with large latent token counts.",
+            links: [["Sequence parallelism", "https://docs.sglang.io/docs/sglang-diffusion/ring_sp_performance"]]
+          },
+          {
+            label: "Kernel path",
+            title: "Breakable CUDA graph and kernel selection",
+            status: "WIP",
+            summary:
+              "Roadmap work to keep graph benefits through diffusion control flow and choose between fused and compiled kernels by shape and hardware.",
+            optimizes: "Launch overhead, stable hot loops, and kernel-path selection without forcing one backend everywhere.",
+            matters:
+              "Diffusion has repeated work but also control flow. The goal is graph and kernel efficiency without losing pipeline flexibility.",
+            helps:
+              "Stable-shape serving paths and deployments where fused kernels or compiled kernels win under different model/hardware regimes.",
+            links: [
+              ["BCG PR", "https://github.com/sgl-project/sglang/pull/27436"],
+              ["Kernel selection PR", "https://github.com/sgl-project/sglang/pull/27250/changes"]
+            ]
+          }
+        ],
+        lossy: [
+          {
+            label: "Cache",
+            title: "Temporal cache acceleration",
+            status: "quality tradeoff",
+            summary:
+              "Reuse denoising work across nearby steps or frames when the model path is similar enough, then validate visible drift.",
+            optimizes: "Denoising compute in iterative generation and video-like temporal workloads.",
+            matters:
+              "Cache can be a large speed lever, but it must be evaluated against artifacts and temporal consistency.",
+            helps:
+              "Workloads where adjacent denoising states are close enough and the quality envelope is explicitly accepted.",
+            links: [["Docs", "https://docs.sglang.io/docs/sglang-diffusion/caching-acceleration"]]
+          },
+          {
+            label: "Precision",
+            title: "Quantization: FP8, FP4, NVFP4",
+            status: "quality tradeoff",
+            summary:
+              "Reduce precision and memory bandwidth while checking model-specific quality and artifact behavior.",
+            optimizes: "Memory footprint, bandwidth pressure, and throughput on hardware with efficient low-precision paths.",
+            matters:
+              "The right quantization mode is model and hardware dependent. It should be reported with quality evidence, not only speed.",
+            helps:
+              "Large image/video models under memory pressure or deployments where low-precision kernels are mature.",
+            links: [["Docs", "https://docs.sglang.io/docs/sglang-diffusion/quantization"]]
+          },
+          {
+            label: "Resolution",
+            title: "Progressive resolution",
+            status: "quality tradeoff",
+            summary:
+              "Run early denoising at a coarser latent resolution, then return to full resolution when details matter more.",
+            optimizes: "Early-step denoising cost. Reported FLUX.2 experiments reached 1.93x acceleration under the evaluated setting.",
+            matters:
+              "The speedup is interesting because early denoising is often coarse, but the quality drift must remain visible and bounded.",
+            helps:
+              "Models and prompts where early low-resolution denoising preserves composition without unacceptable detail loss.",
+            links: [
+              [
+                "Progressive resolution",
+                "https://github.com/sgl-project/sglang/blob/main/docs_new/docs/sglang-diffusion/progressive_resolution.mdx"
+              ]
+            ]
+          },
+          {
+            label: "Evaluation",
+            title: "Speed-quality frontier",
+            status: "method",
+            summary:
+              "Lock the baseline recipe, change one approximate lever at a time, and publish speed with quality-drift evidence.",
+            optimizes: "Decision quality. It keeps lossy acceleration useful without hiding artifacts behind aggregate speed numbers.",
+            matters:
+              "Customers need to know whether a faster result is still acceptable for their prompts, videos, and visual standards.",
+            helps:
+              "Any deployment considering cache, low precision, progressive resolution, or model-specific approximation.",
+            links: [["SGLang-Diffusion docs", "https://docs.sglang.io/docs/sglang-diffusion/"]]
+          }
+        ]
+      };
+
       const fallbackData = {
         id: "h200-main-b0d888a-flux1-cosmos3-20260610",
         updated_at: "2026-06-10",
@@ -908,7 +1204,7 @@
         rows: [
           {
             case: "FLUX.1-dev T2I",
-            details: "1024x1024 · 50 steps · cfg 3.5",
+            details: "1024x1024 - 50 steps - cfg 3.5",
             gpus: "1 GPU",
             torch_compile: "on",
             sglang_diffusion: { client_latency_s: 6.566, server_latency_s: 6.392, profile: "h100-h200-1gpu-speed-compile" },
@@ -919,7 +1215,7 @@
           },
           {
             case: "FLUX.1-dev T2I",
-            details: "1024x1024 · 50 steps · cfg 3.5",
+            details: "1024x1024 - 50 steps - cfg 3.5",
             gpus: "2 GPU TP",
             torch_compile: "on",
             sglang_diffusion: { client_latency_s: 6.4, server_latency_s: 6.239, profile: "h100-h200-2gpu-tp-speed-compile" },
@@ -930,7 +1226,7 @@
           },
           {
             case: "Cosmos3 Nano T2I",
-            details: "1280x720 · 35 steps · cfg 6",
+            details: "1280x720 - 35 steps - cfg 6",
             gpus: "1 GPU",
             torch_compile: "off",
             sglang_diffusion: { client_latency_s: 1.859, server_latency_s: 1.732, profile: "h200-1gpu-fa-speed" },
@@ -941,7 +1237,7 @@
           },
           {
             case: "Cosmos3 Nano T2V",
-            details: "1280x720 · 189 frames · 35 steps · cfg 6",
+            details: "1280x720 - 189 frames - 35 steps - cfg 6",
             gpus: "2 GPU CFG",
             torch_compile: "off",
             sglang_diffusion: { client_latency_s: 107.159, server_latency_s: 104.602, profile: "h200-2gpu-cfg-speed" },
@@ -952,6 +1248,92 @@
           }
         ]
       };
+
+      const modeButtons = [...document.querySelectorAll(".mode-toggle button")];
+      const capabilityList = document.getElementById("capabilityList");
+      const capabilityDetail = document.getElementById("capabilityDetail");
+      let activeMode = "lossless";
+      let activeIndex = 0;
+
+      function statusClass(status) {
+        const normalized = status.toLowerCase();
+        if (normalized === "wip") return "status wip";
+        if (normalized === "quality tradeoff") return "status tradeoff";
+        if (normalized === "method") return "status method";
+        return "status";
+      }
+
+      function renderCapabilityRail() {
+        capabilityList.innerHTML = capabilities[activeMode]
+          .map(
+            (capability, index) => `
+              <button
+                type="button"
+                class="capability-button"
+                role="tab"
+                aria-pressed="${index === activeIndex}"
+                data-index="${index}"
+              >
+                <span>${capability.label}</span>
+                <b>${capability.title}</b>
+              </button>
+            `
+          )
+          .join("");
+
+        capabilityList.querySelectorAll("button").forEach((button) => {
+          button.addEventListener("click", () => {
+            activeIndex = Number(button.dataset.index);
+            renderExplorer();
+          });
+        });
+      }
+
+      function renderCapabilityDetail() {
+        const capability = capabilities[activeMode][activeIndex];
+        const links = capability.links
+          .map(([label, href]) => `<a class="detail-link" href="${href}" target="_blank" rel="noreferrer">${label}</a>`)
+          .join("");
+
+        capabilityDetail.innerHTML = `
+          <div>
+            <div class="detail-top">
+              <h3>${capability.title}</h3>
+              <span class="${statusClass(capability.status)}">${capability.status}</span>
+            </div>
+            <p class="detail-summary">${capability.summary}</p>
+          </div>
+          <div class="detail-grid">
+            <div class="detail-card">
+              <span>What it optimizes</span>
+              <p>${capability.optimizes}</p>
+            </div>
+            <div class="detail-card">
+              <span>Why it matters</span>
+              <p>${capability.matters}</p>
+            </div>
+            <div class="detail-card">
+              <span>When it helps</span>
+              <p>${capability.helps}</p>
+            </div>
+          </div>
+          <div class="detail-links">${links}</div>
+        `;
+      }
+
+      function renderExplorer() {
+        modeButtons.forEach((button) => button.setAttribute("aria-pressed", String(button.dataset.mode === activeMode)));
+        renderCapabilityRail();
+        renderCapabilityDetail();
+      }
+
+      modeButtons.forEach((button) => {
+        button.addEventListener("click", () => {
+          activeMode = button.dataset.mode;
+          activeIndex = 0;
+          renderExplorer();
+        });
+      });
 
       const formatSeconds = (value) => `${Number(value).toFixed(value >= 10 ? 2 : 3)}s`;
 
@@ -967,21 +1349,16 @@
         `;
       }
 
-      function render(data) {
-        const summary = data.summary || fallbackData.summary;
-        document.getElementById("updatedAt").textContent = data.updated_at || fallbackData.updated_at;
-        document.getElementById("winCount").textContent = summary.sglang_diffusion_wins;
-        document.getElementById("headlineCopy").textContent = summary.headline;
+      function renderBenchmarks(data) {
         document.getElementById("sourceReport").textContent = data.source_report || data.id;
-
-        const rows = data.rows
+        document.getElementById("benchmarkRows").innerHTML = data.rows
           .map((row) => {
             const vllmWinner = row.winner === "vLLM-Omni";
             return `
               <tr>
                 <td>
                   <span class="case-name">${row.case}</span>
-                  <span class="case-detail">${row.details} · compile ${row.torch_compile}</span>
+                  <span class="case-detail">${row.details} - compile ${row.torch_compile}</span>
                   <span class="case-detail">${row.note}</span>
                 </td>
                 <td>${row.gpus}</td>
@@ -992,7 +1369,6 @@
             `;
           })
           .join("");
-        document.getElementById("benchmarkRows").innerHTML = rows;
 
         const sgldCommit = data.frameworks?.sglang_diffusion_now?.commit || fallbackData.frameworks.sglang_diffusion_now.commit;
         const vllmCommit =
@@ -1001,10 +1377,10 @@
           `SGLang-Diffusion ${sgldCommit.slice(0, 8)}; vLLM-Omni ${vllmCommit.slice(0, 8)}. ` +
           "Client-side latency is the comparison source; server-side time is shown where available.";
         document.getElementById("footerSource").textContent =
-          `Updated ${data.updated_at || fallbackData.updated_at} from ${data.source_report || data.id}.`;
+          `Benchmark data updated ${data.updated_at || fallbackData.updated_at} from ${data.source_report || data.id}.`;
       }
 
-      async function loadData() {
+      async function loadBenchmarkData() {
         try {
           const response = await fetch("data/latest-cross-framework.json", { cache: "no-store" });
           if (!response.ok) throw new Error(`status ${response.status}`);
@@ -1014,7 +1390,8 @@
         }
       }
 
-      loadData().then(render);
+      renderExplorer();
+      loadBenchmarkData().then(renderBenchmarks);
     </script>
   </body>
 </html>
