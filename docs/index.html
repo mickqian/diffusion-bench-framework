@@ -821,6 +821,12 @@
         background: rgba(255, 255, 255, 0.52);
       }
 
+      .history-stat.note {
+        grid-column: 1 / -1;
+        min-height: 0;
+        background: rgba(255, 255, 255, 0.34);
+      }
+
       .history-stat b {
         display: block;
         color: var(--ink);
@@ -1575,6 +1581,11 @@
         sglang: "SGLang-Diffusion",
         "vllm-omni": "vLLM-Omni",
         lightx2v: "LightX2V",
+        sglang_reference: "SGLang baseline",
+        vllm_omni_tp: "vLLM TP",
+        vllm_omni_cfg: "vLLM CFG",
+        vllm_omni_ulysses: "vLLM Ulysses",
+        lightx2v_fa3: "LightX2V FA3",
         sglang_before: "SGLang Apr 10",
         sglang_now: "SGLang now",
         vllm_omni_now: "vLLM now",
@@ -1646,6 +1657,10 @@
         const sgWins = summary.sglang_diffusion_wins ?? summary.sglang_now_wins ?? 0;
         const otherWins = summary.other_wins ?? 0;
         document.getElementById("historySummary").innerHTML = `
+          <div class="history-stat note">
+            <b>${escapeHtml(section.title || "Selected history")}</b>
+            <span>${escapeHtml(section.subtitle || "Committed benchmark report data.")}</span>
+          </div>
           <div class="history-stat">
             <b>${rows}</b>
             <span>tracked rows in this section</span>
@@ -1685,6 +1700,20 @@
             <th>SGLang now</th>
             <th>vLLM now</th>
             <th>LightX2V now</th>
+            <th>Fastest</th>
+          </tr>
+        `;
+      }
+
+      function videoProfileSweepHead() {
+        document.getElementById("historyTableHead").innerHTML = `
+          <tr>
+            <th>Case</th>
+            <th>SGLang baseline</th>
+            <th>vLLM TP</th>
+            <th>vLLM CFG</th>
+            <th>vLLM Ulysses/SP</th>
+            <th>LightX2V FA3</th>
             <th>Fastest</th>
           </tr>
         `;
@@ -1731,6 +1760,28 @@
           .join("");
       }
 
+      function renderVideoProfileSweepRows(section) {
+        videoProfileSweepHead();
+        document.getElementById("historyRows").innerHTML = section.rows
+          .map(
+            (row) => `
+              <tr>
+                <td>
+                  <span class="case-name">${escapeHtml(row.case)}</span>
+                  <span class="case-detail">${escapeHtml(row.details)}</span>
+                </td>
+                <td>${historyMetricCell(row.cells.sglang_reference, section.mode, "ratio_to_sglang_reference")}</td>
+                <td>${historyMetricCell(row.cells.vllm_omni_tp, section.mode, "ratio_to_sglang_reference")}</td>
+                <td>${historyMetricCell(row.cells.vllm_omni_cfg, section.mode, "ratio_to_sglang_reference")}</td>
+                <td>${historyMetricCell(row.cells.vllm_omni_ulysses, section.mode, "ratio_to_sglang_reference")}</td>
+                <td>${historyMetricCell(row.cells.lightx2v_fa3, section.mode, "ratio_to_sglang_reference")}</td>
+                <td>${historyWinner(row)}</td>
+              </tr>
+            `
+          )
+          .join("");
+      }
+
       function renderHistorical(data) {
         renderHistoryTabs(data);
         const section = data.sections[activeHistoryIndex];
@@ -1745,6 +1796,8 @@
         renderHistorySummary(section);
         if (section.id === "flux_fastest_20260610") {
           renderFluxHistoryRows(section);
+        } else if (section.table === "video_profile_sweep") {
+          renderVideoProfileSweepRows(section);
         } else {
           renderStandardHistoryRows(section);
         }

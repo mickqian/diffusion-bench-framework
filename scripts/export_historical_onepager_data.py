@@ -25,6 +25,7 @@ COSMOS_HISTORY_PATH = (
     ROOT / "tmp" / "report" / "cosmos3-origin-main-64a1dec-vs-vllm-2gpu-video-20260602.json"
 )
 FLUX_FASTEST_DIR = ROOT / "reports" / "flux-fastest-20260610"
+VIDEO_PARALLELISM_REFRESH_DIR = ROOT / "reports" / "h200-video-parallelism-refresh-20260611"
 
 CASE_ORDER = (
     "flux1_dev_t2i_1024",
@@ -361,6 +362,120 @@ def build_flux_section(configs: dict[str, dict[str, Any]]) -> dict[str, Any]:
     }
 
 
+def video_refresh_series(run_id: str, framework: str) -> str | None:
+    if framework == "vllm-omni":
+        if run_id.endswith("h200-2gpu-tp"):
+            return "vllm_omni_tp"
+        if run_id.endswith("h200-2gpu-cfg"):
+            return "vllm_omni_cfg"
+        if run_id.endswith("h200-2gpu-ulysses"):
+            return "vllm_omni_ulysses"
+    if framework == "lightx2v" and run_id.endswith("h200-fa3"):
+        return "lightx2v_fa3"
+    return None
+
+
+def build_video_parallelism_refresh_section(configs: dict[str, dict[str, Any]]) -> dict[str, Any] | None:
+    if not VIDEO_PARALLELISM_REFRESH_DIR.exists():
+        return None
+
+    case_ids = ("wan21_t2v_1_3b_480p", "wan22_ti2v_5b_704p")
+    candidates: dict[tuple[str, str], dict[str, Any]] = {}
+
+    for path in sorted((VIDEO_PARALLELISM_REFRESH_DIR / "raw").glob("*.json")):
+        data = load_json(path)
+        run_id = data.get("run_id") or path.stem
+        for entry in data.get("results") or []:
+            case_id = entry.get("case_id")
+            series = video_refresh_series(run_id, entry.get("framework"))
+            if case_id not in case_ids or not series:
+                continue
+            cloned = dict(entry)
+            cloned["source_result"] = source_label(path)
+            cloned["run_id"] = run_id
+            cloned["series"] = series
+            candidates[(case_id, series)] = cloned
+
+    sglang_baseline: dict[str, dict[str, Any]] = {}
+    if FULL_MATRIX_PATH.exists():
+        full_grouped = group_entries(load_json(FULL_MATRIX_PATH).get("results") or [])
+        for case_id in case_ids:
+            entry = full_grouped.get(case_id, {}).get("sglang")
+            if entry:
+                cloned = dict(entry)
+                cloned["source_result"] = "H200 full matrix baseline"
+                sglang_baseline[case_id] = cloned
+
+    rows = []
+    sg_wins = 0
+    other_wins = 0
+    comparable_rows = 0
+    for case_id in case_ids:
+        cells: dict[str, dict[str, Any]] = {}
+        baseline = sglang_baseline.get(case_id)
+        cells["sglang_reference"] = cell_from_entry(baseline, case_id, "sglang") if baseline else {
+            "status": "not_run",
+            "reason": "No SGLang-Diffusion baseline was available in the committed H200 full matrix.",
+        }
+
+        for series in ("vllm_omni_tp", "vllm_omni_cfg", "vllm_omni_ulysses", "lightx2v_fa3"):
+            entry = candidates.get((case_id, series))
+            if entry:
+                framework = "vllm-omni" if series.startswith("vllm") else "lightx2v"
+                cells[series] = cell_from_entry(entry, case_id, framework)
+                cells[series]["source_result"] = entry.get("source_result")
+            else:
+                cells[series] = {"status": "not_run", "reason": "No successful recorded profile in this refresh."}
+
+        sg_latency = cells["sglang_reference"].get("latency_s")
+        winner = None
+        best_latency = None
+        comparable = 0
+        for series, cell in cells.items():
+            latency = cell.get("latency_s")
+            if latency is None:
+                continue
+            comparable += 1
+            if sg_latency:
+                cell["ratio_to_sglang_reference"] = round(latency / sg_latency, 3)
+            if best_latency is None or latency < best_latency:
+                best_latency = latency
+                winner = series
+
+        if comparable >= 2:
+            comparable_rows += 1
+            if winner == "sglang_reference":
+                sg_wins += 1
+            elif winner:
+                other_wins += 1
+
+        rows.append(
+            {
+                **case_details(case_id, configs[case_id]),
+                "mode": "single_e2e",
+                "winner": winner,
+                "cells": cells,
+            }
+        )
+
+    return {
+        "id": "video_parallelism_refresh_20260611",
+        "title": "H200 video parallelism refresh",
+        "subtitle": "2GPU Wan video profile sweep after enabling vLLM-Omni CFG/Ulysses profiles and LightX2V FA3; SGLang-Diffusion is the existing H200 full-matrix baseline; torch compile off, no cache.",
+        "mode": "single_e2e",
+        "table": "video_profile_sweep",
+        "source_report": "reports/h200-video-parallelism-refresh-20260611",
+        "reproduce": "scripts/run_h200_video_parallelism_refresh_20260611.sh",
+        "summary": {
+            "rows": len(rows),
+            "comparable_rows": comparable_rows,
+            "sglang_diffusion_wins": sg_wins,
+            "other_wins": other_wins,
+        },
+        "rows": rows,
+    }
+
+
 def build_data() -> dict[str, Any]:
     configs = case_configs()
     sections = []
@@ -408,6 +523,9 @@ def build_data() -> dict[str, Any]:
         )
 
     sections.append(build_flux_section(configs))
+    video_refresh = build_video_parallelism_refresh_section(configs)
+    if video_refresh:
+        sections.append(video_refresh)
 
     full_single = next((s for s in sections if s["id"].endswith("_single_e2e")), None)
     full_throughput = next((s for s in sections if s["id"].endswith("_throughput")), None)
