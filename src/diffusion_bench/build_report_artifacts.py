@@ -92,6 +92,7 @@ def merge_results(paths: list[Path], output_json: Path, config_path: Path, run_i
         "benchmark_env": {},
         "benchmark_framework_args": {},
         "benchmark_modes": [],
+        "torch_compile_disabled": None,
         "reproduce_script": "scripts/generate_h200_report_artifacts.sh",
         "source_results": [],
         "results": _merge_entries(runs, "results", case_rank),
@@ -115,6 +116,8 @@ def merge_results(paths: list[Path], output_json: Path, config_path: Path, run_i
         _merge_dict(merged["framework_runtime"], data.get("framework_runtime"))
         _merge_dict(merged["benchmark_env"], data.get("benchmark_env"))
         _merge_dict(merged["benchmark_framework_args"], data.get("benchmark_framework_args"))
+        if data.get("torch_compile_disabled") is not None:
+            merged["torch_compile_disabled"] = bool(data["torch_compile_disabled"])
         modes.update(data.get("benchmark_modes") or [])
         if data.get("results"):
             modes.add("single_e2e")

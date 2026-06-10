@@ -262,6 +262,8 @@ def _hardware_label(results: dict) -> str:
     if override:
         return str(override).upper()
     gpus = (results.get("hardware") or {}).get("gpus") or []
+    if gpus and any(name in str(gpus[0]) for name in ("GB300", "GB200", "B300", "B200")):
+        return "Blackwell"
     if gpus and "H200" in str(gpus[0]):
         return "H200"
     if gpus and "H100" in str(gpus[0]):
@@ -324,9 +326,14 @@ def _draw_header(
     draw.line((0, HEADER_H, WIDTH, HEADER_H), fill="#e5e7eb", width=1)
 
     _draw_text(draw, (MARGIN, 32), "SGLang-Diffusion vs Other Frameworks", FONT_TITLE)
+    compile_label = (
+        "torch compile disabled"
+        if results.get("torch_compile_disabled", True)
+        else "torch compile allowed"
+    )
     subtitle = (
         f"{_hardware_label(results)} - single request latency + high-pressure "
-        "throughput - no cache - torch compile disabled"
+        f"throughput - no cache - {compile_label}"
     )
     _draw_text(draw, (MARGIN, 95), subtitle, FONT_SUBTITLE, "#4b5563")
 

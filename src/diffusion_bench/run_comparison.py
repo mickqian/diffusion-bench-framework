@@ -65,7 +65,7 @@ HARDWARE_PROFILE_ENV = "SGLANG_BENCH_HARDWARE_PROFILE"
 SGLANG_EXTRA_SERVE_ARGS_ENV = "DIFFUSION_BENCH_SGLANG_EXTRA_SERVE_ARGS"
 HF_CACHE_DIR_ENV = "DIFFUSION_BENCH_HF_CACHE_DIR"
 SKIP_FRAMEWORK_INSTALL_ENV = "SGLANG_DIFFUSION_SKIP_FRAMEWORK_INSTALL"
-FORCED_BENCHMARK_ENV = {"TORCH_COMPILE_DISABLE": "1"}
+DISABLE_TORCH_COMPILE_ENV = "DIFFUSION_BENCH_DISABLE_TORCH_COMPILE"
 VLLM_DISABLE_TORCH_COMPILE_ARGS = [
     "--enforce-eager",
     "--compilation-config",
@@ -101,6 +101,37 @@ FRAMEWORK_PROFILE_RUNTIME_KEYS = SGLANG_PROFILE_RUNTIME_KEYS | {
 # Cached reference images keyed by URL.
 _cached_ref_images: dict[str, bytes] = {}
 _cached_ref_image_paths: dict[str, str] = {}
+
+
+def _truthy_env(name: str, default: bool) -> bool:
+    value = os.environ.get(name)
+    if value is None:
+        return default
+    return value.strip().lower() not in ("0", "false", "no", "off")
+
+
+def _torch_compile_disabled() -> bool:
+    return _truthy_env(DISABLE_TORCH_COMPILE_ENV, default=True)
+
+
+def _benchmark_env() -> dict[str, str]:
+    return {"TORCH_COMPILE_DISABLE": "1"} if _torch_compile_disabled() else {}
+
+
+def _apply_benchmark_env(env: dict[str, str]) -> dict[str, str]:
+    if _torch_compile_disabled():
+        env["TORCH_COMPILE_DISABLE"] = "1"
+    else:
+        env.pop("TORCH_COMPILE_DISABLE", None)
+    return env
+
+
+def _vllm_torch_compile_args() -> list[str]:
+    return VLLM_DISABLE_TORCH_COMPILE_ARGS if _torch_compile_disabled() else []
+
+
+def _lightx2v_torch_compile_config() -> dict:
+    return LIGHTX2V_DISABLE_TORCH_COMPILE_CONFIG if _torch_compile_disabled() else {}
 
 
 # ---------------------------------------------------------------------------
@@ -162,7 +193,7 @@ def _build_vllm_cmd(case: dict, fw_cfg: dict, port: int) -> list[str]:
     )
     if num_gpus > 1 and not has_parallel_arg:
         cmd += ["--tensor-parallel-size", str(num_gpus)]
-    cmd += VLLM_DISABLE_TORCH_COMPILE_ARGS
+    cmd += _vllm_torch_compile_args()
     return cmd
 
 
@@ -330,7 +361,7 @@ def _write_lightx2v_config(
         )
     if fw_cfg.get("model_cls") == "ltx2":
         _merge_ltx2_single_file_metadata(cfg)
-    cfg.update(LIGHTX2V_DISABLE_TORCH_COMPILE_CONFIG)
+    cfg.update(_lightx2v_torch_compile_config())
 
     config_path = os.path.join(
         tempfile.gettempdir(), f"lightx2v_config_{case['id']}.json"
@@ -438,7 +469,19 @@ def _hardware_profile_candidates(hardware_metadata: dict | None) -> list[str]:
     ]
     text = " ".join(str(value).lower() for value in values if value)
     candidates = []
-    for profile in ("h200", "h100", "a100", "l40", "l4", "rtx4090", "rtx3090"):
+    for profile in (
+        "gb300",
+        "gb200",
+        "b300",
+        "b200",
+        "h200",
+        "h100",
+        "a100",
+        "l40",
+        "l4",
+        "rtx4090",
+        "rtx3090",
+    ):
         if profile in text or profile.replace("rtx", "rtx ") in text:
             candidates.append(profile)
     return candidates
@@ -1649,7 +1692,7 @@ def run_case_framework(
 
     env = os.environ.copy()
     env.update(fw_cfg.get("extra_env", {}))
-    env.update(FORCED_BENCHMARK_ENV)
+    env = _apply_benchmark_env(env)
     env = _framework_env(framework, env)
     _preflight_framework_command(framework, fw_cfg, env)
 
@@ -1813,7 +1856,11 @@ def run_comparison(
     Order: sglang first (already installed), then vllm-omni, then lightx2v.
     Each non-sglang framework is installed right before its cases run.
     """
-    os.environ.update(FORCED_BENCHMARK_ENV)
+    benchmark_env = _benchmark_env()
+    if benchmark_env:
+        os.environ.update(benchmark_env)
+    else:
+        os.environ.pop("TORCH_COMPILE_DISABLE", None)
     timestamp = datetime.now(timezone.utc).isoformat()
     commit_sha = _current_commit_sha()
     run_id = (
@@ -1918,11 +1965,12 @@ def run_comparison(
         "hardware": hardware_metadata,
         "sglang_runtime": _collect_sglang_runtime_metadata(),
         "framework_runtime": _collect_framework_runtime_metadata(),
-        "benchmark_env": FORCED_BENCHMARK_ENV,
+        "benchmark_env": benchmark_env,
         "benchmark_framework_args": {
-            "vllm-omni": VLLM_DISABLE_TORCH_COMPILE_ARGS,
-            "lightx2v": {"config": LIGHTX2V_DISABLE_TORCH_COMPILE_CONFIG},
+            "vllm-omni": _vllm_torch_compile_args(),
+            "lightx2v": {"config": _lightx2v_torch_compile_config()},
         },
+        "torch_compile_disabled": _torch_compile_disabled(),
         "benchmark_modes": modes,
         "requested_sglang_profile": _requested_sglang_profile(sglang_profile),
         "results": results,
