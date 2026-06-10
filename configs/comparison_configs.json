@@ -41,6 +41,78 @@
                             "serve_args": "--model-type diffusion --warmup --dit-layerwise-offload false",
                             "notes": "Keep this profile updated when the best command changes for a SGLang release or commit."
                         },
+                        "h100-h200-1gpu-compile": {
+                            "description": "Hopper single-GPU legacy-compatible FLUX compile profile.",
+                            "hardware": [
+                                "h100",
+                                "h200"
+                            ],
+                            "num_gpus": 1,
+                            "sglang_ref": "legacy-compatible",
+                            "serve_args": "--model-type diffusion --warmup --dit-layerwise-offload false --enable-torch-compile",
+                            "benchmark": {
+                                "warmup": {
+                                    "num_requests": 2,
+                                    "num_inference_steps": 50
+                                }
+                            },
+                            "notes": "Use for SGLang commits before --performance-mode speed existed; keep compile enabled for fastest available legacy path."
+                        },
+                        "h100-h200-2gpu-tp-compile": {
+                            "description": "Hopper 2-GPU TP legacy-compatible FLUX compile profile.",
+                            "hardware": [
+                                "h100",
+                                "h200"
+                            ],
+                            "num_gpus": 2,
+                            "sglang_ref": "legacy-compatible",
+                            "serve_args": "--model-type diffusion --warmup --dit-layerwise-offload false --tp-size 2 --enable-torch-compile",
+                            "benchmark": {
+                                "warmup": {
+                                    "num_requests": 2,
+                                    "num_inference_steps": 50
+                                }
+                            },
+                            "notes": "Use for SGLang commits before --performance-mode speed existed; TP remains explicit."
+                        },
+                        "blackwell-1gpu-compile": {
+                            "description": "Blackwell single-GPU legacy-compatible FLUX compile profile.",
+                            "hardware": [
+                                "b200",
+                                "gb200",
+                                "b300",
+                                "gb300"
+                            ],
+                            "num_gpus": 1,
+                            "sglang_ref": "legacy-compatible",
+                            "serve_args": "--model-type diffusion --warmup --dit-layerwise-offload false --enable-torch-compile",
+                            "benchmark": {
+                                "warmup": {
+                                    "num_requests": 2,
+                                    "num_inference_steps": 50
+                                }
+                            },
+                            "notes": "Use for SGLang commits before --performance-mode speed existed; keep compile enabled for fastest available legacy path."
+                        },
+                        "blackwell-2gpu-tp-compile": {
+                            "description": "Blackwell 2-GPU TP legacy-compatible FLUX compile profile.",
+                            "hardware": [
+                                "b200",
+                                "gb200",
+                                "b300",
+                                "gb300"
+                            ],
+                            "num_gpus": 2,
+                            "sglang_ref": "legacy-compatible",
+                            "serve_args": "--model-type diffusion --warmup --dit-layerwise-offload false --tp-size 2 --enable-torch-compile",
+                            "benchmark": {
+                                "warmup": {
+                                    "num_requests": 2,
+                                    "num_inference_steps": 50
+                                }
+                            },
+                            "notes": "Use for SGLang commits before --performance-mode speed existed; TP remains explicit."
+                        },
                         "h100-h200-1gpu-speed-compile": {
                             "description": "Hopper single-GPU fastest FLUX profile probe.",
                             "hardware": [
@@ -240,6 +312,78 @@
                             "sglang_ref": "current-main",
                             "serve_args": "--model-type diffusion --warmup --dit-layerwise-offload false",
                             "notes": "Keep this profile updated when the best command changes for a SGLang release or commit."
+                        },
+                        "h100-h200-1gpu-compile": {
+                            "description": "Hopper single-GPU legacy-compatible FLUX.2 compile profile.",
+                            "hardware": [
+                                "h100",
+                                "h200"
+                            ],
+                            "num_gpus": 1,
+                            "sglang_ref": "legacy-compatible",
+                            "serve_args": "--model-type diffusion --warmup --dit-layerwise-offload false --enable-torch-compile",
+                            "benchmark": {
+                                "warmup": {
+                                    "num_requests": 2,
+                                    "num_inference_steps": 50
+                                }
+                            },
+                            "notes": "Use for SGLang commits before --performance-mode speed existed; keep compile enabled for fastest available legacy path."
+                        },
+                        "h100-h200-2gpu-tp-compile": {
+                            "description": "Hopper 2-GPU TP legacy-compatible FLUX.2 compile profile.",
+                            "hardware": [
+                                "h100",
+                                "h200"
+                            ],
+                            "num_gpus": 2,
+                            "sglang_ref": "legacy-compatible",
+                            "serve_args": "--model-type diffusion --warmup --dit-layerwise-offload false --tp-size 2 --enable-torch-compile",
+                            "benchmark": {
+                                "warmup": {
+                                    "num_requests": 2,
+                                    "num_inference_steps": 50
+                                }
+                            },
+                            "notes": "Use for SGLang commits before --performance-mode speed existed; TP remains explicit."
+                        },
+                        "blackwell-1gpu-compile": {
+                            "description": "Blackwell single-GPU legacy-compatible FLUX.2 compile profile.",
+                            "hardware": [
+                                "b200",
+                                "gb200",
+                                "b300",
+                                "gb300"
+                            ],
+                            "num_gpus": 1,
+                            "sglang_ref": "legacy-compatible",
+                            "serve_args": "--model-type diffusion --warmup --dit-layerwise-offload false --enable-torch-compile",
+                            "benchmark": {
+                                "warmup": {
+                                    "num_requests": 2,
+                                    "num_inference_steps": 50
+                                }
+                            },
+                            "notes": "Use for SGLang commits before --performance-mode speed existed; keep compile enabled for fastest available legacy path."
+                        },
+                        "blackwell-2gpu-tp-compile": {
+                            "description": "Blackwell 2-GPU TP legacy-compatible FLUX.2 compile profile.",
+                            "hardware": [
+                                "b200",
+                                "gb200",
+                                "b300",
+                                "gb300"
+                            ],
+                            "num_gpus": 2,
+                            "sglang_ref": "legacy-compatible",
+                            "serve_args": "--model-type diffusion --warmup --dit-layerwise-offload false --tp-size 2 --enable-torch-compile",
+                            "benchmark": {
+                                "warmup": {
+                                    "num_requests": 2,
+                                    "num_inference_steps": 50
+                                }
+                            },
+                            "notes": "Use for SGLang commits before --performance-mode speed existed; TP remains explicit."
                         },
                         "h100-h200-1gpu-speed-compile": {
                             "description": "Hopper single-GPU fastest FLUX.2 profile probe.",
