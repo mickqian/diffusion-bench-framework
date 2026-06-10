@@ -1,0 +1,928 @@
+{
+  "id": "historical-cross-framework-20260610",
+  "updated_at": "2026-06-10",
+  "frameworks": {
+    "sglang": "SGLang-Diffusion",
+    "vllm-omni": "vLLM-Omni",
+    "lightx2v": "LightX2V"
+  },
+  "policy": {
+    "public_source": "Formal manifests plus committed reports/raw; tmp source JSON is used only when referenced by a manifest.",
+    "latency_source": "client-side latency for headline comparisons; server-side latency is diagnostic only.",
+    "cache": "No response cache, no Cache-DiT, no temporal cache in these rows."
+  },
+  "summary": {
+    "sections": 4,
+    "h200_full_matrix_single_rows": 13,
+    "h200_full_matrix_sglang_wins": 12,
+    "h200_full_matrix_other_wins": 0,
+    "h200_throughput_sglang_wins": 4,
+    "h200_throughput_other_wins": 0
+  },
+  "investigation": {
+    "headline": "The latest local evidence does not show SGLang-Diffusion generally behind; the regression is concentrated in H200 FLUX.1 2GPU TP.",
+    "status": "needs stage breakdown / trace to close",
+    "evidence": [
+      "Latest H200 aligned spot-check: SGLang-Diffusion wins 3 of 4 same-GPU cases; vLLM-Omni wins only FLUX.1 2GPU TP by 1.08x.",
+      "H200 FLUX.1 single-GPU favors SGLang-Diffusion: 6.566s vs vLLM-Omni 7.288s, so the base single-GPU path is not slower.",
+      "H200 FLUX.1 TP scaling is weak for SGLang-Diffusion: 6.566s to 6.400s, about 2.5%; vLLM-Omni scales 7.288s to 5.912s, about 18.9%.",
+      "H200 FLUX.2 2GPU TP favors SGLang-Diffusion: 12.507s vs vLLM-Omni 16.654s, so the issue is not a blanket TP failure.",
+      "B200 FLUX rows favor SGLang-Diffusion now after performance-mode speed: FLUX.1 3.608s vs vLLM-Omni 4.224s; FLUX.2 6.256s vs 12.183s.",
+      "Most May H200 full-matrix image/video rows favor SGLang-Diffusion over vLLM-Omni and LightX2V; this makes the H200 FLUX.1 TP miss a narrow optimization target."
+    ],
+    "likely_causes": [
+      "H200 FLUX.1 TP communication or partition overhead cancels the denoiser compute savings at this shape.",
+      "The current best profile may need to prefer 1GPU for FLUX.1/H200 unless throughput pressure or memory constraints require TP.",
+      "vLLM-Omni may be parallelizing the FLUX.1 compiled path with lower per-step overhead on H200."
+    ],
+    "next_checks": [
+      "Collect stage breakdown for text encoder, denoise, VAE decode, and response encoding on 1GPU vs 2GPU.",
+      "Trace TP collectives and denoiser kernels to separate compute speedup from communication overhead.",
+      "Compare denoise-only latency and CUDA graph/compile coverage for SGLang-Diffusion vs vLLM-Omni.",
+      "Keep client-side latency as the public comparison metric and use server-side time only as breakdown."
+    ]
+  },
+  "sections": [
+    {
+      "id": "manifests_20260510-h200-single-e2e.json + manifests_20260514-h200-wan-vllm-omni_single_e2e",
+      "title": "H200 full matrix",
+      "subtitle": "Single-request latency across image and video cases from the May formal matrix.",
+      "mode": "single_e2e",
+      "source_manifest": "manifests/20260510-h200-single-e2e.json + manifests/20260514-h200-wan-vllm-omni.json",
+      "source_run_id": "h200-framework-comparison-merged-local",
+      "reproduce": "scripts/generate_h200_report_artifacts.sh",
+      "summary": {
+        "rows": 13,
+        "comparable_rows": 12,
+        "sglang_diffusion_wins": 12,
+        "other_wins": 0
+      },
+      "rows": [
+        {
+          "case_id": "flux1_dev_t2i_1024",
+          "case": "FLUX.1-dev T2I",
+          "details": "1024x1024 \u00b7 50 steps \u00b7 cfg 3.5",
+          "mode": "single_e2e",
+          "winner": "sglang",
+          "cells": {
+            "sglang": {
+              "gpus": 1,
+              "profile": "default",
+              "status": "ok",
+              "latency_s": 7.69,
+              "ratio_to_sglang": 1.0
+            },
+            "vllm-omni": {
+              "gpus": 1,
+              "profile": "default",
+              "status": "ok",
+              "latency_s": 8.682,
+              "ratio_to_sglang": 1.129
+            },
+            "lightx2v": {
+              "status": "no_profile",
+              "reason": "Tracked LightX2V version has no FLUX.1 serving path."
+            }
+          }
+        },
+        {
+          "case_id": "flux2_dev_t2i_1024",
+          "case": "FLUX.2-dev T2I",
+          "details": "1024x1024 \u00b7 50 steps \u00b7 cfg 4",
+          "mode": "single_e2e",
+          "winner": "sglang",
+          "cells": {
+            "sglang": {
+              "gpus": 1,
+              "profile": "default",
+              "status": "ok",
+              "latency_s": 25.24,
+              "ratio_to_sglang": 1.0
+            },
+            "vllm-omni": {
+              "gpus": 1,
+              "profile": "default",
+              "status": "ok",
+              "latency_s": 26.533,
+              "ratio_to_sglang": 1.051
+            },
+            "lightx2v": {
+              "gpus": 1,
+              "profile": "h200-fa2-flashinfer",
+              "status": "ok",
+              "latency_s": 31.071,
+              "ratio_to_sglang": 1.231
+            }
+          }
+        },
+        {
+          "case_id": "qwen_image_2512_t2i_1024",
+          "case": "Qwen-Image-2512 T2I",
+          "details": "1024x1024 \u00b7 50 steps \u00b7 cfg 1",
+          "mode": "single_e2e",
+          "winner": "sglang",
+          "cells": {
+            "sglang": {
+              "gpus": 1,
+              "profile": "default",
+              "status": "ok",
+              "latency_s": 6.77,
+              "ratio_to_sglang": 1.0
+            },
+            "vllm-omni": {
+              "gpus": 1,
+              "profile": "default",
+              "status": "ok",
+              "latency_s": 8.717,
+              "ratio_to_sglang": 1.288
+            },
+            "lightx2v": {
+              "status": "no_profile",
+              "reason": "Tracked LightX2V version has no Qwen-Image T2I serving path."
+            }
+          }
+        },
+        {
+          "case_id": "qwen_image_edit_2511",
+          "case": "Qwen-Image-Edit-2511",
+          "details": "1024x1024 \u00b7 40 steps \u00b7 cfg 1",
+          "mode": "single_e2e",
+          "winner": "sglang",
+          "cells": {
+            "sglang": {
+              "gpus": 1,
+              "profile": "default",
+              "status": "ok",
+              "latency_s": 12.06,
+              "ratio_to_sglang": 1.0
+            },
+            "vllm-omni": {
+              "gpus": 1,
+              "profile": "default",
+              "status": "ok",
+              "latency_s": 15.31,
+              "ratio_to_sglang": 1.269
+            },
+            "lightx2v": {
+              "status": "no_profile",
+              "reason": "Tracked LightX2V version has no Qwen-Image-Edit serving path."
+            }
+          }
+        },
+        {
+          "case_id": "zimage_turbo_t2i_1024",
+          "case": "Z-Image-Turbo T2I",
+          "details": "1024x1024 \u00b7 9 steps \u00b7 cfg 0",
+          "mode": "single_e2e",
+          "winner": "sglang",
+          "cells": {
+            "sglang": {
+              "gpus": 1,
+              "profile": "default",
+              "status": "ok",
+              "latency_s": 1.35,
+              "ratio_to_sglang": 1.0
+            },
+            "vllm-omni": {
+              "gpus": 1,
+              "profile": "default",
+              "status": "ok",
+              "latency_s": 2.954,
+              "ratio_to_sglang": 2.188
+            },
+            "lightx2v": {
+              "gpus": 1,
+              "profile": "h200-fa2-flashinfer",
+              "status": "ok",
+              "latency_s": 4.012,
+              "ratio_to_sglang": 2.972
+            }
+          }
+        },
+        {
+          "case_id": "wan21_t2v_1_3b_480p",
+          "case": "Wan2.1 T2V 1.3B 480p",
+          "details": "832x480x81f \u00b7 50 steps \u00b7 cfg 6",
+          "mode": "single_e2e",
+          "winner": "sglang",
+          "cells": {
+            "sglang": {
+              "gpus": 2,
+              "profile": "Best known SGLang command for the benchmark repo default profile.",
+              "status": "ok",
+              "latency_s": 25.618,
+              "ratio_to_sglang": 1.0
+            },
+            "vllm-omni": {
+              "gpus": 2,
+              "profile": "h200-2gpu-tp",
+              "status": "ok",
+              "latency_s": 44.094,
+              "ratio_to_sglang": 1.721
+            },
+            "lightx2v": {
+              "gpus": 2,
+              "profile": "h200-fa2",
+              "status": "ok",
+              "latency_s": 41.263,
+              "ratio_to_sglang": 1.611
+            }
+          }
+        },
+        {
+          "case_id": "wan21_i2v_14b_480p",
+          "case": "Wan2.1 I2V 14B 480p",
+          "details": "832x480x81f \u00b7 40 steps \u00b7 cfg 5",
+          "mode": "single_e2e",
+          "winner": "sglang",
+          "cells": {
+            "sglang": {
+              "gpus": 4,
+              "profile": "Best known SGLang command for the benchmark repo default profile.",
+              "status": "ok",
+              "latency_s": 61.149,
+              "ratio_to_sglang": 1.0
+            },
+            "vllm-omni": {
+              "gpus": 4,
+              "profile": "h200-4gpu-tp",
+              "status": "ok",
+              "latency_s": 110.572,
+              "ratio_to_sglang": 1.808
+            },
+            "lightx2v": {
+              "gpus": 4,
+              "profile": "h200-fa2",
+              "status": "ok",
+              "latency_s": 90.228,
+              "ratio_to_sglang": 1.476
+            }
+          }
+        },
+        {
+          "case_id": "wan22_t2v_a14b_720p",
+          "case": "Wan2.2 T2V A14B 720p",
+          "details": "1280x720x81f \u00b7 40 steps \u00b7 cfg 4/3",
+          "mode": "single_e2e",
+          "winner": "sglang",
+          "cells": {
+            "sglang": {
+              "gpus": 4,
+              "profile": "Best known SGLang command for the benchmark repo default profile.",
+              "status": "ok",
+              "latency_s": 218.949,
+              "ratio_to_sglang": 1.0
+            },
+            "vllm-omni": {
+              "gpus": 4,
+              "profile": "h200-4gpu-tp",
+              "status": "ok",
+              "latency_s": 327.024,
+              "ratio_to_sglang": 1.494
+            },
+            "lightx2v": {
+              "gpus": 4,
+              "profile": "h200-fa2",
+              "status": "ok",
+              "latency_s": 339.941,
+              "ratio_to_sglang": 1.553
+            }
+          }
+        },
+        {
+          "case_id": "wan22_ti2v_5b_704p",
+          "case": "Wan2.2 TI2V 5B 704p",
+          "details": "1280x704x81f \u00b7 50 steps \u00b7 cfg 5",
+          "mode": "single_e2e",
+          "winner": "sglang",
+          "cells": {
+            "sglang": {
+              "gpus": 2,
+              "profile": "H100/H200 command for the Wan2.2 TI2V 5B 704p case.",
+              "status": "ok",
+              "latency_s": 35.085,
+              "ratio_to_sglang": 1.0
+            },
+            "vllm-omni": {
+              "gpus": 2,
+              "profile": "h200-2gpu-tp",
+              "status": "ok",
+              "latency_s": 80.38,
+              "ratio_to_sglang": 2.291
+            },
+            "lightx2v": {
+              "gpus": 2,
+              "profile": "h200-fa2",
+              "status": "ok",
+              "latency_s": 42.109,
+              "ratio_to_sglang": 1.2
+            }
+          }
+        },
+        {
+          "case_id": "ltx2_twostage_t2v",
+          "case": "LTX-2 two-stage T2V",
+          "details": "768x512x121f \u00b7 40 steps \u00b7 cfg 4",
+          "mode": "single_e2e",
+          "winner": "sglang",
+          "cells": {
+            "sglang": {
+              "gpus": 2,
+              "profile": "H200 command for the LTX2 two-stage 121-frame case.",
+              "status": "ok",
+              "latency_s": 12.667,
+              "ratio_to_sglang": 1.0
+            },
+            "vllm-omni": {
+              "gpus": 2,
+              "profile": "default",
+              "status": "failed",
+              "reason": "vllm-omni server exited before health check passed (exit 1)"
+            },
+            "lightx2v": {
+              "gpus": 2,
+              "profile": "h200-2gpu",
+              "status": "ok",
+              "latency_s": 23.073,
+              "ratio_to_sglang": 1.822
+            }
+          }
+        },
+        {
+          "case_id": "ltx2.3_twostage_t2v_2gpus",
+          "case": "LTX-2.3 two-stage T2V",
+          "details": "768x512x121f \u00b7 30 steps \u00b7 cfg 3",
+          "mode": "single_e2e",
+          "winner": "sglang",
+          "cells": {
+            "sglang": {
+              "gpus": 2,
+              "profile": "Cookbook-aligned H200 command for the LTX2.3 two-stage 121-frame case.",
+              "status": "ok",
+              "latency_s": 16.249,
+              "ratio_to_sglang": 1.0
+            },
+            "vllm-omni": {
+              "status": "no_profile",
+              "reason": "No validated vLLM-Omni LTX-2.3 two-stage profile is tracked."
+            },
+            "lightx2v": {
+              "gpus": 2,
+              "profile": "h200-2gpu-tp",
+              "status": "failed",
+              "reason": "LightX2V task FAILED: {'task_id': '2D7D-WU61-90I0-4G4K-WVMK', 'status': 'failed', 'start_time': '2026-05-13T13:24:52.753528', 'end_time': '2026-05-13T13:24:53.523421', 'error': \"'LTX2AttentionTP' object has no attribute "
+            }
+          }
+        },
+        {
+          "case_id": "wan21_i2v_14b_720p",
+          "case": "Wan2.1 I2V 14B 720p",
+          "details": "1280x720x81f \u00b7 40 steps \u00b7 cfg 5",
+          "mode": "single_e2e",
+          "winner": "sglang",
+          "cells": {
+            "sglang": {
+              "gpus": 4,
+              "profile": "Best known SGLang command for the benchmark repo default profile.",
+              "status": "ok",
+              "latency_s": 217.476,
+              "ratio_to_sglang": 1.0
+            },
+            "vllm-omni": {
+              "gpus": 4,
+              "profile": "h200-4gpu-tp",
+              "status": "ok",
+              "latency_s": 361.233,
+              "ratio_to_sglang": 1.661
+            },
+            "lightx2v": {
+              "gpus": 4,
+              "profile": "h200-fa2",
+              "status": "ok",
+              "latency_s": 342.82,
+              "ratio_to_sglang": 1.576
+            }
+          }
+        },
+        {
+          "case_id": "wan22_i2v_a14b_720p",
+          "case": "Wan2.2 I2V A14B 720p",
+          "details": "1280x720x81f \u00b7 40 steps \u00b7 cfg 3.5/3.5",
+          "mode": "single_e2e",
+          "winner": "sglang",
+          "cells": {
+            "sglang": {
+              "gpus": 4,
+              "profile": "Best known SGLang command for the benchmark repo default profile.",
+              "status": "ok",
+              "latency_s": 214.487,
+              "ratio_to_sglang": 1.0
+            },
+            "vllm-omni": {
+              "gpus": 4,
+              "profile": "h200-4gpu-tp",
+              "status": "ok",
+              "latency_s": 353.477,
+              "ratio_to_sglang": 1.648
+            },
+            "lightx2v": {
+              "gpus": 4,
+              "profile": "h200-fa2",
+              "status": "ok",
+              "latency_s": 339.803,
+              "ratio_to_sglang": 1.584
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "manifests_20260511-h200-throughput-fast.json + manifests_20260514-h200-wan-vllm-omni_throughput",
+      "title": "H200 high-pressure throughput",
+      "subtitle": "32 image requests at concurrency 4 and 8 video requests at concurrency 2 where tracked.",
+      "mode": "throughput",
+      "source_manifest": "manifests/20260511-h200-throughput-fast.json + manifests/20260514-h200-wan-vllm-omni.json",
+      "source_run_id": "h200-framework-comparison-merged-local",
+      "reproduce": "scripts/generate_h200_report_artifacts.sh",
+      "summary": {
+        "rows": 4,
+        "comparable_rows": 4,
+        "sglang_diffusion_wins": 4,
+        "other_wins": 0
+      },
+      "rows": [
+        {
+          "case_id": "flux2_dev_t2i_1024",
+          "case": "FLUX.2-dev T2I",
+          "details": "1024x1024 \u00b7 50 steps \u00b7 cfg 4",
+          "mode": "throughput",
+          "winner": "sglang",
+          "cells": {
+            "sglang": {
+              "gpus": 1,
+              "profile": "default",
+              "status": "ok",
+              "latency_s": 98.888,
+              "qps": 0.0404,
+              "p50_s": 98.888,
+              "p95_s": 99.353,
+              "p99_s": 99.387,
+              "requests": 32,
+              "concurrency": 4,
+              "ratio_to_sglang": 1.0
+            },
+            "vllm-omni": {
+              "gpus": 1,
+              "profile": "default",
+              "status": "ok",
+              "latency_s": 105.024,
+              "qps": 0.0381,
+              "p50_s": 105.024,
+              "p95_s": 105.372,
+              "p99_s": 105.441,
+              "requests": 32,
+              "concurrency": 4,
+              "ratio_to_sglang": 0.943
+            },
+            "lightx2v": {
+              "gpus": 1,
+              "profile": "h200-fa3-flashinfer",
+              "status": "ok",
+              "latency_s": 109.412,
+              "qps": 0.0366,
+              "p50_s": 109.412,
+              "p95_s": 109.765,
+              "p99_s": 110.996,
+              "requests": 32,
+              "concurrency": 4,
+              "ratio_to_sglang": 0.906
+            }
+          }
+        },
+        {
+          "case_id": "zimage_turbo_t2i_1024",
+          "case": "Z-Image-Turbo T2I",
+          "details": "1024x1024 \u00b7 9 steps \u00b7 cfg 0",
+          "mode": "throughput",
+          "winner": "sglang",
+          "cells": {
+            "sglang": {
+              "gpus": 1,
+              "profile": "default",
+              "status": "ok",
+              "latency_s": 4.52,
+              "qps": 0.8887,
+              "p50_s": 4.52,
+              "p95_s": 4.672,
+              "p99_s": 4.691,
+              "requests": 32,
+              "concurrency": 4,
+              "ratio_to_sglang": 1.0
+            },
+            "vllm-omni": {
+              "gpus": 1,
+              "profile": "default",
+              "status": "ok",
+              "latency_s": 10.551,
+              "qps": 0.3778,
+              "p50_s": 10.551,
+              "p95_s": 10.565,
+              "p99_s": 10.784,
+              "requests": 32,
+              "concurrency": 4,
+              "ratio_to_sglang": 0.425
+            },
+            "lightx2v": {
+              "gpus": 1,
+              "profile": "h200-fa3-flashinfer",
+              "status": "ok",
+              "latency_s": 11.138,
+              "qps": 0.3632,
+              "p50_s": 11.138,
+              "p95_s": 12.102,
+              "p99_s": 12.214,
+              "requests": 32,
+              "concurrency": 4,
+              "ratio_to_sglang": 0.409
+            }
+          }
+        },
+        {
+          "case_id": "wan21_t2v_1_3b_480p",
+          "case": "Wan2.1 T2V 1.3B 480p",
+          "details": "832x480x81f \u00b7 50 steps \u00b7 cfg 6",
+          "mode": "throughput",
+          "winner": "sglang",
+          "cells": {
+            "sglang": {
+              "gpus": 2,
+              "profile": "default",
+              "status": "ok",
+              "latency_s": 53.124,
+              "qps": 0.0378,
+              "p50_s": 53.124,
+              "p95_s": 53.128,
+              "p99_s": 53.128,
+              "requests": 8,
+              "concurrency": 2,
+              "ratio_to_sglang": 1.0
+            },
+            "vllm-omni": {
+              "gpus": 2,
+              "profile": "h200-2gpu-tp",
+              "status": "ok",
+              "latency_s": 86.796,
+              "qps": 0.023,
+              "p50_s": 86.796,
+              "p95_s": 87.674,
+              "p99_s": 87.767,
+              "requests": 8,
+              "concurrency": 2,
+              "ratio_to_sglang": 0.608
+            },
+            "lightx2v": {
+              "gpus": 2,
+              "profile": "h200-fa3",
+              "status": "ok",
+              "latency_s": 57.301,
+              "qps": 0.0346,
+              "p50_s": 57.301,
+              "p95_s": 58.978,
+              "p99_s": 59.264,
+              "requests": 8,
+              "concurrency": 2,
+              "ratio_to_sglang": 0.915
+            }
+          }
+        },
+        {
+          "case_id": "wan22_ti2v_5b_704p",
+          "case": "Wan2.2 TI2V 5B 704p",
+          "details": "1280x704x81f \u00b7 50 steps \u00b7 cfg 5",
+          "mode": "throughput",
+          "winner": "sglang",
+          "cells": {
+            "sglang": {
+              "gpus": 2,
+              "profile": "h100-h200-2gpu",
+              "status": "ok",
+              "latency_s": 70.177,
+              "qps": 0.0283,
+              "p50_s": 70.177,
+              "p95_s": 71.173,
+              "p99_s": 71.175,
+              "requests": 8,
+              "concurrency": 2,
+              "ratio_to_sglang": 1.0
+            },
+            "vllm-omni": {
+              "gpus": 2,
+              "profile": "h200-2gpu-tp",
+              "status": "ok",
+              "latency_s": 117.459,
+              "qps": 0.017,
+              "p50_s": 117.459,
+              "p95_s": 118.688,
+              "p99_s": 119.002,
+              "requests": 8,
+              "concurrency": 2,
+              "ratio_to_sglang": 0.601
+            },
+            "lightx2v": {
+              "gpus": 2,
+              "profile": "h200-fa3",
+              "status": "ok",
+              "latency_s": 70.298,
+              "qps": 0.0245,
+              "p50_s": 70.298,
+              "p95_s": 103.479,
+              "p99_s": 113.033,
+              "requests": 8,
+              "concurrency": 2,
+              "ratio_to_sglang": 0.866
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "manifests_20260601-h200-cosmos3_single_e2e",
+      "title": "Cosmos3 H200 history",
+      "subtitle": "Earlier Cosmos3 Nano SGLang-Diffusion main vs vLLM-Omni PR #3454 comparison.",
+      "mode": "single_e2e",
+      "source_manifest": "manifests/20260601-h200-cosmos3.json",
+      "source_run_id": "cosmos3-origin-main-64a1dec-vs-vllm-2gpu-video-20260602",
+      "reproduce": "scripts/run_h200_cosmos3_20260601.sh",
+      "summary": {
+        "rows": 3,
+        "comparable_rows": 3,
+        "sglang_diffusion_wins": 3,
+        "other_wins": 0
+      },
+      "rows": [
+        {
+          "case_id": "cosmos3_nano_t2i_720p",
+          "case": "Cosmos3 Nano T2I",
+          "details": "1280x720 \u00b7 35 steps \u00b7 cfg 6",
+          "mode": "single_e2e",
+          "winner": "sglang",
+          "cells": {
+            "sglang": {
+              "gpus": 1,
+              "profile": "h200-1gpu-fa",
+              "status": "ok",
+              "latency_s": 1.877,
+              "server_latency_s": 1.76,
+              "ratio_to_sglang": 1.0
+            },
+            "vllm-omni": {
+              "gpus": 1,
+              "profile": "h200-1gpu-fa",
+              "status": "ok",
+              "latency_s": 1.943,
+              "ratio_to_sglang": 1.035
+            },
+            "lightx2v": {
+              "status": "no_profile",
+              "reason": "No validated aligned serving profile is tracked."
+            }
+          }
+        },
+        {
+          "case_id": "cosmos3_nano_t2v_720p_189f",
+          "case": "Cosmos3 Nano T2V",
+          "details": "1280x720x189f \u00b7 35 steps \u00b7 cfg 6",
+          "mode": "single_e2e",
+          "winner": "sglang",
+          "cells": {
+            "sglang": {
+              "gpus": 2,
+              "profile": "h200-2gpu-cfg",
+              "status": "ok",
+              "latency_s": 109.228,
+              "server_latency_s": 106.469,
+              "ratio_to_sglang": 1.0
+            },
+            "vllm-omni": {
+              "gpus": 2,
+              "profile": "h200-2gpu-cfg",
+              "status": "ok",
+              "latency_s": 116.215,
+              "ratio_to_sglang": 1.064
+            },
+            "lightx2v": {
+              "status": "no_profile",
+              "reason": "No validated aligned serving profile is tracked."
+            }
+          }
+        },
+        {
+          "case_id": "cosmos3_nano_i2v_720p_189f",
+          "case": "Cosmos3 Nano I2V",
+          "details": "1280x720x189f \u00b7 35 steps \u00b7 cfg 6",
+          "mode": "single_e2e",
+          "winner": "sglang",
+          "cells": {
+            "sglang": {
+              "gpus": 2,
+              "profile": "h200-2gpu-cfg",
+              "status": "ok",
+              "latency_s": 112.238,
+              "ratio_to_sglang": 1.0
+            },
+            "vllm-omni": {
+              "gpus": 2,
+              "profile": "h200-2gpu-cfg",
+              "status": "ok",
+              "latency_s": 119.661,
+              "ratio_to_sglang": 1.066
+            },
+            "lightx2v": {
+              "status": "no_profile",
+              "reason": "No validated aligned serving profile is tracked."
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "flux_fastest_20260610",
+      "title": "FLUX fastest history",
+      "subtitle": "Best recorded 1GPU/2GPU TP profile per framework series; torch compile allowed; no cache.",
+      "mode": "single_e2e",
+      "source_report": "reports/flux-fastest-20260610",
+      "reproduce": "scripts/run_flux_fastest_20260610.sh",
+      "summary": {
+        "rows": 4,
+        "sglang_now_wins": 3,
+        "other_wins": 1
+      },
+      "rows": [
+        {
+          "case_id": "flux1_dev_t2i_1024",
+          "case": "FLUX.1-dev T2I",
+          "details": "1024x1024 \u00b7 50 steps \u00b7 cfg 3.5",
+          "hardware": "H200",
+          "mode": "single_e2e",
+          "torch_compile": "on",
+          "winner": "vllm_omni_now",
+          "cells": {
+            "sglang_before": {
+              "gpus": "1 GPU",
+              "profile": "h100-h200-1gpu-compile",
+              "status": "failed",
+              "reason": "sglang server exited before health check passed (exit 1)",
+              "source_result": "reports/flux-fastest-20260610/failures/h200-flux-sgld-before-20260610-sglang-h100-h200-1gpu-compile.json"
+            },
+            "sglang_now": {
+              "gpus": "2 GPU TP",
+              "profile": "h100-h200-2gpu-tp-speed-compile",
+              "status": "ok",
+              "latency_s": 6.401,
+              "server_latency_s": 6.238,
+              "source_result": "reports/flux-fastest-20260610/raw/h200-flux-sgld-now-xet-20260610-sglang-h100-h200-2gpu-tp-speed-compile.json",
+              "ratio_to_sglang_now": 1.0
+            },
+            "vllm_omni_now": {
+              "gpus": "2 GPU TP",
+              "profile": "h100-h200-2gpu-tp-compile",
+              "status": "ok",
+              "latency_s": 5.912,
+              "source_result": "reports/flux-fastest-20260610/raw/h200-flux-vllm-now-20260610-vllm-omni-h100-h200-2gpu-tp-compile.json",
+              "ratio_to_sglang_now": 0.924
+            },
+            "lightx2v_now": {
+              "status": "not_run",
+              "reason": "No successful recorded profile in this report."
+            }
+          }
+        },
+        {
+          "case_id": "flux2_dev_t2i_1024",
+          "case": "FLUX.2-dev T2I",
+          "details": "1024x1024 \u00b7 50 steps \u00b7 cfg 4",
+          "hardware": "H200",
+          "mode": "single_e2e",
+          "torch_compile": "on",
+          "winner": "sglang_now",
+          "cells": {
+            "sglang_before": {
+              "gpus": "1 GPU",
+              "profile": "h100-h200-1gpu-compile",
+              "status": "failed",
+              "reason": "sglang server exited before health check passed (exit 1)",
+              "source_result": "reports/flux-fastest-20260610/failures/h200-flux-sgld-before-20260610-sglang-h100-h200-1gpu-compile.json"
+            },
+            "sglang_now": {
+              "gpus": "2 GPU TP",
+              "profile": "h100-h200-2gpu-tp-speed-compile",
+              "status": "ok",
+              "latency_s": 12.507,
+              "server_latency_s": 12.409,
+              "source_result": "reports/flux-fastest-20260610/raw/h200-flux-sgld-now-xet-20260610-sglang-h100-h200-2gpu-tp-speed-compile.json",
+              "ratio_to_sglang_now": 1.0
+            },
+            "vllm_omni_now": {
+              "gpus": "2 GPU TP",
+              "profile": "h100-h200-2gpu-tp-compile",
+              "status": "ok",
+              "latency_s": 16.654,
+              "source_result": "reports/flux-fastest-20260610/raw/h200-flux-vllm-now-20260610-vllm-omni-h100-h200-2gpu-tp-compile.json",
+              "ratio_to_sglang_now": 1.332
+            },
+            "lightx2v_now": {
+              "status": "not_run",
+              "reason": "No successful recorded profile in this report."
+            }
+          }
+        },
+        {
+          "case_id": "flux1_dev_t2i_1024",
+          "case": "FLUX.1-dev T2I",
+          "details": "1024x1024 \u00b7 50 steps \u00b7 cfg 3.5",
+          "hardware": "B200",
+          "mode": "single_e2e",
+          "torch_compile": "on",
+          "winner": "sglang_now",
+          "cells": {
+            "sglang_before": {
+              "gpus": "1 GPU",
+              "profile": "blackwell-1gpu-compile",
+              "status": "ok",
+              "latency_s": 6.116,
+              "server_latency_s": 3.588,
+              "source_result": "reports/flux-fastest-20260610/raw/b200-flux-sgld-before-20260610-sglang-blackwell-1gpu-compile.json",
+              "ratio_to_sglang_now": 1.695
+            },
+            "sglang_now": {
+              "gpus": "1 GPU",
+              "profile": "blackwell-1gpu-speed-compile",
+              "status": "ok",
+              "latency_s": 3.608,
+              "server_latency_s": 3.242,
+              "source_result": "reports/flux-fastest-20260610/raw/b200-flux-sgld-now-20260610-sglang-blackwell-1gpu-speed-compile.json",
+              "ratio_to_sglang_now": 1.0
+            },
+            "vllm_omni_now": {
+              "gpus": "2 GPU TP",
+              "profile": "blackwell-2gpu-tp-compile",
+              "status": "ok",
+              "latency_s": 4.224,
+              "source_result": "reports/flux-fastest-20260610/raw/b200-flux-vllm-now-flashinfer-20260610-vllm-omni-blackwell-2gpu-tp-compile.json",
+              "ratio_to_sglang_now": 1.171
+            },
+            "lightx2v_now": {
+              "status": "not_run",
+              "reason": "No successful recorded profile in this report."
+            }
+          }
+        },
+        {
+          "case_id": "flux2_dev_t2i_1024",
+          "case": "FLUX.2-dev T2I",
+          "details": "1024x1024 \u00b7 50 steps \u00b7 cfg 4",
+          "hardware": "B200",
+          "mode": "single_e2e",
+          "torch_compile": "on",
+          "winner": "sglang_now",
+          "cells": {
+            "sglang_before": {
+              "gpus": "2 GPU TP",
+              "profile": "blackwell-2gpu-tp-compile",
+              "status": "ok",
+              "latency_s": 8.88,
+              "server_latency_s": 7.109,
+              "source_result": "reports/flux-fastest-20260610/raw/b200-flux-sgld-before-20260610-sglang-blackwell-2gpu-tp-compile.json",
+              "ratio_to_sglang_now": 1.419
+            },
+            "sglang_now": {
+              "gpus": "2 GPU TP",
+              "profile": "blackwell-2gpu-tp-speed-compile",
+              "status": "ok",
+              "latency_s": 6.256,
+              "server_latency_s": 6.15,
+              "source_result": "reports/flux-fastest-20260610/raw/b200-flux-sgld-now-20260610-sglang-blackwell-2gpu-tp-speed-compile.json",
+              "ratio_to_sglang_now": 1.0
+            },
+            "vllm_omni_now": {
+              "gpus": "2 GPU TP",
+              "profile": "blackwell-2gpu-tp-compile",
+              "status": "ok",
+              "latency_s": 12.183,
+              "source_result": "reports/flux-fastest-20260610/raw/b200-flux-vllm-now-flashinfer-20260610-vllm-omni-blackwell-2gpu-tp-compile.json",
+              "ratio_to_sglang_now": 1.947
+            },
+            "lightx2v_now": {
+              "gpus": "1 GPU",
+              "profile": "blackwell-fa2-flashinfer",
+              "status": "ok",
+              "latency_s": 18.032,
+              "source_result": "reports/flux-fastest-20260610/raw/b200-flux-lightx2v-now-fa2-20260610-lightx2v-blackwell-fa2-flashinfer.json",
+              "ratio_to_sglang_now": 2.882
+            }
+          }
+        }
+      ]
+    }
+  ]
+}

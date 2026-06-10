@@ -754,6 +754,182 @@
         font-size: 13px;
       }
 
+      .history-panel {
+        border-top: 1px solid var(--hair);
+        background: rgba(255, 255, 255, 0.28);
+      }
+
+      .history-head {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) auto;
+        gap: 18px;
+        align-items: end;
+        padding: 24px 24px 16px;
+      }
+
+      .history-head h3 {
+        margin: 0;
+        font-size: clamp(24px, 3.2vw, 40px);
+        line-height: 1;
+        letter-spacing: 0;
+      }
+
+      .history-head p {
+        margin: 8px 0 0;
+        max-width: 780px;
+        color: var(--body);
+        font-size: 14px;
+      }
+
+      .history-tabs {
+        display: flex;
+        gap: 7px;
+        flex-wrap: wrap;
+        justify-content: flex-end;
+      }
+
+      .history-tabs button {
+        min-height: 36px;
+        padding: 8px 11px;
+        border: 1px solid var(--hair);
+        border-radius: 999px;
+        background: rgba(255, 255, 255, 0.52);
+        color: var(--body);
+        cursor: pointer;
+        font-size: 12px;
+        font-weight: 800;
+      }
+
+      .history-tabs button[aria-pressed="true"] {
+        background: var(--ink);
+        color: white;
+        border-color: var(--ink);
+      }
+
+      .history-summary {
+        display: grid;
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        gap: 10px;
+        padding: 0 24px 20px;
+      }
+
+      .history-stat {
+        min-height: 86px;
+        padding: 15px;
+        border: 1px solid var(--hair);
+        border-radius: 16px;
+        background: rgba(255, 255, 255, 0.52);
+      }
+
+      .history-stat b {
+        display: block;
+        color: var(--ink);
+        font-size: 21px;
+        line-height: 1;
+      }
+
+      .history-stat span {
+        display: block;
+        margin-top: 8px;
+        color: var(--muted);
+        font-size: 12px;
+      }
+
+      .history-table table {
+        min-width: 1040px;
+      }
+
+      .cell-meta {
+        display: block;
+        margin-top: 3px;
+        color: var(--muted);
+        font-size: 11px;
+        line-height: 1.28;
+      }
+
+      .ratio {
+        display: inline-flex;
+        margin-top: 7px;
+        padding: 3px 7px;
+        border-radius: 999px;
+        background: rgba(18, 20, 24, 0.06);
+        color: var(--body);
+        font-size: 11px;
+        font-weight: 850;
+      }
+
+      .status-pill {
+        display: inline-flex;
+        align-items: center;
+        min-height: 26px;
+        padding: 5px 8px;
+        border-radius: 999px;
+        background: rgba(113, 119, 130, 0.12);
+        color: #5a616b;
+        font-size: 11px;
+        font-weight: 850;
+        letter-spacing: 0.04em;
+        text-transform: uppercase;
+      }
+
+      .status-pill.failed {
+        background: rgba(237, 85, 85, 0.12);
+        color: #b72b2b;
+      }
+
+      .winner.muted {
+        background: rgba(18, 20, 24, 0.06);
+        color: var(--body);
+      }
+
+      .investigation-panel {
+        margin: 22px 24px 24px;
+        padding: 22px;
+        border: 1px solid var(--hair);
+        border-radius: 18px;
+        background: rgba(25, 27, 31, 0.92);
+        color: white;
+      }
+
+      .investigation-panel h3 {
+        margin: 0;
+        font-size: clamp(22px, 3vw, 34px);
+        line-height: 1.05;
+      }
+
+      .investigation-panel p {
+        margin: 10px 0 0;
+        color: rgba(255, 255, 255, 0.74);
+        font-size: 14px;
+      }
+
+      .investigation-grid {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 10px;
+        margin-top: 16px;
+      }
+
+      .investigation-grid div {
+        min-height: 116px;
+        padding: 15px;
+        border: 1px solid rgba(255, 255, 255, 0.14);
+        border-radius: 14px;
+        background: rgba(255, 255, 255, 0.08);
+      }
+
+      .investigation-grid b {
+        display: block;
+        margin-bottom: 8px;
+        font-size: 13px;
+      }
+
+      .investigation-grid span {
+        color: rgba(255, 255, 255, 0.72);
+        font-size: 12px;
+        line-height: 1.35;
+      }
+
       .footer {
         padding: 34px 0 54px;
         color: var(--muted);
@@ -807,7 +983,9 @@
         }
 
         .detail-grid,
-        .benchmark-meta {
+        .benchmark-meta,
+        .history-summary,
+        .investigation-grid {
           grid-template-columns: repeat(2, minmax(0, 1fr));
         }
       }
@@ -836,6 +1014,9 @@
         .detail-grid,
         .lesson-grid,
         .benchmark-meta,
+        .history-head,
+        .history-summary,
+        .investigation-grid,
         .footer-inner {
           grid-template-columns: 1fr;
         }
@@ -852,6 +1033,10 @@
         }
 
         .footer-links {
+          justify-content: flex-start;
+        }
+
+        .history-tabs {
           justify-content: flex-start;
         }
       }
@@ -1025,6 +1210,26 @@
               <tbody id="benchmarkRows"></tbody>
             </table>
           </div>
+          <section class="history-panel" aria-label="Historical cross-framework benchmark data">
+            <div class="history-head">
+              <div>
+                <h3>Historical coverage</h3>
+                <p>
+                  Broader local history from formal manifests and committed reports, including vLLM-Omni and LightX2V rows.
+                  These are shown as evidence, not as the latest release headline.
+                </p>
+              </div>
+              <div class="history-tabs" id="historyTabs" aria-label="Historical benchmark sections"></div>
+            </div>
+            <div class="history-summary" id="historySummary"></div>
+            <div class="table-wrap history-table">
+              <table aria-label="Historical cross-framework results">
+                <thead id="historyTableHead"></thead>
+                <tbody id="historyRows"></tbody>
+              </table>
+            </div>
+            <article class="investigation-panel" id="investigationPanel"></article>
+          </section>
           <div class="note-row" id="benchmarkNote">
             SGLang-Diffusion commit b0d888a; vLLM-Omni commit 73df8326. Client-side latency is the comparison source.
           </div>
@@ -1249,11 +1454,38 @@
         ]
       };
 
+      const fallbackHistoricalData = {
+        id: "historical-cross-framework-unavailable",
+        updated_at: "2026-06-10",
+        summary: { sections: 0 },
+        investigation: {
+          headline: "Historical benchmark data is unavailable in this preview.",
+          status: "data load failed",
+          evidence: [],
+          likely_causes: [],
+          next_checks: []
+        },
+        sections: []
+      };
+
       const modeButtons = [...document.querySelectorAll(".mode-toggle button")];
       const capabilityList = document.getElementById("capabilityList");
       const capabilityDetail = document.getElementById("capabilityDetail");
       let activeMode = "lossless";
       let activeIndex = 0;
+      let activeHistoryIndex = 0;
+
+      const escapeHtml = (value) =>
+        String(value ?? "")
+          .replace(/&/g, "&amp;")
+          .replace(/</g, "&lt;")
+          .replace(/>/g, "&gt;")
+          .replace(/"/g, "&quot;");
+
+      const clip = (value, max = 46) => {
+        const text = String(value ?? "");
+        return text.length > max ? `${text.slice(0, max - 1)}...` : text;
+      };
 
       function statusClass(status) {
         const normalized = status.toLowerCase();
@@ -1335,7 +1567,14 @@
         });
       });
 
-      const formatSeconds = (value) => `${Number(value).toFixed(value >= 10 ? 2 : 3)}s`;
+      const formatSeconds = (value) => {
+        const number = Number(value);
+        return Number.isFinite(number) ? `${number.toFixed(number >= 10 ? 2 : 3)}s` : "-";
+      };
+      const formatQps = (value) => {
+        const number = Number(value);
+        return Number.isFinite(number) ? `${number.toFixed(4)} qps` : "-";
+      };
 
       function latencyCell(result) {
         if (!result) return "-";
@@ -1380,6 +1619,212 @@
           `Benchmark data updated ${data.updated_at || fallbackData.updated_at} from ${data.source_report || data.id}.`;
       }
 
+      const frameworkLabels = {
+        sglang: "SGLang-Diffusion",
+        "vllm-omni": "vLLM-Omni",
+        lightx2v: "LightX2V",
+        sglang_before: "SGLang Apr 10",
+        sglang_now: "SGLang now",
+        vllm_omni_now: "vLLM now",
+        lightx2v_now: "LightX2V now"
+      };
+
+      function historyStatusCell(cell) {
+        const status = cell?.status || "not_run";
+        const reason = cell?.reason || (status === "not_run" ? "No row in this artifact." : "");
+        return `
+          <span class="status-pill ${status === "failed" ? "failed" : ""}">${escapeHtml(status.replace("_", " "))}</span>
+          <span class="cell-meta">${escapeHtml(reason)}</span>
+        `;
+      }
+
+      function historyMetricCell(cell, mode, ratioKey = "ratio_to_sglang") {
+        if (!cell || cell.status !== "ok") return historyStatusCell(cell);
+
+        const main =
+          mode === "throughput"
+            ? formatQps(cell.qps)
+            : formatSeconds(cell.latency_s);
+        const latencyLine =
+          mode === "throughput"
+            ? `p50 ${formatSeconds(cell.p50_s)} · p99 ${formatSeconds(cell.p99_s)}`
+            : cell.server_latency_s
+              ? `server ${formatSeconds(cell.server_latency_s)}`
+              : "";
+        const gpuLine = cell.gpus ? `${cell.gpus} GPU · ${clip(cell.profile || "default")}` : clip(cell.profile || "default");
+        const ratio = cell[ratioKey]
+          ? `<span class="ratio">${Number(cell[ratioKey]).toFixed(3)}x ${mode === "throughput" ? "qps" : "latency"}</span>`
+          : "";
+
+        return `
+          <span class="latency">${main}</span>
+          ${latencyLine ? `<span class="cell-meta">${escapeHtml(latencyLine)}</span>` : ""}
+          <span class="cell-meta">${escapeHtml(gpuLine)}</span>
+          ${ratio}
+        `;
+      }
+
+      function historyWinner(row) {
+        if (!row.winner) return `<span class="winner muted">no comparable winner</span>`;
+        return `<span class="winner ${row.winner?.includes("vllm") ? "vllm" : ""}">${frameworkLabels[row.winner] || row.winner}</span>`;
+      }
+
+      function renderHistoryTabs(data) {
+        const tabs = document.getElementById("historyTabs");
+        tabs.innerHTML = data.sections
+          .map(
+            (section, index) => `
+              <button type="button" data-index="${index}" aria-pressed="${index === activeHistoryIndex}">
+                ${escapeHtml(section.title)}
+              </button>
+            `
+          )
+          .join("");
+        tabs.querySelectorAll("button").forEach((button) => {
+          button.addEventListener("click", () => {
+            activeHistoryIndex = Number(button.dataset.index);
+            renderHistorical(data);
+          });
+        });
+      }
+
+      function renderHistorySummary(section) {
+        const summary = section.summary || {};
+        const rows = summary.rows ?? section.rows?.length ?? 0;
+        const sgWins = summary.sglang_diffusion_wins ?? summary.sglang_now_wins ?? 0;
+        const otherWins = summary.other_wins ?? 0;
+        document.getElementById("historySummary").innerHTML = `
+          <div class="history-stat">
+            <b>${rows}</b>
+            <span>tracked rows in this section</span>
+          </div>
+          <div class="history-stat">
+            <b>${summary.comparable_rows ?? rows}</b>
+            <span>rows with at least two comparable frameworks</span>
+          </div>
+          <div class="history-stat">
+            <b>${sgWins}</b>
+            <span>SGLang-Diffusion wins</span>
+          </div>
+          <div class="history-stat">
+            <b>${otherWins}</b>
+            <span>other-framework wins</span>
+          </div>
+        `;
+      }
+
+      function standardHistoryHead() {
+        document.getElementById("historyTableHead").innerHTML = `
+          <tr>
+            <th>Case</th>
+            <th>SGLang-Diffusion</th>
+            <th>vLLM-Omni</th>
+            <th>LightX2V</th>
+            <th>Fastest</th>
+          </tr>
+        `;
+      }
+
+      function fluxHistoryHead() {
+        document.getElementById("historyTableHead").innerHTML = `
+          <tr>
+            <th>Hardware / Case</th>
+            <th>SGLang Apr 10</th>
+            <th>SGLang now</th>
+            <th>vLLM now</th>
+            <th>LightX2V now</th>
+            <th>Fastest</th>
+          </tr>
+        `;
+      }
+
+      function renderStandardHistoryRows(section) {
+        standardHistoryHead();
+        document.getElementById("historyRows").innerHTML = section.rows
+          .map(
+            (row) => `
+              <tr>
+                <td>
+                  <span class="case-name">${escapeHtml(row.case)}</span>
+                  <span class="case-detail">${escapeHtml(row.details)}</span>
+                </td>
+                <td>${historyMetricCell(row.cells.sglang, section.mode)}</td>
+                <td>${historyMetricCell(row.cells["vllm-omni"], section.mode)}</td>
+                <td>${historyMetricCell(row.cells.lightx2v, section.mode)}</td>
+                <td>${historyWinner(row)}</td>
+              </tr>
+            `
+          )
+          .join("");
+      }
+
+      function renderFluxHistoryRows(section) {
+        fluxHistoryHead();
+        document.getElementById("historyRows").innerHTML = section.rows
+          .map(
+            (row) => `
+              <tr>
+                <td>
+                  <span class="case-name">${escapeHtml(row.hardware)} · ${escapeHtml(row.case)}</span>
+                  <span class="case-detail">${escapeHtml(row.details)} · compile ${escapeHtml(row.torch_compile)}</span>
+                </td>
+                <td>${historyMetricCell(row.cells.sglang_before, section.mode, "ratio_to_sglang_now")}</td>
+                <td>${historyMetricCell(row.cells.sglang_now, section.mode, "ratio_to_sglang_now")}</td>
+                <td>${historyMetricCell(row.cells.vllm_omni_now, section.mode, "ratio_to_sglang_now")}</td>
+                <td>${historyMetricCell(row.cells.lightx2v_now, section.mode, "ratio_to_sglang_now")}</td>
+                <td>${historyWinner(row)}</td>
+              </tr>
+            `
+          )
+          .join("");
+      }
+
+      function renderInvestigation(data) {
+        const info = data.investigation || fallbackHistoricalData.investigation;
+        const evidence = (info.evidence || []).slice(0, 3).join(" ");
+        const causes = (info.likely_causes || []).slice(0, 2).join(" ");
+        const checks = (info.next_checks || []).slice(0, 2).join(" ");
+        document.getElementById("investigationPanel").innerHTML = `
+          <h3>${escapeHtml(info.headline)}</h3>
+          <p>${escapeHtml(info.status)}</p>
+          <div class="investigation-grid">
+            <div>
+              <b>Evidence</b>
+              <span>${escapeHtml(evidence || "No evidence attached.")}</span>
+            </div>
+            <div>
+              <b>Likely cause</b>
+              <span>${escapeHtml(causes || "Needs stage breakdown before a root-cause claim.")}</span>
+            </div>
+            <div>
+              <b>Next check</b>
+              <span>${escapeHtml(checks || "Collect trace and stage timings.")}</span>
+            </div>
+          </div>
+        `;
+      }
+
+      function renderHistorical(data) {
+        renderHistoryTabs(data);
+        const section = data.sections[activeHistoryIndex];
+        if (!section) {
+          document.getElementById("historySummary").innerHTML = "";
+          standardHistoryHead();
+          document.getElementById("historyRows").innerHTML = `
+            <tr><td colspan="5">Historical benchmark data is unavailable.</td></tr>
+          `;
+          renderInvestigation(data);
+          return;
+        }
+        renderHistorySummary(section);
+        if (section.id === "flux_fastest_20260610") {
+          renderFluxHistoryRows(section);
+        } else {
+          renderStandardHistoryRows(section);
+        }
+        renderInvestigation(data);
+      }
+
       async function loadBenchmarkData() {
         try {
           const response = await fetch("data/latest-cross-framework.json", { cache: "no-store" });
@@ -1390,8 +1835,19 @@
         }
       }
 
+      async function loadHistoricalData() {
+        try {
+          const response = await fetch("data/historical-cross-framework.json", { cache: "no-store" });
+          if (!response.ok) throw new Error(`status ${response.status}`);
+          return await response.json();
+        } catch {
+          return fallbackHistoricalData;
+        }
+      }
+
       renderExplorer();
       loadBenchmarkData().then(renderBenchmarks);
+      loadHistoricalData().then(renderHistorical);
     </script>
   </body>
 </html>
