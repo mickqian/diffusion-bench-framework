@@ -6,7 +6,7 @@ VENV_ROOT="${SGLANG_DIFFUSION_FRAMEWORK_VENV_ROOT:-/tmp/sglang-diffusion-framewo
 VENV_PATH="${VENV_ROOT}/${FRAMEWORK}"
 PIP_TMPDIR="${SGLANG_DIFFUSION_PIP_TMPDIR:-${VENV_ROOT}/pip-tmp}"
 STAMP_PATH="${VENV_PATH}/.diffusion-bench-install-stamp"
-STAMP_VERSION="20260514-v1"
+STAMP_VERSION="20260610-v1"
 FORCE_REINSTALL="${FORCE_FRAMEWORK_REINSTALL:-${SGLANG_DIFFUSION_FORCE_FRAMEWORK_REINSTALL:-0}}"
 
 mkdir -p "${VENV_ROOT}"
@@ -51,6 +51,7 @@ write_desired_stamp() {
         echo "lightx2v_sageattention_install_spec=${LIGHTX2V_SAGEATTENTION_INSTALL_SPEC:-sageattention==1.0.6}"
         echo "lightx2v_flashinfer_install_spec=${LIGHTX2V_FLASHINFER_INSTALL_SPEC:-flashinfer-python==0.6.11}"
         echo "lightx2v_hf_xet_install_spec=${LIGHTX2V_HF_XET_INSTALL_SPEC:-hf-xet}"
+        echo "lightx2v_librosa_install_spec=${LIGHTX2V_LIBROSA_INSTALL_SPEC:-librosa}"
         ;;
     esac
   } > "${path}"
@@ -69,7 +70,7 @@ framework_health_check() {
       done
       ;;
     lightx2v)
-      "${VENV_PATH}/bin/python3" -c 'import importlib.util; assert importlib.util.find_spec("lightx2v"); import flash_attn_interface; assert hasattr(flash_attn_interface, "flash_attn_func")'
+      "${VENV_PATH}/bin/python3" -c 'import importlib.util; assert importlib.util.find_spec("lightx2v"); import lightx2v.server.main; import flash_attn_interface; assert hasattr(flash_attn_interface, "flash_attn_func")'
       ;;
   esac
 }
@@ -145,6 +146,7 @@ PY
     fi
     python3 -m pip install --upgrade --upgrade-strategy only-if-needed "${LIGHTX2V_SAGEATTENTION_INSTALL_SPEC:-sageattention==1.0.6}"
     python3 -m pip install --upgrade --upgrade-strategy only-if-needed "${LIGHTX2V_FLASHINFER_INSTALL_SPEC:-flashinfer-python==0.6.11}"
+    python3 -m pip install --upgrade --upgrade-strategy only-if-needed "${LIGHTX2V_LIBROSA_INSTALL_SPEC:-librosa}"
     python3 -m pip install --upgrade --force-reinstall pyzmq
     ;;
   *)
