@@ -32,11 +32,13 @@ mkdir -p "${REPORT_DIR}" runs
 
 case "${HARDWARE_PROFILE}" in
   b200|b300|gb200|gb300|blackwell)
+    export TORCH_CUDA_ARCH_LIST="${TORCH_CUDA_ARCH_LIST:-10.0}"
     DEFAULT_SGLANG_PROFILES="blackwell-1gpu-speed-compile blackwell-2gpu-tp-speed-compile"
     DEFAULT_VLLM_PROFILES="blackwell-1gpu-compile blackwell-2gpu-tp-compile"
-    DEFAULT_LIGHTX2V_PROFILES="blackwell-fa3-flashinfer"
+    DEFAULT_LIGHTX2V_PROFILES="blackwell-fa2-flashinfer"
     ;;
   *)
+    export TORCH_CUDA_ARCH_LIST="${TORCH_CUDA_ARCH_LIST:-9.0}"
     DEFAULT_SGLANG_PROFILES="h100-h200-1gpu-speed-compile h100-h200-2gpu-tp-speed-compile"
     DEFAULT_VLLM_PROFILES="h100-h200-1gpu-compile h100-h200-2gpu-tp-compile"
     DEFAULT_LIGHTX2V_PROFILES="h200-fa3-flashinfer"

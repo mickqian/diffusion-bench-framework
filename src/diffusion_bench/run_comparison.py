@@ -1449,6 +1449,7 @@ def _collect_framework_runtime_metadata() -> dict:
             "lightx2v_flashinfer": os.environ.get(
                 "LIGHTX2V_FLASHINFER_INSTALL_SPEC", "flashinfer-python==0.6.11"
             ),
+            "torch_cuda_arch_list": os.environ.get("TORCH_CUDA_ARCH_LIST", ""),
         },
         "launchers": {
             "vllm_omni_server_bin": os.environ.get("VLLM_OMNI_SERVER_BIN", "vllm"),

@@ -601,19 +601,19 @@
                                 "attn_type": "flash_attn3"
                             }
                         },
-                        "blackwell-fa3-flashinfer": {
-                            "description": "Blackwell LightX2V FLUX.2 profile probe using the same non-cache FA3 path when available.",
+                        "blackwell-fa2-flashinfer": {
+                            "description": "Blackwell LightX2V FLUX.2 profile probe using source-built FlashAttention 2 plus FlashInfer RoPE.",
                             "hardware": [
                                 "b200",
                                 "gb200",
                                 "b300",
                                 "gb300"
                             ],
-                            "framework_ref": "lightx2v-latest-flux2_dev+blackwell-fa3-flashinfer",
+                            "framework_ref": "lightx2v-latest-flux2_dev+blackwell-fa2-flashinfer",
                             "serve_args": "",
-                            "notes": "Profile probe only; if upstream LightX2V lacks a stable Blackwell FA3 path, report as unsupported/fail with the captured reason.",
+                            "notes": "Uses a source-built FlashAttention 2 wheel with TORCH_CUDA_ARCH_LIST=10.0; the upstream FA3 wheel used for H200 is Hopper-only.",
                             "lightx2v_config": {
-                                "attn_type": "flash_attn3"
+                                "attn_type": "flash_attn2"
                             }
                         }
                     }

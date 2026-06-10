@@ -52,6 +52,7 @@ write_desired_stamp() {
         echo "lightx2v_flashinfer_install_spec=${LIGHTX2V_FLASHINFER_INSTALL_SPEC:-flashinfer-python==0.6.11}"
         echo "lightx2v_hf_xet_install_spec=${LIGHTX2V_HF_XET_INSTALL_SPEC:-hf-xet}"
         echo "lightx2v_librosa_install_spec=${LIGHTX2V_LIBROSA_INSTALL_SPEC:-librosa}"
+        echo "torch_cuda_arch_list=${TORCH_CUDA_ARCH_LIST:-9.0}"
         ;;
     esac
   } > "${path}"
