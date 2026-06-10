@@ -1138,30 +1138,31 @@
         <div class="lesson-band">
           <article class="lesson-lead">
             <div>
-              <p class="eyebrow">What transfers</p>
-              <h2>Lessons from optimizing diffusion inference</h2>
+              <p class="eyebrow">Architecture lessons</p>
+              <h2>What carries across image and video serving</h2>
               <p>
-                The useful lesson is stack co-design. Diffusion serving needs coordination between requests,
-                stages, memory, communication, kernels, and quality evaluation.
+                The useful lesson is not a benchmark trick. It is how to turn diffusion pipelines into a
+                serving system with explicit request lifecycle, stage boundaries, memory policy, parallelism,
+                and quality-aware acceleration.
               </p>
             </div>
           </article>
           <div class="lesson-grid">
             <article class="lesson">
-              <b>Benchmark like traffic, not demos</b>
-              <p>Single-request latency matters, but throughput, p50/p99, memory envelope, and warmup policy decide production behavior.</p>
+              <b>Native serving creates the optimization surface</b>
+              <p>Batching, scheduling, cancellation, observability, and output handling need to live in the server, not in one-off inference scripts.</p>
             </article>
             <article class="lesson">
-              <b>Track commands by version</b>
-              <p>The fastest command changes across framework versions and hardware. Keep best-known profiles pinned and reproducible.</p>
+              <b>Stage boundaries are scaling boundaries</b>
+              <p>Encoders, denoisers, and decoders bottleneck differently. Treating them as roles makes disaggregation and placement meaningful.</p>
             </article>
             <article class="lesson">
-              <b>Make WIP explicit</b>
-              <p>Roadmap work is useful in customer discussions when it is labeled clearly and separated from shipped benchmark claims.</p>
+              <b>Memory policy is performance policy</b>
+              <p>Keeping hot denoising paths resident while offloading colder encoder work can improve both model fit and latency stability.</p>
             </article>
             <article class="lesson">
-              <b>Treat lossy speed as a contract</b>
-              <p>A 2x speedup is not a result until the acceptable quality-drift boundary is visible.</p>
+              <b>Parallelism has model-specific break-even points</b>
+              <p>CFG, TP, SP, and Ulysses should be selected by model shape and hardware behavior, not treated as universally faster toggles.</p>
             </article>
           </div>
         </div>
