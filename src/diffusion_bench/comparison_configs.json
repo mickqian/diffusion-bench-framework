@@ -262,7 +262,7 @@
                             },
                             "notes": "Use with DIFFUSION_BENCH_DISABLE_TORCH_COMPILE=0 so the harness does not append eager/compile-off args.",
                             "extra_env": {
-                                "DIFFUSION_ATTENTION_BACKEND": "FLASH_ATTN"
+                                "DIFFUSION_ATTENTION_BACKEND": "FLASHINFER_ATTN"
                             }
                         },
                         "blackwell-2gpu-tp-compile": {
@@ -284,7 +284,7 @@
                             },
                             "notes": "The harness adds --tensor-parallel-size 2 when num_gpus=2; use with compile allowed.",
                             "extra_env": {
-                                "DIFFUSION_ATTENTION_BACKEND": "FLASH_ATTN"
+                                "DIFFUSION_ATTENTION_BACKEND": "FLASHINFER_ATTN"
                             }
                         }
                     }
@@ -534,7 +534,7 @@
                             },
                             "notes": "Use with DIFFUSION_BENCH_DISABLE_TORCH_COMPILE=0 so the harness does not append eager/compile-off args.",
                             "extra_env": {
-                                "DIFFUSION_ATTENTION_BACKEND": "FLASH_ATTN"
+                                "DIFFUSION_ATTENTION_BACKEND": "FLASHINFER_ATTN"
                             }
                         },
                         "blackwell-2gpu-tp-compile": {
@@ -556,7 +556,7 @@
                             },
                             "notes": "The harness adds --tensor-parallel-size 2 when num_gpus=2; use with compile allowed.",
                             "extra_env": {
-                                "DIFFUSION_ATTENTION_BACKEND": "FLASH_ATTN"
+                                "DIFFUSION_ATTENTION_BACKEND": "FLASHINFER_ATTN"
                             }
                         }
                     }
