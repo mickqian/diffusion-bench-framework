@@ -1,0 +1,1020 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>SGLang-Diffusion</title>
+    <meta
+      name="description"
+      content="SGLang-Diffusion customer-facing one-pager: performance, serving design, model coverage, and cross-framework benchmarks."
+    />
+    <style>
+      :root {
+        color-scheme: light;
+        --bg: #f5f7fb;
+        --bg-2: #edf2f7;
+        --ink: #111827;
+        --body: #3f4856;
+        --muted: #6b7280;
+        --hairline: rgba(17, 24, 39, 0.11);
+        --glass: rgba(255, 255, 255, 0.68);
+        --glass-strong: rgba(255, 255, 255, 0.82);
+        --glass-dark: rgba(17, 24, 39, 0.88);
+        --red: #ef5555;
+        --blue: #4f7eb3;
+        --green: #4f9d5d;
+        --violet: #7663d9;
+        --amber: #c9852d;
+        --shadow: 0 24px 70px rgba(20, 31, 54, 0.12);
+        --shadow-soft: 0 10px 40px rgba(20, 31, 54, 0.08);
+        --radius: 22px;
+        --sans: ui-sans-serif, -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Segoe UI", sans-serif;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      html {
+        scroll-behavior: smooth;
+      }
+
+      body {
+        margin: 0;
+        min-height: 100vh;
+        background:
+          linear-gradient(130deg, rgba(235, 244, 255, 0.86), rgba(255, 255, 255, 0) 36%),
+          linear-gradient(220deg, rgba(241, 239, 255, 0.7), rgba(255, 255, 255, 0) 44%),
+          linear-gradient(180deg, var(--bg), var(--bg-2));
+        color: var(--ink);
+        font-family: var(--sans);
+        line-height: 1.45;
+      }
+
+      body::before {
+        content: "";
+        position: fixed;
+        inset: 0;
+        pointer-events: none;
+        background-image:
+          linear-gradient(rgba(17, 24, 39, 0.035) 1px, transparent 1px),
+          linear-gradient(90deg, rgba(17, 24, 39, 0.035) 1px, transparent 1px);
+        background-size: 44px 44px;
+        mask-image: linear-gradient(180deg, rgba(0, 0, 0, 0.75), transparent 72%);
+      }
+
+      a {
+        color: inherit;
+        text-decoration: none;
+      }
+
+      button,
+      input,
+      table {
+        font: inherit;
+      }
+
+      .shell {
+        width: min(1180px, calc(100vw - 40px));
+        margin: 0 auto;
+      }
+
+      .nav {
+        position: sticky;
+        top: 12px;
+        z-index: 20;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 18px;
+        margin-top: 12px;
+        padding: 10px 12px;
+        border: 1px solid var(--hairline);
+        border-radius: 999px;
+        background: rgba(255, 255, 255, 0.66);
+        backdrop-filter: blur(22px) saturate(1.3);
+        box-shadow: var(--shadow-soft);
+      }
+
+      .brand {
+        display: inline-flex;
+        align-items: center;
+        gap: 10px;
+        min-width: 0;
+        font-weight: 700;
+        letter-spacing: 0;
+      }
+
+      .brand-mark {
+        width: 30px;
+        height: 30px;
+        display: grid;
+        place-items: center;
+        border-radius: 9px;
+        background: var(--ink);
+        color: white;
+        font-size: 11px;
+        font-weight: 800;
+      }
+
+      .nav-links {
+        display: flex;
+        align-items: center;
+        gap: 4px;
+        flex-wrap: wrap;
+        justify-content: flex-end;
+      }
+
+      .nav-links a {
+        padding: 8px 11px;
+        border-radius: 999px;
+        color: var(--body);
+        font-size: 13px;
+        font-weight: 650;
+      }
+
+      .nav-links a:hover {
+        background: rgba(17, 24, 39, 0.06);
+        color: var(--ink);
+      }
+
+      .hero {
+        min-height: calc(100vh - 82px);
+        display: grid;
+        grid-template-columns: minmax(0, 1.02fr) minmax(390px, 0.82fr);
+        align-items: center;
+        gap: clamp(28px, 6vw, 88px);
+        padding: clamp(56px, 8vw, 104px) 0 clamp(42px, 6vw, 72px);
+      }
+
+      .eyebrow {
+        display: inline-flex;
+        align-items: center;
+        gap: 10px;
+        margin: 0 0 20px;
+        color: var(--muted);
+        font-size: 12px;
+        font-weight: 800;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+      }
+
+      .eyebrow::before {
+        content: "";
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        background: var(--red);
+        box-shadow:
+          14px 0 0 var(--blue),
+          28px 0 0 var(--green);
+      }
+
+      h1 {
+        margin: 0;
+        max-width: 760px;
+        font-size: clamp(56px, 9vw, 112px);
+        line-height: 0.92;
+        letter-spacing: 0;
+        font-weight: 760;
+      }
+
+      .lead {
+        max-width: 760px;
+        margin: 28px 0 0;
+        color: var(--body);
+        font-size: clamp(18px, 2vw, 23px);
+      }
+
+      .hero-actions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        margin-top: 34px;
+      }
+
+      .pill-link {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 40px;
+        padding: 10px 15px;
+        border: 1px solid var(--hairline);
+        border-radius: 999px;
+        background: var(--glass);
+        color: var(--ink);
+        backdrop-filter: blur(18px) saturate(1.3);
+        font-size: 14px;
+        font-weight: 700;
+      }
+
+      .pill-link.primary {
+        background: var(--ink);
+        color: white;
+      }
+
+      .hero-panel,
+      .glass-panel {
+        border: 1px solid var(--hairline);
+        border-radius: var(--radius);
+        background: var(--glass);
+        backdrop-filter: blur(24px) saturate(1.35);
+        box-shadow: var(--shadow);
+      }
+
+      .hero-panel {
+        padding: clamp(18px, 3vw, 26px);
+      }
+
+      .panel-label {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        color: var(--muted);
+        font-size: 12px;
+        font-weight: 800;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+      }
+
+      .panel-label span:last-child {
+        color: var(--ink);
+        letter-spacing: 0;
+        text-transform: none;
+      }
+
+      .headline-stat {
+        margin: 28px 0 8px;
+        font-size: clamp(56px, 8vw, 92px);
+        line-height: 0.92;
+        font-weight: 780;
+        letter-spacing: 0;
+      }
+
+      .headline-stat span {
+        color: var(--red);
+      }
+
+      .hero-panel p {
+        margin: 0;
+        color: var(--body);
+        font-size: 16px;
+      }
+
+      .metric-strip {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 10px;
+        margin-top: 24px;
+      }
+
+      .metric {
+        min-height: 112px;
+        padding: 14px;
+        border: 1px solid rgba(17, 24, 39, 0.08);
+        border-radius: 17px;
+        background: rgba(255, 255, 255, 0.55);
+      }
+
+      .metric b {
+        display: block;
+        font-size: 25px;
+        line-height: 1;
+        letter-spacing: 0;
+      }
+
+      .metric span {
+        display: block;
+        margin-top: 10px;
+        color: var(--muted);
+        font-size: 12px;
+        font-weight: 700;
+      }
+
+      .section {
+        padding: clamp(46px, 7vw, 92px) 0;
+      }
+
+      .section-head {
+        display: grid;
+        grid-template-columns: minmax(240px, 0.78fr) minmax(0, 1.22fr);
+        gap: clamp(22px, 5vw, 70px);
+        align-items: end;
+        margin-bottom: 24px;
+      }
+
+      h2 {
+        margin: 0;
+        font-size: clamp(34px, 5vw, 62px);
+        line-height: 1;
+        letter-spacing: 0;
+        font-weight: 740;
+      }
+
+      .section-head p,
+      .section-copy {
+        margin: 0;
+        color: var(--body);
+        font-size: 18px;
+      }
+
+      .benchmark-panel {
+        overflow: hidden;
+        padding: 0;
+      }
+
+      .benchmark-meta {
+        display: grid;
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        border-bottom: 1px solid var(--hairline);
+      }
+
+      .meta-cell {
+        padding: 18px 20px;
+        border-right: 1px solid var(--hairline);
+      }
+
+      .meta-cell:last-child {
+        border-right: 0;
+      }
+
+      .meta-cell b {
+        display: block;
+        font-size: 16px;
+      }
+
+      .meta-cell span {
+        display: block;
+        margin-top: 5px;
+        color: var(--muted);
+        font-size: 13px;
+      }
+
+      .table-wrap {
+        overflow-x: auto;
+      }
+
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        min-width: 860px;
+      }
+
+      th,
+      td {
+        padding: 18px 20px;
+        border-bottom: 1px solid rgba(17, 24, 39, 0.08);
+        text-align: left;
+        vertical-align: top;
+      }
+
+      th {
+        color: var(--muted);
+        font-size: 12px;
+        font-weight: 800;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+      }
+
+      td {
+        color: var(--body);
+        font-size: 14px;
+      }
+
+      tr:last-child td {
+        border-bottom: 0;
+      }
+
+      .case-name {
+        display: block;
+        color: var(--ink);
+        font-size: 16px;
+        font-weight: 760;
+      }
+
+      .case-detail {
+        display: block;
+        margin-top: 4px;
+        color: var(--muted);
+        font-size: 13px;
+      }
+
+      .latency {
+        display: block;
+        color: var(--ink);
+        font-size: 17px;
+        font-weight: 760;
+      }
+
+      .server-time {
+        display: block;
+        margin-top: 4px;
+        color: var(--muted);
+        font-size: 12px;
+      }
+
+      .winner {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 8px 10px;
+        border-radius: 999px;
+        background: rgba(239, 85, 85, 0.12);
+        color: #b91c1c;
+        font-size: 13px;
+        font-weight: 800;
+        white-space: nowrap;
+      }
+
+      .winner.vllm {
+        background: rgba(79, 126, 179, 0.12);
+        color: #245b93;
+      }
+
+      .winner::before {
+        content: "";
+        width: 8px;
+        height: 8px;
+        border-radius: 3px;
+        background: currentColor;
+      }
+
+      .note-row {
+        padding: 18px 20px 20px;
+        border-top: 1px solid var(--hairline);
+        background: rgba(255, 255, 255, 0.42);
+        color: var(--muted);
+        font-size: 13px;
+      }
+
+      .stack-grid {
+        display: grid;
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        gap: 12px;
+      }
+
+      .stack-item {
+        min-height: 250px;
+        padding: 22px;
+        border: 1px solid var(--hairline);
+        border-radius: var(--radius);
+        background: rgba(255, 255, 255, 0.58);
+        backdrop-filter: blur(20px) saturate(1.25);
+      }
+
+      .stack-index {
+        display: inline-grid;
+        place-items: center;
+        width: 34px;
+        height: 34px;
+        margin-bottom: 24px;
+        border-radius: 11px;
+        background: var(--ink);
+        color: white;
+        font-size: 12px;
+        font-weight: 800;
+      }
+
+      .stack-item h3,
+      .coverage-item h3 {
+        margin: 0 0 10px;
+        color: var(--ink);
+        font-size: 20px;
+        line-height: 1.08;
+        letter-spacing: 0;
+      }
+
+      .stack-item p,
+      .coverage-item p {
+        margin: 0;
+        color: var(--body);
+        font-size: 14px;
+      }
+
+      .coverage-layout {
+        display: grid;
+        grid-template-columns: minmax(0, 0.92fr) minmax(0, 1.08fr);
+        gap: 14px;
+      }
+
+      .coverage-hero {
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        min-height: 420px;
+        padding: 28px;
+        border-radius: var(--radius);
+        background: var(--glass-dark);
+        color: white;
+        box-shadow: var(--shadow);
+      }
+
+      .coverage-hero h2 {
+        color: white;
+      }
+
+      .coverage-hero p {
+        margin: 22px 0 0;
+        color: rgba(255, 255, 255, 0.72);
+        font-size: 18px;
+      }
+
+      .coverage-tags {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        margin-top: 28px;
+      }
+
+      .tag {
+        display: inline-flex;
+        align-items: center;
+        min-height: 30px;
+        padding: 6px 10px;
+        border-radius: 999px;
+        background: rgba(255, 255, 255, 0.12);
+        color: inherit;
+        font-size: 12px;
+        font-weight: 800;
+      }
+
+      .coverage-grid {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 12px;
+      }
+
+      .coverage-item {
+        min-height: 204px;
+        padding: 22px;
+        border: 1px solid var(--hairline);
+        border-radius: var(--radius);
+        background: rgba(255, 255, 255, 0.62);
+        backdrop-filter: blur(20px) saturate(1.25);
+      }
+
+      .feature-band {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 12px;
+      }
+
+      .feature {
+        min-height: 180px;
+        padding: 22px;
+        border-top: 1px solid var(--hairline);
+      }
+
+      .feature b {
+        display: block;
+        color: var(--ink);
+        font-size: 17px;
+      }
+
+      .feature p {
+        margin: 10px 0 0;
+        color: var(--body);
+        font-size: 14px;
+      }
+
+      .footer {
+        padding: 34px 0 54px;
+        color: var(--muted);
+        font-size: 13px;
+      }
+
+      .footer-inner {
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        gap: 20px;
+        border-top: 1px solid var(--hairline);
+        padding-top: 22px;
+      }
+
+      .footer-links {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: flex-end;
+        gap: 10px;
+      }
+
+      .footer a {
+        color: var(--body);
+        font-weight: 700;
+      }
+
+      @media (max-width: 980px) {
+        .hero,
+        .section-head,
+        .coverage-layout {
+          grid-template-columns: 1fr;
+        }
+
+        .stack-grid,
+        .feature-band {
+          grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+
+        .benchmark-meta {
+          grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+      }
+
+      @media (max-width: 680px) {
+        .shell {
+          width: min(100vw - 24px, 1180px);
+        }
+
+        .nav {
+          position: static;
+          align-items: flex-start;
+          border-radius: 18px;
+          flex-direction: column;
+        }
+
+        .nav-links {
+          justify-content: flex-start;
+        }
+
+        .hero {
+          min-height: auto;
+          padding-top: 52px;
+        }
+
+        .hero-panel {
+          border-radius: 18px;
+        }
+
+        .metric-strip,
+        .benchmark-meta,
+        .stack-grid,
+        .coverage-grid,
+        .feature-band,
+        .footer-inner {
+          grid-template-columns: 1fr;
+        }
+
+        .footer-inner {
+          display: grid;
+        }
+
+        .footer-links {
+          justify-content: flex-start;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <header class="shell nav" aria-label="SGLang-Diffusion navigation">
+      <a class="brand" href="#top" aria-label="SGLang-Diffusion home">
+        <span class="brand-mark">SG</span>
+        <span>SGLang-Diffusion</span>
+      </a>
+      <nav class="nav-links">
+        <a href="#benchmark">Benchmark</a>
+        <a href="#design">Design</a>
+        <a href="#coverage">Coverage</a>
+        <a href="#features">Features</a>
+      </nav>
+    </header>
+
+    <main>
+      <section class="shell hero" id="top">
+        <div>
+          <p class="eyebrow">Native image and video serving</p>
+          <h1>SGLang-Diffusion</h1>
+          <p class="lead">
+            A production serving stack for diffusion models. It keeps the generation recipe intact while improving
+            scheduling, memory residency, multi-GPU execution, kernels, and measured end-to-end latency.
+          </p>
+          <div class="hero-actions">
+            <a class="pill-link primary" href="#benchmark">View latest benchmark</a>
+            <a class="pill-link" href="https://docs.sglang.io/docs/sglang-diffusion/" target="_blank" rel="noreferrer">Docs</a>
+            <a class="pill-link" href="https://github.com/sgl-project/sglang" target="_blank" rel="noreferrer">GitHub</a>
+          </div>
+        </div>
+
+        <aside class="hero-panel" aria-label="Latest benchmark summary">
+          <div class="panel-label">
+            <span>H200 cross-framework</span>
+            <span id="updatedAt">2026-06-10</span>
+          </div>
+          <div class="headline-stat"><span id="winCount">3</span>/4</div>
+          <p id="headlineCopy">
+            SGLang-Diffusion wins 3 of 4 aligned same-GPU cases against vLLM-Omni on latest H200 data.
+          </p>
+          <div class="metric-strip" aria-label="Benchmark highlights">
+            <div class="metric">
+              <b>1.11x</b>
+              <span>FLUX.1 1GPU vs vLLM-Omni</span>
+            </div>
+            <div class="metric">
+              <b>1.10x</b>
+              <span>Cosmos3 video 2GPU CFG</span>
+            </div>
+            <div class="metric">
+              <b>1.08x gap</b>
+              <span>vLLM wins FLUX.1 2GPU TP</span>
+            </div>
+          </div>
+        </aside>
+      </section>
+
+      <section class="shell section" id="benchmark">
+        <div class="section-head">
+          <h2>Latest aligned benchmark</h2>
+          <p>
+            Same model, same sampling recipe, same GPU count. The table uses client-side latency as the comparison
+            source and shows server-side time for SGLang-Diffusion where available.
+          </p>
+        </div>
+
+        <div class="glass-panel benchmark-panel">
+          <div class="benchmark-meta" aria-label="Benchmark policy">
+            <div class="meta-cell">
+              <b>Hardware</b>
+              <span>2x NVIDIA H200 devbox, non-CI</span>
+            </div>
+            <div class="meta-cell">
+              <b>Cache policy</b>
+              <span>No response cache, no Cache-DiT, no temporal cache</span>
+            </div>
+            <div class="meta-cell">
+              <b>Compile policy</b>
+              <span>FLUX.1 compile on; Cosmos3 compile off</span>
+            </div>
+            <div class="meta-cell">
+              <b>Source</b>
+              <span id="sourceReport">h200-main-b0d888a-flux1-cosmos3-20260610</span>
+            </div>
+          </div>
+          <div class="table-wrap">
+            <table aria-label="Cross-framework latency results">
+              <thead>
+                <tr>
+                  <th>Case</th>
+                  <th>GPUs</th>
+                  <th>SGLang-Diffusion</th>
+                  <th>vLLM-Omni</th>
+                  <th>Fastest</th>
+                </tr>
+              </thead>
+              <tbody id="benchmarkRows"></tbody>
+            </table>
+          </div>
+          <div class="note-row" id="benchmarkNote">
+            SGLang-Diffusion commit b0d888a; vLLM-Omni commit 73df8326. Data is generated from the benchmark repo manifest.
+          </div>
+        </div>
+      </section>
+
+      <section class="shell section" id="design">
+        <div class="section-head">
+          <h2>Serving-first design</h2>
+          <p>
+            Diffusion performance is not a single kernel story. SGLang-Diffusion exposes the production controls
+            that decide whether image and video generation can be served predictably at scale.
+          </p>
+        </div>
+
+        <div class="stack-grid">
+          <article class="stack-item">
+            <span class="stack-index">01</span>
+            <h3>Native pipeline ownership</h3>
+            <p>Stages, tensors, schedulers, encoders, denoisers, and decoders are represented directly instead of wrapped as opaque scripts.</p>
+          </article>
+          <article class="stack-item">
+            <span class="stack-index">02</span>
+            <h3>Batching and placement</h3>
+            <p>Dynamic batching, performance mode, and layerwise offload keep GPU residency explicit under real traffic.</p>
+          </article>
+          <article class="stack-item">
+            <span class="stack-index">03</span>
+            <h3>Parallel execution</h3>
+            <p>TP, SP, Ulysses/Ring, and CFG parallel paths are tracked per model and hardware profile instead of guessed at runtime.</p>
+          </article>
+          <article class="stack-item">
+            <span class="stack-index">04</span>
+            <h3>Measured tradeoffs</h3>
+            <p>Approximate acceleration is opt-in and paired with quality drift, artifact checks, and customer-facing acceptance thresholds.</p>
+          </article>
+        </div>
+      </section>
+
+      <section class="shell section" id="coverage">
+        <div class="coverage-layout">
+          <div class="coverage-hero">
+            <div>
+              <p class="eyebrow">Model surface</p>
+              <h2>One serving layer for image and video.</h2>
+              <p>
+                The benchmark framework tracks command profiles, versions, and failure reasons so coverage expands without losing reproducibility.
+              </p>
+            </div>
+            <div class="coverage-tags" aria-label="Tracked model families">
+              <span class="tag">FLUX.1 / FLUX.2</span>
+              <span class="tag">Qwen-Image</span>
+              <span class="tag">Z-Image</span>
+              <span class="tag">Cosmos3</span>
+              <span class="tag">Wan 2.1 / 2.2</span>
+              <span class="tag">LTX 2 / 2.3</span>
+            </div>
+          </div>
+
+          <div class="coverage-grid">
+            <article class="coverage-item">
+              <h3>Text-to-image</h3>
+              <p>FLUX, Qwen-Image, Z-Image, Cosmos3, and other image families with tracked single-GPU and TP profiles.</p>
+            </article>
+            <article class="coverage-item">
+              <h3>Text-to-video</h3>
+              <p>Wan, Cosmos3, and LTX style workloads where sequence length, decoder cost, and CFG parallelism dominate.</p>
+            </article>
+            <article class="coverage-item">
+              <h3>Image editing</h3>
+              <p>Editing pipelines reuse the same serving controls while preserving model-specific prompts, image inputs, and recipes.</p>
+            </article>
+            <article class="coverage-item">
+              <h3>Framework tracking</h3>
+              <p>Best commands are versioned per framework and hardware, including SGLang-Diffusion, vLLM-Omni, LightX2V, and diffusers baselines.</p>
+            </article>
+          </div>
+        </div>
+      </section>
+
+      <section class="shell section" id="features">
+        <div class="section-head">
+          <h2>What users get</h2>
+          <p>
+            The goal is not only faster demos. The goal is a repeatable serving surface where model teams can ship,
+            compare, and tune diffusion workloads without rebuilding the runtime per model.
+          </p>
+        </div>
+        <div class="feature-band">
+          <div class="feature">
+            <b>Cross-framework truth</b>
+            <p>Formal reports keep raw data, exact commands, framework versions, hardware, and benchmark policy together.</p>
+          </div>
+          <div class="feature">
+            <b>Production controls</b>
+            <p>Serving knobs are first-class: dynamic batching, offload, parallelism, attention backend, compile, and postprocess placement.</p>
+          </div>
+          <div class="feature">
+            <b>Quality-aware speed</b>
+            <p>Lossy paths such as cache, quantization, or progressive resolution are evaluated as speed-quality frontiers.</p>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <footer class="shell footer">
+      <div class="footer-inner">
+        <div>
+          <strong>SGLang-Diffusion</strong>
+          <div id="footerSource">Updated from benchmark manifest.</div>
+        </div>
+        <div class="footer-links">
+          <a href="https://docs.sglang.io/docs/sglang-diffusion/dynamic_batching" target="_blank" rel="noreferrer">Dynamic batching</a>
+          <a href="https://docs.sglang.io/docs/sglang-diffusion/deployment_cookbook" target="_blank" rel="noreferrer">Performance mode</a>
+          <a href="https://docs.sglang.io/docs/sglang-diffusion/ring_sp_performance" target="_blank" rel="noreferrer">Parallelism</a>
+          <a href="https://docs.sglang.io/docs/sglang-diffusion/quantization" target="_blank" rel="noreferrer">Quantization</a>
+        </div>
+      </div>
+    </footer>
+
+    <script>
+      const fallbackData = {
+        id: "h200-main-b0d888a-flux1-cosmos3-20260610",
+        updated_at: "2026-06-10",
+        source_report: "h200-main-b0d888a-flux1-cosmos3-20260610",
+        frameworks: {
+          sglang_diffusion_now: {
+            commit: "b0d888a195c3ee30350a7681d36efb0dde5fd4a9"
+          },
+          vllm_omni_now: {
+            vllm: "0.22.0",
+            vllm_omni_commit: "73df8326d76fe3bba0b7b5a6abf6ad68976f24e8"
+          }
+        },
+        summary: {
+          same_gpu_cases: 4,
+          sglang_diffusion_wins: 3,
+          vllm_omni_wins: 1,
+          headline:
+            "On the aligned H200 spot-check, SGLang-Diffusion wins 3 of 4 same-GPU cases; vLLM-Omni wins FLUX.1 2GPU TP by 1.08x."
+        },
+        rows: [
+          {
+            case: "FLUX.1-dev T2I",
+            details: "1024x1024 · 50 steps · cfg 3.5",
+            gpus: "1 GPU",
+            torch_compile: "on",
+            sglang_diffusion: { client_latency_s: 6.566, server_latency_s: 6.392, profile: "h100-h200-1gpu-speed-compile" },
+            vllm_omni: { client_latency_s: 7.288, profile: "h100-h200-1gpu-compile" },
+            winner: "SGLang-Diffusion",
+            winner_speedup: "1.11x",
+            note: "same-GPU image path; SGLang speed mode + CUDA norm"
+          },
+          {
+            case: "FLUX.1-dev T2I",
+            details: "1024x1024 · 50 steps · cfg 3.5",
+            gpus: "2 GPU TP",
+            torch_compile: "on",
+            sglang_diffusion: { client_latency_s: 6.4, server_latency_s: 6.239, profile: "h100-h200-2gpu-tp-speed-compile" },
+            vllm_omni: { client_latency_s: 5.912, profile: "h100-h200-2gpu-tp-compile" },
+            winner: "vLLM-Omni",
+            winner_speedup: "1.08x",
+            note: "vLLM has better FLUX.1 TP scaling in this spot-check"
+          },
+          {
+            case: "Cosmos3 Nano T2I",
+            details: "1280x720 · 35 steps · cfg 6",
+            gpus: "1 GPU",
+            torch_compile: "off",
+            sglang_diffusion: { client_latency_s: 1.859, server_latency_s: 1.732, profile: "h200-1gpu-fa-speed" },
+            vllm_omni: { client_latency_s: 1.915, profile: "h200-1gpu-fa" },
+            winner: "SGLang-Diffusion",
+            winner_speedup: "1.03x",
+            note: "same-GPU Cosmos3 image path"
+          },
+          {
+            case: "Cosmos3 Nano T2V",
+            details: "1280x720 · 189 frames · 35 steps · cfg 6",
+            gpus: "2 GPU CFG",
+            torch_compile: "off",
+            sglang_diffusion: { client_latency_s: 107.159, server_latency_s: 104.602, profile: "h200-2gpu-cfg-speed" },
+            vllm_omni: { client_latency_s: 117.82, profile: "h200-2gpu-cfg" },
+            winner: "SGLang-Diffusion",
+            winner_speedup: "1.10x",
+            note: "same 2GPU CFG-only video path"
+          }
+        ]
+      };
+
+      const formatSeconds = (value) => `${Number(value).toFixed(value >= 10 ? 2 : 3)}s`;
+
+      function latencyCell(result) {
+        if (!result) return "-";
+        const server = result.server_latency_s
+          ? `<span class="server-time">server ${formatSeconds(result.server_latency_s)}</span>`
+          : "";
+        return `
+          <span class="latency">${formatSeconds(result.client_latency_s)}</span>
+          ${server}
+          <span class="server-time">${result.profile}</span>
+        `;
+      }
+
+      function render(data) {
+        const summary = data.summary || fallbackData.summary;
+        document.getElementById("updatedAt").textContent = data.updated_at || fallbackData.updated_at;
+        document.getElementById("winCount").textContent = summary.sglang_diffusion_wins;
+        document.getElementById("headlineCopy").textContent = summary.headline;
+        document.getElementById("sourceReport").textContent = data.source_report || data.id;
+
+        const rows = data.rows
+          .map((row) => {
+            const vllmWinner = row.winner === "vLLM-Omni";
+            return `
+              <tr>
+                <td>
+                  <span class="case-name">${row.case}</span>
+                  <span class="case-detail">${row.details} · compile ${row.torch_compile}</span>
+                  <span class="case-detail">${row.note}</span>
+                </td>
+                <td>${row.gpus}</td>
+                <td>${latencyCell(row.sglang_diffusion)}</td>
+                <td>${latencyCell(row.vllm_omni)}</td>
+                <td><span class="winner ${vllmWinner ? "vllm" : ""}">${row.winner} ${row.winner_speedup}</span></td>
+              </tr>
+            `;
+          })
+          .join("");
+        document.getElementById("benchmarkRows").innerHTML = rows;
+
+        const sgldCommit = data.frameworks?.sglang_diffusion_now?.commit || fallbackData.frameworks.sglang_diffusion_now.commit;
+        const vllmCommit =
+          data.frameworks?.vllm_omni_now?.vllm_omni_commit || fallbackData.frameworks.vllm_omni_now.vllm_omni_commit;
+        document.getElementById("benchmarkNote").textContent =
+          `SGLang-Diffusion ${sgldCommit.slice(0, 8)}; vLLM-Omni ${vllmCommit.slice(0, 8)}. ` +
+          "Client-side latency is the comparison source; server-side time is shown where available.";
+        document.getElementById("footerSource").textContent =
+          `Updated ${data.updated_at || fallbackData.updated_at} from ${data.source_report || data.id}.`;
+      }
+
+      async function loadData() {
+        try {
+          const response = await fetch("data/latest-cross-framework.json", { cache: "no-store" });
+          if (!response.ok) throw new Error(`status ${response.status}`);
+          return await response.json();
+        } catch {
+          return fallbackData;
+        }
+      }
+
+      loadData().then(render);
+    </script>
+  </body>
+</html>

@@ -18,3 +18,9 @@ Keep the format simple:
 - `manifest.json` is the index for machines, framework versions, commands, and included files.
 - `summary.md` should contain clear comparison data and short reproducibility notes, not debug analysis.
 - Do not run or record benchmark data from CI, runner, build, GitHub Actions, Jenkins, or other shared automation machines.
+
+Update the GitHub Pages one-pager from a formal report with:
+
+```bash
+node scripts/export_onepager_data.mjs reports/<report-id>
+```
