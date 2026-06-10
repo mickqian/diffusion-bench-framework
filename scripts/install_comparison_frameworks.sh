@@ -116,34 +116,7 @@ case "${FRAMEWORK}" in
       python3 -m pip install --upgrade --no-build-isolation --no-deps "${LIGHTX2V_FLASH_ATTN3_INSTALL_SPEC}"
     else
       python3 -m pip install --upgrade --upgrade-strategy only-if-needed "${LIGHTX2V_HF_XET_INSTALL_SPEC:-hf-xet}"
-      python3 - <<'PY'
-import os
-import shutil
-import site
-from pathlib import Path
-
-from huggingface_hub import snapshot_download
-
-repo = os.environ.get("LIGHTX2V_FA3_HF_REPO", "varunneal/flash-attention-3")
-revision = os.environ.get(
-    "LIGHTX2V_FA3_HF_REVISION", "de87b9b5af06dd9984df595bef90b2eba44b181a"
-)
-subdir = os.environ.get(
-    "LIGHTX2V_FA3_HF_SUBDIR",
-    "build/torch28-cxx11-cu128-x86_64-linux/flash_attention_3",
-)
-snapshot = Path(
-    snapshot_download(repo, revision=revision, allow_patterns=[subdir + "/*"])
-)
-site_dir = Path(site.getsitepackages()[0])
-dst = site_dir / "flash_attention_3"
-if dst.exists():
-    shutil.rmtree(dst)
-shutil.copytree(snapshot / subdir, dst, symlinks=False)
-(site_dir / "flash_attn_interface.py").write_text(
-    "from flash_attention_3.flash_attn_interface import *\n"
-)
-PY
+      python3 "$(dirname "$0")/install_lightx2v_fa3_from_hf.py"
     fi
     python3 -m pip install --upgrade --upgrade-strategy only-if-needed "${LIGHTX2V_SAGEATTENTION_INSTALL_SPEC:-sageattention==1.0.6}"
     python3 -m pip install --upgrade --upgrade-strategy only-if-needed "${LIGHTX2V_FLASHINFER_INSTALL_SPEC:-flashinfer-python==0.6.11}"
