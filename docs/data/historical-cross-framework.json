@@ -19,29 +19,6 @@
     "h200_throughput_sglang_wins": 4,
     "h200_throughput_other_wins": 0
   },
-  "investigation": {
-    "headline": "The latest local evidence does not show SGLang-Diffusion generally behind; the regression is concentrated in H200 FLUX.1 2GPU TP.",
-    "status": "needs stage breakdown / trace to close",
-    "evidence": [
-      "Latest H200 aligned spot-check: SGLang-Diffusion wins 3 of 4 same-GPU cases; vLLM-Omni wins only FLUX.1 2GPU TP by 1.08x.",
-      "H200 FLUX.1 single-GPU favors SGLang-Diffusion: 6.566s vs vLLM-Omni 7.288s, so the base single-GPU path is not slower.",
-      "H200 FLUX.1 TP scaling is weak for SGLang-Diffusion: 6.566s to 6.400s, about 2.5%; vLLM-Omni scales 7.288s to 5.912s, about 18.9%.",
-      "H200 FLUX.2 2GPU TP favors SGLang-Diffusion: 12.507s vs vLLM-Omni 16.654s, so the issue is not a blanket TP failure.",
-      "B200 FLUX rows favor SGLang-Diffusion now after performance-mode speed: FLUX.1 3.608s vs vLLM-Omni 4.224s; FLUX.2 6.256s vs 12.183s.",
-      "Most May H200 full-matrix image/video rows favor SGLang-Diffusion over vLLM-Omni and LightX2V; this makes the H200 FLUX.1 TP miss a narrow optimization target."
-    ],
-    "likely_causes": [
-      "H200 FLUX.1 TP communication or partition overhead cancels the denoiser compute savings at this shape.",
-      "The current best profile may need to prefer 1GPU for FLUX.1/H200 unless throughput pressure or memory constraints require TP.",
-      "vLLM-Omni may be parallelizing the FLUX.1 compiled path with lower per-step overhead on H200."
-    ],
-    "next_checks": [
-      "Collect stage breakdown for text encoder, denoise, VAE decode, and response encoding on 1GPU vs 2GPU.",
-      "Trace TP collectives and denoiser kernels to separate compute speedup from communication overhead.",
-      "Compare denoise-only latency and CUDA graph/compile coverage for SGLang-Diffusion vs vLLM-Omni.",
-      "Keep client-side latency as the public comparison metric and use server-side time only as breakdown."
-    ]
-  },
   "sections": [
     {
       "id": "manifests_20260510-h200-single-e2e.json + manifests_20260514-h200-wan-vllm-omni_single_e2e",

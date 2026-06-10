@@ -882,54 +882,6 @@
         color: var(--body);
       }
 
-      .investigation-panel {
-        margin: 22px 24px 24px;
-        padding: 22px;
-        border: 1px solid var(--hair);
-        border-radius: 18px;
-        background: rgba(25, 27, 31, 0.92);
-        color: white;
-      }
-
-      .investigation-panel h3 {
-        margin: 0;
-        font-size: clamp(22px, 3vw, 34px);
-        line-height: 1.05;
-      }
-
-      .investigation-panel p {
-        margin: 10px 0 0;
-        color: rgba(255, 255, 255, 0.74);
-        font-size: 14px;
-      }
-
-      .investigation-grid {
-        display: grid;
-        grid-template-columns: repeat(3, minmax(0, 1fr));
-        gap: 10px;
-        margin-top: 16px;
-      }
-
-      .investigation-grid div {
-        min-height: 116px;
-        padding: 15px;
-        border: 1px solid rgba(255, 255, 255, 0.14);
-        border-radius: 14px;
-        background: rgba(255, 255, 255, 0.08);
-      }
-
-      .investigation-grid b {
-        display: block;
-        margin-bottom: 8px;
-        font-size: 13px;
-      }
-
-      .investigation-grid span {
-        color: rgba(255, 255, 255, 0.72);
-        font-size: 12px;
-        line-height: 1.35;
-      }
-
       .footer {
         padding: 34px 0 54px;
         color: var(--muted);
@@ -984,8 +936,7 @@
 
         .detail-grid,
         .benchmark-meta,
-        .history-summary,
-        .investigation-grid {
+        .history-summary {
           grid-template-columns: repeat(2, minmax(0, 1fr));
         }
       }
@@ -1016,7 +967,6 @@
         .benchmark-meta,
         .history-head,
         .history-summary,
-        .investigation-grid,
         .footer-inner {
           grid-template-columns: 1fr;
         }
@@ -1229,7 +1179,6 @@
                 <tbody id="historyRows"></tbody>
               </table>
             </div>
-            <article class="investigation-panel" id="investigationPanel"></article>
           </section>
           <div class="note-row" id="benchmarkNote">
             SGLang-Diffusion commit b0d888a; vLLM-Omni commit 73df8326. Client-side latency is the comparison source.
@@ -1459,13 +1408,6 @@
         id: "historical-cross-framework-unavailable",
         updated_at: "2026-06-10",
         summary: { sections: 0 },
-        investigation: {
-          headline: "Historical benchmark data is unavailable in this preview.",
-          status: "data load failed",
-          evidence: [],
-          likely_causes: [],
-          next_checks: []
-        },
         sections: []
       };
 
@@ -1780,31 +1722,6 @@
           .join("");
       }
 
-      function renderInvestigation(data) {
-        const info = data.investigation || fallbackHistoricalData.investigation;
-        const evidence = (info.evidence || []).slice(0, 3).join(" ");
-        const causes = (info.likely_causes || []).slice(0, 2).join(" ");
-        const checks = (info.next_checks || []).slice(0, 2).join(" ");
-        document.getElementById("investigationPanel").innerHTML = `
-          <h3>${escapeHtml(info.headline)}</h3>
-          <p>${escapeHtml(info.status)}</p>
-          <div class="investigation-grid">
-            <div>
-              <b>Evidence</b>
-              <span>${escapeHtml(evidence || "No evidence attached.")}</span>
-            </div>
-            <div>
-              <b>Likely cause</b>
-              <span>${escapeHtml(causes || "Needs stage breakdown before a root-cause claim.")}</span>
-            </div>
-            <div>
-              <b>Next check</b>
-              <span>${escapeHtml(checks || "Collect trace and stage timings.")}</span>
-            </div>
-          </div>
-        `;
-      }
-
       function renderHistorical(data) {
         renderHistoryTabs(data);
         const section = data.sections[activeHistoryIndex];
@@ -1814,7 +1731,6 @@
           document.getElementById("historyRows").innerHTML = `
             <tr><td colspan="5">Historical benchmark data is unavailable.</td></tr>
           `;
-          renderInvestigation(data);
           return;
         }
         renderHistorySummary(section);
@@ -1823,7 +1739,6 @@
         } else {
           renderStandardHistoryRows(section);
         }
-        renderInvestigation(data);
       }
 
       async function loadBenchmarkData() {
