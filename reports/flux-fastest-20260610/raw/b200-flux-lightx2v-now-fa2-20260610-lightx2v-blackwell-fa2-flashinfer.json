@@ -1,0 +1,172 @@
+{
+  "timestamp": "2026-06-10T07:27:56.984669+00:00",
+  "commit_sha": "f29b9d43d39e3abd2ba1dd6f4d71ccf555268b32",
+  "run_id": "b200-flux-lightx2v-now-fa2-20260610-lightx2v-blackwell-fa2-flashinfer",
+  "hardware": {
+    "runner_labels": null,
+    "gpu_config": null,
+    "gpus": [
+      "NVIDIA B200, 183359 MiB, 580.126.20",
+      "NVIDIA B200, 183359 MiB, 580.126.20"
+    ],
+    "hardware_profile_override": "b200"
+  },
+  "sglang_runtime": {
+    "package_version": "0.5.12.post1",
+    "module_path": "/sgl-workspace/sglang/python/sglang/__init__.py",
+    "git_root": "/sgl-workspace/sglang",
+    "git_commit": "5a15cde858ea09b77116212a39356f2fc51b8584"
+  },
+  "framework_runtime": {
+    "venv_root": "/scratch/framework-venvs",
+    "install_specs": {
+      "vllm": "vllm==0.22.0",
+      "vllm_omni": "git+https://github.com/vllm-project/vllm-omni.git@73df8326d76fe3bba0b7b5a6abf6ad68976f24e8",
+      "lightx2v": "git+https://github.com/ModelTC/LightX2V.git@3db87106bafd980f0eeaffdb0d61dd26b364290c",
+      "lightx2v_flash_attn": "flash-attn==2.8.3",
+      "lightx2v_flash_attn3": "",
+      "lightx2v_fa3_hf_repo": "varunneal/flash-attention-3",
+      "lightx2v_fa3_hf_revision": "de87b9b5af06dd9984df595bef90b2eba44b181a",
+      "lightx2v_fa3_hf_subdir": "build/torch28-cxx11-cu128-x86_64-linux/flash_attention_3",
+      "lightx2v_flashinfer": "flashinfer-python==0.6.11",
+      "torch_cuda_arch_list": "10.0"
+    },
+    "launchers": {
+      "vllm_omni_server_bin": "vllm",
+      "vllm_omni_required_help_args": "--omni"
+    },
+    "vllm-omni": {
+      "venv_path": "/scratch/framework-venvs/vllm-omni",
+      "packages": {
+        "vllm": {
+          "Name": "vllm",
+          "Version": "0.22.0",
+          "Home-page": "https://github.com/vllm-project/vllm",
+          "Location": "/scratch/framework-venvs/vllm-omni/lib/python3.12/site-packages"
+        },
+        "vllm-omni": {
+          "Name": "vllm-omni",
+          "Version": "0.22.1.dev31+g73df8326d",
+          "Home-page": "https://github.com/vllm-project/vllm-omni",
+          "Location": "/scratch/framework-venvs/vllm-omni/lib/python3.12/site-packages"
+        }
+      },
+      "direct_urls": {
+        "vllm_omni-0.22.1.dev31+g73df8326d.dist-info": {
+          "url": "https://github.com/vllm-project/vllm-omni.git",
+          "vcs_info": {
+            "commit_id": "73df8326d76fe3bba0b7b5a6abf6ad68976f24e8",
+            "requested_revision": "73df8326d76fe3bba0b7b5a6abf6ad68976f24e8",
+            "vcs": "git"
+          }
+        }
+      }
+    },
+    "lightx2v": {
+      "venv_path": "/scratch/framework-venvs/lightx2v",
+      "packages": {
+        "lightx2v": {
+          "Name": "lightx2v",
+          "Version": "0.1.0",
+          "Home-page": "https://github.com/ModelTC/LightX2V",
+          "Location": "/scratch/framework-venvs/lightx2v/lib/python3.12/site-packages"
+        },
+        "flash_attn": {
+          "Name": "flash_attn",
+          "Version": "2.8.3",
+          "Home-page": "https://github.com/Dao-AILab/flash-attention",
+          "Location": "/scratch/framework-venvs/lightx2v/lib/python3.12/site-packages"
+        },
+        "flashinfer-python": {
+          "Name": "flashinfer-python",
+          "Version": "0.6.11",
+          "Home-page": "https://github.com/flashinfer-ai/flashinfer",
+          "Location": "/scratch/framework-venvs/lightx2v/lib/python3.12/site-packages"
+        }
+      },
+      "direct_urls": {
+        "lightx2v-0.1.0.dist-info": {
+          "url": "https://github.com/ModelTC/LightX2V.git",
+          "vcs_info": {
+            "commit_id": "3db87106bafd980f0eeaffdb0d61dd26b364290c",
+            "requested_revision": "3db87106bafd980f0eeaffdb0d61dd26b364290c",
+            "vcs": "git"
+          }
+        }
+      }
+    }
+  },
+  "benchmark_env": {},
+  "benchmark_framework_args": {
+    "vllm-omni": [],
+    "lightx2v": {
+      "config": {}
+    }
+  },
+  "torch_compile_disabled": false,
+  "benchmark_modes": [
+    "single_e2e"
+  ],
+  "requested_sglang_profile": "auto",
+  "results": [
+    {
+      "case_id": "flux2_dev_t2i_1024",
+      "framework": "lightx2v",
+      "mode": "single_e2e",
+      "model": "black-forest-labs/FLUX.2-dev",
+      "task": "text-to-image",
+      "width": 1024,
+      "height": 1024,
+      "num_frames": null,
+      "fps": null,
+      "num_inference_steps": 50,
+      "guidance_scale": 4.0,
+      "guidance_scale_2": null,
+      "true_cfg_scale": null,
+      "negative_prompt_set": false,
+      "num_gpus": 1,
+      "latency_s": 18.032,
+      "error": null,
+      "framework_metadata": {
+        "profile": "blackwell-fa2-flashinfer",
+        "profile_request": "blackwell-fa2-flashinfer",
+        "profile_source": "explicit",
+        "framework_ref": "lightx2v-latest-flux2_dev+blackwell-fa2-flashinfer",
+        "hardware": [
+          "b200",
+          "gb200",
+          "b300",
+          "gb300"
+        ],
+        "hardware_candidates": [
+          "b200"
+        ],
+        "description": "Blackwell LightX2V FLUX.2 profile probe using source-built FlashAttention 2 plus FlashInfer RoPE.",
+        "notes": "Uses a source-built FlashAttention 2 wheel with TORCH_CUDA_ARCH_LIST=10.0; the upstream FA3 wheel used for H200 is Hopper-only.",
+        "install_specs": null,
+        "server_bin": null,
+        "use_omni_arg": null,
+        "required_help_args": null,
+        "serve_args": "",
+        "num_gpus": 1,
+        "extra_env_keys": [],
+        "lightx2v_config_keys": [
+          "attn_type",
+          "enable_cfg",
+          "feature_caching",
+          "patch_size",
+          "rope_type",
+          "sample_guide_scale",
+          "text_encoder_out_layers",
+          "tokenizer_max_length",
+          "vae_scale_factor"
+        ]
+      },
+      "server_command": "python3 -m lightx2v.server --model_path /scratch/hf-cache/hub/models--black-forest-labs--FLUX.2-dev/snapshots/26afe3a78bb242c0a8bb181dcc8937bb16e5c66c --model_cls flux2_dev --task t2i --config_json /scratch/tmp/lightx2v_config_flux2_dev_t2i_1024.json --host 127.0.0.1 --port 30960",
+      "metrics": {
+        "client_latency_s": 18.032
+      }
+    }
+  ],
+  "throughput_results": []
+}

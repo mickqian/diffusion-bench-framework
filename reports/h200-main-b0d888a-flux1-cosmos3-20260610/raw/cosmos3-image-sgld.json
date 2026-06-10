@@ -1,0 +1,122 @@
+{
+  "timestamp": "2026-06-10T12:06:59.739348+00:00",
+  "commit_sha": "unknown",
+  "run_id": "h200b-main-b0d888a-final-cosmos3-image-sgld",
+  "hardware": {
+    "runner_labels": null,
+    "gpu_config": null,
+    "gpus": [
+      "NVIDIA H200, 143771 MiB, 580.105.08",
+      "NVIDIA H200, 143771 MiB, 580.105.08"
+    ],
+    "hardware_profile_override": "h200"
+  },
+  "sglang_runtime": {
+    "package_version": "0.0.0.dev0",
+    "module_path": "/scratch/flux_fastest_20260610/sglang-archive-b0d888a/python/sglang/__init__.py",
+    "source_root": "/scratch/flux_fastest_20260610/sglang-archive-b0d888a",
+    "git_commit": "b0d888a195c3ee30350a7681d36efb0dde5fd4a9"
+  },
+  "framework_runtime": {
+    "venv_root": "/tmp/sglang-diffusion-framework-venvs",
+    "install_specs": {
+      "vllm": "vllm==0.18.0",
+      "vllm_omni": "vllm-omni==0.18.0",
+      "lightx2v": "git+https://github.com/ModelTC/LightX2V.git@7efd05f8e1425b83321fd4f1cef779ef6504076f",
+      "lightx2v_flash_attn": "flash-attn==2.8.3",
+      "lightx2v_flash_attn3": "",
+      "lightx2v_fa3_hf_repo": "varunneal/flash-attention-3",
+      "lightx2v_fa3_hf_revision": "de87b9b5af06dd9984df595bef90b2eba44b181a",
+      "lightx2v_fa3_hf_subdir": "build/torch28-cxx11-cu128-x86_64-linux/flash_attention_3",
+      "lightx2v_flashinfer": "flashinfer-python==0.6.11",
+      "torch_cuda_arch_list": ""
+    },
+    "launchers": {
+      "vllm_omni_server_bin": "vllm",
+      "vllm_omni_required_help_args": "--omni"
+    },
+    "vllm-omni": {
+      "venv_path": "/tmp/sglang-diffusion-framework-venvs/vllm-omni"
+    },
+    "lightx2v": {
+      "venv_path": "/tmp/sglang-diffusion-framework-venvs/lightx2v"
+    }
+  },
+  "benchmark_env": {
+    "TORCH_COMPILE_DISABLE": "1"
+  },
+  "benchmark_framework_args": {
+    "vllm-omni": [
+      "--enforce-eager",
+      "--compilation-config",
+      "{\"mode\":0}"
+    ],
+    "lightx2v": {
+      "config": {
+        "compile": false,
+        "compile_shapes": []
+      }
+    }
+  },
+  "torch_compile_disabled": true,
+  "benchmark_modes": [
+    "single_e2e"
+  ],
+  "requested_sglang_profile": "h200-1gpu-fa-speed",
+  "results": [
+    {
+      "case_id": "cosmos3_nano_t2i_720p",
+      "framework": "sglang",
+      "mode": "single_e2e",
+      "model": "nvidia/Cosmos3-Nano",
+      "task": "text-to-image",
+      "width": 1280,
+      "height": 720,
+      "num_frames": null,
+      "fps": null,
+      "num_inference_steps": 35,
+      "guidance_scale": 6.0,
+      "guidance_scale_2": null,
+      "true_cfg_scale": null,
+      "negative_prompt_set": false,
+      "num_gpus": 1,
+      "latency_s": 1.859,
+      "error": null,
+      "framework_metadata": {
+        "profile": "h200-1gpu-fa-speed",
+        "profile_request": "h200-1gpu-fa-speed",
+        "profile_source": "explicit",
+        "framework_ref": null,
+        "hardware": [
+          "h200"
+        ],
+        "hardware_candidates": [
+          "h200"
+        ],
+        "description": "H200 single-GPU Cosmos3 Nano T2I speed-mode probe profile.",
+        "notes": "Same as the formal single-card profile plus explicit speed mode; guardrails disabled, no cache, torch compile disabled by harness.",
+        "install_specs": null,
+        "server_bin": null,
+        "use_omni_arg": null,
+        "required_help_args": null,
+        "serve_args": "--model-type diffusion --warmup --attention-backend fa --performance-mode speed",
+        "num_gpus": 1,
+        "extra_env_keys": [
+          "FLASHINFER_USE_CUDA_NORM",
+          "SGLANG_DISABLE_COSMOS3_GUARDRAILS"
+        ],
+        "sglang_profile": "h200-1gpu-fa-speed",
+        "sglang_profile_request": "h200-1gpu-fa-speed",
+        "sglang_profile_source": "explicit",
+        "sglang_ref": "sgl-project/sglang@3d540563916394115f9612f30601ae3fa97ada7c"
+      },
+      "server_command": "sglang serve --model-path nvidia/Cosmos3-Nano --port 31010 --host 127.0.0.1 --model-type diffusion --warmup --attention-backend fa --performance-mode speed --warmup-steps 3",
+      "metrics": {
+        "client_latency_s": 1.859,
+        "server_latency_s": 1.732,
+        "client_overhead_s": 0.127
+      }
+    }
+  ],
+  "throughput_results": []
+}

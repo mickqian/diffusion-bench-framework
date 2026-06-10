@@ -128,7 +128,10 @@
                                     "num_inference_steps": 50
                                 }
                             },
-                            "notes": "Steady-state fastest profile candidate; use with DIFFUSION_BENCH_DISABLE_TORCH_COMPILE=0 so full-step warmup absorbs compile time."
+                            "extra_env": {
+                                "FLASHINFER_USE_CUDA_NORM": "1"
+                            },
+                            "notes": "Steady-state fastest profile candidate; use CUDA norm to avoid FlashInfer CUTE norm JIT on Hopper."
                         },
                         "h100-h200-2gpu-tp-speed-compile": {
                             "description": "Hopper 2-GPU TP fastest FLUX profile probe.",
@@ -145,7 +148,10 @@
                                     "num_inference_steps": 50
                                 }
                             },
-                            "notes": "Steady-state fastest profile candidate; TP is explicit instead of relying on server-side auto inference."
+                            "extra_env": {
+                                "FLASHINFER_USE_CUDA_NORM": "1"
+                            },
+                            "notes": "Steady-state fastest profile candidate; TP is explicit and CUDA norm avoids FlashInfer CUTE norm JIT on Hopper."
                         },
                         "blackwell-1gpu-speed-compile": {
                             "description": "Blackwell single-GPU fastest FLUX profile probe.",
@@ -400,7 +406,10 @@
                                     "num_inference_steps": 50
                                 }
                             },
-                            "notes": "Steady-state fastest profile candidate; use with DIFFUSION_BENCH_DISABLE_TORCH_COMPILE=0 so full-step warmup absorbs compile time."
+                            "extra_env": {
+                                "FLASHINFER_USE_CUDA_NORM": "1"
+                            },
+                            "notes": "Steady-state fastest profile candidate; use CUDA norm to avoid FlashInfer CUTE norm JIT on Hopper."
                         },
                         "h100-h200-2gpu-tp-speed-compile": {
                             "description": "Hopper 2-GPU TP fastest FLUX.2 profile probe.",
@@ -417,7 +426,10 @@
                                     "num_inference_steps": 50
                                 }
                             },
-                            "notes": "Steady-state fastest profile candidate; TP is explicit instead of relying on server-side auto inference."
+                            "extra_env": {
+                                "FLASHINFER_USE_CUDA_NORM": "1"
+                            },
+                            "notes": "Steady-state fastest profile candidate; TP is explicit and CUDA norm avoids FlashInfer CUTE norm JIT on Hopper."
                         },
                         "blackwell-1gpu-speed-compile": {
                             "description": "Blackwell single-GPU fastest FLUX.2 profile probe.",
@@ -1880,6 +1892,7 @@
                             "serve_args": "--model-type diffusion --warmup --attention-backend fa --performance-mode speed",
                             "notes": "Same as the formal single-card profile plus explicit speed mode; guardrails disabled, no cache, torch compile disabled by harness.",
                             "extra_env": {
+                                "FLASHINFER_USE_CUDA_NORM": "1",
                                 "SGLANG_DISABLE_COSMOS3_GUARDRAILS": "1"
                             }
                         },
@@ -2020,6 +2033,20 @@
                             "serve_args": "--model-type diffusion --warmup --attention-backend fa --cfg-parallel-size 2 --sp-degree 1",
                             "notes": "Uses the two GPUs for CFG parallelism only; sp_degree is pinned to 1 to avoid automatic sequence-parallel inference.",
                             "extra_env": {
+                                "SGLANG_DISABLE_COSMOS3_GUARDRAILS": "1"
+                            }
+                        },
+                        "h200-2gpu-cfg-speed": {
+                            "description": "H200 2-GPU Cosmos3 Nano video speed-mode profile using CFG parallelism only.",
+                            "hardware": [
+                                "h200"
+                            ],
+                            "sglang_ref": "sgl-project/sglang@main",
+                            "num_gpus": 2,
+                            "serve_args": "--model-type diffusion --warmup --attention-backend fa --cfg-parallel-size 2 --sp-degree 1 --performance-mode speed",
+                            "notes": "same two-GPU CFG-only profile plus explicit speed mode; sp_degree is pinned to 1 to avoid automatic sequence-parallel inference",
+                            "extra_env": {
+                                "FLASHINFER_USE_CUDA_NORM": "1",
                                 "SGLANG_DISABLE_COSMOS3_GUARDRAILS": "1"
                             }
                         }
@@ -2218,6 +2245,19 @@
                             "num_gpus": 2,
                             "serve_args": "--model-type diffusion --warmup --attention-backend fa --cfg-parallel-size 2 --sp-degree 1",
                             "notes": "Uses the two GPUs for CFG parallelism only; sp_degree is pinned to 1 to avoid automatic sequence-parallel inference.",
+                            "extra_env": {
+                                "SGLANG_DISABLE_COSMOS3_GUARDRAILS": "1"
+                            }
+                        },
+                        "h200-2gpu-cfg-speed": {
+                            "description": "H200 2-GPU Cosmos3 Nano video speed-mode profile using CFG parallelism only.",
+                            "hardware": [
+                                "h200"
+                            ],
+                            "sglang_ref": "sgl-project/sglang@main",
+                            "num_gpus": 2,
+                            "serve_args": "--model-type diffusion --warmup --attention-backend fa --cfg-parallel-size 2 --sp-degree 1 --performance-mode speed",
+                            "notes": "same two-GPU CFG-only profile plus explicit speed mode; sp_degree is pinned to 1 to avoid automatic sequence-parallel inference",
                             "extra_env": {
                                 "SGLANG_DISABLE_COSMOS3_GUARDRAILS": "1"
                             }

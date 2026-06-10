@@ -1,0 +1,165 @@
+{
+  "timestamp": "2026-06-10T04:25:19.361569+00:00",
+  "commit_sha": "41e767b6587c93e62c9155c94a9a2823980a4713",
+  "run_id": "b200-flux-sgld-now-20260610-sglang-blackwell-2gpu-tp-speed-compile",
+  "hardware": {
+    "runner_labels": null,
+    "gpu_config": null,
+    "gpus": [
+      "NVIDIA B200, 183359 MiB, 580.126.09",
+      "NVIDIA B200, 183359 MiB, 580.126.09"
+    ],
+    "hardware_profile_override": "b200"
+  },
+  "sglang_runtime": {
+    "package_version": "0.5.12.post2.dev1122+g165331a20",
+    "module_path": "/scratch/flux_fastest_20260610/sglang-current/python/sglang/__init__.py",
+    "git_root": "/scratch/flux_fastest_20260610/sglang-current",
+    "git_commit": "165331a2004fbda1531091341ed081d6a39d2162"
+  },
+  "framework_runtime": {
+    "venv_root": "/root/.cache/sglang-diffusion-framework-venvs",
+    "install_specs": {
+      "vllm": "vllm==0.22.0",
+      "vllm_omni": "git+https://github.com/vllm-project/vllm-omni.git@73df8326d76fe3bba0b7b5a6abf6ad68976f24e8",
+      "lightx2v": "git+https://github.com/ModelTC/LightX2V.git@3db87106bafd980f0eeaffdb0d61dd26b364290c",
+      "lightx2v_flash_attn": "flash-attn==2.8.3",
+      "lightx2v_flash_attn3": "",
+      "lightx2v_fa3_hf_repo": "varunneal/flash-attention-3",
+      "lightx2v_fa3_hf_revision": "de87b9b5af06dd9984df595bef90b2eba44b181a",
+      "lightx2v_fa3_hf_subdir": "build/torch28-cxx11-cu128-x86_64-linux/flash_attention_3",
+      "lightx2v_flashinfer": "flashinfer-python==0.6.11"
+    },
+    "launchers": {
+      "vllm_omni_server_bin": "vllm",
+      "vllm_omni_required_help_args": "--omni"
+    },
+    "vllm-omni": {
+      "venv_path": "/root/.cache/sglang-diffusion-framework-venvs/vllm-omni"
+    },
+    "lightx2v": {
+      "venv_path": "/root/.cache/sglang-diffusion-framework-venvs/lightx2v"
+    }
+  },
+  "benchmark_env": {},
+  "benchmark_framework_args": {
+    "vllm-omni": [],
+    "lightx2v": {
+      "config": {}
+    }
+  },
+  "torch_compile_disabled": false,
+  "benchmark_modes": [
+    "single_e2e"
+  ],
+  "requested_sglang_profile": "blackwell-2gpu-tp-speed-compile",
+  "results": [
+    {
+      "case_id": "flux1_dev_t2i_1024",
+      "framework": "sglang",
+      "mode": "single_e2e",
+      "model": "black-forest-labs/FLUX.1-dev",
+      "task": "text-to-image",
+      "width": 1024,
+      "height": 1024,
+      "num_frames": null,
+      "fps": null,
+      "num_inference_steps": 50,
+      "guidance_scale": 3.5,
+      "guidance_scale_2": null,
+      "true_cfg_scale": null,
+      "negative_prompt_set": false,
+      "num_gpus": 2,
+      "latency_s": 3.608,
+      "error": null,
+      "framework_metadata": {
+        "profile": "blackwell-2gpu-tp-speed-compile",
+        "profile_request": "blackwell-2gpu-tp-speed-compile",
+        "profile_source": "explicit",
+        "framework_ref": null,
+        "hardware": [
+          "b200",
+          "gb200",
+          "b300",
+          "gb300"
+        ],
+        "hardware_candidates": [
+          "b200"
+        ],
+        "description": "Blackwell 2-GPU TP fastest FLUX profile probe.",
+        "notes": "Steady-state fastest profile candidate for Blackwell; TP is explicit instead of relying on server-side auto inference.",
+        "install_specs": null,
+        "server_bin": null,
+        "use_omni_arg": null,
+        "required_help_args": null,
+        "serve_args": "--model-type diffusion --warmup --dit-layerwise-offload false --tp-size 2 --performance-mode speed --enable-torch-compile",
+        "num_gpus": 2,
+        "extra_env_keys": [],
+        "sglang_profile": "blackwell-2gpu-tp-speed-compile",
+        "sglang_profile_request": "blackwell-2gpu-tp-speed-compile",
+        "sglang_profile_source": "explicit",
+        "sglang_ref": "current-main"
+      },
+      "server_command": "sglang serve --model-path black-forest-labs/FLUX.1-dev --port 30690 --host 127.0.0.1 --num-gpus 2 --model-type diffusion --warmup --dit-layerwise-offload false --tp-size 2 --performance-mode speed --enable-torch-compile --warmup-steps 3",
+      "metrics": {
+        "client_latency_s": 3.608,
+        "server_latency_s": 3.25,
+        "client_overhead_s": 0.359
+      }
+    },
+    {
+      "case_id": "flux2_dev_t2i_1024",
+      "framework": "sglang",
+      "mode": "single_e2e",
+      "model": "black-forest-labs/FLUX.2-dev",
+      "task": "text-to-image",
+      "width": 1024,
+      "height": 1024,
+      "num_frames": null,
+      "fps": null,
+      "num_inference_steps": 50,
+      "guidance_scale": 4.0,
+      "guidance_scale_2": null,
+      "true_cfg_scale": null,
+      "negative_prompt_set": false,
+      "num_gpus": 2,
+      "latency_s": 6.256,
+      "error": null,
+      "framework_metadata": {
+        "profile": "blackwell-2gpu-tp-speed-compile",
+        "profile_request": "blackwell-2gpu-tp-speed-compile",
+        "profile_source": "explicit",
+        "framework_ref": null,
+        "hardware": [
+          "b200",
+          "gb200",
+          "b300",
+          "gb300"
+        ],
+        "hardware_candidates": [
+          "b200"
+        ],
+        "description": "Blackwell 2-GPU TP fastest FLUX.2 profile probe.",
+        "notes": "Steady-state fastest profile candidate for Blackwell; TP is explicit instead of relying on server-side auto inference.",
+        "install_specs": null,
+        "server_bin": null,
+        "use_omni_arg": null,
+        "required_help_args": null,
+        "serve_args": "--model-type diffusion --warmup --dit-layerwise-offload false --tp-size 2 --performance-mode speed --enable-torch-compile",
+        "num_gpus": 2,
+        "extra_env_keys": [],
+        "sglang_profile": "blackwell-2gpu-tp-speed-compile",
+        "sglang_profile_request": "blackwell-2gpu-tp-speed-compile",
+        "sglang_profile_source": "explicit",
+        "sglang_ref": "current-main"
+      },
+      "server_command": "sglang serve --model-path black-forest-labs/FLUX.2-dev --port 30690 --host 127.0.0.1 --num-gpus 2 --model-type diffusion --warmup --dit-layerwise-offload false --tp-size 2 --performance-mode speed --enable-torch-compile --warmup-steps 3",
+      "metrics": {
+        "client_latency_s": 6.256,
+        "server_latency_s": 6.15,
+        "client_overhead_s": 0.106
+      }
+    }
+  ],
+  "throughput_results": []
+}

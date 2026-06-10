@@ -1,0 +1,181 @@
+{
+  "timestamp": "2026-06-10T06:57:09.602944+00:00",
+  "commit_sha": "f29b9d43d39e3abd2ba1dd6f4d71ccf555268b32",
+  "run_id": "b200-flux-vllm-now-flashinfer-20260610-vllm-omni-blackwell-1gpu-compile",
+  "hardware": {
+    "runner_labels": null,
+    "gpu_config": null,
+    "gpus": [
+      "NVIDIA B200, 183359 MiB, 580.126.20",
+      "NVIDIA B200, 183359 MiB, 580.126.20"
+    ],
+    "hardware_profile_override": "b200"
+  },
+  "sglang_runtime": {
+    "package_version": "0.5.12.post1",
+    "module_path": "/sgl-workspace/sglang/python/sglang/__init__.py",
+    "git_root": "/sgl-workspace/sglang",
+    "git_commit": "5a15cde858ea09b77116212a39356f2fc51b8584"
+  },
+  "framework_runtime": {
+    "venv_root": "/scratch/framework-venvs",
+    "install_specs": {
+      "vllm": "vllm==0.22.0",
+      "vllm_omni": "git+https://github.com/vllm-project/vllm-omni.git@73df8326d76fe3bba0b7b5a6abf6ad68976f24e8",
+      "lightx2v": "git+https://github.com/ModelTC/LightX2V.git@3db87106bafd980f0eeaffdb0d61dd26b364290c",
+      "lightx2v_flash_attn": "flash-attn==2.8.3",
+      "lightx2v_flash_attn3": "",
+      "lightx2v_fa3_hf_repo": "varunneal/flash-attention-3",
+      "lightx2v_fa3_hf_revision": "de87b9b5af06dd9984df595bef90b2eba44b181a",
+      "lightx2v_fa3_hf_subdir": "build/torch28-cxx11-cu128-x86_64-linux/flash_attention_3",
+      "lightx2v_flashinfer": "flashinfer-python==0.6.11"
+    },
+    "launchers": {
+      "vllm_omni_server_bin": "vllm",
+      "vllm_omni_required_help_args": "--omni"
+    },
+    "vllm-omni": {
+      "venv_path": "/scratch/framework-venvs/vllm-omni",
+      "packages": {
+        "vllm": {
+          "Name": "vllm",
+          "Version": "0.22.0",
+          "Home-page": "https://github.com/vllm-project/vllm",
+          "Location": "/scratch/framework-venvs/vllm-omni/lib/python3.12/site-packages"
+        },
+        "vllm-omni": {
+          "Name": "vllm-omni",
+          "Version": "0.22.1.dev31+g73df8326d",
+          "Home-page": "https://github.com/vllm-project/vllm-omni",
+          "Location": "/scratch/framework-venvs/vllm-omni/lib/python3.12/site-packages"
+        }
+      },
+      "direct_urls": {
+        "vllm_omni-0.22.1.dev31+g73df8326d.dist-info": {
+          "url": "https://github.com/vllm-project/vllm-omni.git",
+          "vcs_info": {
+            "commit_id": "73df8326d76fe3bba0b7b5a6abf6ad68976f24e8",
+            "requested_revision": "73df8326d76fe3bba0b7b5a6abf6ad68976f24e8",
+            "vcs": "git"
+          }
+        }
+      }
+    },
+    "lightx2v": {
+      "venv_path": "/scratch/framework-venvs/lightx2v"
+    }
+  },
+  "benchmark_env": {},
+  "benchmark_framework_args": {
+    "vllm-omni": [],
+    "lightx2v": {
+      "config": {}
+    }
+  },
+  "torch_compile_disabled": false,
+  "benchmark_modes": [
+    "single_e2e"
+  ],
+  "requested_sglang_profile": "auto",
+  "results": [
+    {
+      "case_id": "flux1_dev_t2i_1024",
+      "framework": "vllm-omni",
+      "mode": "single_e2e",
+      "model": "black-forest-labs/FLUX.1-dev",
+      "task": "text-to-image",
+      "width": 1024,
+      "height": 1024,
+      "num_frames": null,
+      "fps": null,
+      "num_inference_steps": 50,
+      "guidance_scale": 3.5,
+      "guidance_scale_2": null,
+      "true_cfg_scale": null,
+      "negative_prompt_set": false,
+      "num_gpus": 1,
+      "latency_s": 5.354,
+      "error": null,
+      "framework_metadata": {
+        "profile": "blackwell-1gpu-compile",
+        "profile_request": "blackwell-1gpu-compile",
+        "profile_source": "explicit",
+        "framework_ref": "vllm-omni-latest+blackwell+compile-allowed",
+        "hardware": [
+          "b200",
+          "gb200",
+          "b300",
+          "gb300"
+        ],
+        "hardware_candidates": [
+          "b200"
+        ],
+        "description": "Blackwell single-GPU fastest vLLM-Omni FLUX profile probe.",
+        "notes": "Use with DIFFUSION_BENCH_DISABLE_TORCH_COMPILE=0 so the harness does not append eager/compile-off args.",
+        "install_specs": null,
+        "server_bin": null,
+        "use_omni_arg": null,
+        "required_help_args": null,
+        "serve_args": "",
+        "num_gpus": 1,
+        "extra_env_keys": [
+          "DIFFUSION_ATTENTION_BACKEND"
+        ]
+      },
+      "server_command": "vllm serve black-forest-labs/FLUX.1-dev --port 30820 --host 127.0.0.1 --omni",
+      "metrics": {
+        "client_latency_s": 5.354
+      }
+    },
+    {
+      "case_id": "flux2_dev_t2i_1024",
+      "framework": "vllm-omni",
+      "mode": "single_e2e",
+      "model": "black-forest-labs/FLUX.2-dev",
+      "task": "text-to-image",
+      "width": 1024,
+      "height": 1024,
+      "num_frames": null,
+      "fps": null,
+      "num_inference_steps": 50,
+      "guidance_scale": 4.0,
+      "guidance_scale_2": null,
+      "true_cfg_scale": null,
+      "negative_prompt_set": false,
+      "num_gpus": 1,
+      "latency_s": 14.889,
+      "error": null,
+      "framework_metadata": {
+        "profile": "blackwell-1gpu-compile",
+        "profile_request": "blackwell-1gpu-compile",
+        "profile_source": "explicit",
+        "framework_ref": "vllm-omni-latest+blackwell+compile-allowed",
+        "hardware": [
+          "b200",
+          "gb200",
+          "b300",
+          "gb300"
+        ],
+        "hardware_candidates": [
+          "b200"
+        ],
+        "description": "Blackwell single-GPU fastest vLLM-Omni FLUX.2 profile probe.",
+        "notes": "Use with DIFFUSION_BENCH_DISABLE_TORCH_COMPILE=0 so the harness does not append eager/compile-off args.",
+        "install_specs": null,
+        "server_bin": null,
+        "use_omni_arg": null,
+        "required_help_args": null,
+        "serve_args": "",
+        "num_gpus": 1,
+        "extra_env_keys": [
+          "DIFFUSION_ATTENTION_BACKEND"
+        ]
+      },
+      "server_command": "vllm serve black-forest-labs/FLUX.2-dev --port 30820 --host 127.0.0.1 --omni",
+      "metrics": {
+        "client_latency_s": 14.889
+      }
+    }
+  ],
+  "throughput_results": []
+}

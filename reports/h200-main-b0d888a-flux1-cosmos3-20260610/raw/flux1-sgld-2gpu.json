@@ -1,0 +1,113 @@
+{
+  "timestamp": "2026-06-10T12:29:25.985489+00:00",
+  "commit_sha": "unknown",
+  "run_id": "h200b-main-b0d888a-final-flux1-sgld-2gpu",
+  "hardware": {
+    "runner_labels": null,
+    "gpu_config": null,
+    "gpus": [
+      "NVIDIA H200, 143771 MiB, 580.105.08",
+      "NVIDIA H200, 143771 MiB, 580.105.08"
+    ],
+    "hardware_profile_override": "h200"
+  },
+  "sglang_runtime": {
+    "package_version": "0.0.0.dev0",
+    "module_path": "/scratch/flux_fastest_20260610/sglang-archive-b0d888a/python/sglang/__init__.py",
+    "source_root": "/scratch/flux_fastest_20260610/sglang-archive-b0d888a",
+    "git_commit": "b0d888a195c3ee30350a7681d36efb0dde5fd4a9"
+  },
+  "framework_runtime": {
+    "venv_root": "/tmp/sglang-diffusion-framework-venvs",
+    "install_specs": {
+      "vllm": "vllm==0.18.0",
+      "vllm_omni": "vllm-omni==0.18.0",
+      "lightx2v": "git+https://github.com/ModelTC/LightX2V.git@7efd05f8e1425b83321fd4f1cef779ef6504076f",
+      "lightx2v_flash_attn": "flash-attn==2.8.3",
+      "lightx2v_flash_attn3": "",
+      "lightx2v_fa3_hf_repo": "varunneal/flash-attention-3",
+      "lightx2v_fa3_hf_revision": "de87b9b5af06dd9984df595bef90b2eba44b181a",
+      "lightx2v_fa3_hf_subdir": "build/torch28-cxx11-cu128-x86_64-linux/flash_attention_3",
+      "lightx2v_flashinfer": "flashinfer-python==0.6.11",
+      "torch_cuda_arch_list": ""
+    },
+    "launchers": {
+      "vllm_omni_server_bin": "vllm",
+      "vllm_omni_required_help_args": "--omni"
+    },
+    "vllm-omni": {
+      "venv_path": "/tmp/sglang-diffusion-framework-venvs/vllm-omni"
+    },
+    "lightx2v": {
+      "venv_path": "/tmp/sglang-diffusion-framework-venvs/lightx2v"
+    }
+  },
+  "benchmark_env": {},
+  "benchmark_framework_args": {
+    "vllm-omni": [],
+    "lightx2v": {
+      "config": {}
+    }
+  },
+  "torch_compile_disabled": false,
+  "benchmark_modes": [
+    "single_e2e"
+  ],
+  "requested_sglang_profile": "h100-h200-2gpu-tp-speed-compile",
+  "results": [
+    {
+      "case_id": "flux1_dev_t2i_1024",
+      "framework": "sglang",
+      "mode": "single_e2e",
+      "model": "black-forest-labs/FLUX.1-dev",
+      "task": "text-to-image",
+      "width": 1024,
+      "height": 1024,
+      "num_frames": null,
+      "fps": null,
+      "num_inference_steps": 50,
+      "guidance_scale": 3.5,
+      "guidance_scale_2": null,
+      "true_cfg_scale": null,
+      "negative_prompt_set": false,
+      "num_gpus": 2,
+      "latency_s": 6.4,
+      "error": null,
+      "framework_metadata": {
+        "profile": "h100-h200-2gpu-tp-speed-compile",
+        "profile_request": "h100-h200-2gpu-tp-speed-compile",
+        "profile_source": "explicit",
+        "framework_ref": null,
+        "hardware": [
+          "h100",
+          "h200"
+        ],
+        "hardware_candidates": [
+          "h200"
+        ],
+        "description": "Hopper 2-GPU TP fastest FLUX profile probe.",
+        "notes": "Steady-state fastest profile candidate; TP is explicit and CUDA norm avoids FlashInfer CUTE norm JIT on Hopper.",
+        "install_specs": null,
+        "server_bin": null,
+        "use_omni_arg": null,
+        "required_help_args": null,
+        "serve_args": "--model-type diffusion --warmup --dit-layerwise-offload false --tp-size 2 --performance-mode speed --enable-torch-compile",
+        "num_gpus": 2,
+        "extra_env_keys": [
+          "FLASHINFER_USE_CUDA_NORM"
+        ],
+        "sglang_profile": "h100-h200-2gpu-tp-speed-compile",
+        "sglang_profile_request": "h100-h200-2gpu-tp-speed-compile",
+        "sglang_profile_source": "explicit",
+        "sglang_ref": "current-main"
+      },
+      "server_command": "sglang serve --model-path black-forest-labs/FLUX.1-dev --port 31070 --host 127.0.0.1 --num-gpus 2 --model-type diffusion --warmup --dit-layerwise-offload false --tp-size 2 --performance-mode speed --enable-torch-compile --warmup-steps 3",
+      "metrics": {
+        "client_latency_s": 6.4,
+        "server_latency_s": 6.239,
+        "client_overhead_s": 0.161
+      }
+    }
+  ],
+  "throughput_results": []
+}

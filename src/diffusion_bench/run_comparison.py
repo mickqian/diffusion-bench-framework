@@ -1393,6 +1393,11 @@ def _collect_sglang_runtime_metadata() -> dict:
                 if ret.returncode == 0:
                     metadata["git_commit"] = ret.stdout.strip()
                 break
+            source_commit = parent / ".source_commit"
+            if source_commit.exists():
+                metadata["source_root"] = str(parent)
+                metadata["git_commit"] = source_commit.read_text().strip()
+                break
     except Exception:
         pass
     return metadata

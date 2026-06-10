@@ -1,0 +1,149 @@
+{
+  "timestamp": "2026-06-10T12:24:38.147265+00:00",
+  "commit_sha": "unknown",
+  "run_id": "h200b-main-b0d888a-final-cosmos3-video-vllm",
+  "hardware": {
+    "runner_labels": null,
+    "gpu_config": null,
+    "gpus": [
+      "NVIDIA H200, 143771 MiB, 580.105.08",
+      "NVIDIA H200, 143771 MiB, 580.105.08"
+    ],
+    "hardware_profile_override": "h200"
+  },
+  "sglang_runtime": {
+    "package_version": "0.0.0.dev0",
+    "module_path": "/scratch/flux_fastest_20260610/sglang-archive-b0d888a/python/sglang/__init__.py",
+    "source_root": "/scratch/flux_fastest_20260610/sglang-archive-b0d888a",
+    "git_commit": "b0d888a195c3ee30350a7681d36efb0dde5fd4a9"
+  },
+  "framework_runtime": {
+    "venv_root": "/scratch/framework-venvs",
+    "install_specs": {
+      "vllm": "vllm==0.22.0",
+      "vllm_omni": "git+https://github.com/vllm-project/vllm-omni.git@73df8326d76fe3bba0b7b5a6abf6ad68976f24e8",
+      "lightx2v": "git+https://github.com/ModelTC/LightX2V.git@7efd05f8e1425b83321fd4f1cef779ef6504076f",
+      "lightx2v_flash_attn": "flash-attn==2.8.3",
+      "lightx2v_flash_attn3": "",
+      "lightx2v_fa3_hf_repo": "varunneal/flash-attention-3",
+      "lightx2v_fa3_hf_revision": "de87b9b5af06dd9984df595bef90b2eba44b181a",
+      "lightx2v_fa3_hf_subdir": "build/torch28-cxx11-cu128-x86_64-linux/flash_attention_3",
+      "lightx2v_flashinfer": "flashinfer-python==0.6.11",
+      "torch_cuda_arch_list": ""
+    },
+    "launchers": {
+      "vllm_omni_server_bin": "vllm",
+      "vllm_omni_required_help_args": "--omni --model-class-name --stage-init-timeout --no-guardrails --diffusion-attention-backend --cache-backend --cfg-parallel-size --ulysses-degree"
+    },
+    "vllm-omni": {
+      "venv_path": "/scratch/framework-venvs/vllm-omni",
+      "packages": {
+        "vllm": {
+          "Name": "vllm",
+          "Version": "0.22.0",
+          "Home-page": "https://github.com/vllm-project/vllm",
+          "Location": "/scratch/framework-venvs/vllm-omni/lib/python3.12/site-packages"
+        },
+        "vllm-omni": {
+          "Name": "vllm-omni",
+          "Version": "0.22.1.dev31+g73df8326d",
+          "Home-page": "https://github.com/vllm-project/vllm-omni",
+          "Location": "/scratch/framework-venvs/vllm-omni/lib/python3.12/site-packages"
+        }
+      },
+      "direct_urls": {
+        "vllm_omni-0.22.1.dev31+g73df8326d.dist-info": {
+          "url": "https://github.com/vllm-project/vllm-omni.git",
+          "vcs_info": {
+            "commit_id": "73df8326d76fe3bba0b7b5a6abf6ad68976f24e8",
+            "requested_revision": "73df8326d76fe3bba0b7b5a6abf6ad68976f24e8",
+            "vcs": "git"
+          }
+        }
+      }
+    },
+    "lightx2v": {
+      "venv_path": "/scratch/framework-venvs/lightx2v"
+    }
+  },
+  "benchmark_env": {
+    "TORCH_COMPILE_DISABLE": "1"
+  },
+  "benchmark_framework_args": {
+    "vllm-omni": [
+      "--enforce-eager",
+      "--compilation-config",
+      "{\"mode\":0}"
+    ],
+    "lightx2v": {
+      "config": {
+        "compile": false,
+        "compile_shapes": []
+      }
+    }
+  },
+  "torch_compile_disabled": true,
+  "benchmark_modes": [
+    "single_e2e"
+  ],
+  "requested_sglang_profile": "auto",
+  "results": [
+    {
+      "case_id": "cosmos3_nano_t2v_720p_189f",
+      "framework": "vllm-omni",
+      "mode": "single_e2e",
+      "model": "nvidia/Cosmos3-Nano",
+      "task": "text-to-video",
+      "width": 1280,
+      "height": 720,
+      "num_frames": 189,
+      "fps": 24,
+      "num_inference_steps": 35,
+      "guidance_scale": 6.0,
+      "guidance_scale_2": null,
+      "true_cfg_scale": null,
+      "negative_prompt_set": true,
+      "num_gpus": 2,
+      "latency_s": 117.82,
+      "error": null,
+      "framework_metadata": {
+        "profile": "h200-2gpu-cfg",
+        "profile_request": "h200-2gpu-cfg",
+        "profile_source": "explicit",
+        "framework_ref": "vllm-project/vllm-omni@40b2959183d7043cd9d35f5f6387fbb8d1375c57",
+        "hardware": [
+          "h200"
+        ],
+        "hardware_candidates": [
+          "h200"
+        ],
+        "description": "H200 2-GPU Cosmos3 Nano video probe profile using CFG parallelism.",
+        "notes": "Uses the two GPUs for CFG parallelism with guardrails disabled via legacy stage config; no cache or torch compile path.",
+        "install_specs": {
+          "vllm": "vllm==0.22.0",
+          "vllm_omni": "git+https://github.com/vllm-project/vllm-omni.git@40b2959183d7043cd9d35f5f6387fbb8d1375c57"
+        },
+        "server_bin": "vllm",
+        "use_omni_arg": true,
+        "required_help_args": [
+          "--omni",
+          "--model-class-name",
+          "--stage-init-timeout",
+          "--no-guardrails",
+          "--diffusion-attention-backend",
+          "--cache-backend",
+          "--cfg-parallel-size",
+          "--ulysses-degree"
+        ],
+        "serve_args": "--stage-configs-path configs/vllm_omni_cosmos3_h200_2gpu_cfg_guardrails_off.yaml --stage-init-timeout 900 --init-timeout 1800",
+        "num_gpus": 2,
+        "extra_env_keys": []
+      },
+      "server_command": "vllm serve nvidia/Cosmos3-Nano --port 31060 --host 127.0.0.1 --omni --stage-configs-path configs/vllm_omni_cosmos3_h200_2gpu_cfg_guardrails_off.yaml --stage-init-timeout 900 --init-timeout 1800 --tensor-parallel-size 2 --enforce-eager --compilation-config '{\"mode\":0}'",
+      "metrics": {
+        "client_latency_s": 117.82
+      }
+    }
+  ],
+  "throughput_results": []
+}
