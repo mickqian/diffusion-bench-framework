@@ -1337,12 +1337,15 @@
       };
 
       const fallbackData = {
-        id: "h200-main-b0d888a-flux1-cosmos3-20260610",
-        updated_at: "2026-06-10",
-        source_report: "h200-main-b0d888a-flux1-cosmos3-20260610",
+        id: "h200-flux1-tpfix-cosmos3-20260611",
+        updated_at: "2026-06-11",
+        source_report: "reports/flux-fastest-20260610 + reports/h200-main-b0d888a-flux1-cosmos3-20260610",
         frameworks: {
           sglang_diffusion_now: {
-            commit: "b0d888a195c3ee30350a7681d36efb0dde5fd4a9"
+            commit: "796a6080518041c671c4bef347a2d46f314f2f90",
+            measured_commit: "e25f72d8bbfab7039e2ec9ccbc38d33a88b329ad",
+            reference_commit: "b0d888a195c3ee30350a7681d36efb0dde5fd4a9",
+            note: "FLUX.1 rows use the TP-sharding fix branch. Cosmos3 rows are the 2026-06-10 reference spot-check because this patch only changes FLUX.1."
           },
           vllm_omni_now: {
             vllm: "0.22.0",
@@ -1351,10 +1354,10 @@
         },
         summary: {
           same_gpu_cases: 4,
-          sglang_diffusion_wins: 3,
-          vllm_omni_wins: 1,
+          sglang_diffusion_wins: 4,
+          vllm_omni_wins: 0,
           headline:
-            "On the aligned H200 spot-check, SGLang-Diffusion wins 3 of 4 same-GPU cases; vLLM-Omni wins FLUX.1 2GPU TP by 1.08x."
+            "On the aligned H200 spot-check, SGLang-Diffusion wins 4 of 4 same-GPU cases after the FLUX.1 TP sharding fix."
         },
         rows: [
           {
@@ -1362,22 +1365,22 @@
             details: "1024x1024 - 50 steps - cfg 3.5",
             gpus: "1 GPU",
             torch_compile: "on",
-            sglang_diffusion: { client_latency_s: 6.566, server_latency_s: 6.392, profile: "h100-h200-1gpu-speed-compile" },
+            sglang_diffusion: { client_latency_s: 6.556, server_latency_s: 6.381, profile: "h100-h200-1gpu-speed-compile" },
             vllm_omni: { client_latency_s: 7.288, profile: "h100-h200-1gpu-compile" },
             winner: "SGLang-Diffusion",
             winner_speedup: "1.11x",
-            note: "same-GPU image path; SGLang speed mode + CUDA norm"
+            note: "same-GPU image path; SGLang speed mode + CUDA norm; TP-fix branch"
           },
           {
             case: "FLUX.1-dev T2I",
             details: "1024x1024 - 50 steps - cfg 3.5",
             gpus: "2 GPU TP",
             torch_compile: "on",
-            sglang_diffusion: { client_latency_s: 6.4, server_latency_s: 6.239, profile: "h100-h200-2gpu-tp-speed-compile" },
+            sglang_diffusion: { client_latency_s: 4.15, server_latency_s: 4.005, profile: "h100-h200-2gpu-tp-speed-compile" },
             vllm_omni: { client_latency_s: 5.912, profile: "h100-h200-2gpu-tp-compile" },
-            winner: "vLLM-Omni",
-            winner_speedup: "1.08x",
-            note: "vLLM has better FLUX.1 TP scaling in this spot-check"
+            winner: "SGLang-Diffusion",
+            winner_speedup: "1.42x",
+            note: "same 2GPU TP image path after FLUX.1 TP sharding fix"
           },
           {
             case: "Cosmos3 Nano T2I",
@@ -1553,11 +1556,17 @@
           .join("");
 
         const sgldCommit = data.frameworks?.sglang_diffusion_now?.commit || fallbackData.frameworks.sglang_diffusion_now.commit;
+        const sgldMeasuredCommit = data.frameworks?.sglang_diffusion_now?.measured_commit;
+        const sgldNote = data.frameworks?.sglang_diffusion_now?.note;
         const vllmCommit =
           data.frameworks?.vllm_omni_now?.vllm_omni_commit || fallbackData.frameworks.vllm_omni_now.vllm_omni_commit;
+        const sgldLabel = sgldMeasuredCommit
+          ? `SGLang-Diffusion ${sgldCommit.slice(0, 8)} (measured ${sgldMeasuredCommit.slice(0, 8)})`
+          : `SGLang-Diffusion ${sgldCommit.slice(0, 8)}`;
         document.getElementById("benchmarkNote").textContent =
-          `SGLang-Diffusion ${sgldCommit.slice(0, 8)}; vLLM-Omni ${vllmCommit.slice(0, 8)}. ` +
-          "Client-side latency is the comparison source; server-side time is shown where available.";
+          `${sgldLabel}; vLLM-Omni ${vllmCommit.slice(0, 8)}. ` +
+          "Client-side latency is the comparison source; server-side time is shown where available." +
+          (sgldNote ? ` ${sgldNote}` : "");
         document.getElementById("footerSource").textContent =
           `Benchmark data updated ${data.updated_at || fallbackData.updated_at} from ${data.source_report || data.id}.`;
       }

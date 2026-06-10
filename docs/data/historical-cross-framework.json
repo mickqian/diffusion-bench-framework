@@ -1,6 +1,6 @@
 {
   "id": "historical-cross-framework-20260610",
-  "updated_at": "2026-06-10",
+  "updated_at": "2026-06-11",
   "frameworks": {
     "sglang": "SGLang-Diffusion",
     "vllm-omni": "vLLM-Omni",
@@ -731,8 +731,8 @@
       "reproduce": "scripts/run_flux_fastest_20260610.sh",
       "summary": {
         "rows": 4,
-        "sglang_now_wins": 3,
-        "other_wins": 1
+        "sglang_now_wins": 4,
+        "other_wins": 0
       },
       "rows": [
         {
@@ -742,7 +742,7 @@
           "hardware": "H200",
           "mode": "single_e2e",
           "torch_compile": "on",
-          "winner": "vllm_omni_now",
+          "winner": "sglang_now",
           "cells": {
             "sglang_before": {
               "gpus": "1 GPU",
@@ -755,9 +755,9 @@
               "gpus": "2 GPU TP",
               "profile": "h100-h200-2gpu-tp-speed-compile",
               "status": "ok",
-              "latency_s": 6.401,
-              "server_latency_s": 6.238,
-              "source_result": "reports/flux-fastest-20260610/raw/h200-flux-sgld-now-xet-20260610-sglang-h100-h200-2gpu-tp-speed-compile.json",
+              "latency_s": 4.15,
+              "server_latency_s": 4.005,
+              "source_result": "reports/flux-fastest-20260610/raw/h200-flux1-sgld-tpfix-native-20260611-sglang-h100-h200-2gpu-tp-speed-compile.json",
               "ratio_to_sglang_now": 1.0
             },
             "vllm_omni_now": {
@@ -766,7 +766,7 @@
               "status": "ok",
               "latency_s": 5.912,
               "source_result": "reports/flux-fastest-20260610/raw/h200-flux-vllm-now-20260610-vllm-omni-h100-h200-2gpu-tp-compile.json",
-              "ratio_to_sglang_now": 0.924
+              "ratio_to_sglang_now": 1.425
             },
             "lightx2v_now": {
               "status": "not_run",

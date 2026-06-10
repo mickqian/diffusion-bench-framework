@@ -1,9 +1,9 @@
 {
-  "id": "h200-main-b0d888a-flux1-cosmos3-20260610",
+  "id": "h200-flux1-tpfix-cosmos3-20260611",
   "title": "H200 aligned SGLang-Diffusion vs vLLM-Omni spot-check",
-  "updated_at": "2026-06-10",
-  "source_report": "h200-main-b0d888a-flux1-cosmos3-20260610",
-  "source_script": "scripts/run_h200_flux1_cosmos3_spotcheck_20260610.sh",
+  "updated_at": "2026-06-11",
+  "source_report": "reports/flux-fastest-20260610 + reports/h200-main-b0d888a-flux1-cosmos3-20260610",
+  "source_script": "scripts/run_flux_fastest_20260610.sh + scripts/run_h200_flux1_cosmos3_spotcheck_20260610.sh",
   "hardware": {
     "label": "2x NVIDIA H200",
     "gpu_name": "NVIDIA H200",
@@ -20,7 +20,10 @@
   "frameworks": {
     "sglang_diffusion_now": {
       "label": "SGLang-Diffusion",
-      "commit": "b0d888a195c3ee30350a7681d36efb0dde5fd4a9"
+      "commit": "796a6080518041c671c4bef347a2d46f314f2f90",
+      "measured_commit": "e25f72d8bbfab7039e2ec9ccbc38d33a88b329ad",
+      "reference_commit": "b0d888a195c3ee30350a7681d36efb0dde5fd4a9",
+      "note": "FLUX.1 rows use the TP-sharding fix branch. Cosmos3 rows are the 2026-06-10 reference spot-check because this patch only changes FLUX.1."
     },
     "vllm_omni_now": {
       "label": "vLLM-Omni",
@@ -31,9 +34,9 @@
   },
   "summary": {
     "same_gpu_cases": 4,
-    "sglang_diffusion_wins": 3,
-    "vllm_omni_wins": 1,
-    "headline": "On the aligned H200 spot-check, SGLang-Diffusion wins 3 of 4 same-GPU cases; vLLM-Omni wins FLUX.1 2GPU TP by 1.08x."
+    "sglang_diffusion_wins": 4,
+    "vllm_omni_wins": 0,
+    "headline": "On the aligned H200 spot-check, SGLang-Diffusion wins 4 of 4 same-GPU cases after the FLUX.1 TP sharding fix."
   },
   "rows": [
     {
@@ -43,8 +46,8 @@
       "gpus": "1 GPU",
       "torch_compile": "on",
       "sglang_diffusion": {
-        "client_latency_s": 6.566,
-        "server_latency_s": 6.392,
+        "client_latency_s": 6.556,
+        "server_latency_s": 6.381,
         "profile": "h100-h200-1gpu-speed-compile"
       },
       "vllm_omni": {
@@ -53,7 +56,7 @@
       },
       "winner": "SGLang-Diffusion",
       "winner_speedup": "1.11x",
-      "note": "same-GPU image path; SGLang speed mode + CUDA norm"
+      "note": "same-GPU image path; SGLang speed mode + CUDA norm; TP-fix branch"
     },
     {
       "case_id": "flux1_dev_t2i_1024",
@@ -62,17 +65,17 @@
       "gpus": "2 GPU TP",
       "torch_compile": "on",
       "sglang_diffusion": {
-        "client_latency_s": 6.4,
-        "server_latency_s": 6.239,
+        "client_latency_s": 4.15,
+        "server_latency_s": 4.005,
         "profile": "h100-h200-2gpu-tp-speed-compile"
       },
       "vllm_omni": {
         "client_latency_s": 5.912,
         "profile": "h100-h200-2gpu-tp-compile"
       },
-      "winner": "vLLM-Omni",
-      "winner_speedup": "1.08x",
-      "note": "vLLM has better FLUX.1 TP scaling in this spot-check"
+      "winner": "SGLang-Diffusion",
+      "winner_speedup": "1.42x",
+      "note": "same 2GPU TP image path after FLUX.1 TP sharding fix"
     },
     {
       "case_id": "cosmos3_nano_t2i_720p",

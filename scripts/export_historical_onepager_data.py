@@ -256,7 +256,7 @@ def flux_series(run_id: str, framework: str) -> str | None:
     if framework == "sglang":
         if "sgld-before" in run_id:
             return "sglang_before"
-        if "sgld-now" in run_id:
+        if "sgld-now" in run_id or "sgld-tpfix" in run_id:
             return "sglang_now"
     if framework == "vllm-omni":
         return "vllm_omni_now"

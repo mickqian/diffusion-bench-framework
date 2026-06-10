@@ -10,6 +10,7 @@ Scope: single-request latency, client-side timing, no response cache or Cache-Di
 | --- | --- |
 | SGLang-Diffusion Apr 10 | `8227187d472da41a9c56ab6a0d1ba11efc574dd5` |
 | SGLang-Diffusion now | `165331a2004fbda1531091341ed081d6a39d2162` |
+| SGLang-Diffusion TP fix | `796a6080518041c671c4bef347a2d46f314f2f90` (`e25f72d8bbfab7039e2ec9ccbc38d33a88b329ad` measured; final head differs only by a comment amend) |
 | vLLM-Omni now | `vllm==0.22.0`, `vllm-omni@73df8326d76fe3bba0b7b5a6abf6ad68976f24e8` |
 | LightX2V now | `LightX2V@3db87106bafd980f0eeaffdb0d61dd26b364290c`, FA2 on Blackwell |
 
@@ -17,7 +18,7 @@ Scope: single-request latency, client-side timing, no response cache or Cache-Di
 
 | Case | SGLang-Diffusion Apr 10 | SGLang-Diffusion now | vLLM-Omni now | LightX2V now | Fastest |
 | --- | ---: | ---: | ---: | ---: | --- |
-| FLUX.1-dev T2I | env failed | 6.401s, server 6.238s, 2GPU | 5.912s, 2GPU | not run | vLLM-Omni |
+| FLUX.1-dev T2I | env failed | 4.150s, server 4.005s, 2GPU TP fix | 5.912s, 2GPU | not run | SGLang-Diffusion TP fix |
 | FLUX.2-dev T2I | env failed | 12.507s, server 12.409s, 2GPU | 16.654s, 2GPU | not run | SGLang-Diffusion now |
 
 ## Blackwell B200
@@ -42,6 +43,7 @@ HARDWARE_PROFILE=b200 RUN_ID_ROOT=b200-flux-vllm-now-flashinfer-20260610 FRAMEWO
 HARDWARE_PROFILE=b200 RUN_ID_ROOT=b200-flux-lightx2v-now-fa2-20260610 FRAMEWORKS=lightx2v LIGHTX2V_PROFILES="blackwell-fa2-flashinfer" scripts/run_flux_fastest_20260610.sh
 
 HARDWARE_PROFILE=h200 RUN_ID_ROOT=h200-flux-sgld-now-xet-20260610 FRAMEWORKS=sglang SGLANG_PROFILES="h100-h200-1gpu-speed-compile h100-h200-2gpu-tp-speed-compile" scripts/run_flux_fastest_20260610.sh
+HARDWARE_PROFILE=h200 RUN_ID_ROOT=h200-flux1-sgld-tpfix-native-20260611 FRAMEWORKS=sglang SGLANG_PROFILES="h100-h200-1gpu-speed-compile h100-h200-2gpu-tp-speed-compile" CASE_IDS=flux1_dev_t2i_1024 REPORT_DIR=/scratch/flux1_tp_shard_20260611/report/raw PORT_BASE=31680 scripts/run_flux_fastest_20260610.sh
 HARDWARE_PROFILE=h200 RUN_ID_ROOT=h200-flux-vllm-now-20260610 FRAMEWORKS=vllm-omni VLLM_OMNI_PROFILES="h100-h200-1gpu-compile h100-h200-2gpu-tp-compile" scripts/run_flux_fastest_20260610.sh
 ```
 
