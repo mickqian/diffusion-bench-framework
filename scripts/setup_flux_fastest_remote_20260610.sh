@@ -29,7 +29,6 @@ clone_sglang() {
     git clone "${SGLANG_REMOTE}" "${dir}"
   fi
   git -C "${dir}" fetch origin main
-  git -C "${dir}" fetch origin "${commit}"
   git -C "${dir}" checkout "${commit}"
   git -C "${dir}" rev-parse HEAD
 }
