@@ -868,6 +868,32 @@
                             "extra_env": {
                                 "DIFFUSION_ATTENTION_BACKEND": "FLASH_ATTN"
                             }
+                        },
+                        "h200-2gpu-cfg": {
+                            "description": "H200 vLLM-Omni Wan 2-GPU CFG-parallel probe.",
+                            "hardware": [
+                                "h200"
+                            ],
+                            "framework_ref": "vllm-omni-wan+h200-cfg2",
+                            "num_gpus": 2,
+                            "serve_args": "--num-gpus 2 --cfg-parallel-size 2",
+                            "notes": "Uses the two GPUs for CFG parallelism instead of tensor parallelism; no cache or torch compile path.",
+                            "extra_env": {
+                                "DIFFUSION_ATTENTION_BACKEND": "FLASH_ATTN"
+                            }
+                        },
+                        "h200-2gpu-ulysses": {
+                            "description": "H200 vLLM-Omni Wan 2-GPU Ulysses sequence-parallel probe.",
+                            "hardware": [
+                                "h200"
+                            ],
+                            "framework_ref": "vllm-omni-wan+h200-ulysses2",
+                            "num_gpus": 2,
+                            "serve_args": "--num-gpus 2 --ulysses-degree 2",
+                            "notes": "Probe whether vLLM-Omni Wan benefits from Ulysses SP instead of tensor parallelism; no cache or torch compile path.",
+                            "extra_env": {
+                                "DIFFUSION_ATTENTION_BACKEND": "FLASH_ATTN"
+                            }
                         }
                     }
                 },
@@ -969,6 +995,32 @@
                             "num_gpus": 4,
                             "serve_args": "--tensor-parallel-size 4",
                             "notes": "Same-GPU H200 comparison profile; no cache or torch compile path.",
+                            "extra_env": {
+                                "DIFFUSION_ATTENTION_BACKEND": "FLASH_ATTN"
+                            }
+                        },
+                        "h200-4gpu-ulysses": {
+                            "description": "H200 vLLM-Omni Wan 4-GPU Ulysses sequence-parallel probe.",
+                            "hardware": [
+                                "h200"
+                            ],
+                            "framework_ref": "vllm-omni-wan+h200-ulysses4",
+                            "num_gpus": 4,
+                            "serve_args": "--num-gpus 4 --ulysses-degree 4",
+                            "notes": "Probe whether vLLM-Omni Wan benefits from Ulysses SP instead of tensor parallelism; no cache or torch compile path.",
+                            "extra_env": {
+                                "DIFFUSION_ATTENTION_BACKEND": "FLASH_ATTN"
+                            }
+                        },
+                        "h200-4gpu-cfg-ulysses": {
+                            "description": "H200 vLLM-Omni Wan 4-GPU CFG plus Ulysses sequence-parallel probe.",
+                            "hardware": [
+                                "h200"
+                            ],
+                            "framework_ref": "vllm-omni-wan+h200-cfg2-ulysses2",
+                            "num_gpus": 4,
+                            "serve_args": "--num-gpus 4 --cfg-parallel-size 2 --ulysses-degree 2",
+                            "notes": "Matches SGLang-Diffusion 4-GPU CFG+SP shape when vLLM-Omni supports it; no cache or torch compile path.",
                             "extra_env": {
                                 "DIFFUSION_ATTENTION_BACKEND": "FLASH_ATTN"
                             }
@@ -1075,6 +1127,32 @@
                             "num_gpus": 4,
                             "serve_args": "--tensor-parallel-size 4",
                             "notes": "Same-GPU H200 comparison profile; no cache or torch compile path.",
+                            "extra_env": {
+                                "DIFFUSION_ATTENTION_BACKEND": "FLASH_ATTN"
+                            }
+                        },
+                        "h200-4gpu-ulysses": {
+                            "description": "H200 vLLM-Omni Wan 4-GPU Ulysses sequence-parallel probe.",
+                            "hardware": [
+                                "h200"
+                            ],
+                            "framework_ref": "vllm-omni-wan+h200-ulysses4",
+                            "num_gpus": 4,
+                            "serve_args": "--num-gpus 4 --ulysses-degree 4",
+                            "notes": "Probe whether vLLM-Omni Wan benefits from Ulysses SP instead of tensor parallelism; no cache or torch compile path.",
+                            "extra_env": {
+                                "DIFFUSION_ATTENTION_BACKEND": "FLASH_ATTN"
+                            }
+                        },
+                        "h200-4gpu-cfg-ulysses": {
+                            "description": "H200 vLLM-Omni Wan 4-GPU CFG plus Ulysses sequence-parallel probe.",
+                            "hardware": [
+                                "h200"
+                            ],
+                            "framework_ref": "vllm-omni-wan+h200-cfg2-ulysses2",
+                            "num_gpus": 4,
+                            "serve_args": "--num-gpus 4 --cfg-parallel-size 2 --ulysses-degree 2",
+                            "notes": "Matches SGLang-Diffusion 4-GPU CFG+SP shape when vLLM-Omni supports it; no cache or torch compile path.",
                             "extra_env": {
                                 "DIFFUSION_ATTENTION_BACKEND": "FLASH_ATTN"
                             }
@@ -1196,6 +1274,32 @@
                             "num_gpus": 2,
                             "serve_args": "--tensor-parallel-size 2",
                             "notes": "Same-GPU H200 comparison profile; no cache or torch compile path.",
+                            "extra_env": {
+                                "DIFFUSION_ATTENTION_BACKEND": "FLASH_ATTN"
+                            }
+                        },
+                        "h200-2gpu-cfg": {
+                            "description": "H200 vLLM-Omni Wan 2-GPU CFG-parallel probe.",
+                            "hardware": [
+                                "h200"
+                            ],
+                            "framework_ref": "vllm-omni-wan+h200-cfg2",
+                            "num_gpus": 2,
+                            "serve_args": "--num-gpus 2 --cfg-parallel-size 2",
+                            "notes": "Uses the two GPUs for CFG parallelism instead of tensor parallelism; no cache or torch compile path.",
+                            "extra_env": {
+                                "DIFFUSION_ATTENTION_BACKEND": "FLASH_ATTN"
+                            }
+                        },
+                        "h200-2gpu-ulysses": {
+                            "description": "H200 vLLM-Omni Wan 2-GPU Ulysses sequence-parallel probe.",
+                            "hardware": [
+                                "h200"
+                            ],
+                            "framework_ref": "vllm-omni-wan+h200-ulysses2",
+                            "num_gpus": 2,
+                            "serve_args": "--num-gpus 2 --ulysses-degree 2",
+                            "notes": "Probe whether vLLM-Omni Wan benefits from Ulysses SP instead of tensor parallelism; no cache or torch compile path.",
                             "extra_env": {
                                 "DIFFUSION_ATTENTION_BACKEND": "FLASH_ATTN"
                             }
@@ -1657,6 +1761,32 @@
                             "extra_env": {
                                 "DIFFUSION_ATTENTION_BACKEND": "FLASH_ATTN"
                             }
+                        },
+                        "h200-4gpu-ulysses": {
+                            "description": "H200 vLLM-Omni Wan 4-GPU Ulysses sequence-parallel probe.",
+                            "hardware": [
+                                "h200"
+                            ],
+                            "framework_ref": "vllm-omni-wan+h200-ulysses4",
+                            "num_gpus": 4,
+                            "serve_args": "--num-gpus 4 --ulysses-degree 4",
+                            "notes": "Probe whether vLLM-Omni Wan benefits from Ulysses SP instead of tensor parallelism; no cache or torch compile path.",
+                            "extra_env": {
+                                "DIFFUSION_ATTENTION_BACKEND": "FLASH_ATTN"
+                            }
+                        },
+                        "h200-4gpu-cfg-ulysses": {
+                            "description": "H200 vLLM-Omni Wan 4-GPU CFG plus Ulysses sequence-parallel probe.",
+                            "hardware": [
+                                "h200"
+                            ],
+                            "framework_ref": "vllm-omni-wan+h200-cfg2-ulysses2",
+                            "num_gpus": 4,
+                            "serve_args": "--num-gpus 4 --cfg-parallel-size 2 --ulysses-degree 2",
+                            "notes": "Matches SGLang-Diffusion 4-GPU CFG+SP shape when vLLM-Omni supports it; no cache or torch compile path.",
+                            "extra_env": {
+                                "DIFFUSION_ATTENTION_BACKEND": "FLASH_ATTN"
+                            }
                         }
                     }
                 },
@@ -1763,6 +1893,32 @@
                             "num_gpus": 4,
                             "serve_args": "--tensor-parallel-size 4",
                             "notes": "Same-GPU H200 comparison profile; no cache or torch compile path.",
+                            "extra_env": {
+                                "DIFFUSION_ATTENTION_BACKEND": "FLASH_ATTN"
+                            }
+                        },
+                        "h200-4gpu-ulysses": {
+                            "description": "H200 vLLM-Omni Wan 4-GPU Ulysses sequence-parallel probe.",
+                            "hardware": [
+                                "h200"
+                            ],
+                            "framework_ref": "vllm-omni-wan+h200-ulysses4",
+                            "num_gpus": 4,
+                            "serve_args": "--num-gpus 4 --ulysses-degree 4",
+                            "notes": "Probe whether vLLM-Omni Wan benefits from Ulysses SP instead of tensor parallelism; no cache or torch compile path.",
+                            "extra_env": {
+                                "DIFFUSION_ATTENTION_BACKEND": "FLASH_ATTN"
+                            }
+                        },
+                        "h200-4gpu-cfg-ulysses": {
+                            "description": "H200 vLLM-Omni Wan 4-GPU CFG plus Ulysses sequence-parallel probe.",
+                            "hardware": [
+                                "h200"
+                            ],
+                            "framework_ref": "vllm-omni-wan+h200-cfg2-ulysses2",
+                            "num_gpus": 4,
+                            "serve_args": "--num-gpus 4 --cfg-parallel-size 2 --ulysses-degree 2",
+                            "notes": "Matches SGLang-Diffusion 4-GPU CFG+SP shape when vLLM-Omni supports it; no cache or torch compile path.",
                             "extra_env": {
                                 "DIFFUSION_ATTENTION_BACKEND": "FLASH_ATTN"
                             }
