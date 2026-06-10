@@ -4,8 +4,8 @@ set -euo pipefail
 # Run inside an rx devbox after copying BENCH_BUNDLE to the same machine.
 
 WORKDIR="${WORKDIR:-/scratch/flux_fastest_20260610}"
-BENCH_BUNDLE="${BENCH_BUNDLE:-/scratch/diffusion-bench-f3e5914.bundle}"
-BENCH_COMMIT="${BENCH_COMMIT:-f3e5914}"
+BENCH_BUNDLE="${BENCH_BUNDLE:-/scratch/diffusion-bench-ba87023.bundle}"
+BENCH_COMMIT="${BENCH_COMMIT:-ba87023}"
 SGLANG_CURRENT_COMMIT="${SGLANG_CURRENT_COMMIT:-165331a2004fbda1531091341ed081d6a39d2162}"
 SGLANG_BASELINE_COMMIT="${SGLANG_BASELINE_COMMIT:-8227187d472da41a9c56ab6a0d1ba11efc574dd5}"
 SGLANG_REMOTE="${SGLANG_REMOTE:-https://github.com/sgl-project/sglang.git}"
