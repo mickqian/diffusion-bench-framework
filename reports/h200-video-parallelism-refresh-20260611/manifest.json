@@ -3,20 +3,26 @@
   "format_version": 1,
   "created_at": "2026-06-11",
   "title": "H200 Video Parallelism Refresh",
-  "description": "2GPU Wan video profile refresh for vLLM-Omni and LightX2V after adding vLLM-Omni CFG/Ulysses profiles and a LightX2V FA3 H200 profile.",
+  "description": "2GPU Wan video profile refresh for SGLang-Diffusion, vLLM-Omni, and LightX2V after adding vLLM-Omni CFG/Ulysses profiles, a LightX2V FA3 H200 profile, and an explicit SGLang BF16 VAE run.",
   "benchmark_repo": {
     "base_commit": "47a5e4d9ea04f6666cf4ccb2d8e5abe377efc07d",
-    "latest_commit": "b12afbbfa136a15d5b1689fe719a9ac4eb47820a",
+    "latest_commit": "73f3b50a83bb53b79197b37144413ef6d0057566",
     "script": "scripts/run_h200_video_parallelism_refresh_20260611.sh",
     "config": "configs/comparison_configs.json"
   },
   "policy": {
     "latency_source": "client-side single_e2e latency_s",
-    "selection": "explicit 2GPU H200 profile sweep for vLLM-Omni TP, vLLM-Omni CFG, vLLM-Omni Ulysses/SP, and LightX2V FA3",
+    "selection": "explicit 2GPU H200 profile sweep for SGLang-Diffusion BF16 VAE, vLLM-Omni TP, vLLM-Omni CFG, vLLM-Omni Ulysses/SP, and LightX2V FA3",
     "cache": "no response cache, no Cache-DiT, no temporal cache",
     "torch_compile": "disabled for all refreshed rows",
     "hardware": "2x NVIDIA H200 devbox, not CI/runner/build/GitHub Actions infrastructure",
-    "notes": "SGLang-Diffusion numbers shown in the Pages history section are the existing H200 full-matrix baseline, not newly rerun rows in this refresh."
+    "notes": "SGLang-Diffusion Wan rows are newly rerun with explicit --vae-precision bf16 to align with LightX2V's BF16 Wan VAE serving path."
+  },
+  "precision": {
+    "wan_official_native_vae": "fp32 default",
+    "lightx2v_wan_vae": "BF16 via GET_DTYPE()",
+    "sglang_refreshed_wan_vae": "explicit --vae-precision bf16",
+    "note": "The earlier SGLang-Diffusion fp32 Wan rows are the official-parity precision baseline; this report uses BF16 only for the LightX2V best-performance comparison."
   },
   "cases": [
     {
@@ -45,6 +51,12 @@
     }
   },
   "frameworks": {
+    "sglang": {
+      "label": "SGLang-Diffusion",
+      "package": "0.0.0.dev13850+g7adca0d34",
+      "commit": "7adca0d34ab324cbe3a926aee63e827c2f17de35",
+      "venv": "/scratch/framework-venvs/sglang-diffusion"
+    },
     "vllm_omni": {
       "label": "vLLM-Omni",
       "vllm": "0.22.0",
@@ -63,6 +75,7 @@
   },
   "result_files": {
     "raw": [
+      "raw/h200-video-parallelism-refresh-20260611-sglang-bf16-vae.json",
       "raw/h200-video-parallelism-refresh-20260611-vllm-omni-h200-2gpu-tp.json",
       "raw/h200-video-parallelism-refresh-20260611-vllm-omni-h200-2gpu-cfg.json",
       "raw/h200-video-parallelism-refresh-20260611-vllm-omni-h200-2gpu-ulysses.json",
@@ -70,6 +83,10 @@
     ]
   },
   "reproduce": [
+    {
+      "run": "SGLang-Diffusion BF16 VAE profile",
+      "command": "SINGLE_E2E_FRAMEWORKS=sglang SINGLE_E2E_CASES=\"wan21_t2v_1_3b_480p wan22_ti2v_5b_704p\" RUN_ID=h200-video-parallelism-refresh-20260611-sglang-bf16-vae OUTPUT=/scratch/flux1_tp_shard_20260611/report/video_parallelism_refresh/h200-video-parallelism-refresh-20260611-sglang-bf16-vae.json DASHBOARD=/scratch/flux1_tp_shard_20260611/report/video_parallelism_refresh/h200-video-parallelism-refresh-20260611-sglang-bf16-vae.dashboard.md PORT=32100 DIFFUSION_BENCH_SGLANG_EXTRA_SERVE_ARGS=\"--vae-precision bf16\" SGLANG_DIFFUSION_FRAMEWORK_VENV_ROOT=/scratch/framework-venvs SGLANG_DIFFUSION_SKIP_FRAMEWORK_INSTALL=1 HF_HOME=/cluster-storage/models/huggingface DIFFUSION_BENCH_HF_CACHE_DIR=/cluster-storage/models/huggingface/hub bash scripts/run_h200_single_e2e_20260510.sh"
+    },
     {
       "run": "vLLM-Omni profile sweep",
       "command": "RUN_LIGHTX2V=0 RUN_VLLM_OMNI=1 VIDEO_REFRESH_CASES=\"wan21_t2v_1_3b_480p wan22_ti2v_5b_704p\" RUN_ID_ROOT=h200-video-parallelism-refresh-20260611 REPORT_DIR=/scratch/flux1_tp_shard_20260611/report/video_parallelism_refresh PORT_BASE=31800 SGLANG_DIFFUSION_FRAMEWORK_VENV_ROOT=/scratch/framework-venvs SGLANG_DIFFUSION_SKIP_FRAMEWORK_INSTALL=1 HF_HOME=/cluster-storage/models/huggingface DIFFUSION_BENCH_HF_CACHE_DIR=/cluster-storage/models/huggingface/hub bash scripts/run_h200_video_parallelism_refresh_20260611.sh"

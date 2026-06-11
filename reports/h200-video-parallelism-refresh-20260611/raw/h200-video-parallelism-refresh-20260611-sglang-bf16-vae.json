@@ -1,0 +1,223 @@
+{
+  "timestamp": "2026-06-11T02:05:50.485774+00:00",
+  "commit_sha": "73f3b50a83bb53b79197b37144413ef6d0057566",
+  "run_id": "h200-video-parallelism-refresh-20260611-sglang-bf16-vae",
+  "hardware": {
+    "runner_labels": null,
+    "gpu_config": null,
+    "gpus": [
+      "NVIDIA H200, 143771 MiB, 580.105.08",
+      "NVIDIA H200, 143771 MiB, 580.105.08"
+    ],
+    "hardware_profile_override": "h200"
+  },
+  "sglang_runtime": {
+    "package_version": "0.0.0.dev13850+g7adca0d34",
+    "module_path": "/scratch/flux1_tp_shard_20260611/sglang/python/sglang/__init__.py",
+    "git_root": "/scratch/flux1_tp_shard_20260611/sglang",
+    "git_commit": "7adca0d34ab324cbe3a926aee63e827c2f17de35"
+  },
+  "framework_runtime": {
+    "venv_root": "/scratch/framework-venvs",
+    "install_specs": {
+      "vllm": "vllm==0.18.0",
+      "vllm_omni": "vllm-omni==0.18.0",
+      "lightx2v": "git+https://github.com/ModelTC/LightX2V.git@7efd05f8e1425b83321fd4f1cef779ef6504076f",
+      "lightx2v_flash_attn": "flash-attn==2.8.3",
+      "lightx2v_flash_attn3": "",
+      "lightx2v_fa3_hf_repo": "varunneal/flash-attention-3",
+      "lightx2v_fa3_hf_revision": "de87b9b5af06dd9984df595bef90b2eba44b181a",
+      "lightx2v_fa3_hf_subdir": "build/torch28-cxx11-cu128-x86_64-linux/flash_attention_3",
+      "lightx2v_flashinfer": "flashinfer-python==0.6.11",
+      "torch_cuda_arch_list": ""
+    },
+    "launchers": {
+      "vllm_omni_server_bin": "vllm",
+      "vllm_omni_required_help_args": "--omni"
+    },
+    "vllm-omni": {
+      "venv_path": "/scratch/framework-venvs/vllm-omni",
+      "packages": {
+        "vllm": {
+          "Name": "vllm",
+          "Version": "0.22.0",
+          "Home-page": "https://github.com/vllm-project/vllm",
+          "Location": "/scratch/framework-venvs/vllm-omni/lib/python3.12/site-packages"
+        },
+        "vllm-omni": {
+          "Name": "vllm-omni",
+          "Version": "0.22.1.dev31+g73df8326d",
+          "Home-page": "https://github.com/vllm-project/vllm-omni",
+          "Location": "/scratch/framework-venvs/vllm-omni/lib/python3.12/site-packages"
+        }
+      },
+      "direct_urls": {
+        "vllm_omni-0.22.1.dev31+g73df8326d.dist-info": {
+          "url": "https://github.com/vllm-project/vllm-omni.git",
+          "vcs_info": {
+            "commit_id": "73df8326d76fe3bba0b7b5a6abf6ad68976f24e8",
+            "requested_revision": "73df8326d76fe3bba0b7b5a6abf6ad68976f24e8",
+            "vcs": "git"
+          }
+        }
+      }
+    },
+    "lightx2v": {
+      "venv_path": "/scratch/framework-venvs/lightx2v",
+      "packages": {
+        "lightx2v": {
+          "Name": "lightx2v",
+          "Version": "0.1.0",
+          "Home-page": "https://github.com/ModelTC/LightX2V",
+          "Location": "/scratch/framework-venvs/lightx2v/lib/python3.12/site-packages"
+        },
+        "flash_attn": {
+          "Name": "flash_attn",
+          "Version": "2.8.3",
+          "Home-page": "https://github.com/Dao-AILab/flash-attention",
+          "Location": "/scratch/framework-venvs/lightx2v/lib/python3.12/site-packages"
+        },
+        "flashinfer-python": {
+          "Name": "flashinfer-python",
+          "Version": "0.6.11",
+          "Home-page": "https://github.com/flashinfer-ai/flashinfer",
+          "Location": "/scratch/framework-venvs/lightx2v/lib/python3.12/site-packages"
+        }
+      },
+      "direct_urls": {
+        "lightx2v-0.1.0.dist-info": {
+          "url": "https://github.com/ModelTC/LightX2V.git",
+          "vcs_info": {
+            "commit_id": "3db87106bafd980f0eeaffdb0d61dd26b364290c",
+            "requested_revision": "3db87106bafd980f0eeaffdb0d61dd26b364290c",
+            "vcs": "git"
+          }
+        }
+      }
+    }
+  },
+  "benchmark_env": {
+    "TORCH_COMPILE_DISABLE": "1"
+  },
+  "benchmark_framework_args": {
+    "vllm-omni": [
+      "--enforce-eager",
+      "--compilation-config",
+      "{\"mode\":0}"
+    ],
+    "lightx2v": {
+      "config": {
+        "compile": false,
+        "compile_shapes": []
+      }
+    }
+  },
+  "torch_compile_disabled": true,
+  "benchmark_modes": [
+    "single_e2e"
+  ],
+  "requested_sglang_profile": "auto",
+  "results": [
+    {
+      "case_id": "wan21_t2v_1_3b_480p",
+      "framework": "sglang",
+      "mode": "single_e2e",
+      "model": "Wan-AI/Wan2.1-T2V-1.3B-Diffusers",
+      "task": "text-to-video",
+      "width": 832,
+      "height": 480,
+      "num_frames": 81,
+      "fps": 16,
+      "num_inference_steps": 50,
+      "guidance_scale": 6.0,
+      "guidance_scale_2": null,
+      "true_cfg_scale": null,
+      "negative_prompt_set": false,
+      "num_gpus": 2,
+      "latency_s": 26.042,
+      "error": null,
+      "framework_metadata": {
+        "profile": "default",
+        "profile_request": "auto",
+        "profile_source": "default",
+        "framework_ref": null,
+        "hardware": null,
+        "hardware_candidates": [
+          "h200"
+        ],
+        "description": "Best known SGLang command for the benchmark repo default profile.",
+        "notes": "Keep this profile updated when the best command changes for a SGLang release or commit.",
+        "install_specs": null,
+        "server_bin": null,
+        "use_omni_arg": null,
+        "required_help_args": null,
+        "serve_args": "--model-type diffusion --warmup --enable-cfg-parallel",
+        "num_gpus": null,
+        "extra_env_keys": [],
+        "sglang_profile": "default",
+        "sglang_profile_request": "auto",
+        "sglang_profile_source": "default",
+        "sglang_ref": "current-main"
+      },
+      "server_command": "sglang serve --model-path Wan-AI/Wan2.1-T2V-1.3B-Diffusers --port 32100 --host 127.0.0.1 --num-gpus 2 --model-type diffusion --warmup --enable-cfg-parallel --vae-precision bf16 --warmup-steps 3",
+      "metrics": {
+        "client_latency_s": 26.042,
+        "server_latency_s": 24.923,
+        "client_overhead_s": 1.118
+      }
+    },
+    {
+      "case_id": "wan22_ti2v_5b_704p",
+      "framework": "sglang",
+      "mode": "single_e2e",
+      "model": "Wan-AI/Wan2.2-TI2V-5B-Diffusers",
+      "task": "text-image-to-video",
+      "width": 1280,
+      "height": 704,
+      "num_frames": 81,
+      "fps": 24,
+      "num_inference_steps": 50,
+      "guidance_scale": 5.0,
+      "guidance_scale_2": null,
+      "true_cfg_scale": null,
+      "negative_prompt_set": false,
+      "num_gpus": 2,
+      "latency_s": 34.059,
+      "error": null,
+      "framework_metadata": {
+        "profile": "h100-h200-2gpu",
+        "profile_request": "auto",
+        "profile_source": "hardware",
+        "framework_ref": null,
+        "hardware": [
+          "h100",
+          "h200"
+        ],
+        "hardware_candidates": [
+          "h200"
+        ],
+        "description": "H100/H200 command for the Wan2.2 TI2V 5B 704p case.",
+        "notes": "Keep DiT resident on high-memory GPUs to avoid CPU offload in performance runs.",
+        "install_specs": null,
+        "server_bin": null,
+        "use_omni_arg": null,
+        "required_help_args": null,
+        "serve_args": "--model-type diffusion --warmup --enable-cfg-parallel --dit-cpu-offload false --text-encoder-cpu-offload --pin-cpu-memory",
+        "num_gpus": 2,
+        "extra_env_keys": [],
+        "sglang_profile": "h100-h200-2gpu",
+        "sglang_profile_request": "auto",
+        "sglang_profile_source": "hardware",
+        "sglang_ref": "current-main"
+      },
+      "server_command": "sglang serve --model-path Wan-AI/Wan2.2-TI2V-5B-Diffusers --port 32100 --host 127.0.0.1 --num-gpus 2 --model-type diffusion --warmup --enable-cfg-parallel --dit-cpu-offload false --text-encoder-cpu-offload --pin-cpu-memory --vae-precision bf16 --warmup-steps 3",
+      "metrics": {
+        "client_latency_s": 34.059,
+        "server_latency_s": 33.3,
+        "client_overhead_s": 0.759,
+        "server_latency_source": "comparison-logs/wan22_ti2v_5b_704p_sglang.log"
+      }
+    }
+  ],
+  "throughput_results": []
+}

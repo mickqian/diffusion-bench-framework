@@ -185,9 +185,10 @@
           "cells": {
             "sglang": {
               "gpus": 2,
-              "profile": "Best known SGLang command for the benchmark repo default profile.",
+              "profile": "default",
               "status": "ok",
-              "latency_s": 25.618,
+              "latency_s": 26.042,
+              "server_latency_s": 24.923,
               "ratio_to_sglang": 1.0
             },
             "vllm-omni": {
@@ -195,14 +196,14 @@
               "profile": "h200-2gpu-cfg",
               "status": "ok",
               "latency_s": 29.502,
-              "ratio_to_sglang": 1.152
+              "ratio_to_sglang": 1.133
             },
             "lightx2v": {
               "gpus": 2,
               "profile": "h200-fa3",
               "status": "ok",
               "latency_s": 29.058,
-              "ratio_to_sglang": 1.134
+              "ratio_to_sglang": 1.116
             }
           }
         },
@@ -275,9 +276,10 @@
           "cells": {
             "sglang": {
               "gpus": 2,
-              "profile": "H100/H200 command for the Wan2.2 TI2V 5B 704p case.",
+              "profile": "h100-h200-2gpu",
               "status": "ok",
-              "latency_s": 35.085,
+              "latency_s": 34.059,
+              "server_latency_s": 33.3,
               "ratio_to_sglang": 1.0
             },
             "vllm-omni": {
@@ -285,14 +287,14 @@
               "profile": "h200-2gpu-cfg",
               "status": "ok",
               "latency_s": 36.087,
-              "ratio_to_sglang": 1.029
+              "ratio_to_sglang": 1.06
             },
             "lightx2v": {
               "gpus": 2,
               "profile": "h200-fa3",
               "status": "ok",
               "latency_s": 35.177,
-              "ratio_to_sglang": 1.003
+              "ratio_to_sglang": 1.033
             }
           }
         },
