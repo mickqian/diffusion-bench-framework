@@ -12,7 +12,7 @@
     "cache": "No response cache, no Cache-DiT, no temporal cache in these rows."
   },
   "summary": {
-    "sections": 5,
+    "sections": 4,
     "h200_full_matrix_single_rows": 13,
     "h200_full_matrix_sglang_wins": 12,
     "h200_full_matrix_other_wins": 0,
@@ -21,12 +21,12 @@
   },
   "sections": [
     {
-      "id": "manifests_20260510-h200-single-e2e.json + manifests_20260514-h200-wan-vllm-omni_single_e2e",
+      "id": "manifests_20260510-h200-single-e2e.json + manifests_20260514-h200-wan-vllm-omni.json + reports_h200-video-parallelism-refresh-20260611_single_e2e",
       "title": "H200 full matrix",
-      "subtitle": "Single-request latency across image and video cases from the May formal matrix.",
+      "subtitle": "Single-request latency across image and video cases, with refreshed vLLM-Omni CFG and LightX2V FA3 Wan video rows.",
       "mode": "single_e2e",
-      "source_manifest": "manifests/20260510-h200-single-e2e.json + manifests/20260514-h200-wan-vllm-omni.json",
-      "source_run_id": "h200-framework-comparison-merged-local",
+      "source_manifest": "manifests/20260510-h200-single-e2e.json + manifests/20260514-h200-wan-vllm-omni.json + reports/h200-video-parallelism-refresh-20260611",
+      "source_run_id": "h200-framework-comparison-merged",
       "reproduce": "scripts/generate_h200_report_artifacts.sh",
       "summary": {
         "rows": 13,
@@ -192,17 +192,17 @@
             },
             "vllm-omni": {
               "gpus": 2,
-              "profile": "h200-2gpu-tp",
+              "profile": "h200-2gpu-cfg",
               "status": "ok",
-              "latency_s": 44.094,
-              "ratio_to_sglang": 1.721
+              "latency_s": 29.502,
+              "ratio_to_sglang": 1.152
             },
             "lightx2v": {
               "gpus": 2,
-              "profile": "h200-fa2",
+              "profile": "h200-fa3",
               "status": "ok",
-              "latency_s": 41.263,
-              "ratio_to_sglang": 1.611
+              "latency_s": 29.058,
+              "ratio_to_sglang": 1.134
             }
           }
         },
@@ -282,17 +282,17 @@
             },
             "vllm-omni": {
               "gpus": 2,
-              "profile": "h200-2gpu-tp",
+              "profile": "h200-2gpu-cfg",
               "status": "ok",
-              "latency_s": 80.38,
-              "ratio_to_sglang": 2.291
+              "latency_s": 36.087,
+              "ratio_to_sglang": 1.029
             },
             "lightx2v": {
               "gpus": 2,
-              "profile": "h200-fa2",
+              "profile": "h200-fa3",
               "status": "ok",
-              "latency_s": 42.109,
-              "ratio_to_sglang": 1.2
+              "latency_s": 35.177,
+              "ratio_to_sglang": 1.003
             }
           }
         },
@@ -419,7 +419,7 @@
       "subtitle": "32 image requests at concurrency 4 and 8 video requests at concurrency 2 where tracked.",
       "mode": "throughput",
       "source_manifest": "manifests/20260511-h200-throughput-fast.json + manifests/20260514-h200-wan-vllm-omni.json",
-      "source_run_id": "h200-framework-comparison-merged-local",
+      "source_run_id": "h200-framework-comparison-merged",
       "reproduce": "scripts/generate_h200_report_artifacts.sh",
       "summary": {
         "rows": 4,
@@ -896,119 +896,6 @@
               "latency_s": 18.032,
               "source_result": "reports/flux-fastest-20260610/raw/b200-flux-lightx2v-now-fa2-20260610-lightx2v-blackwell-fa2-flashinfer.json",
               "ratio_to_sglang_now": 2.882
-            }
-          }
-        }
-      ]
-    },
-    {
-      "id": "video_parallelism_refresh_20260611",
-      "title": "H200 video parallelism refresh",
-      "subtitle": "2GPU Wan video profile sweep after enabling vLLM-Omni CFG/Ulysses profiles and LightX2V FA3; SGLang-Diffusion is the existing H200 full-matrix baseline; torch compile off, no cache.",
-      "mode": "single_e2e",
-      "table": "video_profile_sweep",
-      "source_report": "reports/h200-video-parallelism-refresh-20260611",
-      "reproduce": "scripts/run_h200_video_parallelism_refresh_20260611.sh",
-      "summary": {
-        "rows": 2,
-        "comparable_rows": 2,
-        "sglang_diffusion_wins": 2,
-        "other_wins": 0
-      },
-      "rows": [
-        {
-          "case_id": "wan21_t2v_1_3b_480p",
-          "case": "Wan2.1 T2V 1.3B 480p",
-          "details": "832x480x81f \u00b7 50 steps \u00b7 cfg 6",
-          "mode": "single_e2e",
-          "winner": "sglang_reference",
-          "cells": {
-            "sglang_reference": {
-              "gpus": 2,
-              "profile": "Best known SGLang command for the benchmark repo default profile.",
-              "status": "ok",
-              "latency_s": 25.618,
-              "ratio_to_sglang_reference": 1.0
-            },
-            "vllm_omni_tp": {
-              "gpus": 2,
-              "profile": "h200-2gpu-tp",
-              "status": "ok",
-              "latency_s": 38.597,
-              "source_result": "reports/h200-video-parallelism-refresh-20260611/raw/h200-video-parallelism-refresh-20260611-vllm-omni-h200-2gpu-tp.json",
-              "ratio_to_sglang_reference": 1.507
-            },
-            "vllm_omni_cfg": {
-              "gpus": 2,
-              "profile": "h200-2gpu-cfg",
-              "status": "ok",
-              "latency_s": 29.502,
-              "source_result": "reports/h200-video-parallelism-refresh-20260611/raw/h200-video-parallelism-refresh-20260611-vllm-omni-h200-2gpu-cfg.json",
-              "ratio_to_sglang_reference": 1.152
-            },
-            "vllm_omni_ulysses": {
-              "gpus": 2,
-              "profile": "h200-2gpu-ulysses",
-              "status": "ok",
-              "latency_s": 32.107,
-              "source_result": "reports/h200-video-parallelism-refresh-20260611/raw/h200-video-parallelism-refresh-20260611-vllm-omni-h200-2gpu-ulysses.json",
-              "ratio_to_sglang_reference": 1.253
-            },
-            "lightx2v_fa3": {
-              "gpus": 2,
-              "profile": "h200-fa3",
-              "status": "ok",
-              "latency_s": 29.058,
-              "source_result": "reports/h200-video-parallelism-refresh-20260611/raw/h200-video-parallelism-refresh-20260611-lightx2v-h200-fa3.json",
-              "ratio_to_sglang_reference": 1.134
-            }
-          }
-        },
-        {
-          "case_id": "wan22_ti2v_5b_704p",
-          "case": "Wan2.2 TI2V 5B 704p",
-          "details": "1280x704x81f \u00b7 50 steps \u00b7 cfg 5",
-          "mode": "single_e2e",
-          "winner": "sglang_reference",
-          "cells": {
-            "sglang_reference": {
-              "gpus": 2,
-              "profile": "H100/H200 command for the Wan2.2 TI2V 5B 704p case.",
-              "status": "ok",
-              "latency_s": 35.085,
-              "ratio_to_sglang_reference": 1.0
-            },
-            "vllm_omni_tp": {
-              "gpus": 2,
-              "profile": "h200-2gpu-tp",
-              "status": "ok",
-              "latency_s": 48.118,
-              "source_result": "reports/h200-video-parallelism-refresh-20260611/raw/h200-video-parallelism-refresh-20260611-vllm-omni-h200-2gpu-tp.json",
-              "ratio_to_sglang_reference": 1.371
-            },
-            "vllm_omni_cfg": {
-              "gpus": 2,
-              "profile": "h200-2gpu-cfg",
-              "status": "ok",
-              "latency_s": 36.087,
-              "source_result": "reports/h200-video-parallelism-refresh-20260611/raw/h200-video-parallelism-refresh-20260611-vllm-omni-h200-2gpu-cfg.json",
-              "ratio_to_sglang_reference": 1.029
-            },
-            "vllm_omni_ulysses": {
-              "gpus": 2,
-              "profile": "h200-2gpu-ulysses",
-              "status": "ok",
-              "latency_s": 39.771,
-              "source_result": "reports/h200-video-parallelism-refresh-20260611/raw/h200-video-parallelism-refresh-20260611-vllm-omni-h200-2gpu-ulysses.json",
-              "ratio_to_sglang_reference": 1.134
-            },
-            "lightx2v_fa3": {
-              "gpus": 2,
-              "profile": "h200-fa3",
-              "status": "ok",
-              "latency_s": 35.177,
-              "source_result": "reports/h200-video-parallelism-refresh-20260611/raw/h200-video-parallelism-refresh-20260611-lightx2v-h200-fa3.json",
-              "ratio_to_sglang_reference": 1.003
             }
           }
         }

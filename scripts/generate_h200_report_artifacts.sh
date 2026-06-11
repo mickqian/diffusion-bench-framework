@@ -21,6 +21,8 @@ else
     tmp/report/h200-throughput-common-20260514-d13d74e.json
     tmp/report/h200-ltx-lightx2v-20260513-6ee98c7.json
     tmp/report/h200-ltx23-lightx2v-2gpu-tp-20260513-6e6ae7e.json
+    reports/h200-video-parallelism-refresh-20260611/raw/h200-video-parallelism-refresh-20260611-vllm-omni-h200-2gpu-cfg.json
+    reports/h200-video-parallelism-refresh-20260611/raw/h200-video-parallelism-refresh-20260611-lightx2v-h200-fa3.json
   )
 fi
 
