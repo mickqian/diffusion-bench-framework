@@ -185,10 +185,10 @@
           "cells": {
             "sglang": {
               "gpus": 2,
-              "profile": "default",
+              "profile": "h200-2gpu-cfg-bf16-vae-resident",
               "status": "ok",
-              "latency_s": 26.042,
-              "server_latency_s": 24.923,
+              "latency_s": 26.041,
+              "server_latency_s": 24.687,
               "ratio_to_sglang": 1.0
             },
             "vllm-omni": {
@@ -276,10 +276,9 @@
           "cells": {
             "sglang": {
               "gpus": 2,
-              "profile": "h100-h200-2gpu",
+              "profile": "h200-2gpu-cfg-bf16-vae-resident",
               "status": "ok",
-              "latency_s": 34.059,
-              "server_latency_s": 33.3,
+              "latency_s": 33.059,
               "ratio_to_sglang": 1.0
             },
             "vllm-omni": {
@@ -287,14 +286,14 @@
               "profile": "h200-2gpu-cfg",
               "status": "ok",
               "latency_s": 36.087,
-              "ratio_to_sglang": 1.06
+              "ratio_to_sglang": 1.092
             },
             "lightx2v": {
               "gpus": 2,
               "profile": "h200-fa3",
               "status": "ok",
               "latency_s": 35.177,
-              "ratio_to_sglang": 1.033
+              "ratio_to_sglang": 1.064
             }
           }
         },
