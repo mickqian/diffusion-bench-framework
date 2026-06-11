@@ -48,6 +48,17 @@ run_compare() {
       --run-id "${run_id}" \
       --port "${port}" \
       --output "${output}"
+  elif [[ "${framework}" == "sglang" ]]; then
+    diffusion-bench-compare \
+      --config "${CONFIG}" \
+      --modes single_e2e \
+      --frameworks sglang \
+      --case-ids "$@" \
+      --hardware-profile h200 \
+      --sglang-profile "${profile}" \
+      --run-id "${run_id}" \
+      --port "${port}" \
+      --output "${output}"
   else
     echo "unknown framework ${framework}" >&2
     return 2
@@ -61,6 +72,12 @@ else
     wan21_t2v_1_3b_480p
     wan22_ti2v_5b_704p
   )
+fi
+
+if [[ "${RUN_SGLANG:-1}" == "1" ]]; then
+  profile="${SGLANG_VIDEO_REFRESH_PROFILE:-h200-2gpu-cfg-bf16-vae-resident}"
+  output="${REPORT_DIR}/${RUN_ID_ROOT}-sglang-${profile}.json"
+  run_compare sglang "${profile}" "${output}" "${RUN_ID_ROOT}-sglang-${profile}" "$((PORT_BASE + 200))" "${CASES[@]}"
 fi
 
 if [[ "${RUN_VLLM_OMNI:-1}" == "1" ]]; then

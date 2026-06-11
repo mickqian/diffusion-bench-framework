@@ -47,12 +47,18 @@ else
   FRAMEWORKS=(sglang vllm-omni lightx2v)
 fi
 
+SGLANG_PROFILE_ARGS=()
+if [[ -n "${SINGLE_E2E_SGLANG_PROFILE:-}" ]]; then
+  SGLANG_PROFILE_ARGS=(--sglang-profile "${SINGLE_E2E_SGLANG_PROFILE}")
+fi
+
 diffusion-bench-compare \
   --config "${CONFIG}" \
   --modes single_e2e \
   --frameworks "${FRAMEWORKS[@]}" \
   --case-ids "${CASES[@]}" \
   --hardware-profile h200 \
+  "${SGLANG_PROFILE_ARGS[@]}" \
   --run-id "${RUN_ID}" \
   --port "${PORT}" \
   --output "${OUTPUT}"

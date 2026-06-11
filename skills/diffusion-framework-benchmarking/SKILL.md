@@ -37,6 +37,7 @@ Every framework entry should carry `command_profiles`, not just inline args.
 - Use `sglang_ref` or `framework_ref` to pin the release, commit, package version, or meaningful upstream line.
 - Split profiles by hardware when best commands differ, for example `h100-80gb-2gpu` vs `h200-2gpu`.
 - Split profiles by framework version when the best command changes across releases.
+- Temporary extra serve args are acceptable for probes, but formal report data must promote the command into `command_profiles` and rerun through the profile before updating raw results.
 - For SGLang failures, fix the backend or add a stable hardware-specific profile before using the comparison.
 - For non-SGLang frameworks, seek the fastest fair command too; do not leave a slow default if upstream has a documented faster path.
 - When upstream support changes, update install specs and profiles before claiming unsupported. Example: latest LightX2V supports LTX-2/LTX-2.3 even if an older pinned commit did not.

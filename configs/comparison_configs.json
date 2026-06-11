@@ -836,6 +836,16 @@
                             "sglang_ref": "current-main",
                             "serve_args": "--model-type diffusion --warmup --enable-cfg-parallel",
                             "notes": "Keep this profile updated when the best command changes for a SGLang release or commit."
+                        },
+                        "h200-2gpu-cfg-bf16-vae-resident": {
+                            "description": "H200 full-resident 2-GPU CFG profile for LightX2V-aligned Wan best-performance rows.",
+                            "hardware": [
+                                "h200"
+                            ],
+                            "sglang_ref": "current-main",
+                            "num_gpus": 2,
+                            "serve_args": "--model-type diffusion --warmup --enable-cfg-parallel --dit-cpu-offload false --vae-precision bf16 --text-encoder-cpu-offload false --image-encoder-cpu-offload false --vae-cpu-offload false",
+                            "notes": "Keeps DiT, text/image encoders, and VAE resident on high-memory H200; BF16 VAE aligns with LightX2V best-performance Wan serving path. No cache or torch compile path."
                         }
                     }
                 },
@@ -1234,6 +1244,16 @@
                             "sglang_ref": "current-main",
                             "serve_args": "--model-type diffusion --warmup --enable-cfg-parallel",
                             "notes": "Keep this profile updated when the best command changes for a SGLang release or commit."
+                        },
+                        "h200-2gpu-cfg-bf16-vae-resident": {
+                            "description": "H200 full-resident 2-GPU CFG profile for LightX2V-aligned Wan best-performance rows.",
+                            "hardware": [
+                                "h200"
+                            ],
+                            "sglang_ref": "current-main",
+                            "num_gpus": 2,
+                            "serve_args": "--model-type diffusion --warmup --enable-cfg-parallel --dit-cpu-offload false --vae-precision bf16 --text-encoder-cpu-offload false --image-encoder-cpu-offload false --vae-cpu-offload false",
+                            "notes": "Keeps DiT, text/image encoders, and VAE resident on high-memory H200; BF16 VAE aligns with LightX2V best-performance Wan serving path. No cache or torch compile path."
                         },
                         "h100-h200-2gpu": {
                             "description": "H100/H200 command for the Wan2.2 TI2V 5B 704p case.",
