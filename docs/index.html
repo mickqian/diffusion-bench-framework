@@ -8,27 +8,120 @@
       name="description"
       content="SGLang-Diffusion customer-facing one-pager: performance gains, inference stack design, lossy optimization evaluation, and cross-framework benchmarks."
     />
+    <script>
+      (() => {
+        const stored = localStorage.getItem("sgld-theme");
+        if (stored === "light" || stored === "dark") document.documentElement.dataset.theme = stored;
+      })();
+    </script>
     <style>
+      /* Self-hosted variable fonts — no external request, renders offline / behind proxies */
+      @font-face {
+        font-family: "Fraunces";
+        src: url("fonts/fraunces-full-normal.woff2") format("woff2");
+        font-weight: 100 900;
+        font-style: normal;
+        font-display: swap;
+      }
+      @font-face {
+        font-family: "Fraunces";
+        src: url("fonts/fraunces-full-italic.woff2") format("woff2");
+        font-weight: 100 900;
+        font-style: italic;
+        font-display: swap;
+      }
+      @font-face {
+        font-family: "Hanken Grotesk";
+        src: url("fonts/hanken-grotesk-wght-normal.woff2") format("woff2");
+        font-weight: 100 900;
+        font-style: normal;
+        font-display: swap;
+      }
+
       :root {
         color-scheme: light;
-        --paper: #f7f6f2;
-        --paper-2: #eeeee9;
-        --ink: #111113;
-        --body: #3d4148;
-        --muted: #717782;
-        --hair: rgba(18, 20, 24, 0.12);
-        --hair-strong: rgba(18, 20, 24, 0.22);
-        --glass: rgba(255, 255, 255, 0.68);
-        --glass-strong: rgba(255, 255, 255, 0.86);
-        --dark: #191b1f;
-        --red: #ed5555;
-        --blue: #4d7fb4;
-        --green: #4d9a63;
-        --amber: #b98735;
-        --shadow: 0 24px 80px rgba(20, 24, 32, 0.11);
-        --soft-shadow: 0 12px 40px rgba(20, 24, 32, 0.08);
-        --radius: 20px;
-        --sans: ui-sans-serif, -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Segoe UI", sans-serif;
+        --paper: #f6f3ec;
+        --paper-2: #fffdf8;
+        --ink: #211c16;
+        --body: #4b443a;
+        --muted: #7b7468;
+        --faint: #a59d8d;
+        --hair: #e6e0d2;
+        --hair-strong: #d6cebc;
+        --hover-bg: #efeadd;
+        --accent: #d55816;
+        --accent-strong: #b4480f;
+        --accent-tint: #fbe6d8;
+        --ink-04: rgba(33, 28, 22, 0.05);
+        --ink-08: rgba(33, 28, 22, 0.09);
+        --bar-sgl: #d55816;
+        --bar-vllm: #b9b1a0;
+        --bar-neutral: #c9c1b0;
+        --glass-bg: rgba(250, 247, 240, 0.72);
+        --glass-border: rgba(255, 255, 255, 0.55);
+        --glass-hi: rgba(255, 255, 255, 0.75);
+        --shadow-1: 0 1px 2px rgba(54, 40, 24, 0.05), 0 10px 34px rgba(54, 40, 24, 0.08);
+        --shadow-2: 0 2px 6px rgba(54, 40, 24, 0.06), 0 22px 60px rgba(54, 40, 24, 0.12);
+        --serif: "Fraunces", ui-serif, Georgia, "Times New Roman", serif;
+        --sans: "Hanken Grotesk", -apple-system, BlinkMacSystemFont, "Helvetica Neue", Arial, sans-serif;
+        --mono: ui-monospace, "SF Mono", SFMono-Regular, Menlo, Consolas, monospace;
+        --r-lg: 22px;
+        --r-md: 16px;
+        --r-sm: 11px;
+      }
+
+      [data-theme="dark"] {
+        color-scheme: dark;
+        --paper: #18150f;
+        --paper-2: #221d16;
+        --ink: #f1ece1;
+        --body: #c5bdac;
+        --muted: #948b7c;
+        --faint: #6d6657;
+        --hair: #2e2a20;
+        --hair-strong: #443d30;
+        --hover-bg: #221e16;
+        --accent: #ef8a4f;
+        --accent-strong: #f59c63;
+        --accent-tint: rgba(213, 88, 22, 0.18);
+        --ink-04: rgba(241, 236, 225, 0.05);
+        --ink-08: rgba(241, 236, 225, 0.09);
+        --bar-sgl: #ef8a4f;
+        --bar-vllm: #5d5648;
+        --bar-neutral: #6c6555;
+        --glass-bg: rgba(28, 24, 18, 0.62);
+        --glass-border: rgba(255, 255, 255, 0.1);
+        --glass-hi: rgba(255, 255, 255, 0.09);
+        --shadow-1: 0 1px 2px rgba(0, 0, 0, 0.3), 0 10px 34px rgba(0, 0, 0, 0.42);
+        --shadow-2: 0 2px 8px rgba(0, 0, 0, 0.36), 0 24px 64px rgba(0, 0, 0, 0.5);
+      }
+
+      @media (prefers-color-scheme: dark) {
+        :root:not([data-theme="light"]) {
+          color-scheme: dark;
+          --paper: #18150f;
+          --paper-2: #221d16;
+          --ink: #f1ece1;
+          --body: #c5bdac;
+          --muted: #948b7c;
+          --faint: #6d6657;
+          --hair: #2e2a20;
+          --hair-strong: #443d30;
+          --hover-bg: #221e16;
+          --accent: #ef8a4f;
+          --accent-strong: #f59c63;
+          --accent-tint: rgba(213, 88, 22, 0.18);
+          --ink-04: rgba(241, 236, 225, 0.05);
+          --ink-08: rgba(241, 236, 225, 0.09);
+          --bar-sgl: #ef8a4f;
+          --bar-vllm: #5d5648;
+          --bar-neutral: #6c6555;
+          --glass-bg: rgba(28, 24, 18, 0.62);
+          --glass-border: rgba(255, 255, 255, 0.1);
+          --glass-hi: rgba(255, 255, 255, 0.09);
+          --shadow-1: 0 1px 2px rgba(0, 0, 0, 0.3), 0 10px 34px rgba(0, 0, 0, 0.42);
+          --shadow-2: 0 2px 8px rgba(0, 0, 0, 0.36), 0 24px 64px rgba(0, 0, 0, 0.5);
+        }
       }
 
       * {
@@ -41,13 +134,18 @@
 
       body {
         margin: 0;
-        min-height: 100vh;
-        background:
-          linear-gradient(180deg, rgba(255, 255, 255, 0.76), rgba(255, 255, 255, 0) 34%),
-          linear-gradient(180deg, var(--paper), var(--paper-2));
+        background: var(--paper);
         color: var(--ink);
         font-family: var(--sans);
-        line-height: 1.42;
+        font-size: 16px;
+        line-height: 1.65;
+        -webkit-font-smoothing: antialiased;
+        text-rendering: optimizeLegibility;
+      }
+
+      ::selection {
+        background: var(--accent-tint);
+        color: var(--accent-strong);
       }
 
       a {
@@ -62,542 +160,533 @@
 
       button {
         color: inherit;
+        background: none;
+        border: 0;
+        padding: 0;
+        cursor: pointer;
       }
 
       .shell {
-        width: min(1160px, calc(100vw - 40px));
+        width: min(1160px, calc(100vw - 56px));
         margin: 0 auto;
       }
 
+      .label {
+        font-size: 13px;
+        font-weight: 600;
+        letter-spacing: 0.16em;
+        text-transform: uppercase;
+        color: var(--accent-strong);
+      }
+
+      .ulink {
+        position: relative;
+        color: var(--ink);
+        background-image: linear-gradient(var(--accent), var(--accent));
+        background-position: 0 100%;
+        background-repeat: no-repeat;
+        background-size: 100% 1.5px;
+        padding-bottom: 2px;
+        transition: background-size 220ms ease, color 160ms ease;
+      }
+
+      .ulink:hover {
+        color: var(--accent-strong);
+        background-size: 0 1.5px;
+        background-position: 100% 100%;
+      }
+
+      /* ---- liquid glass ---- */
+      .glass {
+        background: var(--paper-2);
+        border: 1px solid var(--glass-border);
+        box-shadow: inset 0 1px 0 var(--glass-hi), var(--shadow-1);
+      }
+
+      @supports ((backdrop-filter: blur(2px)) or (-webkit-backdrop-filter: blur(2px))) {
+        .glass {
+          background: var(--glass-bg);
+          -webkit-backdrop-filter: blur(22px) saturate(1.5);
+          backdrop-filter: blur(22px) saturate(1.5);
+        }
+      }
+
+      /* ---- top ---- */
       .topbar {
         position: sticky;
-        top: 12px;
+        top: 0;
         z-index: 30;
+        background: var(--paper);
+        border-bottom: 1px solid var(--hair);
+      }
+
+      @supports ((backdrop-filter: blur(2px)) or (-webkit-backdrop-filter: blur(2px))) {
+        .topbar {
+          background: var(--glass-bg);
+          -webkit-backdrop-filter: blur(20px) saturate(1.6);
+          backdrop-filter: blur(20px) saturate(1.6);
+          box-shadow: inset 0 1px 0 var(--glass-hi);
+        }
+      }
+
+      .topbar-inner {
         display: flex;
         align-items: center;
         justify-content: space-between;
-        gap: 18px;
-        margin-top: 12px;
-        padding: 10px 12px;
-        border: 1px solid var(--hair);
-        border-radius: 999px;
-        background: rgba(248, 248, 245, 0.72);
-        backdrop-filter: blur(24px) saturate(1.35);
-        box-shadow: var(--soft-shadow);
+        gap: 24px;
+        padding: 16px 0;
       }
 
       .brand {
-        display: inline-flex;
-        align-items: center;
-        gap: 10px;
-        min-width: 0;
-        font-size: 14px;
-        font-weight: 760;
-      }
-
-      .brand-mark {
-        display: grid;
-        place-items: center;
-        width: 30px;
-        height: 30px;
-        border-radius: 10px;
-        background: var(--ink);
-        color: var(--paper);
-        font-size: 11px;
-        font-weight: 850;
+        font-family: var(--serif);
+        font-size: 20px;
+        font-weight: 500;
+        letter-spacing: -0.01em;
       }
 
       .nav-links {
         display: flex;
         align-items: center;
-        justify-content: flex-end;
-        gap: 3px;
+        gap: 28px;
         flex-wrap: wrap;
       }
 
       .nav-links a {
-        padding: 8px 11px;
-        border-radius: 999px;
-        color: var(--body);
-        font-size: 13px;
-        font-weight: 650;
+        font-size: 15px;
+        color: var(--muted);
+        transition: color 160ms ease;
       }
 
       .nav-links a:hover {
-        background: rgba(18, 20, 24, 0.06);
         color: var(--ink);
       }
 
-      .hero {
-        min-height: calc(100vh - 78px);
-        display: grid;
-        grid-template-columns: minmax(0, 1fr) minmax(360px, 0.62fr);
-        align-items: center;
-        gap: clamp(34px, 7vw, 108px);
-        padding: clamp(64px, 9vw, 118px) 0 clamp(42px, 7vw, 86px);
-      }
-
-      .eyebrow {
-        display: inline-flex;
-        align-items: center;
-        gap: 10px;
-        margin: 0 0 22px;
+      .theme-toggle {
+        font-size: 13px;
+        font-weight: 500;
         color: var(--muted);
-        font-size: 12px;
-        font-weight: 800;
-        letter-spacing: 0.12em;
-        text-transform: uppercase;
+        border: 1px solid var(--hair-strong);
+        border-radius: 999px;
+        padding: 6px 15px;
+        transition: color 160ms ease, border-color 160ms ease, background 160ms ease;
       }
 
-      .eyebrow::before {
-        content: "";
-        width: 26px;
-        height: 8px;
-        border-radius: 999px;
-        background: linear-gradient(90deg, var(--red), var(--blue), var(--green));
+      .theme-toggle:hover {
+        color: var(--ink);
+        border-color: var(--ink);
+        background: var(--ink-04);
+      }
+
+      /* ---- hero ---- */
+      .hero {
+        display: grid;
+        grid-template-columns: minmax(0, 1.08fr) minmax(310px, 0.92fr);
+        gap: clamp(40px, 7vw, 110px);
+        padding: clamp(64px, 10vw, 128px) 0 clamp(56px, 8vw, 104px);
+        align-items: start;
       }
 
       h1 {
-        margin: 0;
-        max-width: 900px;
-        font-size: clamp(54px, 9.5vw, 116px);
-        line-height: 0.92;
-        letter-spacing: 0;
-        font-weight: 780;
+        margin: 20px 0 0;
+        font-family: var(--serif);
+        font-size: clamp(46px, 7vw, 88px);
+        font-weight: 400;
+        font-optical-sizing: auto;
+        letter-spacing: -0.025em;
+        line-height: 0.98;
       }
 
       .hero-copy {
-        max-width: 790px;
+        max-width: 460px;
         margin: 26px 0 0;
         color: var(--body);
-        font-size: clamp(18px, 2vw, 23px);
+        font-size: 18px;
+        line-height: 1.6;
       }
 
       .hero-actions {
         display: flex;
         flex-wrap: wrap;
-        gap: 10px;
-        margin-top: 32px;
+        gap: 14px 28px;
+        margin-top: 40px;
+        font-size: 16px;
       }
 
-      .pill {
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        min-height: 40px;
-        padding: 9px 14px;
-        border: 1px solid var(--hair);
-        border-radius: 999px;
-        background: rgba(255, 255, 255, 0.62);
+      .thesis {
+        position: relative;
+        padding: clamp(26px, 3vw, 38px);
+        border-radius: var(--r-lg);
+      }
+
+      .thesis::before {
+        content: "";
+        position: absolute;
+        inset: 0;
+        border-radius: inherit;
+        background: linear-gradient(150deg, var(--glass-hi), transparent 42%);
+        opacity: 0.7;
+        pointer-events: none;
+      }
+
+      .thesis h2 {
+        position: relative;
+        margin: 0 0 22px;
+        font-family: var(--serif);
+        font-size: clamp(23px, 2.5vw, 31px);
+        font-weight: 400;
+        font-style: italic;
+        line-height: 1.28;
+        letter-spacing: -0.01em;
         color: var(--ink);
-        backdrop-filter: blur(16px) saturate(1.2);
-        font-size: 14px;
-        font-weight: 720;
-        transition:
-          transform 180ms ease,
-          background 180ms ease,
-          border-color 180ms ease;
-      }
-
-      .pill:hover {
-        transform: translateY(-1px);
-        background: rgba(255, 255, 255, 0.86);
-        border-color: var(--hair-strong);
-      }
-
-      .pill.primary {
-        background: var(--ink);
-        color: white;
-      }
-
-      .hero-panel,
-      .glass-panel {
-        border: 1px solid var(--hair);
-        border-radius: var(--radius);
-        background: var(--glass);
-        backdrop-filter: blur(24px) saturate(1.32);
-        box-shadow: var(--shadow);
-      }
-
-      .hero-panel {
-        padding: clamp(20px, 3vw, 28px);
-      }
-
-      .hero-panel h2 {
-        margin: 22px 0 0;
-        font-size: clamp(30px, 4vw, 46px);
-        line-height: 0.98;
-        letter-spacing: 0;
-      }
-
-      .panel-label {
-        display: flex;
-        justify-content: space-between;
-        gap: 14px;
-        color: var(--muted);
-        font-size: 12px;
-        font-weight: 800;
-        letter-spacing: 0.08em;
-        text-transform: uppercase;
-      }
-
-      .system-lines {
-        display: grid;
-        gap: 10px;
-        margin-top: 26px;
       }
 
       .system-line {
+        position: relative;
         display: grid;
-        grid-template-columns: 86px 1fr;
-        gap: 14px;
-        align-items: start;
-        padding: 13px 0;
+        grid-template-columns: 96px 1fr;
+        gap: 18px;
+        padding: 15px 0;
         border-top: 1px solid var(--hair);
       }
 
       .system-line b {
-        color: var(--ink);
-        font-size: 13px;
+        font-weight: 600;
+        font-size: 12px;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+        color: var(--accent-strong);
+        padding-top: 3px;
       }
 
       .system-line span {
         color: var(--body);
-        font-size: 14px;
+        font-size: 15px;
       }
 
+      /* ---- sections ---- */
       .section {
-        padding: clamp(54px, 8vw, 104px) 0;
+        border-top: 1px solid var(--hair);
+        padding: clamp(60px, 8vw, 104px) 0;
       }
 
       .section-head {
         display: grid;
-        grid-template-columns: minmax(250px, 0.72fr) minmax(0, 1.28fr);
-        gap: clamp(22px, 5vw, 72px);
-        align-items: end;
-        margin-bottom: 28px;
+        grid-template-columns: minmax(220px, 0.62fr) minmax(0, 1.38fr);
+        gap: clamp(24px, 5vw, 80px);
+        margin-bottom: clamp(40px, 5vw, 60px);
       }
 
-      h2 {
+      h2.section-title {
         margin: 0;
-        font-size: clamp(38px, 5.7vw, 70px);
-        line-height: 0.98;
-        letter-spacing: 0;
-        font-weight: 760;
+        font-size: 13px;
+        font-weight: 600;
+        letter-spacing: 0.16em;
+        text-transform: uppercase;
+        color: var(--accent-strong);
       }
 
       .section-head p {
         margin: 0;
-        max-width: 780px;
-        color: var(--body);
-        font-size: 18px;
+        max-width: 580px;
+        color: var(--ink);
+        font-family: var(--serif);
+        font-size: clamp(20px, 2.1vw, 27px);
+        font-weight: 400;
+        line-height: 1.4;
+        letter-spacing: -0.01em;
       }
 
       .split-summary {
         display: grid;
-        grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
-        gap: 12px;
-        margin-bottom: 14px;
+        grid-template-columns: 1fr 1fr;
+        gap: clamp(24px, 4vw, 60px);
+        margin-bottom: clamp(44px, 5vw, 68px);
       }
 
       .summary-card {
-        min-height: 180px;
-        padding: 24px;
-        border: 1px solid var(--hair);
-        border-radius: var(--radius);
-        background: rgba(255, 255, 255, 0.52);
+        border-top: 2px solid var(--ink);
+        padding-top: 18px;
       }
 
       .summary-card b {
         display: block;
-        margin-bottom: 12px;
-        font-size: 22px;
-        line-height: 1;
+        font-weight: 600;
+        font-size: 18px;
+        letter-spacing: -0.01em;
+        margin-bottom: 10px;
       }
 
       .summary-card p {
         margin: 0;
         color: var(--body);
+        font-size: 15.5px;
+        max-width: 450px;
       }
 
+      /* ---- explorer ---- */
       .explorer {
         display: grid;
-        grid-template-columns: 330px minmax(0, 1fr);
-        gap: 14px;
-        min-height: 600px;
-        padding: 14px;
-      }
-
-      .control-panel {
-        display: flex;
-        flex-direction: column;
-        gap: 12px;
+        grid-template-columns: 264px minmax(0, 1fr);
+        gap: clamp(28px, 4vw, 60px);
+        align-items: start;
       }
 
       .mode-toggle {
-        display: grid;
-        grid-template-columns: 1fr 1fr;
-        gap: 6px;
-        padding: 5px;
-        border: 1px solid var(--hair);
-        border-radius: 16px;
-        background: rgba(255, 255, 255, 0.58);
-      }
-
-      .mode-toggle button,
-      .capability-button {
-        border: 0;
-        cursor: pointer;
+        display: inline-flex;
+        gap: 4px;
+        padding: 4px;
+        margin-bottom: 22px;
+        background: var(--ink-04);
+        border-radius: 999px;
       }
 
       .mode-toggle button {
-        min-height: 42px;
-        border-radius: 12px;
-        background: transparent;
-        color: var(--muted);
         font-size: 13px;
-        font-weight: 800;
-        transition:
-          background 160ms ease,
-          color 160ms ease,
-          transform 160ms ease;
+        font-weight: 500;
+        letter-spacing: 0.04em;
+        color: var(--muted);
+        padding: 7px 18px;
+        border-radius: 999px;
+        transition: color 160ms ease, background 160ms ease, box-shadow 160ms ease;
+      }
+
+      .mode-toggle button:hover {
+        color: var(--ink);
       }
 
       .mode-toggle button[aria-pressed="true"] {
-        background: var(--ink);
-        color: white;
-        box-shadow: 0 8px 22px rgba(18, 20, 24, 0.16);
+        color: var(--ink);
+        background: var(--paper-2);
+        box-shadow: var(--shadow-1);
       }
 
       .capability-list {
         display: grid;
-        gap: 8px;
       }
 
       .capability-button {
-        width: 100%;
-        min-height: 78px;
-        padding: 13px 14px;
-        border: 1px solid var(--hair);
-        border-radius: 16px;
-        background: rgba(255, 255, 255, 0.46);
+        position: relative;
         text-align: left;
-        transition:
-          transform 160ms ease,
-          background 160ms ease,
-          border-color 160ms ease;
+        padding: 16px 16px 16px 18px;
+        border-radius: var(--r-sm);
+        transition: background 160ms ease;
       }
 
-      .capability-button:hover {
-        transform: translateX(2px);
-        background: rgba(255, 255, 255, 0.74);
-        border-color: var(--hair-strong);
+      .capability-button + .capability-button {
+        margin-top: 2px;
       }
 
-      .capability-button[aria-pressed="true"] {
-        background: var(--glass-strong);
-        border-color: rgba(18, 20, 24, 0.34);
+      .capability-button::before {
+        content: "";
+        position: absolute;
+        left: 0;
+        top: 50%;
+        transform: translateY(-50%) scaleY(0);
+        width: 3px;
+        height: 60%;
+        border-radius: 2px;
+        background: var(--accent);
+        transition: transform 200ms cubic-bezier(0.16, 1, 0.3, 1);
       }
 
       .capability-button span {
         display: block;
-        color: var(--muted);
         font-size: 11px;
-        font-weight: 850;
-        letter-spacing: 0.08em;
+        font-weight: 600;
+        letter-spacing: 0.12em;
         text-transform: uppercase;
+        color: var(--faint);
       }
 
       .capability-button b {
         display: block;
-        margin-top: 6px;
-        font-size: 15px;
-        line-height: 1.12;
+        margin-top: 4px;
+        font-weight: 500;
+        font-size: 16px;
+        letter-spacing: -0.01em;
+        color: var(--muted);
+        transition: color 160ms ease;
+      }
+
+      .capability-button:hover {
+        background: var(--ink-04);
+      }
+
+      .capability-button:hover b {
+        color: var(--ink);
+      }
+
+      .capability-button[aria-pressed="true"] {
+        background: var(--accent-tint);
+      }
+
+      .capability-button[aria-pressed="true"]::before {
+        transform: translateY(-50%) scaleY(1);
+      }
+
+      .capability-button[aria-pressed="true"] b {
+        color: var(--accent-strong);
+        font-weight: 600;
       }
 
       .detail-panel {
-        display: grid;
-        grid-template-rows: auto 1fr auto;
-        min-height: 570px;
-        padding: clamp(22px, 4vw, 36px);
-        border-radius: calc(var(--radius) - 6px);
-        background: rgba(255, 255, 255, 0.72);
-        border: 1px solid rgba(18, 20, 24, 0.08);
+        position: relative;
+        padding: clamp(26px, 3vw, 40px);
+        border-radius: var(--r-lg);
+        overflow: hidden;
+      }
+
+      .detail-panel::after {
+        content: "";
+        position: absolute;
+        inset: 0;
+        border-radius: inherit;
+        background: radial-gradient(120% 80% at 0% 0%, var(--glass-hi), transparent 46%);
+        opacity: 0.6;
+        pointer-events: none;
       }
 
       .detail-top {
         display: flex;
         justify-content: space-between;
-        gap: 18px;
-        align-items: flex-start;
-      }
-
-      .status {
-        display: inline-flex;
         align-items: center;
-        min-height: 26px;
-        padding: 5px 9px;
-        border-radius: 999px;
-        background: rgba(77, 154, 99, 0.12);
-        color: #26643a;
-        font-size: 11px;
-        font-weight: 850;
-        letter-spacing: 0.08em;
-        text-transform: uppercase;
-        white-space: nowrap;
-      }
-
-      .status.wip {
-        background: rgba(113, 119, 130, 0.14);
-        color: #5a616b;
-      }
-
-      .status.tradeoff {
-        background: rgba(185, 135, 53, 0.14);
-        color: #7d5a22;
-      }
-
-      .status.method {
-        background: rgba(77, 127, 180, 0.12);
-        color: #285e96;
+        gap: 18px;
       }
 
       .detail-panel h3 {
         margin: 0;
-        max-width: 720px;
-        font-size: clamp(32px, 5vw, 58px);
-        line-height: 0.98;
-        letter-spacing: 0;
+        font-family: var(--serif);
+        font-size: clamp(23px, 2.4vw, 30px);
+        font-weight: 500;
+        letter-spacing: -0.015em;
+        line-height: 1.2;
+      }
+
+      .status {
+        flex: none;
+        font-size: 11px;
+        font-weight: 600;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+        color: var(--accent-strong);
+        background: var(--accent-tint);
+        padding: 5px 12px;
+        border-radius: 999px;
+        white-space: nowrap;
       }
 
       .detail-summary {
-        max-width: 760px;
+        max-width: 600px;
         margin: 18px 0 0;
         color: var(--body);
-        font-size: 18px;
+        font-size: 17px;
+        line-height: 1.6;
       }
 
       .detail-grid {
         display: grid;
         grid-template-columns: repeat(3, minmax(0, 1fr));
-        gap: 12px;
-        margin-top: 34px;
+        gap: clamp(18px, 2.5vw, 36px);
+        margin-top: 36px;
       }
 
       .detail-card {
-        min-height: 172px;
-        padding: 18px;
-        border: 1px solid var(--hair);
-        border-radius: 17px;
-        background: rgba(247, 246, 242, 0.62);
+        border-top: 1px solid var(--hair-strong);
+        padding-top: 14px;
       }
 
       .detail-card span {
         display: block;
-        color: var(--muted);
         font-size: 11px;
-        font-weight: 850;
-        letter-spacing: 0.08em;
+        font-weight: 600;
+        letter-spacing: 0.1em;
         text-transform: uppercase;
+        color: var(--accent-strong);
       }
 
       .detail-card p {
-        margin: 12px 0 0;
+        margin: 10px 0 0;
         color: var(--body);
-        font-size: 14px;
+        font-size: 15px;
+        line-height: 1.55;
       }
 
       .detail-links {
+        position: relative;
         display: flex;
         flex-wrap: wrap;
-        gap: 8px;
-        margin-top: 26px;
+        gap: 14px 24px;
+        margin-top: 32px;
+        font-size: 15px;
       }
 
-      .detail-link {
-        display: inline-flex;
-        align-items: center;
-        min-height: 34px;
-        padding: 7px 11px;
-        border: 1px solid var(--hair);
-        border-radius: 999px;
-        background: rgba(255, 255, 255, 0.72);
-        color: var(--ink);
-        font-size: 13px;
-        font-weight: 760;
+      .detail-link::after {
+        content: " ↗";
+        font-size: 12px;
+        color: var(--accent);
       }
 
+      /* ---- lessons ---- */
       .lesson-band {
         display: grid;
-        grid-template-columns: 0.86fr 1.14fr;
-        gap: 14px;
-        align-items: stretch;
-      }
-
-      .lesson-lead {
-        display: flex;
-        flex-direction: column;
-        justify-content: space-between;
-        min-height: 370px;
-        padding: 28px;
-        border-radius: var(--radius);
-        background: var(--dark);
-        color: white;
-      }
-
-      .lesson-lead h2 {
-        color: white;
+        grid-template-columns: minmax(220px, 0.6fr) minmax(0, 1.4fr);
+        gap: clamp(24px, 5vw, 80px);
       }
 
       .lesson-lead p {
-        margin: 22px 0 0;
-        color: rgba(255, 255, 255, 0.74);
-        font-size: 18px;
+        margin: 18px 0 0;
+        max-width: 380px;
+        color: var(--body);
+        font-size: 16px;
       }
 
       .lesson-grid {
         display: grid;
         grid-template-columns: repeat(2, minmax(0, 1fr));
-        gap: 12px;
+        gap: clamp(28px, 4vw, 52px);
       }
 
       .lesson {
-        min-height: 178px;
-        padding: 22px;
-        border: 1px solid var(--hair);
-        border-radius: var(--radius);
-        background: rgba(255, 255, 255, 0.58);
+        position: relative;
+        padding-top: 22px;
+        border-top: 1px solid var(--hair);
+      }
+
+      .lesson::before {
+        content: "";
+        position: absolute;
+        top: -1px;
+        left: 0;
+        width: 42px;
+        height: 2px;
+        background: var(--accent);
       }
 
       .lesson b {
         display: block;
-        margin-bottom: 10px;
-        font-size: 18px;
+        font-weight: 600;
+        font-size: 17px;
+        letter-spacing: -0.01em;
+        line-height: 1.3;
+        margin-bottom: 9px;
       }
 
       .lesson p {
         margin: 0;
         color: var(--body);
-        font-size: 14px;
+        font-size: 15px;
+        line-height: 1.55;
       }
 
-      details.benchmark-shell {
-        border: 1px solid var(--hair);
-        border-radius: var(--radius);
-        background: var(--glass);
-        backdrop-filter: blur(22px) saturate(1.25);
-        box-shadow: var(--shadow);
-        overflow: hidden;
-      }
-
+      /* ---- benchmarks ---- */
       details.benchmark-shell > summary {
-        display: grid;
-        grid-template-columns: minmax(0, 1fr) auto;
+        display: flex;
+        justify-content: space-between;
+        align-items: baseline;
         gap: 18px;
-        align-items: center;
-        padding: 24px;
         cursor: pointer;
         list-style: none;
+        padding-bottom: 24px;
       }
 
       details.benchmark-shell > summary::-webkit-details-marker {
@@ -606,313 +695,741 @@
 
       .summary-title {
         display: block;
-        font-size: clamp(24px, 3vw, 34px);
-        font-weight: 780;
-        line-height: 1.05;
+        font-family: var(--serif);
+        font-size: clamp(24px, 3vw, 36px);
+        font-weight: 500;
+        letter-spacing: -0.02em;
+        line-height: 1.1;
       }
 
       .summary-copy {
         display: block;
-        margin-top: 8px;
+        margin-top: 12px;
         color: var(--body);
-        font-size: 15px;
+        font-size: 16px;
+        line-height: 1.55;
+        max-width: 600px;
       }
 
-      .chevron {
-        display: grid;
-        place-items: center;
+      .marker {
+        flex: none;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
         width: 38px;
         height: 38px;
         border-radius: 999px;
-        background: var(--ink);
-        color: white;
-        transition: transform 180ms ease;
+        border: 1px solid var(--hair-strong);
+        font-size: 18px;
+        font-weight: 300;
+        color: var(--muted);
+        transition: transform 220ms cubic-bezier(0.16, 1, 0.3, 1), color 160ms ease, border-color 160ms ease;
       }
 
-      details[open] .chevron {
-        transform: rotate(45deg);
+      details[open] .marker {
+        transform: rotate(135deg);
+        color: var(--accent-strong);
+        border-color: var(--accent);
       }
 
       .benchmark-meta {
         display: grid;
         grid-template-columns: repeat(4, minmax(0, 1fr));
-        border-top: 1px solid var(--hair);
-        border-bottom: 1px solid var(--hair);
-      }
-
-      .meta-cell {
-        min-height: 96px;
-        padding: 18px 20px;
-        border-right: 1px solid var(--hair);
-      }
-
-      .meta-cell:last-child {
-        border-right: 0;
+        gap: clamp(18px, 3vw, 36px);
+        padding: 24px clamp(20px, 2.5vw, 30px);
+        border-radius: var(--r-md);
+        background: var(--ink-04);
       }
 
       .meta-cell b {
         display: block;
-        font-size: 15px;
+        font-weight: 600;
+        font-size: 11px;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+        color: var(--accent-strong);
       }
 
       .meta-cell span {
         display: block;
-        margin-top: 6px;
+        margin-top: 7px;
+        color: var(--body);
+        font-size: 14.5px;
+        line-height: 1.5;
+      }
+
+      .bench-headline {
+        margin-top: 28px;
+        padding: 24px 26px;
+        border-radius: var(--r-md);
+        background: var(--accent-tint);
+        border: 1px solid var(--glass-border);
+      }
+
+      .bench-headline p {
+        margin: 0;
+        font-family: var(--serif);
+        font-size: clamp(19px, 2vw, 25px);
+        font-weight: 400;
+        line-height: 1.35;
+        letter-spacing: -0.01em;
+        color: var(--ink);
+        max-width: 760px;
+      }
+
+      .bench-score {
+        margin-top: 12px !important;
+        font-family: var(--sans);
+        font-size: 14px !important;
+        font-weight: 500;
+        letter-spacing: 0.01em;
+        color: var(--accent-strong);
+      }
+
+      .bench-toolbar {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 14px 28px;
+        margin-top: 28px;
+        padding: 16px 0;
+      }
+
+      .filter-group {
+        display: flex;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 10px;
+      }
+
+      .filter-group > span {
+        font-size: 11px;
+        font-weight: 600;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+        color: var(--faint);
+        margin-right: 4px;
+      }
+
+      .chip {
+        font-size: 13.5px;
+        font-weight: 500;
         color: var(--muted);
+        padding: 7px 15px;
+        border-radius: 999px;
+        border: 1px solid var(--hair-strong);
+        transition: color 160ms ease, border-color 160ms ease, background 160ms ease;
+      }
+
+      .chip:hover {
+        color: var(--ink);
+        border-color: var(--ink);
+      }
+
+      .chip[aria-pressed="true"] {
+        color: var(--accent-strong);
+        border-color: transparent;
+        background: var(--accent-tint);
+      }
+
+      .legend {
+        margin-left: auto;
+        display: flex;
+        gap: 20px;
         font-size: 13px;
+        font-weight: 500;
+        color: var(--muted);
+      }
+
+      .legend i {
+        font-style: normal;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+      }
+
+      .legend i::before {
+        content: "";
+        width: 16px;
+        height: 6px;
+        border-radius: 999px;
+      }
+
+      .legend .l-sgl::before {
+        background: var(--bar-sgl);
+      }
+
+      .legend .l-vllm::before {
+        background: var(--bar-vllm);
       }
 
       .table-wrap {
         overflow-x: auto;
+        margin: 0 -4px;
+        padding: 0 4px;
       }
 
       table {
         width: 100%;
-        min-width: 860px;
+        min-width: 820px;
         border-collapse: collapse;
       }
 
       th,
       td {
-        padding: 17px 20px;
-        border-bottom: 1px solid rgba(18, 20, 24, 0.08);
+        padding: 18px 30px 18px 0;
+        border-top: 1px solid var(--hair);
         text-align: left;
         vertical-align: top;
       }
 
+      thead th {
+        border-top: 0;
+        border-bottom: 2px solid var(--hair-strong);
+      }
+
       th {
-        color: var(--muted);
-        font-size: 12px;
-        font-weight: 850;
-        letter-spacing: 0.08em;
+        font-weight: 600;
+        font-size: 11.5px;
+        letter-spacing: 0.1em;
         text-transform: uppercase;
+        color: var(--faint);
+        white-space: nowrap;
+      }
+
+      th.sortable {
+        cursor: pointer;
+        user-select: none;
+        transition: color 140ms ease;
+      }
+
+      th.sortable:hover {
+        color: var(--ink);
+      }
+
+      th .sort-arrow {
+        margin-left: 6px;
+        font-size: 9px;
+        opacity: 0.5;
+      }
+
+      th[aria-sort] {
+        color: var(--accent-strong);
+      }
+
+      th[aria-sort] .sort-arrow {
+        opacity: 1;
       }
 
       td {
         color: var(--body);
-        font-size: 14px;
+        font-size: 15px;
       }
 
-      tr:last-child td {
-        border-bottom: 0;
+      tbody tr {
+        transition: background 160ms ease;
       }
 
-      .case-name,
-      .latency {
-        display: block;
-        color: var(--ink);
-        font-weight: 780;
+      tbody tr:hover {
+        background: var(--hover-bg);
       }
 
       .case-name {
+        display: block;
+        color: var(--ink);
         font-size: 16px;
+        font-weight: 600;
+        letter-spacing: -0.01em;
       }
 
       .case-detail,
-      .server-time {
+      .server-time,
+      .cell-meta {
         display: block;
         margin-top: 4px;
         color: var(--muted);
-        font-size: 12px;
+        font-size: 13px;
+        line-height: 1.45;
       }
 
       .latency {
-        font-size: 17px;
+        display: block;
+        color: var(--ink);
+        font-size: 19px;
+        font-weight: 600;
+        letter-spacing: -0.01em;
+        font-variant-numeric: tabular-nums;
+      }
+
+      .bar-track {
+        display: block;
+        width: min(180px, 100%);
+        height: 9px;
+        margin-top: 10px;
+        background: var(--ink-08);
+        border-radius: 999px;
+        overflow: hidden;
+      }
+
+      .bar-track i {
+        display: block;
+        height: 100%;
+        border-radius: 999px;
+        transform-origin: left center;
+        animation: barGrow 0.85s cubic-bezier(0.16, 1, 0.3, 1) both;
+      }
+
+      @keyframes barGrow {
+        from {
+          transform: scaleX(0);
+        }
+        to {
+          transform: scaleX(1);
+        }
+      }
+
+      .bar-sgl i {
+        background: var(--bar-sgl);
+      }
+
+      .bar-vllm i,
+      .bar-neutral i {
+        background: var(--bar-vllm);
       }
 
       .winner {
         display: inline-flex;
         align-items: center;
-        gap: 8px;
-        padding: 8px 10px;
+        gap: 7px;
+        font-size: 13.5px;
+        font-weight: 600;
+        letter-spacing: -0.005em;
+        color: var(--accent-strong);
+        background: var(--accent-tint);
+        padding: 6px 13px;
         border-radius: 999px;
-        background: rgba(237, 85, 85, 0.12);
-        color: #b72b2b;
-        font-size: 13px;
-        font-weight: 850;
         white-space: nowrap;
-      }
-
-      .winner.vllm {
-        background: rgba(77, 127, 180, 0.13);
-        color: #285e96;
       }
 
       .winner::before {
         content: "";
-        width: 8px;
-        height: 8px;
-        border-radius: 3px;
-        background: currentColor;
+        width: 7px;
+        height: 7px;
+        border-radius: 999px;
+        background: var(--accent);
+      }
+
+      .winner.muted {
+        color: var(--muted);
+        background: var(--ink-04);
+      }
+
+      .winner.muted::before {
+        background: var(--faint);
+      }
+
+      .ratio {
+        display: inline-block;
+        margin-top: 8px;
+        font-size: 12.5px;
+        font-weight: 500;
+        color: var(--muted);
+        font-variant-numeric: tabular-nums;
+      }
+
+      .status-pill {
+        display: inline-block;
+        font-size: 11px;
+        font-weight: 600;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        color: var(--muted);
       }
 
       .note-row {
-        padding: 18px 20px 22px;
         border-top: 1px solid var(--hair);
-        background: rgba(255, 255, 255, 0.38);
+        margin-top: 8px;
+        padding: 20px 0 4px;
         color: var(--muted);
-        font-size: 13px;
+        font-size: 13.5px;
+        line-height: 1.6;
+        max-width: 820px;
       }
 
-      .history-panel {
+      /* ---- benchmark chart view ---- */
+      .bench-view-toggle {
+        display: inline-flex;
+        gap: 4px;
+        padding: 4px;
+        background: var(--ink-04);
+        border-radius: 999px;
+      }
+
+      .bench-view-toggle button {
+        font-size: 13px;
+        font-weight: 500;
+        color: var(--muted);
+        padding: 6px 16px;
+        border-radius: 999px;
+        transition: color 160ms ease, background 160ms ease, box-shadow 160ms ease;
+      }
+
+      .bench-view-toggle button:hover {
+        color: var(--ink);
+      }
+
+      .bench-view-toggle button[aria-pressed="true"] {
+        color: var(--accent-strong);
+        background: var(--paper-2);
+        box-shadow: var(--shadow-1);
+      }
+
+      .bench-chart {
+        display: grid;
+        gap: 12px;
+      }
+
+      .chart-hint {
+        margin: 0 0 10px;
+        font-size: 12.5px;
+        color: var(--muted);
+      }
+
+      .chart-hint b {
+        color: var(--ink);
+        font-weight: 600;
+      }
+
+      .chart-empty {
+        margin: 0;
+        padding: 16px 0;
+        color: var(--muted);
+        font-size: 15px;
+      }
+
+      .matchup {
+        padding: 22px clamp(18px, 2.5vw, 26px);
+        border-radius: var(--r-md);
+        background: var(--ink-04);
+        transition: background 160ms ease;
+      }
+
+      .matchup:hover {
+        background: var(--hover-bg);
+      }
+
+      .matchup-head {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        gap: 16px;
+        margin-bottom: 18px;
+      }
+
+      .matchup-case {
+        margin: 0;
+        font-size: 18px;
+        font-weight: 600;
+        letter-spacing: -0.01em;
+        color: var(--ink);
+      }
+
+      .matchup-meta {
+        display: block;
+        margin-top: 5px;
+        font-size: 13px;
+        color: var(--muted);
+      }
+
+      .bars {
+        display: grid;
+        gap: 12px;
+      }
+
+      .bar-row {
+        display: grid;
+        grid-template-columns: 150px 1fr auto;
+        align-items: center;
+        gap: 16px;
+      }
+
+      .bar-label {
+        font-size: 14px;
+        font-weight: 500;
+        color: var(--muted);
+      }
+
+      .bar-label.sgl {
+        color: var(--accent-strong);
+        font-weight: 600;
+      }
+
+      .bar-row .bar-track {
+        width: 100%;
+        height: 14px;
+        margin: 0;
+      }
+
+      .bar-value {
+        min-width: 66px;
+        text-align: right;
+        font-size: 17px;
+        font-weight: 600;
+        letter-spacing: -0.01em;
+        font-variant-numeric: tabular-nums;
+        color: var(--ink);
+      }
+
+      .matchup-note {
+        margin: 16px 0 0;
+        font-size: 13.5px;
+        line-height: 1.5;
+        color: var(--body);
+      }
+
+      .matchup-sub {
+        margin: 6px 0 0;
+        font-size: 12.5px;
+        line-height: 1.5;
+        color: var(--faint);
+        font-variant-numeric: tabular-nums;
+      }
+
+      .case-note {
+        display: block;
+        margin-top: 6px;
+        font-size: 12.5px;
+        line-height: 1.45;
+        color: var(--muted);
+        max-width: 440px;
+      }
+
+      .history-view-toggle {
+        margin: 2px 0 18px;
+      }
+
+      .bar-label small {
+        display: block;
+        margin-top: 3px;
+        font-weight: 400;
+        font-size: 11.5px;
+        line-height: 1.35;
+        color: var(--faint);
+      }
+
+      .bar-row.status {
+        grid-template-columns: 150px 1fr;
+      }
+
+      .matchup-status {
+        font-size: 13px;
+        color: var(--faint);
+      }
+
+      @media (max-width: 560px) {
+        .bar-row {
+          grid-template-columns: 84px 1fr auto;
+          gap: 10px;
+        }
+        .bar-label {
+          font-size: 12.5px;
+        }
+        .bar-value {
+          font-size: 15px;
+          min-width: 52px;
+        }
+      }
+
+      /* ---- hover card ---- */
+      .hover-card {
+        position: fixed;
+        z-index: 50;
+        max-width: 340px;
+        padding: 16px 18px;
+        border-radius: var(--r-md);
+        background: var(--paper-2);
+        border: 1px solid var(--glass-border);
+        box-shadow: inset 0 1px 0 var(--glass-hi), var(--shadow-2);
+        pointer-events: none;
+        opacity: 0;
+        transform: translateY(6px);
+        transition: opacity 160ms ease, transform 160ms ease;
+      }
+
+      @supports ((backdrop-filter: blur(2px)) or (-webkit-backdrop-filter: blur(2px))) {
+        .hover-card {
+          background: var(--glass-bg);
+          -webkit-backdrop-filter: blur(24px) saturate(1.6);
+          backdrop-filter: blur(24px) saturate(1.6);
+        }
+      }
+
+      .hover-card.visible {
+        opacity: 1;
+        transform: none;
+      }
+
+      .hover-card h4 {
+        margin: 0 0 12px;
+        font-size: 15px;
+        font-weight: 600;
+        letter-spacing: -0.01em;
+        color: var(--ink);
+      }
+
+      .hover-card dl {
+        display: grid;
+        grid-template-columns: auto 1fr;
+        gap: 5px 16px;
+        margin: 0;
+      }
+
+      .hover-card dt {
+        color: var(--faint);
+        font-size: 11px;
+        font-weight: 600;
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
+        padding-top: 2px;
+      }
+
+      .hover-card dd {
+        margin: 0;
+        color: var(--body);
+        font-size: 13px;
+        font-variant-numeric: tabular-nums;
+      }
+
+      .hover-card .hc-note {
+        margin: 12px 0 0;
+        padding-top: 12px;
         border-top: 1px solid var(--hair);
-        background: rgba(255, 255, 255, 0.28);
+        color: var(--muted);
+        font-size: 13px;
+        line-height: 1.5;
+      }
+
+      /* ---- history ---- */
+      .history-panel {
+        margin-top: 52px;
+        padding-top: 4px;
       }
 
       .history-head {
         display: grid;
         grid-template-columns: minmax(0, 1fr) auto;
-        gap: 18px;
+        gap: 20px;
         align-items: end;
-        padding: 24px 24px 16px;
+        padding-bottom: 20px;
       }
 
       .history-head h3 {
         margin: 0;
-        font-size: clamp(24px, 3.2vw, 40px);
-        line-height: 1;
-        letter-spacing: 0;
+        font-family: var(--serif);
+        font-size: clamp(20px, 2.2vw, 27px);
+        font-weight: 500;
+        letter-spacing: -0.015em;
       }
 
       .history-head p {
-        margin: 8px 0 0;
-        max-width: 780px;
+        margin: 10px 0 0;
+        max-width: 580px;
         color: var(--body);
-        font-size: 14px;
+        font-size: 15px;
+        line-height: 1.55;
       }
 
       .history-tabs {
         display: flex;
-        gap: 7px;
+        gap: 8px;
         flex-wrap: wrap;
         justify-content: flex-end;
       }
 
       .history-tabs button {
-        min-height: 36px;
-        padding: 8px 11px;
-        border: 1px solid var(--hair);
+        font-size: 13px;
+        font-weight: 500;
+        color: var(--muted);
+        padding: 7px 14px;
         border-radius: 999px;
-        background: rgba(255, 255, 255, 0.52);
-        color: var(--body);
-        cursor: pointer;
-        font-size: 12px;
-        font-weight: 800;
+        border: 1px solid var(--hair-strong);
+        transition: color 160ms ease, border-color 160ms ease, background 160ms ease;
       }
 
-      .history-tabs button[aria-pressed="true"] {
-        background: var(--ink);
-        color: white;
+      .history-tabs button:hover {
+        color: var(--ink);
         border-color: var(--ink);
       }
 
+      .history-tabs button[aria-pressed="true"] {
+        color: var(--accent-strong);
+        border-color: transparent;
+        background: var(--accent-tint);
+      }
+
       .history-summary {
-        display: grid;
-        grid-template-columns: repeat(4, minmax(0, 1fr));
-        gap: 10px;
-        padding: 0 24px 20px;
-      }
-
-      .history-stat {
-        min-height: 86px;
-        padding: 15px;
-        border: 1px solid var(--hair);
-        border-radius: 16px;
-        background: rgba(255, 255, 255, 0.52);
-      }
-
-      .history-stat.note {
-        grid-column: 1 / -1;
-        min-height: 0;
-        background: rgba(255, 255, 255, 0.34);
-      }
-
-      .history-stat b {
-        display: block;
-        color: var(--ink);
-        font-size: 21px;
-        line-height: 1;
-      }
-
-      .history-stat span {
-        display: block;
-        margin-top: 8px;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px 26px;
+        padding: 18px 24px;
+        border-radius: var(--r-md);
+        background: var(--ink-04);
+        font-size: 14px;
         color: var(--muted);
-        font-size: 12px;
+      }
+
+      .history-summary .hs-title {
+        color: var(--ink);
+        font-weight: 600;
+      }
+
+      .history-table {
+        margin-top: 8px;
       }
 
       .history-table table {
-        min-width: 1040px;
+        min-width: 1000px;
       }
 
-      .cell-meta {
-        display: block;
-        margin-top: 3px;
-        color: var(--muted);
-        font-size: 11px;
-        line-height: 1.28;
-      }
-
-      .ratio {
-        display: inline-flex;
-        margin-top: 7px;
-        padding: 3px 7px;
-        border-radius: 999px;
-        background: rgba(18, 20, 24, 0.06);
-        color: var(--body);
-        font-size: 11px;
-        font-weight: 850;
-      }
-
-      .status-pill {
-        display: inline-flex;
-        align-items: center;
-        min-height: 26px;
-        padding: 5px 8px;
-        border-radius: 999px;
-        background: rgba(113, 119, 130, 0.12);
-        color: #5a616b;
-        font-size: 11px;
-        font-weight: 850;
-        letter-spacing: 0.04em;
-        text-transform: uppercase;
-      }
-
-      .status-pill.failed {
-        background: rgba(237, 85, 85, 0.12);
-        color: #b72b2b;
-      }
-
-      .winner.muted {
-        background: rgba(18, 20, 24, 0.06);
-        color: var(--body);
-      }
-
+      /* ---- footer ---- */
       .footer {
-        padding: 34px 0 54px;
+        border-top: 1px solid var(--hair);
+        padding: 40px 0 64px;
         color: var(--muted);
-        font-size: 13px;
+        font-size: 14px;
       }
 
       .footer-inner {
         display: flex;
         justify-content: space-between;
-        align-items: flex-start;
-        gap: 20px;
-        border-top: 1px solid var(--hair);
-        padding-top: 22px;
+        align-items: baseline;
+        gap: 24px;
+      }
+
+      .footer strong {
+        display: block;
+        margin-bottom: 6px;
+        font-family: var(--serif);
+        font-weight: 500;
+        font-size: 18px;
+        letter-spacing: -0.01em;
+        color: var(--ink);
       }
 
       .footer-links {
         display: flex;
         flex-wrap: wrap;
         justify-content: flex-end;
-        gap: 10px;
+        gap: 14px 24px;
       }
 
-      .footer a {
-        color: var(--body);
-        font-weight: 730;
+      .footer-links a {
+        color: var(--muted);
+        transition: color 160ms ease;
+      }
+
+      .footer-links a:hover {
+        color: var(--accent-strong);
       }
 
       @media (prefers-reduced-motion: reduce) {
@@ -921,10 +1438,11 @@
         *::after {
           scroll-behavior: auto !important;
           transition: none !important;
+          animation: none !important;
         }
       }
 
-      @media (max-width: 980px) {
+      @media (max-width: 960px) {
         .hero,
         .section-head,
         .explorer,
@@ -932,90 +1450,72 @@
           grid-template-columns: 1fr;
         }
 
-        .hero {
-          min-height: auto;
-        }
-
-        .detail-panel {
-          min-height: auto;
-        }
-
-        .detail-grid,
         .benchmark-meta,
-        .history-summary {
+        .detail-grid {
           grid-template-columns: repeat(2, minmax(0, 1fr));
         }
       }
 
-      @media (max-width: 680px) {
+      @media (max-width: 640px) {
         .shell {
-          width: min(100vw - 24px, 1160px);
+          width: calc(100vw - 32px);
         }
 
-        .topbar {
-          position: static;
-          align-items: flex-start;
+        .topbar-inner {
           flex-direction: column;
-          border-radius: 18px;
-        }
-
-        .nav-links {
-          justify-content: flex-start;
-        }
-
-        .hero {
-          padding-top: 54px;
+          align-items: flex-start;
+          gap: 12px;
         }
 
         .split-summary,
-        .detail-grid,
         .lesson-grid,
         .benchmark-meta,
-        .history-head,
-        .history-summary,
-        .footer-inner {
+        .detail-grid,
+        .history-head {
           grid-template-columns: 1fr;
         }
 
         .system-line {
           grid-template-columns: 1fr;
-          gap: 6px;
+          gap: 4px;
         }
 
-        .detail-top,
-        details.benchmark-shell > summary,
-        .footer-inner {
-          display: grid;
-        }
-
-        .footer-links {
-          justify-content: flex-start;
+        .legend {
+          margin-left: 0;
         }
 
         .history-tabs {
+          justify-content: flex-start;
+        }
+
+        .footer-inner {
+          flex-direction: column;
+        }
+
+        .footer-links {
           justify-content: flex-start;
         }
       }
     </style>
   </head>
   <body>
-    <header class="shell topbar" aria-label="SGLang-Diffusion navigation">
-      <a class="brand" href="#top" aria-label="SGLang-Diffusion home">
-        <span class="brand-mark">SG</span>
-        <span>SGLang-Diffusion</span>
-      </a>
-      <nav class="nav-links">
-        <a href="#performance">Performance gains</a>
-        <a href="#lessons">What we learn</a>
-        <a href="#benchmarks">Benchmarks</a>
-        <a href="https://docs.sglang.io/docs/sglang-diffusion/" target="_blank" rel="noreferrer">Docs</a>
-      </nav>
+    <header class="topbar" aria-label="SGLang-Diffusion navigation">
+      <div class="shell topbar-inner">
+        <a class="brand" href="#top">SGLang-Diffusion</a>
+        <nav class="nav-links">
+          <a href="#performance">Performance gains</a>
+          <a href="#lessons">What we learn</a>
+          <a href="#benchmarks">Benchmarks</a>
+          <a href="https://docs.sglang.io/docs/sglang-diffusion/" target="_blank" rel="noreferrer">Docs ↗</a>
+          <button class="theme-toggle" id="themeToggle" type="button" aria-label="Toggle color theme">Dark</button>
+        </nav>
+      </div>
     </header>
 
     <main>
       <section class="shell hero" id="top">
         <div>
-          <p class="eyebrow">Native image and video serving</p>
+          <p class="label">Native image and video serving</p>
           <h1>SGLang-Diffusion</h1>
           <p class="hero-copy">
             A native serving stack for image and video generation. The main performance gains come from the
@@ -1023,18 +1523,14 @@
             kernel paths, and carefully measured lossy acceleration.
           </p>
           <div class="hero-actions">
-            <a class="pill primary" href="#performance">Explore the stack</a>
-            <a class="pill" href="#benchmarks">View benchmark data</a>
-            <a class="pill" href="https://github.com/sgl-project/sglang" target="_blank" rel="noreferrer">GitHub</a>
+            <a class="ulink" href="#performance">Explore the stack</a>
+            <a class="ulink" href="#benchmarks">View benchmark data</a>
+            <a class="ulink" href="https://github.com/sgl-project/sglang" target="_blank" rel="noreferrer">GitHub ↗</a>
           </div>
         </div>
 
-        <aside class="hero-panel" aria-label="Performance thesis">
-          <div class="panel-label">
-            <span>Customer conversation</span>
-            <span>lossless + lossy</span>
-          </div>
-          <h2>Performance is a stack, not a single trick.</h2>
+        <aside class="thesis" aria-label="Performance thesis">
+          <h2>‘Performance is a stack, not a single trick.’</h2>
           <div class="system-lines">
             <div class="system-line">
               <b>Serving</b>
@@ -1054,7 +1550,7 @@
 
       <section class="shell section" id="performance">
         <div class="section-head">
-          <h2>Where the gains come from</h2>
+          <h2 class="section-title">Where the gains come from</h2>
           <p>
             The clean way to discuss SGLang-Diffusion is to separate output-preserving inference-stack gains from
             lossy optimizations that trade computation for measured quality drift.
@@ -1078,7 +1574,7 @@
           </article>
         </div>
 
-        <section class="glass-panel explorer" aria-label="Interactive performance explorer">
+        <section class="explorer" aria-label="Interactive performance explorer">
           <div class="control-panel">
             <div class="mode-toggle" aria-label="Optimization mode">
               <button type="button" data-mode="lossless" aria-pressed="true">Lossless</button>
@@ -1093,15 +1589,12 @@
       <section class="shell section" id="lessons">
         <div class="lesson-band">
           <article class="lesson-lead">
-            <div>
-              <p class="eyebrow">Architecture lessons</p>
-              <h2>What carries across image and video serving</h2>
-              <p>
-                The useful lesson is not a benchmark trick. It is how to turn diffusion pipelines into a
-                serving system with explicit request lifecycle, stage boundaries, memory policy, parallelism,
-                and quality-aware acceleration.
-              </p>
-            </div>
+            <h2 class="section-title">What carries across image and video serving</h2>
+            <p>
+              The useful lesson is not a benchmark trick. It is how to turn diffusion pipelines into a
+              serving system with explicit request lifecycle, stage boundaries, memory policy, parallelism,
+              and quality-aware acceleration.
+            </p>
           </article>
           <div class="lesson-grid">
             <article class="lesson">
@@ -1133,7 +1626,7 @@
                 More cross-framework data will be added here; current rows are aligned H200 spot-checks against vLLM-Omni.
               </span>
             </span>
-            <span class="chevron" aria-hidden="true">+</span>
+            <span class="marker" aria-hidden="true">+</span>
           </summary>
           <div class="benchmark-meta" aria-label="Benchmark policy">
             <div class="meta-cell">
@@ -1153,9 +1646,26 @@
               <span id="sourceReport">h200-main-b0d888a-flux1-cosmos3-20260610</span>
             </div>
           </div>
-          <div class="table-wrap">
+          <div class="bench-headline" id="benchHeadline" hidden>
+            <p id="benchHeadlineText"></p>
+            <p class="bench-score" id="benchScore"></p>
+          </div>
+          <div class="bench-toolbar" id="benchToolbar" hidden>
+            <div class="bench-view-toggle" id="benchViewToggle" role="tablist" aria-label="Benchmark view">
+              <button type="button" data-view="chart" aria-pressed="true">Chart</button>
+              <button type="button" data-view="table" aria-pressed="false">Table</button>
+            </div>
+            <div class="filter-group" id="modelFilters"><span>Model</span></div>
+            <div class="filter-group" id="gpuFilters"><span>GPUs</span></div>
+            <div class="legend">
+              <i class="l-sgl">SGLang-Diffusion</i>
+              <i class="l-vllm">vLLM-Omni</i>
+            </div>
+          </div>
+          <div class="bench-chart" id="benchChart"></div>
+          <div class="table-wrap" id="benchTableWrap" hidden>
             <table aria-label="Cross-framework latency results">
-              <thead>
+              <thead id="benchHead">
                 <tr>
                   <th>Case</th>
                   <th>GPUs</th>
@@ -1179,7 +1689,12 @@
               <div class="history-tabs" id="historyTabs" aria-label="Historical benchmark sections"></div>
             </div>
             <div class="history-summary" id="historySummary"></div>
-            <div class="table-wrap history-table">
+            <div class="bench-view-toggle history-view-toggle" id="historyViewToggle" role="tablist" aria-label="Historical view">
+              <button type="button" data-view="chart" aria-pressed="true">Chart</button>
+              <button type="button" data-view="table" aria-pressed="false">Table</button>
+            </div>
+            <div class="bench-chart" id="historyChart"></div>
+            <div class="table-wrap history-table" id="historyTableWrap" hidden>
               <table aria-label="Historical cross-framework results">
                 <thead id="historyTableHead"></thead>
                 <tbody id="historyRows"></tbody>
@@ -1209,7 +1724,42 @@
       </div>
     </footer>
 
+    <div class="hover-card" id="hoverCard" role="tooltip"></div>
+
+    <!--
+      Inline data snapshots. These are only used when fetch() is unavailable
+      (e.g. opening this file directly via file://). On a web server / GitHub
+      Pages the page always reads docs/data/*.json directly, so updating the
+      JSON files is all that is needed. To refresh these offline snapshots,
+      run: python3 scripts/refresh_docs_data.py
+    -->
+    <script type="application/json" id="latestDataInline">{"id":"h200-flux1-tpfix-cosmos3-20260611","title":"H200 aligned SGLang-Diffusion vs vLLM-Omni spot-check","updated_at":"2026-06-11","source_report":"reports/flux-fastest-20260610 + reports/h200-main-b0d888a-flux1-cosmos3-20260610","source_script":"scripts/run_flux_fastest_20260610.sh + scripts/run_h200_flux1_cosmos3_spotcheck_20260610.sh","hardware":{"label":"2x NVIDIA H200","gpu_name":"NVIDIA H200","gpus":2},"policy":{"latency_source":"client-side single_e2e latency_s; SGLang rows also report server-side latency when available","selection":"explicit best-known profile per framework for the same case and GPU count","cache":"no response cache, no Cache-DiT, no temporal cache","torch_compile":"FLUX.1 uses torch compile for fastest image path; Cosmos3 keeps torch compile disabled","hardware":"2x NVIDIA H200 devbox, not CI/runner/build/GitHub Actions infrastructure","client_server_breakdown":"client latency is the comparison source; server latency is shown only as diagnostic context"},"frameworks":{"sglang_diffusion_now":{"label":"SGLang-Diffusion","commit":"796a6080518041c671c4bef347a2d46f314f2f90","measured_commit":"e25f72d8bbfab7039e2ec9ccbc38d33a88b329ad","reference_commit":"b0d888a195c3ee30350a7681d36efb0dde5fd4a9","note":"FLUX.1 rows use the TP-sharding fix branch. Cosmos3 rows are the 2026-06-10 reference spot-check because this patch only changes FLUX.1."},"vllm_omni_now":{"label":"vLLM-Omni","vllm":"0.22.0","vllm_omni":"0.22.1.dev31+g73df8326d","vllm_omni_commit":"73df8326d76fe3bba0b7b5a6abf6ad68976f24e8"}},"summary":{"same_gpu_cases":4,"sglang_diffusion_wins":4,"vllm_omni_wins":0,"headline":"On the aligned H200 spot-check, SGLang-Diffusion wins 4 of 4 same-GPU cases after the FLUX.1 TP sharding fix."},"rows":[{"case_id":"flux1_dev_t2i_1024","case":"FLUX.1-dev T2I","details":"1024x1024 · 50 steps · cfg 3.5","gpus":"1 GPU","torch_compile":"on","sglang_diffusion":{"client_latency_s":6.556,"server_latency_s":6.381,"profile":"h100-h200-1gpu-speed-compile"},"vllm_omni":{"client_latency_s":7.288,"profile":"h100-h200-1gpu-compile"},"winner":"SGLang-Diffusion","winner_speedup":"1.11x","note":"same-GPU image path; SGLang speed mode + CUDA norm; TP-fix branch"},{"case_id":"flux1_dev_t2i_1024","case":"FLUX.1-dev T2I","details":"1024x1024 · 50 steps · cfg 3.5","gpus":"2 GPU TP","torch_compile":"on","sglang_diffusion":{"client_latency_s":4.15,"server_latency_s":4.005,"profile":"h100-h200-2gpu-tp-speed-compile"},"vllm_omni":{"client_latency_s":5.912,"profile":"h100-h200-2gpu-tp-compile"},"winner":"SGLang-Diffusion","winner_speedup":"1.42x","note":"same 2GPU TP image path after FLUX.1 TP sharding fix"},{"case_id":"cosmos3_nano_t2i_720p","case":"Cosmos3 Nano T2I","details":"1280x720 · 35 steps · cfg 6","gpus":"1 GPU","torch_compile":"off","sglang_diffusion":{"client_latency_s":1.859,"server_latency_s":1.732,"profile":"h200-1gpu-fa-speed"},"vllm_omni":{"client_latency_s":1.915,"profile":"h200-1gpu-fa"},"winner":"SGLang-Diffusion","winner_speedup":"1.03x","note":"same-GPU Cosmos3 image path"},{"case_id":"cosmos3_nano_t2v_720p_189f","case":"Cosmos3 Nano T2V","details":"1280x720 · 189 frames · 35 steps · cfg 6","gpus":"2 GPU CFG","torch_compile":"off","sglang_diffusion":{"client_latency_s":107.159,"server_latency_s":104.602,"profile":"h200-2gpu-cfg-speed"},"vllm_omni":{"client_latency_s":117.82,"profile":"h200-2gpu-cfg"},"winner":"SGLang-Diffusion","winner_speedup":"1.10x","note":"same 2GPU CFG-only video path"}]}</script>
+    <script type="application/json" id="historicalDataInline">{"id":"historical-cross-framework-20260610","updated_at":"2026-06-11","frameworks":{"sglang":"SGLang-Diffusion","vllm-omni":"vLLM-Omni","lightx2v":"LightX2V"},"policy":{"public_source":"Formal manifests plus committed reports/raw; tmp source JSON is used only when referenced by a manifest.","latency_source":"client-side latency for headline comparisons; server-side latency is diagnostic only.","cache":"No response cache, no Cache-DiT, no temporal cache in these rows."},"summary":{"sections":4,"h200_full_matrix_single_rows":13,"h200_full_matrix_sglang_wins":12,"h200_full_matrix_other_wins":0,"h200_throughput_sglang_wins":4,"h200_throughput_other_wins":0},"sections":[{"id":"manifests_20260510-h200-single-e2e.json + manifests_20260514-h200-wan-vllm-omni.json + reports_h200-video-parallelism-refresh-20260611_single_e2e","title":"H200 full matrix","subtitle":"Single-request latency across image and video cases, with refreshed vLLM-Omni CFG and LightX2V FA3 Wan video rows.","mode":"single_e2e","source_manifest":"manifests/20260510-h200-single-e2e.json + manifests/20260514-h200-wan-vllm-omni.json + reports/h200-video-parallelism-refresh-20260611","source_run_id":"h200-framework-comparison-merged","reproduce":"scripts/generate_h200_report_artifacts.sh","summary":{"rows":13,"comparable_rows":12,"sglang_diffusion_wins":12,"other_wins":0},"rows":[{"case_id":"flux1_dev_t2i_1024","case":"FLUX.1-dev T2I","details":"1024x1024 · 50 steps · cfg 3.5","mode":"single_e2e","winner":"sglang","cells":{"sglang":{"gpus":1,"profile":"default","status":"ok","latency_s":7.69,"ratio_to_sglang":1.0},"vllm-omni":{"gpus":1,"profile":"default","status":"ok","latency_s":8.682,"ratio_to_sglang":1.129},"lightx2v":{"status":"no_profile","reason":"Tracked LightX2V version has no FLUX.1 serving path."}}},{"case_id":"flux2_dev_t2i_1024","case":"FLUX.2-dev T2I","details":"1024x1024 · 50 steps · cfg 4","mode":"single_e2e","winner":"sglang","cells":{"sglang":{"gpus":1,"profile":"default","status":"ok","latency_s":25.24,"ratio_to_sglang":1.0},"vllm-omni":{"gpus":1,"profile":"default","status":"ok","latency_s":26.533,"ratio_to_sglang":1.051},"lightx2v":{"gpus":1,"profile":"h200-fa2-flashinfer","status":"ok","latency_s":31.071,"ratio_to_sglang":1.231}}},{"case_id":"qwen_image_2512_t2i_1024","case":"Qwen-Image-2512 T2I","details":"1024x1024 · 50 steps · cfg 1","mode":"single_e2e","winner":"sglang","cells":{"sglang":{"gpus":1,"profile":"default","status":"ok","latency_s":6.77,"ratio_to_sglang":1.0},"vllm-omni":{"gpus":1,"profile":"default","status":"ok","latency_s":8.717,"ratio_to_sglang":1.288},"lightx2v":{"status":"no_profile","reason":"Tracked LightX2V version has no Qwen-Image T2I serving path."}}},{"case_id":"qwen_image_edit_2511","case":"Qwen-Image-Edit-2511","details":"1024x1024 · 40 steps · cfg 1","mode":"single_e2e","winner":"sglang","cells":{"sglang":{"gpus":1,"profile":"default","status":"ok","latency_s":12.06,"ratio_to_sglang":1.0},"vllm-omni":{"gpus":1,"profile":"default","status":"ok","latency_s":15.31,"ratio_to_sglang":1.269},"lightx2v":{"status":"no_profile","reason":"Tracked LightX2V version has no Qwen-Image-Edit serving path."}}},{"case_id":"zimage_turbo_t2i_1024","case":"Z-Image-Turbo T2I","details":"1024x1024 · 9 steps · cfg 0","mode":"single_e2e","winner":"sglang","cells":{"sglang":{"gpus":1,"profile":"default","status":"ok","latency_s":1.35,"ratio_to_sglang":1.0},"vllm-omni":{"gpus":1,"profile":"default","status":"ok","latency_s":2.954,"ratio_to_sglang":2.188},"lightx2v":{"gpus":1,"profile":"h200-fa2-flashinfer","status":"ok","latency_s":4.012,"ratio_to_sglang":2.972}}},{"case_id":"wan21_t2v_1_3b_480p","case":"Wan2.1 T2V 1.3B 480p","details":"832x480x81f · 50 steps · cfg 6","mode":"single_e2e","winner":"sglang","cells":{"sglang":{"gpus":2,"profile":"h200-2gpu-cfg-bf16-vae-resident","status":"ok","latency_s":26.041,"server_latency_s":24.687,"ratio_to_sglang":1.0},"vllm-omni":{"gpus":2,"profile":"h200-2gpu-cfg","status":"ok","latency_s":29.502,"ratio_to_sglang":1.133},"lightx2v":{"gpus":2,"profile":"h200-fa3","status":"ok","latency_s":29.058,"ratio_to_sglang":1.116}}},{"case_id":"wan21_i2v_14b_480p","case":"Wan2.1 I2V 14B 480p","details":"832x480x81f · 40 steps · cfg 5","mode":"single_e2e","winner":"sglang","cells":{"sglang":{"gpus":4,"profile":"Best known SGLang command for the benchmark repo default profile.","status":"ok","latency_s":61.149,"ratio_to_sglang":1.0},"vllm-omni":{"gpus":4,"profile":"h200-4gpu-tp","status":"ok","latency_s":110.572,"ratio_to_sglang":1.808},"lightx2v":{"gpus":4,"profile":"h200-fa2","status":"ok","latency_s":90.228,"ratio_to_sglang":1.476}}},{"case_id":"wan22_t2v_a14b_720p","case":"Wan2.2 T2V A14B 720p","details":"1280x720x81f · 40 steps · cfg 4/3","mode":"single_e2e","winner":"sglang","cells":{"sglang":{"gpus":4,"profile":"Best known SGLang command for the benchmark repo default profile.","status":"ok","latency_s":218.949,"ratio_to_sglang":1.0},"vllm-omni":{"gpus":4,"profile":"h200-4gpu-tp","status":"ok","latency_s":327.024,"ratio_to_sglang":1.494},"lightx2v":{"gpus":4,"profile":"h200-fa2","status":"ok","latency_s":339.941,"ratio_to_sglang":1.553}}},{"case_id":"wan22_ti2v_5b_704p","case":"Wan2.2 TI2V 5B 704p","details":"1280x704x81f · 50 steps · cfg 5","mode":"single_e2e","winner":"sglang","cells":{"sglang":{"gpus":2,"profile":"h200-2gpu-cfg-bf16-vae-resident","status":"ok","latency_s":33.059,"ratio_to_sglang":1.0},"vllm-omni":{"gpus":2,"profile":"h200-2gpu-cfg","status":"ok","latency_s":36.087,"ratio_to_sglang":1.092},"lightx2v":{"gpus":2,"profile":"h200-fa3","status":"ok","latency_s":35.177,"ratio_to_sglang":1.064}}},{"case_id":"ltx2_twostage_t2v","case":"LTX-2 two-stage T2V","details":"768x512x121f · 40 steps · cfg 4","mode":"single_e2e","winner":"sglang","cells":{"sglang":{"gpus":2,"profile":"H200 command for the LTX2 two-stage 121-frame case.","status":"ok","latency_s":12.667,"ratio_to_sglang":1.0},"vllm-omni":{"gpus":2,"profile":"default","status":"failed","reason":"vllm-omni server exited before health check passed (exit 1)"},"lightx2v":{"gpus":2,"profile":"h200-2gpu","status":"ok","latency_s":23.073,"ratio_to_sglang":1.822}}},{"case_id":"ltx2.3_twostage_t2v_2gpus","case":"LTX-2.3 two-stage T2V","details":"768x512x121f · 30 steps · cfg 3","mode":"single_e2e","winner":"sglang","cells":{"sglang":{"gpus":2,"profile":"Cookbook-aligned H200 command for the LTX2.3 two-stage 121-frame case.","status":"ok","latency_s":16.249,"ratio_to_sglang":1.0},"vllm-omni":{"status":"no_profile","reason":"No validated vLLM-Omni LTX-2.3 two-stage profile is tracked."},"lightx2v":{"gpus":2,"profile":"h200-2gpu-tp","status":"failed","reason":"LightX2V task FAILED: {'task_id': '2D7D-WU61-90I0-4G4K-WVMK', 'status': 'failed', 'start_time': '2026-05-13T13:24:52.753528', 'end_time': '2026-05-13T13:24:53.523421', 'error': \"'LTX2AttentionTP' object has no attribute "}}},{"case_id":"wan21_i2v_14b_720p","case":"Wan2.1 I2V 14B 720p","details":"1280x720x81f · 40 steps · cfg 5","mode":"single_e2e","winner":"sglang","cells":{"sglang":{"gpus":4,"profile":"Best known SGLang command for the benchmark repo default profile.","status":"ok","latency_s":217.476,"ratio_to_sglang":1.0},"vllm-omni":{"gpus":4,"profile":"h200-4gpu-tp","status":"ok","latency_s":361.233,"ratio_to_sglang":1.661},"lightx2v":{"gpus":4,"profile":"h200-fa2","status":"ok","latency_s":342.82,"ratio_to_sglang":1.576}}},{"case_id":"wan22_i2v_a14b_720p","case":"Wan2.2 I2V A14B 720p","details":"1280x720x81f · 40 steps · cfg 3.5/3.5","mode":"single_e2e","winner":"sglang","cells":{"sglang":{"gpus":4,"profile":"Best known SGLang command for the benchmark repo default profile.","status":"ok","latency_s":214.487,"ratio_to_sglang":1.0},"vllm-omni":{"gpus":4,"profile":"h200-4gpu-tp","status":"ok","latency_s":353.477,"ratio_to_sglang":1.648},"lightx2v":{"gpus":4,"profile":"h200-fa2","status":"ok","latency_s":339.803,"ratio_to_sglang":1.584}}}]},{"id":"manifests_20260511-h200-throughput-fast.json + manifests_20260514-h200-wan-vllm-omni_throughput","title":"H200 high-pressure throughput","subtitle":"32 image requests at concurrency 4 and 8 video requests at concurrency 2 where tracked.","mode":"throughput","source_manifest":"manifests/20260511-h200-throughput-fast.json + manifests/20260514-h200-wan-vllm-omni.json","source_run_id":"h200-framework-comparison-merged","reproduce":"scripts/generate_h200_report_artifacts.sh","summary":{"rows":4,"comparable_rows":4,"sglang_diffusion_wins":4,"other_wins":0},"rows":[{"case_id":"flux2_dev_t2i_1024","case":"FLUX.2-dev T2I","details":"1024x1024 · 50 steps · cfg 4","mode":"throughput","winner":"sglang","cells":{"sglang":{"gpus":1,"profile":"default","status":"ok","latency_s":98.888,"qps":0.0404,"p50_s":98.888,"p95_s":99.353,"p99_s":99.387,"requests":32,"concurrency":4,"ratio_to_sglang":1.0},"vllm-omni":{"gpus":1,"profile":"default","status":"ok","latency_s":105.024,"qps":0.0381,"p50_s":105.024,"p95_s":105.372,"p99_s":105.441,"requests":32,"concurrency":4,"ratio_to_sglang":0.943},"lightx2v":{"gpus":1,"profile":"h200-fa3-flashinfer","status":"ok","latency_s":109.412,"qps":0.0366,"p50_s":109.412,"p95_s":109.765,"p99_s":110.996,"requests":32,"concurrency":4,"ratio_to_sglang":0.906}}},{"case_id":"zimage_turbo_t2i_1024","case":"Z-Image-Turbo T2I","details":"1024x1024 · 9 steps · cfg 0","mode":"throughput","winner":"sglang","cells":{"sglang":{"gpus":1,"profile":"default","status":"ok","latency_s":4.52,"qps":0.8887,"p50_s":4.52,"p95_s":4.672,"p99_s":4.691,"requests":32,"concurrency":4,"ratio_to_sglang":1.0},"vllm-omni":{"gpus":1,"profile":"default","status":"ok","latency_s":10.551,"qps":0.3778,"p50_s":10.551,"p95_s":10.565,"p99_s":10.784,"requests":32,"concurrency":4,"ratio_to_sglang":0.425},"lightx2v":{"gpus":1,"profile":"h200-fa3-flashinfer","status":"ok","latency_s":11.138,"qps":0.3632,"p50_s":11.138,"p95_s":12.102,"p99_s":12.214,"requests":32,"concurrency":4,"ratio_to_sglang":0.409}}},{"case_id":"wan21_t2v_1_3b_480p","case":"Wan2.1 T2V 1.3B 480p","details":"832x480x81f · 50 steps · cfg 6","mode":"throughput","winner":"sglang","cells":{"sglang":{"gpus":2,"profile":"default","status":"ok","latency_s":53.124,"qps":0.0378,"p50_s":53.124,"p95_s":53.128,"p99_s":53.128,"requests":8,"concurrency":2,"ratio_to_sglang":1.0},"vllm-omni":{"gpus":2,"profile":"h200-2gpu-tp","status":"ok","latency_s":86.796,"qps":0.023,"p50_s":86.796,"p95_s":87.674,"p99_s":87.767,"requests":8,"concurrency":2,"ratio_to_sglang":0.608},"lightx2v":{"gpus":2,"profile":"h200-fa3","status":"ok","latency_s":57.301,"qps":0.0346,"p50_s":57.301,"p95_s":58.978,"p99_s":59.264,"requests":8,"concurrency":2,"ratio_to_sglang":0.915}}},{"case_id":"wan22_ti2v_5b_704p","case":"Wan2.2 TI2V 5B 704p","details":"1280x704x81f · 50 steps · cfg 5","mode":"throughput","winner":"sglang","cells":{"sglang":{"gpus":2,"profile":"h100-h200-2gpu","status":"ok","latency_s":70.177,"qps":0.0283,"p50_s":70.177,"p95_s":71.173,"p99_s":71.175,"requests":8,"concurrency":2,"ratio_to_sglang":1.0},"vllm-omni":{"gpus":2,"profile":"h200-2gpu-tp","status":"ok","latency_s":117.459,"qps":0.017,"p50_s":117.459,"p95_s":118.688,"p99_s":119.002,"requests":8,"concurrency":2,"ratio_to_sglang":0.601},"lightx2v":{"gpus":2,"profile":"h200-fa3","status":"ok","latency_s":70.298,"qps":0.0245,"p50_s":70.298,"p95_s":103.479,"p99_s":113.033,"requests":8,"concurrency":2,"ratio_to_sglang":0.866}}}]},{"id":"manifests_20260601-h200-cosmos3_single_e2e","title":"Cosmos3 H200 history","subtitle":"Earlier Cosmos3 Nano SGLang-Diffusion main vs vLLM-Omni PR #3454 comparison.","mode":"single_e2e","source_manifest":"manifests/20260601-h200-cosmos3.json","source_run_id":"cosmos3-origin-main-64a1dec-vs-vllm-2gpu-video-20260602","reproduce":"scripts/run_h200_cosmos3_20260601.sh","summary":{"rows":3,"comparable_rows":3,"sglang_diffusion_wins":3,"other_wins":0},"rows":[{"case_id":"cosmos3_nano_t2i_720p","case":"Cosmos3 Nano T2I","details":"1280x720 · 35 steps · cfg 6","mode":"single_e2e","winner":"sglang","cells":{"sglang":{"gpus":1,"profile":"h200-1gpu-fa","status":"ok","latency_s":1.877,"server_latency_s":1.76,"ratio_to_sglang":1.0},"vllm-omni":{"gpus":1,"profile":"h200-1gpu-fa","status":"ok","latency_s":1.943,"ratio_to_sglang":1.035},"lightx2v":{"status":"no_profile","reason":"No validated aligned serving profile is tracked."}}},{"case_id":"cosmos3_nano_t2v_720p_189f","case":"Cosmos3 Nano T2V","details":"1280x720x189f · 35 steps · cfg 6","mode":"single_e2e","winner":"sglang","cells":{"sglang":{"gpus":2,"profile":"h200-2gpu-cfg","status":"ok","latency_s":109.228,"server_latency_s":106.469,"ratio_to_sglang":1.0},"vllm-omni":{"gpus":2,"profile":"h200-2gpu-cfg","status":"ok","latency_s":116.215,"ratio_to_sglang":1.064},"lightx2v":{"status":"no_profile","reason":"No validated aligned serving profile is tracked."}}},{"case_id":"cosmos3_nano_i2v_720p_189f","case":"Cosmos3 Nano I2V","details":"1280x720x189f · 35 steps · cfg 6","mode":"single_e2e","winner":"sglang","cells":{"sglang":{"gpus":2,"profile":"h200-2gpu-cfg","status":"ok","latency_s":112.238,"ratio_to_sglang":1.0},"vllm-omni":{"gpus":2,"profile":"h200-2gpu-cfg","status":"ok","latency_s":119.661,"ratio_to_sglang":1.066},"lightx2v":{"status":"no_profile","reason":"No validated aligned serving profile is tracked."}}}]},{"id":"flux_fastest_20260610","title":"FLUX fastest history","subtitle":"Best recorded 1GPU/2GPU TP profile per framework series; torch compile allowed; no cache.","mode":"single_e2e","source_report":"reports/flux-fastest-20260610","reproduce":"scripts/run_flux_fastest_20260610.sh","summary":{"rows":4,"sglang_now_wins":4,"other_wins":0},"rows":[{"case_id":"flux1_dev_t2i_1024","case":"FLUX.1-dev T2I","details":"1024x1024 · 50 steps · cfg 3.5","hardware":"H200","mode":"single_e2e","torch_compile":"on","winner":"sglang_now","cells":{"sglang_before":{"gpus":"1 GPU","profile":"h100-h200-1gpu-compile","status":"failed","reason":"sglang server exited before health check passed (exit 1)","source_result":"reports/flux-fastest-20260610/failures/h200-flux-sgld-before-20260610-sglang-h100-h200-1gpu-compile.json"},"sglang_now":{"gpus":"2 GPU TP","profile":"h100-h200-2gpu-tp-speed-compile","status":"ok","latency_s":4.15,"server_latency_s":4.005,"source_result":"reports/flux-fastest-20260610/raw/h200-flux1-sgld-tpfix-native-20260611-sglang-h100-h200-2gpu-tp-speed-compile.json","ratio_to_sglang_now":1.0},"vllm_omni_now":{"gpus":"2 GPU TP","profile":"h100-h200-2gpu-tp-compile","status":"ok","latency_s":5.912,"source_result":"reports/flux-fastest-20260610/raw/h200-flux-vllm-now-20260610-vllm-omni-h100-h200-2gpu-tp-compile.json","ratio_to_sglang_now":1.425},"lightx2v_now":{"status":"not_run","reason":"No successful recorded profile in this report."}}},{"case_id":"flux2_dev_t2i_1024","case":"FLUX.2-dev T2I","details":"1024x1024 · 50 steps · cfg 4","hardware":"H200","mode":"single_e2e","torch_compile":"on","winner":"sglang_now","cells":{"sglang_before":{"gpus":"1 GPU","profile":"h100-h200-1gpu-compile","status":"failed","reason":"sglang server exited before health check passed (exit 1)","source_result":"reports/flux-fastest-20260610/failures/h200-flux-sgld-before-20260610-sglang-h100-h200-1gpu-compile.json"},"sglang_now":{"gpus":"2 GPU TP","profile":"h100-h200-2gpu-tp-speed-compile","status":"ok","latency_s":12.507,"server_latency_s":12.409,"source_result":"reports/flux-fastest-20260610/raw/h200-flux-sgld-now-xet-20260610-sglang-h100-h200-2gpu-tp-speed-compile.json","ratio_to_sglang_now":1.0},"vllm_omni_now":{"gpus":"2 GPU TP","profile":"h100-h200-2gpu-tp-compile","status":"ok","latency_s":16.654,"source_result":"reports/flux-fastest-20260610/raw/h200-flux-vllm-now-20260610-vllm-omni-h100-h200-2gpu-tp-compile.json","ratio_to_sglang_now":1.332},"lightx2v_now":{"status":"not_run","reason":"No successful recorded profile in this report."}}},{"case_id":"flux1_dev_t2i_1024","case":"FLUX.1-dev T2I","details":"1024x1024 · 50 steps · cfg 3.5","hardware":"B200","mode":"single_e2e","torch_compile":"on","winner":"sglang_now","cells":{"sglang_before":{"gpus":"1 GPU","profile":"blackwell-1gpu-compile","status":"ok","latency_s":6.116,"server_latency_s":3.588,"source_result":"reports/flux-fastest-20260610/raw/b200-flux-sgld-before-20260610-sglang-blackwell-1gpu-compile.json","ratio_to_sglang_now":1.695},"sglang_now":{"gpus":"1 GPU","profile":"blackwell-1gpu-speed-compile","status":"ok","latency_s":3.608,"server_latency_s":3.242,"source_result":"reports/flux-fastest-20260610/raw/b200-flux-sgld-now-20260610-sglang-blackwell-1gpu-speed-compile.json","ratio_to_sglang_now":1.0},"vllm_omni_now":{"gpus":"2 GPU TP","profile":"blackwell-2gpu-tp-compile","status":"ok","latency_s":4.224,"source_result":"reports/flux-fastest-20260610/raw/b200-flux-vllm-now-flashinfer-20260610-vllm-omni-blackwell-2gpu-tp-compile.json","ratio_to_sglang_now":1.171},"lightx2v_now":{"status":"not_run","reason":"No successful recorded profile in this report."}}},{"case_id":"flux2_dev_t2i_1024","case":"FLUX.2-dev T2I","details":"1024x1024 · 50 steps · cfg 4","hardware":"B200","mode":"single_e2e","torch_compile":"on","winner":"sglang_now","cells":{"sglang_before":{"gpus":"2 GPU TP","profile":"blackwell-2gpu-tp-compile","status":"ok","latency_s":8.88,"server_latency_s":7.109,"source_result":"reports/flux-fastest-20260610/raw/b200-flux-sgld-before-20260610-sglang-blackwell-2gpu-tp-compile.json","ratio_to_sglang_now":1.419},"sglang_now":{"gpus":"2 GPU TP","profile":"blackwell-2gpu-tp-speed-compile","status":"ok","latency_s":6.256,"server_latency_s":6.15,"source_result":"reports/flux-fastest-20260610/raw/b200-flux-sgld-now-20260610-sglang-blackwell-2gpu-tp-speed-compile.json","ratio_to_sglang_now":1.0},"vllm_omni_now":{"gpus":"2 GPU TP","profile":"blackwell-2gpu-tp-compile","status":"ok","latency_s":12.183,"source_result":"reports/flux-fastest-20260610/raw/b200-flux-vllm-now-flashinfer-20260610-vllm-omni-blackwell-2gpu-tp-compile.json","ratio_to_sglang_now":1.947},"lightx2v_now":{"gpus":"1 GPU","profile":"blackwell-fa2-flashinfer","status":"ok","latency_s":18.032,"source_result":"reports/flux-fastest-20260610/raw/b200-flux-lightx2v-now-fa2-20260610-lightx2v-blackwell-fa2-flashinfer.json","ratio_to_sglang_now":2.882}}}]}]}</script>
+
     <script>
+      /* ---------- theme ---------- */
+      const themeToggle = document.getElementById("themeToggle");
+
+      function currentTheme() {
+        return (
+          document.documentElement.dataset.theme ||
+          (window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light")
+        );
+      }
+
+      function updateThemeLabel() {
+        themeToggle.textContent = currentTheme() === "dark" ? "Light" : "Dark";
+      }
+
+      themeToggle.addEventListener("click", () => {
+        const next = currentTheme() === "dark" ? "light" : "dark";
+        document.documentElement.dataset.theme = next;
+        localStorage.setItem("sgld-theme", next);
+        updateThemeLabel();
+      });
+      updateThemeLabel();
+
+      /* ---------- capabilities explorer ---------- */
       const capabilities = {
         lossless: [
           {
@@ -1426,6 +1976,7 @@
       let activeMode = "lossless";
       let activeIndex = 0;
       let activeHistoryIndex = 0;
+      let historyView = "chart";
 
       const escapeHtml = (value) =>
         String(value ?? "")
@@ -1438,14 +1989,6 @@
         const text = String(value ?? "");
         return text.length > max ? `${text.slice(0, max - 1)}...` : text;
       };
-
-      function statusClass(status) {
-        const normalized = status.toLowerCase();
-        if (normalized === "wip") return "status wip";
-        if (normalized === "quality tradeoff") return "status tradeoff";
-        if (normalized === "method") return "status method";
-        return "status";
-      }
 
       function renderCapabilityRail() {
         capabilityList.innerHTML = capabilities[activeMode]
@@ -1476,14 +2019,14 @@
       function renderCapabilityDetail() {
         const capability = capabilities[activeMode][activeIndex];
         const links = capability.links
-          .map(([label, href]) => `<a class="detail-link" href="${href}" target="_blank" rel="noreferrer">${label}</a>`)
+          .map(([label, href]) => `<a class="ulink detail-link" href="${href}" target="_blank" rel="noreferrer">${label}</a>`)
           .join("");
 
         capabilityDetail.innerHTML = `
           <div>
             <div class="detail-top">
               <h3>${capability.title}</h3>
-              <span class="${statusClass(capability.status)}">${capability.status}</span>
+              <span class="status">${capability.status}</span>
             </div>
             <p class="detail-summary">${capability.summary}</p>
           </div>
@@ -1528,38 +2071,286 @@
         return Number.isFinite(number) ? `${number.toFixed(4)} qps` : "-";
       };
 
-      function latencyCell(result) {
+      /* ---------- latest benchmark: interactive table ---------- */
+      let benchData = null;
+      let benchSort = { key: null, dir: 1 };
+      let benchFilter = { model: "all", gpu: "all" };
+      let benchView = "chart";
+      let benchViewRows = [];
+
+      const benchColumns = [
+        { key: "case", label: "Case", sort: (r) => r.case },
+        { key: "gpus", label: "GPUs", sort: (r) => parseInt(r.gpus, 10) || 0 },
+        { key: "sgl", label: "SGLang-Diffusion", sort: (r) => r.sglang_diffusion?.client_latency_s ?? Infinity },
+        { key: "vllm", label: "vLLM-Omni", sort: (r) => r.vllm_omni?.client_latency_s ?? Infinity },
+        { key: "speedup", label: "Fastest", sort: (r) => parseFloat(r.winner_speedup) || 0 }
+      ];
+
+      function latencyCell(result, kind, rowMax) {
         if (!result) return "-";
-        const server = result.server_latency_s
-          ? `<span class="server-time">server ${formatSeconds(result.server_latency_s)}</span>`
-          : "";
+        const value = Number(result.client_latency_s);
+        const width = Number.isFinite(value) && rowMax > 0 ? Math.max(3, (value / rowMax) * 100) : 0;
         return `
           <span class="latency">${formatSeconds(result.client_latency_s)}</span>
-          ${server}
-          <span class="server-time">${result.profile}</span>
+          <span class="bar-track bar-${kind}"><i style="width:${width.toFixed(1)}%"></i></span>
         `;
       }
 
-      function renderBenchmarks(data) {
-        document.getElementById("sourceReport").textContent = data.source_report || data.id;
-        document.getElementById("benchmarkRows").innerHTML = data.rows
-          .map((row) => {
-            const vllmWinner = row.winner === "vLLM-Omni";
+      function modelFamily(row) {
+        return String(row.case || "").split(" ")[0];
+      }
+
+      function gpuCount(row) {
+        return String(parseInt(row.gpus, 10) || "?");
+      }
+
+      function benchRowsForView() {
+        let rows = [...(benchData?.rows ?? [])];
+        if (benchFilter.model !== "all") rows = rows.filter((r) => modelFamily(r) === benchFilter.model);
+        if (benchFilter.gpu !== "all") rows = rows.filter((r) => gpuCount(r) === benchFilter.gpu);
+        if (benchSort.key) {
+          const column = benchColumns.find((c) => c.key === benchSort.key);
+          rows.sort((a, b) => {
+            const va = column.sort(a);
+            const vb = column.sort(b);
+            const cmp = typeof va === "string" ? va.localeCompare(vb) : va - vb;
+            return cmp * benchSort.dir;
+          });
+        }
+        return rows;
+      }
+
+      function renderBenchHead() {
+        const head = document.getElementById("benchHead");
+        head.innerHTML = `
+          <tr>
+            ${benchColumns
+              .map((column) => {
+                const sorted = benchSort.key === column.key;
+                const arrow = sorted ? (benchSort.dir === 1 ? "↑" : "↓") : "↕";
+                return `
+                  <th
+                    class="sortable"
+                    data-key="${column.key}"
+                    ${sorted ? `aria-sort="${benchSort.dir === 1 ? "ascending" : "descending"}"` : ""}
+                  >${column.label}<span class="sort-arrow">${arrow}</span></th>
+                `;
+              })
+              .join("")}
+          </tr>
+        `;
+        head.querySelectorAll("th").forEach((th) => {
+          th.addEventListener("click", () => {
+            const key = th.dataset.key;
+            if (benchSort.key === key) {
+              benchSort.dir = -benchSort.dir;
+            } else {
+              benchSort = { key, dir: 1 };
+            }
+            renderBenchTable();
+          });
+        });
+      }
+
+      function renderBenchFilters() {
+        const toolbar = document.getElementById("benchToolbar");
+        toolbar.hidden = false;
+        const models = ["all", ...new Set(benchData.rows.map(modelFamily))];
+        const gpus = ["all", ...new Set(benchData.rows.map(gpuCount))].sort();
+
+        const renderChips = (containerId, values, active, labelFn) => {
+          const container = document.getElementById(containerId);
+          container.querySelectorAll(".chip").forEach((chip) => chip.remove());
+          values.forEach((value) => {
+            const chip = document.createElement("button");
+            chip.type = "button";
+            chip.className = "chip";
+            chip.textContent = labelFn(value);
+            chip.setAttribute("aria-pressed", String(value === active));
+            chip.addEventListener("click", () => {
+              if (containerId === "modelFilters") benchFilter.model = value;
+              else benchFilter.gpu = value;
+              renderBenchFilters();
+              renderBenchView();
+            });
+            container.appendChild(chip);
+          });
+        };
+
+        renderChips("modelFilters", models, benchFilter.model, (v) => (v === "all" ? "All" : v));
+        renderChips("gpuFilters", gpus, benchFilter.gpu, (v) => (v === "all" ? "All" : `${v} GPU`));
+      }
+
+      function renderBenchChart() {
+        const chart = document.getElementById("benchChart");
+        benchViewRows = benchRowsForView();
+        if (!benchViewRows.length) {
+          chart.innerHTML = `<p class="chart-empty">No rows match the current filters.</p>`;
+          return;
+        }
+        chart.innerHTML =
+          `<p class="chart-hint">Bar length = client latency · <b>shorter is faster</b></p>` +
+          benchViewRows
+            .map((row) => {
+              const sgl = row.sglang_diffusion || {};
+              const vllm = row.vllm_omni || {};
+              const sglV = Number(sgl.client_latency_s);
+              const vllmV = Number(vllm.client_latency_s);
+              const max = Math.max(sglV || 0, vllmV || 0) || 1;
+              const width = (v) => (Number.isFinite(v) && v > 0 ? Math.max(4, (v / max) * 100) : 0);
+              const sub = [
+                sgl.profile ? `SGLang ${sgl.profile}` : null,
+                sgl.server_latency_s != null ? `server ${formatSeconds(sgl.server_latency_s)}` : null,
+                vllm.profile ? `vLLM ${vllm.profile}` : null
+              ]
+                .filter(Boolean)
+                .join(" · ");
+              return `
+                <article class="matchup">
+                  <div class="matchup-head">
+                    <div>
+                      <h4 class="matchup-case">${escapeHtml(row.case)}</h4>
+                      <span class="matchup-meta">${escapeHtml(row.gpus)} · ${escapeHtml(row.details)} · compile ${escapeHtml(row.torch_compile)}</span>
+                    </div>
+                    <span class="winner">${escapeHtml(row.winner)} · ${escapeHtml(row.winner_speedup)}</span>
+                  </div>
+                  <div class="bars">
+                    <div class="bar-row">
+                      <span class="bar-label sgl">SGLang-Diffusion</span>
+                      <span class="bar-track bar-sgl"><i style="width:${width(sglV).toFixed(1)}%"></i></span>
+                      <span class="bar-value">${formatSeconds(sgl.client_latency_s)}</span>
+                    </div>
+                    <div class="bar-row">
+                      <span class="bar-label">vLLM-Omni</span>
+                      <span class="bar-track bar-vllm"><i style="width:${width(vllmV).toFixed(1)}%"></i></span>
+                      <span class="bar-value">${formatSeconds(vllm.client_latency_s)}</span>
+                    </div>
+                  </div>
+                  ${row.note ? `<p class="matchup-note">${escapeHtml(row.note)}</p>` : ""}
+                  ${sub ? `<p class="matchup-sub">${escapeHtml(sub)}</p>` : ""}
+                </article>
+              `;
+            })
+            .join("");
+      }
+
+      function renderBenchView() {
+        const chart = document.getElementById("benchChart");
+        const table = document.getElementById("benchTableWrap");
+        const toggle = document.getElementById("benchViewToggle");
+        const isChart = benchView === "chart";
+        toggle
+          .querySelectorAll("button")
+          .forEach((button) => button.setAttribute("aria-pressed", String(button.dataset.view === benchView)));
+        chart.hidden = !isChart;
+        table.hidden = isChart;
+        if (isChart) renderBenchChart();
+        else renderBenchTable();
+      }
+
+      function renderBenchTable() {
+        renderBenchHead();
+        benchViewRows = benchRowsForView();
+        const body = document.getElementById("benchmarkRows");
+        if (!benchViewRows.length) {
+          body.innerHTML = `<tr><td colspan="5">No rows match the current filters.</td></tr>`;
+          return;
+        }
+        body.innerHTML = benchViewRows
+          .map((row, index) => {
+            const rowMax = Math.max(
+              Number(row.sglang_diffusion?.client_latency_s) || 0,
+              Number(row.vllm_omni?.client_latency_s) || 0
+            );
             return `
-              <tr>
+              <tr data-row-index="${index}">
                 <td>
-                  <span class="case-name">${row.case}</span>
-                  <span class="case-detail">${row.details} - compile ${row.torch_compile}</span>
-                  <span class="case-detail">${row.note}</span>
+                  <span class="case-name">${escapeHtml(row.case)}</span>
+                  <span class="case-detail">${escapeHtml(row.details)} - compile ${escapeHtml(row.torch_compile)}</span>
+                  ${row.note ? `<span class="case-note">${escapeHtml(row.note)}</span>` : ""}
                 </td>
-                <td>${row.gpus}</td>
-                <td>${latencyCell(row.sglang_diffusion)}</td>
-                <td>${latencyCell(row.vllm_omni)}</td>
-                <td><span class="winner ${vllmWinner ? "vllm" : ""}">${row.winner} ${row.winner_speedup}</span></td>
+                <td>${escapeHtml(row.gpus)}</td>
+                <td>${latencyCell(row.sglang_diffusion, "sgl", rowMax)}</td>
+                <td>${latencyCell(row.vllm_omni, "vllm", rowMax)}</td>
+                <td><span class="winner">${escapeHtml(row.winner)} · ${escapeHtml(row.winner_speedup)}</span></td>
               </tr>
             `;
           })
           .join("");
+        attachHoverCards(body);
+      }
+
+      /* ---------- hover detail card ---------- */
+      const hoverCard = document.getElementById("hoverCard");
+
+      function hoverCardHtml(row) {
+        const sgl = row.sglang_diffusion || {};
+        const vllm = row.vllm_omni || {};
+        const pairs = [
+          ["SGLang profile", sgl.profile],
+          ["SGLang client", sgl.client_latency_s != null ? formatSeconds(sgl.client_latency_s) : null],
+          ["SGLang server", sgl.server_latency_s != null ? formatSeconds(sgl.server_latency_s) : null],
+          ["vLLM profile", vllm.profile],
+          ["vLLM client", vllm.client_latency_s != null ? formatSeconds(vllm.client_latency_s) : null],
+          ["Compile", row.torch_compile]
+        ].filter(([, v]) => v != null && v !== "");
+        return `
+          <h4>${escapeHtml(row.case)} · ${escapeHtml(row.gpus)}</h4>
+          <dl>${pairs.map(([k, v]) => `<dt>${escapeHtml(k)}</dt><dd>${escapeHtml(v)}</dd>`).join("")}</dl>
+          ${row.note ? `<p class="hc-note">${escapeHtml(row.note)}</p>` : ""}
+        `;
+      }
+
+      function showHoverCard(tr, row) {
+        hoverCard.innerHTML = hoverCardHtml(row);
+        hoverCard.style.left = "0px";
+        hoverCard.style.top = "-9999px";
+        hoverCard.classList.add("visible");
+        const anchor = tr.getBoundingClientRect();
+        const cardWidth = hoverCard.offsetWidth;
+        const cardHeight = hoverCard.offsetHeight;
+        let x = Math.min(anchor.left + anchor.width * 0.38, window.innerWidth - cardWidth - 12);
+        let y = anchor.bottom + 8;
+        if (y + cardHeight > window.innerHeight - 10) y = anchor.top - cardHeight - 8;
+        hoverCard.style.left = `${Math.max(8, x)}px`;
+        hoverCard.style.top = `${Math.max(8, y)}px`;
+      }
+
+      function attachHoverCards(tbody) {
+        tbody.querySelectorAll("tr[data-row-index]").forEach((tr) => {
+          const row = benchViewRows[Number(tr.dataset.rowIndex)];
+          if (!row) return;
+          tr.addEventListener("mouseenter", () => showHoverCard(tr, row));
+          tr.addEventListener("mouseleave", () => hoverCard.classList.remove("visible"));
+        });
+        document.addEventListener("scroll", () => hoverCard.classList.remove("visible"), { passive: true });
+      }
+
+      /* ---------- latest benchmark: headline + meta ---------- */
+      function renderBenchmarks(data) {
+        benchData = data;
+        document.getElementById("sourceReport").textContent = data.source_report || data.id;
+
+        const summary = data.summary || {};
+        if (summary.headline) {
+          const headline = document.getElementById("benchHeadline");
+          headline.hidden = false;
+          document.getElementById("benchHeadlineText").textContent = summary.headline;
+          document.getElementById("benchScore").textContent =
+            `${summary.same_gpu_cases ?? "-"} same-GPU cases · ` +
+            `${summary.sglang_diffusion_wins ?? "-"} SGLang-Diffusion wins · ` +
+            `${summary.vllm_omni_wins ?? "-"} vLLM-Omni wins`;
+        }
+
+        renderBenchFilters();
+        const viewToggle = document.getElementById("benchViewToggle");
+        viewToggle.querySelectorAll("button").forEach((button) =>
+          button.addEventListener("click", () => {
+            benchView = button.dataset.view;
+            renderBenchView();
+          })
+        );
+        renderBenchView();
 
         const sgldCommit = data.frameworks?.sglang_diffusion_now?.commit || fallbackData.frameworks.sglang_diffusion_now.commit;
         const sgldMeasuredCommit = data.frameworks?.sglang_diffusion_now?.measured_commit;
@@ -1577,6 +2368,7 @@
           `Benchmark data updated ${data.updated_at || fallbackData.updated_at} from ${data.source_report || data.id}.`;
       }
 
+      /* ---------- historical data ---------- */
       const frameworkLabels = {
         sglang: "SGLang-Diffusion",
         "vllm-omni": "vLLM-Omni",
@@ -1596,12 +2388,12 @@
         const status = cell?.status || "not_run";
         const reason = cell?.reason || (status === "not_run" ? "No row in this artifact." : "");
         return `
-          <span class="status-pill ${status === "failed" ? "failed" : ""}">${escapeHtml(status.replace("_", " "))}</span>
+          <span class="status-pill">${escapeHtml(status.replace("_", " "))}</span>
           <span class="cell-meta">${escapeHtml(reason)}</span>
         `;
       }
 
-      function historyMetricCell(cell, mode, ratioKey = "ratio_to_sglang") {
+      function historyMetricCell(cell, mode, ratioKey = "ratio_to_sglang", kind = "neutral") {
         if (!cell || cell.status !== "ok") return historyStatusCell(cell);
 
         const main =
@@ -1615,8 +2407,18 @@
               ? `server ${formatSeconds(cell.server_latency_s)}`
               : "";
         const gpuLine = cell.gpus ? `${cell.gpus} GPU · ${clip(cell.profile || "default")}` : clip(cell.profile || "default");
-        const ratio = cell[ratioKey]
-          ? `<span class="ratio">${Number(cell[ratioKey]).toFixed(3)}x ${mode === "throughput" ? "qps" : "latency"}</span>`
+        const ratioValue = Number(cell[ratioKey]);
+        const hasRatio = Number.isFinite(ratioValue) && ratioValue > 0;
+        const barWidth = hasRatio
+          ? mode === "throughput"
+            ? Math.min(100, ratioValue * 50)
+            : Math.min(100, (1 / ratioValue) * 50)
+          : 0;
+        const ratio = hasRatio
+          ? `
+            <span class="ratio">${ratioValue.toFixed(3)}x ${mode === "throughput" ? "qps" : "latency"}</span>
+            <span class="bar-track bar-${kind}"><i style="width:${barWidth.toFixed(1)}%"></i></span>
+          `
           : "";
 
         return `
@@ -1629,7 +2431,7 @@
 
       function historyWinner(row) {
         if (!row.winner) return `<span class="winner muted">no comparable winner</span>`;
-        return `<span class="winner ${row.winner?.includes("vllm") ? "vllm" : ""}">${frameworkLabels[row.winner] || row.winner}</span>`;
+        return `<span class="winner">${frameworkLabels[row.winner] || row.winner}</span>`;
       }
 
       function renderHistoryTabs(data) {
@@ -1657,26 +2459,12 @@
         const sgWins = summary.sglang_diffusion_wins ?? summary.sglang_now_wins ?? 0;
         const otherWins = summary.other_wins ?? 0;
         document.getElementById("historySummary").innerHTML = `
-          <div class="history-stat note">
-            <b>${escapeHtml(section.title || "Selected history")}</b>
-            <span>${escapeHtml(section.subtitle || "Committed benchmark report data.")}</span>
-          </div>
-          <div class="history-stat">
-            <b>${rows}</b>
-            <span>tracked rows in this section</span>
-          </div>
-          <div class="history-stat">
-            <b>${summary.comparable_rows ?? rows}</b>
-            <span>rows with at least two comparable frameworks</span>
-          </div>
-          <div class="history-stat">
-            <b>${sgWins}</b>
-            <span>SGLang-Diffusion wins</span>
-          </div>
-          <div class="history-stat">
-            <b>${otherWins}</b>
-            <span>other-framework wins</span>
-          </div>
+          <span class="hs-title">${escapeHtml(section.title || "Selected history")}</span>
+          <span>${escapeHtml(section.subtitle || "Committed benchmark report data.")}</span>
+          <span>${rows} tracked rows</span>
+          <span>${summary.comparable_rows ?? rows} comparable</span>
+          <span>${sgWins} SGLang-Diffusion wins</span>
+          <span>${otherWins} other-framework wins</span>
         `;
       }
 
@@ -1729,7 +2517,7 @@
                   <span class="case-name">${escapeHtml(row.case)}</span>
                   <span class="case-detail">${escapeHtml(row.details)}</span>
                 </td>
-                <td>${historyMetricCell(row.cells.sglang, section.mode)}</td>
+                <td>${historyMetricCell(row.cells.sglang, section.mode, "ratio_to_sglang", "sgl")}</td>
                 <td>${historyMetricCell(row.cells["vllm-omni"], section.mode)}</td>
                 <td>${historyMetricCell(row.cells.lightx2v, section.mode)}</td>
                 <td>${historyWinner(row)}</td>
@@ -1750,7 +2538,7 @@
                   <span class="case-detail">${escapeHtml(row.details)} · compile ${escapeHtml(row.torch_compile)}</span>
                 </td>
                 <td>${historyMetricCell(row.cells.sglang_before, section.mode, "ratio_to_sglang_now")}</td>
-                <td>${historyMetricCell(row.cells.sglang_now, section.mode, "ratio_to_sglang_now")}</td>
+                <td>${historyMetricCell(row.cells.sglang_now, section.mode, "ratio_to_sglang_now", "sgl")}</td>
                 <td>${historyMetricCell(row.cells.vllm_omni_now, section.mode, "ratio_to_sglang_now")}</td>
                 <td>${historyMetricCell(row.cells.lightx2v_now, section.mode, "ratio_to_sglang_now")}</td>
                 <td>${historyWinner(row)}</td>
@@ -1770,7 +2558,7 @@
                   <span class="case-name">${escapeHtml(row.case)}</span>
                   <span class="case-detail">${escapeHtml(row.details)}</span>
                 </td>
-                <td>${historyMetricCell(row.cells.sglang_reference, section.mode, "ratio_to_sglang_reference")}</td>
+                <td>${historyMetricCell(row.cells.sglang_reference, section.mode, "ratio_to_sglang_reference", "sgl")}</td>
                 <td>${historyMetricCell(row.cells.vllm_omni_tp, section.mode, "ratio_to_sglang_reference")}</td>
                 <td>${historyMetricCell(row.cells.vllm_omni_cfg, section.mode, "ratio_to_sglang_reference")}</td>
                 <td>${historyMetricCell(row.cells.vllm_omni_ulysses, section.mode, "ratio_to_sglang_reference")}</td>
@@ -1782,24 +2570,170 @@
           .join("");
       }
 
-      function renderHistorical(data) {
-        renderHistoryTabs(data);
+      function historyFrameworksFor(section) {
+        if (section.id === "flux_fastest_20260610") {
+          return {
+            cols: [
+              { key: "sglang_before", label: "SGLang Apr 10", sgl: false },
+              { key: "sglang_now", label: "SGLang now", sgl: true },
+              { key: "vllm_omni_now", label: "vLLM now", sgl: false },
+              { key: "lightx2v_now", label: "LightX2V now", sgl: false }
+            ]
+          };
+        }
+        if (section.table === "video_profile_sweep") {
+          return {
+            cols: [
+              { key: "sglang_reference", label: "SGLang baseline", sgl: true },
+              { key: "vllm_omni_tp", label: "vLLM TP", sgl: false },
+              { key: "vllm_omni_cfg", label: "vLLM CFG", sgl: false },
+              { key: "vllm_omni_ulysses", label: "vLLM Ulysses", sgl: false },
+              { key: "lightx2v_fa3", label: "LightX2V FA3", sgl: false }
+            ]
+          };
+        }
+        return {
+          cols: [
+            { key: "sglang", label: "SGLang-Diffusion", sgl: true },
+            { key: "vllm-omni", label: "vLLM-Omni", sgl: false },
+            { key: "lightx2v", label: "LightX2V", sgl: false }
+          ]
+        };
+      }
+
+      function renderHistoryChart(section) {
+        const chart = document.getElementById("historyChart");
+        const { cols } = historyFrameworksFor(section);
+        const isThroughput = section.mode === "throughput";
+        const metricOf = (cell) => Number(isThroughput ? cell.qps : cell.latency_s);
+        const hint = isThroughput
+          ? "Bar length = throughput · <b>higher qps is faster</b>"
+          : "Bar length = latency · <b>shorter is faster</b>";
+
+        chart.innerHTML =
+          `<p class="chart-hint">${hint}</p>` +
+          section.rows
+            .map((row) => {
+              const okValues = cols
+                .map((c) => row.cells[c.key])
+                .filter((cell) => cell && cell.status === "ok")
+                .map(metricOf)
+                .filter((v) => Number.isFinite(v) && v > 0);
+              const max = okValues.length ? Math.max(...okValues) : 1;
+              const caseTitle = row.hardware
+                ? `${escapeHtml(row.hardware)} · ${escapeHtml(row.case)}`
+                : escapeHtml(row.case);
+              const detail = `${escapeHtml(row.details || "")}${
+                row.torch_compile ? ` · compile ${escapeHtml(row.torch_compile)}` : ""
+              }`;
+              const bars = cols
+                .map((c) => {
+                  const cell = row.cells[c.key];
+                  if (!cell) return "";
+                  if (cell.status !== "ok") {
+                    return `
+                      <div class="bar-row status">
+                        <span class="bar-label${c.sgl ? " sgl" : ""}">${escapeHtml(c.label)}</span>
+                        <span class="matchup-status">${escapeHtml((cell.status || "n/a").replace(/_/g, " "))}${
+                          cell.reason ? ` — ${escapeHtml(clip(cell.reason, 80))}` : ""
+                        }</span>
+                      </div>
+                    `;
+                  }
+                  const value = metricOf(cell);
+                  const width = Number.isFinite(value) && value > 0 ? Math.max(4, (value / max) * 100) : 0;
+                  const main = isThroughput ? formatQps(cell.qps) : formatSeconds(cell.latency_s);
+                  const sub = [
+                    cell.gpus == null
+                      ? null
+                      : typeof cell.gpus === "number"
+                        ? `${cell.gpus} GPU`
+                        : String(cell.gpus),
+                    clip(cell.profile || "default", 38),
+                    cell.server_latency_s != null ? `server ${formatSeconds(cell.server_latency_s)}` : null
+                  ]
+                    .filter(Boolean)
+                    .join(" · ");
+                  return `
+                    <div class="bar-row">
+                      <span class="bar-label${c.sgl ? " sgl" : ""}">${escapeHtml(c.label)}<small>${escapeHtml(sub)}</small></span>
+                      <span class="bar-track bar-${c.sgl ? "sgl" : "vllm"}"><i style="width:${width.toFixed(1)}%"></i></span>
+                      <span class="bar-value">${main}</span>
+                    </div>
+                  `;
+                })
+                .join("");
+              const winner = row.winner
+                ? `<span class="winner">${escapeHtml(frameworkLabels[row.winner] || row.winner)}</span>`
+                : `<span class="winner muted">no comparable winner</span>`;
+              return `
+                <article class="matchup">
+                  <div class="matchup-head">
+                    <div>
+                      <h4 class="matchup-case">${caseTitle}</h4>
+                      <span class="matchup-meta">${detail}</span>
+                    </div>
+                    ${winner}
+                  </div>
+                  <div class="bars">${bars}</div>
+                </article>
+              `;
+            })
+            .join("");
+      }
+
+      function renderHistoryView(data) {
         const section = data.sections[activeHistoryIndex];
+        const chart = document.getElementById("historyChart");
+        const table = document.getElementById("historyTableWrap");
+        const toggle = document.getElementById("historyViewToggle");
+        const isChart = historyView === "chart";
+        toggle
+          .querySelectorAll("button")
+          .forEach((button) => button.setAttribute("aria-pressed", String(button.dataset.view === historyView)));
+        chart.hidden = !isChart;
+        table.hidden = isChart;
         if (!section) {
-          document.getElementById("historySummary").innerHTML = "";
-          standardHistoryHead();
-          document.getElementById("historyRows").innerHTML = `
-            <tr><td colspan="5">Historical benchmark data is unavailable.</td></tr>
-          `;
+          if (isChart) {
+            chart.innerHTML = `<p class="chart-empty">Historical benchmark data is unavailable.</p>`;
+          } else {
+            standardHistoryHead();
+            document.getElementById("historyRows").innerHTML = `
+              <tr><td colspan="5">Historical benchmark data is unavailable.</td></tr>
+            `;
+          }
           return;
         }
-        renderHistorySummary(section);
-        if (section.id === "flux_fastest_20260610") {
-          renderFluxHistoryRows(section);
-        } else if (section.table === "video_profile_sweep") {
-          renderVideoProfileSweepRows(section);
-        } else {
-          renderStandardHistoryRows(section);
+        if (isChart) renderHistoryChart(section);
+        else if (section.id === "flux_fastest_20260610") renderFluxHistoryRows(section);
+        else if (section.table === "video_profile_sweep") renderVideoProfileSweepRows(section);
+        else renderStandardHistoryRows(section);
+      }
+
+      function renderHistorical(data) {
+        renderHistoryTabs(data);
+        const toggle = document.getElementById("historyViewToggle");
+        if (toggle && !toggle.dataset.wired) {
+          toggle.dataset.wired = "1";
+          toggle.querySelectorAll("button").forEach((button) =>
+            button.addEventListener("click", () => {
+              historyView = button.dataset.view;
+              renderHistoryView(data);
+            })
+          );
+        }
+        const section = data.sections[activeHistoryIndex];
+        if (section) renderHistorySummary(section);
+        else document.getElementById("historySummary").innerHTML = "";
+        renderHistoryView(data);
+      }
+
+      function inlineJson(id) {
+        try {
+          const parsed = JSON.parse(document.getElementById(id).textContent);
+          return parsed && Object.keys(parsed).length ? parsed : null;
+        } catch {
+          return null;
         }
       }
 
@@ -1809,7 +2743,7 @@
           if (!response.ok) throw new Error(`status ${response.status}`);
           return await response.json();
         } catch {
-          return fallbackData;
+          return inlineJson("latestDataInline") || fallbackData;
         }
       }
 
@@ -1819,7 +2753,7 @@
           if (!response.ok) throw new Error(`status ${response.status}`);
           return await response.json();
         } catch {
-          return fallbackHistoricalData;
+          return inlineJson("historicalDataInline") || fallbackHistoricalData;
         }
       }
 
