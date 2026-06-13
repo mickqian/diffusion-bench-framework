@@ -1391,6 +1391,213 @@
         min-width: 1000px;
       }
 
+      /* ---- nightly performance track ---- */
+      .nightly-pill {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        font-size: 13px;
+        font-weight: 600;
+        letter-spacing: 0.01em;
+        color: var(--accent-strong);
+        background: var(--accent-tint);
+        border: 0;
+        border-radius: 999px;
+        padding: 8px 16px;
+        cursor: pointer;
+        transition: background 160ms ease, color 160ms ease, box-shadow 160ms ease;
+      }
+
+      .nightly-pill::before {
+        content: "";
+        width: 7px;
+        height: 7px;
+        border-radius: 999px;
+        background: var(--accent);
+      }
+
+      .nightly-pill:hover {
+        box-shadow: var(--shadow-1);
+      }
+
+      .nightly-pill[aria-expanded="true"] {
+        background: var(--accent);
+        color: #fff;
+      }
+
+      .nightly-pill[aria-expanded="true"]::before {
+        background: rgba(255, 255, 255, 0.92);
+      }
+
+      .nightly-meta {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px 28px;
+        padding: 16px 22px;
+        border-radius: var(--r-md);
+        background: var(--ink-04);
+        font-size: 14px;
+        color: var(--muted);
+        margin-bottom: 30px;
+      }
+
+      .nightly-meta b {
+        color: var(--ink);
+        font-weight: 600;
+      }
+
+      .nightly-meta .mono {
+        font-family: var(--mono);
+      }
+
+      .nightly-status {
+        color: var(--muted);
+        font-size: 15px;
+        padding: 16px 0 28px;
+      }
+
+      .nightly-status.error {
+        color: var(--accent-strong);
+      }
+
+      .nightly-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+        gap: 18px;
+      }
+
+      .trend-card {
+        border: 1px solid var(--hair);
+        border-radius: var(--r-md);
+        padding: 18px 18px 12px;
+        background: var(--paper-2);
+        transition: border-color 160ms ease;
+      }
+
+      .trend-card:hover {
+        border-color: var(--hair-strong);
+      }
+
+      .trend-head {
+        display: flex;
+        justify-content: space-between;
+        align-items: baseline;
+        gap: 10px;
+      }
+
+      .trend-model {
+        font-size: 15px;
+        font-weight: 600;
+        letter-spacing: -0.01em;
+        color: var(--ink);
+      }
+
+      .trend-task {
+        font-size: 10.5px;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        color: var(--faint);
+        white-space: nowrap;
+      }
+
+      .trend-latest {
+        margin: 6px 0 12px;
+        color: var(--muted);
+        font-size: 12.5px;
+      }
+
+      .trend-latest b {
+        color: var(--ink);
+        font-weight: 600;
+        font-size: 20px;
+        letter-spacing: -0.01em;
+        font-variant-numeric: tabular-nums;
+      }
+
+      .trend-delta {
+        font-size: 12px;
+        font-weight: 600;
+        margin-left: 8px;
+        font-variant-numeric: tabular-nums;
+      }
+
+      .trend-delta.up {
+        color: #c75b4a;
+      }
+
+      .trend-delta.down {
+        color: #3a8a5e;
+      }
+
+      .trend-delta.flat {
+        color: var(--faint);
+      }
+
+      .trend-svg {
+        width: 100%;
+        height: auto;
+        display: block;
+      }
+
+      .trend-hit {
+        fill: transparent;
+        pointer-events: all;
+        cursor: crosshair;
+      }
+
+      .trend-cursor {
+        fill: var(--accent);
+        opacity: 0;
+        pointer-events: none;
+      }
+
+      .trend-guide {
+        stroke: var(--accent);
+        stroke-width: 1;
+        stroke-dasharray: 3 3;
+        opacity: 0;
+        pointer-events: none;
+      }
+
+      .nightly-tip {
+        position: fixed;
+        z-index: 60;
+        pointer-events: none;
+        opacity: 0;
+        transform: translateY(3px);
+        transition: opacity 120ms ease;
+        background: var(--paper-2);
+        border: 1px solid var(--glass-border);
+        box-shadow: var(--shadow-2);
+        border-radius: 10px;
+        padding: 9px 12px;
+        font-size: 12.5px;
+        white-space: nowrap;
+      }
+
+      .nightly-tip.show {
+        opacity: 1;
+        transform: none;
+      }
+
+      .nightly-tip b {
+        font-size: 16px;
+        font-weight: 600;
+        color: var(--ink);
+        font-variant-numeric: tabular-nums;
+      }
+
+      .nightly-tip .nt-row {
+        margin-top: 3px;
+        color: var(--muted);
+      }
+
+      .nightly-tip .nt-row.mono {
+        font-family: var(--mono);
+        color: var(--accent-strong);
+        font-size: 12px;
+      }
+
       /* ---- footer ---- */
       .footer {
         border-top: 1px solid var(--hair);
@@ -1507,6 +1714,7 @@
           <a href="#lessons">What we learn</a>
           <a href="#benchmarks">Benchmarks</a>
           <a href="https://docs.sglang.io/docs/sglang-diffusion/" target="_blank" rel="noreferrer">Docs ↗</a>
+          <button class="nightly-pill" id="nightlyToggle" type="button" aria-expanded="false" aria-controls="nightly">Nightly Performance Track</button>
           <button class="theme-toggle" id="themeToggle" type="button" aria-label="Toggle color theme">Dark</button>
         </nav>
       </div>
@@ -1705,6 +1913,21 @@
             SGLang-Diffusion commit b0d888a; vLLM-Omni commit 73df8326. Client-side latency is the comparison source.
           </div>
         </details>
+      </section>
+
+      <section class="shell section" id="nightly" hidden aria-label="Nightly performance track">
+        <div class="section-head">
+          <h2 class="section-title">Nightly performance track</h2>
+          <p>
+            Automated nightly latency for SGLang-Diffusion across the cross-framework CI cases — fetched live from
+            <a class="ulink" href="https://github.com/sgl-project/ci-data/tree/main/diffusion-comparisons" target="_blank" rel="noreferrer">sgl-project/ci-data</a>
+            each time you open this section, so it always reflects the latest run.
+          </p>
+        </div>
+        <div class="nightly-meta" id="nightlyMeta" hidden></div>
+        <div class="nightly-status" id="nightlyStatus">Loading nightly data…</div>
+        <div class="nightly-grid" id="nightlyGrid"></div>
+        <div class="note-row" id="nightlyNote" hidden></div>
       </section>
     </main>
 
@@ -2760,6 +2983,283 @@
       renderExplorer();
       loadBenchmarkData().then(renderBenchmarks);
       loadHistoricalData().then(renderHistorical);
+
+      /* ---------- nightly performance track ---------- */
+      const NIGHTLY = {
+        listApi: "https://api.github.com/repos/sgl-project/ci-data/contents/diffusion-comparisons",
+        repoUrl: "https://github.com/sgl-project/ci-data/tree/main/diffusion-comparisons",
+        maxRuns: 60,
+        cacheKey: "sgld-nightly-v1",
+        cacheTtl: 6 * 60 * 60 * 1000,
+        loaded: false,
+      };
+      const nightlyToggle = document.getElementById("nightlyToggle");
+      const nightlySection = document.getElementById("nightly");
+      let nightlyPlot = {};
+
+      nightlyToggle.addEventListener("click", () => {
+        const show = nightlySection.hidden;
+        nightlySection.hidden = !show;
+        nightlyToggle.setAttribute("aria-expanded", String(show));
+        if (show) {
+          nightlySection.scrollIntoView({ behavior: "smooth", block: "start" });
+          if (!NIGHTLY.loaded) {
+            NIGHTLY.loaded = true;
+            loadNightly();
+          }
+        }
+      });
+
+      const prettyModel = (model) => String(model || "").split("/").pop().replace(/-Diffusers$/, "");
+      const nightlyDate = (ms) => {
+        const d = new Date(ms);
+        return `${d.getUTCMonth() + 1}/${d.getUTCDate()}`;
+      };
+      const nightlyFullDate = (ms) =>
+        new Date(ms).toLocaleDateString("en-US", { year: "numeric", month: "short", day: "numeric", timeZone: "UTC" });
+
+      function readNightlyCache(allowStale) {
+        try {
+          const raw = localStorage.getItem(NIGHTLY.cacheKey);
+          if (!raw) return null;
+          const obj = JSON.parse(raw);
+          if (!obj) return null;
+          if (!allowStale && Date.now() - obj.savedAt > NIGHTLY.cacheTtl) return null;
+          const cases = new Map((obj.cases || []).map((c) => [c.case_id, { model: c.model, task: c.task, pts: c.pts }]));
+          return cases.size ? { meta: obj.meta, cases } : null;
+        } catch {
+          return null;
+        }
+      }
+
+      function writeNightlyCache(meta, cases) {
+        try {
+          const arr = [...cases.entries()].map(([id, c]) => ({ case_id: id, model: c.model, task: c.task, pts: c.pts }));
+          localStorage.setItem(NIGHTLY.cacheKey, JSON.stringify({ savedAt: Date.now(), meta, cases: arr }));
+        } catch {
+          /* quota / private mode — non-fatal */
+        }
+      }
+
+      async function loadNightly() {
+        const status = document.getElementById("nightlyStatus");
+        const cached = readNightlyCache();
+        if (cached) {
+          renderNightly(cached.meta, cached.cases);
+          return;
+        }
+        status.hidden = false;
+        status.classList.remove("error");
+        status.textContent = "Loading nightly data…";
+        try {
+          const listResp = await fetch(NIGHTLY.listApi, { headers: { Accept: "application/vnd.github+json" } });
+          if (!listResp.ok) throw new Error("listing " + listResp.status);
+          const list = await listResp.json();
+          const files = list
+            .filter((f) => /^\d{4}-\d{2}-\d{2}_.*\.json$/.test(f.name))
+            .sort((a, b) => (a.name < b.name ? -1 : 1));
+          const recent = files.slice(-NIGHTLY.maxRuns);
+          if (!recent.length) throw new Error("no runs found");
+          status.textContent = `Fetching ${recent.length} nightly runs…`;
+
+          const runs = (
+            await Promise.all(
+              recent.map(async (f) => {
+                try {
+                  const r = await fetch(f.download_url, { cache: "no-store" });
+                  return r.ok ? await r.json() : null;
+                } catch {
+                  return null;
+                }
+              })
+            )
+          )
+            .filter(Boolean)
+            .sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp));
+          if (!runs.length) throw new Error("could not read any run");
+
+          const cases = new Map();
+          for (const run of runs) {
+            const t = new Date(run.timestamp).getTime();
+            const sha = run.commit_sha || "";
+            for (const res of run.results || []) {
+              if (res.framework !== "sglang") continue;
+              if (res.error || res.latency_s == null) continue;
+              if (!cases.has(res.case_id)) cases.set(res.case_id, { model: res.model, task: res.task, pts: [] });
+              cases.get(res.case_id).pts.push({ t, v: Number(res.latency_s), c: sha });
+            }
+          }
+          if (!cases.size) throw new Error("no latency points");
+
+          const latest = runs[runs.length - 1];
+          const meta = {
+            commit: latest.commit_sha || "",
+            latestMs: new Date(latest.timestamp).getTime(),
+            runs: runs.length,
+            caseCount: cases.size,
+          };
+          writeNightlyCache(meta, cases);
+          renderNightly(meta, cases);
+        } catch (e) {
+          const stale = readNightlyCache(true);
+          if (stale) {
+            renderNightly(stale.meta, stale.cases);
+            const note = document.getElementById("nightlyNote");
+            note.innerHTML += ` <span style="color:var(--faint)">(cached — live refresh unavailable right now)</span>`;
+            return;
+          }
+          status.hidden = false;
+          status.classList.add("error");
+          status.innerHTML =
+            `Couldn't load nightly data (${escapeHtml(String((e && e.message) || e))}). ` +
+            `<a class="ulink" href="${NIGHTLY.repoUrl}" target="_blank" rel="noreferrer">Open the data on GitHub ↗</a>`;
+          NIGHTLY.loaded = false;
+        }
+      }
+
+      function renderNightly(meta, cases) {
+        const status = document.getElementById("nightlyStatus");
+        const grid = document.getElementById("nightlyGrid");
+        const metaEl = document.getElementById("nightlyMeta");
+        const note = document.getElementById("nightlyNote");
+        nightlyPlot = {};
+
+        metaEl.hidden = false;
+        metaEl.innerHTML =
+          `<span>Source <b>sgl-project/ci-data</b></span>` +
+          `<span>Updated <b>${nightlyDate(meta.latestMs)}, ${new Date(meta.latestMs).getUTCFullYear()}</b></span>` +
+          `<span>Commit <b class="mono">${escapeHtml((meta.commit || "").slice(0, 7))}</b></span>` +
+          `<span><b>${meta.runs}</b> nightly runs</span>` +
+          `<span><b>${meta.caseCount}</b> cases</span>`;
+
+        const order = [...cases.keys()].sort();
+        grid.innerHTML = order.map((cid) => nightlyCard(cid, cases.get(cid))).join("");
+        status.hidden = true;
+        note.hidden = false;
+        note.innerHTML =
+          `SGLang-Diffusion server-side latency (lower is better), last ${meta.runs} runs of the nightly ` +
+          `<code>nightly-test-diffusion-comparison</code> CI job — hover any point for value, date and commit. ` +
+          `<a class="ulink" href="${NIGHTLY.repoUrl}" target="_blank" rel="noreferrer">View raw data ↗</a>`;
+        attachNightlyHover();
+      }
+
+      function nightlyCard(caseId, c) {
+        const pts = c.pts;
+        const last = pts[pts.length - 1].v;
+        let delta = "";
+        if (pts.length > 1) {
+          const prev = pts[pts.length - 2].v;
+          if (prev > 0) {
+            const pct = ((last - prev) / prev) * 100;
+            const cls = pct > 0.5 ? "up" : pct < -0.5 ? "down" : "flat";
+            const arrow = pct > 0.5 ? "↑" : pct < -0.5 ? "↓" : "→";
+            delta = `<span class="trend-delta ${cls}">${arrow} ${Math.abs(pct).toFixed(1)}%</span>`;
+          }
+        }
+        const fixed = last < 10 ? 3 : last < 100 ? 2 : 1;
+        return `
+          <article class="trend-card" data-case="${escapeHtml(caseId)}">
+            <div class="trend-head">
+              <span class="trend-model">${escapeHtml(prettyModel(c.model))}</span>
+              <span class="trend-task">${escapeHtml(c.task)}</span>
+            </div>
+            <div class="trend-latest"><b>${last.toFixed(fixed)}s</b>${delta}</div>
+            ${nightlySvg(caseId, pts)}
+          </article>`;
+      }
+
+      function nightlySvg(caseId, pts) {
+        const W = 340, H = 120, L = 6, R = 8, T = 14, B = 20;
+        const vs = pts.map((p) => p.v);
+        const ts = pts.map((p) => p.t);
+        let mn = Math.min(...vs), mx = Math.max(...vs);
+        if (mn === mx) { mn *= 0.95; mx = mx * 1.05 || 1; }
+        const padY = (mx - mn) * 0.18;
+        mn -= padY; mx += padY;
+        const tmn = Math.min(...ts), tmx = Math.max(...ts);
+        const x = (t) => L + (tmx === tmn ? 0 : (t - tmn) / (tmx - tmn)) * (W - L - R);
+        const y = (v) => T + (1 - (v - mn) / (mx - mn)) * (H - T - B);
+        const plotted = pts.map((p) => ({ px: x(p.t), py: y(p.v), v: p.v, t: p.t, c: p.c }));
+        const last = pts[pts.length - 1];
+        const fixed = last.v < 10 ? 3 : last.v < 100 ? 2 : 1;
+        nightlyPlot[caseId] = { plotted, W, H, fixed };
+        const line = plotted.map((p, i) => `${i ? "L" : "M"}${p.px.toFixed(1)},${p.py.toFixed(1)}`).join(" ");
+        const area = `${line} L${x(tmx).toFixed(1)},${(H - B).toFixed(1)} L${x(tmn).toFixed(1)},${(H - B).toFixed(1)} Z`;
+        const lp = plotted[plotted.length - 1];
+        const yMax = mx.toFixed(mx < 10 ? 2 : mx < 100 ? 1 : 0);
+        return `
+          <svg class="trend-svg" viewBox="0 0 ${W} ${H}" role="img" aria-label="latency trend over time">
+            <path d="${area}" fill="var(--accent)" fill-opacity="0.09" />
+            <path d="${line}" fill="none" stroke="var(--accent)" stroke-width="2" stroke-linejoin="round" stroke-linecap="round" vector-effect="non-scaling-stroke" />
+            <line class="trend-guide" x1="0" y1="${T}" x2="0" y2="${H - B}" />
+            <circle cx="${lp.px.toFixed(1)}" cy="${lp.py.toFixed(1)}" r="3.2" fill="var(--accent)" />
+            <circle class="trend-cursor" cx="0" cy="0" r="3.8" />
+            <text x="${L}" y="10" fill="var(--faint)" font-size="10">${yMax}s</text>
+            <text x="${L}" y="${H - 6}" fill="var(--faint)" font-size="10">${nightlyDate(tmn)}</text>
+            <text x="${W - R}" y="${H - 6}" text-anchor="end" fill="var(--faint)" font-size="10">${nightlyDate(tmx)}</text>
+            <rect class="trend-hit" x="0" y="0" width="${W}" height="${H}" />
+          </svg>`;
+      }
+
+      function ensureNightlyTip() {
+        let tip = document.getElementById("nightlyTip");
+        if (!tip) {
+          tip = document.createElement("div");
+          tip.id = "nightlyTip";
+          tip.className = "nightly-tip";
+          document.body.appendChild(tip);
+          document.addEventListener("scroll", () => tip.classList.remove("show"), { passive: true });
+        }
+        return tip;
+      }
+
+      function attachNightlyHover() {
+        const tip = ensureNightlyTip();
+        document.querySelectorAll(".trend-card[data-case]").forEach((card) => {
+          const plot = nightlyPlot[card.dataset.case];
+          if (!plot) return;
+          const svg = card.querySelector("svg");
+          const cursor = svg.querySelector(".trend-cursor");
+          const guide = svg.querySelector(".trend-guide");
+          const move = (ev) => {
+            const rect = svg.getBoundingClientRect();
+            if (!rect.width) return;
+            const vbx = ((ev.clientX - rect.left) / rect.width) * plot.W;
+            let best = 0, bd = Infinity;
+            plot.plotted.forEach((p, i) => {
+              const d = Math.abs(p.px - vbx);
+              if (d < bd) { bd = d; best = i; }
+            });
+            const p = plot.plotted[best];
+            cursor.setAttribute("cx", p.px.toFixed(1));
+            cursor.setAttribute("cy", p.py.toFixed(1));
+            cursor.style.opacity = "1";
+            guide.setAttribute("x1", p.px.toFixed(1));
+            guide.setAttribute("x2", p.px.toFixed(1));
+            guide.style.opacity = "0.55";
+            tip.innerHTML =
+              `<b>${p.v.toFixed(plot.fixed)}s</b>` +
+              `<div class="nt-row">${nightlyFullDate(p.t)}</div>` +
+              `<div class="nt-row mono">${escapeHtml((p.c || "").slice(0, 7) || "—")}</div>`;
+            tip.classList.add("show");
+            const sx = rect.left + (p.px / plot.W) * rect.width;
+            const sy = rect.top + (p.py / plot.H) * rect.height;
+            const tw = tip.offsetWidth, th = tip.offsetHeight;
+            const lx = Math.max(8, Math.min(sx - tw / 2, window.innerWidth - tw - 8));
+            let ly = sy - th - 12;
+            if (ly < 8) ly = sy + 16;
+            tip.style.left = `${lx}px`;
+            tip.style.top = `${ly}px`;
+          };
+          const leave = () => {
+            tip.classList.remove("show");
+            cursor.style.opacity = "0";
+            guide.style.opacity = "0";
+          };
+          svg.addEventListener("pointermove", move);
+          svg.addEventListener("pointerleave", leave);
+        });
+      }
     </script>
   </body>
 </html>
