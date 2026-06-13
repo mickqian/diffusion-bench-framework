@@ -1460,16 +1460,29 @@
         color: var(--accent-strong);
       }
 
+      body.nightly-only #top,
+      body.nightly-only #performance,
+      body.nightly-only #lessons,
+      body.nightly-only #benchmarks,
+      body.nightly-only .footer {
+        display: none;
+      }
+
+      body.nightly-only #nightly {
+        padding-top: clamp(32px, 4vw, 56px);
+        border-top: 0;
+      }
+
       .nightly-grid {
         display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-        gap: 18px;
+        grid-template-columns: repeat(auto-fit, minmax(440px, 1fr));
+        gap: 22px;
       }
 
       .trend-card {
         border: 1px solid var(--hair);
         border-radius: var(--r-md);
-        padding: 18px 18px 12px;
+        padding: 22px 24px 16px;
         background: var(--paper-2);
         transition: border-color 160ms ease;
       }
@@ -1486,7 +1499,7 @@
       }
 
       .trend-model {
-        font-size: 15px;
+        font-size: 17px;
         font-weight: 600;
         letter-spacing: -0.01em;
         color: var(--ink);
@@ -1509,7 +1522,7 @@
       .trend-latest b {
         color: var(--ink);
         font-weight: 600;
-        font-size: 20px;
+        font-size: 26px;
         letter-spacing: -0.01em;
         font-variant-numeric: tabular-nums;
       }
@@ -2997,18 +3010,30 @@
       const nightlySection = document.getElementById("nightly");
       let nightlyPlot = {};
 
-      nightlyToggle.addEventListener("click", () => {
-        const show = nightlySection.hidden;
-        nightlySection.hidden = !show;
-        nightlyToggle.setAttribute("aria-expanded", String(show));
-        if (show) {
-          nightlySection.scrollIntoView({ behavior: "smooth", block: "start" });
-          if (!NIGHTLY.loaded) {
-            NIGHTLY.loaded = true;
-            loadNightly();
-          }
+      function exitNightly() {
+        document.body.classList.remove("nightly-only");
+        nightlySection.hidden = true;
+        nightlyToggle.setAttribute("aria-expanded", "false");
+      }
+      function enterNightly() {
+        document.body.classList.add("nightly-only");
+        nightlySection.hidden = false;
+        nightlyToggle.setAttribute("aria-expanded", "true");
+        window.scrollTo({ top: 0, behavior: "auto" });
+        if (!NIGHTLY.loaded) {
+          NIGHTLY.loaded = true;
+          loadNightly();
         }
+      }
+      nightlyToggle.addEventListener("click", () => {
+        if (document.body.classList.contains("nightly-only")) exitNightly();
+        else enterNightly();
       });
+      document.querySelectorAll('.nav-links a[href^="#"], .brand').forEach((a) =>
+        a.addEventListener("click", () => {
+          if (document.body.classList.contains("nightly-only")) exitNightly();
+        })
+      );
 
       const prettyModel = (model) => String(model || "").split("/").pop().replace(/-Diffusers$/, "");
       const nightlyDate = (ms) => {
@@ -3169,7 +3194,7 @@
       }
 
       function nightlySvg(caseId, pts) {
-        const W = 340, H = 120, L = 6, R = 8, T = 14, B = 20;
+        const W = 360, H = 150, L = 6, R = 8, T = 16, B = 22;
         const vs = pts.map((p) => p.v);
         const ts = pts.map((p) => p.t);
         let mn = Math.min(...vs), mx = Math.max(...vs);
