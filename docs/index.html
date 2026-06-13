@@ -17,25 +17,32 @@
       })();
     </script>
     <style>
-      /* Self-hosted variable fonts — no external request, renders offline / behind proxies */
+      /* Self-hosted Ubuntu (Dalton Maag · Ubuntu Font Licence) — no external request, renders offline / behind proxies */
       @font-face {
-        font-family: "Fraunces";
-        src: url("fonts/fraunces-full-normal.woff2") format("woff2");
-        font-weight: 100 900;
+        font-family: "Ubuntu";
+        src: url("fonts/ubuntu-400-normal.woff2") format("woff2");
+        font-weight: 400;
         font-style: normal;
         font-display: swap;
       }
       @font-face {
-        font-family: "Fraunces";
-        src: url("fonts/fraunces-full-italic.woff2") format("woff2");
-        font-weight: 100 900;
+        font-family: "Ubuntu";
+        src: url("fonts/ubuntu-400-italic.woff2") format("woff2");
+        font-weight: 400;
         font-style: italic;
         font-display: swap;
       }
       @font-face {
-        font-family: "Hanken Grotesk";
-        src: url("fonts/hanken-grotesk-wght-normal.woff2") format("woff2");
-        font-weight: 100 900;
+        font-family: "Ubuntu";
+        src: url("fonts/ubuntu-500-normal.woff2") format("woff2");
+        font-weight: 500;
+        font-style: normal;
+        font-display: swap;
+      }
+      @font-face {
+        font-family: "Ubuntu";
+        src: url("fonts/ubuntu-700-normal.woff2") format("woff2");
+        font-weight: 700;
         font-style: normal;
         font-display: swap;
       }
@@ -64,8 +71,8 @@
         --glass-hi: rgba(255, 255, 255, 0.75);
         --shadow-1: 0 1px 2px rgba(54, 40, 24, 0.05), 0 10px 34px rgba(54, 40, 24, 0.08);
         --shadow-2: 0 2px 6px rgba(54, 40, 24, 0.06), 0 22px 60px rgba(54, 40, 24, 0.12);
-        --serif: "Fraunces", ui-serif, Georgia, "Times New Roman", serif;
-        --sans: "Hanken Grotesk", -apple-system, BlinkMacSystemFont, "Helvetica Neue", Arial, sans-serif;
+        --serif: "Ubuntu", -apple-system, BlinkMacSystemFont, system-ui, "Segoe UI", sans-serif;
+        --sans: "Ubuntu", -apple-system, BlinkMacSystemFont, system-ui, "Helvetica Neue", Arial, sans-serif;
         --mono: ui-monospace, "SF Mono", SFMono-Regular, Menlo, Consolas, monospace;
         --r-lg: 22px;
         --r-md: 16px;
@@ -335,8 +342,8 @@
         margin: 0 0 22px;
         font-family: var(--serif);
         font-size: clamp(23px, 2.5vw, 31px);
-        font-weight: 400;
-        font-style: italic;
+        font-weight: 500;
+        font-style: normal;
         line-height: 1.28;
         letter-spacing: -0.01em;
         color: var(--ink);
@@ -1726,6 +1733,7 @@
         <a class="brand" href="#top">SGLang-Diffusion</a>
         <nav class="nav-links">
           <a href="#performance">Performance gains</a>
+          <a href="#platform">Platform</a>
           <a href="#lessons">What we learn</a>
           <a href="#benchmarks">Benchmarks</a>
           <a href="https://docs.sglang.io/docs/sglang-diffusion/" target="_blank" rel="noreferrer">Docs ↗</a>
@@ -1753,7 +1761,6 @@
         </div>
 
         <aside class="thesis" aria-label="Performance thesis">
-          <h2>‘Performance is a stack, not a single trick.’</h2>
           <div class="system-lines">
             <div class="system-line">
               <b>Serving</b>
@@ -1807,6 +1814,34 @@
           </div>
           <article class="detail-panel" id="capabilityDetail" aria-live="polite"></article>
         </section>
+      </section>
+
+      <section class="shell section" id="platform">
+        <div class="section-head">
+          <h2 class="section-title">Built to extend</h2>
+          <p>
+            Beyond raw speed, SGLang-Diffusion is an open, modular serving platform — built on Diffusers,
+            composable by stage, and observable — so research and industry can build on it, not just run it.
+          </p>
+        </div>
+        <div class="lesson-grid">
+          <article class="lesson">
+            <b>Diffusers-native backend</b>
+            <p>Loads Hugging Face Diffusers pipelines directly, so new models work day-0 — and you can freely compose Cache-DiT, parallelism (TP / SP / CFG), quantization, and LoRA on top.</p>
+          </article>
+          <article class="lesson">
+            <b>Modular pipeline</b>
+            <p>Every model is a composition of stages — text-encode → denoise → decode. New algorithms like progressive resolution slot in as stages without forking the engine.</p>
+          </article>
+          <article class="lesson">
+            <b>Profiling &amp; observability</b>
+            <p>A built-in profiler with per-stage and per-step timing makes denoise and decode bottlenecks visible, so tuning is measured rather than guessed.</p>
+          </article>
+          <article class="lesson">
+            <b>Broad model coverage</b>
+            <p>20+ image and video families — Wan, FLUX, HunyuanVideo, LTX, Qwen-Image, Cosmos and more — served on one stack.</p>
+          </article>
+        </div>
       </section>
 
       <section class="shell section" id="lessons">
@@ -2028,15 +2063,15 @@
           },
           {
             label: "Memory",
-            title: "Encoder layerwise offload",
+            title: "Full-stack layerwise offload",
             status: "shipped",
             summary:
-              "Automatically place encoder layers to reduce peak memory while keeping hot execution paths practical for serving.",
-            optimizes: "Memory envelope, model fit, and latency stability when encoders are large but not always the dominant hot loop.",
+              "Layerwise CPU offload across the whole stack — text/vision encoders, the DiT denoiser, and the VAE decoder — to cut peak memory while keeping hot paths resident.",
+            optimizes: "Peak memory and model fit, so larger models and higher resolutions run on a given GPU without forced fallbacks or OOM retries.",
             matters:
-              "Lower memory pressure can avoid forced offload patterns, OOM retries, or smaller serving envelopes.",
+              "The memory bottleneck moves between encoder, DiT, and decoder by model and resolution; offloading any stage per-layer keeps the serving envelope flexible.",
             helps:
-              "Large text or vision encoders, multi-encoder pipelines, and high-resolution image/video generation.",
+              "Large encoders, big DiTs, heavy VAE decoding for high-resolution image/video, and tight single-GPU deployments.",
             links: [["Performance mode", "https://docs.sglang.io/docs/sglang-diffusion/deployment_cookbook"]]
           },
           {
@@ -2051,6 +2086,22 @@
             helps:
               "Wan, Cosmos, LTX-style video paths, high-resolution image models, and requests with large latent token counts.",
             links: [["Sequence parallelism", "https://docs.sglang.io/docs/sglang-diffusion/ring_sp_performance"]]
+          },
+          {
+            label: "Kernel path",
+            title: "Shared CUDA kernel stack",
+            status: "shipped",
+            summary:
+              "Reuse SGLang's sgl-kernel for general ops — fused RMSNorm, SiLU-and-mul, FP4 quant GEMM, FlashAttention — plus a diffusion-specific jit_kernel set (fused norm-scale-shift, group-norm-SiLU, QK-norm RoPE) on the DiT hot loop.",
+            optimizes: "Per-step denoising latency and kernel-launch overhead by replacing eager PyTorch with fused CUDA/Triton kernels on the repeated DiT work.",
+            matters:
+              "A DiT runs the same block hundreds of times per request; the same battle-tested kernels behind SGLang's LLM runtime carry over, plus diffusion-specific fusions.",
+            helps:
+              "Every DiT-based image/video model, especially long video sampling where the denoiser dominates wall-clock time.",
+            links: [
+              ["sgl-kernel", "https://github.com/sgl-project/sglang/tree/main/sgl-kernel"],
+              ["jit_kernel", "https://github.com/sgl-project/sglang/tree/main/python/sglang/jit_kernel/diffusion"]
+            ]
           },
           {
             label: "Kernel path",
@@ -2113,6 +2164,19 @@
                 "https://github.com/sgl-project/sglang/blob/main/docs_new/docs/sglang-diffusion/progressive_resolution.mdx"
               ]
             ]
+          },
+          {
+            label: "Attention",
+            title: "Attention backends",
+            status: "quality tradeoff",
+            summary:
+              "Swap the attention backend per model and hardware, including sparse and quantized paths — sliding-tile, block/video-sparse, and SageAttention-style quantized attention — that trade a little fidelity for speed.",
+            optimizes: "Attention cost, which dominates long-frame video and high-resolution latents, by taking a cheaper attention path where the quality envelope allows.",
+            matters:
+              "Exact backends (FlashAttention, SDPA) stay lossless; the sparse and quantized ones are a real speed lever for long sequences but must be reported with quality drift.",
+            helps:
+              "Long video and high-resolution image attention where dense attention is the bottleneck and bounded approximation is acceptable.",
+            links: [["Docs", "https://docs.sglang.io/docs/sglang-diffusion/"]]
           },
           {
             label: "Evaluation",
