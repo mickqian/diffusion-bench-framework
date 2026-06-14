@@ -1878,67 +1878,18 @@
             <span>
               <span class="summary-title">Cross-framework benchmark data</span>
               <span class="summary-copy">
-                Latest same-H200, cache-free comparison: SGLang-Diffusion (native pipeline) vs TensorRT-LLM VisualGen, eager and compiled.
+                Same-H200, cache-free single-request latency across all models and frameworks — one case per model, unsupported combos marked. Per-framework versions/profiles in the source manifests; TensorRT-LLM VisualGen is 1.3.0rc18.
               </span>
             </span>
             <span class="marker" aria-hidden="true">+</span>
           </summary>
-          <div class="benchmark-meta" aria-label="Benchmark policy">
-            <div class="meta-cell">
-              <b>Hardware</b>
-              <span id="benchHardware">1x NVIDIA H200 devbox, non-CI</span>
-            </div>
-            <div class="meta-cell">
-              <b>Cache policy</b>
-              <span>No response cache, no Cache-DiT, no temporal cache</span>
-            </div>
-            <div class="meta-cell">
-              <b>Frameworks</b>
-              <span id="benchFrameworkVersions">—</span>
-            </div>
-            <div class="meta-cell">
-              <b>Source</b>
-              <span id="sourceReport">h200-main-b0d888a-flux1-cosmos3-20260610</span>
-            </div>
-          </div>
-          <div class="bench-headline" id="benchHeadline" hidden>
-            <p id="benchHeadlineText"></p>
-            <p class="bench-score" id="benchScore"></p>
-          </div>
-          <div class="bench-toolbar" id="benchToolbar" hidden>
-            <div class="bench-view-toggle" id="benchViewToggle" role="tablist" aria-label="Benchmark view">
-              <button type="button" data-view="chart" aria-pressed="true">Chart</button>
-              <button type="button" data-view="table" aria-pressed="false">Table</button>
-            </div>
-            <div class="filter-group" id="modelFilters"><span>Model</span></div>
-            <div class="filter-group" id="gpuFilters"><span>GPUs</span></div>
-            <div class="legend" id="benchLegend">
-              <i class="l-sgl">SGLang-Diffusion</i>
-              <i class="l-vllm">vLLM-Omni</i>
-            </div>
-          </div>
-          <div class="bench-chart" id="benchChart"></div>
-          <div class="table-wrap" id="benchTableWrap" hidden>
-            <table aria-label="Cross-framework latency results">
-              <thead id="benchHead">
-                <tr>
-                  <th>Case</th>
-                  <th>GPUs</th>
-                  <th>SGLang-Diffusion</th>
-                  <th>vLLM-Omni</th>
-                  <th>Fastest</th>
-                </tr>
-              </thead>
-              <tbody id="benchmarkRows"></tbody>
-            </table>
-          </div>
-          <section class="history-panel" aria-label="Historical cross-framework benchmark data">
+          <section class="history-panel" aria-label="Cross-framework benchmark coverage">
             <div class="history-head">
               <div>
-                <h3>Historical coverage</h3>
+                <h3>Cross-framework coverage</h3>
                 <p>
-                  Broader local history from formal manifests and committed reports, including vLLM-Omni and LightX2V rows.
-                  These are shown as evidence, not as the latest release headline.
+                  One representative case per model across all four frameworks, from formal manifests and committed reports.
+                  Same-GPU and cache-free; unsupported or unbenched combinations are marked with the reason.
                 </p>
               </div>
               <div class="history-tabs" id="historyTabs" aria-label="Historical benchmark sections"></div>
@@ -3263,7 +3214,7 @@
       }
 
       renderExplorer();
-      loadBenchmarkData().then(renderBenchmarks);
+      // Focused "latest" view removed; the consolidated coverage matrix is rendered below.
       loadHistoricalData().then(renderHistorical);
 
       /* ---------- nightly performance track ---------- */
