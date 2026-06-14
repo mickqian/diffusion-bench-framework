@@ -94,12 +94,13 @@ GENERIC_HTTP_FRAMEWORKS = {"trtllm-visual"}
 
 # Frameworks whose pipelines REQUIRE torch.compile to run correctly, so the
 # cache-free `TORCH_COMPILE_DISABLE=1` policy must not be applied to them.
-# TensorRT-LLM VisualGen crashes in eager mode with a layer_norm
-# "expected scalar type Float but found BFloat16" error; compile is functional,
-# not an optimization. Measured latency is still post-warmup steady-state (the
-# compile cost is paid during warmup and excluded), so the comparison stays
-# fair — see scripts/run_trtllm_visual_h200.md.
-REQUIRES_TORCH_COMPILE = {"trtllm-visual"}
+# (Empty by default.) TensorRT-LLM VisualGen used to belong here — it crashed in
+# eager mode with a layer_norm "expected scalar type Float but found BFloat16"
+# error — but scripts/patches/apply_trtllm_visual_patches.py (applied at install)
+# fixes that, so trtllm-visual now honors the global compile flag uniformly and
+# can be benchmarked both compile-on and compile-off. See
+# scripts/run_trtllm_visual_h200.md.
+REQUIRES_TORCH_COMPILE: set[str] = set()
 SGLANG_PROFILE_RUNTIME_KEYS = {
     "serve_args",
     "num_gpus",
@@ -1950,6 +1951,9 @@ def run_case_framework(
     log_thread = None
 
     proc = None
+    startup_t0 = time.time()
+    server_startup_s: float | None = None
+    warmup_s: float | None = None
     try:
         proc = subprocess.Popen(
             cmd,
@@ -1982,10 +1986,16 @@ def run_case_framework(
             proc=proc,
             health_path=(fw_cfg.get("http_server") or {}).get("health_path"),
         )
+        # Time-to-ready (process start -> health pass) captures the cold-start
+        # cost, which for compile-on serving includes graph compilation. The
+        # compile-on vs compile-off delta in this number is the compile cost.
+        server_startup_s = round(time.time() - startup_t0, 2)
         bench_cfg = _merge_nested(
             _benchmark_config(config, case), fw_cfg.get("benchmark", {})
         )
+        warmup_t0 = time.time()
         _run_warmups(base_url, case, framework, config, bench_cfg)
+        warmup_s = round(time.time() - warmup_t0, 2)
 
         if MODE_SINGLE_E2E in modes:
             single_result = run_single_request(
@@ -2010,6 +2020,15 @@ def run_case_framework(
         if log_thread:
             log_thread.join(timeout=5)
         log_fh.close()
+
+    # Attach cold-start / warmup timing (incl. compile) to whichever results ran.
+    for _result in (single_result, throughput_result):
+        if isinstance(_result, dict):
+            metrics = _result.setdefault("metrics", {})
+            if server_startup_s is not None:
+                metrics["server_startup_s"] = server_startup_s
+            if warmup_s is not None:
+                metrics["warmup_s"] = warmup_s
 
     return single_result, throughput_result
 

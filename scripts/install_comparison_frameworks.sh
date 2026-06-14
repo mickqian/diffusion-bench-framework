@@ -157,6 +157,9 @@ case "${FRAMEWORK}" in
     python3 -m pip install --upgrade --upgrade-strategy only-if-needed \
       --extra-index-url "${TRTLLM_PIP_EXTRA_INDEX_URL:-https://pypi.nvidia.com}" \
       "${TRTLLM_INSTALL_SPEC:-tensorrt-llm==1.3.0rc18}"
+    # Local patch: let VisualGen run in eager mode (TORCH_COMPILE_DISABLE=1) for
+    # a same-policy compile-off comparison. See the patcher's docstring.
+    python3 "$(dirname "$0")/patches/apply_trtllm_visual_patches.py"
     ;;
   *)
     echo "Unknown comparison framework: ${FRAMEWORK}" >&2

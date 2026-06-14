@@ -13,7 +13,7 @@
     "cache": "No response cache, no Cache-DiT, no temporal cache in these rows."
   },
   "summary": {
-    "sections": 5,
+    "sections": 6,
     "h200_full_matrix_single_rows": 13,
     "h200_full_matrix_sglang_wins": 12,
     "h200_full_matrix_other_wins": 0,
@@ -416,18 +416,18 @@
       ]
     },
     {
-      "id": "trtllm_visualgen_h200_20260614",
-      "title": "TensorRT-LLM VisualGen (H200)",
-      "subtitle": "TensorRT-LLM VisualGen (tensorrt-llm 1.3.0rc18) measured on a 2\u00d7H200 devbox, 1-GPU, cache-free. trtllm-visual runs torch.compile-on because that is its only functional mode (eager crashes); SGLang-Diffusion / vLLM-Omni figures are the existing cache-free, compile-off matrix references for the same case \u2014 shown for context, not a same-compile-policy head-to-head, so no winner is declared. See scripts/run_trtllm_visual_h200.md.",
+      "id": "compile_on_bestvsbest_h200_20260614",
+      "title": "Compile-on best-vs-best (H200)",
+      "subtitle": "Same-box H200, 1-GPU, cache-free, torch.compile ON for both. SGLang-Diffusion runs resident (--dit-cpu-offload false; standard config, not its max-tuned speed profile); trtllm-visual is TensorRT-LLM VisualGen 1.3.0rc18. 'compile +Xs' is the extra cold-start (load+compile+warmup) from enabling compile \u2014 note trtllm's compile is ~2-6s vs SGLang's ~74-97s. See scripts/run_trtllm_visual_h200.md.",
       "mode": "single_e2e",
-      "source_report": "tensorrt-llm 1.3.0rc18 on 2x H200 rx devbox (2026-06-14)",
+      "source_report": "H200 2026-06-14 same-box compile-on",
       "reproduce": "scripts/run_trtllm_visual_h200.md",
       "summary": {
-        "rows": 4,
-        "comparable_rows": 3,
+        "rows": 3,
+        "comparable_rows": 2,
         "sglang_diffusion_wins": 0,
-        "other_wins": 0,
-        "note": "Reference comparison; trtllm-visual is compile-on (required), SGLang/vLLM figures are compile-off."
+        "other_wins": 2,
+        "note": "Both compile-on, resident, cache-free."
       },
       "rows": [
         {
@@ -435,33 +435,23 @@
           "case": "FLUX.1-dev T2I",
           "details": "1024x1024 \u00b7 50 steps \u00b7 cfg 3.5",
           "mode": "single_e2e",
-          "winner": null,
+          "winner": "trtllm-visual",
           "cells": {
             "sglang": {
               "gpus": 1,
-              "profile": "default",
+              "profile": "resident",
               "status": "ok",
-              "latency_s": 7.69,
-              "ratio_to_sglang": 1.0
-            },
-            "vllm-omni": {
-              "gpus": 1,
-              "profile": "default",
-              "status": "ok",
-              "latency_s": 8.682,
-              "ratio_to_sglang": 1.129
-            },
-            "lightx2v": {
-              "status": "no_profile",
-              "reason": "No tracked profile for this case."
+              "latency_s": 7.601,
+              "ratio_to_sglang": 1.0,
+              "compile_s": 97
             },
             "trtllm-visual": {
               "gpus": 1,
-              "profile": "h100-h200-1gpu-speed (compile-on)",
+              "profile": "trtllm-kernels",
               "status": "ok",
-              "latency_s": 7.315,
-              "ratio_to_sglang": 0.951,
-              "server_latency_s": null
+              "latency_s": 7.084,
+              "ratio_to_sglang": 0.932,
+              "compile_s": 2
             }
           }
         },
@@ -470,36 +460,23 @@
           "case": "FLUX.2-dev T2I",
           "details": "1024x1024 \u00b7 50 steps \u00b7 cfg 4",
           "mode": "single_e2e",
-          "winner": null,
+          "winner": "trtllm-visual",
           "cells": {
             "sglang": {
               "gpus": 1,
-              "profile": "default",
+              "profile": "resident",
               "status": "ok",
-              "latency_s": 25.24,
-              "ratio_to_sglang": 1.0
-            },
-            "vllm-omni": {
-              "gpus": 1,
-              "profile": "default",
-              "status": "ok",
-              "latency_s": 26.533,
-              "ratio_to_sglang": 1.051
-            },
-            "lightx2v": {
-              "gpus": 1,
-              "profile": "h200-fa2-flashinfer",
-              "status": "ok",
-              "latency_s": 31.071,
-              "ratio_to_sglang": 1.231
+              "latency_s": 24.275,
+              "ratio_to_sglang": 1.0,
+              "compile_s": 74
             },
             "trtllm-visual": {
               "gpus": 1,
-              "profile": "h100-h200-1gpu-speed (compile-on)",
+              "profile": "trtllm-kernels",
               "status": "ok",
-              "latency_s": 23.768,
-              "ratio_to_sglang": 0.942,
-              "server_latency_s": null
+              "latency_s": 23.181,
+              "ratio_to_sglang": 0.955,
+              "compile_s": 6
             }
           }
         },
@@ -511,61 +488,102 @@
           "winner": null,
           "cells": {
             "sglang": {
-              "gpus": 1,
-              "profile": "default",
-              "status": "ok",
-              "latency_s": 6.77,
-              "ratio_to_sglang": 1.0
-            },
-            "vllm-omni": {
-              "gpus": 1,
-              "profile": "default",
-              "status": "ok",
-              "latency_s": 8.717,
-              "ratio_to_sglang": 1.288
-            },
-            "lightx2v": {
-              "status": "no_profile",
-              "reason": "No tracked profile for this case."
+              "status": "failed",
+              "reason": "compile-on: sglang server exited before health check (needs investigation)"
             },
             "trtllm-visual": {
               "gpus": 1,
-              "profile": "h100-h200-1gpu-speed (compile-on)",
+              "profile": "trtllm-kernels",
               "status": "ok",
-              "latency_s": 7.515,
-              "ratio_to_sglang": 1.11,
-              "server_latency_s": null
+              "latency_s": 7.248,
+              "ratio_to_sglang": null,
+              "compile_s": 3
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "compile_off_h200_20260614",
+      "title": "Compile-off (H200)",
+      "subtitle": "Same-box H200, 1-GPU, cache-free, torch.compile OFF. trtllm-visual runs in eager mode via the persisted layer_norm dtype patch (scripts/patches/). SGLang resident. Qwen SGLang row is anomalously slow vs its historical ~6.8s and is flagged for follow-up.",
+      "mode": "single_e2e",
+      "source_report": "H200 2026-06-14 same-box compile-off",
+      "reproduce": "scripts/run_trtllm_visual_h200.md",
+      "summary": {
+        "rows": 3,
+        "comparable_rows": 3,
+        "sglang_diffusion_wins": 0,
+        "other_wins": 3,
+        "note": "Both compile-off, resident, cache-free."
+      },
+      "rows": [
+        {
+          "case_id": "flux1_dev_t2i_1024",
+          "case": "FLUX.1-dev T2I",
+          "details": "1024x1024 \u00b7 50 steps \u00b7 cfg 3.5",
+          "mode": "single_e2e",
+          "winner": "trtllm-visual",
+          "cells": {
+            "sglang": {
+              "gpus": 1,
+              "profile": "resident",
+              "status": "ok",
+              "latency_s": 9.778,
+              "ratio_to_sglang": 1.0
+            },
+            "trtllm-visual": {
+              "gpus": 1,
+              "profile": "eager (patched)",
+              "status": "ok",
+              "latency_s": 8.699,
+              "ratio_to_sglang": 0.89
             }
           }
         },
         {
-          "case_id": "cosmos3_nano_t2i_720p",
-          "case": "Cosmos3 Nano T2I",
-          "details": "1280x720 \u00b7 35 steps \u00b7 cfg 6",
+          "case_id": "flux2_dev_t2i_1024",
+          "case": "FLUX.2-dev T2I",
+          "details": "1024x1024 \u00b7 50 steps \u00b7 cfg 4",
           "mode": "single_e2e",
-          "winner": null,
+          "winner": "trtllm-visual",
           "cells": {
             "sglang": {
               "gpus": 1,
-              "profile": "h200-1gpu-fa",
+              "profile": "resident",
               "status": "ok",
-              "latency_s": 1.877,
+              "latency_s": 28.712,
               "ratio_to_sglang": 1.0
             },
-            "vllm-omni": {
+            "trtllm-visual": {
               "gpus": 1,
-              "profile": "h200-1gpu-fa",
+              "profile": "eager (patched)",
               "status": "ok",
-              "latency_s": 1.943,
-              "ratio_to_sglang": 1.035
-            },
-            "lightx2v": {
-              "status": "no_profile",
-              "reason": "No tracked profile for this case."
+              "latency_s": 25.771,
+              "ratio_to_sglang": 0.898
+            }
+          }
+        },
+        {
+          "case_id": "qwen_image_2512_t2i_1024",
+          "case": "Qwen-Image-2512 T2I",
+          "details": "1024x1024 \u00b7 50 steps \u00b7 cfg 1",
+          "mode": "single_e2e",
+          "winner": "trtllm-visual",
+          "cells": {
+            "sglang": {
+              "gpus": 1,
+              "profile": "resident (anomalous: hist ~6.8s)",
+              "status": "ok",
+              "latency_s": 18.461,
+              "ratio_to_sglang": 1.0
             },
             "trtllm-visual": {
-              "status": "failed",
-              "reason": "VisualGen image endpoint returned 400 for the 1280x720 request; size/param format for non-square Cosmos3 image needs follow-up."
+              "gpus": 1,
+              "profile": "eager (patched)",
+              "status": "ok",
+              "latency_s": 8.343,
+              "ratio_to_sglang": 0.452
             }
           }
         }
