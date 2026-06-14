@@ -4,7 +4,8 @@
   "frameworks": {
     "sglang": "SGLang-Diffusion",
     "vllm-omni": "vLLM-Omni",
-    "lightx2v": "LightX2V"
+    "lightx2v": "LightX2V",
+    "trtllm-visual": "TensorRT-LLM VisualGen"
   },
   "policy": {
     "public_source": "Formal manifests plus committed reports/raw; tmp source JSON is used only when referenced by a manifest.",
@@ -12,7 +13,7 @@
     "cache": "No response cache, no Cache-DiT, no temporal cache in these rows."
   },
   "summary": {
-    "sections": 4,
+    "sections": 5,
     "h200_full_matrix_single_rows": 13,
     "h200_full_matrix_sglang_wins": 12,
     "h200_full_matrix_other_wins": 0,
@@ -409,6 +410,162 @@
               "status": "ok",
               "latency_s": 339.803,
               "ratio_to_sglang": 1.584
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "trtllm_visualgen_h200_20260614",
+      "title": "TensorRT-LLM VisualGen (H200)",
+      "subtitle": "TensorRT-LLM VisualGen (tensorrt-llm 1.3.0rc18) measured on a 2\u00d7H200 devbox, 1-GPU, cache-free. trtllm-visual runs torch.compile-on because that is its only functional mode (eager crashes); SGLang-Diffusion / vLLM-Omni figures are the existing cache-free, compile-off matrix references for the same case \u2014 shown for context, not a same-compile-policy head-to-head, so no winner is declared. See scripts/run_trtllm_visual_h200.md.",
+      "mode": "single_e2e",
+      "source_report": "tensorrt-llm 1.3.0rc18 on 2x H200 rx devbox (2026-06-14)",
+      "reproduce": "scripts/run_trtllm_visual_h200.md",
+      "summary": {
+        "rows": 4,
+        "comparable_rows": 3,
+        "sglang_diffusion_wins": 0,
+        "other_wins": 0,
+        "note": "Reference comparison; trtllm-visual is compile-on (required), SGLang/vLLM figures are compile-off."
+      },
+      "rows": [
+        {
+          "case_id": "flux1_dev_t2i_1024",
+          "case": "FLUX.1-dev T2I",
+          "details": "1024x1024 \u00b7 50 steps \u00b7 cfg 3.5",
+          "mode": "single_e2e",
+          "winner": null,
+          "cells": {
+            "sglang": {
+              "gpus": 1,
+              "profile": "default",
+              "status": "ok",
+              "latency_s": 7.69,
+              "ratio_to_sglang": 1.0
+            },
+            "vllm-omni": {
+              "gpus": 1,
+              "profile": "default",
+              "status": "ok",
+              "latency_s": 8.682,
+              "ratio_to_sglang": 1.129
+            },
+            "lightx2v": {
+              "status": "no_profile",
+              "reason": "No tracked profile for this case."
+            },
+            "trtllm-visual": {
+              "gpus": 1,
+              "profile": "h100-h200-1gpu-speed (compile-on)",
+              "status": "ok",
+              "latency_s": 7.315,
+              "ratio_to_sglang": 0.951,
+              "server_latency_s": null
+            }
+          }
+        },
+        {
+          "case_id": "flux2_dev_t2i_1024",
+          "case": "FLUX.2-dev T2I",
+          "details": "1024x1024 \u00b7 50 steps \u00b7 cfg 4",
+          "mode": "single_e2e",
+          "winner": null,
+          "cells": {
+            "sglang": {
+              "gpus": 1,
+              "profile": "default",
+              "status": "ok",
+              "latency_s": 25.24,
+              "ratio_to_sglang": 1.0
+            },
+            "vllm-omni": {
+              "gpus": 1,
+              "profile": "default",
+              "status": "ok",
+              "latency_s": 26.533,
+              "ratio_to_sglang": 1.051
+            },
+            "lightx2v": {
+              "gpus": 1,
+              "profile": "h200-fa2-flashinfer",
+              "status": "ok",
+              "latency_s": 31.071,
+              "ratio_to_sglang": 1.231
+            },
+            "trtllm-visual": {
+              "gpus": 1,
+              "profile": "h100-h200-1gpu-speed (compile-on)",
+              "status": "ok",
+              "latency_s": 23.768,
+              "ratio_to_sglang": 0.942,
+              "server_latency_s": null
+            }
+          }
+        },
+        {
+          "case_id": "qwen_image_2512_t2i_1024",
+          "case": "Qwen-Image-2512 T2I",
+          "details": "1024x1024 \u00b7 50 steps \u00b7 cfg 1",
+          "mode": "single_e2e",
+          "winner": null,
+          "cells": {
+            "sglang": {
+              "gpus": 1,
+              "profile": "default",
+              "status": "ok",
+              "latency_s": 6.77,
+              "ratio_to_sglang": 1.0
+            },
+            "vllm-omni": {
+              "gpus": 1,
+              "profile": "default",
+              "status": "ok",
+              "latency_s": 8.717,
+              "ratio_to_sglang": 1.288
+            },
+            "lightx2v": {
+              "status": "no_profile",
+              "reason": "No tracked profile for this case."
+            },
+            "trtllm-visual": {
+              "gpus": 1,
+              "profile": "h100-h200-1gpu-speed (compile-on)",
+              "status": "ok",
+              "latency_s": 7.515,
+              "ratio_to_sglang": 1.11,
+              "server_latency_s": null
+            }
+          }
+        },
+        {
+          "case_id": "cosmos3_nano_t2i_720p",
+          "case": "Cosmos3 Nano T2I",
+          "details": "1280x720 \u00b7 35 steps \u00b7 cfg 6",
+          "mode": "single_e2e",
+          "winner": null,
+          "cells": {
+            "sglang": {
+              "gpus": 1,
+              "profile": "h200-1gpu-fa",
+              "status": "ok",
+              "latency_s": 1.877,
+              "ratio_to_sglang": 1.0
+            },
+            "vllm-omni": {
+              "gpus": 1,
+              "profile": "h200-1gpu-fa",
+              "status": "ok",
+              "latency_s": 1.943,
+              "ratio_to_sglang": 1.035
+            },
+            "lightx2v": {
+              "status": "no_profile",
+              "reason": "No tracked profile for this case."
+            },
+            "trtllm-visual": {
+              "status": "failed",
+              "reason": "VisualGen image endpoint returned 400 for the 1280x720 request; size/param format for non-square Cosmos3 image needs follow-up."
             }
           }
         }

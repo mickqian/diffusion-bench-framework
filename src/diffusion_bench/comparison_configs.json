@@ -294,6 +294,59 @@
                             }
                         }
                     }
+                },
+                "trtllm-visual": {
+                    "num_gpus": 1,
+                    "serve_args": "--backend pytorch",
+                    "extra_env": {},
+                    "http_server": {
+                        "bin": "trtllm-serve",
+                        "args_template": [
+                            "serve",
+                            "{model}",
+                            "--host",
+                            "{host}",
+                            "--port",
+                            "{port}"
+                        ],
+                        "tp_flag": "--tp_size",
+                        "health_path": "/health"
+                    },
+                    "http_request": {
+                        "text-to-image": {
+                            "endpoint": "/v1/images/generations"
+                        }
+                    },
+                    "command_profiles": {
+                        "default": {
+                            "description": "Best known TensorRT-LLM VisualGen command for aligned non-cache FLUX.1 runs.",
+                            "framework_ref": "tensorrt-llm-visualgen-trtllm-serve",
+                            "serve_args": "--backend pytorch",
+                            "notes": "Keep this profile updated as the best command changes. trtllm-serve auto-detects the FLUX.1 diffusion model; add --extra_visual_gen_options <model>.yml for steady-state tuning. PyTorch backend, no TeaCache and no torch compile so the row stays cache-free and comparable. Needs GPU validation."
+                        },
+                        "h100-h200-1gpu-speed": {
+                            "description": "Hopper single-GPU TensorRT-LLM VisualGen FLUX.1 profile probe.",
+                            "hardware": [
+                                "h100",
+                                "h200"
+                            ],
+                            "num_gpus": 1,
+                            "framework_ref": "tensorrt-llm-visualgen+trtllm-kernels",
+                            "serve_args": "--backend pytorch",
+                            "notes": "TRTLLM attention-backend kernels on Hopper. trtllm-serve auto-detects the FLUX.1 diffusion model; add --extra_visual_gen_options <model>.yml for steady-state tuning. PyTorch backend, no TeaCache and no torch compile so the row stays cache-free and comparable. Needs GPU validation."
+                        },
+                        "h100-h200-2gpu-tp-speed": {
+                            "description": "Hopper 2-GPU TP TensorRT-LLM VisualGen FLUX.1 profile probe.",
+                            "hardware": [
+                                "h100",
+                                "h200"
+                            ],
+                            "num_gpus": 2,
+                            "framework_ref": "tensorrt-llm-visualgen+tp2",
+                            "serve_args": "--backend pytorch",
+                            "notes": "Harness appends --tp_size 2 when num_gpus=2. trtllm-serve auto-detects the FLUX.1 diffusion model; add --extra_visual_gen_options <model>.yml for steady-state tuning. PyTorch backend, no TeaCache and no torch compile so the row stays cache-free and comparable. Needs GPU validation."
+                        }
+                    }
                 }
             }
         },
@@ -629,6 +682,59 @@
                             }
                         }
                     }
+                },
+                "trtllm-visual": {
+                    "num_gpus": 1,
+                    "serve_args": "--backend pytorch",
+                    "extra_env": {},
+                    "http_server": {
+                        "bin": "trtllm-serve",
+                        "args_template": [
+                            "serve",
+                            "{model}",
+                            "--host",
+                            "{host}",
+                            "--port",
+                            "{port}"
+                        ],
+                        "tp_flag": "--tp_size",
+                        "health_path": "/health"
+                    },
+                    "http_request": {
+                        "text-to-image": {
+                            "endpoint": "/v1/images/generations"
+                        }
+                    },
+                    "command_profiles": {
+                        "default": {
+                            "description": "Best known TensorRT-LLM VisualGen command for aligned non-cache FLUX.2 runs.",
+                            "framework_ref": "tensorrt-llm-visualgen-trtllm-serve",
+                            "serve_args": "--backend pytorch",
+                            "notes": "Keep this profile updated as the best command changes. trtllm-serve auto-detects the FLUX.2 diffusion model; add --extra_visual_gen_options <model>.yml for steady-state tuning. PyTorch backend, no TeaCache and no torch compile so the row stays cache-free and comparable. Needs GPU validation."
+                        },
+                        "h100-h200-1gpu-speed": {
+                            "description": "Hopper single-GPU TensorRT-LLM VisualGen FLUX.2 profile probe.",
+                            "hardware": [
+                                "h100",
+                                "h200"
+                            ],
+                            "num_gpus": 1,
+                            "framework_ref": "tensorrt-llm-visualgen+trtllm-kernels",
+                            "serve_args": "--backend pytorch",
+                            "notes": "TRTLLM attention-backend kernels on Hopper. trtllm-serve auto-detects the FLUX.2 diffusion model; add --extra_visual_gen_options <model>.yml for steady-state tuning. PyTorch backend, no TeaCache and no torch compile so the row stays cache-free and comparable. Needs GPU validation."
+                        },
+                        "h100-h200-2gpu-tp-speed": {
+                            "description": "Hopper 2-GPU TP TensorRT-LLM VisualGen FLUX.2 profile probe.",
+                            "hardware": [
+                                "h100",
+                                "h200"
+                            ],
+                            "num_gpus": 2,
+                            "framework_ref": "tensorrt-llm-visualgen+tp2",
+                            "serve_args": "--backend pytorch",
+                            "notes": "Harness appends --tp_size 2 when num_gpus=2. trtllm-serve auto-detects the FLUX.2 diffusion model; add --extra_visual_gen_options <model>.yml for steady-state tuning. PyTorch backend, no TeaCache and no torch compile so the row stays cache-free and comparable. Needs GPU validation."
+                        }
+                    }
                 }
             }
         },
@@ -677,6 +783,59 @@
                             "extra_env": {
                                 "DIFFUSION_ATTENTION_BACKEND": "FLASH_ATTN"
                             }
+                        }
+                    }
+                },
+                "trtllm-visual": {
+                    "num_gpus": 1,
+                    "serve_args": "--backend pytorch",
+                    "extra_env": {},
+                    "http_server": {
+                        "bin": "trtllm-serve",
+                        "args_template": [
+                            "serve",
+                            "{model}",
+                            "--host",
+                            "{host}",
+                            "--port",
+                            "{port}"
+                        ],
+                        "tp_flag": "--tp_size",
+                        "health_path": "/health"
+                    },
+                    "http_request": {
+                        "text-to-image": {
+                            "endpoint": "/v1/images/generations"
+                        }
+                    },
+                    "command_profiles": {
+                        "default": {
+                            "description": "Best known TensorRT-LLM VisualGen command for aligned non-cache Qwen-Image runs.",
+                            "framework_ref": "tensorrt-llm-visualgen-trtllm-serve",
+                            "serve_args": "--backend pytorch",
+                            "notes": "Keep this profile updated as the best command changes. trtllm-serve auto-detects the Qwen-Image diffusion model; add --extra_visual_gen_options <model>.yml for steady-state tuning. PyTorch backend, no TeaCache and no torch compile so the row stays cache-free and comparable. Needs GPU validation."
+                        },
+                        "h100-h200-1gpu-speed": {
+                            "description": "Hopper single-GPU TensorRT-LLM VisualGen Qwen-Image profile probe.",
+                            "hardware": [
+                                "h100",
+                                "h200"
+                            ],
+                            "num_gpus": 1,
+                            "framework_ref": "tensorrt-llm-visualgen+trtllm-kernels",
+                            "serve_args": "--backend pytorch",
+                            "notes": "TRTLLM attention-backend kernels on Hopper. trtllm-serve auto-detects the Qwen-Image diffusion model; add --extra_visual_gen_options <model>.yml for steady-state tuning. PyTorch backend, no TeaCache and no torch compile so the row stays cache-free and comparable. Needs GPU validation."
+                        },
+                        "h100-h200-2gpu-tp-speed": {
+                            "description": "Hopper 2-GPU TP TensorRT-LLM VisualGen Qwen-Image profile probe.",
+                            "hardware": [
+                                "h100",
+                                "h200"
+                            ],
+                            "num_gpus": 2,
+                            "framework_ref": "tensorrt-llm-visualgen+tp2",
+                            "serve_args": "--backend pytorch",
+                            "notes": "Harness appends --tp_size 2 when num_gpus=2. trtllm-serve auto-detects the Qwen-Image diffusion model; add --extra_visual_gen_options <model>.yml for steady-state tuning. PyTorch backend, no TeaCache and no torch compile so the row stays cache-free and comparable. Needs GPU validation."
                         }
                     }
                 }
@@ -808,6 +967,56 @@
                             "lightx2v_config": {
                                 "attn_type": "flash_attn3"
                             }
+                        }
+                    }
+                }
+            }
+        },
+        {
+            "id": "ideogram4_t2i_1024_2gpu_tp",
+            "model": "ideogram-ai/ideogram-4-fp8",
+            "task": "text-to-image",
+            "prompt": "A futuristic cyberpunk city at night, neon lights reflecting on wet streets",
+            "width": 1024,
+            "height": 1024,
+            "seed": 42,
+            "num_gpus": 2,
+            "num_inference_steps": 20,
+            "_note": "Ideogram-4 derives steps and guidance from its sampling preset (V4_DEFAULT_20: 20 steps, final guidance 7); guidance_scale is intentionally omitted because the model rejects an explicit value.",
+            "report_framework_statuses": {
+                "vllm-omni": "unsupported",
+                "lightx2v": "unsupported",
+                "trtllm-visual": "unsupported"
+            },
+            "report_framework_reasons": {
+                "vllm-omni": "Latest vLLM-Omni has no Ideogram-4 serving path (image-gen coverage is FLUX/Qwen-Image/Wan).",
+                "lightx2v": "Latest LightX2V has no Ideogram-4 serving path.",
+                "trtllm-visual": "Latest TensorRT-LLM VisualGen has no Ideogram-4 serving path (coverage is FLUX/Wan/LTX-2/Qwen-Image/Cosmos3)."
+            },
+            "frameworks": {
+                "sglang": {
+                    "serve_args": "--model-type diffusion --warmup --dit-layerwise-offload false --tp-size 2",
+                    "extra_env": {},
+                    "command_profiles": {
+                        "default": {
+                            "description": "Best known SGLang command for Ideogram-4 T2I at 2-GPU TP.",
+                            "sglang_ref": "current-main",
+                            "serve_args": "--model-type diffusion --warmup --dit-layerwise-offload false --tp-size 2",
+                            "notes": "Tensor-parallel across 2 GPUs; no cache, no torch compile. Keep updated as the best command changes."
+                        },
+                        "h100-h200-2gpu-tp-speed": {
+                            "description": "Hopper 2-GPU TP fastest Ideogram-4 profile probe.",
+                            "hardware": [
+                                "h100",
+                                "h200"
+                            ],
+                            "num_gpus": 2,
+                            "sglang_ref": "current-main",
+                            "serve_args": "--model-type diffusion --warmup --dit-layerwise-offload false --tp-size 2 --performance-mode speed",
+                            "extra_env": {
+                                "FLASHINFER_USE_CUDA_NORM": "1"
+                            },
+                            "notes": "Speed mode + CUDA norm on Hopper; TP is explicit. Torch compile left off pending FP8 compile validation on GPU."
                         }
                     }
                 }
@@ -2104,6 +2313,61 @@
                             "num_gpus": 1,
                             "serve_args": "--stage-configs-path configs/vllm_omni_cosmos3_h200_1gpu_guardrails_off.yaml --stage-init-timeout 900 --init-timeout 1800",
                             "notes": "Single-card image serving profile; guardrails disabled via legacy stage config, no cache, torch compile disabled by harness."
+                        }
+                    }
+                },
+                "trtllm-visual": {
+                    "num_gpus": 1,
+                    "serve_args": "--backend pytorch",
+                    "extra_env": {
+                        "TRTLLM_DISABLE_COSMOS3_GUARDRAILS": "1"
+                    },
+                    "http_server": {
+                        "bin": "trtllm-serve",
+                        "args_template": [
+                            "serve",
+                            "{model}",
+                            "--host",
+                            "{host}",
+                            "--port",
+                            "{port}"
+                        ],
+                        "tp_flag": "--tp_size",
+                        "health_path": "/health"
+                    },
+                    "http_request": {
+                        "text-to-image": {
+                            "endpoint": "/v1/images/generations"
+                        }
+                    },
+                    "command_profiles": {
+                        "default": {
+                            "description": "Best known TensorRT-LLM VisualGen command for aligned non-cache Cosmos3 runs.",
+                            "framework_ref": "tensorrt-llm-visualgen-trtllm-serve",
+                            "serve_args": "--backend pytorch",
+                            "notes": "Keep this profile updated as the best command changes. trtllm-serve auto-detects the Cosmos3 diffusion model; add --extra_visual_gen_options <model>.yml for steady-state tuning. PyTorch backend, no TeaCache and no torch compile so the row stays cache-free and comparable. Needs GPU validation."
+                        },
+                        "h100-h200-1gpu-speed": {
+                            "description": "Hopper single-GPU TensorRT-LLM VisualGen Cosmos3 profile probe.",
+                            "hardware": [
+                                "h100",
+                                "h200"
+                            ],
+                            "num_gpus": 1,
+                            "framework_ref": "tensorrt-llm-visualgen+trtllm-kernels",
+                            "serve_args": "--backend pytorch",
+                            "notes": "TRTLLM attention-backend kernels on Hopper. trtllm-serve auto-detects the Cosmos3 diffusion model; add --extra_visual_gen_options <model>.yml for steady-state tuning. PyTorch backend, no TeaCache and no torch compile so the row stays cache-free and comparable. Needs GPU validation."
+                        },
+                        "h100-h200-2gpu-tp-speed": {
+                            "description": "Hopper 2-GPU TP TensorRT-LLM VisualGen Cosmos3 profile probe.",
+                            "hardware": [
+                                "h100",
+                                "h200"
+                            ],
+                            "num_gpus": 2,
+                            "framework_ref": "tensorrt-llm-visualgen+tp2",
+                            "serve_args": "--backend pytorch",
+                            "notes": "Harness appends --tp_size 2 when num_gpus=2. trtllm-serve auto-detects the Cosmos3 diffusion model; add --extra_visual_gen_options <model>.yml for steady-state tuning. PyTorch backend, no TeaCache and no torch compile so the row stays cache-free and comparable. Needs GPU validation."
                         }
                     }
                 }

@@ -5,6 +5,7 @@ Standalone benchmark harness for comparing diffusion serving frameworks:
 - SGLang-Diffusion
 - vLLM-Omni
 - LightX2V
+- TensorRT-LLM VisualGen (`trtllm-visual`, served via `trtllm-serve`)
 
 The repo launches one serving stack per case, sends a single end-to-end request, optionally runs a fixed high-pressure throughput workload, and writes a unified JSON result file.
 
@@ -17,7 +18,7 @@ The repo launches one serving stack per case, sends a single end-to-end request,
 - `src/diffusion_bench/build_report_artifacts.py`: merges result JSONs and regenerates report/image artifacts.
 - `src/diffusion_bench/generate_report_image.py`: PNG/SVG comparison image generator.
 - `configs/comparison_configs.json`: editable copy of the default model, prompt, shape, seed, and framework settings.
-- `scripts/install_comparison_frameworks.sh`: isolated venv installer for vLLM-Omni and LightX2V.
+- `scripts/install_comparison_frameworks.sh`: isolated venv installer for vLLM-Omni, LightX2V, and TensorRT-LLM VisualGen (`trtllm-visual`).
 - `scripts/run_h200_single_e2e_20260510.sh`: reproducible H200 single-request run script for the 2026-05-10 report shape.
 - `scripts/run_h200_throughput_20260511.sh`: reproducible H200 throughput run script for faster image cases.
 - `scripts/run_h200_throughput_common_20260514.sh`: H200 throughput run script for cases with SGLang-Diffusion, vLLM-Omni, and LightX2V profiles.
@@ -46,7 +47,9 @@ SGLang-Diffusion must be installed in the main environment if you want to run th
 python3 -m pip install -e /path/to/sglang/python[diffusion]
 ```
 
-vLLM-Omni and LightX2V are installed into isolated temporary virtualenvs by the runner because their dependencies conflict with SGLang.
+vLLM-Omni, LightX2V, and TensorRT-LLM VisualGen are installed into isolated temporary virtualenvs by the runner because their dependencies conflict with SGLang. `trtllm-visual` installs `tensorrt-llm==1.3.0rc18` from the NVIDIA PyPI index by default; override `TRTLLM_INSTALL_SPEC` and `TRTLLM_PIP_EXTRA_INDEX_URL` to pin a different release. **VisualGen (diffusion serving + the `/v1/images/generations` endpoint, with `get_is_diffusion_model` auto-detection in `trtllm-serve`) is only in the 1.3.0 release candidates — the 1.2.x stable line has no VisualGen path and serves FLUX through the LLM engine, which fails.** Multi-GPU parallelism for VisualGen (CFG / Ulysses) is configured through a `--extra_visual_gen_options` YAML, not `--tp_size`.
+
+`trtllm-visual` is a generic, config-driven HTTP framework: the runner has no bespoke command builder or request sender for it. Its launch command and request shape come entirely from the per-case `http_server` / `http_request` config blocks (defaulting to the OpenAI-compatible image/video endpoints `trtllm-serve` exposes), so additional OpenAI-compatible backends can be onboarded without editing `run_comparison.py`.
 
 `diffusion-bench-compare` forces `TORCH_COMPILE_DISABLE=1` for all benchmarked framework subprocesses so cold compile time does not leak into cross-framework runs. vLLM-Omni also gets `--enforce-eager --compilation-config '{"mode":0}'` because its diffusion runner uses `enforce_eager` to skip regional torch.compile. LightX2V config files force `compile=false` and `compile_shapes=[]`.
 
@@ -97,7 +100,7 @@ The bundled config is the formal tracking plan and keeps one representative case
 
 Extra variants such as true-CFG, alternate resolutions, non-representative LTX-2.3 pipeline/task variants, or single-GPU vs multi-GPU image runs should be added only for targeted investigations or explicit reruns, not as default tracker coverage. The representative LTX-2.3 default case is the two-stage pipeline.
 
-Framework entries are included only when the local harness has a compatible serving path. Current coverage includes vLLM-Omni for supported image, Wan, and LTX cases, and LightX2V for supported Wan, FLUX.2, Z-Image, and LTX cases.
+Framework entries are included only when the local harness has a compatible serving path. Current coverage includes vLLM-Omni for supported image, Wan, and LTX cases, LightX2V for supported Wan, FLUX.2, Z-Image, and LTX cases, and TensorRT-LLM VisualGen (`trtllm-visual`) for the FLUX.1/FLUX.2/Qwen-Image/Cosmos3 image cases. Ideogram-4 (`ideogram4_t2i_1024_2gpu_tp`, 2-GPU tensor-parallel) is SGLang-only as of 2026-06: vLLM-Omni, LightX2V, and TensorRT-LLM VisualGen have no Ideogram-4 serving path in their latest versions, so the case marks them unsupported via `report_framework_statuses`.
 If a framework needs a repackaged model ID for the same case, the formal report shows the actual per-framework model in the comparison table.
 
 ## Command Profiles
@@ -165,6 +168,32 @@ scripts/generate_h200_report_artifacts.sh
 ```
 
 This writes a merged JSON, dashboard Markdown, data-only issue Markdown, and PNG/SVG comparison image from the same input JSONs. The default inputs are the local H200 single-request, throughput, LightX2V LTX rerun, and same-GPU LTX-2.3 override artifacts under `tmp/report`.
+
+## GitHub Pages dashboard
+
+The published one-pager (`docs/index.html`) reads two committed JSON files and renders any framework set they declare — no HTML edits are needed to add a framework column:
+
+- `docs/data/latest-cross-framework.json`: the current spot-check. The "latest" view is framework-generic. New uploads should declare `framework_order` (an ordered list of framework keys) and give each row a `cells` map keyed by framework, e.g.:
+
+  ```json
+  {
+    "framework_order": ["sglang", "vllm-omni", "trtllm-visual"],
+    "frameworks": { "sglang": { "label": "SGLang-Diffusion", "commit": "…" }, "trtllm-visual": { "label": "TensorRT-LLM VisualGen", "tensorrt_llm": "1.x" } },
+    "rows": [{
+      "case": "FLUX.1-dev T2I", "gpus": "2 GPU TP", "winner": "SGLang-Diffusion", "winner_speedup": "1.4x",
+      "cells": {
+        "sglang": { "client_latency_s": 4.15, "server_latency_s": 4.0, "profile": "…" },
+        "vllm-omni": { "client_latency_s": 5.91, "profile": "…" },
+        "trtllm-visual": { "status": "no_profile", "reason": "…" }
+      }
+    }]
+  }
+  ```
+
+  The legacy two-framework schema (top-level `sglang_diffusion` / `vllm_omni` row keys) still renders for backward compatibility.
+- `docs/data/historical-cross-framework.json`: the historical matrix. Standard sections derive their framework columns from the `cells` present per row, so a framework an upload includes (e.g. `trtllm-visual`) appears automatically.
+- Register a new framework's bar color + label once in `FRAMEWORK_META` (latest view) and `frameworkLabels` (historical view) in `docs/index.html`; any unregistered key still renders with a neutral bar and its key as label.
+- After editing the JSON files, run `python3 scripts/refresh_docs_data.py` to refresh the inline `file://` preview snapshots embedded in `docs/index.html` (the deployed page always fetches the JSON directly).
 
 ## Notes
 

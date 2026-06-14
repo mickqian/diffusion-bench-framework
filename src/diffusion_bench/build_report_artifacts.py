@@ -16,7 +16,7 @@ from diffusion_bench.generate_dashboard import (
 from diffusion_bench.generate_report_image import render_report_image
 
 
-FRAMEWORK_ORDER = {"sglang": 0, "vllm-omni": 1, "lightx2v": 2, "diffusers": 3}
+FRAMEWORK_ORDER = {"sglang": 0, "vllm-omni": 1, "lightx2v": 2, "trtllm-visual": 3, "diffusers": 4}
 
 
 def _load(path: Path) -> dict:

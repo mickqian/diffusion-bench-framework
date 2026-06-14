@@ -65,6 +65,8 @@
         --ink-08: rgba(33, 28, 22, 0.09);
         --bar-sgl: #d55816;
         --bar-vllm: #b9b1a0;
+        --bar-lightx2v: #b08968;
+        --bar-trtllm: #7d8f69;
         --bar-neutral: #c9c1b0;
         --glass-bg: rgba(250, 247, 240, 0.72);
         --glass-border: rgba(255, 255, 255, 0.55);
@@ -97,6 +99,8 @@
         --ink-08: rgba(241, 236, 225, 0.09);
         --bar-sgl: #ef8a4f;
         --bar-vllm: #5d5648;
+        --bar-lightx2v: #c89b76;
+        --bar-trtllm: #93a87d;
         --bar-neutral: #6c6555;
         --glass-bg: rgba(28, 24, 18, 0.62);
         --glass-border: rgba(255, 255, 255, 0.1);
@@ -124,6 +128,8 @@
           --ink-08: rgba(241, 236, 225, 0.09);
           --bar-sgl: #ef8a4f;
           --bar-vllm: #5d5648;
+          --bar-lightx2v: #c89b76;
+          --bar-trtllm: #93a87d;
           --bar-neutral: #6c6555;
           --glass-bg: rgba(28, 24, 18, 0.62);
           --glass-border: rgba(255, 255, 255, 0.1);
@@ -872,6 +878,18 @@
         background: var(--bar-vllm);
       }
 
+      .legend .l-lightx2v::before {
+        background: var(--bar-lightx2v);
+      }
+
+      .legend .l-trtllm::before {
+        background: var(--bar-trtllm);
+      }
+
+      .legend .l-neutral::before {
+        background: var(--bar-neutral);
+      }
+
       .table-wrap {
         overflow-x: auto;
         margin: 0 -4px;
@@ -1001,9 +1019,20 @@
         background: var(--bar-sgl);
       }
 
-      .bar-vllm i,
-      .bar-neutral i {
+      .bar-vllm i {
         background: var(--bar-vllm);
+      }
+
+      .bar-lightx2v i {
+        background: var(--bar-lightx2v);
+      }
+
+      .bar-trtllm i {
+        background: var(--bar-trtllm);
+      }
+
+      .bar-neutral i {
+        background: var(--bar-neutral);
       }
 
       .winner {
@@ -1883,7 +1912,7 @@
             </div>
             <div class="filter-group" id="modelFilters"><span>Model</span></div>
             <div class="filter-group" id="gpuFilters"><span>GPUs</span></div>
-            <div class="legend">
+            <div class="legend" id="benchLegend">
               <i class="l-sgl">SGLang-Diffusion</i>
               <i class="l-vllm">vLLM-Omni</i>
             </div>
@@ -1975,7 +2004,7 @@
       run: python3 scripts/refresh_docs_data.py
     -->
     <script type="application/json" id="latestDataInline">{"id":"h200-flux1-tpfix-cosmos3-20260611","title":"H200 aligned SGLang-Diffusion vs vLLM-Omni spot-check","updated_at":"2026-06-11","source_report":"reports/flux-fastest-20260610 + reports/h200-main-b0d888a-flux1-cosmos3-20260610","source_script":"scripts/run_flux_fastest_20260610.sh + scripts/run_h200_flux1_cosmos3_spotcheck_20260610.sh","hardware":{"label":"2x NVIDIA H200","gpu_name":"NVIDIA H200","gpus":2},"policy":{"latency_source":"client-side single_e2e latency_s; SGLang rows also report server-side latency when available","selection":"explicit best-known profile per framework for the same case and GPU count","cache":"no response cache, no Cache-DiT, no temporal cache","torch_compile":"FLUX.1 uses torch compile for fastest image path; Cosmos3 keeps torch compile disabled","hardware":"2x NVIDIA H200 devbox, not CI/runner/build/GitHub Actions infrastructure","client_server_breakdown":"client latency is the comparison source; server latency is shown only as diagnostic context"},"frameworks":{"sglang_diffusion_now":{"label":"SGLang-Diffusion","commit":"796a6080518041c671c4bef347a2d46f314f2f90","measured_commit":"e25f72d8bbfab7039e2ec9ccbc38d33a88b329ad","reference_commit":"b0d888a195c3ee30350a7681d36efb0dde5fd4a9","note":"FLUX.1 rows use the TP-sharding fix branch. Cosmos3 rows are the 2026-06-10 reference spot-check because this patch only changes FLUX.1."},"vllm_omni_now":{"label":"vLLM-Omni","vllm":"0.22.0","vllm_omni":"0.22.1.dev31+g73df8326d","vllm_omni_commit":"73df8326d76fe3bba0b7b5a6abf6ad68976f24e8"}},"summary":{"same_gpu_cases":4,"sglang_diffusion_wins":4,"vllm_omni_wins":0,"headline":"On the aligned H200 spot-check, SGLang-Diffusion wins 4 of 4 same-GPU cases after the FLUX.1 TP sharding fix."},"rows":[{"case_id":"flux1_dev_t2i_1024","case":"FLUX.1-dev T2I","details":"1024x1024 · 50 steps · cfg 3.5","gpus":"1 GPU","torch_compile":"on","sglang_diffusion":{"client_latency_s":6.556,"server_latency_s":6.381,"profile":"h100-h200-1gpu-speed-compile"},"vllm_omni":{"client_latency_s":7.288,"profile":"h100-h200-1gpu-compile"},"winner":"SGLang-Diffusion","winner_speedup":"1.11x","note":"same-GPU image path; SGLang speed mode + CUDA norm; TP-fix branch"},{"case_id":"flux1_dev_t2i_1024","case":"FLUX.1-dev T2I","details":"1024x1024 · 50 steps · cfg 3.5","gpus":"2 GPU TP","torch_compile":"on","sglang_diffusion":{"client_latency_s":4.15,"server_latency_s":4.005,"profile":"h100-h200-2gpu-tp-speed-compile"},"vllm_omni":{"client_latency_s":5.912,"profile":"h100-h200-2gpu-tp-compile"},"winner":"SGLang-Diffusion","winner_speedup":"1.42x","note":"same 2GPU TP image path after FLUX.1 TP sharding fix"},{"case_id":"cosmos3_nano_t2i_720p","case":"Cosmos3 Nano T2I","details":"1280x720 · 35 steps · cfg 6","gpus":"1 GPU","torch_compile":"off","sglang_diffusion":{"client_latency_s":1.859,"server_latency_s":1.732,"profile":"h200-1gpu-fa-speed"},"vllm_omni":{"client_latency_s":1.915,"profile":"h200-1gpu-fa"},"winner":"SGLang-Diffusion","winner_speedup":"1.03x","note":"same-GPU Cosmos3 image path"},{"case_id":"cosmos3_nano_t2v_720p_189f","case":"Cosmos3 Nano T2V","details":"1280x720 · 189 frames · 35 steps · cfg 6","gpus":"2 GPU CFG","torch_compile":"off","sglang_diffusion":{"client_latency_s":107.159,"server_latency_s":104.602,"profile":"h200-2gpu-cfg-speed"},"vllm_omni":{"client_latency_s":117.82,"profile":"h200-2gpu-cfg"},"winner":"SGLang-Diffusion","winner_speedup":"1.10x","note":"same 2GPU CFG-only video path"}]}</script>
-    <script type="application/json" id="historicalDataInline">{"id":"historical-cross-framework-20260610","updated_at":"2026-06-11","frameworks":{"sglang":"SGLang-Diffusion","vllm-omni":"vLLM-Omni","lightx2v":"LightX2V"},"policy":{"public_source":"Formal manifests plus committed reports/raw; tmp source JSON is used only when referenced by a manifest.","latency_source":"client-side latency for headline comparisons; server-side latency is diagnostic only.","cache":"No response cache, no Cache-DiT, no temporal cache in these rows."},"summary":{"sections":4,"h200_full_matrix_single_rows":13,"h200_full_matrix_sglang_wins":12,"h200_full_matrix_other_wins":0,"h200_throughput_sglang_wins":4,"h200_throughput_other_wins":0},"sections":[{"id":"manifests_20260510-h200-single-e2e.json + manifests_20260514-h200-wan-vllm-omni.json + reports_h200-video-parallelism-refresh-20260611_single_e2e","title":"H200 full matrix","subtitle":"Single-request latency across image and video cases, with refreshed vLLM-Omni CFG and LightX2V FA3 Wan video rows.","mode":"single_e2e","source_manifest":"manifests/20260510-h200-single-e2e.json + manifests/20260514-h200-wan-vllm-omni.json + reports/h200-video-parallelism-refresh-20260611","source_run_id":"h200-framework-comparison-merged","reproduce":"scripts/generate_h200_report_artifacts.sh","summary":{"rows":13,"comparable_rows":12,"sglang_diffusion_wins":12,"other_wins":0},"rows":[{"case_id":"flux1_dev_t2i_1024","case":"FLUX.1-dev T2I","details":"1024x1024 · 50 steps · cfg 3.5","mode":"single_e2e","winner":"sglang","cells":{"sglang":{"gpus":1,"profile":"default","status":"ok","latency_s":7.69,"ratio_to_sglang":1.0},"vllm-omni":{"gpus":1,"profile":"default","status":"ok","latency_s":8.682,"ratio_to_sglang":1.129},"lightx2v":{"status":"no_profile","reason":"Tracked LightX2V version has no FLUX.1 serving path."}}},{"case_id":"flux2_dev_t2i_1024","case":"FLUX.2-dev T2I","details":"1024x1024 · 50 steps · cfg 4","mode":"single_e2e","winner":"sglang","cells":{"sglang":{"gpus":1,"profile":"default","status":"ok","latency_s":25.24,"ratio_to_sglang":1.0},"vllm-omni":{"gpus":1,"profile":"default","status":"ok","latency_s":26.533,"ratio_to_sglang":1.051},"lightx2v":{"gpus":1,"profile":"h200-fa2-flashinfer","status":"ok","latency_s":31.071,"ratio_to_sglang":1.231}}},{"case_id":"qwen_image_2512_t2i_1024","case":"Qwen-Image-2512 T2I","details":"1024x1024 · 50 steps · cfg 1","mode":"single_e2e","winner":"sglang","cells":{"sglang":{"gpus":1,"profile":"default","status":"ok","latency_s":6.77,"ratio_to_sglang":1.0},"vllm-omni":{"gpus":1,"profile":"default","status":"ok","latency_s":8.717,"ratio_to_sglang":1.288},"lightx2v":{"status":"no_profile","reason":"Tracked LightX2V version has no Qwen-Image T2I serving path."}}},{"case_id":"qwen_image_edit_2511","case":"Qwen-Image-Edit-2511","details":"1024x1024 · 40 steps · cfg 1","mode":"single_e2e","winner":"sglang","cells":{"sglang":{"gpus":1,"profile":"default","status":"ok","latency_s":12.06,"ratio_to_sglang":1.0},"vllm-omni":{"gpus":1,"profile":"default","status":"ok","latency_s":15.31,"ratio_to_sglang":1.269},"lightx2v":{"status":"no_profile","reason":"Tracked LightX2V version has no Qwen-Image-Edit serving path."}}},{"case_id":"zimage_turbo_t2i_1024","case":"Z-Image-Turbo T2I","details":"1024x1024 · 9 steps · cfg 0","mode":"single_e2e","winner":"sglang","cells":{"sglang":{"gpus":1,"profile":"default","status":"ok","latency_s":1.35,"ratio_to_sglang":1.0},"vllm-omni":{"gpus":1,"profile":"default","status":"ok","latency_s":2.954,"ratio_to_sglang":2.188},"lightx2v":{"gpus":1,"profile":"h200-fa2-flashinfer","status":"ok","latency_s":4.012,"ratio_to_sglang":2.972}}},{"case_id":"wan21_t2v_1_3b_480p","case":"Wan2.1 T2V 1.3B 480p","details":"832x480x81f · 50 steps · cfg 6","mode":"single_e2e","winner":"sglang","cells":{"sglang":{"gpus":2,"profile":"h200-2gpu-cfg-bf16-vae-resident","status":"ok","latency_s":26.041,"server_latency_s":24.687,"ratio_to_sglang":1.0},"vllm-omni":{"gpus":2,"profile":"h200-2gpu-cfg","status":"ok","latency_s":29.502,"ratio_to_sglang":1.133},"lightx2v":{"gpus":2,"profile":"h200-fa3","status":"ok","latency_s":29.058,"ratio_to_sglang":1.116}}},{"case_id":"wan21_i2v_14b_480p","case":"Wan2.1 I2V 14B 480p","details":"832x480x81f · 40 steps · cfg 5","mode":"single_e2e","winner":"sglang","cells":{"sglang":{"gpus":4,"profile":"Best known SGLang command for the benchmark repo default profile.","status":"ok","latency_s":61.149,"ratio_to_sglang":1.0},"vllm-omni":{"gpus":4,"profile":"h200-4gpu-tp","status":"ok","latency_s":110.572,"ratio_to_sglang":1.808},"lightx2v":{"gpus":4,"profile":"h200-fa2","status":"ok","latency_s":90.228,"ratio_to_sglang":1.476}}},{"case_id":"wan22_t2v_a14b_720p","case":"Wan2.2 T2V A14B 720p","details":"1280x720x81f · 40 steps · cfg 4/3","mode":"single_e2e","winner":"sglang","cells":{"sglang":{"gpus":4,"profile":"Best known SGLang command for the benchmark repo default profile.","status":"ok","latency_s":218.949,"ratio_to_sglang":1.0},"vllm-omni":{"gpus":4,"profile":"h200-4gpu-tp","status":"ok","latency_s":327.024,"ratio_to_sglang":1.494},"lightx2v":{"gpus":4,"profile":"h200-fa2","status":"ok","latency_s":339.941,"ratio_to_sglang":1.553}}},{"case_id":"wan22_ti2v_5b_704p","case":"Wan2.2 TI2V 5B 704p","details":"1280x704x81f · 50 steps · cfg 5","mode":"single_e2e","winner":"sglang","cells":{"sglang":{"gpus":2,"profile":"h200-2gpu-cfg-bf16-vae-resident","status":"ok","latency_s":33.059,"ratio_to_sglang":1.0},"vllm-omni":{"gpus":2,"profile":"h200-2gpu-cfg","status":"ok","latency_s":36.087,"ratio_to_sglang":1.092},"lightx2v":{"gpus":2,"profile":"h200-fa3","status":"ok","latency_s":35.177,"ratio_to_sglang":1.064}}},{"case_id":"ltx2_twostage_t2v","case":"LTX-2 two-stage T2V","details":"768x512x121f · 40 steps · cfg 4","mode":"single_e2e","winner":"sglang","cells":{"sglang":{"gpus":2,"profile":"H200 command for the LTX2 two-stage 121-frame case.","status":"ok","latency_s":12.667,"ratio_to_sglang":1.0},"vllm-omni":{"gpus":2,"profile":"default","status":"failed","reason":"vllm-omni server exited before health check passed (exit 1)"},"lightx2v":{"gpus":2,"profile":"h200-2gpu","status":"ok","latency_s":23.073,"ratio_to_sglang":1.822}}},{"case_id":"ltx2.3_twostage_t2v_2gpus","case":"LTX-2.3 two-stage T2V","details":"768x512x121f · 30 steps · cfg 3","mode":"single_e2e","winner":"sglang","cells":{"sglang":{"gpus":2,"profile":"Cookbook-aligned H200 command for the LTX2.3 two-stage 121-frame case.","status":"ok","latency_s":16.249,"ratio_to_sglang":1.0},"vllm-omni":{"status":"no_profile","reason":"No validated vLLM-Omni LTX-2.3 two-stage profile is tracked."},"lightx2v":{"gpus":2,"profile":"h200-2gpu-tp","status":"failed","reason":"LightX2V task FAILED: {'task_id': '2D7D-WU61-90I0-4G4K-WVMK', 'status': 'failed', 'start_time': '2026-05-13T13:24:52.753528', 'end_time': '2026-05-13T13:24:53.523421', 'error': \"'LTX2AttentionTP' object has no attribute "}}},{"case_id":"wan21_i2v_14b_720p","case":"Wan2.1 I2V 14B 720p","details":"1280x720x81f · 40 steps · cfg 5","mode":"single_e2e","winner":"sglang","cells":{"sglang":{"gpus":4,"profile":"Best known SGLang command for the benchmark repo default profile.","status":"ok","latency_s":217.476,"ratio_to_sglang":1.0},"vllm-omni":{"gpus":4,"profile":"h200-4gpu-tp","status":"ok","latency_s":361.233,"ratio_to_sglang":1.661},"lightx2v":{"gpus":4,"profile":"h200-fa2","status":"ok","latency_s":342.82,"ratio_to_sglang":1.576}}},{"case_id":"wan22_i2v_a14b_720p","case":"Wan2.2 I2V A14B 720p","details":"1280x720x81f · 40 steps · cfg 3.5/3.5","mode":"single_e2e","winner":"sglang","cells":{"sglang":{"gpus":4,"profile":"Best known SGLang command for the benchmark repo default profile.","status":"ok","latency_s":214.487,"ratio_to_sglang":1.0},"vllm-omni":{"gpus":4,"profile":"h200-4gpu-tp","status":"ok","latency_s":353.477,"ratio_to_sglang":1.648},"lightx2v":{"gpus":4,"profile":"h200-fa2","status":"ok","latency_s":339.803,"ratio_to_sglang":1.584}}}]},{"id":"manifests_20260511-h200-throughput-fast.json + manifests_20260514-h200-wan-vllm-omni_throughput","title":"H200 high-pressure throughput","subtitle":"32 image requests at concurrency 4 and 8 video requests at concurrency 2 where tracked.","mode":"throughput","source_manifest":"manifests/20260511-h200-throughput-fast.json + manifests/20260514-h200-wan-vllm-omni.json","source_run_id":"h200-framework-comparison-merged","reproduce":"scripts/generate_h200_report_artifacts.sh","summary":{"rows":4,"comparable_rows":4,"sglang_diffusion_wins":4,"other_wins":0},"rows":[{"case_id":"flux2_dev_t2i_1024","case":"FLUX.2-dev T2I","details":"1024x1024 · 50 steps · cfg 4","mode":"throughput","winner":"sglang","cells":{"sglang":{"gpus":1,"profile":"default","status":"ok","latency_s":98.888,"qps":0.0404,"p50_s":98.888,"p95_s":99.353,"p99_s":99.387,"requests":32,"concurrency":4,"ratio_to_sglang":1.0},"vllm-omni":{"gpus":1,"profile":"default","status":"ok","latency_s":105.024,"qps":0.0381,"p50_s":105.024,"p95_s":105.372,"p99_s":105.441,"requests":32,"concurrency":4,"ratio_to_sglang":0.943},"lightx2v":{"gpus":1,"profile":"h200-fa3-flashinfer","status":"ok","latency_s":109.412,"qps":0.0366,"p50_s":109.412,"p95_s":109.765,"p99_s":110.996,"requests":32,"concurrency":4,"ratio_to_sglang":0.906}}},{"case_id":"zimage_turbo_t2i_1024","case":"Z-Image-Turbo T2I","details":"1024x1024 · 9 steps · cfg 0","mode":"throughput","winner":"sglang","cells":{"sglang":{"gpus":1,"profile":"default","status":"ok","latency_s":4.52,"qps":0.8887,"p50_s":4.52,"p95_s":4.672,"p99_s":4.691,"requests":32,"concurrency":4,"ratio_to_sglang":1.0},"vllm-omni":{"gpus":1,"profile":"default","status":"ok","latency_s":10.551,"qps":0.3778,"p50_s":10.551,"p95_s":10.565,"p99_s":10.784,"requests":32,"concurrency":4,"ratio_to_sglang":0.425},"lightx2v":{"gpus":1,"profile":"h200-fa3-flashinfer","status":"ok","latency_s":11.138,"qps":0.3632,"p50_s":11.138,"p95_s":12.102,"p99_s":12.214,"requests":32,"concurrency":4,"ratio_to_sglang":0.409}}},{"case_id":"wan21_t2v_1_3b_480p","case":"Wan2.1 T2V 1.3B 480p","details":"832x480x81f · 50 steps · cfg 6","mode":"throughput","winner":"sglang","cells":{"sglang":{"gpus":2,"profile":"default","status":"ok","latency_s":53.124,"qps":0.0378,"p50_s":53.124,"p95_s":53.128,"p99_s":53.128,"requests":8,"concurrency":2,"ratio_to_sglang":1.0},"vllm-omni":{"gpus":2,"profile":"h200-2gpu-tp","status":"ok","latency_s":86.796,"qps":0.023,"p50_s":86.796,"p95_s":87.674,"p99_s":87.767,"requests":8,"concurrency":2,"ratio_to_sglang":0.608},"lightx2v":{"gpus":2,"profile":"h200-fa3","status":"ok","latency_s":57.301,"qps":0.0346,"p50_s":57.301,"p95_s":58.978,"p99_s":59.264,"requests":8,"concurrency":2,"ratio_to_sglang":0.915}}},{"case_id":"wan22_ti2v_5b_704p","case":"Wan2.2 TI2V 5B 704p","details":"1280x704x81f · 50 steps · cfg 5","mode":"throughput","winner":"sglang","cells":{"sglang":{"gpus":2,"profile":"h100-h200-2gpu","status":"ok","latency_s":70.177,"qps":0.0283,"p50_s":70.177,"p95_s":71.173,"p99_s":71.175,"requests":8,"concurrency":2,"ratio_to_sglang":1.0},"vllm-omni":{"gpus":2,"profile":"h200-2gpu-tp","status":"ok","latency_s":117.459,"qps":0.017,"p50_s":117.459,"p95_s":118.688,"p99_s":119.002,"requests":8,"concurrency":2,"ratio_to_sglang":0.601},"lightx2v":{"gpus":2,"profile":"h200-fa3","status":"ok","latency_s":70.298,"qps":0.0245,"p50_s":70.298,"p95_s":103.479,"p99_s":113.033,"requests":8,"concurrency":2,"ratio_to_sglang":0.866}}}]},{"id":"manifests_20260601-h200-cosmos3_single_e2e","title":"Cosmos3 H200 history","subtitle":"Earlier Cosmos3 Nano SGLang-Diffusion main vs vLLM-Omni PR #3454 comparison.","mode":"single_e2e","source_manifest":"manifests/20260601-h200-cosmos3.json","source_run_id":"cosmos3-origin-main-64a1dec-vs-vllm-2gpu-video-20260602","reproduce":"scripts/run_h200_cosmos3_20260601.sh","summary":{"rows":3,"comparable_rows":3,"sglang_diffusion_wins":3,"other_wins":0},"rows":[{"case_id":"cosmos3_nano_t2i_720p","case":"Cosmos3 Nano T2I","details":"1280x720 · 35 steps · cfg 6","mode":"single_e2e","winner":"sglang","cells":{"sglang":{"gpus":1,"profile":"h200-1gpu-fa","status":"ok","latency_s":1.877,"server_latency_s":1.76,"ratio_to_sglang":1.0},"vllm-omni":{"gpus":1,"profile":"h200-1gpu-fa","status":"ok","latency_s":1.943,"ratio_to_sglang":1.035},"lightx2v":{"status":"no_profile","reason":"No validated aligned serving profile is tracked."}}},{"case_id":"cosmos3_nano_t2v_720p_189f","case":"Cosmos3 Nano T2V","details":"1280x720x189f · 35 steps · cfg 6","mode":"single_e2e","winner":"sglang","cells":{"sglang":{"gpus":2,"profile":"h200-2gpu-cfg","status":"ok","latency_s":109.228,"server_latency_s":106.469,"ratio_to_sglang":1.0},"vllm-omni":{"gpus":2,"profile":"h200-2gpu-cfg","status":"ok","latency_s":116.215,"ratio_to_sglang":1.064},"lightx2v":{"status":"no_profile","reason":"No validated aligned serving profile is tracked."}}},{"case_id":"cosmos3_nano_i2v_720p_189f","case":"Cosmos3 Nano I2V","details":"1280x720x189f · 35 steps · cfg 6","mode":"single_e2e","winner":"sglang","cells":{"sglang":{"gpus":2,"profile":"h200-2gpu-cfg","status":"ok","latency_s":112.238,"ratio_to_sglang":1.0},"vllm-omni":{"gpus":2,"profile":"h200-2gpu-cfg","status":"ok","latency_s":119.661,"ratio_to_sglang":1.066},"lightx2v":{"status":"no_profile","reason":"No validated aligned serving profile is tracked."}}}]},{"id":"flux_fastest_20260610","title":"FLUX fastest history","subtitle":"Best recorded 1GPU/2GPU TP profile per framework series; torch compile allowed; no cache.","mode":"single_e2e","source_report":"reports/flux-fastest-20260610","reproduce":"scripts/run_flux_fastest_20260610.sh","summary":{"rows":4,"sglang_now_wins":4,"other_wins":0},"rows":[{"case_id":"flux1_dev_t2i_1024","case":"FLUX.1-dev T2I","details":"1024x1024 · 50 steps · cfg 3.5","hardware":"H200","mode":"single_e2e","torch_compile":"on","winner":"sglang_now","cells":{"sglang_before":{"gpus":"1 GPU","profile":"h100-h200-1gpu-compile","status":"failed","reason":"sglang server exited before health check passed (exit 1)","source_result":"reports/flux-fastest-20260610/failures/h200-flux-sgld-before-20260610-sglang-h100-h200-1gpu-compile.json"},"sglang_now":{"gpus":"2 GPU TP","profile":"h100-h200-2gpu-tp-speed-compile","status":"ok","latency_s":4.15,"server_latency_s":4.005,"source_result":"reports/flux-fastest-20260610/raw/h200-flux1-sgld-tpfix-native-20260611-sglang-h100-h200-2gpu-tp-speed-compile.json","ratio_to_sglang_now":1.0},"vllm_omni_now":{"gpus":"2 GPU TP","profile":"h100-h200-2gpu-tp-compile","status":"ok","latency_s":5.912,"source_result":"reports/flux-fastest-20260610/raw/h200-flux-vllm-now-20260610-vllm-omni-h100-h200-2gpu-tp-compile.json","ratio_to_sglang_now":1.425},"lightx2v_now":{"status":"not_run","reason":"No successful recorded profile in this report."}}},{"case_id":"flux2_dev_t2i_1024","case":"FLUX.2-dev T2I","details":"1024x1024 · 50 steps · cfg 4","hardware":"H200","mode":"single_e2e","torch_compile":"on","winner":"sglang_now","cells":{"sglang_before":{"gpus":"1 GPU","profile":"h100-h200-1gpu-compile","status":"failed","reason":"sglang server exited before health check passed (exit 1)","source_result":"reports/flux-fastest-20260610/failures/h200-flux-sgld-before-20260610-sglang-h100-h200-1gpu-compile.json"},"sglang_now":{"gpus":"2 GPU TP","profile":"h100-h200-2gpu-tp-speed-compile","status":"ok","latency_s":12.507,"server_latency_s":12.409,"source_result":"reports/flux-fastest-20260610/raw/h200-flux-sgld-now-xet-20260610-sglang-h100-h200-2gpu-tp-speed-compile.json","ratio_to_sglang_now":1.0},"vllm_omni_now":{"gpus":"2 GPU TP","profile":"h100-h200-2gpu-tp-compile","status":"ok","latency_s":16.654,"source_result":"reports/flux-fastest-20260610/raw/h200-flux-vllm-now-20260610-vllm-omni-h100-h200-2gpu-tp-compile.json","ratio_to_sglang_now":1.332},"lightx2v_now":{"status":"not_run","reason":"No successful recorded profile in this report."}}},{"case_id":"flux1_dev_t2i_1024","case":"FLUX.1-dev T2I","details":"1024x1024 · 50 steps · cfg 3.5","hardware":"B200","mode":"single_e2e","torch_compile":"on","winner":"sglang_now","cells":{"sglang_before":{"gpus":"1 GPU","profile":"blackwell-1gpu-compile","status":"ok","latency_s":6.116,"server_latency_s":3.588,"source_result":"reports/flux-fastest-20260610/raw/b200-flux-sgld-before-20260610-sglang-blackwell-1gpu-compile.json","ratio_to_sglang_now":1.695},"sglang_now":{"gpus":"1 GPU","profile":"blackwell-1gpu-speed-compile","status":"ok","latency_s":3.608,"server_latency_s":3.242,"source_result":"reports/flux-fastest-20260610/raw/b200-flux-sgld-now-20260610-sglang-blackwell-1gpu-speed-compile.json","ratio_to_sglang_now":1.0},"vllm_omni_now":{"gpus":"2 GPU TP","profile":"blackwell-2gpu-tp-compile","status":"ok","latency_s":4.224,"source_result":"reports/flux-fastest-20260610/raw/b200-flux-vllm-now-flashinfer-20260610-vllm-omni-blackwell-2gpu-tp-compile.json","ratio_to_sglang_now":1.171},"lightx2v_now":{"status":"not_run","reason":"No successful recorded profile in this report."}}},{"case_id":"flux2_dev_t2i_1024","case":"FLUX.2-dev T2I","details":"1024x1024 · 50 steps · cfg 4","hardware":"B200","mode":"single_e2e","torch_compile":"on","winner":"sglang_now","cells":{"sglang_before":{"gpus":"2 GPU TP","profile":"blackwell-2gpu-tp-compile","status":"ok","latency_s":8.88,"server_latency_s":7.109,"source_result":"reports/flux-fastest-20260610/raw/b200-flux-sgld-before-20260610-sglang-blackwell-2gpu-tp-compile.json","ratio_to_sglang_now":1.419},"sglang_now":{"gpus":"2 GPU TP","profile":"blackwell-2gpu-tp-speed-compile","status":"ok","latency_s":6.256,"server_latency_s":6.15,"source_result":"reports/flux-fastest-20260610/raw/b200-flux-sgld-now-20260610-sglang-blackwell-2gpu-tp-speed-compile.json","ratio_to_sglang_now":1.0},"vllm_omni_now":{"gpus":"2 GPU TP","profile":"blackwell-2gpu-tp-compile","status":"ok","latency_s":12.183,"source_result":"reports/flux-fastest-20260610/raw/b200-flux-vllm-now-flashinfer-20260610-vllm-omni-blackwell-2gpu-tp-compile.json","ratio_to_sglang_now":1.947},"lightx2v_now":{"gpus":"1 GPU","profile":"blackwell-fa2-flashinfer","status":"ok","latency_s":18.032,"source_result":"reports/flux-fastest-20260610/raw/b200-flux-lightx2v-now-fa2-20260610-lightx2v-blackwell-fa2-flashinfer.json","ratio_to_sglang_now":2.882}}}]}]}</script>
+    <script type="application/json" id="historicalDataInline">{"id":"historical-cross-framework-20260610","updated_at":"2026-06-11","frameworks":{"sglang":"SGLang-Diffusion","vllm-omni":"vLLM-Omni","lightx2v":"LightX2V","trtllm-visual":"TensorRT-LLM VisualGen"},"policy":{"public_source":"Formal manifests plus committed reports/raw; tmp source JSON is used only when referenced by a manifest.","latency_source":"client-side latency for headline comparisons; server-side latency is diagnostic only.","cache":"No response cache, no Cache-DiT, no temporal cache in these rows."},"summary":{"sections":5,"h200_full_matrix_single_rows":13,"h200_full_matrix_sglang_wins":12,"h200_full_matrix_other_wins":0,"h200_throughput_sglang_wins":4,"h200_throughput_other_wins":0},"sections":[{"id":"manifests_20260510-h200-single-e2e.json + manifests_20260514-h200-wan-vllm-omni.json + reports_h200-video-parallelism-refresh-20260611_single_e2e","title":"H200 full matrix","subtitle":"Single-request latency across image and video cases, with refreshed vLLM-Omni CFG and LightX2V FA3 Wan video rows.","mode":"single_e2e","source_manifest":"manifests/20260510-h200-single-e2e.json + manifests/20260514-h200-wan-vllm-omni.json + reports/h200-video-parallelism-refresh-20260611","source_run_id":"h200-framework-comparison-merged","reproduce":"scripts/generate_h200_report_artifacts.sh","summary":{"rows":13,"comparable_rows":12,"sglang_diffusion_wins":12,"other_wins":0},"rows":[{"case_id":"flux1_dev_t2i_1024","case":"FLUX.1-dev T2I","details":"1024x1024 · 50 steps · cfg 3.5","mode":"single_e2e","winner":"sglang","cells":{"sglang":{"gpus":1,"profile":"default","status":"ok","latency_s":7.69,"ratio_to_sglang":1.0},"vllm-omni":{"gpus":1,"profile":"default","status":"ok","latency_s":8.682,"ratio_to_sglang":1.129},"lightx2v":{"status":"no_profile","reason":"Tracked LightX2V version has no FLUX.1 serving path."}}},{"case_id":"flux2_dev_t2i_1024","case":"FLUX.2-dev T2I","details":"1024x1024 · 50 steps · cfg 4","mode":"single_e2e","winner":"sglang","cells":{"sglang":{"gpus":1,"profile":"default","status":"ok","latency_s":25.24,"ratio_to_sglang":1.0},"vllm-omni":{"gpus":1,"profile":"default","status":"ok","latency_s":26.533,"ratio_to_sglang":1.051},"lightx2v":{"gpus":1,"profile":"h200-fa2-flashinfer","status":"ok","latency_s":31.071,"ratio_to_sglang":1.231}}},{"case_id":"qwen_image_2512_t2i_1024","case":"Qwen-Image-2512 T2I","details":"1024x1024 · 50 steps · cfg 1","mode":"single_e2e","winner":"sglang","cells":{"sglang":{"gpus":1,"profile":"default","status":"ok","latency_s":6.77,"ratio_to_sglang":1.0},"vllm-omni":{"gpus":1,"profile":"default","status":"ok","latency_s":8.717,"ratio_to_sglang":1.288},"lightx2v":{"status":"no_profile","reason":"Tracked LightX2V version has no Qwen-Image T2I serving path."}}},{"case_id":"qwen_image_edit_2511","case":"Qwen-Image-Edit-2511","details":"1024x1024 · 40 steps · cfg 1","mode":"single_e2e","winner":"sglang","cells":{"sglang":{"gpus":1,"profile":"default","status":"ok","latency_s":12.06,"ratio_to_sglang":1.0},"vllm-omni":{"gpus":1,"profile":"default","status":"ok","latency_s":15.31,"ratio_to_sglang":1.269},"lightx2v":{"status":"no_profile","reason":"Tracked LightX2V version has no Qwen-Image-Edit serving path."}}},{"case_id":"zimage_turbo_t2i_1024","case":"Z-Image-Turbo T2I","details":"1024x1024 · 9 steps · cfg 0","mode":"single_e2e","winner":"sglang","cells":{"sglang":{"gpus":1,"profile":"default","status":"ok","latency_s":1.35,"ratio_to_sglang":1.0},"vllm-omni":{"gpus":1,"profile":"default","status":"ok","latency_s":2.954,"ratio_to_sglang":2.188},"lightx2v":{"gpus":1,"profile":"h200-fa2-flashinfer","status":"ok","latency_s":4.012,"ratio_to_sglang":2.972}}},{"case_id":"wan21_t2v_1_3b_480p","case":"Wan2.1 T2V 1.3B 480p","details":"832x480x81f · 50 steps · cfg 6","mode":"single_e2e","winner":"sglang","cells":{"sglang":{"gpus":2,"profile":"h200-2gpu-cfg-bf16-vae-resident","status":"ok","latency_s":26.041,"server_latency_s":24.687,"ratio_to_sglang":1.0},"vllm-omni":{"gpus":2,"profile":"h200-2gpu-cfg","status":"ok","latency_s":29.502,"ratio_to_sglang":1.133},"lightx2v":{"gpus":2,"profile":"h200-fa3","status":"ok","latency_s":29.058,"ratio_to_sglang":1.116}}},{"case_id":"wan21_i2v_14b_480p","case":"Wan2.1 I2V 14B 480p","details":"832x480x81f · 40 steps · cfg 5","mode":"single_e2e","winner":"sglang","cells":{"sglang":{"gpus":4,"profile":"Best known SGLang command for the benchmark repo default profile.","status":"ok","latency_s":61.149,"ratio_to_sglang":1.0},"vllm-omni":{"gpus":4,"profile":"h200-4gpu-tp","status":"ok","latency_s":110.572,"ratio_to_sglang":1.808},"lightx2v":{"gpus":4,"profile":"h200-fa2","status":"ok","latency_s":90.228,"ratio_to_sglang":1.476}}},{"case_id":"wan22_t2v_a14b_720p","case":"Wan2.2 T2V A14B 720p","details":"1280x720x81f · 40 steps · cfg 4/3","mode":"single_e2e","winner":"sglang","cells":{"sglang":{"gpus":4,"profile":"Best known SGLang command for the benchmark repo default profile.","status":"ok","latency_s":218.949,"ratio_to_sglang":1.0},"vllm-omni":{"gpus":4,"profile":"h200-4gpu-tp","status":"ok","latency_s":327.024,"ratio_to_sglang":1.494},"lightx2v":{"gpus":4,"profile":"h200-fa2","status":"ok","latency_s":339.941,"ratio_to_sglang":1.553}}},{"case_id":"wan22_ti2v_5b_704p","case":"Wan2.2 TI2V 5B 704p","details":"1280x704x81f · 50 steps · cfg 5","mode":"single_e2e","winner":"sglang","cells":{"sglang":{"gpus":2,"profile":"h200-2gpu-cfg-bf16-vae-resident","status":"ok","latency_s":33.059,"ratio_to_sglang":1.0},"vllm-omni":{"gpus":2,"profile":"h200-2gpu-cfg","status":"ok","latency_s":36.087,"ratio_to_sglang":1.092},"lightx2v":{"gpus":2,"profile":"h200-fa3","status":"ok","latency_s":35.177,"ratio_to_sglang":1.064}}},{"case_id":"ltx2_twostage_t2v","case":"LTX-2 two-stage T2V","details":"768x512x121f · 40 steps · cfg 4","mode":"single_e2e","winner":"sglang","cells":{"sglang":{"gpus":2,"profile":"H200 command for the LTX2 two-stage 121-frame case.","status":"ok","latency_s":12.667,"ratio_to_sglang":1.0},"vllm-omni":{"gpus":2,"profile":"default","status":"failed","reason":"vllm-omni server exited before health check passed (exit 1)"},"lightx2v":{"gpus":2,"profile":"h200-2gpu","status":"ok","latency_s":23.073,"ratio_to_sglang":1.822}}},{"case_id":"ltx2.3_twostage_t2v_2gpus","case":"LTX-2.3 two-stage T2V","details":"768x512x121f · 30 steps · cfg 3","mode":"single_e2e","winner":"sglang","cells":{"sglang":{"gpus":2,"profile":"Cookbook-aligned H200 command for the LTX2.3 two-stage 121-frame case.","status":"ok","latency_s":16.249,"ratio_to_sglang":1.0},"vllm-omni":{"status":"no_profile","reason":"No validated vLLM-Omni LTX-2.3 two-stage profile is tracked."},"lightx2v":{"gpus":2,"profile":"h200-2gpu-tp","status":"failed","reason":"LightX2V task FAILED: {'task_id': '2D7D-WU61-90I0-4G4K-WVMK', 'status': 'failed', 'start_time': '2026-05-13T13:24:52.753528', 'end_time': '2026-05-13T13:24:53.523421', 'error': \"'LTX2AttentionTP' object has no attribute "}}},{"case_id":"wan21_i2v_14b_720p","case":"Wan2.1 I2V 14B 720p","details":"1280x720x81f · 40 steps · cfg 5","mode":"single_e2e","winner":"sglang","cells":{"sglang":{"gpus":4,"profile":"Best known SGLang command for the benchmark repo default profile.","status":"ok","latency_s":217.476,"ratio_to_sglang":1.0},"vllm-omni":{"gpus":4,"profile":"h200-4gpu-tp","status":"ok","latency_s":361.233,"ratio_to_sglang":1.661},"lightx2v":{"gpus":4,"profile":"h200-fa2","status":"ok","latency_s":342.82,"ratio_to_sglang":1.576}}},{"case_id":"wan22_i2v_a14b_720p","case":"Wan2.2 I2V A14B 720p","details":"1280x720x81f · 40 steps · cfg 3.5/3.5","mode":"single_e2e","winner":"sglang","cells":{"sglang":{"gpus":4,"profile":"Best known SGLang command for the benchmark repo default profile.","status":"ok","latency_s":214.487,"ratio_to_sglang":1.0},"vllm-omni":{"gpus":4,"profile":"h200-4gpu-tp","status":"ok","latency_s":353.477,"ratio_to_sglang":1.648},"lightx2v":{"gpus":4,"profile":"h200-fa2","status":"ok","latency_s":339.803,"ratio_to_sglang":1.584}}}]},{"id":"trtllm_visualgen_h200_20260614","title":"TensorRT-LLM VisualGen (H200)","subtitle":"TensorRT-LLM VisualGen (tensorrt-llm 1.3.0rc18) measured on a 2×H200 devbox, 1-GPU, cache-free. trtllm-visual runs torch.compile-on because that is its only functional mode (eager crashes); SGLang-Diffusion / vLLM-Omni figures are the existing cache-free, compile-off matrix references for the same case — shown for context, not a same-compile-policy head-to-head, so no winner is declared. See scripts/run_trtllm_visual_h200.md.","mode":"single_e2e","source_report":"tensorrt-llm 1.3.0rc18 on 2x H200 rx devbox (2026-06-14)","reproduce":"scripts/run_trtllm_visual_h200.md","summary":{"rows":4,"comparable_rows":3,"sglang_diffusion_wins":0,"other_wins":0,"note":"Reference comparison; trtllm-visual is compile-on (required), SGLang/vLLM figures are compile-off."},"rows":[{"case_id":"flux1_dev_t2i_1024","case":"FLUX.1-dev T2I","details":"1024x1024 · 50 steps · cfg 3.5","mode":"single_e2e","winner":null,"cells":{"sglang":{"gpus":1,"profile":"default","status":"ok","latency_s":7.69,"ratio_to_sglang":1.0},"vllm-omni":{"gpus":1,"profile":"default","status":"ok","latency_s":8.682,"ratio_to_sglang":1.129},"lightx2v":{"status":"no_profile","reason":"No tracked profile for this case."},"trtllm-visual":{"gpus":1,"profile":"h100-h200-1gpu-speed (compile-on)","status":"ok","latency_s":7.315,"ratio_to_sglang":0.951,"server_latency_s":null}}},{"case_id":"flux2_dev_t2i_1024","case":"FLUX.2-dev T2I","details":"1024x1024 · 50 steps · cfg 4","mode":"single_e2e","winner":null,"cells":{"sglang":{"gpus":1,"profile":"default","status":"ok","latency_s":25.24,"ratio_to_sglang":1.0},"vllm-omni":{"gpus":1,"profile":"default","status":"ok","latency_s":26.533,"ratio_to_sglang":1.051},"lightx2v":{"gpus":1,"profile":"h200-fa2-flashinfer","status":"ok","latency_s":31.071,"ratio_to_sglang":1.231},"trtllm-visual":{"gpus":1,"profile":"h100-h200-1gpu-speed (compile-on)","status":"ok","latency_s":23.768,"ratio_to_sglang":0.942,"server_latency_s":null}}},{"case_id":"qwen_image_2512_t2i_1024","case":"Qwen-Image-2512 T2I","details":"1024x1024 · 50 steps · cfg 1","mode":"single_e2e","winner":null,"cells":{"sglang":{"gpus":1,"profile":"default","status":"ok","latency_s":6.77,"ratio_to_sglang":1.0},"vllm-omni":{"gpus":1,"profile":"default","status":"ok","latency_s":8.717,"ratio_to_sglang":1.288},"lightx2v":{"status":"no_profile","reason":"No tracked profile for this case."},"trtllm-visual":{"gpus":1,"profile":"h100-h200-1gpu-speed (compile-on)","status":"ok","latency_s":7.515,"ratio_to_sglang":1.11,"server_latency_s":null}}},{"case_id":"cosmos3_nano_t2i_720p","case":"Cosmos3 Nano T2I","details":"1280x720 · 35 steps · cfg 6","mode":"single_e2e","winner":null,"cells":{"sglang":{"gpus":1,"profile":"h200-1gpu-fa","status":"ok","latency_s":1.877,"ratio_to_sglang":1.0},"vllm-omni":{"gpus":1,"profile":"h200-1gpu-fa","status":"ok","latency_s":1.943,"ratio_to_sglang":1.035},"lightx2v":{"status":"no_profile","reason":"No tracked profile for this case."},"trtllm-visual":{"status":"failed","reason":"VisualGen image endpoint returned 400 for the 1280x720 request; size/param format for non-square Cosmos3 image needs follow-up."}}}]},{"id":"manifests_20260511-h200-throughput-fast.json + manifests_20260514-h200-wan-vllm-omni_throughput","title":"H200 high-pressure throughput","subtitle":"32 image requests at concurrency 4 and 8 video requests at concurrency 2 where tracked.","mode":"throughput","source_manifest":"manifests/20260511-h200-throughput-fast.json + manifests/20260514-h200-wan-vllm-omni.json","source_run_id":"h200-framework-comparison-merged","reproduce":"scripts/generate_h200_report_artifacts.sh","summary":{"rows":4,"comparable_rows":4,"sglang_diffusion_wins":4,"other_wins":0},"rows":[{"case_id":"flux2_dev_t2i_1024","case":"FLUX.2-dev T2I","details":"1024x1024 · 50 steps · cfg 4","mode":"throughput","winner":"sglang","cells":{"sglang":{"gpus":1,"profile":"default","status":"ok","latency_s":98.888,"qps":0.0404,"p50_s":98.888,"p95_s":99.353,"p99_s":99.387,"requests":32,"concurrency":4,"ratio_to_sglang":1.0},"vllm-omni":{"gpus":1,"profile":"default","status":"ok","latency_s":105.024,"qps":0.0381,"p50_s":105.024,"p95_s":105.372,"p99_s":105.441,"requests":32,"concurrency":4,"ratio_to_sglang":0.943},"lightx2v":{"gpus":1,"profile":"h200-fa3-flashinfer","status":"ok","latency_s":109.412,"qps":0.0366,"p50_s":109.412,"p95_s":109.765,"p99_s":110.996,"requests":32,"concurrency":4,"ratio_to_sglang":0.906}}},{"case_id":"zimage_turbo_t2i_1024","case":"Z-Image-Turbo T2I","details":"1024x1024 · 9 steps · cfg 0","mode":"throughput","winner":"sglang","cells":{"sglang":{"gpus":1,"profile":"default","status":"ok","latency_s":4.52,"qps":0.8887,"p50_s":4.52,"p95_s":4.672,"p99_s":4.691,"requests":32,"concurrency":4,"ratio_to_sglang":1.0},"vllm-omni":{"gpus":1,"profile":"default","status":"ok","latency_s":10.551,"qps":0.3778,"p50_s":10.551,"p95_s":10.565,"p99_s":10.784,"requests":32,"concurrency":4,"ratio_to_sglang":0.425},"lightx2v":{"gpus":1,"profile":"h200-fa3-flashinfer","status":"ok","latency_s":11.138,"qps":0.3632,"p50_s":11.138,"p95_s":12.102,"p99_s":12.214,"requests":32,"concurrency":4,"ratio_to_sglang":0.409}}},{"case_id":"wan21_t2v_1_3b_480p","case":"Wan2.1 T2V 1.3B 480p","details":"832x480x81f · 50 steps · cfg 6","mode":"throughput","winner":"sglang","cells":{"sglang":{"gpus":2,"profile":"default","status":"ok","latency_s":53.124,"qps":0.0378,"p50_s":53.124,"p95_s":53.128,"p99_s":53.128,"requests":8,"concurrency":2,"ratio_to_sglang":1.0},"vllm-omni":{"gpus":2,"profile":"h200-2gpu-tp","status":"ok","latency_s":86.796,"qps":0.023,"p50_s":86.796,"p95_s":87.674,"p99_s":87.767,"requests":8,"concurrency":2,"ratio_to_sglang":0.608},"lightx2v":{"gpus":2,"profile":"h200-fa3","status":"ok","latency_s":57.301,"qps":0.0346,"p50_s":57.301,"p95_s":58.978,"p99_s":59.264,"requests":8,"concurrency":2,"ratio_to_sglang":0.915}}},{"case_id":"wan22_ti2v_5b_704p","case":"Wan2.2 TI2V 5B 704p","details":"1280x704x81f · 50 steps · cfg 5","mode":"throughput","winner":"sglang","cells":{"sglang":{"gpus":2,"profile":"h100-h200-2gpu","status":"ok","latency_s":70.177,"qps":0.0283,"p50_s":70.177,"p95_s":71.173,"p99_s":71.175,"requests":8,"concurrency":2,"ratio_to_sglang":1.0},"vllm-omni":{"gpus":2,"profile":"h200-2gpu-tp","status":"ok","latency_s":117.459,"qps":0.017,"p50_s":117.459,"p95_s":118.688,"p99_s":119.002,"requests":8,"concurrency":2,"ratio_to_sglang":0.601},"lightx2v":{"gpus":2,"profile":"h200-fa3","status":"ok","latency_s":70.298,"qps":0.0245,"p50_s":70.298,"p95_s":103.479,"p99_s":113.033,"requests":8,"concurrency":2,"ratio_to_sglang":0.866}}}]},{"id":"manifests_20260601-h200-cosmos3_single_e2e","title":"Cosmos3 H200 history","subtitle":"Earlier Cosmos3 Nano SGLang-Diffusion main vs vLLM-Omni PR #3454 comparison.","mode":"single_e2e","source_manifest":"manifests/20260601-h200-cosmos3.json","source_run_id":"cosmos3-origin-main-64a1dec-vs-vllm-2gpu-video-20260602","reproduce":"scripts/run_h200_cosmos3_20260601.sh","summary":{"rows":3,"comparable_rows":3,"sglang_diffusion_wins":3,"other_wins":0},"rows":[{"case_id":"cosmos3_nano_t2i_720p","case":"Cosmos3 Nano T2I","details":"1280x720 · 35 steps · cfg 6","mode":"single_e2e","winner":"sglang","cells":{"sglang":{"gpus":1,"profile":"h200-1gpu-fa","status":"ok","latency_s":1.877,"server_latency_s":1.76,"ratio_to_sglang":1.0},"vllm-omni":{"gpus":1,"profile":"h200-1gpu-fa","status":"ok","latency_s":1.943,"ratio_to_sglang":1.035},"lightx2v":{"status":"no_profile","reason":"No validated aligned serving profile is tracked."}}},{"case_id":"cosmos3_nano_t2v_720p_189f","case":"Cosmos3 Nano T2V","details":"1280x720x189f · 35 steps · cfg 6","mode":"single_e2e","winner":"sglang","cells":{"sglang":{"gpus":2,"profile":"h200-2gpu-cfg","status":"ok","latency_s":109.228,"server_latency_s":106.469,"ratio_to_sglang":1.0},"vllm-omni":{"gpus":2,"profile":"h200-2gpu-cfg","status":"ok","latency_s":116.215,"ratio_to_sglang":1.064},"lightx2v":{"status":"no_profile","reason":"No validated aligned serving profile is tracked."}}},{"case_id":"cosmos3_nano_i2v_720p_189f","case":"Cosmos3 Nano I2V","details":"1280x720x189f · 35 steps · cfg 6","mode":"single_e2e","winner":"sglang","cells":{"sglang":{"gpus":2,"profile":"h200-2gpu-cfg","status":"ok","latency_s":112.238,"ratio_to_sglang":1.0},"vllm-omni":{"gpus":2,"profile":"h200-2gpu-cfg","status":"ok","latency_s":119.661,"ratio_to_sglang":1.066},"lightx2v":{"status":"no_profile","reason":"No validated aligned serving profile is tracked."}}}]},{"id":"flux_fastest_20260610","title":"FLUX fastest history","subtitle":"Best recorded 1GPU/2GPU TP profile per framework series; torch compile allowed; no cache.","mode":"single_e2e","source_report":"reports/flux-fastest-20260610","reproduce":"scripts/run_flux_fastest_20260610.sh","summary":{"rows":4,"sglang_now_wins":4,"other_wins":0},"rows":[{"case_id":"flux1_dev_t2i_1024","case":"FLUX.1-dev T2I","details":"1024x1024 · 50 steps · cfg 3.5","hardware":"H200","mode":"single_e2e","torch_compile":"on","winner":"sglang_now","cells":{"sglang_before":{"gpus":"1 GPU","profile":"h100-h200-1gpu-compile","status":"failed","reason":"sglang server exited before health check passed (exit 1)","source_result":"reports/flux-fastest-20260610/failures/h200-flux-sgld-before-20260610-sglang-h100-h200-1gpu-compile.json"},"sglang_now":{"gpus":"2 GPU TP","profile":"h100-h200-2gpu-tp-speed-compile","status":"ok","latency_s":4.15,"server_latency_s":4.005,"source_result":"reports/flux-fastest-20260610/raw/h200-flux1-sgld-tpfix-native-20260611-sglang-h100-h200-2gpu-tp-speed-compile.json","ratio_to_sglang_now":1.0},"vllm_omni_now":{"gpus":"2 GPU TP","profile":"h100-h200-2gpu-tp-compile","status":"ok","latency_s":5.912,"source_result":"reports/flux-fastest-20260610/raw/h200-flux-vllm-now-20260610-vllm-omni-h100-h200-2gpu-tp-compile.json","ratio_to_sglang_now":1.425},"lightx2v_now":{"status":"not_run","reason":"No successful recorded profile in this report."}}},{"case_id":"flux2_dev_t2i_1024","case":"FLUX.2-dev T2I","details":"1024x1024 · 50 steps · cfg 4","hardware":"H200","mode":"single_e2e","torch_compile":"on","winner":"sglang_now","cells":{"sglang_before":{"gpus":"1 GPU","profile":"h100-h200-1gpu-compile","status":"failed","reason":"sglang server exited before health check passed (exit 1)","source_result":"reports/flux-fastest-20260610/failures/h200-flux-sgld-before-20260610-sglang-h100-h200-1gpu-compile.json"},"sglang_now":{"gpus":"2 GPU TP","profile":"h100-h200-2gpu-tp-speed-compile","status":"ok","latency_s":12.507,"server_latency_s":12.409,"source_result":"reports/flux-fastest-20260610/raw/h200-flux-sgld-now-xet-20260610-sglang-h100-h200-2gpu-tp-speed-compile.json","ratio_to_sglang_now":1.0},"vllm_omni_now":{"gpus":"2 GPU TP","profile":"h100-h200-2gpu-tp-compile","status":"ok","latency_s":16.654,"source_result":"reports/flux-fastest-20260610/raw/h200-flux-vllm-now-20260610-vllm-omni-h100-h200-2gpu-tp-compile.json","ratio_to_sglang_now":1.332},"lightx2v_now":{"status":"not_run","reason":"No successful recorded profile in this report."}}},{"case_id":"flux1_dev_t2i_1024","case":"FLUX.1-dev T2I","details":"1024x1024 · 50 steps · cfg 3.5","hardware":"B200","mode":"single_e2e","torch_compile":"on","winner":"sglang_now","cells":{"sglang_before":{"gpus":"1 GPU","profile":"blackwell-1gpu-compile","status":"ok","latency_s":6.116,"server_latency_s":3.588,"source_result":"reports/flux-fastest-20260610/raw/b200-flux-sgld-before-20260610-sglang-blackwell-1gpu-compile.json","ratio_to_sglang_now":1.695},"sglang_now":{"gpus":"1 GPU","profile":"blackwell-1gpu-speed-compile","status":"ok","latency_s":3.608,"server_latency_s":3.242,"source_result":"reports/flux-fastest-20260610/raw/b200-flux-sgld-now-20260610-sglang-blackwell-1gpu-speed-compile.json","ratio_to_sglang_now":1.0},"vllm_omni_now":{"gpus":"2 GPU TP","profile":"blackwell-2gpu-tp-compile","status":"ok","latency_s":4.224,"source_result":"reports/flux-fastest-20260610/raw/b200-flux-vllm-now-flashinfer-20260610-vllm-omni-blackwell-2gpu-tp-compile.json","ratio_to_sglang_now":1.171},"lightx2v_now":{"status":"not_run","reason":"No successful recorded profile in this report."}}},{"case_id":"flux2_dev_t2i_1024","case":"FLUX.2-dev T2I","details":"1024x1024 · 50 steps · cfg 4","hardware":"B200","mode":"single_e2e","torch_compile":"on","winner":"sglang_now","cells":{"sglang_before":{"gpus":"2 GPU TP","profile":"blackwell-2gpu-tp-compile","status":"ok","latency_s":8.88,"server_latency_s":7.109,"source_result":"reports/flux-fastest-20260610/raw/b200-flux-sgld-before-20260610-sglang-blackwell-2gpu-tp-compile.json","ratio_to_sglang_now":1.419},"sglang_now":{"gpus":"2 GPU TP","profile":"blackwell-2gpu-tp-speed-compile","status":"ok","latency_s":6.256,"server_latency_s":6.15,"source_result":"reports/flux-fastest-20260610/raw/b200-flux-sgld-now-20260610-sglang-blackwell-2gpu-tp-speed-compile.json","ratio_to_sglang_now":1.0},"vllm_omni_now":{"gpus":"2 GPU TP","profile":"blackwell-2gpu-tp-compile","status":"ok","latency_s":12.183,"source_result":"reports/flux-fastest-20260610/raw/b200-flux-vllm-now-flashinfer-20260610-vllm-omni-blackwell-2gpu-tp-compile.json","ratio_to_sglang_now":1.947},"lightx2v_now":{"gpus":"1 GPU","profile":"blackwell-fa2-flashinfer","status":"ok","latency_s":18.032,"source_result":"reports/flux-fastest-20260610/raw/b200-flux-lightx2v-now-fa2-20260610-lightx2v-blackwell-fa2-flashinfer.json","ratio_to_sglang_now":2.882}}}]}]}</script>
 
     <script>
       /* ---------- theme ---------- */
@@ -2348,21 +2377,105 @@
       let benchView = "chart";
       let benchViewRows = [];
 
-      const benchColumns = [
-        { key: "case", label: "Case", sort: (r) => r.case },
-        { key: "gpus", label: "GPUs", sort: (r) => parseInt(r.gpus, 10) || 0 },
-        { key: "sgl", label: "SGLang-Diffusion", sort: (r) => r.sglang_diffusion?.client_latency_s ?? Infinity },
-        { key: "vllm", label: "vLLM-Omni", sort: (r) => r.vllm_omni?.client_latency_s ?? Infinity },
-        { key: "speedup", label: "Fastest", sort: (r) => parseFloat(r.winner_speedup) || 0 }
-      ];
+      // Framework display metadata — the single place to register a framework's
+      // bar color + label for the latest (current) view. `sgl: true` marks the
+      // SGLang accent. Any framework key the data declares but is not listed
+      // here still renders (neutral bar, key as label).
+      const FRAMEWORK_META = {
+        sglang: { label: "SGLang-Diffusion", bar: "sgl", sgl: true },
+        "vllm-omni": { label: "vLLM-Omni", bar: "vllm" },
+        lightx2v: { label: "LightX2V", bar: "lightx2v" },
+        "trtllm-visual": { label: "TensorRT-LLM VisualGen", bar: "trtllm" },
+      };
+      // Legacy two-framework latest schema → canonical framework keys, so older
+      // committed data keeps rendering after the generic migration.
+      const LEGACY_ROW_KEYS = { sglang_diffusion: "sglang", vllm_omni: "vllm-omni" };
+      const LEGACY_FW_KEYS = { sglang_diffusion_now: "sglang", vllm_omni_now: "vllm-omni" };
+      const FRAMEWORK_RANK = ["sglang", "vllm-omni", "lightx2v", "trtllm-visual"];
 
-      function latencyCell(result, kind, rowMax) {
-        if (!result) return "-";
-        const value = Number(result.client_latency_s);
+      let benchFrameworks = []; // per-framework render columns (chart bars, table cells, legend)
+      let benchCols = []; // full sortable table columns: Case, GPUs, …frameworks, Fastest
+
+      function frameworkColumn(key, override) {
+        const meta = FRAMEWORK_META[key] || {};
+        return {
+          key,
+          label: (override && override.label) || meta.label || key,
+          bar: (override && override.bar) || meta.bar || "neutral",
+          sgl: (override && override.sgl) || meta.sgl || key === "sglang",
+        };
+      }
+
+      // Frameworks present in the latest data, as ordered render columns. An
+      // uploaded file can declare `framework_order` explicitly; otherwise we
+      // derive the set from the `frameworks` map and the row cells (generic
+      // `cells` or legacy per-framework keys) so any upload renders directly.
+      function latestFrameworks(data) {
+        if (Array.isArray(data?.framework_order) && data.framework_order.length) {
+          return data.framework_order.map((f) =>
+            typeof f === "string" ? frameworkColumn(f) : frameworkColumn(f.key, f)
+          );
+        }
+        const keys = new Set();
+        Object.keys(data?.frameworks || {}).forEach((k) => keys.add(LEGACY_FW_KEYS[k] || k));
+        (data?.rows || []).forEach((row) => {
+          if (row.cells) Object.keys(row.cells).forEach((k) => keys.add(k));
+          Object.keys(LEGACY_ROW_KEYS).forEach((lk) => {
+            if (row[lk]) keys.add(LEGACY_ROW_KEYS[lk]);
+          });
+        });
+        const ranked = [...keys].sort((a, b) => {
+          const ia = FRAMEWORK_RANK.indexOf(a);
+          const ib = FRAMEWORK_RANK.indexOf(b);
+          return (ia < 0 ? 99 : ia) - (ib < 0 ? 99 : ib) || a.localeCompare(b);
+        });
+        return ranked.map((key) => frameworkColumn(key));
+      }
+
+      // Resolve a row's per-framework cell from either the generic `cells` map
+      // or a legacy top-level key.
+      function rowCell(row, key) {
+        if (row.cells && row.cells[key]) return row.cells[key];
+        for (const [legacyKey, canonical] of Object.entries(LEGACY_ROW_KEYS)) {
+          if (canonical === key && row[legacyKey]) return row[legacyKey];
+        }
+        return null;
+      }
+
+      const cellLatency = (cell) =>
+        cell ? Number(cell.client_latency_s ?? cell.latency_s) : NaN;
+      const cellOk = (cell) => !!cell && (!cell.status || cell.status === "ok");
+
+      function rowMaxLatency(row) {
+        return Math.max(
+          0,
+          ...benchFrameworks.map((fw) => (cellOk(rowCell(row, fw.key)) ? cellLatency(rowCell(row, fw.key)) || 0 : 0))
+        );
+      }
+
+      function benchColumnsFor(cols) {
+        return [
+          { key: "case", label: "Case", sort: (r) => r.case },
+          { key: "gpus", label: "GPUs", sort: (r) => parseInt(r.gpus, 10) || 0 },
+          ...cols.map((fw) => ({
+            key: `fw:${fw.key}`,
+            label: fw.label,
+            sort: (r) => (cellOk(rowCell(r, fw.key)) ? cellLatency(rowCell(r, fw.key)) : Infinity),
+          })),
+          { key: "speedup", label: "Fastest", sort: (r) => parseFloat(r.winner_speedup) || 0 },
+        ];
+      }
+
+      function latencyCell(cell, bar, rowMax) {
+        if (!cell) return "-";
+        if (!cellOk(cell)) {
+          return `<span class="status-pill">${escapeHtml((cell.status || "n/a").replace(/_/g, " "))}</span>`;
+        }
+        const value = cellLatency(cell);
         const width = Number.isFinite(value) && rowMax > 0 ? Math.max(3, (value / rowMax) * 100) : 0;
         return `
-          <span class="latency">${formatSeconds(result.client_latency_s)}</span>
-          <span class="bar-track bar-${kind}"><i style="width:${width.toFixed(1)}%"></i></span>
+          <span class="latency">${formatSeconds(value)}</span>
+          <span class="bar-track bar-${bar}"><i style="width:${width.toFixed(1)}%"></i></span>
         `;
       }
 
@@ -2379,13 +2492,15 @@
         if (benchFilter.model !== "all") rows = rows.filter((r) => modelFamily(r) === benchFilter.model);
         if (benchFilter.gpu !== "all") rows = rows.filter((r) => gpuCount(r) === benchFilter.gpu);
         if (benchSort.key) {
-          const column = benchColumns.find((c) => c.key === benchSort.key);
-          rows.sort((a, b) => {
-            const va = column.sort(a);
-            const vb = column.sort(b);
-            const cmp = typeof va === "string" ? va.localeCompare(vb) : va - vb;
-            return cmp * benchSort.dir;
-          });
+          const column = benchCols.find((c) => c.key === benchSort.key);
+          if (column) {
+            rows.sort((a, b) => {
+              const va = column.sort(a);
+              const vb = column.sort(b);
+              const cmp = typeof va === "string" ? va.localeCompare(vb) : va - vb;
+              return cmp * benchSort.dir;
+            });
+          }
         }
         return rows;
       }
@@ -2394,7 +2509,7 @@
         const head = document.getElementById("benchHead");
         head.innerHTML = `
           <tr>
-            ${benchColumns
+            ${benchCols
               .map((column) => {
                 const sorted = benchSort.key === column.key;
                 const arrow = sorted ? (benchSort.dir === 1 ? "↑" : "↓") : "↕";
@@ -2462,40 +2577,63 @@
           `<p class="chart-hint">Bar length = client latency · <b>shorter is faster</b></p>` +
           benchViewRows
             .map((row) => {
-              const sgl = row.sglang_diffusion || {};
-              const vllm = row.vllm_omni || {};
-              const sglV = Number(sgl.client_latency_s);
-              const vllmV = Number(vllm.client_latency_s);
-              const max = Math.max(sglV || 0, vllmV || 0) || 1;
+              const max = rowMaxLatency(row) || 1;
               const width = (v) => (Number.isFinite(v) && v > 0 ? Math.max(4, (v / max) * 100) : 0);
+              const sgl = benchFrameworks.find((fw) => fw.sgl);
+              const sglCell = sgl ? rowCell(row, sgl.key) : null;
               const sub = [
-                sgl.profile ? `SGLang ${sgl.profile}` : null,
-                sgl.server_latency_s != null ? `server ${formatSeconds(sgl.server_latency_s)}` : null,
-                vllm.profile ? `vLLM ${vllm.profile}` : null
+                ...benchFrameworks.map((fw) => {
+                  const cell = rowCell(row, fw.key);
+                  return cell && cell.profile ? `${fw.label} ${cell.profile}` : null;
+                }),
+                sglCell && sglCell.server_latency_s != null
+                  ? `server ${formatSeconds(sglCell.server_latency_s)}`
+                  : null,
               ]
                 .filter(Boolean)
+                .join(" · ");
+              const bars = benchFrameworks
+                .map((fw) => {
+                  const cell = rowCell(row, fw.key);
+                  const labelClass = fw.sgl ? "bar-label sgl" : "bar-label";
+                  if (!cellOk(cell)) {
+                    const status = cell ? (cell.status || "n/a").replace(/_/g, " ") : "not run";
+                    return `
+                    <div class="bar-row status">
+                      <span class="${labelClass}">${escapeHtml(fw.label)}</span>
+                      <span class="matchup-status">${escapeHtml(status)}${
+                        cell && cell.reason ? ` — ${escapeHtml(clip(cell.reason, 80))}` : ""
+                      }</span>
+                    </div>`;
+                  }
+                  const value = cellLatency(cell);
+                  return `
+                    <div class="bar-row">
+                      <span class="${labelClass}">${escapeHtml(fw.label)}</span>
+                      <span class="bar-track bar-${fw.bar}"><i style="width:${width(value).toFixed(1)}%"></i></span>
+                      <span class="bar-value">${formatSeconds(value)}</span>
+                    </div>`;
+                })
+                .join("");
+              const winner = row.winner
+                ? `<span class="winner">${escapeHtml(row.winner)}${
+                    row.winner_speedup ? ` · ${escapeHtml(row.winner_speedup)}` : ""
+                  }</span>`
+                : `<span class="winner muted">no comparable winner</span>`;
+              const meta = [row.gpus, row.details, row.torch_compile ? `compile ${row.torch_compile}` : null]
+                .filter(Boolean)
+                .map(escapeHtml)
                 .join(" · ");
               return `
                 <article class="matchup">
                   <div class="matchup-head">
                     <div>
                       <h4 class="matchup-case">${escapeHtml(row.case)}</h4>
-                      <span class="matchup-meta">${escapeHtml(row.gpus)} · ${escapeHtml(row.details)} · compile ${escapeHtml(row.torch_compile)}</span>
+                      <span class="matchup-meta">${meta}</span>
                     </div>
-                    <span class="winner">${escapeHtml(row.winner)} · ${escapeHtml(row.winner_speedup)}</span>
+                    ${winner}
                   </div>
-                  <div class="bars">
-                    <div class="bar-row">
-                      <span class="bar-label sgl">SGLang-Diffusion</span>
-                      <span class="bar-track bar-sgl"><i style="width:${width(sglV).toFixed(1)}%"></i></span>
-                      <span class="bar-value">${formatSeconds(sgl.client_latency_s)}</span>
-                    </div>
-                    <div class="bar-row">
-                      <span class="bar-label">vLLM-Omni</span>
-                      <span class="bar-track bar-vllm"><i style="width:${width(vllmV).toFixed(1)}%"></i></span>
-                      <span class="bar-value">${formatSeconds(vllm.client_latency_s)}</span>
-                    </div>
-                  </div>
+                  <div class="bars">${bars}</div>
                   ${row.note ? `<p class="matchup-note">${escapeHtml(row.note)}</p>` : ""}
                   ${sub ? `<p class="matchup-sub">${escapeHtml(sub)}</p>` : ""}
                 </article>
@@ -2523,26 +2661,34 @@
         benchViewRows = benchRowsForView();
         const body = document.getElementById("benchmarkRows");
         if (!benchViewRows.length) {
-          body.innerHTML = `<tr><td colspan="5">No rows match the current filters.</td></tr>`;
+          body.innerHTML = `<tr><td colspan="${benchCols.length}">No rows match the current filters.</td></tr>`;
           return;
         }
         body.innerHTML = benchViewRows
           .map((row, index) => {
-            const rowMax = Math.max(
-              Number(row.sglang_diffusion?.client_latency_s) || 0,
-              Number(row.vllm_omni?.client_latency_s) || 0
-            );
+            const rowMax = rowMaxLatency(row);
+            const detail = [row.details, row.torch_compile ? `compile ${row.torch_compile}` : null]
+              .filter(Boolean)
+              .map(escapeHtml)
+              .join(" - ");
+            const fwCells = benchFrameworks
+              .map((fw) => `<td>${latencyCell(rowCell(row, fw.key), fw.bar, rowMax)}</td>`)
+              .join("");
+            const winner = row.winner
+              ? `<span class="winner">${escapeHtml(row.winner)}${
+                  row.winner_speedup ? ` · ${escapeHtml(row.winner_speedup)}` : ""
+                }</span>`
+              : `<span class="winner muted">—</span>`;
             return `
               <tr data-row-index="${index}">
                 <td>
                   <span class="case-name">${escapeHtml(row.case)}</span>
-                  <span class="case-detail">${escapeHtml(row.details)} - compile ${escapeHtml(row.torch_compile)}</span>
+                  <span class="case-detail">${detail}</span>
                   ${row.note ? `<span class="case-note">${escapeHtml(row.note)}</span>` : ""}
                 </td>
                 <td>${escapeHtml(row.gpus)}</td>
-                <td>${latencyCell(row.sglang_diffusion, "sgl", rowMax)}</td>
-                <td>${latencyCell(row.vllm_omni, "vllm", rowMax)}</td>
-                <td><span class="winner">${escapeHtml(row.winner)} · ${escapeHtml(row.winner_speedup)}</span></td>
+                ${fwCells}
+                <td>${winner}</td>
               </tr>
             `;
           })
@@ -2554,19 +2700,25 @@
       const hoverCard = document.getElementById("hoverCard");
 
       function hoverCardHtml(row) {
-        const sgl = row.sglang_diffusion || {};
-        const vllm = row.vllm_omni || {};
-        const pairs = [
-          ["SGLang profile", sgl.profile],
-          ["SGLang client", sgl.client_latency_s != null ? formatSeconds(sgl.client_latency_s) : null],
-          ["SGLang server", sgl.server_latency_s != null ? formatSeconds(sgl.server_latency_s) : null],
-          ["vLLM profile", vllm.profile],
-          ["vLLM client", vllm.client_latency_s != null ? formatSeconds(vllm.client_latency_s) : null],
-          ["Compile", row.torch_compile]
-        ].filter(([, v]) => v != null && v !== "");
+        const pairs = [];
+        benchFrameworks.forEach((fw) => {
+          const cell = rowCell(row, fw.key);
+          if (!cell) return;
+          if (!cellOk(cell)) {
+            pairs.push([fw.label, (cell.status || "n/a").replace(/_/g, " ")]);
+            return;
+          }
+          if (cell.profile) pairs.push([`${fw.label} profile`, cell.profile]);
+          const client = cellLatency(cell);
+          if (Number.isFinite(client)) pairs.push([`${fw.label} client`, formatSeconds(client)]);
+          if (cell.server_latency_s != null)
+            pairs.push([`${fw.label} server`, formatSeconds(cell.server_latency_s)]);
+        });
+        pairs.push(["Compile", row.torch_compile]);
+        const visible = pairs.filter(([, v]) => v != null && v !== "");
         return `
           <h4>${escapeHtml(row.case)} · ${escapeHtml(row.gpus)}</h4>
-          <dl>${pairs.map(([k, v]) => `<dt>${escapeHtml(k)}</dt><dd>${escapeHtml(v)}</dd>`).join("")}</dl>
+          <dl>${visible.map(([k, v]) => `<dt>${escapeHtml(k)}</dt><dd>${escapeHtml(v)}</dd>`).join("")}</dl>
           ${row.note ? `<p class="hc-note">${escapeHtml(row.note)}</p>` : ""}
         `;
       }
@@ -2597,19 +2749,52 @@
       }
 
       /* ---------- latest benchmark: headline + meta ---------- */
+      // A short version string for a framework metadata entry, tolerant of the
+      // varied shapes used across frameworks (sglang commit, vLLM/trtllm version).
+      function frameworkVersionLabel(entry) {
+        if (!entry) return "";
+        if (entry.commit) {
+          const base = entry.commit.slice(0, 8);
+          return entry.measured_commit ? `${base} (measured ${entry.measured_commit.slice(0, 8)})` : base;
+        }
+        const ver = entry.vllm_omni || entry.vllm || entry.version || entry.trtllm || entry.tensorrt_llm;
+        return ver ? String(ver) : "";
+      }
+
+      function renderBenchLegend() {
+        const legend = document.getElementById("benchLegend");
+        if (!legend) return;
+        legend.innerHTML = benchFrameworks
+          .map((fw) => `<i class="l-${fw.bar}">${escapeHtml(fw.label)}</i>`)
+          .join("");
+      }
+
       function renderBenchmarks(data) {
         benchData = data;
+        benchFrameworks = latestFrameworks(data);
+        benchCols = benchColumnsFor(benchFrameworks);
         document.getElementById("sourceReport").textContent = data.source_report || data.id;
+        renderBenchLegend();
 
         const summary = data.summary || {};
         if (summary.headline) {
           const headline = document.getElementById("benchHeadline");
           headline.hidden = false;
           document.getElementById("benchHeadlineText").textContent = summary.headline;
-          document.getElementById("benchScore").textContent =
-            `${summary.same_gpu_cases ?? "-"} same-GPU cases · ` +
-            `${summary.sglang_diffusion_wins ?? "-"} SGLang-Diffusion wins · ` +
-            `${summary.vllm_omni_wins ?? "-"} vLLM-Omni wins`;
+          const parts = [];
+          if (summary.same_gpu_cases != null) parts.push(`${summary.same_gpu_cases} same-GPU cases`);
+          // Generic per-framework win counts: prefer an explicit `wins` map,
+          // else fall back to the legacy `<framework>_wins` fields.
+          const winsMap = summary.wins || {
+            sglang: summary.sglang_diffusion_wins,
+            "vllm-omni": summary.vllm_omni_wins,
+            lightx2v: summary.lightx2v_wins,
+            "trtllm-visual": summary.trtllm_visual_wins,
+          };
+          Object.entries(winsMap).forEach(([key, value]) => {
+            if (value != null) parts.push(`${value} ${(FRAMEWORK_META[key]?.label) || key} wins`);
+          });
+          document.getElementById("benchScore").textContent = summary.score || parts.join(" · ");
         }
 
         renderBenchFilters();
@@ -2622,16 +2807,19 @@
         );
         renderBenchView();
 
-        const sgldCommit = data.frameworks?.sglang_diffusion_now?.commit || fallbackData.frameworks.sglang_diffusion_now.commit;
-        const sgldMeasuredCommit = data.frameworks?.sglang_diffusion_now?.measured_commit;
-        const sgldNote = data.frameworks?.sglang_diffusion_now?.note;
-        const vllmCommit =
-          data.frameworks?.vllm_omni_now?.vllm_omni_commit || fallbackData.frameworks.vllm_omni_now.vllm_omni_commit;
-        const sgldLabel = sgldMeasuredCommit
-          ? `SGLang-Diffusion ${sgldCommit.slice(0, 8)} (measured ${sgldMeasuredCommit.slice(0, 8)})`
-          : `SGLang-Diffusion ${sgldCommit.slice(0, 8)}`;
+        // Framework version line, generic over whatever `frameworks` declares.
+        const fwEntries = data.frameworks || {};
+        const versionBits = Object.entries(fwEntries)
+          .map(([key, entry]) => {
+            const canonical = LEGACY_FW_KEYS[key] || key;
+            const label = entry.label || FRAMEWORK_META[canonical]?.label || canonical;
+            const ver = frameworkVersionLabel(entry);
+            return ver ? `${label} ${ver}` : label;
+          })
+          .filter(Boolean);
+        const sgldNote = Object.values(fwEntries).find((e) => e && e.note)?.note;
         document.getElementById("benchmarkNote").textContent =
-          `${sgldLabel}; vLLM-Omni ${vllmCommit.slice(0, 8)}. ` +
+          (versionBits.length ? `${versionBits.join("; ")}. ` : "") +
           "Client-side latency is the comparison source; server-side time is shown where available." +
           (sgldNote ? ` ${sgldNote}` : "");
         document.getElementById("footerSource").textContent =
@@ -2643,6 +2831,7 @@
         sglang: "SGLang-Diffusion",
         "vllm-omni": "vLLM-Omni",
         lightx2v: "LightX2V",
+        "trtllm-visual": "TensorRT-LLM VisualGen",
         sglang_reference: "SGLang baseline",
         vllm_omni_tp: "vLLM TP",
         vllm_omni_cfg: "vLLM CFG",
@@ -2738,13 +2927,16 @@
         `;
       }
 
-      function standardHistoryHead() {
+      function standardHistoryHead(cols) {
+        const fwCols = cols || [
+          { label: "SGLang-Diffusion" },
+          { label: "vLLM-Omni" },
+          { label: "LightX2V" },
+        ];
         document.getElementById("historyTableHead").innerHTML = `
           <tr>
             <th>Case</th>
-            <th>SGLang-Diffusion</th>
-            <th>vLLM-Omni</th>
-            <th>LightX2V</th>
+            ${fwCols.map((c) => `<th>${escapeHtml(c.label)}</th>`).join("")}
             <th>Fastest</th>
           </tr>
         `;
@@ -2778,22 +2970,32 @@
       }
 
       function renderStandardHistoryRows(section) {
-        standardHistoryHead();
+        const { cols } = historyFrameworksFor(section);
+        standardHistoryHead(cols);
         document.getElementById("historyRows").innerHTML = section.rows
-          .map(
-            (row) => `
+          .map((row) => {
+            const cells = cols
+              .map(
+                (c) =>
+                  `<td>${historyMetricCell(
+                    (row.cells || {})[c.key],
+                    section.mode,
+                    "ratio_to_sglang",
+                    c.bar
+                  )}</td>`
+              )
+              .join("");
+            return `
               <tr>
                 <td>
                   <span class="case-name">${escapeHtml(row.case)}</span>
                   <span class="case-detail">${escapeHtml(row.details)}</span>
                 </td>
-                <td>${historyMetricCell(row.cells.sglang, section.mode, "ratio_to_sglang", "sgl")}</td>
-                <td>${historyMetricCell(row.cells["vllm-omni"], section.mode)}</td>
-                <td>${historyMetricCell(row.cells.lightx2v, section.mode)}</td>
+                ${cells}
                 <td>${historyWinner(row)}</td>
               </tr>
-            `
-          )
+            `;
+          })
           .join("");
       }
 
@@ -2840,34 +3042,58 @@
           .join("");
       }
 
+      // Map any framework cell key (canonical or section-specific like
+      // "sglang_now"/"vllm_omni_tp") to a bar color class.
+      function historyBar(key) {
+        if (key.includes("sglang")) return "sgl";
+        if (key.includes("trtllm")) return "trtllm";
+        if (key.includes("lightx2v")) return "lightx2v";
+        if (key.includes("vllm")) return "vllm";
+        return "neutral";
+      }
+
       function historyFrameworksFor(section) {
         if (section.id === "flux_fastest_20260610") {
           return {
             cols: [
-              { key: "sglang_before", label: "SGLang Apr 10", sgl: false },
-              { key: "sglang_now", label: "SGLang now", sgl: true },
-              { key: "vllm_omni_now", label: "vLLM now", sgl: false },
-              { key: "lightx2v_now", label: "LightX2V now", sgl: false }
-            ]
+              { key: "sglang_before", label: "SGLang Apr 10", sgl: false, bar: "sgl" },
+              { key: "sglang_now", label: "SGLang now", sgl: true, bar: "sgl" },
+              { key: "vllm_omni_now", label: "vLLM now", sgl: false, bar: "vllm" },
+              { key: "lightx2v_now", label: "LightX2V now", sgl: false, bar: "lightx2v" },
+              { key: "trtllm_visual_now", label: "TensorRT-LLM now", sgl: false, bar: "trtllm" }
+            ].filter((c) => (section.rows || []).some((r) => r.cells && r.cells[c.key]))
           };
         }
         if (section.table === "video_profile_sweep") {
           return {
             cols: [
-              { key: "sglang_reference", label: "SGLang baseline", sgl: true },
-              { key: "vllm_omni_tp", label: "vLLM TP", sgl: false },
-              { key: "vllm_omni_cfg", label: "vLLM CFG", sgl: false },
-              { key: "vllm_omni_ulysses", label: "vLLM Ulysses", sgl: false },
-              { key: "lightx2v_fa3", label: "LightX2V FA3", sgl: false }
+              { key: "sglang_reference", label: "SGLang baseline", sgl: true, bar: "sgl" },
+              { key: "vllm_omni_tp", label: "vLLM TP", sgl: false, bar: "vllm" },
+              { key: "vllm_omni_cfg", label: "vLLM CFG", sgl: false, bar: "vllm" },
+              { key: "vllm_omni_ulysses", label: "vLLM Ulysses", sgl: false, bar: "vllm" },
+              { key: "lightx2v_fa3", label: "LightX2V FA3", sgl: false, bar: "lightx2v" }
             ]
           };
         }
+        // Standard sections: derive the framework columns from the cells present
+        // so any framework an upload includes (e.g. trtllm-visual) shows up.
+        const known = ["sglang", "vllm-omni", "lightx2v", "trtllm-visual"];
+        const present = new Set();
+        (section.rows || []).forEach((r) =>
+          Object.keys(r.cells || {}).forEach((k) => present.add(k))
+        );
+        let keys = known.filter((k) => present.has(k));
+        [...present].forEach((k) => {
+          if (!keys.includes(k)) keys.push(k);
+        });
+        if (!keys.length) keys = ["sglang", "vllm-omni", "lightx2v"];
         return {
-          cols: [
-            { key: "sglang", label: "SGLang-Diffusion", sgl: true },
-            { key: "vllm-omni", label: "vLLM-Omni", sgl: false },
-            { key: "lightx2v", label: "LightX2V", sgl: false }
-          ]
+          cols: keys.map((k) => ({
+            key: k,
+            label: frameworkLabels[k] || k,
+            sgl: k === "sglang",
+            bar: historyBar(k),
+          })),
         };
       }
 
@@ -2927,7 +3153,7 @@
                   return `
                     <div class="bar-row">
                       <span class="bar-label${c.sgl ? " sgl" : ""}">${escapeHtml(c.label)}<small>${escapeHtml(sub)}</small></span>
-                      <span class="bar-track bar-${c.sgl ? "sgl" : "vllm"}"><i style="width:${width.toFixed(1)}%"></i></span>
+                      <span class="bar-track bar-${c.bar || (c.sgl ? "sgl" : "vllm")}"><i style="width:${width.toFixed(1)}%"></i></span>
                       <span class="bar-value">${main}</span>
                     </div>
                   `;

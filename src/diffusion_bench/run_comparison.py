@@ -81,8 +81,25 @@ class LatencyBreakdown:
 
 
 # Frameworks that need separate installation (conflict with sglang's deps)
-INSTALLABLE_FRAMEWORKS = {"vllm-omni", "lightx2v"}
-FRAMEWORK_ORDER = ["sglang", "vllm-omni", "lightx2v"]
+INSTALLABLE_FRAMEWORKS = {"vllm-omni", "lightx2v", "trtllm-visual"}
+FRAMEWORK_ORDER = ["sglang", "vllm-omni", "lightx2v", "trtllm-visual"]
+
+# Frameworks served through the generic, config-driven HTTP path (no bespoke
+# command builder / request sender). A framework opts in by declaring an
+# `http_server` block in its per-case config; its launch command and request
+# shape come entirely from config so new OpenAI-compatible backends can be
+# added without editing this file. `trtllm-visual` (TensorRT-LLM VisualGen via
+# `trtllm-serve`) is the first such framework.
+GENERIC_HTTP_FRAMEWORKS = {"trtllm-visual"}
+
+# Frameworks whose pipelines REQUIRE torch.compile to run correctly, so the
+# cache-free `TORCH_COMPILE_DISABLE=1` policy must not be applied to them.
+# TensorRT-LLM VisualGen crashes in eager mode with a layer_norm
+# "expected scalar type Float but found BFloat16" error; compile is functional,
+# not an optimization. Measured latency is still post-warmup steady-state (the
+# compile cost is paid during warmup and excluded), so the comparison stays
+# fair — see scripts/run_trtllm_visual_h200.md.
+REQUIRES_TORCH_COMPILE = {"trtllm-visual"}
 SGLANG_PROFILE_RUNTIME_KEYS = {
     "serve_args",
     "num_gpus",
@@ -96,6 +113,8 @@ FRAMEWORK_PROFILE_RUNTIME_KEYS = SGLANG_PROFILE_RUNTIME_KEYS | {
     "server_bin",
     "use_omni_arg",
     "required_help_args",
+    "http_server",
+    "http_request",
 }
 
 # Cached reference images keyed by URL.
@@ -423,6 +442,61 @@ def _server_model_path(case: dict, fw_cfg: dict) -> str:
     return os.path.expandvars(str(fw_cfg.get("model_path") or case["model"]))
 
 
+def _build_generic_http_cmd(case: dict, fw_cfg: dict, port: int) -> list[str]:
+    """Build the launch command for a generic config-driven HTTP framework.
+
+    The command is described entirely by the framework's ``http_server`` block
+    so new OpenAI-compatible backends need no bespoke builder. Schema::
+
+        "http_server": {
+          "bin": "trtllm-serve",                # executable (env vars expanded)
+          "args_template": ["{model}", "--host", "{host}", "--port", "{port}"],
+          "tp_flag": "--tp_size",               # appended as [flag, num_gpus] when num_gpus > 1
+          "health_path": "/health"              # consumed by wait_for_health via case lookup
+        }
+
+    Placeholders ``{model}``, ``{host}``, ``{port}`` and ``{num_gpus}`` are
+    substituted. ``serve_args`` (case/profile) are appended verbatim, matching
+    the other builders.
+    """
+    server = fw_cfg.get("http_server") or {}
+    bin_name = os.path.expandvars(str(server.get("bin") or fw_cfg.get("server_bin") or "")).strip()
+    if not bin_name:
+        raise ValueError(
+            "generic HTTP framework requires an 'http_server.bin' (or 'server_bin') entry"
+        )
+    model_path = _server_model_path(case, fw_cfg)
+    num_gpus = fw_cfg.get("num_gpus", case["num_gpus"])
+    subst = {
+        "model": model_path,
+        "host": DEFAULT_HOST,
+        "port": str(port),
+        "num_gpus": str(num_gpus),
+    }
+
+    def _render(token: str) -> str:
+        return os.path.expandvars(str(token)).format(**subst)
+
+    args_template = server.get("args_template") or [
+        "{model}",
+        "--host",
+        "{host}",
+        "--port",
+        "{port}",
+    ]
+    cmd = [bin_name] + [_render(token) for token in args_template]
+
+    tp_flag = server.get("tp_flag")
+    if num_gpus > 1 and tp_flag:
+        has_tp = any(arg == tp_flag or arg.startswith(f"{tp_flag}=") for arg in cmd)
+        if not has_tp:
+            cmd += [tp_flag, str(num_gpus)]
+
+    if fw_cfg.get("serve_args", "").strip():
+        cmd += fw_cfg["serve_args"].strip().split()
+    return cmd
+
+
 def build_server_cmd(framework: str, case: dict, fw_cfg: dict, port: int) -> list[str]:
     builders = {
         "sglang": _build_sglang_cmd,
@@ -431,6 +505,8 @@ def build_server_cmd(framework: str, case: dict, fw_cfg: dict, port: int) -> lis
     }
     builder = builders.get(framework)
     if builder is None:
+        if framework in GENERIC_HTTP_FRAMEWORKS or fw_cfg.get("http_server"):
+            return _build_generic_http_cmd(case, fw_cfg, port)
         raise ValueError(f"Unknown framework: {framework}")
     return builder(case, fw_cfg, port)
 
@@ -622,9 +698,15 @@ def wait_for_health(
     framework: str = "sglang",
     timeout: int = HEALTH_TIMEOUT,
     proc: subprocess.Popen | None = None,
+    health_path: str | None = None,
 ) -> None:
-    """Poll health endpoint until 200, then verify model is loaded."""
-    endpoint = HEALTH_ENDPOINTS.get(framework, "/health")
+    """Poll health endpoint until 200, then verify model is loaded.
+
+    ``health_path`` lets a generic, config-driven framework override the probe
+    path (from its ``http_server.health_path``); otherwise the per-framework
+    default is used, falling back to ``/health`` for OpenAI-compatible servers.
+    """
+    endpoint = health_path or HEALTH_ENDPOINTS.get(framework, "/health")
     health_url = f"{base_url}{endpoint}"
     print(f"  Waiting for server at {health_url} ...")
     start = time.time()
@@ -1227,6 +1309,148 @@ def send_request_lightx2v(base_url: str, case: dict, config: dict) -> float:
 
 
 # ---------------------------------------------------------------------------
+# Request helpers — generic OpenAI-compatible HTTP frameworks
+# ---------------------------------------------------------------------------
+
+
+def _generic_http_request_spec(case: dict, framework: str) -> dict:
+    """Per-task request overrides for a generic HTTP framework.
+
+    Read from the framework's ``http_request`` block, keyed by task. Every
+    field is optional; OpenAI-compatible defaults are applied when omitted, so
+    a backend with standard endpoints needs no request config at all::
+
+        "http_request": {
+          "text-to-image": {"endpoint": "/v1/images/generations"},
+          "text-to-video": {"endpoint": "/v1/videos", "mode": "async_poll"}
+        }
+    """
+    fw_block = (case.get("frameworks") or {}).get(framework) or {}
+    by_task = fw_block.get("http_request") or {}
+    return by_task.get(case["task"]) or {}
+
+
+def send_request_generic_http(
+    base_url: str, case: dict, config: dict, framework: str
+) -> float:
+    """Send a request to a generic OpenAI-compatible visual-generation server.
+
+    Defaults mirror the OpenAI image/video API (the shape TensorRT-LLM
+    VisualGen / ``trtllm-serve`` and vLLM-Omni expose): T2I posts the standard
+    image payload to ``/v1/images/generations``; video submits to ``/v1/videos``
+    and polls. Endpoints/mode are overridable per task via ``http_request`` so
+    other config-driven backends can deviate without code changes.
+    """
+    task = case["task"]
+    spec = _generic_http_request_spec(case, framework)
+
+    if task in ("text-to-video", "image-to-video", "text-image-to-video"):
+        endpoint = spec.get("endpoint", "/v1/videos")
+        data = {
+            "model": case["model"],
+            "prompt": case["prompt"],
+            "size": f"{case['width']}x{case['height']}",
+            "width": str(case["width"]),
+            "height": str(case["height"]),
+        }
+        for key in (
+            "num_inference_steps",
+            "guidance_scale",
+            "guidance_scale_2",
+            "seed",
+            "num_frames",
+            "fps",
+            "negative_prompt",
+        ):
+            if key in case:
+                data[key] = str(case[key])
+        _update_form_data(data, _request_extra(case, framework))
+        files = None
+        if case.get("reference_image"):
+            files = {
+                "input_reference": (
+                    "ref.png",
+                    io.BytesIO(_get_ref_image_bytes(config, case)),
+                    "image/png",
+                )
+            }
+        start = time.time()
+        resp = requests.post(
+            f"{base_url}{endpoint}", data=data, files=files, timeout=REQUEST_TIMEOUT
+        )
+        resp.raise_for_status()
+        job = resp.json()
+        # Synchronous endpoints return the result directly; async returns a job id.
+        job_id = job.get("id")
+        if spec.get("mode") == "sync" or not job_id:
+            latency = time.time() - start
+            print(f"  Generated in {latency:.2f}s ({framework})")
+            return latency
+        poll_url = f"{base_url}{endpoint.rstrip('/')}/{job_id}"
+        while True:
+            time.sleep(1)
+            poll_resp = requests.get(poll_url, timeout=30)
+            poll_resp.raise_for_status()
+            poll_data = poll_resp.json()
+            status = str(poll_data.get("status") or "").lower()
+            if status in ("completed", "succeeded", "success"):
+                break
+            if status in ("failed", "error", "cancelled", "canceled") or poll_data.get("error"):
+                raise RuntimeError(f"{framework} video generation failed: {poll_data}")
+            if time.time() - start > REQUEST_TIMEOUT:
+                raise TimeoutError(f"{framework} video timed out after {REQUEST_TIMEOUT}s")
+        latency = time.time() - start
+        print(f"  Generated in {latency:.2f}s ({framework})")
+        return latency
+
+    if task == "text-to-image":
+        endpoint = spec.get("endpoint", "/v1/images/generations")
+        payload = _build_sglang_payload(case)
+        payload.update(_request_extra(case, framework))
+        start = time.time()
+        resp = requests.post(
+            f"{base_url}{endpoint}", json=payload, timeout=REQUEST_TIMEOUT
+        )
+        latency = time.time() - start
+        resp.raise_for_status()
+        print(f"  Generated in {latency:.2f}s ({framework})")
+        return latency
+
+    if task in ("image-edit", "image-to-image"):
+        endpoint = spec.get("endpoint", "/v1/images/edits")
+        files = {
+            "image": ("ref.png", io.BytesIO(_get_ref_image_bytes(config, case)), "image/png")
+        }
+        data = {
+            "model": case["model"],
+            "prompt": case["prompt"],
+            "size": f"{case['width']}x{case['height']}",
+            "n": "1",
+            "response_format": "b64_json",
+        }
+        for key in (
+            "num_inference_steps",
+            "guidance_scale",
+            "true_cfg_scale",
+            "seed",
+            "negative_prompt",
+        ):
+            if key in case:
+                data[key] = str(case[key])
+        _update_form_data(data, _request_extra(case, framework))
+        start = time.time()
+        resp = requests.post(
+            f"{base_url}{endpoint}", files=files, data=data, timeout=REQUEST_TIMEOUT
+        )
+        latency = time.time() - start
+        resp.raise_for_status()
+        print(f"  Generated in {latency:.2f}s ({framework})")
+        return latency
+
+    raise ValueError(f"Unknown task type for generic HTTP framework: {task}")
+
+
+# ---------------------------------------------------------------------------
 # Unified request dispatcher
 # ---------------------------------------------------------------------------
 
@@ -1246,6 +1470,13 @@ def send_request(
     elif framework == "lightx2v":
         return LatencyBreakdown(
             client_s=send_request_lightx2v(base_url, case, config)
+        )
+    elif framework in GENERIC_HTTP_FRAMEWORKS or (
+        framework != "sglang"
+        and ((case.get("frameworks") or {}).get(framework) or {}).get("http_server")
+    ):
+        return LatencyBreakdown(
+            client_s=send_request_generic_http(base_url, case, config, framework)
         )
     # SGLang — use OpenAI-compatible endpoints with optional perf log
     task = case["task"]
@@ -1454,6 +1685,11 @@ def _collect_framework_runtime_metadata() -> dict:
             "lightx2v_flashinfer": os.environ.get(
                 "LIGHTX2V_FLASHINFER_INSTALL_SPEC", "flashinfer-python==0.6.11"
             ),
+            "trtllm": os.environ.get(
+                # VisualGen serving is only in the 1.3.0 release candidates, not
+                # the 1.2.x stable line; pin an rc that ships it.
+                "TRTLLM_INSTALL_SPEC", "tensorrt-llm==1.3.0rc18"
+            ),
             "torch_cuda_arch_list": os.environ.get("TORCH_CUDA_ARCH_LIST", ""),
         },
         "launchers": {
@@ -1461,11 +1697,15 @@ def _collect_framework_runtime_metadata() -> dict:
             "vllm_omni_required_help_args": os.environ.get(
                 "VLLM_OMNI_REQUIRED_HELP_ARGS", "--omni"
             ),
+            "trtllm_visual_server_bin": os.environ.get(
+                "TRTLLM_VISUAL_SERVER_BIN", "trtllm-serve"
+            ),
         },
     }
     packages_by_framework = {
         "vllm-omni": ["vllm", "vllm-omni"],
         "lightx2v": ["lightx2v", "flash-attn", "flash-attn-3", "flashinfer-python"],
+        "trtllm-visual": ["tensorrt-llm", "tensorrt"],
     }
     for framework, packages in packages_by_framework.items():
         venv_path = _framework_venv_path(framework)
@@ -1699,6 +1939,9 @@ def run_case_framework(
     env = os.environ.copy()
     env.update(fw_cfg.get("extra_env", {}))
     env = _apply_benchmark_env(env)
+    if framework in REQUIRES_TORCH_COMPILE:
+        # This framework cannot run in eager mode; let it keep torch.compile.
+        env.pop("TORCH_COMPILE_DISABLE", None)
     env = _framework_env(framework, env)
     _preflight_framework_command(framework, fw_cfg, env)
 
@@ -1733,7 +1976,12 @@ def run_case_framework(
         log_thread.start()
 
         base_url = f"http://{DEFAULT_HOST}:{port}"
-        wait_for_health(base_url, framework, proc=proc)
+        wait_for_health(
+            base_url,
+            framework,
+            proc=proc,
+            health_path=(fw_cfg.get("http_server") or {}).get("health_path"),
+        )
         bench_cfg = _merge_nested(
             _benchmark_config(config, case), fw_cfg.get("benchmark", {})
         )

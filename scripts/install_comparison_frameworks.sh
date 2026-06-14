@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-FRAMEWORK="${1:?usage: install_comparison_frameworks.sh <vllm-omni|lightx2v>}"
+FRAMEWORK="${1:?usage: install_comparison_frameworks.sh <vllm-omni|lightx2v|trtllm-visual>}"
 VENV_ROOT="${SGLANG_DIFFUSION_FRAMEWORK_VENV_ROOT:-/tmp/sglang-diffusion-framework-venvs}"
 VENV_PATH="${VENV_ROOT}/${FRAMEWORK}"
 PIP_TMPDIR="${SGLANG_DIFFUSION_PIP_TMPDIR:-${VENV_ROOT}/pip-tmp}"
@@ -14,7 +14,7 @@ mkdir -p "${PIP_TMPDIR}"
 export TMPDIR="${PIP_TMPDIR}"
 
 case "${FRAMEWORK}" in
-  vllm-omni|lightx2v) ;;
+  vllm-omni|lightx2v|trtllm-visual) ;;
   *)
     echo "Unknown comparison framework: ${FRAMEWORK}" >&2
     exit 1
@@ -54,6 +54,13 @@ write_desired_stamp() {
         echo "lightx2v_librosa_install_spec=${LIGHTX2V_LIBROSA_INSTALL_SPEC:-librosa}"
         echo "torch_cuda_arch_list=${TORCH_CUDA_ARCH_LIST:-9.0}"
         ;;
+      trtllm-visual)
+        echo "trtllm_install_spec=${TRTLLM_INSTALL_SPEC:-tensorrt-llm==1.3.0rc18}"
+        echo "trtllm_torch_install_spec=${TRTLLM_TORCH_INSTALL_SPEC:-torch==2.10.0}"
+        echo "trtllm_torch_index_url=${TRTLLM_TORCH_INDEX_URL:-https://download.pytorch.org/whl/cu130}"
+        echo "trtllm_pip_extra_index_url=${TRTLLM_PIP_EXTRA_INDEX_URL:-https://pypi.nvidia.com}"
+        echo "trtllm_visual_server_bin=${TRTLLM_VISUAL_SERVER_BIN:-trtllm-serve}"
+        ;;
     esac
   } > "${path}"
 }
@@ -72,6 +79,11 @@ framework_health_check() {
       ;;
     lightx2v)
       "${VENV_PATH}/bin/python3" -c 'import importlib.util; assert importlib.util.find_spec("lightx2v"); import lightx2v.server.main; import flash_attn_interface; assert hasattr(flash_attn_interface, "flash_attn_func")'
+      ;;
+    trtllm-visual)
+      "${VENV_PATH}/bin/python3" -c 'import importlib.util; assert importlib.util.find_spec("tensorrt_llm")'
+      local trtllm_bin="${TRTLLM_VISUAL_SERVER_BIN:-trtllm-serve}"
+      [[ -x "${VENV_PATH}/bin/${trtllm_bin}" ]] || return 1
       ;;
   esac
 }
@@ -122,6 +134,29 @@ case "${FRAMEWORK}" in
     python3 -m pip install --upgrade --upgrade-strategy only-if-needed "${LIGHTX2V_FLASHINFER_INSTALL_SPEC:-flashinfer-python==0.6.11}"
     python3 -m pip install --upgrade --upgrade-strategy only-if-needed "${LIGHTX2V_LIBROSA_INSTALL_SPEC:-librosa}"
     python3 -m pip install --upgrade --force-reinstall pyzmq
+    ;;
+  trtllm-visual)
+    # TensorRT-LLM VisualGen, served via `trtllm-serve`. Wheels live on the
+    # NVIDIA PyPI index; override the spec/index per release as needed.
+    #
+    # NOTE 1: VisualGen (diffusion serving + /v1/images/generations, with
+    #   get_is_diffusion_model auto-detection in trtllm-serve) is NOT in the
+    #   1.2.x stable line — it lands in the 1.3.0 release candidates. A plain
+    #   `tensorrt-llm` resolves to 1.2.x and serves FLUX through the LLM path,
+    #   which fails. Pin a 1.3.0rc (or newer) here.
+    # NOTE 2: 1.3.0rc has an UNRESOLVABLE pip conflict on a clean index —
+    #   it requires `cuda-python>=13` (→ cuda-bindings 13.x) AND `torch>=2.10`,
+    #   but PyPI's torch 2.10.0 pins `cuda-bindings==12.9.4`. The fix is to
+    #   install torch 2.10.0 from PyTorch's cu130 index FIRST (its cuda-bindings
+    #   is 13.x compatible), then install tensorrt-llm with only-if-needed so it
+    #   keeps that torch. Verified working: torch 2.10.0+cu130 + tensorrt-llm
+    #   1.3.0rc18 on H200.
+    python3 -m pip install \
+      "${TRTLLM_TORCH_INSTALL_SPEC:-torch==2.10.0}" torchvision \
+      --index-url "${TRTLLM_TORCH_INDEX_URL:-https://download.pytorch.org/whl/cu130}"
+    python3 -m pip install --upgrade --upgrade-strategy only-if-needed \
+      --extra-index-url "${TRTLLM_PIP_EXTRA_INDEX_URL:-https://pypi.nvidia.com}" \
+      "${TRTLLM_INSTALL_SPEC:-tensorrt-llm==1.3.0rc18}"
     ;;
   *)
     echo "Unknown comparison framework: ${FRAMEWORK}" >&2
