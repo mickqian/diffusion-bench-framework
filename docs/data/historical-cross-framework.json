@@ -39,7 +39,7 @@
         {
           "case_id": "flux1_dev_t2i_1024",
           "case": "FLUX.1-dev T2I",
-          "details": "1024x1024 \u00b7 50 steps \u00b7 cfg 3.5",
+          "details": "1024x1024 · 50 steps · cfg 3.5",
           "mode": "single_e2e",
           "winner": "sglang",
           "cells": {
@@ -66,7 +66,7 @@
         {
           "case_id": "flux2_dev_t2i_1024",
           "case": "FLUX.2-dev T2I",
-          "details": "1024x1024 \u00b7 50 steps \u00b7 cfg 4",
+          "details": "1024x1024 · 50 steps · cfg 4",
           "mode": "single_e2e",
           "winner": "sglang",
           "cells": {
@@ -96,7 +96,7 @@
         {
           "case_id": "qwen_image_2512_t2i_1024",
           "case": "Qwen-Image-2512 T2I",
-          "details": "1024x1024 \u00b7 50 steps \u00b7 cfg 1",
+          "details": "1024x1024 · 50 steps · cfg 1",
           "mode": "single_e2e",
           "winner": "sglang",
           "cells": {
@@ -123,7 +123,7 @@
         {
           "case_id": "qwen_image_edit_2511",
           "case": "Qwen-Image-Edit-2511",
-          "details": "1024x1024 \u00b7 40 steps \u00b7 cfg 1",
+          "details": "1024x1024 · 40 steps · cfg 1",
           "mode": "single_e2e",
           "winner": "sglang",
           "cells": {
@@ -150,7 +150,7 @@
         {
           "case_id": "zimage_turbo_t2i_1024",
           "case": "Z-Image-Turbo T2I",
-          "details": "1024x1024 \u00b7 9 steps \u00b7 cfg 0",
+          "details": "1024x1024 · 9 steps · cfg 0",
           "mode": "single_e2e",
           "winner": "sglang",
           "cells": {
@@ -180,7 +180,7 @@
         {
           "case_id": "wan21_t2v_1_3b_480p",
           "case": "Wan2.1 T2V 1.3B 480p",
-          "details": "832x480x81f \u00b7 50 steps \u00b7 cfg 6",
+          "details": "832x480x81f · 50 steps · cfg 6",
           "mode": "single_e2e",
           "winner": "sglang",
           "cells": {
@@ -211,7 +211,7 @@
         {
           "case_id": "wan21_i2v_14b_480p",
           "case": "Wan2.1 I2V 14B 480p",
-          "details": "832x480x81f \u00b7 40 steps \u00b7 cfg 5",
+          "details": "832x480x81f · 40 steps · cfg 5",
           "mode": "single_e2e",
           "winner": "sglang",
           "cells": {
@@ -241,7 +241,7 @@
         {
           "case_id": "wan22_t2v_a14b_720p",
           "case": "Wan2.2 T2V A14B 720p",
-          "details": "1280x720x81f \u00b7 40 steps \u00b7 cfg 4/3",
+          "details": "1280x720x81f · 40 steps · cfg 4/3",
           "mode": "single_e2e",
           "winner": "sglang",
           "cells": {
@@ -271,7 +271,7 @@
         {
           "case_id": "wan22_ti2v_5b_704p",
           "case": "Wan2.2 TI2V 5B 704p",
-          "details": "1280x704x81f \u00b7 50 steps \u00b7 cfg 5",
+          "details": "1280x704x81f · 50 steps · cfg 5",
           "mode": "single_e2e",
           "winner": "sglang",
           "cells": {
@@ -301,7 +301,7 @@
         {
           "case_id": "ltx2_twostage_t2v",
           "case": "LTX-2 two-stage T2V",
-          "details": "768x512x121f \u00b7 40 steps \u00b7 cfg 4",
+          "details": "768x512x121f · 40 steps · cfg 4",
           "mode": "single_e2e",
           "winner": "sglang",
           "cells": {
@@ -330,7 +330,7 @@
         {
           "case_id": "ltx2.3_twostage_t2v_2gpus",
           "case": "LTX-2.3 two-stage T2V",
-          "details": "768x512x121f \u00b7 30 steps \u00b7 cfg 3",
+          "details": "768x512x121f · 30 steps · cfg 3",
           "mode": "single_e2e",
           "winner": "sglang",
           "cells": {
@@ -356,7 +356,7 @@
         {
           "case_id": "wan21_i2v_14b_720p",
           "case": "Wan2.1 I2V 14B 720p",
-          "details": "1280x720x81f \u00b7 40 steps \u00b7 cfg 5",
+          "details": "1280x720x81f · 40 steps · cfg 5",
           "mode": "single_e2e",
           "winner": "sglang",
           "cells": {
@@ -386,7 +386,7 @@
         {
           "case_id": "wan22_i2v_a14b_720p",
           "case": "Wan2.2 I2V A14B 720p",
-          "details": "1280x720x81f \u00b7 40 steps \u00b7 cfg 3.5/3.5",
+          "details": "1280x720x81f · 40 steps · cfg 3.5/3.5",
           "mode": "single_e2e",
           "winner": "sglang",
           "cells": {
@@ -418,7 +418,7 @@
     {
       "id": "compile_on_bestvsbest_h200_20260614",
       "title": "Compile-on best-vs-best (H200)",
-      "subtitle": "Same-box H200, 1-GPU, cache-free, torch.compile ON for both. SGLang-Diffusion runs resident (--dit-cpu-offload false; standard config, not its max-tuned speed profile); trtllm-visual is TensorRT-LLM VisualGen 1.3.0rc18. 'compile +Xs' is the extra cold-start (load+compile+warmup) from enabling compile \u2014 note trtllm's compile is ~2-6s vs SGLang's ~74-97s. See scripts/run_trtllm_visual_h200.md.",
+      "subtitle": "Same-box H200, 1-GPU, cache-free, torch.compile ON. Note: SGLang ran the diffusers fallback path here — superseded by the latest view's native numbers.",
       "mode": "single_e2e",
       "source_report": "H200 2026-06-14 same-box compile-on",
       "reproduce": "scripts/run_trtllm_visual_h200.md",
@@ -433,7 +433,7 @@
         {
           "case_id": "flux1_dev_t2i_1024",
           "case": "FLUX.1-dev T2I",
-          "details": "1024x1024 \u00b7 50 steps \u00b7 cfg 3.5",
+          "details": "1024x1024 · 50 steps · cfg 3.5",
           "mode": "single_e2e",
           "winner": "trtllm-visual",
           "cells": {
@@ -458,7 +458,7 @@
         {
           "case_id": "flux2_dev_t2i_1024",
           "case": "FLUX.2-dev T2I",
-          "details": "1024x1024 \u00b7 50 steps \u00b7 cfg 4",
+          "details": "1024x1024 · 50 steps · cfg 4",
           "mode": "single_e2e",
           "winner": "trtllm-visual",
           "cells": {
@@ -483,13 +483,13 @@
         {
           "case_id": "qwen_image_2512_t2i_1024",
           "case": "Qwen-Image-2512 T2I",
-          "details": "1024x1024 \u00b7 50 steps \u00b7 cfg 1",
+          "details": "1024x1024 · 50 steps · cfg 1",
           "mode": "single_e2e",
           "winner": null,
           "cells": {
             "sglang": {
               "status": "failed",
-              "reason": "compile-on: sglang server exited before health check (needs investigation)"
+              "reason": "compile-on warmup-compile timeout on the diffusers fallback path (not a crash); native path serves fine — see latest view"
             },
             "trtllm-visual": {
               "gpus": 1,
@@ -506,7 +506,7 @@
     {
       "id": "compile_off_h200_20260614",
       "title": "Compile-off (H200)",
-      "subtitle": "Same-box H200, 1-GPU, cache-free, torch.compile OFF. trtllm-visual runs in eager mode via the persisted layer_norm dtype patch (scripts/patches/). SGLang resident. Qwen SGLang row is anomalously slow vs its historical ~6.8s and is flagged for follow-up.",
+      "subtitle": "Same-box H200, 1-GPU, cache-free, eager. Note: SGLang ran the diffusers fallback path here — superseded by the latest view's native numbers.",
       "mode": "single_e2e",
       "source_report": "H200 2026-06-14 same-box compile-off",
       "reproduce": "scripts/run_trtllm_visual_h200.md",
@@ -521,7 +521,7 @@
         {
           "case_id": "flux1_dev_t2i_1024",
           "case": "FLUX.1-dev T2I",
-          "details": "1024x1024 \u00b7 50 steps \u00b7 cfg 3.5",
+          "details": "1024x1024 · 50 steps · cfg 3.5",
           "mode": "single_e2e",
           "winner": "trtllm-visual",
           "cells": {
@@ -544,7 +544,7 @@
         {
           "case_id": "flux2_dev_t2i_1024",
           "case": "FLUX.2-dev T2I",
-          "details": "1024x1024 \u00b7 50 steps \u00b7 cfg 4",
+          "details": "1024x1024 · 50 steps · cfg 4",
           "mode": "single_e2e",
           "winner": "trtllm-visual",
           "cells": {
@@ -567,13 +567,13 @@
         {
           "case_id": "qwen_image_2512_t2i_1024",
           "case": "Qwen-Image-2512 T2I",
-          "details": "1024x1024 \u00b7 50 steps \u00b7 cfg 1",
+          "details": "1024x1024 · 50 steps · cfg 1",
           "mode": "single_e2e",
           "winner": "trtllm-visual",
           "cells": {
             "sglang": {
               "gpus": 1,
-              "profile": "resident (anomalous: hist ~6.8s)",
+              "profile": "resident (diffusers fallback; superseded)",
               "status": "ok",
               "latency_s": 18.461,
               "ratio_to_sglang": 1.0
@@ -607,7 +607,7 @@
         {
           "case_id": "flux2_dev_t2i_1024",
           "case": "FLUX.2-dev T2I",
-          "details": "1024x1024 \u00b7 50 steps \u00b7 cfg 4",
+          "details": "1024x1024 · 50 steps · cfg 4",
           "mode": "throughput",
           "winner": "sglang",
           "cells": {
@@ -655,7 +655,7 @@
         {
           "case_id": "zimage_turbo_t2i_1024",
           "case": "Z-Image-Turbo T2I",
-          "details": "1024x1024 \u00b7 9 steps \u00b7 cfg 0",
+          "details": "1024x1024 · 9 steps · cfg 0",
           "mode": "throughput",
           "winner": "sglang",
           "cells": {
@@ -703,7 +703,7 @@
         {
           "case_id": "wan21_t2v_1_3b_480p",
           "case": "Wan2.1 T2V 1.3B 480p",
-          "details": "832x480x81f \u00b7 50 steps \u00b7 cfg 6",
+          "details": "832x480x81f · 50 steps · cfg 6",
           "mode": "throughput",
           "winner": "sglang",
           "cells": {
@@ -751,7 +751,7 @@
         {
           "case_id": "wan22_ti2v_5b_704p",
           "case": "Wan2.2 TI2V 5B 704p",
-          "details": "1280x704x81f \u00b7 50 steps \u00b7 cfg 5",
+          "details": "1280x704x81f · 50 steps · cfg 5",
           "mode": "throughput",
           "winner": "sglang",
           "cells": {
@@ -816,7 +816,7 @@
         {
           "case_id": "cosmos3_nano_t2i_720p",
           "case": "Cosmos3 Nano T2I",
-          "details": "1280x720 \u00b7 35 steps \u00b7 cfg 6",
+          "details": "1280x720 · 35 steps · cfg 6",
           "mode": "single_e2e",
           "winner": "sglang",
           "cells": {
@@ -844,7 +844,7 @@
         {
           "case_id": "cosmos3_nano_t2v_720p_189f",
           "case": "Cosmos3 Nano T2V",
-          "details": "1280x720x189f \u00b7 35 steps \u00b7 cfg 6",
+          "details": "1280x720x189f · 35 steps · cfg 6",
           "mode": "single_e2e",
           "winner": "sglang",
           "cells": {
@@ -872,7 +872,7 @@
         {
           "case_id": "cosmos3_nano_i2v_720p_189f",
           "case": "Cosmos3 Nano I2V",
-          "details": "1280x720x189f \u00b7 35 steps \u00b7 cfg 6",
+          "details": "1280x720x189f · 35 steps · cfg 6",
           "mode": "single_e2e",
           "winner": "sglang",
           "cells": {
@@ -914,7 +914,7 @@
         {
           "case_id": "flux1_dev_t2i_1024",
           "case": "FLUX.1-dev T2I",
-          "details": "1024x1024 \u00b7 50 steps \u00b7 cfg 3.5",
+          "details": "1024x1024 · 50 steps · cfg 3.5",
           "hardware": "H200",
           "mode": "single_e2e",
           "torch_compile": "on",
@@ -953,7 +953,7 @@
         {
           "case_id": "flux2_dev_t2i_1024",
           "case": "FLUX.2-dev T2I",
-          "details": "1024x1024 \u00b7 50 steps \u00b7 cfg 4",
+          "details": "1024x1024 · 50 steps · cfg 4",
           "hardware": "H200",
           "mode": "single_e2e",
           "torch_compile": "on",
@@ -992,7 +992,7 @@
         {
           "case_id": "flux1_dev_t2i_1024",
           "case": "FLUX.1-dev T2I",
-          "details": "1024x1024 \u00b7 50 steps \u00b7 cfg 3.5",
+          "details": "1024x1024 · 50 steps · cfg 3.5",
           "hardware": "B200",
           "mode": "single_e2e",
           "torch_compile": "on",
@@ -1033,7 +1033,7 @@
         {
           "case_id": "flux2_dev_t2i_1024",
           "case": "FLUX.2-dev T2I",
-          "details": "1024x1024 \u00b7 50 steps \u00b7 cfg 4",
+          "details": "1024x1024 · 50 steps · cfg 4",
           "hardware": "B200",
           "mode": "single_e2e",
           "torch_compile": "on",
