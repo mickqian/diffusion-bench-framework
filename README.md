@@ -1,205 +1,75 @@
 # Diffusion Bench Framework
 
-Standalone benchmark harness for comparing diffusion serving frameworks:
+Standalone harness for fair, reproducible comparison of diffusion serving frameworks on the same case:
 
-- SGLang-Diffusion
-- vLLM-Omni
-- LightX2V
-- TensorRT-LLM VisualGen (`trtllm-visual`, served via `trtllm-serve`)
+- **SGLang-Diffusion**
+- **vLLM-Omni**
+- **LightX2V**
+- **TensorRT-LLM VisualGen** (`trtllm-visual`, served via `trtllm-serve`)
 
-The repo launches one serving stack per case, sends a single end-to-end request, optionally runs a fixed high-pressure throughput workload, and writes a unified JSON result file.
+It launches one serving stack per case, sends a single end-to-end request, optionally runs a fixed high-pressure throughput workload, writes a unified JSON result, and publishes a GitHub Pages one-pager.
 
-## Layout
-
-- `src/diffusion_bench/run_comparison.py`: cross-framework server lifecycle and benchmark runner.
-- `src/diffusion_bench/bench_serving.py`: fixed/VBench/random async serving benchmark client.
-- `src/diffusion_bench/datasets.py`: benchmark dataset definitions.
-- `src/diffusion_bench/generate_dashboard.py`: Markdown dashboard generator.
-- `src/diffusion_bench/build_report_artifacts.py`: merges result JSONs and regenerates report/image artifacts.
-- `src/diffusion_bench/generate_report_image.py`: PNG/SVG comparison image generator.
-- `configs/comparison_configs.json`: editable copy of the default model, prompt, shape, seed, and framework settings.
-- `scripts/install_comparison_frameworks.sh`: isolated venv installer for vLLM-Omni, LightX2V, and TensorRT-LLM VisualGen (`trtllm-visual`).
-- `scripts/run_h200_single_e2e_20260510.sh`: reproducible H200 single-request run script for the 2026-05-10 report shape.
-- `scripts/run_h200_throughput_20260511.sh`: reproducible H200 throughput run script for faster image cases.
-- `scripts/run_h200_throughput_common_20260514.sh`: H200 throughput run script for cases with SGLang-Diffusion, vLLM-Omni, and LightX2V profiles.
-- `scripts/run_h200_ltx_lightx2v_20260513.sh`: targeted H200 LightX2V LTX-2/LTX-2.3 rerun with the latest tracked upstream commit.
-- `scripts/run_h100_ltx_lightx2v_20260513.sh`: targeted H100 LightX2V LTX-2/LTX-2.3 rerun when H200 is unavailable.
-- `scripts/run_h200_wan_vllm_omni_20260514.sh`: targeted H200 vLLM-Omni Wan rerun for cells that previously had no report data.
-- `scripts/run_h200_video_parallelism_refresh_20260611.sh`: targeted H200 Wan 2GPU profile refresh for SGLang-Diffusion, vLLM-Omni, and LightX2V.
-- `scripts/run_h200_cosmos3_20260601.sh`: H200 Cosmos3 Nano rerun for SGLang-Diffusion main vs vLLM-Omni main.
-- `scripts/generate_h200_report_artifacts.sh`: fixed local entrypoint for merged JSON, issue Markdown, dashboard Markdown, and image output.
-- `manifests/`: pinned run manifests tying report data to bench, SGLang, framework, and hardware versions.
-- `skills/`: repo-local Codex skills for maintaining long-term performance tracking.
-- `.github/ISSUE_TEMPLATE/performance-report.yml`: fallback template for bootstrapping a tracker issue in a new fork.
-
-## Install
+## Quickstart
 
 ```bash
-python3 -m venv .venv
-source .venv/bin/activate
-python3 -m pip install -U pip
-python3 -m pip install -e .
-```
+python3 -m venv .venv && source .venv/bin/activate
+python3 -m pip install -U pip && python3 -m pip install -e .
 
-SGLang-Diffusion must be installed in the main environment if you want to run the `sglang` framework. Install it with the diffusion extra, for example:
-
-```bash
+# SGLang-Diffusion must be in the same env to bench the `sglang` framework:
 python3 -m pip install -e /path/to/sglang/python[diffusion]
-```
 
-vLLM-Omni, LightX2V, and TensorRT-LLM VisualGen are installed into isolated temporary virtualenvs by the runner because their dependencies conflict with SGLang. `trtllm-visual` installs `tensorrt-llm==1.3.0rc18` from the NVIDIA PyPI index by default; override `TRTLLM_INSTALL_SPEC` and `TRTLLM_PIP_EXTRA_INDEX_URL` to pin a different release. **VisualGen (diffusion serving + the `/v1/images/generations` endpoint, with `get_is_diffusion_model` auto-detection in `trtllm-serve`) is only in the 1.3.0 release candidates — the 1.2.x stable line has no VisualGen path and serves FLUX through the LLM engine, which fails.** Multi-GPU parallelism for VisualGen (CFG / Ulysses) is configured through a `--extra_visual_gen_options` YAML, not `--tp_size`.
-
-`trtllm-visual` is a generic, config-driven HTTP framework: the runner has no bespoke command builder or request sender for it. Its launch command and request shape come entirely from the per-case `http_server` / `http_request` config blocks (defaulting to the OpenAI-compatible image/video endpoints `trtllm-serve` exposes), so additional OpenAI-compatible backends can be onboarded without editing `run_comparison.py`.
-
-`diffusion-bench-compare` forces `TORCH_COMPILE_DISABLE=1` for all benchmarked framework subprocesses so cold compile time does not leak into cross-framework runs. vLLM-Omni also gets `--enforce-eager --compilation-config '{"mode":0}'` because its diffusion runner uses `enforce_eager` to skip regional torch.compile. LightX2V config files force `compile=false` and `compile_shapes=[]`.
-
-Set `SGLANG_DIFFUSION_SKIP_FRAMEWORK_INSTALL=1` only for reruns where the isolated framework venv has already been installed and should be reused.
-The default installer pins LightX2V to the latest tracked upstream commit with LTX-2/LTX-2.3 runner support; override `LIGHTX2V_INSTALL_SPEC` only when intentionally changing that framework ref.
-The LightX2V isolated venv also pins `transformers<5` by default because the tracked LTX-2 Gemma path expects the Transformers 4.x SigLIP module layout, then restores the `safetensors>=0.8.0rc0` constraint required by the tracked Diffusers package; override `LIGHTX2V_TRANSFORMERS_INSTALL_SPEC` only when validating a newer upstream stack.
-Set `DIFFUSION_BENCH_HF_CACHE_DIR` or `HF_HOME` when the default HuggingFace cache filesystem is small or full. The fixed run scripts default to `/root/diffusion-bench-hf-cache/hub` so model downloads are kept separate from isolated framework venvs.
-The H200 LightX2V profiles use FA3/FlashInfer paths. By default the installer rebuilds flash-attn from source for the isolated torch version, then uses a pinned torch 2.8/cu128 FA3 artifact via `LIGHTX2V_FA3_HF_REPO`, `LIGHTX2V_FA3_HF_REVISION`, and `LIGHTX2V_FA3_HF_SUBDIR`; set `LIGHTX2V_FLASH_ATTN3_INSTALL_SPEC` only when intentionally switching back to a source build. It also installs `sageattention` for upstream LTX configs that select `sage_attn2`, and installs `hf-xet` without upgrading `huggingface_hub` past the Transformers 4.x constraint.
-For single-file LTX checkpoints such as LTX-2.3, the harness projects transformer metadata from the safetensors header into the generated LightX2V config so server runs match upstream inference config semantics.
-H200 LTX-2.3 LightX2V reporting uses the same 2GPU budget as SGLang; the previous single-GPU success result is excluded from formal same-GPU comparisons.
-H100 LTX LightX2V profiles are hardware-specific: LTX-2 uses upstream block offload; LTX-2.3 keeps the best attempted full-offload profile, but currently still fails after warmup on 80GB GPUs and should be reported as no stable H100 server data.
-`scripts/run_h200_throughput_20260511.sh` sets `DIFFUSION_BENCH_SGLANG_EXTRA_SERVE_ARGS="--batching-max-size ${THROUGHPUT_MAX_CONCURRENCY} --batching-delay-ms 0"` by default so SGLang throughput runs use the same request concurrency as the benchmark client.
-Set `THROUGHPUT_FRAMEWORKS="lightx2v"` and `THROUGHPUT_CASES="zimage_turbo_t2i_1024"` to reproduce a targeted throughput rerun without rerunning the whole matrix.
-Use `scripts/run_h200_throughput_common_20260514.sh` for the preferred three-framework throughput suite. It defaults to all-supported image cases `zimage_turbo_t2i_1024` and `flux2_dev_t2i_1024` at 32 requests / concurrency 4, plus all-supported video cases `wan21_t2v_1_3b_480p` and `wan22_ti2v_5b_704p` at 8 requests / concurrency 2. Override `THROUGHPUT_IMAGE_CASES`, `THROUGHPUT_VIDEO_CASES`, `IMAGE_NUM_REQUESTS`, `IMAGE_MAX_CONCURRENCY`, `VIDEO_NUM_REQUESTS`, or `VIDEO_MAX_CONCURRENCY` for targeted reruns.
-Set `SINGLE_E2E_FRAMEWORKS` and `SINGLE_E2E_CASES` the same way for targeted single-request reruns. Set `SINGLE_E2E_SGLANG_PROFILE` when the SGLang case should use a tracked command profile instead of ad hoc extra serve args.
-Use `scripts/run_h200_wan_vllm_omni_20260514.sh` to reproduce the vLLM-Omni Wan coverage rerun. It defaults to a fresh isolated vLLM-Omni install, `CUDA_VISIBLE_DEVICES=0,1,2,3`, H200 profile selection, and the six Wan cases that previously had no report data.
-Use `scripts/run_h200_video_parallelism_refresh_20260611.sh` to reproduce the H200 Wan video profile sweep. It defaults to `SGLANG_VIDEO_REFRESH_PROFILE=h200-2gpu-cfg-bf16-vae-resident`, vLLM-Omni TP/CFG/Ulysses profiles, and LightX2V FA3; disable frameworks with `RUN_SGLANG=0`, `RUN_VLLM_OMNI=0`, or `RUN_LIGHTX2V=0` for targeted reruns.
-Use `scripts/run_h200_cosmos3_20260601.sh` to reproduce the Cosmos3 Nano comparison. It pins vLLM to `vllm==0.22.0` and vLLM-Omni to `vllm-project/vllm-omni@40b2959` through an isolated venv stamp, expects SGLang-Diffusion `sgl-project/sglang@3d540563`, disables torch compile and guardrails, runs T2I/T2V/I2V single-request cases, and runs throughput only for the T2I case by default.
-Use `scripts/probe_h200_cosmos3_sglang_profiles_20260601.sh` to reproduce SGLang-Diffusion Cosmos3 formal-vs-speed profile probes before changing the formal comparison profile.
-Use `scripts/probe_h200_cosmos3_vllm_omni_video_profiles_20260601.sh` to reproduce vLLM-Omni Cosmos3 video launch-profile probes before changing the formal comparison profile. It writes one JSON per case/profile and defaults to the tracked 1GPU, 2GPU, and 4GPU no-cache/compile-off video profiles.
-Use `scripts/summarize_result_jsons.py runs/*.json` for a compact case/framework/profile latency and failure table from probe or formal result JSONs.
-
-## Dry Run
-
-```bash
+# Dry-run (prints planned commands, runs nothing):
 diffusion-bench-compare --dry-run --modes single_e2e throughput
-```
 
-## Run Selected Cases
-
-```bash
+# Run selected cases:
 diffusion-bench-compare \
   --config configs/comparison_configs.json \
-  --sglang-profile default \
-  --case-ids qwen_image_2512_t2i_1024 qwen_image_edit_2511 \
-  --frameworks sglang vllm-omni \
+  --case-ids flux2_dev_t2i_1024 qwen_image_2512_t2i_1024 \
+  --frameworks sglang trtllm-visual \
   --modes single_e2e throughput \
-  --throughput-num-requests 32 \
-  --throughput-max-concurrency 4 \
-  --run-id "$(date -u +%Y%m%d-%H%M%S)" \
-  --port 30200 \
-  --output comparison-results.json
+  --run-id "$(date -u +%Y%m%d-%H%M%S)" --output comparison-results.json
 ```
 
-## Default Coverage
+vLLM-Omni, LightX2V, and TensorRT-LLM VisualGen are installed into isolated virtualenvs by the runner (their deps conflict with SGLang). `trtllm-visual` is a generic, config-driven HTTP framework — its launch command and request shape come entirely from per-case `http_server` / `http_request` config blocks, so new OpenAI-compatible backends are added without editing `run_comparison.py`.
 
-The bundled config is the formal tracking plan and keeps one representative case per official model ID. It currently covers FLUX.1, FLUX.2, Qwen-Image text-to-image and edit, Z-Image image generation, Wan2.1/Wan2.2 video generation, LTX-2/LTX-2.3 video generation, and targeted Cosmos3 Nano image/video generation.
+## How it works
 
-Extra variants such as true-CFG, alternate resolutions, non-representative LTX-2.3 pipeline/task variants, or single-GPU vs multi-GPU image runs should be added only for targeted investigations or explicit reruns, not as default tracker coverage. The representative LTX-2.3 default case is the two-stage pipeline.
-
-Framework entries are included only when the local harness has a compatible serving path. Current coverage includes vLLM-Omni for supported image, Wan, and LTX cases, LightX2V for supported Wan, FLUX.2, Z-Image, and LTX cases, and TensorRT-LLM VisualGen (`trtllm-visual`) for the FLUX.1/FLUX.2/Qwen-Image/Cosmos3 image cases. Ideogram-4 (`ideogram4_t2i_1024_2gpu_tp`, 2-GPU tensor-parallel) is SGLang-only as of 2026-06: vLLM-Omni, LightX2V, and TensorRT-LLM VisualGen have no Ideogram-4 serving path in their latest versions, so the case marks them unsupported via `report_framework_statuses`.
-If a framework needs a repackaged model ID for the same case, the formal report shows the actual per-framework model in the comparison table.
-
-## Command Profiles
-
-Each case can track version-specific best commands for every backend:
-
-```json
-"sglang": {
-  "serve_args": "--model-type diffusion --warmup",
-  "command_profiles": {
-    "default": {
-      "sglang_ref": "current-main",
-      "serve_args": "--model-type diffusion --warmup",
-      "notes": "Best known command for this SGLang line."
-    },
-    "v0.5.0-h100": {
-      "sglang_ref": "v0.5.0",
-      "hardware": ["h100"],
-      "serve_args": "--warmup",
-      "notes": "Example: older release where compile was not the best option."
-    }
-  }
-}
+```
+diffusion-bench-compare → per case: launch stack → single e2e (+ optional throughput) → unified JSON → dashboard
 ```
 
-Select a SGLang profile with `--sglang-profile <name>` or `SGLANG_BENCH_SGLANG_PROFILE=<name>`. Non-SGLang frameworks can use `DIFFUSION_BENCH_<FRAMEWORK>_PROFILE=<name>` or `DIFFUSION_BENCH_FRAMEWORK_PROFILE=<name>`. If no profile is explicit, the runner auto-selects the first profile whose `hardware` matches `--hardware-profile`, `SGLANG_BENCH_HARDWARE_PROFILE`, `GPU_CONFIG`, `RUNNER_LABELS`, or `nvidia-smi`, then falls back to `default`. Use separate profiles when H100/H200 need different GPU counts or launch args; do not reuse a profile that is known to OOM on one hardware class. Profiles should record any framework-specific install specs and launcher requirements needed to reproduce that command. The runner records the selected profile, profile source, hardware candidates, framework ref, profile install specs, effective `serve_args`, actual server command, and best-effort SGLang runtime metadata in `comparison-results.json`.
+- **Cases** — the bundled config is the formal tracking plan: one representative case per official model ID (FLUX.1/.2, Qwen-Image T2I+edit, Z-Image, Wan2.1/2.2, LTX-2/2.3, Cosmos3 Nano). Extra variants are for targeted investigations, not default coverage.
+- **Command profiles** — each case tracks version- and hardware-specific best commands per framework (`--sglang-profile`, `DIFFUSION_BENCH_<FW>_PROFILE`; auto-selected by hardware else `default`). The runner records the resolved profile, framework ref, effective args, and actual server command in the result JSON.
+- **Fairness** — cache-free, no Cache-DiT, same shape/seed/steps/guidance/dtype, same GPU count; compile disabled unless explicitly comparing compile-inclusive numbers. SGLang runs with `--backend sglang` so it never silently benchmarks the diffusers fallback.
 
-Framework entries may set `model_path` when the server needs a local mirror or snapshot path while the report should keep the official `model` ID in the case summary.
+## Where things live
 
-## Repo Skills
-
-This repo includes Codex skills that encode the operating discipline for long-term benchmark maintenance:
-
-- `skills/diffusion-bench-maintainer`: maintain runner/config/dashboard semantics without breaking comparability.
-- `skills/diffusion-case-onboarding`: add new model/framework cases and command profiles.
-- `skills/diffusion-framework-benchmarking`: plan, run, and interpret fair cross-framework diffusion benchmark data.
-- `skills/diffusion-regression-investigator`: investigate when SGLang-Diffusion appears slower or a comparison looks unfair.
-- `skills/diffusion-performance-reporting`: append data-only comments to the fixed performance tracker issue.
-
-Install or symlink them into your Codex skills directory when you want them auto-discovered.
-
-Formal benchmark reports should append one data-only comment to the fixed tracker issue instead of opening new issues. The canonical tracker for this repo is `mickqian/diffusion-bench-framework#1`.
-
-Run manifests in `manifests/` are the source of truth for reconstructing historical reports. Each manifest records the benchmark commit, SGLang commit, framework install specs or observed commits, hardware profile, run IDs, and known framework failures.
-
-## Generate Dashboard
-
-```bash
-diffusion-bench-dashboard \
-  --results comparison-results.json \
-  --output dashboard.md \
-  --charts-dir comparison-charts \
-  --report-repo mickqian/diffusion-bench-framework \
-  --report-issue 1
-```
-
-The issue comment generated by `--report-issue` contains only structured performance data: run metadata, framework versions, GPU model, reproduce entrypoints, one grouped comparison block per case, selected profile, GPU count, latency, throughput p50/p95/p99, QPS, status, ratio-to-SGLang columns, and core sampling parameters. Keep debug analysis in separate investigation notes or dedicated follow-up issues, not in the tracker issue.
-
-## Generate Report Artifacts
-
-```bash
-RESULTS="runs/single.json runs/throughput.json" \
-OUTPUT_JSON=tmp/report/h200-framework-comparison-merged.json \
-scripts/generate_h200_report_artifacts.sh
-```
-
-This writes a merged JSON, dashboard Markdown, data-only issue Markdown, and PNG/SVG comparison image from the same input JSONs. The default inputs are the local H200 single-request, throughput, LightX2V LTX rerun, and same-GPU LTX-2.3 override artifacts under `tmp/report`.
+- `src/diffusion_bench/` — `run_comparison.py` (server lifecycle + runner), `bench_serving.py` (async client), `generate_dashboard.py` / `build_report_artifacts.py` / `generate_report_image.py`.
+- `configs/comparison_configs.json` — editable case/framework config.
+- `scripts/` — reproducible per-run scripts (`run_h200_*.sh`), `install_comparison_frameworks.sh`, `run_trtllm_visual_h200.md`, artifact generators. One script per tracked run; see the script header for its knobs.
+- `manifests/` — pinned run manifests (bench/SGLang/framework/hardware versions); the source of truth for reconstructing historical reports.
+- `skills/` — operating discipline (see below).
+- `docs/` — the GitHub Pages one-pager.
 
 ## GitHub Pages dashboard
 
-The published one-pager (`docs/index.html`) reads two committed JSON files and renders any framework set they declare — no HTML edits are needed to add a framework column:
+The published one-pager (`docs/index.html`) reads two committed JSON files and renders **any** framework set they declare — no HTML edits to add a framework column:
 
-- `docs/data/latest-cross-framework.json`: the current spot-check. The "latest" view is framework-generic. New uploads should declare `framework_order` (an ordered list of framework keys) and give each row a `cells` map keyed by framework, e.g.:
+- `docs/data/latest-cross-framework.json` — current spot-check. Declare `framework_order` and give each row a `cells` map keyed by framework.
+- `docs/data/historical-cross-framework.json` — historical matrix; columns derive from the `cells` present per row.
+- Register a new framework's bar color + label once in `FRAMEWORK_META` / `frameworkLabels` in `docs/index.html`; unregistered keys still render neutrally.
+- After editing the JSON, run `python3 scripts/refresh_docs_data.py` to refresh the inline preview snapshots (the deployed page fetches the JSON directly).
 
-  ```json
-  {
-    "framework_order": ["sglang", "vllm-omni", "trtllm-visual"],
-    "frameworks": { "sglang": { "label": "SGLang-Diffusion", "commit": "…" }, "trtllm-visual": { "label": "TensorRT-LLM VisualGen", "tensorrt_llm": "1.x" } },
-    "rows": [{
-      "case": "FLUX.1-dev T2I", "gpus": "2 GPU TP", "winner": "SGLang-Diffusion", "winner_speedup": "1.4x",
-      "cells": {
-        "sglang": { "client_latency_s": 4.15, "server_latency_s": 4.0, "profile": "…" },
-        "vllm-omni": { "client_latency_s": 5.91, "profile": "…" },
-        "trtllm-visual": { "status": "no_profile", "reason": "…" }
-      }
-    }]
-  }
-  ```
+## Skills
 
-  The legacy two-framework schema (top-level `sglang_diffusion` / `vllm_omni` row keys) still renders for backward compatibility.
-- `docs/data/historical-cross-framework.json`: the historical matrix. Standard sections derive their framework columns from the `cells` present per row, so a framework an upload includes (e.g. `trtllm-visual`) appears automatically.
-- Register a new framework's bar color + label once in `FRAMEWORK_META` (latest view) and `frameworkLabels` (historical view) in `docs/index.html`; any unregistered key still renders with a neutral bar and its key as label.
-- After editing the JSON files, run `python3 scripts/refresh_docs_data.py` to refresh the inline `file://` preview snapshots embedded in `docs/index.html` (the deployed page always fetches the JSON directly).
+Operating discipline for long-term maintenance lives in `skills/` (install/symlink into your Codex/Claude skills dir to auto-discover):
 
-## Notes
+| skill | use for |
+|---|---|
+| `diffusion-framework-benchmarking` | plan/run/interpret fair benchmarks; **per-framework install pins + env-var reference** |
+| `diffusion-case-onboarding` | add new model/framework cases and command profiles |
+| `diffusion-bench-maintainer` | change runner/config/dashboard without breaking comparability |
+| `diffusion-regression-investigator` | investigate when SGLang looks slow or a comparison looks unfair |
+| `diffusion-performance-reporting` | append data-only comments to the fixed tracker issue (`mickqian/diffusion-bench-framework#1`) |
 
-- No response cache or Cache-DiT is enabled by default.
-- The CLI bundles a default config. Pass `--config configs/comparison_configs.json` when editing the repo copy.
-- The default config uses one representative case per official model ID, model defaults for omitted sampling params, and overrides only resolution, seed, and framework-specific launch args.
-- Command profiles are per case because the best serving command can change by model, framework version, and hardware.
-- Hardware-specific profiles are first-class. Formal H100/H200 runs should either pass `--hardware-profile` or rely on detected GPU metadata, and the selected profile must be visible in the result JSON.
-- Video models may require large GPUs and framework-specific runtime packages.
+Formal reports append one data-only comment to the tracker issue instead of opening new issues. Detailed operational knobs (LightX2V FA3 pins, `trtllm` install spec, throughput/single-e2e env vars, per-script overrides) live in the **benchmarking skill**, not here.

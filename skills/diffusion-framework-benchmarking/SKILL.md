@@ -123,3 +123,19 @@ When reporting back, include:
 - which cases were excluded and why
 - whether data is benchmarked, failed, unsupported, or supported but not run
 - exact paths to generated report/image artifacts
+
+## Install & Environment Reference
+
+Operational knobs relocated from the README. The runner installs conflicting frameworks into isolated virtualenvs; override the specs below only when intentionally changing a tracked ref.
+
+**Compile policy (cache-free fairness).** `diffusion-bench-compare` sets `TORCH_COMPILE_DISABLE=1` for all benchmarked subprocesses so cold compile time doesn't leak into runs. vLLM-Omni also gets `--enforce-eager --compilation-config '{"mode":0}'`; LightX2V configs force `compile=false` / `compile_shapes=[]`. SGLang is launched with `--backend sglang` so it never silently benchmarks the vanilla-diffusers fallback (under `--backend auto` it falls back when `model_index.json` can't resolve — gated FLUX 403s, or `HF_HUB_OFFLINE`).
+
+**trtllm-visual.** Installs `tensorrt-llm==1.3.0rc18` from the NVIDIA PyPI index; override `TRTLLM_INSTALL_SPEC` / `TRTLLM_PIP_EXTRA_INDEX_URL`. VisualGen (the `/v1/images/generations` path + `get_is_diffusion_model` auto-detect in `trtllm-serve`) exists **only in the 1.3.0 release candidates** — 1.2.x stable serves FLUX through the LLM engine and fails. Multi-GPU (CFG/Ulysses) is set via a `--extra_visual_gen_options` YAML, not `--tp_size`.
+
+**LightX2V.** Pinned to the latest tracked upstream commit with LTX-2/2.3 runner support (`LIGHTX2V_INSTALL_SPEC`). Pins `transformers<5` (`LIGHTX2V_TRANSFORMERS_INSTALL_SPEC`) for the LTX-2 Gemma/SigLIP layout, then restores `safetensors>=0.8.0rc0`. H200 profiles use FA3/FlashInfer: the installer rebuilds flash-attn from source then uses a pinned torch 2.8/cu128 FA3 artifact (`LIGHTX2V_FA3_HF_REPO` / `_HF_REVISION` / `_HF_SUBDIR`; `LIGHTX2V_FLASH_ATTN3_INSTALL_SPEC` to switch to a source build); also installs `sageattention` (for `sage_attn2` configs) and `hf-xet`. Single-file LTX checkpoints (LTX-2.3) get transformer metadata projected from the safetensors header into the generated config. Report LTX-2.3 LightX2V on the same 2-GPU budget as SGLang; H100 LTX profiles are hardware-specific.
+
+**Reuse / cache.** `SGLANG_DIFFUSION_SKIP_FRAMEWORK_INSTALL=1` reuses an already-installed isolated venv. `DIFFUSION_BENCH_HF_CACHE_DIR` or `HF_HOME` redirects the HuggingFace cache when the default filesystem is small; fixed run scripts default to `/root/diffusion-bench-hf-cache/hub`.
+
+**Run-script env vars (targeted reruns).** `DIFFUSION_BENCH_SGLANG_EXTRA_SERVE_ARGS`; throughput: `THROUGHPUT_FRAMEWORKS`, `THROUGHPUT_CASES` / `THROUGHPUT_IMAGE_CASES` / `THROUGHPUT_VIDEO_CASES`, `IMAGE_NUM_REQUESTS` / `IMAGE_MAX_CONCURRENCY` / `VIDEO_NUM_REQUESTS` / `VIDEO_MAX_CONCURRENCY`; single-request: `SINGLE_E2E_FRAMEWORKS`, `SINGLE_E2E_CASES`, `SINGLE_E2E_SGLANG_PROFILE`; Wan video sweep: `SGLANG_VIDEO_REFRESH_PROFILE`, `RUN_SGLANG` / `RUN_VLLM_OMNI` / `RUN_LIGHTX2V`.
+
+**Reproduction-script index.** `run_h200_single_e2e_*.sh` / `run_h200_throughput_*.sh` (+ `_common_` for the 3-framework suite), `run_h200_ltx_lightx2v_*` / `run_h100_ltx_lightx2v_*`, `run_h200_wan_vllm_omni_*`, `run_h200_video_parallelism_refresh_*`, `run_h200_cosmos3_*` (+ `probe_h200_cosmos3_*` profile probes), `run_trtllm_visual_h200.md` (runbook), `generate_h200_report_artifacts.sh`. Use `scripts/summarize_result_jsons.py runs/*.json` for a compact latency/failure table.
