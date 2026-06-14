@@ -359,7 +359,7 @@
               "gpus": 2,
               "profile": "h200-2gpu-tp",
               "status": "failed",
-              "reason": "LightX2V task FAILED: {'task_id': '2D7D-WU61-90I0-4G4K-WVMK', 'status': 'failed', 'start_time': '2026-05-13T13:24:52.753528', 'end_time': '2026-05-13T13:24:53.523421', 'error': \"'LTX2AttentionTP' object has no attribute "
+              "reason": "LightX2V LTX-2.3 TP run failed: 'LTX2AttentionTP' object has no attribute (upstream)."
             },
             "trtllm-visual": {
               "status": "unsupported",
