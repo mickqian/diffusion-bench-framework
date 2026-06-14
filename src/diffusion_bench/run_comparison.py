@@ -171,6 +171,14 @@ def _build_sglang_cmd(case: dict, fw_cfg: dict, port: int) -> list[str]:
         str(port),
         "--host",
         DEFAULT_HOST,
+        # Force the native SGLang pipeline so we never silently benchmark the
+        # vanilla-diffusers fallback (which happens under --backend auto when
+        # model_index.json can't be resolved -- e.g. gated FLUX 403s, or
+        # HF_HUB_OFFLINE). With sglang backend the server fails loudly instead,
+        # keeping the comparison apples-to-apples. A profile's serve_args may
+        # still append --backend to override this (argparse takes the last).
+        "--backend",
+        "sglang",
     ]
     if num_gpus > 1:
         cmd += ["--num-gpus", str(num_gpus)]
