@@ -1471,7 +1471,7 @@
 
       body.nightly-only #top,
       body.nightly-only #performance,
-      body.nightly-only #lessons,
+      body.nightly-only #platform,
       body.nightly-only #benchmarks,
       body.nightly-only .footer {
         display: none;
@@ -1734,7 +1734,6 @@
         <nav class="nav-links">
           <a href="#performance">Performance gains</a>
           <a href="#platform">Platform</a>
-          <a href="#lessons">What we learn</a>
           <a href="#benchmarks">Benchmarks</a>
           <a href="https://docs.sglang.io/docs/sglang-diffusion/" target="_blank" rel="noreferrer">Docs ↗</a>
           <button class="nightly-pill" id="nightlyToggle" type="button" aria-expanded="false" aria-controls="nightly">Nightly Performance Track</button>
@@ -1841,37 +1840,6 @@
             <b>Broad model coverage</b>
             <p>20+ image and video families — Wan, FLUX, HunyuanVideo, LTX, Qwen-Image, Cosmos and more — served on one stack.</p>
           </article>
-        </div>
-      </section>
-
-      <section class="shell section" id="lessons">
-        <div class="lesson-band">
-          <article class="lesson-lead">
-            <h2 class="section-title">What carries across image and video serving</h2>
-            <p>
-              The useful lesson is not a benchmark trick. It is how to turn diffusion pipelines into a
-              serving system with explicit request lifecycle, stage boundaries, memory policy, parallelism,
-              and quality-aware acceleration.
-            </p>
-          </article>
-          <div class="lesson-grid">
-            <article class="lesson">
-              <b>Native serving creates the optimization surface</b>
-              <p>Batching, scheduling, cancellation, observability, and output handling need to live in the server, not in one-off inference scripts.</p>
-            </article>
-            <article class="lesson">
-              <b>Stage boundaries are scaling boundaries</b>
-              <p>Encoders, denoisers, and decoders bottleneck differently. Treating them as roles makes disaggregation and placement meaningful.</p>
-            </article>
-            <article class="lesson">
-              <b>Memory policy is performance policy</b>
-              <p>Keeping hot denoising paths resident while offloading colder encoder work can improve both model fit and latency stability.</p>
-            </article>
-            <article class="lesson">
-              <b>Parallelism has model-specific break-even points</b>
-              <p>CFG, TP, SP, and Ulysses should be selected by model shape and hardware behavior, not treated as universally faster toggles.</p>
-            </article>
-          </div>
         </div>
       </section>
 
@@ -3215,15 +3183,19 @@
         const note = document.getElementById("nightlyNote");
         nightlyPlot = {};
 
+        // drop near-empty cases — a 1-2 point chart is not a trend (e.g. transient LTX-2.3 runs)
+        const order = [...cases.keys()]
+          .filter((k) => (cases.get(k).pts || []).length >= 3)
+          .sort();
+
         metaEl.hidden = false;
         metaEl.innerHTML =
           `<span>Source <b>sgl-project/ci-data</b></span>` +
           `<span>Updated <b>${nightlyDate(meta.latestMs)}, ${new Date(meta.latestMs).getUTCFullYear()}</b></span>` +
           `<span>Commit <b class="mono">${escapeHtml((meta.commit || "").slice(0, 7))}</b></span>` +
           `<span><b>${meta.runs}</b> nightly runs</span>` +
-          `<span><b>${meta.caseCount}</b> cases</span>`;
+          `<span><b>${order.length}</b> cases</span>`;
 
-        const order = [...cases.keys()].sort();
         grid.innerHTML = order.map((cid) => nightlyCard(cid, cases.get(cid))).join("");
         status.hidden = true;
         note.hidden = false;
