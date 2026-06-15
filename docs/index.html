@@ -1487,12 +1487,43 @@
       .history-table td {
         max-width: 240px;
         vertical-align: top;
+        /* height:1px is stretched to the row height by table layout, which gives
+           the inner .metric a definite parent height so its height:100% (and the
+           margin-top:auto bottom-anchor) actually resolves. */
+        height: 1px;
       }
 
       .history-table td .cell-meta {
         display: block;
         white-space: normal;
         overflow-wrap: anywhere;
+      }
+
+      /* Metric cells are flex columns that fill the row height; the ratio + bar
+         are anchored to the bottom (margin-top:auto) so they line up across
+         every column regardless of how many meta lines a cell has (server /
+         compile / wrapped profile). The latency stays top-aligned. */
+      .history-table td .metric {
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+        height: 100%;
+      }
+
+      .history-table td .metric .latency,
+      .history-table td .metric .cell-meta,
+      .history-table td .metric .ratio {
+        margin-top: 0;
+      }
+
+      .history-table td .metric .metric-foot {
+        display: block;
+        margin-top: auto;
+        padding-top: 8px;
+      }
+
+      .history-table td .metric .metric-foot .bar-track {
+        margin-top: 6px;
       }
 
       .history-table table {
@@ -2913,11 +2944,13 @@
           : "";
 
         return `
-          <span class="latency">${main}</span>
-          ${latencyLine ? `<span class="cell-meta">${escapeHtml(latencyLine)}</span>` : ""}
-          <span class="cell-meta">${escapeHtml(gpuLine)}</span>
-          ${compileLine ? `<span class="cell-meta">${escapeHtml(compileLine)}</span>` : ""}
-          ${ratio}
+          <div class="metric">
+            <span class="latency">${main}</span>
+            ${latencyLine ? `<span class="cell-meta">${escapeHtml(latencyLine)}</span>` : ""}
+            <span class="cell-meta">${escapeHtml(gpuLine)}</span>
+            ${compileLine ? `<span class="cell-meta">${escapeHtml(compileLine)}</span>` : ""}
+            ${ratio ? `<span class="metric-foot">${ratio}</span>` : ""}
+          </div>
         `;
       }
 
