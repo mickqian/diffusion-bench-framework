@@ -1004,7 +1004,8 @@
         border-radius: 999px;
         transform: scaleX(0);
         transform-origin: left center;
-        transition: transform 0.9s cubic-bezier(0.16, 1, 0.3, 1);
+        transition: transform 0.9s cubic-bezier(0.16, 1, 0.3, 1),
+          filter 200ms ease;
       }
 
       /* Bars grow left-to-right when their row scrolls into view (JS adds .in-view). */
@@ -1223,6 +1224,33 @@
         font-weight: 600;
         letter-spacing: -0.01em;
         font-variant-numeric: tabular-nums;
+        color: var(--ink);
+        transition: color 180ms ease;
+      }
+
+      /* Modern hover highlight on chart bars — the chart view had none (only the
+         table rows did). Hovering a row floats a glassy tint, brightens the bar
+         fill, and pulls the value into the SGLang accent. No layout shift: the
+         6px box-shadow halo reuses the row tint so adjacent rows never overlap. */
+      .bar-row:not(.status) {
+        border-radius: 12px;
+        transition: background 180ms ease, box-shadow 180ms ease;
+      }
+
+      .bar-row:not(.status):hover {
+        background: var(--hover-bg);
+        box-shadow: 0 0 0 6px var(--hover-bg);
+      }
+
+      .bar-row:not(.status):hover .bar-track i {
+        filter: brightness(1.07) saturate(1.05);
+      }
+
+      .bar-row:not(.status):hover .bar-value {
+        color: var(--accent-strong);
+      }
+
+      .bar-row:not(.status):hover .bar-label:not(.sgl) {
         color: var(--ink);
       }
 
