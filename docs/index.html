@@ -1134,6 +1134,14 @@
         gap: 12px;
       }
 
+      /* [hidden] must beat the author display rule above — otherwise toggling
+         Chart/Table leaves the chart visible and the table renders stacked
+         below it (looks like an append) instead of switching. */
+      .bench-chart[hidden],
+      .table-wrap[hidden] {
+        display: none;
+      }
+
       .chart-hint {
         margin: 0 0 10px;
         font-size: 12.5px;
@@ -2289,7 +2297,7 @@
       let activeMode = "lossless";
       let activeIndex = 0;
       let activeHistoryIndex = 0;
-      let historyView = "table";
+      let historyView = "chart";
 
       const escapeHtml = (value) =>
         String(value ?? "")
