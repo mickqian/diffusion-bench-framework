@@ -46,6 +46,15 @@
         font-style: normal;
         font-display: swap;
       }
+      /* Fraunces (Dalton Maag · OFL) — variable wght, display optical size. Used
+         only for the benchmark ledger's model names / framework names. */
+      @font-face {
+        font-family: "Fraunces";
+        src: url("fonts/fraunces-var.woff2") format("woff2");
+        font-weight: 100 900;
+        font-style: normal;
+        font-display: swap;
+      }
 
       :root {
         color-scheme: light;
@@ -76,6 +85,7 @@
         --serif: "Ubuntu", -apple-system, BlinkMacSystemFont, system-ui, "Segoe UI", sans-serif;
         --sans: "Ubuntu", -apple-system, BlinkMacSystemFont, system-ui, "Helvetica Neue", Arial, sans-serif;
         --mono: ui-monospace, "SF Mono", SFMono-Regular, Menlo, Consolas, monospace;
+        --display: "Fraunces", Georgia, "Times New Roman", serif;
         --r-lg: 22px;
         --r-md: 16px;
         --r-sm: 11px;
@@ -1530,6 +1540,64 @@
         min-width: 1000px;
       }
 
+      /* ---- restrained cross-framework ledger (replaces the chart/table view) ---- */
+      .bnx { margin-top: 30px; }
+      .bnx-row { padding: 26px 0; border-bottom: 1px solid var(--hair); }
+      .bnx-row:first-child { border-top: 1px solid var(--hair-strong); }
+      .bnx-rowhead {
+        display: flex; align-items: baseline; justify-content: space-between;
+        gap: 16px; margin-bottom: 16px;
+      }
+      .bnx-model {
+        font-family: var(--display); font-weight: 480; font-optical-sizing: auto;
+        font-size: clamp(20px, 2.3vw, 25px); letter-spacing: -0.01em; color: var(--ink);
+      }
+      .bnx-spec { font-size: 12.5px; color: var(--muted); white-space: nowrap; }
+      .bnx-bars { display: grid; gap: 11px; }
+      .bnx-brow { display: grid; grid-template-columns: 112px 1fr 80px; align-items: center; gap: 18px; }
+      .bnx-fw { font-size: 13px; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+      .bnx-brow.win .bnx-fw { color: var(--ink); }
+      .bnx-track { position: relative; height: 7px; border-radius: 99px; background: var(--ink-08); overflow: hidden; }
+      .bnx-track i {
+        position: absolute; inset: 0 auto 0 0; border-radius: 99px;
+        transform: scaleX(0); transform-origin: left center;
+        transition: transform 1.05s cubic-bezier(0.22, 1, 0.36, 1);
+      }
+      .bnx-row.seen .bnx-track i { transform: scaleX(1); }
+      .bnx-val { text-align: right; font-size: 15px; color: var(--body); white-space: nowrap; font-variant-numeric: tabular-nums; }
+      .bnx-val .u { color: var(--faint); font-size: 11.5px; margin-left: 1px; }
+      .bnx-brow.win .bnx-val { color: var(--ink); font-weight: 500; }
+      .bnx-brow.win .bnx-val::after {
+        content: ""; display: inline-block; width: 4px; height: 4px; border-radius: 99px;
+        background: var(--accent-strong); margin-left: 7px; vertical-align: 2px;
+      }
+      .bnx-na { grid-column: 2 / 4; display: flex; align-items: center; gap: 10px; cursor: help; }
+      .bnx-dash { flex: 1; border-top: 1px dotted var(--hair); }
+      .bnx-chip { font-size: 11px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--faint); white-space: nowrap; }
+
+      .bnx-standlabel {
+        margin: 48px 0 0; font-size: 11.5px; letter-spacing: 0.22em; text-transform: uppercase;
+        color: var(--muted); padding-bottom: 20px; border-bottom: 1px solid var(--hair-strong);
+      }
+      .bnx-st { display: grid; grid-template-columns: 14px 1fr auto auto; gap: 18px clamp(20px, 4vw, 52px); align-items: center; padding: 18px 0; border-bottom: 1px solid var(--hair); }
+      .bnx-sw { width: 9px; height: 9px; border-radius: 2px; }
+      .bnx-stname { font-family: var(--display); font-weight: 480; font-size: 18px; letter-spacing: -0.005em; color: var(--ink); }
+      .bnx-stsub { font-size: 12px; color: var(--muted); margin-top: 2px; }
+      .bnx-m { text-align: right; }
+      .bnx-mv { font-size: 17px; color: var(--ink); font-variant-numeric: tabular-nums; }
+      .bnx-ml { font-size: 10.5px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); margin-top: 4px; }
+      .bnx-st.lead .bnx-mv { color: var(--accent-strong); }
+
+      @media (max-width: 620px) {
+        .bnx-rowhead { flex-direction: column; gap: 4px; }
+        .bnx-brow { grid-template-columns: 84px 1fr 64px; gap: 12px; }
+        .bnx-st { grid-template-columns: 14px 1fr auto; }
+        .bnx-st .bnx-m:last-child { display: none; }
+      }
+      @media (prefers-reduced-motion: reduce) {
+        .bnx-track i { transform: scaleX(1); transition: none; }
+      }
+
       /* ---- nightly performance track ---- */
       .nightly-pill {
         display: inline-flex;
@@ -1999,17 +2067,7 @@
               <div class="history-tabs" id="historyTabs" aria-label="Historical benchmark sections"></div>
             </div>
             <div class="history-summary" id="historySummary"></div>
-            <div class="bench-view-toggle history-view-toggle" id="historyViewToggle" role="tablist" aria-label="Historical view">
-              <button type="button" data-view="chart" aria-pressed="true">Chart</button>
-              <button type="button" data-view="table" aria-pressed="false">Table</button>
-            </div>
-            <div class="bench-chart" id="historyChart"></div>
-            <div class="table-wrap history-table" id="historyTableWrap" hidden>
-              <table aria-label="Historical cross-framework results">
-                <thead id="historyTableHead"></thead>
-                <tbody id="historyRows"></tbody>
-              </table>
-            </div>
+            <div class="bnx" id="bnxBench"></div>
           </section>
           <div class="note-row" id="benchmarkNote">
             Frameworks: SGLang-Diffusion (native pipeline, latest main) · vLLM-Omni 0.22 · LightX2V (latest tracked upstream commit) · TensorRT-LLM VisualGen 1.3.0rc18. Exact per-framework commits and serving profiles are in the source manifests; client-side single-request latency is the comparison source.
@@ -3309,21 +3367,86 @@
       }
 
       function renderHistorical(data) {
-        renderHistoryTabs(data);
-        const toggle = document.getElementById("historyViewToggle");
-        if (toggle && !toggle.dataset.wired) {
-          toggle.dataset.wired = "1";
-          toggle.querySelectorAll("button").forEach((button) =>
-            button.addEventListener("click", () => {
-              historyView = button.dataset.view;
-              renderHistoryView(data);
-            })
-          );
-        }
-        const section = data.sections[activeHistoryIndex];
+        const section = (data.sections || [])[activeHistoryIndex] || (data.sections || [])[0];
         if (section) renderHistorySummary(section);
         else document.getElementById("historySummary").innerHTML = "";
-        renderHistoryView(data);
+        renderBench2(data, section);
+      }
+
+      const BNX_ORDER = ["sglang", "vllm-omni", "lightx2v", "trtllm-visual"];
+      const BNX_SHORT = { "sglang": "SGLang", "vllm-omni": "vLLM-Omni", "lightx2v": "LightX2V", "trtllm-visual": "TRT-LLM" };
+      const BNX_VER = { "sglang": "native · FA3", "vllm-omni": "0.18.0", "lightx2v": "git 7efd05f8", "trtllm-visual": "1.3.0rc18" };
+      const BNX_COLOR = { "sglang": "var(--bar-sgl)", "vllm-omni": "var(--bar-vllm)", "lightx2v": "var(--bar-lightx2v)", "trtllm-visual": "var(--bar-trtllm)" };
+      const bnxLat = (c) => (c && c.status === "ok" ? (c.latency_s ?? c.client_latency_s ?? null) : null);
+
+      function renderBench2(data, section) {
+        const root = document.getElementById("bnxBench");
+        if (!root) return;
+        section = section || (data.sections || [])[0];
+        if (!section || !Array.isArray(section.rows) || !section.rows.length) {
+          root.innerHTML = `<p class="chart-empty">Benchmark data is unavailable.</p>`;
+          return;
+        }
+        const labels = data.frameworks || {};
+        const rowsHtml = section.rows.map((row) => {
+          const cells = row.cells || {};
+          const oks = BNX_ORDER.filter((k) => bnxLat(cells[k]) != null);
+          const rowMax = oks.length ? Math.max(...oks.map((k) => bnxLat(cells[k]))) : 1;
+          const fastest = oks.length ? oks.reduce((a, k) => (bnxLat(cells[k]) < bnxLat(cells[a]) ? k : a), oks[0]) : null;
+          const bars = BNX_ORDER.map((k) => {
+            const c = cells[k];
+            if (!c) return "";
+            const L = bnxLat(c);
+            if (L == null) {
+              const status = String(c.status || "n/a").replace(/_/g, " ");
+              return `<div class="bnx-brow"><span class="bnx-fw">${BNX_SHORT[k]}</span>`
+                + `<span class="bnx-na" title="${escapeHtml(c.reason || status)}"><span class="bnx-dash"></span>`
+                + `<span class="bnx-chip">${escapeHtml(status)}</span></span></div>`;
+            }
+            const w = Math.max(5, (L / rowMax) * 100);
+            const win = k === fastest;
+            return `<div class="bnx-brow${win ? " win" : ""}"><span class="bnx-fw">${BNX_SHORT[k]}</span>`
+              + `<span class="bnx-track"><i style="width:${w.toFixed(1)}%;background:${BNX_COLOR[k]}"></i></span>`
+              + `<span class="bnx-val">${L >= 100 ? L.toFixed(0) : L.toFixed(2)}<span class="u">s</span></span></div>`;
+          }).join("");
+          return `<div class="bnx-row"><div class="bnx-rowhead">`
+            + `<span class="bnx-model">${escapeHtml(row.case)}</span>`
+            + `<span class="bnx-spec">${escapeHtml(row.details || "")}</span></div>`
+            + `<div class="bnx-bars">${bars}</div></div>`;
+        }).join("");
+        const standRows = BNX_ORDER.map((k) => {
+          let wins = 0, served = 0, ratios = [];
+          section.rows.forEach((row) => {
+            const c = (row.cells || {})[k];
+            const L = bnxLat(c);
+            if (L == null) return;
+            served++;
+            const sg = bnxLat((row.cells || {})["sglang"]);
+            if (Number.isFinite(c.ratio_to_sglang) && c.ratio_to_sglang > 0) ratios.push(c.ratio_to_sglang);
+            else if (sg) ratios.push(L / sg);
+            const others = BNX_ORDER.map((x) => bnxLat((row.cells || {})[x])).filter((v) => v != null);
+            if (L === Math.min(...others)) wins++;
+          });
+          const avg = ratios.length ? ratios.reduce((a, b) => a + b, 0) / ratios.length : null;
+          const lead = k === "sglang";
+          const m1 = lead
+            ? { v: `${wins} / ${served}`, l: "fastest of served" }
+            : { v: avg ? `${avg.toFixed(2)}×` : "—", l: "avg vs SGLang" };
+          return `<div class="bnx-st${lead ? " lead" : ""}">`
+            + `<span class="bnx-sw" style="background:${BNX_COLOR[k]}"></span>`
+            + `<div><div class="bnx-stname">${escapeHtml(labels[k] || k)}</div>`
+            + `<div class="bnx-stsub">${escapeHtml(BNX_VER[k] || "")} · served ${served}/${section.rows.length}</div></div>`
+            + `<div class="bnx-m"><div class="bnx-mv">${m1.v}</div><div class="bnx-ml">${m1.l}</div></div>`
+            + `<div class="bnx-m"><div class="bnx-mv">${wins}</div><div class="bnx-ml">fastest</div></div></div>`;
+        }).join("");
+        root.innerHTML = `<div class="bnx-ledger">${rowsHtml}</div>`
+          + `<div class="bnx-standlabel">Standings · across the cases each framework could serve</div>`
+          + `<div class="bnx-stand">${standRows}</div>`;
+        if (window.__bnxIO) window.__bnxIO.disconnect();
+        window.__bnxIO = new IntersectionObserver((es) => {
+          es.forEach((e) => { if (e.isIntersecting) { e.target.classList.add("seen"); window.__bnxIO.unobserve(e.target); } });
+        }, { rootMargin: "0px 0px -8% 0px", threshold: 0.2 });
+        root.querySelectorAll(".bnx-row").forEach((r) => window.__bnxIO.observe(r));
       }
 
       function inlineJson(id) {
