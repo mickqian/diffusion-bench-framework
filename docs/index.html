@@ -1002,8 +1002,14 @@
         display: block;
         height: 100%;
         border-radius: 999px;
+        transform: scaleX(0);
         transform-origin: left center;
-        animation: barGrow 0.85s cubic-bezier(0.16, 1, 0.3, 1) both;
+        transition: transform 0.9s cubic-bezier(0.16, 1, 0.3, 1);
+      }
+
+      /* Bars grow left-to-right when their row scrolls into view (JS adds .in-view). */
+      .bar-track.in-view i {
+        transform: scaleX(1);
       }
 
       @keyframes barGrow {
@@ -1725,6 +1731,9 @@
           scroll-behavior: auto !important;
           transition: none !important;
           animation: none !important;
+        }
+        .bar-track i {
+          transform: scaleX(1) !important;
         }
       }
 
@@ -3173,6 +3182,34 @@
             .join("");
       }
 
+      // Grow data bars left-to-right as they scroll into view.
+      const barGrowObserver =
+        typeof IntersectionObserver !== "undefined"
+          ? new IntersectionObserver(
+              (entries) => {
+                entries.forEach((e) => {
+                  if (e.isIntersecting) {
+                    e.target.classList.add("in-view");
+                    barGrowObserver.unobserve(e.target);
+                  }
+                });
+              },
+              { threshold: 0.25, rootMargin: "0px 0px -6% 0px" }
+            )
+          : null;
+      function observeBars() {
+        const tracks = document.querySelectorAll(".bar-track:not(.in-view)");
+        if (!barGrowObserver) {
+          tracks.forEach((t) => t.classList.add("in-view"));
+          return;
+        }
+        requestAnimationFrame(() => {
+          tracks.forEach((t) => {
+            if (t.querySelector("i")) barGrowObserver.observe(t);
+          });
+        });
+      }
+
       function renderHistoryView(data) {
         const section = data.sections[activeHistoryIndex];
         const chart = document.getElementById("historyChart");
@@ -3199,6 +3236,7 @@
         else if (section.id === "flux_fastest_20260610") renderFluxHistoryRows(section);
         else if (section.table === "video_profile_sweep") renderVideoProfileSweepRows(section);
         else renderStandardHistoryRows(section);
+        observeBars();
       }
 
       function renderHistorical(data) {
