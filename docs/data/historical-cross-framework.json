@@ -21,8 +21,8 @@
   "sections": [
     {
       "id": "h200-cross-framework-coverage-20260614",
-      "title": "H200 cross-framework coverage",
-      "subtitle": "One representative case per model, all four frameworks, same-GPU & cache-free. Single-request latency (s); lower is better. Unsupported / unbenched cells are marked. TensorRT-LLM VisualGen is image-only. The latest view above has the strict same-box SGLang-native vs VisualGen numbers.",
+      "title": "Single-request latency · H200 · cache-free",
+      "subtitle": "One representative case per model, all four frameworks, same GPU count and cache-free. Bars/values are single-request latency (lower is faster); within each case they are ordered fastest-first. Unsupported or unbenched cells are marked with the reason. TensorRT-LLM VisualGen is image-only.",
       "mode": "single_e2e",
       "source_manifest": "manifests/20260510-h200-single-e2e.json + 20260514 + 20260601-cosmos3 + 2026-06-14 trtllm-visual",
       "reproduce": "scripts/generate_h200_report_artifacts.sh + scripts/run_trtllm_visual_h200.md",
