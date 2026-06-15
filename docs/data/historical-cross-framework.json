@@ -165,7 +165,7 @@
             },
             "trtllm-visual": {
               "status": "no_profile",
-              "reason": "Not benched on TensorRT-LLM VisualGen."
+              "reason": "trtllm-serve loads the checkpoint as base Qwen-Image (text-to-image runs ~6.0s warm at 40 steps), but /v1/images/generations rejects an input image (\"extra inputs are not permitted\"), so the image-edit workload has no exposed serving path."
             }
           }
         },
@@ -198,8 +198,8 @@
               "ratio_to_sglang": 2.972
             },
             "trtllm-visual": {
-              "status": "no_profile",
-              "reason": "Not benched on TensorRT-LLM VisualGen."
+              "status": "unsupported",
+              "reason": "trtllm-serve 1.3.0rc18 cannot detect a pipeline type for Z-Image-Turbo's architecture; the diffusion worker dies during initialization."
             }
           }
         },
@@ -231,7 +231,7 @@
             },
             "trtllm-visual": {
               "status": "no_profile",
-              "reason": "VisualGen Cosmos3 path returned 400 (request format); not validated."
+              "reason": "trtllm-serve loads Cosmos3-Nano (auto-detected as a diffusion model) but /v1/images/generations returns HTTP 400; no working T2I generation path on 1.3.0rc18."
             }
           }
         },
