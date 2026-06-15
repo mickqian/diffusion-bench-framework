@@ -1,0 +1,530 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>SGLang-Diffusion · Benchmark Dispatch</title>
+    <link rel="icon" type="image/png" href="favicon.png" />
+    <meta
+      name="description"
+      content="SGLang-Diffusion benchmark dispatch — single-request latency across 10 diffusion models and 4 serving frameworks on one H200, cache-free."
+    />
+    <script>
+      (() => {
+        const s = localStorage.getItem("sgld-theme");
+        if (s === "light" || s === "dark") document.documentElement.dataset.theme = s;
+      })();
+    </script>
+    <style>
+      /* ---- type: self-hosted, no external request ---- */
+      @font-face { font-family:"Ubuntu"; src:url("fonts/ubuntu-400-normal.woff2") format("woff2"); font-weight:400; font-display:swap; }
+      @font-face { font-family:"Ubuntu"; src:url("fonts/ubuntu-400-italic.woff2") format("woff2"); font-weight:400; font-style:italic; font-display:swap; }
+      @font-face { font-family:"Ubuntu"; src:url("fonts/ubuntu-500-normal.woff2") format("woff2"); font-weight:500; font-display:swap; }
+      @font-face { font-family:"Ubuntu"; src:url("fonts/ubuntu-700-normal.woff2") format("woff2"); font-weight:700; font-display:swap; }
+      /* Fraunces — variable (wght axis, opsz pinned to display) */
+      @font-face { font-family:"Fraunces"; src:url("fonts/fraunces-var.woff2") format("woff2"); font-weight:100 900; font-display:swap; }
+
+      :root {
+        color-scheme: light;
+        --paper:#f1ebdd;
+        --paper-2:#e9e1cf;
+        --ink:#191510;
+        --body:#403a30;
+        --muted:#7c7363;
+        --faint:#a89d89;
+        --hair:rgba(25,21,16,0.14);
+        --hair-soft:rgba(25,21,16,0.08);
+        --rule:#191510;
+        --accent:#cb4d12;
+        --accent-deep:#9a3a0b;
+        --accent-tint:#f7e2d2;
+        --c-sgl:#cb4d12;
+        --c-vllm:#436b87;
+        --c-lx:#9a7748;
+        --c-trt:#647b4d;
+        --c-na:#cabfa8;
+        --sans:"Ubuntu",-apple-system,BlinkMacSystemFont,system-ui,sans-serif;
+        --display:"Fraunces",Georgia,"Times New Roman",serif;
+      }
+      [data-theme="dark"] {
+        color-scheme: dark;
+        --paper:#14110b;
+        --paper-2:#1d1810;
+        --ink:#f2ece0;
+        --body:#c9c0ae;
+        --muted:#988e7d;
+        --faint:#6f6757;
+        --hair:rgba(242,236,224,0.16);
+        --hair-soft:rgba(242,236,224,0.08);
+        --rule:#f2ece0;
+        --accent:#f08a4d;
+        --accent-deep:#f5a06a;
+        --accent-tint:rgba(203,77,18,0.2);
+        --c-sgl:#f08a4d;
+        --c-vllm:#6f9bd6;
+        --c-lx:#c69a6c;
+        --c-trt:#94aa78;
+        --c-na:#5c5547;
+      }
+      @media (prefers-color-scheme: dark) {
+        :root:not([data-theme="light"]) {
+          color-scheme: dark;
+          --paper:#14110b; --paper-2:#1d1810; --ink:#f2ece0; --body:#c9c0ae;
+          --muted:#988e7d; --faint:#6f6757; --hair:rgba(242,236,224,0.16);
+          --hair-soft:rgba(242,236,224,0.08); --rule:#f2ece0; --accent:#f08a4d;
+          --accent-deep:#f5a06a; --accent-tint:rgba(203,77,18,0.2);
+          --c-sgl:#f08a4d; --c-vllm:#6f9bd6; --c-lx:#c69a6c; --c-trt:#94aa78; --c-na:#5c5547;
+        }
+      }
+
+      * { box-sizing: border-box; }
+      html { scroll-behavior: smooth; }
+      body {
+        margin:0; background:var(--paper); color:var(--ink);
+        font-family:var(--sans); font-size:16px; line-height:1.6;
+        -webkit-font-smoothing:antialiased; text-rendering:optimizeLegibility;
+        /* faint newsprint tooth */
+        background-image:radial-gradient(var(--hair-soft) 0.5px, transparent 0.5px);
+        background-size:5px 5px;
+      }
+      ::selection { background:var(--accent); color:var(--paper); }
+      a { color:inherit; text-decoration:none; }
+      button { font:inherit; color:inherit; background:none; border:0; padding:0; cursor:pointer; }
+
+      .wrap { width:min(1180px, calc(100vw - 48px)); margin:0 auto; }
+
+      .num { font-variant-numeric: tabular-nums lining-nums; font-feature-settings:"tnum" 1; }
+
+      /* ============ masthead ============ */
+      header.mast { padding:30px 0 0; }
+      .mast-top {
+        display:flex; justify-content:space-between; align-items:baseline;
+        gap:16px; padding-bottom:12px;
+        font-size:11.5px; letter-spacing:0.26em; text-transform:uppercase; color:var(--muted);
+      }
+      .mast-top .edition { color:var(--accent-deep); font-weight:600; }
+      .theme {
+        letter-spacing:0.22em; font-size:10.5px; text-transform:uppercase;
+        border:1px solid var(--hair); border-radius:999px; padding:6px 13px;
+        color:var(--muted); transition:color .18s, border-color .18s;
+      }
+      .theme:hover { color:var(--ink); border-color:var(--rule); }
+      .rule-thick { height:0; border-top:3px solid var(--rule); }
+      .rule-thin { height:0; border-top:1px solid var(--hair); }
+
+      .wordmark {
+        font-family:var(--display); font-weight:880;
+        font-size:clamp(40px, 9.6vw, 116px); line-height:0.9;
+        letter-spacing:-0.028em; margin:16px 0 14px; color:var(--ink);
+        font-optical-sizing:auto; white-space:nowrap;
+      }
+      .wordmark .amp { color:var(--accent); font-style:italic; font-weight:500; }
+      .mast-foot {
+        display:flex; flex-wrap:wrap; justify-content:space-between; gap:10px 24px;
+        padding:12px 0 0; font-size:12.5px; letter-spacing:0.04em; color:var(--muted);
+      }
+      .mast-foot b { color:var(--ink); font-weight:600; }
+
+      /* ============ lede ============ */
+      .lede { display:grid; grid-template-columns:1.35fr 1fr; gap:clamp(28px,5vw,72px); padding:64px 0 22px; align-items:end; }
+      .lede h1 {
+        font-family:var(--display); font-weight:300; font-optical-sizing:auto;
+        font-size:clamp(34px, 5.4vw, 70px); line-height:1.02; letter-spacing:-0.018em;
+        margin:0; color:var(--ink); max-width:13ch;
+      }
+      .lede h1 em { font-style:italic; color:var(--accent); font-weight:400; }
+      .standfirst { color:var(--body); font-size:clamp(15px,1.5vw,18px); line-height:1.62; max-width:46ch; }
+      .standfirst .drop { color:var(--accent-deep); font-weight:600; }
+      .tally { display:flex; gap:34px; margin-top:26px; padding-top:18px; border-top:1px solid var(--hair); }
+      .tally .t-n { font-family:var(--display); font-weight:840; font-size:clamp(34px,4vw,52px); line-height:0.9; letter-spacing:-0.02em; color:var(--ink); }
+      .tally .t-n .small { color:var(--accent); }
+      .tally .t-l { font-size:11px; letter-spacing:0.14em; text-transform:uppercase; color:var(--muted); margin-top:7px; max-width:14ch; }
+
+      /* ============ section frame ============ */
+      .sec { padding:62px 0 8px; }
+      .sec-head { display:flex; align-items:flex-start; gap:20px; padding-bottom:20px; }
+      .sec-idx {
+        font-family:var(--display); font-weight:840; font-size:clamp(26px,3vw,40px);
+        line-height:1; color:var(--accent); letter-spacing:-0.02em; flex:none;
+        width:1.8em;
+      }
+      .sec-title { font-family:var(--display); font-weight:560; font-size:clamp(22px,2.5vw,33px); line-height:1.05; letter-spacing:-0.01em; margin:0; }
+      .sec-kicker { font-size:11.5px; letter-spacing:0.2em; text-transform:uppercase; color:var(--muted); margin:5px 0 0; }
+      .sec-lead { color:var(--body); max-width:62ch; margin:2px 0 0; font-size:15px; }
+
+      /* ============ ledger ============ */
+      .ledger { border-top:3px solid var(--rule); }
+      .lrow {
+        display:grid; grid-template-columns:minmax(220px,1fr) minmax(340px,1.9fr);
+        gap:clamp(20px,4vw,60px); align-items:center;
+        padding:22px 0; border-bottom:1px solid var(--hair);
+      }
+      .lrow:hover { background:linear-gradient(90deg,var(--hair-soft),transparent 70%); }
+      .lr-name { min-width:0; }
+      .lr-rank { font-size:11px; letter-spacing:0.16em; color:var(--faint); }
+      .lr-model {
+        font-family:var(--display); font-weight:600; font-optical-sizing:auto;
+        font-size:clamp(22px,2.7vw,33px); line-height:1.02; letter-spacing:-0.015em;
+        margin:3px 0 0; color:var(--ink); display:block;
+      }
+      .lr-spec { font-size:12.5px; color:var(--muted); margin-top:6px; }
+      .lr-spec .task {
+        color:var(--accent-deep); font-weight:600; letter-spacing:0.04em;
+        text-transform:uppercase; font-size:11px; margin-right:9px;
+      }
+
+      .bars { display:grid; gap:9px; }
+      .brow { display:grid; grid-template-columns:96px 1fr auto; align-items:center; gap:14px; }
+      .b-fw { font-size:12.5px; color:var(--muted); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+      .brow.win .b-fw { color:var(--accent-deep); font-weight:600; }
+      .b-track { position:relative; height:13px; }
+      .b-track::before { /* baseline rule */
+        content:""; position:absolute; left:0; right:0; top:50%; height:1px; background:var(--hair-soft);
+      }
+      .b-fill {
+        position:absolute; left:0; top:1px; bottom:1px; border-radius:2px;
+        transform:scaleX(0); transform-origin:left center;
+        transition:transform 1s cubic-bezier(0.16,1,0.3,1);
+      }
+      .seen .b-fill { transform:scaleX(1); }
+      .brow.win .b-fill::after {
+        content:""; position:absolute; right:-2px; top:-3px; bottom:-3px; width:3px;
+        background:var(--accent); border-radius:2px;
+      }
+      .b-val { font-size:15px; font-weight:600; color:var(--ink); white-space:nowrap; }
+      .b-val .u { color:var(--muted); font-weight:400; font-size:12px; margin-left:1px; }
+      .brow.win .b-val { color:var(--accent-deep); }
+      .win-tag {
+        display:inline-block; margin-left:8px; font-size:9.5px; letter-spacing:0.14em;
+        text-transform:uppercase; color:var(--accent); vertical-align:1px;
+      }
+      .b-na {
+        grid-column:2 / 4; font-size:11.5px; letter-spacing:0.05em;
+        color:var(--faint); display:flex; align-items:center; gap:9px; cursor:help;
+      }
+      .b-na .chip { text-transform:uppercase; letter-spacing:0.13em; font-weight:600; font-size:10px; color:var(--c-na); }
+      .b-na .dash { flex:1; border-top:1px dashed var(--hair); }
+
+      /* ============ standings ============ */
+      .stand { border-top:3px solid var(--rule); }
+      .strow {
+        display:grid; grid-template-columns:auto 1fr auto auto; gap:18px clamp(16px,3vw,44px);
+        align-items:baseline; padding:20px 0; border-bottom:1px solid var(--hair);
+      }
+      .st-dot { width:11px; height:11px; border-radius:3px; align-self:center; }
+      .st-name { font-family:var(--display); font-weight:560; font-size:clamp(19px,2.1vw,26px); letter-spacing:-0.01em; }
+      .st-ver { font-size:12px; color:var(--muted); margin-top:2px; }
+      .st-metric { text-align:right; }
+      .st-big { font-family:var(--display); font-weight:780; font-size:clamp(22px,2.6vw,32px); line-height:1; letter-spacing:-0.02em; }
+      .st-lab { font-size:10.5px; letter-spacing:0.13em; text-transform:uppercase; color:var(--muted); margin-top:5px; }
+      .st-lead .st-big { color:var(--accent); }
+
+      /* ============ why (editorial columns) ============ */
+      .why { columns:3; column-gap:clamp(26px,3.5vw,52px); border-top:3px solid var(--rule); padding-top:26px; }
+      .why p { margin:0 0 16px; color:var(--body); font-size:15px; line-height:1.66; break-inside:avoid; }
+      .why p:first-child { break-inside:avoid; }
+      .why p strong { color:var(--ink); font-weight:600; }
+      .why .head {
+        font-family:var(--display); font-weight:600; font-size:18px; color:var(--ink);
+        display:block; margin-bottom:6px; letter-spacing:-0.01em;
+      }
+      .why .lead-cap::first-letter {
+        font-family:var(--display); font-weight:840; float:left; font-size:62px;
+        line-height:0.74; padding:6px 10px 0 0; color:var(--accent);
+      }
+
+      /* ============ colophon ============ */
+      .colophon { border-top:1px solid var(--hair); margin-top:60px; padding:30px 0 64px; }
+      .colo-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(200px,1fr)); gap:26px 40px; }
+      .colo h4 { font-size:11px; letter-spacing:0.18em; text-transform:uppercase; color:var(--accent-deep); margin:0 0 10px; }
+      .colo p, .colo li { font-size:13px; color:var(--body); line-height:1.6; margin:0 0 6px; }
+      .colo ul { list-style:none; padding:0; margin:0; }
+      .colo a { border-bottom:1px solid var(--hair); transition:border-color .18s; }
+      .colo a:hover { border-color:var(--accent); }
+      .colo .end { margin-top:30px; font-size:11.5px; letter-spacing:0.05em; color:var(--faint); display:flex; justify-content:space-between; flex-wrap:wrap; gap:8px; }
+
+      /* ============ reveal ============ */
+      .rev { opacity:0; transform:translateY(16px); transition:opacity .8s ease, transform .8s cubic-bezier(0.16,1,0.3,1); }
+      .rev.in { opacity:1; transform:none; }
+
+      @media (max-width:860px) {
+        .lede { grid-template-columns:1fr; align-items:start; }
+        .lrow { grid-template-columns:1fr; gap:16px; }
+        .why { columns:1; }
+      }
+      @media (max-width:540px) {
+        .brow { grid-template-columns:74px 1fr auto; gap:9px; }
+        .b-fw { font-size:11px; }
+        .mast-top { letter-spacing:0.16em; font-size:10px; }
+      }
+      @media (prefers-reduced-motion: reduce) {
+        * { scroll-behavior:auto; }
+        .rev { opacity:1; transform:none; transition:none; }
+        .b-fill { transform:scaleX(1); transition:none; }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="wrap">
+      <!-- ===================== MASTHEAD ===================== -->
+      <header class="mast">
+        <div class="mast-top">
+          <span class="edition">Benchmark Dispatch · Vol. 1</span>
+          <span>1× NVIDIA H200 · cache-free</span>
+          <button class="theme" id="theme" type="button" aria-label="Toggle theme">Dark / Light</button>
+        </div>
+        <div class="rule-thick"></div>
+        <div class="wordmark rev">SGLang<span class="amp">&</span>Diffusion</div>
+        <div class="rule-thin"></div>
+        <div class="mast-foot">
+          <span>Single-request latency, lower is faster — <b>10 diffusion models</b>, <b>4 serving frameworks</b></span>
+          <span>Updated <b>15 June 2026</b> · no response cache, no Cache-DiT</span>
+        </div>
+      </header>
+
+      <!-- ===================== LEDE ===================== -->
+      <section class="lede">
+        <h1 class="rev">Fastest on <em>every</em> model we put it against.</h1>
+        <div>
+          <p class="standfirst rev">
+            On one H200, cache-free, against vLLM-Omni, LightX2V and TensorRT-LLM
+            VisualGen, <span class="drop">SGLang-Diffusion leads every comparable
+            case</span> — from a 1.35-second Z-Image turbo render to a 33-second
+            5-billion-parameter video.
+          </p>
+          <div class="tally rev">
+            <div>
+              <div class="t-n num">10<span class="small">/10</span></div>
+              <div class="t-l">Models, SGLang fastest</div>
+            </div>
+            <div>
+              <div class="t-n num">4</div>
+              <div class="t-l">Frameworks compared</div>
+            </div>
+            <div>
+              <div class="t-n num">1.35<span class="small">s</span></div>
+              <div class="t-l">Quickest render measured</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ===================== 01 · THE LEDGER ===================== -->
+      <section class="sec">
+        <div class="sec-head rev">
+          <div class="sec-idx num">01</div>
+          <div>
+            <p class="sec-kicker">The results, model by model</p>
+            <h2 class="sec-title">The ledger</h2>
+            <p class="sec-lead">One representative case per model, all four frameworks, same GPU
+              count, cache-free. Bars run longest = slowest; within each model the fastest
+              framework is marked. Cells without a bar carry the reason.</p>
+          </div>
+        </div>
+        <div class="ledger" id="ledger"></div>
+      </section>
+
+      <!-- ===================== 02 · STANDINGS ===================== -->
+      <section class="sec">
+        <div class="sec-head rev">
+          <div class="sec-idx num">02</div>
+          <div>
+            <p class="sec-kicker">How the four placed</p>
+            <h2 class="sec-title">Standings</h2>
+            <p class="sec-lead">Across the comparable cases each framework could actually serve.</p>
+          </div>
+        </div>
+        <div class="stand" id="standings"></div>
+      </section>
+
+      <!-- ===================== 03 · WHY ===================== -->
+      <section class="sec">
+        <div class="sec-head rev">
+          <div class="sec-idx num">03</div>
+          <div>
+            <p class="sec-kicker">Where the speed comes from</p>
+            <h2 class="sec-title">Why it wins</h2>
+          </div>
+        </div>
+        <div class="why rev">
+          <p class="lead-cap"><span class="head">Kernels that already shipped.</span>
+            A diffusion transformer runs the same block hundreds of times per request. The
+            battle-tested attention and GEMM kernels behind SGLang's LLM runtime carry
+            straight over — <strong>FlashAttention-3</strong> on Hopper, fused norm and
+            residual paths, no warm-up tax on every step.</p>
+          <p><span class="head">A native pipeline, not a wrapper.</span>
+            SGLang serves FLUX and Qwen-Image through purpose-built pipelines rather than a
+            generic diffusers fallback. That removes per-step Python overhead and lets the
+            scheduler batch, parallelise and cache where it helps — and skip it cleanly where
+            the comparison must stay cache-free.</p>
+          <p><span class="head">Compile where it pays.</span>
+            Regional <strong>torch.compile</strong> over the repeated DiT block keeps cold
+            starts sane while still fusing the hot path. The numbers here are steady-state and
+            cache-free, so what you read is the kernel, not a cache hit.</p>
+          <p><span class="head">Honest about the gaps.</span>
+            Where a framework has no serving path for a model — or simply can't load it — the
+            ledger says so plainly. TensorRT-LLM VisualGen is image-only; LightX2V tracks a
+            fixed model set. No silent blanks.</p>
+        </div>
+      </section>
+
+      <!-- ===================== COLOPHON ===================== -->
+      <footer class="colophon">
+        <div class="colo-grid">
+          <div class="colo">
+            <h4>Method</h4>
+            <p>Single end-to-end request, steady-state (one-time compile excluded), no response
+              cache, no Cache-DiT, no temporal cache. Same H200 SKU and GPU count per row.</p>
+          </div>
+          <div class="colo">
+            <h4>Frameworks &amp; versions</h4>
+            <ul>
+              <li><b>SGLang-Diffusion</b> — native FA3, commit 582bd23f</li>
+              <li><b>vLLM-Omni</b> — 0.18.0</li>
+              <li><b>LightX2V</b> — git 7efd05f8</li>
+              <li><b>TensorRT-LLM VisualGen</b> — 1.3.0rc18</li>
+            </ul>
+          </div>
+          <div class="colo">
+            <h4>Reproduce</h4>
+            <p>Every run is scripted and committed.
+              <a href="https://github.com/sgl-project/sglang" target="_blank" rel="noopener">sgl-project/sglang</a>
+              ships the runtime; the comparison harness and per-run logs live alongside this page.</p>
+          </div>
+        </div>
+        <div class="end">
+          <span>SGLang-Diffusion — diffusion &amp; multimodal generation for the SGLang runtime.</span>
+          <span>Set in Fraunces &amp; Ubuntu.</span>
+        </div>
+      </footer>
+    </div>
+
+    <script>
+      // ---- theme toggle ----
+      const root = document.documentElement;
+      const tBtn = document.getElementById("theme");
+      function curTheme() {
+        return root.dataset.theme || (matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
+      }
+      tBtn.addEventListener("click", () => {
+        const next = curTheme() === "dark" ? "light" : "dark";
+        root.dataset.theme = next;
+        try { localStorage.setItem("sgld-theme", next); } catch (e) {}
+      });
+
+      // ---- data (the real cross-framework matrix) ----
+      const FW = {
+        sgl:      { label:"SGLang-Diffusion",        short:"SGLang",    ver:"native · FA3",      color:"var(--c-sgl)" },
+        vllm:     { label:"vLLM-Omni",               short:"vLLM-Omni", ver:"0.18.0",            color:"var(--c-vllm)" },
+        lightx2v: { label:"LightX2V",                short:"LightX2V",  ver:"git 7efd05f8",      color:"var(--c-lx)" },
+        trtllm:   { label:"TensorRT-LLM VisualGen",  short:"TRT-LLM",   ver:"1.3.0rc18",         color:"var(--c-trt)" },
+      };
+      const ORDER = ["sgl", "vllm", "lightx2v", "trtllm"];
+      const ROWS = [
+        { model:"FLUX.1-dev",            task:"T2I",            spec:"1024² · 50 steps · cfg 3.5", cells:{ sgl:7.69,  vllm:8.68,  lightx2v:{na:"no profile"},  trtllm:8.70 } },
+        { model:"FLUX.2-dev",            task:"T2I",            spec:"1024² · 50 steps · cfg 4",   cells:{ sgl:25.24, vllm:26.53, lightx2v:31.07,             trtllm:25.77 } },
+        { model:"Qwen-Image-2512",       task:"T2I",            spec:"1024² · 50 steps · cfg 1",   cells:{ sgl:6.77,  vllm:8.72,  lightx2v:{na:"no profile"},  trtllm:8.34 } },
+        { model:"Qwen-Image-Edit-2511",  task:"image edit",     spec:"1024² · 40 steps · cfg 1",   cells:{ sgl:12.06, vllm:15.31, lightx2v:{na:"no profile"},  trtllm:{na:"no edit path"} } },
+        { model:"Z-Image-Turbo",         task:"T2I",            spec:"1024² · 9 steps · cfg 0",    cells:{ sgl:1.35,  vllm:2.95,  lightx2v:4.01,              trtllm:{na:"unsupported"} } },
+        { model:"Cosmos3-Nano",          task:"T2I",            spec:"1280×720 · 35 steps · cfg 6",cells:{ sgl:1.88,  vllm:1.94,  lightx2v:{na:"no profile"},  trtllm:{na:"http 400"} } },
+        { model:"Wan2.1 T2V 1.3B",       task:"text → video",   spec:"480p",                       cells:{ sgl:26.04, vllm:29.50, lightx2v:29.06,             trtllm:{na:"image-only"} } },
+        { model:"Wan2.2 TI2V 5B",        task:"text → video",   spec:"704p",                       cells:{ sgl:33.06, vllm:36.09, lightx2v:35.18,             trtllm:{na:"image-only"} } },
+        { model:"LTX-2",                 task:"two-stage T2V",  spec:"two-stage decode",           cells:{ sgl:12.67, vllm:{na:"failed"},        lightx2v:23.07,            trtllm:{na:"image-only"} } },
+        { model:"LTX-2.3",               task:"two-stage T2V",  spec:"two-stage decode",           cells:{ sgl:16.25, vllm:{na:"no profile"},   lightx2v:{na:"failed"},    trtllm:{na:"image-only"} } },
+      ];
+
+      const isNum = (v) => typeof v === "number";
+      const fmt = (v) => (v >= 100 ? v.toFixed(0) : v.toFixed(2));
+
+      // ---- ledger ----
+      const ledger = document.getElementById("ledger");
+      ROWS.forEach((row, i) => {
+        const vals = ORDER.map((k) => row.cells[k]).filter(isNum);
+        const rowMax = Math.max(...vals);
+        const fastest = ORDER.filter((k) => isNum(row.cells[k]))
+          .reduce((a, k) => (row.cells[k] < row.cells[a] ? k : a), ORDER.find((k) => isNum(row.cells[k])));
+        const bars = ORDER.map((k) => {
+          const c = row.cells[k];
+          const fw = FW[k];
+          if (!isNum(c)) {
+            return `<div class="brow">
+                <span class="b-fw">${fw.short}</span>
+                <span class="b-na" title="${c.na}"><span class="chip">${c.na}</span><span class="dash"></span></span>
+              </div>`;
+          }
+          const w = Math.max(4, (c / rowMax) * 100);
+          const win = k === fastest;
+          return `<div class="brow${win ? " win" : ""}">
+              <span class="b-fw">${fw.short}</span>
+              <span class="b-track"><span class="b-fill" style="width:${w.toFixed(1)}%;background:${fw.color}"></span></span>
+              <span class="b-val num">${fmt(c)}<span class="u">s</span>${win ? '<span class="win-tag">fastest</span>' : ""}</span>
+            </div>`;
+        }).join("");
+        const el = document.createElement("div");
+        el.className = "lrow rev";
+        el.innerHTML = `
+          <div class="lr-name">
+            <div class="lr-rank num">${String(i + 1).padStart(2, "0")}</div>
+            <span class="lr-model">${row.model}</span>
+            <div class="lr-spec"><span class="task">${row.task}</span>${row.spec}</div>
+          </div>
+          <div class="bars">${bars}</div>`;
+        ledger.appendChild(el);
+      });
+
+      // ---- standings ----
+      const stEl = document.getElementById("standings");
+      const stats = ORDER.map((k) => {
+        let wins = 0, supported = 0, ratios = [];
+        ROWS.forEach((row) => {
+          const c = row.cells[k];
+          if (!isNum(c)) return;
+          supported++;
+          const sg = row.cells.sgl;
+          if (isNum(sg)) ratios.push(c / sg);
+          const others = ORDER.map((x) => row.cells[x]).filter(isNum);
+          if (c === Math.min(...others)) wins++;
+        });
+        const avg = ratios.length ? ratios.reduce((a, b) => a + b, 0) / ratios.length : null;
+        return { k, wins, supported, avg };
+      });
+      stats.forEach((s) => {
+        const fw = FW[s.k];
+        const lead = s.k === "sgl";
+        const metric = lead
+          ? { big: `${s.wins}`, lab: `wins of ${s.supported} served` }
+          : { big: s.avg ? `${s.avg.toFixed(2)}×` : "—", lab: `avg latency vs SGLang` };
+        const el = document.createElement("div");
+        el.className = "strow rev" + (lead ? " st-lead" : "");
+        el.innerHTML = `
+          <span class="st-dot" style="background:${fw.color}"></span>
+          <div><div class="st-name">${fw.label}</div><div class="st-ver">${fw.ver} · served ${s.supported}/10 models</div></div>
+          <div class="st-metric"><div class="st-big num">${metric.big}</div><div class="st-lab">${metric.lab}</div></div>
+          <div class="st-metric"><div class="st-big num">${s.wins}</div><div class="st-lab">fastest</div></div>`;
+        stEl.appendChild(el);
+      });
+
+      // ---- orchestrated reveal ----
+      const revs = [...document.querySelectorAll(".rev")];
+      const io = new IntersectionObserver((entries) => {
+        entries.forEach((e) => { if (e.isIntersecting) { e.target.classList.add("in"); io.unobserve(e.target); } });
+      }, { rootMargin: "0px 0px -8% 0px", threshold: 0.08 });
+      revs.forEach((r) => io.observe(r));
+      // staggered entrance for whatever is in view at load
+      requestAnimationFrame(() => {
+        const vh = innerHeight;
+        let d = 0;
+        revs.forEach((r) => {
+          if (r.getBoundingClientRect().top < vh) { r.style.transitionDelay = `${d}ms`; d += 70; r.classList.add("in"); }
+        });
+        setTimeout(() => revs.forEach((r) => (r.style.transitionDelay = "")), 1200);
+      });
+
+      // ---- bars grow when scrolled into view ----
+      const barObs = new IntersectionObserver((entries) => {
+        entries.forEach((e) => { if (e.isIntersecting) { e.target.classList.add("seen"); barObs.unobserve(e.target); } });
+      }, { rootMargin: "0px 0px -10% 0px", threshold: 0.2 });
+      document.querySelectorAll(".lrow").forEach((r) => barObs.observe(r));
+    </script>
+  </body>
+</html>
