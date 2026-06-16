@@ -198,8 +198,16 @@
       }
 
       .shell {
-        width: min(1160px, calc(100vw - 56px));
+        width: min(1200px, calc(100vw - 56px));
         margin: 0 auto;
+      }
+
+      /* Use more of the canvas on large / 2K displays instead of stranding the
+         content in a narrow column. Text blocks keep their own max-widths. */
+      @media (min-width: 1600px) {
+        .shell {
+          width: min(1560px, calc(100vw - 140px));
+        }
       }
 
       .label {
