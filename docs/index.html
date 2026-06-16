@@ -1611,6 +1611,116 @@
         .bnx-track i { transform: scaleX(1); transition: none; }
       }
 
+      /* ---- gallery (continuous-scroll wall) ---- */
+      .gallery-wall {
+        position: relative; margin-top: 8px; overflow: hidden;
+        height: clamp(460px, 74vh, 780px);
+      }
+      /* Edge treatment: content eases into the paper background (so there is no
+         hard cut) while a soft backdrop blur frosts the transition — the way
+         polished sites fade a scroll edge. The mask on each overlay fades the
+         blur itself out toward the inside, so there is no hard blur seam. */
+      .gallery-wall::before,
+      .gallery-wall::after {
+        content: ""; position: absolute; left: 0; right: 0; z-index: 5; pointer-events: none;
+      }
+      .gallery-wall::before {
+        top: 0; height: 132px;
+        background: linear-gradient(to bottom,
+          var(--paper) 0%,
+          color-mix(in srgb, var(--paper) 82%, transparent) 28%,
+          color-mix(in srgb, var(--paper) 40%, transparent) 58%,
+          transparent 100%);
+        -webkit-backdrop-filter: blur(5px); backdrop-filter: blur(5px);
+        -webkit-mask-image: linear-gradient(to bottom, #000 0%, #000 30%, transparent 100%);
+        mask-image: linear-gradient(to bottom, #000 0%, #000 30%, transparent 100%);
+      }
+      .gallery-wall::after {
+        bottom: 0; height: 188px;
+        background: linear-gradient(to top,
+          var(--paper) 0%,
+          color-mix(in srgb, var(--paper) 82%, transparent) 32%,
+          color-mix(in srgb, var(--paper) 40%, transparent) 62%,
+          transparent 100%);
+        -webkit-backdrop-filter: blur(7px); backdrop-filter: blur(7px);
+        -webkit-mask-image: linear-gradient(to top, #000 0%, #000 34%, transparent 100%);
+        mask-image: linear-gradient(to top, #000 0%, #000 34%, transparent 100%);
+      }
+      .gallery-cols { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; align-items: start; }
+      @media (max-width: 920px) { .gallery-cols { grid-template-columns: repeat(2, 1fr); } }
+      @media (max-width: 560px) { .gallery-cols { grid-template-columns: 1fr; } }
+      .gallery-col { display: flex; flex-direction: column; gap: 16px; will-change: transform; animation: gwall 50s linear infinite; }
+      .gallery-col:nth-child(2) { animation-duration: 64s; animation-delay: -16s; }
+      .gallery-col:nth-child(3) { animation-duration: 56s; animation-delay: -34s; }
+      .gallery-col .g-tile { margin: 0; }
+      .gallery-wall:hover .gallery-col { animation-play-state: paused; }
+      @keyframes gwall { from { transform: translateY(-50%); } to { transform: translateY(0); } }
+      @media (prefers-reduced-motion: reduce) {
+        .gallery-wall { height: auto; overflow: visible; }
+        .gallery-wall::before, .gallery-wall::after { display: none; }
+        .gallery-col { animation: none; }
+        .gallery-col .g-dup { display: none; }
+      }
+      .g-tile {
+        position: relative; display: block; width: 100%; margin: 0 0 16px;
+        break-inside: avoid; border-radius: var(--r-md); overflow: hidden;
+        border: 1px solid var(--hair); background: var(--ink-04); cursor: pointer;
+        -webkit-tap-highlight-color: transparent; line-height: 0;
+        transition: transform 0.25s cubic-bezier(0.16,1,0.3,1), box-shadow 0.25s ease;
+      }
+      .g-tile:hover { transform: translateY(-2px); box-shadow: var(--shadow-1); }
+      .g-tile img, .g-tile video { display: block; width: 100%; height: auto; }
+      .g-tag {
+        position: absolute; top: 10px; left: 10px; z-index: 2; line-height: 1;
+        font-size: 11.5px; font-weight: 500; letter-spacing: 0.01em;
+        padding: 5px 11px; border-radius: 999px;
+        background: var(--accent-tint); color: var(--accent-strong);
+      }
+      .g-play { position: absolute; inset: 0; z-index: 1; display: flex; align-items: center; justify-content: center; pointer-events: none; }
+      .g-play span {
+        width: 48px; height: 48px; border-radius: 999px; display: flex; align-items: center; justify-content: center;
+        background: rgba(25,21,16,0.42); color: #fff; font-size: 16px; line-height: 1; padding-left: 3px;
+      }
+      .g-cap {
+        position: absolute; left: 0; right: 0; bottom: 0; z-index: 2; line-height: 1.45;
+        padding: 30px 14px 13px; color: #f4efe6;
+        background: linear-gradient(to top, rgba(20,17,12,0.84), rgba(20,17,12,0));
+        opacity: 0; transform: translateY(6px); transition: opacity 0.22s ease, transform 0.22s ease;
+      }
+      .g-tile:hover .g-cap, .g-tile:focus-visible .g-cap { opacity: 1; transform: none; }
+      .g-cap .m { font-size: 12.5px; font-weight: 600; }
+      .g-cap .p { margin: 3px 0 0; font-size: 12px; opacity: 0.88;
+        display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+      .g-tile:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+      .gallery-empty { color: var(--muted); font-size: 15px; }
+
+      /* lightbox */
+      .lightbox {
+        position: fixed; inset: 0; z-index: 100; display: flex; align-items: center; justify-content: center;
+        background: rgba(18,15,10,0.88); padding: clamp(16px, 4vw, 52px);
+        opacity: 0; transition: opacity 0.2s ease;
+      }
+      .lightbox.open { opacity: 1; }
+      .lightbox[hidden] { display: none; }
+      .lb-figure { margin: 0; max-width: min(1100px, 100%); display: flex; flex-direction: column; gap: 14px; }
+      .lb-stage { display: flex; align-items: center; justify-content: center; }
+      .lb-stage img, .lb-stage video { max-width: 100%; max-height: 78vh; border-radius: var(--r-md); display: block; }
+      .lb-cap { color: #e9e3d6; font-size: 14px; line-height: 1.55; text-align: center; max-width: 70ch; margin: 0 auto; }
+      .lb-cap .m { color: var(--accent); font-weight: 600; }
+      .lb-cap .p { display: block; margin-top: 4px; }
+      .lb-cap .pa { display: block; margin-top: 5px; color: #b6ad9d; font-size: 12.5px; letter-spacing: 0.02em; }
+      .lb-close, .lb-nav {
+        position: fixed; z-index: 101; color: #f0ebe0; background: rgba(0,0,0,0.32);
+        border-radius: 999px; width: 44px; height: 44px; font-size: 26px; line-height: 1;
+        display: flex; align-items: center; justify-content: center; transition: background 0.18s ease;
+      }
+      .lb-close:hover, .lb-nav:hover { background: rgba(0,0,0,0.55); }
+      .lb-close { top: 18px; right: 20px; font-size: 30px; }
+      .lb-nav { top: 50%; transform: translateY(-50%); }
+      .lb-prev { left: 16px; }
+      .lb-next { right: 16px; }
+      @media (max-width: 560px) { .lb-nav { top: auto; bottom: 18px; transform: none; } .lb-prev { left: 30%; } .lb-next { right: 30%; } }
+
       /* ---- nightly performance track ---- */
       .nightly-pill {
         display: inline-flex;
@@ -1946,6 +2056,7 @@
       <div class="shell topbar-inner">
         <a class="brand" href="#top">SGLang-Diffusion</a>
         <nav class="nav-links">
+          <a href="#gallery">Gallery</a>
           <a href="#performance">Performance gains</a>
           <a href="#platform">Platform</a>
           <a href="#benchmarks">Benchmarks</a>
@@ -1990,6 +2101,24 @@
           </div>
         </aside>
       </section>
+
+      <section class="shell section" id="gallery" aria-label="Gallery of generated media">
+        <div class="section-head" style="display: block; margin-bottom: clamp(28px, 4vw, 42px)">
+          <h2 class="section-title">Made with SGLang-Diffusion</h2>
+        </div>
+        <div class="gallery-wall" id="galleryGrid"></div>
+        <p class="gallery-empty" id="galleryEmpty" hidden>Gallery is being prepared.</p>
+      </section>
+
+      <div class="lightbox" id="lightbox" hidden aria-hidden="true" role="dialog" aria-modal="true" aria-label="Generated media viewer">
+        <button class="lb-close" id="lbClose" type="button" aria-label="Close">&times;</button>
+        <button class="lb-nav lb-prev" id="lbPrev" type="button" aria-label="Previous">&#8249;</button>
+        <button class="lb-nav lb-next" id="lbNext" type="button" aria-label="Next">&#8250;</button>
+        <figure class="lb-figure">
+          <div class="lb-stage" id="lbStage"></div>
+          <figcaption class="lb-cap" id="lbCap"></figcaption>
+        </figure>
+      </div>
 
       <section class="shell section" id="performance">
         <div class="section-head">
@@ -3474,6 +3603,94 @@
         }, { rootMargin: "0px 0px -8% 0px", threshold: 0.2 });
         root.querySelectorAll(".bnx-row").forEach((r) => window.__bnxIO.observe(r));
       }
+
+      (function gallery() {
+        const grid = document.getElementById("galleryGrid");
+        if (!grid) return;
+        const empty = document.getElementById("galleryEmpty");
+        const lb = document.getElementById("lightbox");
+        const lbStage = document.getElementById("lbStage");
+        const lbCap = document.getElementById("lbCap");
+        let items = [], cur = 0;
+        const esc = (s) => String(s == null ? "" : s).replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+        const still = (it) => (it.type === "video" ? (it.poster || it.src || "") : (it.src || it.poster || ""));
+
+        function tileHtml(i, dup) {
+          const it = items[i];
+          const isVid = it.type === "video";
+          const ar = it.aspect ? ` style="aspect-ratio:${esc(it.aspect)}"` : "";
+          const media = isVid && it.src
+            ? `<video${ar} preload="metadata" muted loop playsinline ${it.poster ? `poster="${esc(it.poster)}"` : ""} src="${esc(it.src)}"></video>`
+            : `<img${ar} loading="lazy" decoding="async" src="${esc(still(it))}" alt="${esc(it.model)} — ${esc(it.prompt)}">`;
+          const a11y = dup ? 'tabindex="-1" aria-hidden="true"' : `aria-label="${esc(it.model)}: ${esc(it.prompt)}"`;
+          return `<button class="g-tile${dup ? " g-dup" : ""}" type="button" data-i="${i}" ${a11y}>
+              <span class="g-tag">${isVid ? "▶ " : ""}${esc(it.model)}</span>
+              ${media}
+              ${isVid && !it.src ? '<span class="g-play"><span>▶</span></span>' : ""}
+              <span class="g-cap"><span class="m">${esc(it.model)}</span><span class="p">${esc(it.prompt)}</span></span>
+            </button>`;
+        }
+
+        function render() {
+          const ncols = items.length >= 3 ? 3 : items.length;
+          const cols = Array.from({ length: ncols }, () => []);
+          items.forEach((it, i) => cols[i % ncols].push(i));
+          grid.innerHTML = `<div class="gallery-cols">`
+            + cols.map((idxs) => {
+                const once = idxs.map((i) => tileHtml(i, false)).join("");
+                const dup = idxs.map((i) => tileHtml(i, true)).join("");
+                return `<div class="gallery-col">${once}${dup}</div>`;
+              }).join("")
+            + `</div>`;
+          grid.querySelectorAll(".g-tile").forEach((t) => t.addEventListener("click", () => openLb(+t.dataset.i)));
+          const vio = new IntersectionObserver((es) => es.forEach((e) => {
+            const v = e.target;
+            if (e.isIntersecting) { const p = v.play(); if (p && p.catch) p.catch(() => {}); } else { v.pause(); }
+          }), { threshold: 0.3 });
+          grid.querySelectorAll("video").forEach((v) => vio.observe(v));
+        }
+
+        function openLb(i) {
+          cur = i;
+          const it = items[i];
+          lbStage.innerHTML = (it.type === "video" && it.src)
+            ? `<video controls autoplay loop muted playsinline ${it.poster ? `poster="${esc(it.poster)}"` : ""} src="${esc(it.src)}"></video>`
+            : `<img src="${esc(still(it))}" alt="${esc(it.model)}">`;
+          lbCap.innerHTML = `<span class="m">${esc(it.model)}</span><span class="p">${esc(it.prompt)}</span>`
+            + `<span class="pa">${esc(it.params || "")}${it.placeholder ? " · placeholder art" : ""}</span>`;
+          lb.hidden = false;
+          lb.setAttribute("aria-hidden", "false");
+          requestAnimationFrame(() => lb.classList.add("open"));
+          document.body.style.overflow = "hidden";
+        }
+        function closeLb() {
+          lb.classList.remove("open");
+          lb.setAttribute("aria-hidden", "true");
+          document.body.style.overflow = "";
+          setTimeout(() => { lb.hidden = true; lbStage.innerHTML = ""; }, 200);
+        }
+        const step = (d) => openLb((cur + d + items.length) % items.length);
+
+        document.getElementById("lbClose").addEventListener("click", closeLb);
+        document.getElementById("lbPrev").addEventListener("click", () => step(-1));
+        document.getElementById("lbNext").addEventListener("click", () => step(1));
+        lb.addEventListener("click", (e) => { if (e.target === lb) closeLb(); });
+        document.addEventListener("keydown", (e) => {
+          if (lb.hidden) return;
+          if (e.key === "Escape") closeLb();
+          else if (e.key === "ArrowLeft") step(-1);
+          else if (e.key === "ArrowRight") step(1);
+        });
+
+        fetch("gallery/manifest.json", { cache: "no-store" })
+          .then((r) => (r.ok ? r.json() : Promise.reject()))
+          .then((data) => {
+            items = (data && data.items) || [];
+            if (!items.length) { empty.hidden = false; return; }
+            render();
+          })
+          .catch(() => { empty.hidden = false; });
+      })();
 
       function inlineJson(id) {
         try {

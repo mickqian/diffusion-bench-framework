@@ -1,0 +1,80 @@
+{
+  "note": "Placeholder gallery. Replace each item's src/poster with real SGLang-Diffusion output in docs/gallery/, and edit prompt/model/params. type=image -> <img>; type=video -> <video> (set src to an .mp4/.webm; poster is the still).",
+  "items": [
+    {
+      "type": "image",
+      "model": "FLUX.2-dev",
+      "prompt": "A weathered brass diving helmet resting on raw linen, soft north-window light — a quiet still life in the spirit of 1950s editorial photography.",
+      "params": "1024² · 50 steps · cfg 4",
+      "aspect": "4 / 5",
+      "placeholder": true,
+      "src": "gallery/ph-flux2.svg"
+    },
+    {
+      "type": "image",
+      "model": "Qwen-Image-2512",
+      "prompt": "An abandoned Art Nouveau conservatory reclaimed by ferns and morning mist, light falling through a cracked glass roof.",
+      "params": "1024² · 50 steps · cfg 1",
+      "aspect": "1 / 1",
+      "placeholder": true,
+      "src": "gallery/ph-qwen.svg"
+    },
+    {
+      "type": "video",
+      "model": "Wan2.2 TI2V",
+      "prompt": "A lone heron lifts from a glass-still lake at first light, slow motion, mist peeling off the water.",
+      "params": "704p · 81 frames",
+      "aspect": "16 / 9",
+      "placeholder": true,
+      "src": "",
+      "poster": "gallery/ph-wan22.svg"
+    },
+    {
+      "type": "image",
+      "model": "Z-Image-Turbo",
+      "prompt": "Studio portrait of an old jazz guitarist mid-phrase, a single warm key light, the grain of Kodak Portra 400.",
+      "params": "1024² · 9 steps · turbo",
+      "aspect": "1 / 1",
+      "placeholder": true,
+      "src": "gallery/ph-zimage.svg"
+    },
+    {
+      "type": "image",
+      "model": "FLUX.1-dev",
+      "prompt": "An Art-Deco travel poster of the Zhejiang coastline — geometric waves, cream and burnt orange, screen-printed texture.",
+      "params": "1024² · 50 steps · cfg 3.5",
+      "aspect": "4 / 5",
+      "placeholder": true,
+      "src": "gallery/ph-flux1.svg"
+    },
+    {
+      "type": "video",
+      "model": "LTX-2",
+      "prompt": "A paper boat drifting down a rain-slick gutter through fallen ginkgo leaves, shallow depth of field.",
+      "params": "768×512 · 121 frames",
+      "aspect": "3 / 2",
+      "placeholder": true,
+      "src": "",
+      "poster": "gallery/ph-ltx2.svg"
+    },
+    {
+      "type": "image",
+      "model": "Cosmos3-Nano",
+      "prompt": "A warehouse robot pauses to watch dust drift through a single shaft of late-afternoon light.",
+      "params": "1280×720 · 35 steps · cfg 6",
+      "aspect": "16 / 9",
+      "placeholder": true,
+      "src": "gallery/ph-cosmos.svg"
+    },
+    {
+      "type": "video",
+      "model": "Wan2.1 T2V",
+      "prompt": "Wind moving in long waves across a golden barley field at dusk, anamorphic lens, soft flare.",
+      "params": "480p · 81 frames",
+      "aspect": "16 / 9",
+      "placeholder": true,
+      "src": "",
+      "poster": "gallery/ph-wan21.svg"
+    }
+  ]
+}
