@@ -3665,14 +3665,27 @@
         let _grt;
         window.addEventListener("resize", () => { clearTimeout(_grt); _grt = setTimeout(() => { if (items.length) render(); }, 250); });
 
-        fetch("gallery/manifest.json", { cache: "no-store" })
-          .then((r) => (r.ok ? r.json() : Promise.reject()))
-          .then((data) => {
-            items = (data && data.items) || [];
-            if (!items.length) { empty.hidden = false; return; }
-            render();
-          })
-          .catch(() => { empty.hidden = false; });
+        // Cache-bust + retry: GitHub Pages' CDN can serve a stale 404 for the
+        // manifest right after a deploy (the file existed seconds later), and a
+        // single failed fetch would leave the gallery permanently empty for that
+        // page load. The ?t= query bypasses any edge-cached 404; retries cover
+        // the brief build window.
+        (async () => {
+          for (let attempt = 0; attempt < 3; attempt++) {
+            try {
+              const r = await fetch(`gallery/manifest.json?t=${Date.now()}`, { cache: "no-store" });
+              if (!r.ok) throw new Error("HTTP " + r.status);
+              const data = await r.json();
+              items = (data && data.items) || [];
+              if (!items.length) { empty.hidden = false; return; }
+              render();
+              return;
+            } catch (e) {
+              if (attempt < 2) { await new Promise((res) => setTimeout(res, 1200 * (attempt + 1))); continue; }
+              empty.hidden = false;
+            }
+          }
+        })();
       })();
 
       function inlineJson(id) {
