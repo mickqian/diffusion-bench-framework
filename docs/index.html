@@ -1614,50 +1614,24 @@
       /* ---- gallery (continuous-scroll wall) ---- */
       .gallery-wall {
         position: relative; margin-top: 8px; overflow: hidden;
-        height: clamp(460px, 74vh, 780px);
+        height: clamp(620px, 96vh, 1180px);
+        /* full-bleed: break out of the centered .shell to the full viewport */
+        width: 100vw; margin-left: calc(50% - 50vw); margin-right: calc(50% - 50vw);
+        padding: 0 clamp(20px, 3.5vw, 72px);
+        /* Soft edge: the tiles themselves dissolve into the page background via a
+           mask to transparent — the way polished sites fade a scroll rail. No
+           frosted band, no color seam, and it adapts to light/dark automatically
+           because it reveals whatever paper is behind it. */
+        -webkit-mask-image: linear-gradient(to bottom, transparent 0, #000 130px, #000 calc(100% - 170px), transparent 100%);
+        mask-image: linear-gradient(to bottom, transparent 0, #000 130px, #000 calc(100% - 170px), transparent 100%);
       }
-      /* Edge treatment: content eases into the paper background (so there is no
-         hard cut) while a soft backdrop blur frosts the transition — the way
-         polished sites fade a scroll edge. The mask on each overlay fades the
-         blur itself out toward the inside, so there is no hard blur seam. */
-      .gallery-wall::before,
-      .gallery-wall::after {
-        content: ""; position: absolute; left: 0; right: 0; z-index: 5; pointer-events: none;
-      }
-      .gallery-wall::before {
-        top: 0; height: 132px;
-        background: linear-gradient(to bottom,
-          var(--paper) 0%,
-          color-mix(in srgb, var(--paper) 82%, transparent) 28%,
-          color-mix(in srgb, var(--paper) 40%, transparent) 58%,
-          transparent 100%);
-        -webkit-backdrop-filter: blur(5px); backdrop-filter: blur(5px);
-        -webkit-mask-image: linear-gradient(to bottom, #000 0%, #000 30%, transparent 100%);
-        mask-image: linear-gradient(to bottom, #000 0%, #000 30%, transparent 100%);
-      }
-      .gallery-wall::after {
-        bottom: 0; height: 188px;
-        background: linear-gradient(to top,
-          var(--paper) 0%,
-          color-mix(in srgb, var(--paper) 82%, transparent) 32%,
-          color-mix(in srgb, var(--paper) 40%, transparent) 62%,
-          transparent 100%);
-        -webkit-backdrop-filter: blur(7px); backdrop-filter: blur(7px);
-        -webkit-mask-image: linear-gradient(to top, #000 0%, #000 34%, transparent 100%);
-        mask-image: linear-gradient(to top, #000 0%, #000 34%, transparent 100%);
-      }
-      .gallery-cols { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; align-items: start; }
-      @media (max-width: 920px) { .gallery-cols { grid-template-columns: repeat(2, 1fr); } }
-      @media (max-width: 560px) { .gallery-cols { grid-template-columns: 1fr; } }
-      .gallery-col { display: flex; flex-direction: column; gap: 16px; will-change: transform; animation: gwall 50s linear infinite; }
-      .gallery-col:nth-child(2) { animation-duration: 64s; animation-delay: -16s; }
-      .gallery-col:nth-child(3) { animation-duration: 56s; animation-delay: -34s; }
+      .gallery-cols { display: grid; gap: 18px; align-items: start; }
+      .gallery-col { display: flex; flex-direction: column; gap: 18px; will-change: transform; animation: gwall var(--gdur, 54s) linear infinite; animation-delay: var(--gdelay, 0s); }
       .gallery-col .g-tile { margin: 0; }
       .gallery-wall:hover .gallery-col { animation-play-state: paused; }
       @keyframes gwall { from { transform: translateY(-50%); } to { transform: translateY(0); } }
       @media (prefers-reduced-motion: reduce) {
-        .gallery-wall { height: auto; overflow: visible; }
-        .gallery-wall::before, .gallery-wall::after { display: none; }
+        .gallery-wall { height: auto; overflow: visible; -webkit-mask-image: none; mask-image: none; }
         .gallery-col { animation: none; }
         .gallery-col .g-dup { display: none; }
       }
@@ -3631,15 +3605,21 @@
             </button>`;
         }
 
+        const DURS = [54, 66, 60, 72], DELS = [0, -18, -36, -24];
+        function colCount() {
+          const w = window.innerWidth;
+          const n = w >= 1200 ? 4 : w >= 780 ? 3 : w >= 520 ? 2 : 1;
+          return Math.min(n, items.length || 1);
+        }
         function render() {
-          const ncols = items.length >= 3 ? 3 : items.length;
+          const ncols = colCount();
           const cols = Array.from({ length: ncols }, () => []);
           items.forEach((it, i) => cols[i % ncols].push(i));
-          grid.innerHTML = `<div class="gallery-cols">`
-            + cols.map((idxs) => {
+          grid.innerHTML = `<div class="gallery-cols" style="grid-template-columns:repeat(${ncols},1fr)">`
+            + cols.map((idxs, ci) => {
                 const once = idxs.map((i) => tileHtml(i, false)).join("");
                 const dup = idxs.map((i) => tileHtml(i, true)).join("");
-                return `<div class="gallery-col">${once}${dup}</div>`;
+                return `<div class="gallery-col" style="--gdur:${DURS[ci % DURS.length]}s;--gdelay:${DELS[ci % DELS.length]}s">${once}${dup}</div>`;
               }).join("")
             + `</div>`;
           grid.querySelectorAll(".g-tile").forEach((t) => t.addEventListener("click", () => openLb(+t.dataset.i)));
@@ -3654,7 +3634,7 @@
           cur = i;
           const it = items[i];
           lbStage.innerHTML = (it.type === "video" && it.src)
-            ? `<video controls autoplay loop muted playsinline ${it.poster ? `poster="${esc(it.poster)}"` : ""} src="${esc(it.src)}"></video>`
+            ? `<video controls autoplay loop playsinline ${it.poster ? `poster="${esc(it.poster)}"` : ""} src="${esc(it.src)}"></video>`
             : `<img src="${esc(still(it))}" alt="${esc(it.model)}">`;
           lbCap.innerHTML = `<span class="m">${esc(it.model)}</span><span class="p">${esc(it.prompt)}</span>`
             + `<span class="pa">${esc(it.params || "")}${it.placeholder ? " · placeholder art" : ""}</span>`;
@@ -3681,6 +3661,9 @@
           else if (e.key === "ArrowLeft") step(-1);
           else if (e.key === "ArrowRight") step(1);
         });
+
+        let _grt;
+        window.addEventListener("resize", () => { clearTimeout(_grt); _grt = setTimeout(() => { if (items.length) render(); }, 250); });
 
         fetch("gallery/manifest.json", { cache: "no-store" })
           .then((r) => (r.ok ? r.json() : Promise.reject()))

@@ -13,3 +13,8 @@ comparison-results.json
 dashboard.md
 outputs/
 
+# editor / local scratch
+.idea/
+tmp/
+.DS_Store
+
