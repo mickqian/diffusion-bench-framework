@@ -37,9 +37,17 @@
     },
     {
       "type": "image",
-      "src": "gallery/smiths.png",
+      "src": "gallery/vu_drummer.png",
       "model": "Ideogram-4",
-      "prompt": "A bunch of gladioli on a worn windowsill, rain on the glass — a melancholic black-and-white still life.",
+      "prompt": "A drummer standing at a minimal kit with a tambourine, stark black-and-white — a primitive, hypnotic rhythm.",
+      "params": "1024² · structured input · 2-GPU TP",
+      "aspect": "1 / 1"
+    },
+    {
+      "type": "image",
+      "src": "gallery/vu_banana.png",
+      "model": "Ideogram-4",
+      "prompt": "A single ripe banana on crumpled silver foil under hard light — Factory-era pop-art cool.",
       "params": "1024² · structured input · 2-GPU TP",
       "aspect": "1 / 1"
     },

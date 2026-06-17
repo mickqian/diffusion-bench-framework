@@ -1628,7 +1628,8 @@
       .gallery-cols { display: grid; gap: 18px; align-items: start; }
       .gallery-col { display: flex; flex-direction: column; gap: 18px; will-change: transform; animation: gwall var(--gdur, 54s) linear infinite; animation-delay: var(--gdelay, 0s); }
       .gallery-col .g-tile { margin: 0; }
-      .gallery-wall:hover .gallery-col { animation-play-state: paused; }
+      /* Pause only the column the cursor is over, not the whole wall. */
+      .gallery-col:hover { animation-play-state: paused; }
       @keyframes gwall { from { transform: translateY(-50%); } to { transform: translateY(0); } }
       @media (prefers-reduced-motion: reduce) {
         .gallery-wall { height: auto; overflow: visible; -webkit-mask-image: none; mask-image: none; }
@@ -1765,6 +1766,7 @@
       }
 
       body.nightly-only #top,
+      body.nightly-only #gallery,
       body.nightly-only #performance,
       body.nightly-only #platform,
       body.nightly-only #benchmarks,
