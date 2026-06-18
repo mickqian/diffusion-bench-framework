@@ -21,7 +21,7 @@
             "width": 1024,
             "height": 1024,
             "seed": 42,
-            "num_gpus": 1,
+            "num_gpus": 2,
             "num_inference_steps": 50,
             "guidance_scale": 3.5,
             "report_framework_statuses": {
@@ -32,31 +32,14 @@
             },
             "frameworks": {
                 "sglang": {
-                    "serve_args": "--model-type diffusion --warmup --dit-layerwise-offload false",
+                    "serve_args": "--model-type diffusion --warmup --dit-layerwise-offload false --tp-size 2",
                     "extra_env": {},
                     "command_profiles": {
                         "default": {
                             "description": "Best known SGLang command for the benchmark repo default profile.",
                             "sglang_ref": "current-main",
-                            "serve_args": "--model-type diffusion --warmup --dit-layerwise-offload false",
+                            "serve_args": "--model-type diffusion --warmup --dit-layerwise-offload false --tp-size 2",
                             "notes": "Keep this profile updated when the best command changes for a SGLang release or commit."
-                        },
-                        "h100-h200-1gpu-compile": {
-                            "description": "Hopper single-GPU legacy-compatible FLUX compile profile.",
-                            "hardware": [
-                                "h100",
-                                "h200"
-                            ],
-                            "num_gpus": 1,
-                            "sglang_ref": "legacy-compatible",
-                            "serve_args": "--model-type diffusion --warmup --dit-layerwise-offload false --enable-torch-compile",
-                            "benchmark": {
-                                "warmup": {
-                                    "num_requests": 2,
-                                    "num_inference_steps": 50
-                                }
-                            },
-                            "notes": "Use for SGLang commits before --performance-mode speed existed; keep compile enabled for fastest available legacy path."
                         },
                         "h100-h200-2gpu-tp-compile": {
                             "description": "Hopper 2-GPU TP legacy-compatible FLUX compile profile.",
@@ -74,25 +57,6 @@
                                 }
                             },
                             "notes": "Use for SGLang commits before --performance-mode speed existed; TP remains explicit."
-                        },
-                        "blackwell-1gpu-compile": {
-                            "description": "Blackwell single-GPU legacy-compatible FLUX compile profile.",
-                            "hardware": [
-                                "b200",
-                                "gb200",
-                                "b300",
-                                "gb300"
-                            ],
-                            "num_gpus": 1,
-                            "sglang_ref": "legacy-compatible",
-                            "serve_args": "--model-type diffusion --warmup --dit-layerwise-offload false --enable-torch-compile",
-                            "benchmark": {
-                                "warmup": {
-                                    "num_requests": 2,
-                                    "num_inference_steps": 50
-                                }
-                            },
-                            "notes": "Use for SGLang commits before --performance-mode speed existed; keep compile enabled for fastest available legacy path."
                         },
                         "blackwell-2gpu-tp-compile": {
                             "description": "Blackwell 2-GPU TP legacy-compatible FLUX compile profile.",
@@ -113,26 +77,6 @@
                             },
                             "notes": "Use for SGLang commits before --performance-mode speed existed; TP remains explicit."
                         },
-                        "h100-h200-1gpu-speed-compile": {
-                            "description": "Hopper single-GPU fastest FLUX profile probe.",
-                            "hardware": [
-                                "h100",
-                                "h200"
-                            ],
-                            "num_gpus": 1,
-                            "sglang_ref": "current-main",
-                            "serve_args": "--model-type diffusion --warmup --dit-layerwise-offload false --performance-mode speed --enable-torch-compile",
-                            "benchmark": {
-                                "warmup": {
-                                    "num_requests": 2,
-                                    "num_inference_steps": 50
-                                }
-                            },
-                            "extra_env": {
-                                "FLASHINFER_USE_CUDA_NORM": "1"
-                            },
-                            "notes": "Steady-state fastest profile candidate; use CUDA norm to avoid FlashInfer CUTE norm JIT on Hopper."
-                        },
                         "h100-h200-2gpu-tp-speed-compile": {
                             "description": "Hopper 2-GPU TP fastest FLUX profile probe.",
                             "hardware": [
@@ -152,25 +96,6 @@
                                 "FLASHINFER_USE_CUDA_NORM": "1"
                             },
                             "notes": "Steady-state fastest profile candidate; TP is explicit and CUDA norm avoids FlashInfer CUTE norm JIT on Hopper."
-                        },
-                        "blackwell-1gpu-speed-compile": {
-                            "description": "Blackwell single-GPU fastest FLUX profile probe.",
-                            "hardware": [
-                                "b200",
-                                "gb200",
-                                "b300",
-                                "gb300"
-                            ],
-                            "num_gpus": 1,
-                            "sglang_ref": "current-main",
-                            "serve_args": "--model-type diffusion --warmup --dit-layerwise-offload false --performance-mode speed --enable-torch-compile",
-                            "benchmark": {
-                                "warmup": {
-                                    "num_requests": 2,
-                                    "num_inference_steps": 50
-                                }
-                            },
-                            "notes": "Steady-state fastest profile candidate for Blackwell; use with DIFFUSION_BENCH_DISABLE_TORCH_COMPILE=0."
                         },
                         "blackwell-2gpu-tp-speed-compile": {
                             "description": "Blackwell 2-GPU TP fastest FLUX profile probe.",
@@ -194,7 +119,7 @@
                     }
                 },
                 "vllm-omni": {
-                    "num_gpus": 1,
+                    "num_gpus": 2,
                     "serve_args": "",
                     "extra_env": {
                         "DIFFUSION_ATTENTION_BACKEND": "FLASH_ATTN"
@@ -205,26 +130,6 @@
                             "framework_ref": "vllm-omni-0.18.0-cli-env",
                             "serve_args": "",
                             "notes": "Uses env-selected FlashAttention; torch compile is disabled by the benchmark harness.",
-                            "extra_env": {
-                                "DIFFUSION_ATTENTION_BACKEND": "FLASH_ATTN"
-                            }
-                        },
-                        "h100-h200-1gpu-compile": {
-                            "description": "Hopper single-GPU fastest vLLM-Omni FLUX profile probe.",
-                            "hardware": [
-                                "h100",
-                                "h200"
-                            ],
-                            "num_gpus": 1,
-                            "framework_ref": "vllm-omni-latest+compile-allowed",
-                            "serve_args": "",
-                            "benchmark": {
-                                "warmup": {
-                                    "num_requests": 2,
-                                    "num_inference_steps": 50
-                                }
-                            },
-                            "notes": "Use with DIFFUSION_BENCH_DISABLE_TORCH_COMPILE=0 so the harness does not append eager/compile-off args.",
                             "extra_env": {
                                 "DIFFUSION_ATTENTION_BACKEND": "FLASH_ATTN"
                             }
@@ -247,28 +152,6 @@
                             "notes": "The harness adds --tensor-parallel-size 2 when num_gpus=2; use with compile allowed.",
                             "extra_env": {
                                 "DIFFUSION_ATTENTION_BACKEND": "FLASH_ATTN"
-                            }
-                        },
-                        "blackwell-1gpu-compile": {
-                            "description": "Blackwell single-GPU fastest vLLM-Omni FLUX profile probe.",
-                            "hardware": [
-                                "b200",
-                                "gb200",
-                                "b300",
-                                "gb300"
-                            ],
-                            "num_gpus": 1,
-                            "framework_ref": "vllm-omni-latest+blackwell+compile-allowed",
-                            "serve_args": "",
-                            "benchmark": {
-                                "warmup": {
-                                    "num_requests": 2,
-                                    "num_inference_steps": 50
-                                }
-                            },
-                            "notes": "Use with DIFFUSION_BENCH_DISABLE_TORCH_COMPILE=0 so the harness does not append eager/compile-off args.",
-                            "extra_env": {
-                                "DIFFUSION_ATTENTION_BACKEND": "FLASHINFER_ATTN"
                             }
                         },
                         "blackwell-2gpu-tp-compile": {
@@ -296,7 +179,7 @@
                     }
                 },
                 "trtllm-visual": {
-                    "num_gpus": 1,
+                    "num_gpus": 2,
                     "serve_args": "--backend pytorch",
                     "extra_env": {},
                     "http_server": {
@@ -324,17 +207,6 @@
                             "serve_args": "--backend pytorch",
                             "notes": "Keep this profile updated as the best command changes. trtllm-serve auto-detects the FLUX.1 diffusion model; add --extra_visual_gen_options <model>.yml for steady-state tuning. PyTorch backend, no TeaCache and no torch compile so the row stays cache-free and comparable. Needs GPU validation."
                         },
-                        "h100-h200-1gpu-speed": {
-                            "description": "Hopper single-GPU TensorRT-LLM VisualGen FLUX.1 profile probe.",
-                            "hardware": [
-                                "h100",
-                                "h200"
-                            ],
-                            "num_gpus": 1,
-                            "framework_ref": "tensorrt-llm-visualgen+trtllm-kernels",
-                            "serve_args": "--backend pytorch",
-                            "notes": "TRTLLM attention-backend kernels on Hopper. trtllm-serve auto-detects the FLUX.1 diffusion model; add --extra_visual_gen_options <model>.yml for steady-state tuning. PyTorch backend, no TeaCache and no torch compile so the row stays cache-free and comparable. Needs GPU validation."
-                        },
                         "h100-h200-2gpu-tp-speed": {
                             "description": "Hopper 2-GPU TP TensorRT-LLM VisualGen FLUX.1 profile probe.",
                             "hardware": [
@@ -358,36 +230,19 @@
             "width": 1024,
             "height": 1024,
             "seed": 42,
-            "num_gpus": 1,
+            "num_gpus": 2,
             "num_inference_steps": 50,
             "guidance_scale": 4.0,
             "frameworks": {
                 "sglang": {
-                    "serve_args": "--model-type diffusion --warmup --dit-layerwise-offload false",
+                    "serve_args": "--model-type diffusion --warmup --dit-layerwise-offload false --tp-size 2",
                     "extra_env": {},
                     "command_profiles": {
                         "default": {
                             "description": "Best known SGLang command for the benchmark repo default profile.",
                             "sglang_ref": "current-main",
-                            "serve_args": "--model-type diffusion --warmup --dit-layerwise-offload false",
+                            "serve_args": "--model-type diffusion --warmup --dit-layerwise-offload false --tp-size 2",
                             "notes": "Keep this profile updated when the best command changes for a SGLang release or commit."
-                        },
-                        "h100-h200-1gpu-compile": {
-                            "description": "Hopper single-GPU legacy-compatible FLUX.2 compile profile.",
-                            "hardware": [
-                                "h100",
-                                "h200"
-                            ],
-                            "num_gpus": 1,
-                            "sglang_ref": "legacy-compatible",
-                            "serve_args": "--model-type diffusion --warmup --dit-layerwise-offload false --enable-torch-compile",
-                            "benchmark": {
-                                "warmup": {
-                                    "num_requests": 2,
-                                    "num_inference_steps": 50
-                                }
-                            },
-                            "notes": "Use for SGLang commits before --performance-mode speed existed; keep compile enabled for fastest available legacy path."
                         },
                         "h100-h200-2gpu-tp-compile": {
                             "description": "Hopper 2-GPU TP legacy-compatible FLUX.2 compile profile.",
@@ -405,25 +260,6 @@
                                 }
                             },
                             "notes": "Use for SGLang commits before --performance-mode speed existed; TP remains explicit."
-                        },
-                        "blackwell-1gpu-compile": {
-                            "description": "Blackwell single-GPU legacy-compatible FLUX.2 compile profile.",
-                            "hardware": [
-                                "b200",
-                                "gb200",
-                                "b300",
-                                "gb300"
-                            ],
-                            "num_gpus": 1,
-                            "sglang_ref": "legacy-compatible",
-                            "serve_args": "--model-type diffusion --warmup --dit-layerwise-offload false --enable-torch-compile",
-                            "benchmark": {
-                                "warmup": {
-                                    "num_requests": 2,
-                                    "num_inference_steps": 50
-                                }
-                            },
-                            "notes": "Use for SGLang commits before --performance-mode speed existed; keep compile enabled for fastest available legacy path."
                         },
                         "blackwell-2gpu-tp-compile": {
                             "description": "Blackwell 2-GPU TP legacy-compatible FLUX.2 compile profile.",
@@ -444,26 +280,6 @@
                             },
                             "notes": "Use for SGLang commits before --performance-mode speed existed; TP remains explicit."
                         },
-                        "h100-h200-1gpu-speed-compile": {
-                            "description": "Hopper single-GPU fastest FLUX.2 profile probe.",
-                            "hardware": [
-                                "h100",
-                                "h200"
-                            ],
-                            "num_gpus": 1,
-                            "sglang_ref": "current-main",
-                            "serve_args": "--model-type diffusion --warmup --dit-layerwise-offload false --performance-mode speed --enable-torch-compile",
-                            "benchmark": {
-                                "warmup": {
-                                    "num_requests": 2,
-                                    "num_inference_steps": 50
-                                }
-                            },
-                            "extra_env": {
-                                "FLASHINFER_USE_CUDA_NORM": "1"
-                            },
-                            "notes": "Steady-state fastest profile candidate; use CUDA norm to avoid FlashInfer CUTE norm JIT on Hopper."
-                        },
                         "h100-h200-2gpu-tp-speed-compile": {
                             "description": "Hopper 2-GPU TP fastest FLUX.2 profile probe.",
                             "hardware": [
@@ -483,25 +299,6 @@
                                 "FLASHINFER_USE_CUDA_NORM": "1"
                             },
                             "notes": "Steady-state fastest profile candidate; TP is explicit and CUDA norm avoids FlashInfer CUTE norm JIT on Hopper."
-                        },
-                        "blackwell-1gpu-speed-compile": {
-                            "description": "Blackwell single-GPU fastest FLUX.2 profile probe.",
-                            "hardware": [
-                                "b200",
-                                "gb200",
-                                "b300",
-                                "gb300"
-                            ],
-                            "num_gpus": 1,
-                            "sglang_ref": "current-main",
-                            "serve_args": "--model-type diffusion --warmup --dit-layerwise-offload false --performance-mode speed --enable-torch-compile",
-                            "benchmark": {
-                                "warmup": {
-                                    "num_requests": 2,
-                                    "num_inference_steps": 50
-                                }
-                            },
-                            "notes": "Steady-state fastest profile candidate for Blackwell; use with DIFFUSION_BENCH_DISABLE_TORCH_COMPILE=0."
                         },
                         "blackwell-2gpu-tp-speed-compile": {
                             "description": "Blackwell 2-GPU TP fastest FLUX.2 profile probe.",
@@ -525,7 +322,7 @@
                     }
                 },
                 "vllm-omni": {
-                    "num_gpus": 1,
+                    "num_gpus": 2,
                     "serve_args": "",
                     "extra_env": {
                         "DIFFUSION_ATTENTION_BACKEND": "FLASH_ATTN"
@@ -536,26 +333,6 @@
                             "framework_ref": "vllm-omni-0.18.0-cli-env",
                             "serve_args": "",
                             "notes": "Uses env-selected FlashAttention; torch compile is disabled by the benchmark harness.",
-                            "extra_env": {
-                                "DIFFUSION_ATTENTION_BACKEND": "FLASH_ATTN"
-                            }
-                        },
-                        "h100-h200-1gpu-compile": {
-                            "description": "Hopper single-GPU fastest vLLM-Omni FLUX.2 profile probe.",
-                            "hardware": [
-                                "h100",
-                                "h200"
-                            ],
-                            "num_gpus": 1,
-                            "framework_ref": "vllm-omni-latest+compile-allowed",
-                            "serve_args": "",
-                            "benchmark": {
-                                "warmup": {
-                                    "num_requests": 2,
-                                    "num_inference_steps": 50
-                                }
-                            },
-                            "notes": "Use with DIFFUSION_BENCH_DISABLE_TORCH_COMPILE=0 so the harness does not append eager/compile-off args.",
                             "extra_env": {
                                 "DIFFUSION_ATTENTION_BACKEND": "FLASH_ATTN"
                             }
@@ -578,28 +355,6 @@
                             "notes": "The harness adds --tensor-parallel-size 2 when num_gpus=2; use with compile allowed.",
                             "extra_env": {
                                 "DIFFUSION_ATTENTION_BACKEND": "FLASH_ATTN"
-                            }
-                        },
-                        "blackwell-1gpu-compile": {
-                            "description": "Blackwell single-GPU fastest vLLM-Omni FLUX.2 profile probe.",
-                            "hardware": [
-                                "b200",
-                                "gb200",
-                                "b300",
-                                "gb300"
-                            ],
-                            "num_gpus": 1,
-                            "framework_ref": "vllm-omni-latest+blackwell+compile-allowed",
-                            "serve_args": "",
-                            "benchmark": {
-                                "warmup": {
-                                    "num_requests": 2,
-                                    "num_inference_steps": 50
-                                }
-                            },
-                            "notes": "Use with DIFFUSION_BENCH_DISABLE_TORCH_COMPILE=0 so the harness does not append eager/compile-off args.",
-                            "extra_env": {
-                                "DIFFUSION_ATTENTION_BACKEND": "FLASHINFER_ATTN"
                             }
                         },
                         "blackwell-2gpu-tp-compile": {
@@ -630,7 +385,7 @@
                     "model": "black-forest-labs/FLUX.2-dev",
                     "model_cls": "flux2_dev",
                     "lightx2v_task": "t2i",
-                    "num_gpus": 1,
+                    "num_gpus": 2,
                     "serve_args": "",
                     "extra_env": {},
                     "lightx2v_config": {
@@ -684,7 +439,7 @@
                     }
                 },
                 "trtllm-visual": {
-                    "num_gpus": 1,
+                    "num_gpus": 2,
                     "serve_args": "--backend pytorch",
                     "extra_env": {},
                     "http_server": {
@@ -711,17 +466,6 @@
                             "framework_ref": "tensorrt-llm-visualgen-trtllm-serve",
                             "serve_args": "--backend pytorch",
                             "notes": "Keep this profile updated as the best command changes. trtllm-serve auto-detects the FLUX.2 diffusion model; add --extra_visual_gen_options <model>.yml for steady-state tuning. PyTorch backend, no TeaCache and no torch compile so the row stays cache-free and comparable. Needs GPU validation."
-                        },
-                        "h100-h200-1gpu-speed": {
-                            "description": "Hopper single-GPU TensorRT-LLM VisualGen FLUX.2 profile probe.",
-                            "hardware": [
-                                "h100",
-                                "h200"
-                            ],
-                            "num_gpus": 1,
-                            "framework_ref": "tensorrt-llm-visualgen+trtllm-kernels",
-                            "serve_args": "--backend pytorch",
-                            "notes": "TRTLLM attention-backend kernels on Hopper. trtllm-serve auto-detects the FLUX.2 diffusion model; add --extra_visual_gen_options <model>.yml for steady-state tuning. PyTorch backend, no TeaCache and no torch compile so the row stays cache-free and comparable. Needs GPU validation."
                         },
                         "h100-h200-2gpu-tp-speed": {
                             "description": "Hopper 2-GPU TP TensorRT-LLM VisualGen FLUX.2 profile probe.",
