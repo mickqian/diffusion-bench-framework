@@ -34,7 +34,7 @@ diffusion-bench-compare \
   --frameworks sglang \
   --case-ids cosmos3_nano_t2i_720p \
   --hardware-profile h200 \
-  --sglang-profile h200-1gpu-fa \
+  --sglang-profile h200-2gpu-tp-fa \
   --run-id "${RUN_ID_ROOT}-sglang-t2i-single" \
   --port "${PORT_BASE}" \
   --output "${SGLANG_T2I_SINGLE}"
@@ -56,7 +56,7 @@ diffusion-bench-compare \
   --frameworks sglang \
   --case-ids cosmos3_nano_t2i_720p \
   --hardware-profile h200 \
-  --sglang-profile h200-1gpu-fa-batch4 \
+  --sglang-profile h200-2gpu-tp-fa-batch4 \
   --throughput-num-requests "${THROUGHPUT_NUM_REQUESTS:-8}" \
   --throughput-max-concurrency "${THROUGHPUT_MAX_CONCURRENCY:-4}" \
   --throughput-request-rate "${THROUGHPUT_REQUEST_RATE:-inf}" \
@@ -64,7 +64,7 @@ diffusion-bench-compare \
   --port "$((PORT_BASE + 20))" \
   --output "${SGLANG_T2I_THROUGHPUT}"
 
-DIFFUSION_BENCH_VLLM_OMNI_PROFILE=h200-1gpu-fa \
+DIFFUSION_BENCH_VLLM_OMNI_PROFILE=h200-2gpu-cfg \
 diffusion-bench-compare \
   --config "${CONFIG}" \
   --modes single_e2e \
@@ -86,7 +86,7 @@ diffusion-bench-compare \
   --port "$((PORT_BASE + 40))" \
   --output "${VLLM_VIDEO_SINGLE}"
 
-DIFFUSION_BENCH_VLLM_OMNI_PROFILE=h200-1gpu-fa \
+DIFFUSION_BENCH_VLLM_OMNI_PROFILE=h200-2gpu-cfg \
 diffusion-bench-compare \
   --config "${CONFIG}" \
   --modes throughput \

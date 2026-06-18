@@ -83,11 +83,11 @@ run_compare "${REPORT_DIR}/${RUN_ID_ROOT}-cosmos3-image-sgld.json" \
   --frameworks sglang \
   --case-ids cosmos3_nano_t2i_720p \
   --hardware-profile h200 \
-  --sglang-profile h200-1gpu-fa-speed \
+  --sglang-profile h200-2gpu-tp-fa-speed \
   --run-id "${RUN_ID_ROOT}-cosmos3-image-sgld" \
   --port "${port}"
 
-DIFFUSION_BENCH_VLLM_OMNI_PROFILE=h200-1gpu-fa \
+DIFFUSION_BENCH_VLLM_OMNI_PROFILE=h200-2gpu-cfg \
 run_compare "${REPORT_DIR}/${RUN_ID_ROOT}-cosmos3-image-vllm.json" \
   --config "${CONFIG}" \
   --modes single_e2e \
