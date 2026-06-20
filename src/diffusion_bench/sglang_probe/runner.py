@@ -296,7 +296,7 @@ MODEL_CATALOG: list[dict[str, Any]] = [
         "modality": "image",
         "task_type": "T2I",
         "size": "1024x1024",
-        "steps": 4,
+        "steps": 20,
         "prompt": "A crisp poster with the word SGLang.",
         "tags": ["b200", "nvfp4", "modelopt", "special"],
         "env": {"SGLANG_DIFFUSION_FLASHINFER_FP4_GEMM_BACKEND": "flashinfer_trtllm"},
