@@ -1,0 +1,6 @@
+{
+  "description": "Fast daily coverage across model families and entrypoints. Intended for manually scheduled GPU devbox runs.",
+  "phases": ["smoke"],
+  "max_pairwise_cells": 0
+}
+

@@ -1,0 +1,6 @@
+{
+  "description": "Full pre-release stability matrix: smoke, bounded pairwise, targeted risky triples, and stress cells.",
+  "phases": ["smoke", "pairwise", "targeted", "stress"],
+  "max_pairwise_cells": 180
+}
+

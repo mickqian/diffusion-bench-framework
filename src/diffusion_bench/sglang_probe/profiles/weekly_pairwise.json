@@ -1,0 +1,6 @@
+{
+  "description": "Bounded weekly pairwise coverage across model, entrypoint, backend/env group, and request family axes.",
+  "phases": ["smoke", "pairwise", "targeted"],
+  "max_pairwise_cells": 80
+}
+

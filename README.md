@@ -9,6 +9,8 @@ Standalone harness for fair, reproducible comparison of diffusion serving framew
 
 It launches one serving stack per case, sends a single end-to-end request, optionally runs a fixed high-pressure throughput workload, writes a unified JSON result, and publishes a GitHub Pages one-pager.
 
+It also includes a separate SGLang-Diffusion stability probe suite for periodic server/API robustness experiments. That suite is intentionally not part of the formal cross-framework latency comparison.
+
 ## Quickstart
 
 ```bash
@@ -45,9 +47,11 @@ diffusion-bench-compare → per case: launch stack → single e2e (+ optional th
 ## Where things live
 
 - `src/diffusion_bench/` — `run_comparison.py` (server lifecycle + runner), `bench_serving.py` (async client), `generate_dashboard.py` / `build_report_artifacts.py` / `generate_report_image.py`.
+- `src/diffusion_bench/sglang_probe/` — SGLang-Diffusion stability probe matrix, runner, reporting, and reusable profiles.
 - `configs/comparison_configs.json` — editable case/framework config.
 - `scripts/` — reproducible per-run scripts (`run_h200_*.sh`), `install_comparison_frameworks.sh`, `run_trtllm_visual_h200.md`, artifact generators. One script per tracked run; see the script header for its knobs.
 - `manifests/` — pinned run manifests (bench/SGLang/framework/hardware versions); the source of truth for reconstructing historical reports.
+- `docs/sglang_probe/` — probe usage notes plus historical probe matrix/result summaries.
 - `skills/` — operating discipline (see below).
 - `docs/` — the GitHub Pages one-pager.
 
