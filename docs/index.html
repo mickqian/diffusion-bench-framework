@@ -1645,6 +1645,11 @@
       }
       .g-tile:hover { transform: translateY(-2px); box-shadow: var(--shadow-1); }
       .g-tile img, .g-tile video { display: block; width: 100%; height: auto; }
+      /* 3D preview tile: auto-rotating, non-interactive in the wall (click opens the lightbox) */
+      .g-mv { display: block; width: 100%; pointer-events: none; background: transparent;
+        --poster-color: transparent; --progress-bar-color: transparent; }
+      .lb-mv { width: min(78vh, 92vw); height: min(78vh, 92vw); background: transparent;
+        border-radius: var(--r-md); --poster-color: transparent; }
       .g-tag {
         position: absolute; top: 10px; left: 10px; z-index: 2; line-height: 1;
         font-size: 11.5px; font-weight: 500; letter-spacing: 0.01em;
@@ -1680,6 +1685,7 @@
       .lb-figure { margin: 0; max-width: min(1100px, 100%); display: flex; flex-direction: column; gap: 14px; }
       .lb-stage { display: flex; align-items: center; justify-content: center; }
       .lb-stage img, .lb-stage video { max-width: 100%; max-height: 78vh; border-radius: var(--r-md); display: block; }
+      .lb-stage img { cursor: zoom-in; transform-origin: center center; transition: transform 0.12s ease-out; will-change: transform; }
       .lb-cap { color: #e9e3d6; font-size: 14px; line-height: 1.55; text-align: center; max-width: 70ch; margin: 0 auto; }
       .lb-cap .m { color: var(--accent); font-weight: 600; }
       .lb-cap .p { display: block; margin-top: 4px; }
@@ -3589,18 +3595,25 @@
         const lbCap = document.getElementById("lbCap");
         let items = [], cur = 0;
         const esc = (s) => String(s == null ? "" : s).replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
-        const still = (it) => (it.type === "video" ? (it.poster || it.src || "") : (it.src || it.poster || ""));
+        const still = (it) => (it.type === "image" ? (it.src || it.poster || "") : (it.poster || it.src || ""));
 
         function tileHtml(i, dup) {
           const it = items[i];
           const isVid = it.type === "video";
+          const is3d = it.type === "model3d";
           const ar = it.aspect ? ` style="aspect-ratio:${esc(it.aspect)}"` : "";
-          const media = isVid && it.src
-            ? `<video${ar} preload="metadata" muted loop playsinline ${it.poster ? `poster="${esc(it.poster)}"` : ""} src="${esc(it.src)}"></video>`
-            : `<img${ar} loading="lazy" decoding="async" src="${esc(still(it))}" alt="${esc(it.model)} — ${esc(it.prompt)}">`;
+          let media;
+          if (is3d && it.src) {
+            // auto-rotating, non-interactive preview in the wall; click opens the lightbox
+            media = `<model-viewer${ar} class="g-mv" src="${esc(it.src)}" ${it.poster ? `poster="${esc(it.poster)}"` : ""} auto-rotate rotation-per-second="22deg" interaction-prompt="none" disable-zoom disable-tap camera-controls="false" loading="eager" reveal="auto" shadow-intensity="0.5" exposure="1.05" environment-image="neutral"></model-viewer>`;
+          } else if (isVid && it.src) {
+            media = `<video${ar} preload="metadata" muted loop playsinline ${it.poster ? `poster="${esc(it.poster)}"` : ""} src="${esc(it.src)}"></video>`;
+          } else {
+            media = `<img${ar} loading="lazy" decoding="async" src="${esc(still(it))}" alt="${esc(it.model)} — ${esc(it.prompt)}">`;
+          }
           const a11y = dup ? 'tabindex="-1" aria-hidden="true"' : `aria-label="${esc(it.model)}: ${esc(it.prompt)}"`;
           return `<button class="g-tile${dup ? " g-dup" : ""}" type="button" data-i="${i}" ${a11y}>
-              <span class="g-tag">${isVid ? "▶ " : ""}${esc(it.model)}</span>
+              <span class="g-tag">${is3d ? "✦ 3D · " : isVid ? "▶ " : ""}${esc(it.model)}</span>
               ${media}
               ${isVid && !it.src ? '<span class="g-play"><span>▶</span></span>' : ""}
               <span class="g-cap"><span class="m">${esc(it.model)}</span><span class="p">${esc(it.prompt)}</span></span>
@@ -3632,14 +3645,52 @@
           grid.querySelectorAll("video").forEach((v) => vio.observe(v));
         }
 
+        // --- lightbox zoom / pan (images only) ---
+        let zScale = 1, zTx = 0, zTy = 0, zImg = null, zDrag = false, zsx = 0, zsy = 0;
+        function zApply() {
+          if (!zImg) return;
+          zImg.style.transform = `translate(${zTx}px, ${zTy}px) scale(${zScale})`;
+          zImg.style.cursor = zScale > 1 ? (zDrag ? "grabbing" : "grab") : "zoom-in";
+        }
+        function zReset() { zScale = 1; zTx = 0; zTy = 0; if (zImg) zApply(); }
+        function zCenter() { const r = lbStage.getBoundingClientRect(); return { cx: r.left + r.width / 2, cy: r.top + r.height / 2 }; }
+        function zSetup(img) {
+          zImg = img; zReset();
+          img.addEventListener("wheel", (e) => {
+            e.preventDefault();
+            const { cx, cy } = zCenter(); const ox = e.clientX - cx, oy = e.clientY - cy;
+            const f = e.deltaY < 0 ? 1.15 : 1 / 1.15;
+            const s2 = Math.min(6, Math.max(1, zScale * f));
+            if (s2 === zScale) return;
+            zTx = ox - (ox - zTx) * (s2 / zScale); zTy = oy - (oy - zTy) * (s2 / zScale);
+            zScale = s2; if (zScale === 1) { zTx = 0; zTy = 0; } zApply();
+          }, { passive: false });
+          img.addEventListener("dblclick", (e) => {
+            if (zScale > 1) { zReset(); return; }
+            const { cx, cy } = zCenter(); const ox = e.clientX - cx, oy = e.clientY - cy;
+            zScale = 2.5; zTx = ox - ox * zScale; zTy = oy - oy * zScale; zApply();
+          });
+          img.addEventListener("mousedown", (e) => {
+            if (zScale <= 1) return;
+            zDrag = true; zsx = e.clientX - zTx; zsy = e.clientY - zTy;
+            zImg.style.transition = "none"; e.preventDefault(); zApply();
+          });
+        }
+        window.addEventListener("mousemove", (e) => { if (!zDrag) return; zTx = e.clientX - zsx; zTy = e.clientY - zsy; zApply(); });
+        window.addEventListener("mouseup", () => { if (!zDrag) return; zDrag = false; if (zImg) zImg.style.transition = ""; zApply(); });
+
         function openLb(i) {
           cur = i;
           const it = items[i];
-          lbStage.innerHTML = (it.type === "video" && it.src)
+          lbStage.innerHTML = (it.type === "model3d" && it.src)
+            ? `<model-viewer class="lb-mv" src="${esc(it.src)}" ${it.poster ? `poster="${esc(it.poster)}"` : ""} camera-controls auto-rotate rotation-per-second="20deg" touch-action="pan-y" interaction-prompt="none" shadow-intensity="0.7" exposure="1.05" environment-image="neutral"></model-viewer>`
+            : (it.type === "video" && it.src)
             ? `<video controls autoplay loop playsinline ${it.poster ? `poster="${esc(it.poster)}"` : ""} src="${esc(it.src)}"></video>`
             : `<img src="${esc(still(it))}" alt="${esc(it.model)}">`;
           lbCap.innerHTML = `<span class="m">${esc(it.model)}</span><span class="p">${esc(it.prompt)}</span>`
             + `<span class="pa">${esc(it.params || "")}${it.placeholder ? " · placeholder art" : ""}</span>`;
+          const _zi = lbStage.querySelector("img");
+          if (_zi) zSetup(_zi); else { zImg = null; }
           lb.hidden = false;
           lb.setAttribute("aria-hidden", "false");
           requestAnimationFrame(() => lb.classList.add("open"));
@@ -3649,6 +3700,7 @@
           lb.classList.remove("open");
           lb.setAttribute("aria-hidden", "true");
           document.body.style.overflow = "";
+          zDrag = false; zImg = null;
           setTimeout(() => { lb.hidden = true; lbStage.innerHTML = ""; }, 200);
         }
         const step = (d) => openLb((cur + d + items.length) % items.length);

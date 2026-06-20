@@ -3,37 +3,11 @@
   "items": [
     {
       "type": "image",
-      "src": "gallery/bowie.png",
-      "model": "Ideogram-4",
-      "prompt": "An androgynous glam-rock figure, a single crimson-and-cobalt lightning bolt across one eye — a cosmic, theatrical portrait.",
-      "params": "832×1216 · structured input · 2-GPU TP",
-      "aspect": "832 / 1216"
-    },
-    {
-      "type": "video",
-      "src": "gallery/radiohead.mp4",
-      "poster": "gallery/radiohead.png",
-      "model": "LTX-2.3 HQ",
-      "prompt": "A rain-soaked motorway at night seen from a moving car, cold light-trails smearing across wet glass — late-90s alienation.",
-      "params": "1080p · 121 frames · two-stage HQ",
-      "aspect": "1920 / 1088"
-    },
-    {
-      "type": "image",
       "src": "gallery/wanqing.png",
       "model": "Ideogram-4",
       "prompt": "A northern industrial town at dusk — smokestacks against a bruised sky, a lone figure on a concrete overpass.",
       "params": "1280×768 · structured input · 2-GPU TP",
       "aspect": "1280 / 768"
-    },
-    {
-      "type": "video",
-      "src": "gallery/bossa.mp4",
-      "poster": "gallery/bossa.png",
-      "model": "LTX-2.3 HQ",
-      "prompt": "Golden-hour light drifting across a 1960s Rio balcony, a nylon-string guitar on a rattan chair, curtains breathing in the sea breeze.",
-      "params": "1080p · 121 frames · two-stage HQ",
-      "aspect": "1920 / 1088"
     },
     {
       "type": "image",
@@ -52,6 +26,46 @@
       "aspect": "1 / 1"
     },
     {
+      "type": "image",
+      "src": "gallery/highland.png",
+      "model": "Ideogram-4",
+      "prompt": "A Scottish highland moor under a brooding sky — a single shaft of light sweeping across the dark hills.",
+      "params": "768×1280 · structured input · 2-GPU TP",
+      "aspect": "768 / 1280"
+    },
+    {
+      "type": "image",
+      "src": "gallery/birch.png",
+      "model": "Ideogram-4",
+      "prompt": "A misty birch forest at dawn — slender white trunks fading into pale fog, a lone walker among them.",
+      "params": "1280×768 · structured input · 2-GPU TP",
+      "aspect": "1280 / 768"
+    },
+    {
+      "type": "image",
+      "src": "gallery/stormcoast.png",
+      "model": "Ideogram-4",
+      "prompt": "Immense sea cliffs battered by huge waves under a storm sky — a shaft of pale light breaking onto the dark ocean.",
+      "params": "1920×1088 · structured input · 2-GPU TP",
+      "aspect": "1920 / 1088"
+    },
+    {
+      "type": "image",
+      "src": "gallery/plateau.png",
+      "model": "Ideogram-4",
+      "prompt": "A vast high plateau under a brooding sky — a single shaft of sunlight sweeping the wild land toward distant peaks.",
+      "params": "1920×1088 · structured input · 2-GPU TP",
+      "aspect": "1920 / 1088"
+    },
+    {
+      "type": "image",
+      "src": "gallery/dunes.png",
+      "model": "Ideogram-4",
+      "prompt": "An immense sea of desert dunes before an approaching sandstorm — low light raking the ridges.",
+      "params": "1920×1088 · structured input · 2-GPU TP",
+      "aspect": "1920 / 1088"
+    },
+    {
       "type": "video",
       "src": "gallery/lingbot.mp4",
       "poster": "gallery/lingbot.png",
@@ -59,47 +73,6 @@
       "prompt": "A rover crossing the dust-red Martian surface, mountains on the horizon — a real-time world-model scene.",
       "params": "480p · 40 fps · real-time world model",
       "aspect": "832 / 480"
-    },
-    {
-      "type": "image",
-      "src": "gallery/flux2.png",
-      "model": "FLUX.2-dev",
-      "prompt": "A weathered brass diving helmet resting on raw linen, soft north-window light — a quiet still life in the spirit of 1950s editorial photography.",
-      "params": "1024×1280 · 50 steps",
-      "aspect": "1024 / 1280"
-    },
-    {
-      "type": "image",
-      "src": "gallery/qwen.png",
-      "model": "Qwen-Image",
-      "prompt": "An abandoned Art Nouveau conservatory reclaimed by ferns and morning mist, light falling through a cracked glass roof.",
-      "params": "1024² · text-to-image",
-      "aspect": "1 / 1"
-    },
-    {
-      "type": "image",
-      "src": "gallery/ideogram.png",
-      "model": "Ideogram-4",
-      "prompt": "A vintage turntable on a sunlit windowsill, a record spinning on a quiet afternoon — warm editorial still life.",
-      "params": "1024² · structured input · 2-GPU TP",
-      "aspect": "1 / 1"
-    },
-    {
-      "type": "video",
-      "src": "gallery/wan22.mp4",
-      "poster": "gallery/wan22.png",
-      "model": "Wan2.2 TI2V",
-      "prompt": "A lone heron lifts from a glass-still lake at first light, slow motion, mist peeling off the water.",
-      "params": "704p · 81 frames",
-      "aspect": "1280 / 704"
-    },
-    {
-      "type": "image",
-      "src": "gallery/flux1.png",
-      "model": "FLUX.1-dev",
-      "prompt": "An Art-Deco travel poster of the Zhejiang coastline — geometric waves, cream and burnt orange, screen-printed texture.",
-      "params": "1024×1280 · 40 steps · cfg 3.5",
-      "aspect": "1024 / 1280"
     },
     {
       "type": "video",
