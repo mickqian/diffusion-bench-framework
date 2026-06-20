@@ -1,0 +1,286 @@
+{
+  "total": 293,
+  "ok": 170,
+  "failed_trusted": 123,
+  "complete": 293,
+  "missing": 0,
+  "ignored_false": {
+    "sglang-probe-out-full": 7,
+    "sglang-probe-out-resume-fixed": 7,
+    "sglang-probe-out-resume3-fixed": 14,
+    "incomplete_qwen_layered_cache": 6
+  },
+  "missing_by_phase": {},
+  "missing_ids": [],
+  "complete_by_phase": {
+    "pairwise": 180,
+    "targeted": 12,
+    "stress": 5,
+    "smoke": 96
+  },
+  "trusted_failed_by_phase": {
+    "pairwise": 83,
+    "targeted": 7,
+    "smoke": 31,
+    "stress": 2
+  },
+  "ok_by_phase": {
+    "pairwise": 97,
+    "targeted": 5,
+    "stress": 3,
+    "smoke": 65
+  },
+  "trusted_failed_by_model_top": [
+    [
+      "t2v",
+      39
+    ],
+    [
+      "t2i",
+      34
+    ],
+    [
+      "realtime",
+      15
+    ],
+    [
+      "ti2v",
+      10
+    ],
+    [
+      "ti2i",
+      7
+    ],
+    [
+      "i2v",
+      6
+    ],
+    [
+      "i2m",
+      6
+    ],
+    [
+      "i2i",
+      6
+    ]
+  ],
+  "trusted_failed_by_entrypoint": [
+    [
+      "serve_raw_http",
+      63
+    ],
+    [
+      "serve_openai_sdk",
+      31
+    ],
+    [
+      "cli_generate",
+      9
+    ],
+    [
+      "python_server_args",
+      8
+    ],
+    [
+      "python_diffgenerator",
+      8
+    ],
+    [
+      "python_lora",
+      4
+    ]
+  ],
+  "request_failure_by_name_status_top": [
+    {
+      "name": "bad video frames",
+      "status": 500,
+      "count": 27
+    },
+    {
+      "name": "bad size image",
+      "status": 200,
+      "count": 20
+    },
+    {
+      "name": "bad size image",
+      "status": 500,
+      "count": 19
+    },
+    {
+      "name": "image generation",
+      "status": 500,
+      "count": 5
+    },
+    {
+      "name": "image edit multipart",
+      "status": 500,
+      "count": 2
+    }
+  ],
+  "selected_sources": [
+    [
+      "sglang-probe-out-split-probe2",
+      55
+    ],
+    [
+      "sglang-probe-out-split-probe3",
+      55
+    ],
+    [
+      "sglang-probe-out-split-probe4",
+      45
+    ],
+    [
+      "sglang-probe-out-split-probe5",
+      35
+    ],
+    [
+      "sglang-probe-out-resume3-fixed",
+      30
+    ],
+    [
+      "sglang-probe-out-full",
+      15
+    ],
+    [
+      "sglang-probe-out-probe2-first-rerun2",
+      12
+    ],
+    [
+      "sglang-probe-out-resume-fixed",
+      12
+    ],
+    [
+      "sglang-probe-out-final-tail-probe2",
+      7
+    ],
+    [
+      "sglang-probe-out-split-probe5-resume1",
+      7
+    ],
+    [
+      "sglang-probe-out-qwen-layered-rerun-probe6",
+      6
+    ],
+    [
+      "sglang-probe-out-split-probe4-resume1",
+      5
+    ],
+    [
+      "sglang-probe-out-split-probe5-resume2",
+      4
+    ],
+    [
+      "sglang-probe-out-probe2-first-rerun",
+      2
+    ],
+    [
+      "sglang-probe-out-probe3-tail-rerun2",
+      2
+    ],
+    [
+      "sglang-probe-out-probe3-tail-rerun",
+      1
+    ]
+  ],
+  "ignored_examples": {
+    "sglang-probe-out-full": [
+      {
+        "cell_id": "smoke_zimage_t2i_serve_raw_http_invalid_baseline_baseline_smoke"
+      },
+      {
+        "cell_id": "smoke_qwen_image_t2i_serve_raw_http_invalid_baseline_baseline_smoke"
+      },
+      {
+        "cell_id": "smoke_flux1_t2i_serve_raw_http_invalid_baseline_baseline_smoke"
+      },
+      {
+        "cell_id": "smoke_flux2_t2i_serve_raw_http_image_generation_baseline_baseline_smoke"
+      },
+      {
+        "cell_id": "smoke_flux2_t2i_serve_raw_http_invalid_baseline_baseline_smoke"
+      },
+      {
+        "cell_id": "smoke_qwen_image_edit_ti2i_serve_raw_http_control_baseline_baseline_smoke"
+      },
+      {
+        "cell_id": "smoke_qwen_image_edit_ti2i_serve_raw_http_image_edit_baseline_baseline_smoke"
+      }
+    ],
+    "sglang-probe-out-resume-fixed": [
+      {
+        "cell_id": "smoke_qwen_image_edit_ti2i_serve_raw_http_invalid_baseline_baseline_smoke"
+      },
+      {
+        "cell_id": "smoke_qwen_image_layered_i2i_serve_raw_http_image_edit_baseline_baseline_smoke"
+      },
+      {
+        "cell_id": "smoke_qwen_image_layered_i2i_serve_openai_sdk_image_edit_baseline_baseline_smoke"
+      },
+      {
+        "cell_id": "smoke_qwen_image_layered_i2i_serve_raw_http_invalid_baseline_baseline_smoke"
+      },
+      {
+        "cell_id": "smoke_joyai_image_edit_ti2i_serve_openai_sdk_image_edit_baseline_baseline_smoke"
+      },
+      {
+        "cell_id": "smoke_joyai_image_edit_ti2i_serve_raw_http_invalid_baseline_baseline_smoke"
+      },
+      {
+        "cell_id": "smoke_wan21_t2v_1_3b_serve_openai_sdk_video_generation_baseline_baseline_smoke"
+      }
+    ],
+    "sglang-probe-out-resume3-fixed": [
+      {
+        "cell_id": "smoke_wan21_t2v_1_3b_serve_openai_sdk_video_generation_baseline_baseline_smoke"
+      },
+      {
+        "cell_id": "smoke_wan21_t2v_1_3b_serve_raw_http_invalid_baseline_baseline_smoke"
+      },
+      {
+        "cell_id": "smoke_turbo_wan21_t2v_serve_raw_http_invalid_baseline_baseline_smoke"
+      },
+      {
+        "cell_id": "smoke_fast_hunyuan_video_serve_raw_http_invalid_baseline_baseline_smoke"
+      },
+      {
+        "cell_id": "smoke_cosmos3_nano_t2v_serve_raw_http_invalid_baseline_baseline_smoke"
+      },
+      {
+        "cell_id": "smoke_wan21_i2v_480p_serve_openai_sdk_video_generation_baseline_baseline_smoke"
+      },
+      {
+        "cell_id": "smoke_wan21_i2v_480p_serve_raw_http_invalid_baseline_baseline_smoke"
+      },
+      {
+        "cell_id": "smoke_wan22_i2v_a14b_serve_raw_http_invalid_baseline_baseline_smoke"
+      },
+      {
+        "cell_id": "smoke_wan22_ti2v_5b_serve_raw_http_invalid_baseline_baseline_smoke"
+      },
+      {
+        "cell_id": "smoke_sana_wm_ti2v_serve_raw_http_invalid_baseline_baseline_smoke"
+      }
+    ],
+    "incomplete_qwen_layered_cache": [
+      {
+        "cell_id": "smoke_qwen_image_layered_i2i_serve_raw_http_invalid_baseline_baseline_smoke"
+      },
+      {
+        "cell_id": "pairwise_qwen_image_layered_i2i_serve_raw_http_control_warmup_request_stage_logging_smoke"
+      },
+      {
+        "cell_id": "pairwise_qwen_image_layered_i2i_cli_generate_image_edit_component_layerwise_offload_cache_dit_scm_fast_smoke"
+      },
+      {
+        "cell_id": "pairwise_qwen_image_layered_i2i_python_server_args_image_edit_warmup_server_cache_dit_basic_smoke"
+      },
+      {
+        "cell_id": "smoke_qwen_image_layered_i2i_serve_raw_http_image_edit_baseline_baseline_smoke"
+      },
+      {
+        "cell_id": "pairwise_qwen_image_layered_i2i_python_server_args_image_edit_warmup_off_kernel_api_log_stability"
+      }
+    ]
+  }
+}

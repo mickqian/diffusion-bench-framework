@@ -1,0 +1,6 @@
+{
+  "description": "Long-running stress cells only. Use after smoke and pairwise are stable on the target environment.",
+  "phases": ["stress"],
+  "max_pairwise_cells": 0
+}
+
