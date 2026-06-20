@@ -39,7 +39,7 @@ The run used multiple remote GPU devboxes across Blackwell-class systems. Some r
 - Invalid image size is inconsistent: 20 cases returned 200, 19 returned 500.
 - Qwen-Image-Layered raw HTTP image edit returns 500 for the valid multipart image_edit smoke. The invalid image smoke also returns 500 for bad size.
 - Qwen-Image-Layered Python server_args can report cell success while command logs include `IsADirectoryError: '/'` in `QwenImageLayeredBeforeDenoisingStage`; this looks like an image_path normalization/API adapter issue.
-- Ideogram4 NVFP4/B200 combinations hit `num_inference_steps=4` versus `V4_DEFAULT_20` incompatibility and can hang during shutdown/GC.
+- Ideogram4 NVFP4/B200 combinations hit the historical probe bug `num_inference_steps=4` versus `V4_DEFAULT_20` and can hang during shutdown/GC. The harness catalog now uses the preset-aligned default of 20 steps for future runs.
 - LingBot realtime/OpenAI SDK combinations remain fragile around image_path/init semantics and invalid session handling.
 - Dynamic multi-LoRA still fails for Z-Image because dynamic LoRA supports one adapter per target unless merge mode is used.
 
