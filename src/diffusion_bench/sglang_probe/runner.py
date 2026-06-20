@@ -385,7 +385,7 @@ SERVER_ARG_GROUPS: dict[str, list[str]] = {
         "2",
     ],
     "fsdp_inference": ["--use-fsdp-inference", "true"],
-    "cfg_parallel": ["--enable-cfg-parallel", "true"],
+    "cfg_parallel": ["--num-gpus", "2", "--enable-cfg-parallel", "true"],
     "ulysses2": ["--num-gpus", "2", "--ulysses-degree", "2"],
     "ring2": ["--num-gpus", "2", "--ulysses-degree", "1", "--ring-degree", "2"],
     "lora_static": ["--lora-path", "{lora_path}", "--lora-merge-mode", "auto"],
@@ -552,6 +552,8 @@ def compatible(model: dict[str, Any], entrypoint: str, arg_group: str, env_group
     if arg_group in {"lora_static", "lora_dynamic"} and not (
         model.get("lora_path") or model.get("dynamic_lora_path")
     ):
+        return False
+    if arg_group == "cfg_parallel" and model["modality"] == "3d":
         return False
     if arg_group in {"ulysses2", "ring2"} and model.get("required_gpus", 1) > 2:
         return False
