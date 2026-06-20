@@ -1472,9 +1472,7 @@ def run_realtime(base_url: str, recorder: Recorder, cell: dict[str, Any], run_di
             "seed": 0,
         }
         if "image_input" in model.get("tags", []) or model.get("task_type") in {"I2V", "TI2V"}:
-            image_path = run_dir / "sample_input.png"
-            image_path.write_bytes(sample_image_bytes(run_dir))
-            payload["image_path"] = str(image_path)
+            payload["first_frame"] = sample_image_bytes(run_dir)
         started = now_ms()
         try:
             async with websockets.connect(ws_url, open_timeout=30, close_timeout=10) as ws:
