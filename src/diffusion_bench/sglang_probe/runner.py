@@ -30,6 +30,12 @@ DEFAULT_REPO = Path(os.environ.get("SGLANG_REPO", ".")).resolve()
 DEFAULT_OUT_ROOT = Path(os.environ.get("DIFFUSION_BENCH_PROBE_OUT", "sglang-probe-runs"))
 DEFAULT_TIMEOUT_S = 600
 DEFAULT_POLL_S = 1.0
+REALTIME_WS_MAX_SIZE_BYTES = int(
+    os.environ.get("DIFFUSION_BENCH_REALTIME_WS_MAX_SIZE", str(64 * 1024 * 1024))
+)
+REALTIME_RECV_TIMEOUT_S = float(
+    os.environ.get("DIFFUSION_BENCH_REALTIME_RECV_TIMEOUT_S", "120")
+)
 PROFILE_DIR = Path(__file__).resolve().parent / "profiles"
 
 
@@ -1477,7 +1483,12 @@ def run_realtime(base_url: str, recorder: Recorder, cell: dict[str, Any], run_di
             payload["first_frame"] = sample_image_bytes(run_dir)
         started = now_ms()
         try:
-            async with websockets.connect(ws_url, open_timeout=30, close_timeout=10) as ws:
+            async with websockets.connect(
+                ws_url,
+                open_timeout=30,
+                close_timeout=10,
+                max_size=REALTIME_WS_MAX_SIZE_BYTES,
+            ) as ws:
                 await ws.send(msgspec.msgpack.encode({"bad": "init"}))
                 first = await asyncio.wait_for(ws.recv(), timeout=30)
                 recorder.event("realtime_invalid_init", cell_id=cell["id"], latency_ms=now_ms() - started, bytes=len(first) if isinstance(first, bytes) else 0)
@@ -1485,7 +1496,10 @@ def run_realtime(base_url: str, recorder: Recorder, cell: dict[str, Any], run_di
                 got_frame = False
                 deadline = time.time() + timeout_s
                 while time.time() < deadline:
-                    msg = await asyncio.wait_for(ws.recv(), timeout=30)
+                    recv_timeout = min(
+                        REALTIME_RECV_TIMEOUT_S, max(1.0, deadline - time.time())
+                    )
+                    msg = await asyncio.wait_for(ws.recv(), timeout=recv_timeout)
                     if isinstance(msg, bytes):
                         decoded = None
                         try:
@@ -1493,6 +1507,15 @@ def run_realtime(base_url: str, recorder: Recorder, cell: dict[str, Any], run_di
                         except Exception:
                             pass
                         recorder.event("realtime_message", cell_id=cell["id"], payload_preview=str(decoded)[:300], bytes=len(msg))
+                        if isinstance(decoded, dict) and decoded.get("type") == "frame_batch_header":
+                            recorder.event(
+                                "realtime_frame_batch_header",
+                                cell_id=cell["id"],
+                                content_type=decoded.get("content_type"),
+                                num_frames=decoded.get("num_frames"),
+                                total_size=decoded.get("total_size"),
+                                format=decoded.get("format"),
+                            )
                         if isinstance(decoded, dict) and decoded.get("type") in {"chunk_stats", "complete"}:
                             got_frame = True
                         elif decoded is None:
