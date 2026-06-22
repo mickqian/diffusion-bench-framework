@@ -55,16 +55,6 @@ run_compare() {
 if [[ "${RUN_SGLANG}" == "1" ]]; then
   export DIFFUSION_BENCH_DISABLE_TORCH_COMPILE=0
 
-  run_compare "${REPORT_DIR}/${RUN_ID_ROOT}-flux1-sgld-1gpu.json" \
-    --config "${CONFIG}" \
-    --modes single_e2e \
-    --frameworks sglang \
-    --case-ids flux1_dev_t2i_1024 \
-    --hardware-profile h200 \
-    --sglang-profile h100-h200-1gpu-speed-compile \
-    --run-id "${RUN_ID_ROOT}-flux1-sgld-1gpu" \
-    --port "${port}"
-
   run_compare "${REPORT_DIR}/${RUN_ID_ROOT}-flux1-sgld-2gpu.json" \
     --config "${CONFIG}" \
     --modes single_e2e \
@@ -83,7 +73,7 @@ if [[ "${RUN_SGLANG}" == "1" ]]; then
     --frameworks sglang \
     --case-ids cosmos3_nano_t2i_720p \
     --hardware-profile h200 \
-    --sglang-profile h200-1gpu-fa-speed \
+    --sglang-profile h200-2gpu-tp-fa-speed \
     --run-id "${RUN_ID_ROOT}-cosmos3-image-sgld" \
     --port "${port}"
 
@@ -104,16 +94,6 @@ if [[ "${RUN_VLLM_OMNI}" == "1" ]]; then
 
   export DIFFUSION_BENCH_DISABLE_TORCH_COMPILE=0
 
-  DIFFUSION_BENCH_VLLM_OMNI_PROFILE=h100-h200-1gpu-compile \
-  run_compare "${REPORT_DIR}/${RUN_ID_ROOT}-flux1-vllm-1gpu.json" \
-    --config "${CONFIG}" \
-    --modes single_e2e \
-    --frameworks vllm-omni \
-    --case-ids flux1_dev_t2i_1024 \
-    --hardware-profile h200 \
-    --run-id "${RUN_ID_ROOT}-flux1-vllm-1gpu" \
-    --port "${port}"
-
   DIFFUSION_BENCH_VLLM_OMNI_PROFILE=h100-h200-2gpu-tp-compile \
   run_compare "${REPORT_DIR}/${RUN_ID_ROOT}-flux1-vllm-2gpu.json" \
     --config "${CONFIG}" \
@@ -126,7 +106,7 @@ if [[ "${RUN_VLLM_OMNI}" == "1" ]]; then
 
   export DIFFUSION_BENCH_DISABLE_TORCH_COMPILE=1
 
-  DIFFUSION_BENCH_VLLM_OMNI_PROFILE=h200-1gpu-fa \
+  DIFFUSION_BENCH_VLLM_OMNI_PROFILE=h200-2gpu-cfg \
   run_compare "${REPORT_DIR}/${RUN_ID_ROOT}-cosmos3-image-vllm.json" \
     --config "${CONFIG}" \
     --modes single_e2e \
