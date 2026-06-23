@@ -65,6 +65,36 @@
       "aspect": "1280 / 768"
     },
     {
+      "type": "video",
+      "src": "gallery/aurora_coast_v.mp4",
+      "poster": "gallery/aurora_coast_v.png",
+      "model": "LTX-2.3 HQ",
+      "prompt": "Image-to-video from the aurora still — the green aurora ripples across the night sky as waves roll onto the volcanic shore.",
+      "params": "1920×1088 · image-to-video · two-stage HQ",
+      "time": "85s",
+      "aspect": "1920 / 1088"
+    },
+    {
+      "type": "video",
+      "src": "gallery/fjord_v.mp4",
+      "poster": "gallery/fjord_v.png",
+      "model": "LTX-2.3 HQ",
+      "prompt": "Image-to-video from the fjord still — mist drifts between the granite cliffs and ripples spread across the still water.",
+      "params": "1920×1088 · image-to-video · two-stage HQ",
+      "time": "85s",
+      "aspect": "1920 / 1088"
+    },
+    {
+      "type": "video",
+      "src": "gallery/desert_ruins_v.mp4",
+      "poster": "gallery/desert_ruins_v.png",
+      "model": "LTX-2.3 HQ",
+      "prompt": "Image-to-video from the desert still — a lone traveler walks on as heat haze shimmers and fine sand drifts in the wind.",
+      "params": "1920×1088 · image-to-video · two-stage HQ",
+      "time": "85s",
+      "aspect": "1920 / 1088"
+    },
+    {
       "type": "image",
       "src": "gallery/wanqing.png",
       "model": "Ideogram-4",
