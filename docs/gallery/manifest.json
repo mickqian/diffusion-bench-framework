@@ -12,6 +12,60 @@
     },
     {
       "type": "image",
+      "src": "gallery/fjord.png",
+      "model": "Ideogram-4",
+      "prompt": "A misty Norwegian fjord at first light — sheer cliffs falling to still water, a lone kayak gliding far below.",
+      "params": "1280×768 · text-to-image · 2-GPU TP",
+      "time": "5s",
+      "aspect": "1280 / 768"
+    },
+    {
+      "type": "image",
+      "src": "gallery/cathedral.png",
+      "model": "Ideogram-4",
+      "prompt": "The vast nave of a Gothic cathedral in raking light — a lone figure dwarfed by stone columns, stark black and white.",
+      "params": "768×1280 · text-to-image · 2-GPU TP",
+      "time": "5s",
+      "aspect": "768 / 1280"
+    },
+    {
+      "type": "image",
+      "src": "gallery/glacier.png",
+      "model": "Ideogram-4",
+      "prompt": "An aerial sweep over a vast blue glacier — deep crevasses fracturing the ice, a tiny figure giving the scale.",
+      "params": "1280×768 · text-to-image · 2-GPU TP",
+      "time": "5s",
+      "aspect": "1280 / 768"
+    },
+    {
+      "type": "image",
+      "src": "gallery/redwoods.png",
+      "model": "Ideogram-4",
+      "prompt": "A towering redwood grove in morning fog — immense trunks above a quiet forest path, sun filtering through the canopy.",
+      "params": "768×1280 · text-to-image · 2-GPU TP",
+      "time": "5s",
+      "aspect": "768 / 1280"
+    },
+    {
+      "type": "image",
+      "src": "gallery/desert_ruins.png",
+      "model": "Ideogram-4",
+      "prompt": "A lone traveler crossing red sandstone badlands at golden hour — vast emptiness under low, raking light.",
+      "params": "1280×768 · text-to-image · 2-GPU TP",
+      "time": "5s",
+      "aspect": "1280 / 768"
+    },
+    {
+      "type": "image",
+      "src": "gallery/aurora_coast.png",
+      "model": "Ideogram-4",
+      "prompt": "A black volcanic coastline beneath a sweeping green aurora — the night sky ablaze over dark, breaking waves.",
+      "params": "1280×768 · text-to-image · 2-GPU TP",
+      "time": "5s",
+      "aspect": "1280 / 768"
+    },
+    {
+      "type": "image",
       "src": "gallery/wanqing.png",
       "model": "Ideogram-4",
       "prompt": "A northern industrial town at dusk — smokestacks against a bruised sky, a lone figure on a concrete overpass.",
