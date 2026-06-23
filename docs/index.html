@@ -1656,6 +1656,13 @@
         padding: 5px 11px; border-radius: 999px;
         background: var(--accent-tint); color: var(--accent-strong);
       }
+      .g-time {
+        position: absolute; top: 10px; right: 10px; z-index: 2; line-height: 1;
+        font-size: 11.5px; font-weight: 600; letter-spacing: 0.01em;
+        padding: 5px 10px; border-radius: 999px;
+        background: rgba(20,17,12,0.55); color: #f4efe6;
+        backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px);
+      }
       .g-play { position: absolute; inset: 0; z-index: 1; display: flex; align-items: center; justify-content: center; pointer-events: none; }
       .g-play span {
         width: 48px; height: 48px; border-radius: 999px; display: flex; align-items: center; justify-content: center;
@@ -3617,6 +3624,7 @@
           const a11y = dup ? 'tabindex="-1" aria-hidden="true"' : `aria-label="${esc(it.model)}: ${esc(it.prompt)}"`;
           return `<button class="g-tile${dup ? " g-dup" : ""}" type="button" data-i="${i}" ${a11y}>
               <span class="g-tag">${is3d ? "✦ 3D · " : isVid ? "▶ " : ""}${esc(it.model)}</span>
+              ${it.time ? `<span class="g-time">⚡ ${esc(it.time)}</span>` : ""}
               ${media}
               ${isVid && !it.src ? '<span class="g-play"><span>▶</span></span>' : ""}
               <span class="g-cap"><span class="m">${esc(it.model)}</span><span class="p">${esc(it.prompt)}</span></span>
@@ -3691,7 +3699,7 @@
             ? `<video controls autoplay loop playsinline ${it.poster ? `poster="${esc(it.poster)}"` : ""} src="${esc(it.src)}"></video>`
             : `<img src="${esc(still(it))}" alt="${esc(it.model)}">`;
           lbCap.innerHTML = `<span class="m">${esc(it.model)}</span><span class="p">${esc(it.prompt)}</span>`
-            + `<span class="pa">${esc(it.params || "")}${it.placeholder ? " · placeholder art" : ""}</span>`;
+            + `<span class="pa">${esc(it.params || "")}${it.time ? ` · ⚡ ${esc(it.time)}` : ""}${it.placeholder ? " · placeholder art" : ""}</span>`;
           const _zi = lbStage.querySelector("img");
           if (_zi) zSetup(_zi); else { zImg = null; }
           lb.hidden = false;

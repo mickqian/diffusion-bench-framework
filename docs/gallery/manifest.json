@@ -7,6 +7,7 @@
       "model": "Hunyuan3D-2",
       "prompt": "Andy Warhol's banana (The Velvet Underground & Nico) as a textured 3D mesh — image-to-3D.",
       "params": "image-to-3D · shape + paint · 6-view PBR texture",
+      "time": "80s",
       "aspect": "1 / 1"
     },
     {
@@ -89,6 +90,7 @@
       "model": "LTX-2.3",
       "prompt": "A paper boat drifting down a rain-slick gutter through fallen ginkgo leaves, shallow depth of field.",
       "params": "768×512 · 121 frames",
+      "time": "16s",
       "aspect": "768 / 512"
     }
   ]
