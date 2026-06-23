@@ -1,6 +1,14 @@
 {
-  "note": "Real SGLang-Diffusion output (H200). To add an item: drop the file in docs/gallery/ and append an entry. image -> src; video -> src (.mp4) + poster (still).",
+  "note": "Real SGLang-Diffusion output (H200). To add an item: drop the file in docs/gallery/ and append an entry. image -> src; video -> src (.mp4) + poster (still); 3D -> type model3d + src (.glb).",
   "items": [
+    {
+      "type": "model3d",
+      "src": "gallery/warhol_banana_3d.glb",
+      "model": "Hunyuan3D-2",
+      "prompt": "Andy Warhol's banana (The Velvet Underground & Nico) as a textured 3D mesh — image-to-3D.",
+      "params": "image-to-3D · shape + paint · 6-view PBR texture",
+      "aspect": "1 / 1"
+    },
     {
       "type": "image",
       "src": "gallery/wanqing.png",

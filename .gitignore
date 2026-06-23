@@ -15,6 +15,7 @@ outputs/
 
 # editor / local scratch
 .idea/
+.claude/
 tmp/
 .DS_Store
 
