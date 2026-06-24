@@ -2080,9 +2080,9 @@
       .bd-mode .section-head p { display: none; }
       .opt-list { display: none; }
       .bd-mode ul.opt-list { display: block; margin: 16px 0 0; padding: 0; list-style: none; }
-      .bd-mode ul.opt-list li { position: relative; padding: 4px 0 4px 18px; line-height: 1.5; font-size: 13px; color: var(--muted); }
-      .bd-mode ul.opt-list li::before { content: "\2022"; position: absolute; left: 3px; color: var(--accent-strong); opacity: 0.7; }
-      .bd-mode ul.opt-list li b { color: var(--accent-strong); font-weight: 600; }
+      .bd-mode ul.opt-list li { padding: 3px 0 3px 16px; text-indent: -16px; line-height: 1.5; font-size: 13px; color: var(--muted); }
+      .bd-mode ul.opt-list li::before { content: "\2022"; color: var(--accent-strong); opacity: 0.7; margin-right: 8px; }
+      .bd-mode ul.opt-list li b { display: inline; font-size: 13px; line-height: inherit; margin: 0; letter-spacing: 0; font-weight: 600; color: var(--accent-strong); }
     </style>
   </head>
   <body>
@@ -2190,13 +2190,13 @@
               stack schedules, places, parallelizes, and executes the pipeline.
             </p>
             <ul class="opt-list">
-              <li><b>Dynamic batching</b> &mdash; keep the GPU busy with queued requests</li>
-              <li><b>Full-stack layerwise offload</b> &mdash; stream weights to fit large models</li>
-              <li><b>VAE parallel decode</b> &mdash; split VAE decode across GPUs</li>
-              <li><b>Model-aware parallelism</b> &mdash; TP / SP / CFG, sharded per architecture</li>
-              <li><b>Disaggregation (Mooncake)</b> &mdash; split encode / denoise / decode</li>
-              <li><b>Shared CUDA kernel stack</b> &mdash; SGLang's tuned kernels, reused</li>
-              <li><b>Breakable CUDA graph</b> &mdash; graph replay with runtime kernel selection</li>
+              <li><b>Dynamic batching</b> &mdash; keep the GPU busy</li>
+              <li><b>Full-stack layerwise offload</b> &mdash; fit larger models</li>
+              <li><b>VAE parallel decode</b> &mdash; split across GPUs</li>
+              <li><b>Model-aware parallelism</b> &mdash; TP / SP / CFG</li>
+              <li><b>Disaggregation</b> &mdash; Mooncake, split stages</li>
+              <li><b>Shared CUDA kernel stack</b> &mdash; reuse tuned kernels</li>
+              <li><b>Breakable CUDA graph</b> &mdash; runtime kernel selection</li>
             </ul>
           </article>
           <article class="summary-card">
@@ -2206,10 +2206,10 @@
               artifact checks, and an explicit acceptance threshold.
             </p>
             <ul class="opt-list">
-              <li><b>Quantization</b> &mdash; FP8 / FP4 / NVFP4 weights &amp; activations</li>
-              <li><b>Temporal cache</b> &mdash; reuse features across denoise steps</li>
-              <li><b>Progressive resolution</b> &mdash; denoise low-res, then upscale</li>
-              <li><b>Attention backends</b> &mdash; swap attention impls for speed</li>
+              <li><b>Quantization</b> &mdash; FP8 / FP4 / NVFP4</li>
+              <li><b>Temporal cache</b> &mdash; reuse across steps</li>
+              <li><b>Progressive resolution</b> &mdash; low-res, then upscale</li>
+              <li><b>Attention backends</b> &mdash; swappable for speed</li>
             </ul>
           </article>
         </div>
