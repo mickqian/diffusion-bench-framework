@@ -2060,6 +2060,9 @@
       .kr-stat { display: flex; flex-direction: column; gap: 10px; }
       .kr-num { font-size: clamp(40px, 5.4vw, 68px); font-weight: 700; line-height: 1; letter-spacing: -0.02em; color: var(--accent-strong); }
       .kr-label { color: var(--muted); font-size: 14px; line-height: 1.5; max-width: 34ch; }
+      /* BD: surface the key optimizations on the cards (detailed view keeps the full explorer below) */
+      .opt-list { display: none; }
+      .bd-mode .opt-list { display: block; margin-top: 14px; font-size: 13.5px; line-height: 1.7; font-weight: 500; color: var(--accent-strong); }
     </style>
   </head>
   <body>
@@ -2155,10 +2158,6 @@
       <section class="shell section" id="performance">
         <div class="section-head">
           <h2 class="section-title">Where the gains come from</h2>
-          <p>
-            The clean way to discuss SGLang-Diffusion is to separate output-preserving inference-stack gains from
-            lossy optimizations that trade computation for measured quality drift.
-          </p>
         </div>
 
         <div class="split-summary" aria-label="Lossless and lossy optimization split">
@@ -2168,6 +2167,7 @@
               Preserve the generation recipe. Improve throughput, latency, and memory by changing how the serving
               stack schedules, places, parallelizes, and executes the pipeline.
             </p>
+            <p class="opt-list">Dynamic batching &middot; Full-stack layerwise offload &middot; Model-aware parallelism (TP / SP / CFG) &middot; Disaggregation (Mooncake) &middot; Shared CUDA kernel stack</p>
           </article>
           <article class="summary-card">
             <b>Lossy acceleration frontier</b>
@@ -2175,6 +2175,7 @@
               Change the amount or precision of computation. Report speed only together with quality drift,
               artifact checks, and an explicit acceptance threshold.
             </p>
+            <p class="opt-list">Quantization (FP8 / FP4 / NVFP4) &middot; Temporal cache acceleration &middot; Progressive resolution &middot; Attention backends</p>
           </article>
         </div>
 
