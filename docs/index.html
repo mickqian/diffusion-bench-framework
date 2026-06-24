@@ -2053,6 +2053,13 @@
       .bd-mode .section-head { margin-bottom: clamp(14px, 2vw, 24px); }
       .bd-mode .split-summary { gap: clamp(16px, 2.4vw, 28px); }
       .bd-mode .lesson-grid { gap: clamp(16px, 2.4vw, 28px) clamp(20px, 3vw, 40px); }
+      /* key benchmark results — BD opener (hidden in the detailed view) */
+      .key-results { display: none; }
+      .bd-mode .key-results { display: block; order: 0; }
+      .kr-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: clamp(20px, 3vw, 44px); }
+      .kr-stat { display: flex; flex-direction: column; gap: 10px; }
+      .kr-num { font-size: clamp(40px, 5.4vw, 68px); font-weight: 700; line-height: 1; letter-spacing: -0.02em; color: var(--accent-strong); }
+      .kr-label { color: var(--muted); font-size: 14px; line-height: 1.5; max-width: 34ch; }
     </style>
   </head>
   <body>
@@ -2124,6 +2131,26 @@
           <figcaption class="lb-cap" id="lbCap"></figcaption>
         </figure>
       </div>
+
+      <section class="shell section key-results" id="keyResults" aria-label="Headline benchmark results">
+        <div class="section-head">
+          <h2 class="section-title">By the numbers</h2>
+        </div>
+        <div class="kr-grid">
+          <div class="kr-stat">
+            <b class="kr-num">10/10</b>
+            <span class="kr-label">cross-framework cases where SGLang-Diffusion is the fastest — same H200, cache-free</span>
+          </div>
+          <div class="kr-stat">
+            <b class="kr-num">up to 2.2&times;</b>
+            <span class="kr-label">faster than vLLM-Omni (Z-Image-Turbo); 1.1&ndash;1.3&times; on FLUX.1 &amp; Qwen-Image</span>
+          </div>
+          <div class="kr-stat">
+            <b class="kr-num">3</b>
+            <span class="kr-label">frameworks compared &mdash; vLLM-Omni &middot; LightX2V &middot; TensorRT-LLM VisualGen, all slower</span>
+          </div>
+        </div>
+      </section>
 
       <section class="shell section" id="performance">
         <div class="section-head">
