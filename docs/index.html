@@ -1138,7 +1138,7 @@
         color: var(--muted);
         font-size: 13.5px;
         line-height: 1.6;
-        max-width: 820px;
+        max-width: 580px;
       }
 
       /* ---- benchmark chart view ---- */
@@ -2080,8 +2080,9 @@
       .kr-num { font-size: clamp(40px, 5.4vw, 68px); font-weight: 700; line-height: 1; letter-spacing: -0.02em; color: var(--accent-strong); }
       .kr-label { color: var(--muted); font-size: 14px; line-height: 1.5; max-width: 34ch; }
       /* BD: no section intros; key optimizations as light bullet lists (name accent, detail muted) */
-      .bd-mode .section-head p { display: none; }
       .bd-mode .summary-card p { max-width: none; }
+      .bd-mode .section-head { display: block; }
+      .bd-mode .section-head p { font-family: inherit; font-size: 15px; line-height: 1.55; max-width: 640px; margin-top: 10px; color: var(--body); }
       .opt-list { display: none; }
       .bd-mode ul.opt-list { display: block; margin: 16px 0 0; padding: 0; list-style: none; }
       .bd-mode ul.opt-list li { padding: 3px 0 3px 16px; text-indent: -16px; line-height: 1.5; font-size: 13px; color: var(--muted); }
