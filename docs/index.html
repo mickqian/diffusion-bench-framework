@@ -476,7 +476,6 @@
         margin: 0;
         color: var(--body);
         font-size: 15.5px;
-        max-width: 450px;
       }
 
       /* ---- explorer ---- */
@@ -735,18 +734,8 @@
       }
 
       /* ---- benchmarks ---- */
-      details.benchmark-shell > summary {
-        display: flex;
-        justify-content: space-between;
-        align-items: baseline;
-        gap: 18px;
-        cursor: pointer;
-        list-style: none;
+      .benchmark-head {
         padding-bottom: 24px;
-      }
-
-      details.benchmark-shell > summary::-webkit-details-marker {
-        display: none;
       }
 
       .summary-title {
@@ -764,7 +753,6 @@
         color: var(--body);
         font-size: 16px;
         line-height: 1.55;
-        max-width: 600px;
       }
 
       .marker {
@@ -830,7 +818,6 @@
         line-height: 1.35;
         letter-spacing: -0.01em;
         color: var(--ink);
-        max-width: 760px;
       }
 
       .bench-score {
@@ -1470,7 +1457,6 @@
 
       .history-head p {
         margin: 10px 0 0;
-        max-width: 580px;
         color: var(--body);
         font-size: 15px;
         line-height: 1.55;
@@ -2260,16 +2246,13 @@
       </section>
 
       <section class="shell section" id="benchmarks">
-        <details class="benchmark-shell" open>
-          <summary>
-            <span>
-              <span class="summary-title">Cross-framework benchmark data</span>
-              <span class="summary-copy">
-                Same-H200, cache-free single-request latency across all models and frameworks — one case per model, unsupported combos marked. Per-framework versions/profiles in the source manifests; TensorRT-LLM VisualGen is 1.3.0rc18.
-              </span>
+        <div class="benchmark-shell">
+          <div class="benchmark-head">
+            <span class="summary-title">Cross-framework benchmark data</span>
+            <span class="summary-copy">
+              Same-H200, cache-free single-request latency across all models and frameworks — one case per model, unsupported combos marked. Per-framework versions/profiles in the source manifests; TensorRT-LLM VisualGen is 1.3.0rc18.
             </span>
-            <span class="marker" aria-hidden="true">+</span>
-          </summary>
+          </div>
           <section class="history-panel" aria-label="Cross-framework benchmark coverage">
             <div class="history-head">
               <div>
@@ -2287,7 +2270,7 @@
           <div class="note-row bd-hide" id="benchmarkNote">
             Per-framework versions are listed above; exact commits and serving profiles live in the source manifests, and client-side single-request latency is the comparison source.
           </div>
-        </details>
+        </div>
       </section>
 
       <section class="shell section" id="nightly" hidden aria-label="Nightly performance track">
