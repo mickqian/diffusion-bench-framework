@@ -70,10 +70,8 @@ Operating discipline for long-term maintenance lives in `skills/` (install/symli
 
 | skill | use for |
 |---|---|
-| `diffusion-framework-benchmarking` | plan/run/interpret fair benchmarks; **per-framework install pins + env-var reference** |
-| `diffusion-case-onboarding` | add new model/framework cases and command profiles |
-| `diffusion-bench-maintainer` | change runner/config/dashboard without breaking comparability |
+| `diffusion-framework-benchmarking` | plan/run/interpret fair benchmarks; publish results + formal tracker-issue report (`mickqian/diffusion-bench-framework#1`); per-framework install pins + env-var reference |
+| `diffusion-case-onboarding` | add model/framework cases + command profiles; maintain runner/config/result-schema without breaking comparability |
 | `diffusion-regression-investigator` | investigate when SGLang looks slow or a comparison looks unfair |
-| `diffusion-performance-reporting` | append data-only comments to the fixed tracker issue (`mickqian/diffusion-bench-framework#1`) |
 
 Formal reports append one data-only comment to the tracker issue instead of opening new issues. Detailed operational knobs (LightX2V FA3 pins, `trtllm` install spec, throughput/single-e2e env vars, per-script overrides) live in the **benchmarking skill**, not here.

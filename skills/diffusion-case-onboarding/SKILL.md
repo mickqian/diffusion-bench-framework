@@ -1,6 +1,6 @@
 ---
 name: diffusion-case-onboarding
-description: Use when adding or updating benchmark cases, models, frameworks, shapes, sampling params, SGLang command profiles, or dependency installers in diffusion-bench-framework. The goal is to onboard comparable test cases for tracking SGLang-Diffusion against open-source diffusion serving frameworks.
+description: Use when adding or updating benchmark cases, models, frameworks, shapes, sampling params, SGLang command profiles, or dependency installers in diffusion-bench-framework, or when maintaining the runner/config/result-schema/dashboard code without breaking comparability. The goal is to onboard comparable test cases and keep the harness reproducible for tracking SGLang-Diffusion against open-source diffusion serving frameworks.
 ---
 
 # Diffusion Case Onboarding
@@ -43,3 +43,14 @@ If a SGLang profile OOMs or fails on one hardware class, add a hardware-specific
 ## Validation
 
 At minimum, run a dry run and inspect generated commands. GPU benchmark validation should happen on a remote GPU machine, not on a local Mac.
+
+## Repo Maintenance
+
+When changing runner/config/result-schema (not just adding a case), comparability comes before convenience:
+
+- inspect `configs/comparison_configs.json`, the packaged `src/diffusion_bench/comparison_configs.json`, runner code, README, and recent results before editing
+- changing config semantics: update BOTH the editable and packaged config
+- changing result JSON shape: update dashboard/reporting code and README examples in the same change
+- backend command changes: add/update a per-case `command_profiles` entry, never overwrite historical intent
+- runner changes: preserve fail-fast behavior; keep server logs and bench JSON paths discoverable
+- after edits: inspect diffs and run only lightweight static checks unless a real benchmark is requested

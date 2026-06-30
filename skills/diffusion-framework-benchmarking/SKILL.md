@@ -116,6 +116,13 @@ For comparison images:
 - regenerate from a fixed script so future reports are reproducible
 - include every framework in scope, even when the cell is `unsupported`, `no_profile`, `failed`, or `not_run`
 
+Formal tracker-issue report (data-only comment on the fixed tracker `mickqian/diffusion-bench-framework#1`, one grouped block per case, stable layout across runs):
+
+- run header: run timestamp, benchmark commit, sglang commit/version, run id, GPU count + model
+- case metadata table: `| model | task | dims | steps | cfg |`
+- framework comparison table: `| framework | profile | gpus | single_e2e_s | single/sglang | single_status | done/reqs | concurrency | p50_s | p50/sglang | p95_s | p99_s | qps | qps/sglang | throughput_status | reason |`
+- delete stale formal comments before appending the new one; keep interpretation OUT of the comment (if a run looks unfair/regressed, write a separate investigation note)
+
 ## Publishing A Completed Run
 
 After a full run, publish results so they are durable and comparable over time:
