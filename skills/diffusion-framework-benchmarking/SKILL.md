@@ -9,6 +9,16 @@ description: Use when planning, running, extending, or interpreting diffusion fr
 
 Produce reproducible, fair, and actionable performance data for open-source diffusion serving frameworks. The benchmark is a guardrail for SGLang-Diffusion, so invalid comparisons are worse than missing data.
 
+## Default Run Configuration (Complete Cross-Framework Run)
+
+Unless the user asks otherwise, a complete cross-framework run defaults to:
+
+- **Version policy: latest-vs-latest.** SGLang runs `origin/main` HEAD; every competitor runs its newest line — `vllm` newest, `vllm-omni` main HEAD, `LightX2V` main HEAD, newest `trtllm` release candidate. Override every competitor `*_INSTALL_SPEC` to latest and record each resolved version/commit in the result artifact. Pinned snapshots (the version sets in the Install reference and in `manifests/`) are **only** for reproducing a specific dated historical report — do not silently inherit an old pin for a fresh run.
+- **Framework scope: all frameworks.** Include `sglang`, `vllm-omni`, `lightx2v`, and `trtllm-visual` (image cases). `diffusers` is an optional correctness/baseline reference, labeled as such. A complete run includes every framework in scope; cells a framework can't run are classified (`unsupported` / `no_profile` / `failed` / `not_run` / `invalid`), never silently dropped.
+- **Execution environment: a freshly-acquired `rx devbox` H200.** Acquire a fresh H200 via the `rx` CLI (see the `rx-devbox` / `remote-development` skills) as the default machine; 2-GPU is the standard profile budget. Keep conflicting competitor frameworks in isolated virtualenvs. The local MacBook cannot run these benchmarks.
+
+When the user explicitly narrows any of these (a single framework, a pinned ref to reproduce, an existing machine), follow that instead — these are defaults, not overrides of an explicit request.
+
 ## Non-Negotiables
 
 - Do not use response cache, Cache-DiT, precomputed outputs, quantized checkpoints, reduced steps, or distilled weights unless the case explicitly compares those semantics.
@@ -145,7 +155,7 @@ When reporting back, include:
 
 Operational knobs relocated from the README. The runner installs conflicting frameworks into isolated virtualenvs; override the specs below only when intentionally changing a tracked ref.
 
-**Pins are time-of-report snapshots, not permanent defaults.** The install specs below (e.g. `vllm-omni==0.18.0`, a fixed `LIGHTX2V_INSTALL_SPEC` commit, `tensorrt-llm==1.3.0rc18`) capture the competitor version tracked when that report ran, for reproducing *that* run. For a **latest-vs-latest** comparison — sglang `origin/main` against competitors' newest — override every competitor spec to latest and record the resolved versions/commits in the result artifact: `VLLM_INSTALL_SPEC=vllm` (newest), `VLLM_OMNI_INSTALL_SPEC=git+https://github.com/vllm-project/vllm-omni.git` (main HEAD), `LIGHTX2V_INSTALL_SPEC=git+https://github.com/ModelTC/LightX2V.git` (main HEAD), newest `TRTLLM_INSTALL_SPEC`. Do not silently inherit an old default pin when the intent is latest-vs-latest — that benchmarks stale competitors against a current sglang and is unfair.
+**Pins are time-of-report snapshots, not permanent defaults.** The install specs below (e.g. `vllm-omni==0.18.0`, a fixed `LIGHTX2V_INSTALL_SPEC` commit, `tensorrt-llm==1.3.0rc18`) capture the competitor version tracked when that report ran, for reproducing *that* run only. **A fresh complete run defaults to latest-vs-latest** (see *Default Run Configuration* above): sglang `origin/main` against competitors' newest. Override every competitor spec to latest and record the resolved versions/commits in the result artifact: `VLLM_INSTALL_SPEC=vllm` (newest), `VLLM_OMNI_INSTALL_SPEC=git+https://github.com/vllm-project/vllm-omni.git` (main HEAD), `LIGHTX2V_INSTALL_SPEC=git+https://github.com/ModelTC/LightX2V.git` (main HEAD), newest `TRTLLM_INSTALL_SPEC`. Do not silently inherit an old default pin for a fresh run — that benchmarks stale competitors against a current sglang and is unfair.
 
 **Compile policy (cache-free fairness).** `diffusion-bench-compare` sets `TORCH_COMPILE_DISABLE=1` for all benchmarked subprocesses so cold compile time doesn't leak into runs. vLLM-Omni also gets `--enforce-eager --compilation-config '{"mode":0}'`; LightX2V configs force `compile=false` / `compile_shapes=[]`. SGLang is launched with `--backend sglang` so it never silently benchmarks the vanilla-diffusers fallback (under `--backend auto` it falls back when `model_index.json` can't resolve — gated FLUX 403s, or `HF_HUB_OFFLINE`).
 
