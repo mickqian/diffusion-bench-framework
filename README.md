@@ -52,7 +52,7 @@ diffusion-bench-compare → per case: launch stack → single e2e (+ optional th
 - `scripts/` — reproducible per-run scripts (`run_h200_*.sh`), `install_comparison_frameworks.sh`, `run_trtllm_visual_h200.md`, artifact generators. One script per tracked run; see the script header for its knobs.
 - `manifests/` — pinned run manifests (bench/SGLang/framework/hardware versions); the source of truth for reconstructing historical reports.
 - `docs/sglang_probe/` — probe usage notes plus historical probe matrix/result summaries.
-- `skills/` — operating discipline (see below).
+- `.claude/skills/` — operating discipline (see below).
 - `docs/` — the GitHub Pages one-pager.
 
 ## GitHub Pages dashboard
@@ -66,7 +66,7 @@ The published one-pager (`docs/index.html`) reads two committed JSON files and r
 
 ## Skills
 
-Operating discipline for long-term maintenance lives in `skills/` (install/symlink into your Codex/Claude skills dir to auto-discover):
+Operating discipline for long-term maintenance lives in `.claude/skills/` (auto-discovered by Claude Code when this repo is opened as the project):
 
 | skill | use for |
 |---|---|

@@ -17,6 +17,7 @@ outputs/
 .idea/
 .claude/*
 !.claude/skills
+!.claude/skills/**
 tmp/
 .DS_Store
 
