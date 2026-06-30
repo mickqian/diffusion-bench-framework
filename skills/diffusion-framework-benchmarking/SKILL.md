@@ -16,6 +16,7 @@ Produce reproducible, fair, and actionable performance data for open-source diff
 - Keep external frameworks in isolated virtualenvs when dependencies conflict with SGLang.
 - Never treat startup failure, import failure, OOM, timeout, compile stall, or NaN as latency data.
 - Compare single-request latency with single-request latency, and throughput with throughput. Do not mix the two in one conclusion.
+- A complete cross-framework run must include both single-request e2e AND a multi-request server throughput workload (several concurrent requests), at minimum for the image cases — a single-request-only run is incomplete. Report the two sections separately.
 - Track actual framework version/ref, selected command profile, hardware, GPU count, sampling params, dimensions, frames, concurrency, and actual server command in result artifacts.
 
 ## Fairness Checklist
@@ -29,6 +30,7 @@ Before accepting a number, verify:
 - warmup is comparable and not dominated by cold model download or compile
 - framework-specific fast paths are fair: fast attention is fine; hidden caches or lower-quality models are not
 - single request uses one request; throughput records `num_requests`, concurrency, p50, p99, and QPS
+- framework version parity: when sglang runs `origin/main` (latest), competitors must also run latest (git main HEAD / newest release), not a stale pinned ref — latest-sglang vs an old competitor pin is not a fair comparison
 
 ## Command Profiles
 
@@ -114,6 +116,14 @@ For comparison images:
 - regenerate from a fixed script so future reports are reproducible
 - include every framework in scope, even when the cell is `unsupported`, `no_profile`, `failed`, or `not_run`
 
+## Publishing A Completed Run
+
+After a full run, publish results so they are durable and comparable over time:
+
+- commit the complete result JSONs (every case, every framework, single + throughput) into the repo
+- update the GitHub Pages benchmark section: write `docs/data/latest-cross-framework.json` and append the run to `docs/data/historical-cross-framework.json`, then run `scripts/refresh_docs_data.py` to refresh the inline preview
+- the published benchmark MUST state the **benchmark date** and the **exact version/commit of every framework** (sglang commit, vllm-omni commit, lightx2v commit, trtllm-visual version) — a latest-vs-latest comparison is uninterpretable later without the dated version set
+
 ## Output Discipline
 
 When reporting back, include:
@@ -127,6 +137,8 @@ When reporting back, include:
 ## Install & Environment Reference
 
 Operational knobs relocated from the README. The runner installs conflicting frameworks into isolated virtualenvs; override the specs below only when intentionally changing a tracked ref.
+
+**Pins are time-of-report snapshots, not permanent defaults.** The install specs below (e.g. `vllm-omni==0.18.0`, a fixed `LIGHTX2V_INSTALL_SPEC` commit, `tensorrt-llm==1.3.0rc18`) capture the competitor version tracked when that report ran, for reproducing *that* run. For a **latest-vs-latest** comparison — sglang `origin/main` against competitors' newest — override every competitor spec to latest and record the resolved versions/commits in the result artifact: `VLLM_INSTALL_SPEC=vllm` (newest), `VLLM_OMNI_INSTALL_SPEC=git+https://github.com/vllm-project/vllm-omni.git` (main HEAD), `LIGHTX2V_INSTALL_SPEC=git+https://github.com/ModelTC/LightX2V.git` (main HEAD), newest `TRTLLM_INSTALL_SPEC`. Do not silently inherit an old default pin when the intent is latest-vs-latest — that benchmarks stale competitors against a current sglang and is unfair.
 
 **Compile policy (cache-free fairness).** `diffusion-bench-compare` sets `TORCH_COMPILE_DISABLE=1` for all benchmarked subprocesses so cold compile time doesn't leak into runs. vLLM-Omni also gets `--enforce-eager --compilation-config '{"mode":0}'`; LightX2V configs force `compile=false` / `compile_shapes=[]`. SGLang is launched with `--backend sglang` so it never silently benchmarks the vanilla-diffusers fallback (under `--backend auto` it falls back when `model_index.json` can't resolve — gated FLUX 403s, or `HF_HUB_OFFLINE`).
 
