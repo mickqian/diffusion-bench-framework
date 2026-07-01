@@ -3955,8 +3955,9 @@
         repoUrl: "https://github.com/sgl-project/ci-data/tree/main/diffusion-comparisons",
         maxRuns: 30,
         cacheKey: "sgld-nightly-v1",
-        cacheTtl: 6 * 60 * 60 * 1000,
-        loaded: false,
+        // stale-while-revalidate: cache is always used for the instant paint; revalidateAfter
+        // is how old the cache must be before loadNightly hits the network again on open.
+        revalidateAfter: 15 * 60 * 1000,
       };
       const nightlyToggle = document.getElementById("nightlyToggle");
       const nightlySection = document.getElementById("nightly");
@@ -3972,10 +3973,9 @@
         nightlySection.hidden = false;
         nightlyToggle.setAttribute("aria-expanded", "true");
         window.scrollTo({ top: 0, behavior: "auto" });
-        if (!NIGHTLY.loaded) {
-          NIGHTLY.loaded = true;
-          loadNightly();
-        }
+        // always call loadNightly on open; it paints from cache instantly and only hits the
+        // network when the cache is older than revalidateAfter (so reopening = a chance to refresh).
+        loadNightly();
       }
       nightlyToggle.addEventListener("click", () => {
         if (document.body.classList.contains("nightly-only")) exitNightly();
@@ -3995,15 +3995,14 @@
       const nightlyFullDate = (ms) =>
         new Date(ms).toLocaleDateString("en-US", { year: "numeric", month: "short", day: "numeric", timeZone: "UTC" });
 
-      function readNightlyCache(allowStale) {
+      function readNightlyCache() {
         try {
           const raw = localStorage.getItem(NIGHTLY.cacheKey);
           if (!raw) return null;
           const obj = JSON.parse(raw);
           if (!obj) return null;
-          if (!allowStale && Date.now() - obj.savedAt > NIGHTLY.cacheTtl) return null;
           const cases = new Map((obj.cases || []).map((c) => [c.case_id, { model: c.model, task: c.task, pts: c.pts }]));
-          return cases.size ? { meta: obj.meta, cases } : null;
+          return cases.size ? { meta: obj.meta, cases, savedAt: obj.savedAt || 0 } : null;
         } catch {
           return null;
         }
@@ -4020,14 +4019,19 @@
 
       async function loadNightly() {
         const status = document.getElementById("nightlyStatus");
+        // stale-while-revalidate: paint cache instantly, then always try to fetch fresher data.
         const cached = readNightlyCache();
+        const shownMs = cached ? cached.meta && cached.meta.latestMs : 0;
         if (cached) {
           renderNightly(cached.meta, cached.cases);
-          return;
+          // recent cache → trust it and skip the network (avoids hammering the GitHub API);
+          // older than revalidateAfter → fall through and refresh in the background.
+          if (Date.now() - (cached.savedAt || 0) < NIGHTLY.revalidateAfter) return;
+        } else {
+          status.hidden = false;
+          status.classList.remove("error");
+          status.textContent = "Loading nightly data…";
         }
-        status.hidden = false;
-        status.classList.remove("error");
-        status.textContent = "Loading nightly data…";
         try {
           const listResp = await fetch(NIGHTLY.listApi, { headers: { Accept: "application/vnd.github+json" } });
           if (!listResp.ok) throw new Error("listing " + listResp.status);
@@ -4076,21 +4080,29 @@
             caseCount: cases.size,
           };
           writeNightlyCache(meta, cases);
-          renderNightly(meta, cases);
+          // re-render only when the fresh fetch is actually newer/different than what we already painted
+          if (!cached || (meta.latestMs || 0) !== (shownMs || 0) || meta.commit !== (cached.meta && cached.meta.commit)) {
+            renderNightly(meta, cases);
+          }
         } catch (e) {
-          const stale = readNightlyCache(true);
-          if (stale) {
-            renderNightly(stale.meta, stale.cases);
+          const msg = String((e && e.message) || e);
+          const rateLimited = /\b403\b/.test(msg);
+          // we already painted cached data → keep it, just annotate once (don't wipe the charts)
+          if (cached) {
             const note = document.getElementById("nightlyNote");
-            note.innerHTML += ` <span style="color:var(--faint)">(cached — live refresh unavailable right now)</span>`;
+            if (note && !note.dataset.staleNoted) {
+              note.dataset.staleNoted = "1";
+              note.innerHTML += ` <span style="color:var(--faint)">(showing cached — ${
+                rateLimited ? "GitHub API rate-limited, retry shortly" : "live refresh unavailable right now"
+              })</span>`;
+            }
             return;
           }
           status.hidden = false;
           status.classList.add("error");
           status.innerHTML =
-            `Couldn't load nightly data (${escapeHtml(String((e && e.message) || e))}). ` +
+            `Couldn't load nightly data (${escapeHtml(msg)}${rateLimited ? " — GitHub API rate limit, retry shortly" : ""}). ` +
             `<a class="ulink" href="${NIGHTLY.repoUrl}" target="_blank" rel="noreferrer">Open the data on GitHub ↗</a>`;
-          NIGHTLY.loaded = false;
         }
       }
 
