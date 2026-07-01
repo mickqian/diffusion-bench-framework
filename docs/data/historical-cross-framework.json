@@ -31,7 +31,7 @@
         "comparable_rows": 8,
         "sglang_diffusion_wins": 8,
         "other_wins": 0,
-        "note": "vLLM-Omni image cells marked anomaly (0.24 concurrency-1 ~55s stall); see throughput for steady-state."
+        "note": "vLLM-Omni image cells marked anomaly (0.24 concurrency-1 ~55s stall); see throughput for steady-state. Attention backends differ per framework on Blackwell (sglang FA4 / vLLM-Omni FlashInfer / LightX2V FA2); a semantically-consistent H200+FA3 run is the fairness reference."
       },
       "rows": [
         {
@@ -298,7 +298,15 @@
             }
           }
         }
-      ]
+      ],
+      "date": "2026-07-01",
+      "gpu": "NVIDIA B200 · 2–4 GPU",
+      "framework_versions": {
+        "sglang": "0.5.14 (1c2523b)",
+        "vllm-omni": "vllm-omni 0.24.0rc1 · vllm 0.24.0",
+        "lightx2v": "0.1.0 (16d7202)",
+        "trtllm-visual": "1.3.0rc18"
+      }
     },
     {
       "id": "b200-cross-framework-throughput-20260701",
@@ -312,7 +320,7 @@
         "comparable_rows": 8,
         "sglang_diffusion_wins": 8,
         "other_wins": 0,
-        "note": "Continuous load; no idle stall. All frameworks clean."
+        "note": "Continuous load; no idle stall. All frameworks clean. Attention backends differ per framework on Blackwell (sglang FA4 / vLLM-Omni FlashInfer / LightX2V FA2); a semantically-consistent H200+FA3 run is the fairness reference."
       },
       "rows": [
         {
@@ -653,7 +661,15 @@
             }
           }
         }
-      ]
+      ],
+      "date": "2026-07-01",
+      "gpu": "NVIDIA B200 · 2–4 GPU",
+      "framework_versions": {
+        "sglang": "0.5.14 (1c2523b)",
+        "vllm-omni": "vllm-omni 0.24.0rc1 · vllm 0.24.0",
+        "lightx2v": "0.1.0 (16d7202)",
+        "trtllm-visual": "1.3.0rc18"
+      }
     },
     {
       "id": "h200-sglang-native-vs-trtllm-20260614",
@@ -795,7 +811,9 @@
             }
           }
         }
-      ]
+      ],
+      "date": "2026-06-14",
+      "gpu": "1× NVIDIA H200"
     },
     {
       "id": "h200-cross-framework-coverage-20260614",
@@ -1145,7 +1163,9 @@
             }
           }
         }
-      ]
+      ],
+      "date": "2026-06-14",
+      "gpu": "NVIDIA H200 · 1–2 GPU"
     }
   ]
 }
