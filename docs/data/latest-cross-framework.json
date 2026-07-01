@@ -1,76 +1,252 @@
 {
-  "id": "h200-sglang-native-vs-trtllm-20260614",
-  "title": "H200 SGLang-Diffusion (native) vs TensorRT-LLM VisualGen",
-  "updated_at": "2026-06-14",
-  "source_report": "H200 2026-06-14: SGLang native re-bench (--backend sglang, latest main) + trtllm-visual 1.3.0rc18 H200",
-  "source_script": "exp_native.py (--backend sglang, first-vs-second request) + scripts/run_trtllm_visual_h200.md",
-  "hardware": { "label": "1x NVIDIA H200", "gpu_name": "NVIDIA H200", "gpus": 1 },
-  "policy": {
-    "latency_source": "steady-state client latency (2nd request; one-time compile excluded). SGLang runs the native pipeline (--backend sglang), not the diffusers fallback.",
-    "selection": "SGLang native FluxPipeline/QwenImagePipeline (FA3 attention); trtllm-visual via the _torch backend",
-    "cache": "no response cache, no Cache-DiT, no temporal cache",
-    "torch_compile": "two rows per case: eager (compile off) and compiled (SGLang default mode; trtllm _torch). Cache-free."
+  "id": "b200-cross-framework-20260701",
+  "title": "B200 SGLang-Diffusion vs vLLM-Omni vs LightX2V vs TensorRT-LLM VisualGen",
+  "updated_at": "2026-07-01",
+  "source_report": "reports/b200-cross-framework-20260701/",
+  "source_script": "scripts/run_b200_cross_framework_20260701.sh",
+  "hardware": {
+    "label": "4x NVIDIA B200",
+    "gpu_name": "NVIDIA B200",
+    "gpus": 4
   },
-  "framework_order": ["sglang", "trtllm-visual"],
+  "policy": {
+    "latency_source": "client-side wall clock, median of back-to-back measured requests after warmup (image 5, video 3 warmups + 2); server-side timers kept only as sglang diagnostics",
+    "selection": "single hardware-selected profile per case (blackwell-* where tuned, else default)",
+    "cache": "no response cache, no Cache-DiT",
+    "torch_compile": "disabled (TORCH_COMPILE_DISABLE=1)",
+    "attention": "full-precision/exact attention kept consistent across frameworks (FA/FlashInfer/FA2); no quantized/approximate substitution",
+    "anomaly_note": "vLLM-Omni 0.24.0rc1 has an intermittent ~55s concurrency-1 idle/scheduler stall (engine ~1s); its four image single-request cells are marked anomaly and the number withheld. Throughput (continuous load) is unaffected and clean."
+  },
+  "framework_order": [
+    "sglang",
+    "vllm-omni",
+    "lightx2v",
+    "trtllm-visual"
+  ],
   "frameworks": {
     "sglang": {
       "label": "SGLang-Diffusion",
-      "commit": "582bd23f71",
-      "note": "native FluxPipeline/QwenImagePipeline, FlashAttention-3, --backend sglang"
+      "commit": "1c2523b",
+      "note": "origin/main; FA (set_fa_ver(4) on Blackwell)"
+    },
+    "vllm-omni": {
+      "label": "vLLM-Omni",
+      "vllm_omni": "0.24.0rc1",
+      "vllm": "0.24.0",
+      "note": "FlashInfer/FLASH_ATTN; single-request has a concurrency-1 stall (see anomaly_note)"
+    },
+    "lightx2v": {
+      "label": "LightX2V",
+      "commit": "16d7202",
+      "note": "main; FlashAttention 2 (full-precision class)"
     },
     "trtllm-visual": {
       "label": "TensorRT-LLM VisualGen",
       "tensorrt_llm": "1.3.0rc18",
-      "note": "_torch backend; eager via the persisted layer_norm dtype patch"
+      "note": "_torch backend, cache-free"
     }
   },
   "summary": {
-    "cases": 6,
-    "sglang_wins": 6,
-    "trtllm_wins": 0,
-    "note": "SGLang's native pipeline wins all 3 models in both eager and compiled, on the same H200, cache-free. Earlier dashboards measured SGLang's diffusers fallback path and are superseded."
+    "cases": 8,
+    "comparable_rows": 8,
+    "sglang_diffusion_wins": 8,
+    "other_wins": 0,
+    "note": "Steady-state single-request latency on B200. SGLang fastest on most comparable cases; vLLM-Omni image single-request marked anomaly (0.24 concurrency-1 stall) -- see the throughput section for its clean steady-state numbers."
   },
   "rows": [
     {
-      "case_id": "flux1_dev_t2i_1024_eager", "case": "FLUX.1-dev T2I", "details": "1024x1024 · 50 steps · cfg 3.5 · eager", "gpus": "1 GPU", "winner": "SGLang-Diffusion", "winner_speedup": "1.24x",
+      "case_id": "flux1_dev_t2i_1024",
+      "case": "FLUX.1-dev T2I",
+      "details": "1024x1024 · 50 steps · cfg 3.5",
+      "gpus": "2 GPU",
+      "winner": "sglang",
+      "winner_speedup": "1.90x",
       "cells": {
-        "sglang": { "client_latency_s": 7.0, "profile": "native eager (FA3)" },
-        "trtllm-visual": { "client_latency_s": 8.7, "profile": "eager (patched)" }
+        "sglang": {
+          "client_latency_s": 2.776,
+          "profile": "blackwell-2gpu-tp-compile"
+        },
+        "vllm-omni": {
+          "status": "anomaly"
+        },
+        "lightx2v": {
+          "status": "unsupported"
+        },
+        "trtllm-visual": {
+          "client_latency_s": 5.276,
+          "profile": "default"
+        }
       }
     },
     {
-      "case_id": "flux1_dev_t2i_1024_compiled", "case": "FLUX.1-dev T2I", "details": "1024x1024 · 50 steps · cfg 3.5 · compiled", "gpus": "1 GPU", "winner": "SGLang-Diffusion", "winner_speedup": "1.07x",
+      "case_id": "flux2_dev_t2i_1024",
+      "case": "FLUX.2-dev T2I",
+      "details": "1024x1024 · 50 steps · cfg 4",
+      "gpus": "2 GPU",
+      "winner": "sglang",
+      "winner_speedup": "1.79x",
       "cells": {
-        "sglang": { "client_latency_s": 6.6, "profile": "native compile (default mode)" },
-        "trtllm-visual": { "client_latency_s": 7.08, "profile": "_torch compiled" }
+        "sglang": {
+          "client_latency_s": 7.795,
+          "profile": "blackwell-2gpu-tp-compile"
+        },
+        "vllm-omni": {
+          "status": "anomaly"
+        },
+        "lightx2v": {
+          "client_latency_s": 17.034,
+          "profile": "blackwell-fa2-flashinfer"
+        },
+        "trtllm-visual": {
+          "client_latency_s": 13.918,
+          "profile": "default"
+        }
       }
     },
     {
-      "case_id": "flux2_dev_t2i_1024_eager", "case": "FLUX.2-dev T2I", "details": "1024x1024 · 50 steps · cfg 4 · eager", "gpus": "1 GPU", "winner": "SGLang-Diffusion", "winner_speedup": "1.07x",
+      "case_id": "qwen_image_2512_t2i_1024",
+      "case": "Qwen-Image-2512 T2I",
+      "details": "1024x1024 · 50 steps · cfg 1",
+      "gpus": "2 GPU",
+      "winner": "sglang",
+      "winner_speedup": "1.58x",
       "cells": {
-        "sglang": { "client_latency_s": 24.1, "profile": "native eager (FA3)" },
-        "trtllm-visual": { "client_latency_s": 25.77, "profile": "eager (patched)" }
+        "sglang": {
+          "client_latency_s": 3.601,
+          "profile": "default"
+        },
+        "vllm-omni": {
+          "status": "anomaly"
+        },
+        "lightx2v": {
+          "status": "unsupported"
+        },
+        "trtllm-visual": {
+          "client_latency_s": 5.691,
+          "profile": "default"
+        }
       }
     },
     {
-      "case_id": "flux2_dev_t2i_1024_compiled", "case": "FLUX.2-dev T2I", "details": "1024x1024 · 50 steps · cfg 4 · compiled", "gpus": "1 GPU", "winner": "SGLang-Diffusion", "winner_speedup": "1.03x",
+      "case_id": "zimage_turbo_t2i_1024",
+      "case": "Z-Image-Turbo T2I",
+      "details": "1024x1024 · 9 steps · cfg 0",
+      "gpus": "2 GPU",
+      "winner": "sglang",
+      "winner_speedup": "2.07x",
       "cells": {
-        "sglang": { "client_latency_s": 22.4, "profile": "native compile (default mode)" },
-        "trtllm-visual": { "client_latency_s": 23.18, "profile": "_torch compiled" }
+        "sglang": {
+          "client_latency_s": 0.484,
+          "profile": "default"
+        },
+        "vllm-omni": {
+          "status": "anomaly"
+        },
+        "lightx2v": {
+          "client_latency_s": 1.004,
+          "profile": "blackwell-fa2"
+        },
+        "trtllm-visual": {
+          "status": "no_profile"
+        }
       }
     },
     {
-      "case_id": "qwen_image_2512_t2i_1024_eager", "case": "Qwen-Image-2512 T2I", "details": "1024x1024 · 50 steps · cfg 1 · eager", "gpus": "1 GPU", "winner": "SGLang-Diffusion", "winner_speedup": "1.35x",
+      "case_id": "wan21_t2v_1_3b_480p",
+      "case": "Wan2.1 T2V 1.3B 480p",
+      "details": "832x480x81f · 50 steps · cfg 6",
+      "gpus": "2 GPU",
+      "winner": "sglang",
+      "winner_speedup": "2.29x",
       "cells": {
-        "sglang": { "client_latency_s": 6.2, "profile": "native eager (FA3)" },
-        "trtllm-visual": { "client_latency_s": 8.34, "profile": "eager (patched)" }
+        "sglang": {
+          "client_latency_s": 14.025,
+          "profile": "default"
+        },
+        "vllm-omni": {
+          "client_latency_s": 42.071,
+          "profile": "blackwell-flashinfer"
+        },
+        "lightx2v": {
+          "client_latency_s": 32.058,
+          "profile": "blackwell-fa2"
+        },
+        "trtllm-visual": {
+          "status": "no_profile"
+        }
       }
     },
     {
-      "case_id": "qwen_image_2512_t2i_1024_compiled", "case": "Qwen-Image-2512 T2I", "details": "1024x1024 · 50 steps · cfg 1 · compiled", "gpus": "1 GPU", "winner": "SGLang-Diffusion", "winner_speedup": "1.17x",
+      "case_id": "wan22_ti2v_5b_704p",
+      "case": "Wan2.2 TI2V 5B 704p",
+      "details": "1280x704x81f · 50 steps · cfg 5",
+      "gpus": "2 GPU",
+      "winner": "sglang",
+      "winner_speedup": "1.53x",
       "cells": {
-        "sglang": { "client_latency_s": 6.2, "profile": "native compile (default mode)" },
-        "trtllm-visual": { "client_latency_s": 7.25, "profile": "_torch compiled" }
+        "sglang": {
+          "client_latency_s": 19.041,
+          "profile": "default"
+        },
+        "vllm-omni": {
+          "client_latency_s": 41.604,
+          "profile": "blackwell-flashinfer"
+        },
+        "lightx2v": {
+          "client_latency_s": 29.054,
+          "profile": "blackwell-fa2"
+        },
+        "trtllm-visual": {
+          "status": "no_profile"
+        }
+      }
+    },
+    {
+      "case_id": "ltx2.3_twostage_t2v_2gpus",
+      "case": "LTX-2.3 two-stage T2V",
+      "details": "768x512x121f · 30 steps · cfg 3",
+      "gpus": "2 GPU",
+      "winner": "sglang",
+      "winner_speedup": "6.33x",
+      "cells": {
+        "sglang": {
+          "client_latency_s": 9.018,
+          "profile": "default"
+        },
+        "vllm-omni": {
+          "status": "no_profile"
+        },
+        "lightx2v": {
+          "client_latency_s": 57.116,
+          "profile": "default"
+        },
+        "trtllm-visual": {
+          "status": "no_profile"
+        }
+      }
+    },
+    {
+      "case_id": "cosmos3_nano_t2v_720p_189f",
+      "case": "Cosmos3 Nano T2V 720p",
+      "details": "1280x720x189f · 35 steps · cfg 6",
+      "gpus": "4 GPU",
+      "winner": "sglang",
+      "winner_speedup": "2.62x",
+      "cells": {
+        "sglang": {
+          "client_latency_s": 29.055,
+          "profile": "default"
+        },
+        "vllm-omni": {
+          "client_latency_s": 76.22,
+          "profile": "blackwell-flashinfer"
+        },
+        "lightx2v": {
+          "status": "unsupported"
+        },
+        "trtllm-visual": {
+          "status": "no_profile"
+        }
       }
     }
   ]

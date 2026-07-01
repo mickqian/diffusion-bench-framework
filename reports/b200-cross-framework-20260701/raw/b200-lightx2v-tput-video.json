@@ -1,0 +1,372 @@
+{
+  "timestamp": "2026-07-01T04:01:58.800780+00:00",
+  "commit_sha": "c280cb5b1ade9c4bafc63086d1c8294876d0f5b9",
+  "run_id": "b200-lightx2v-tput-video",
+  "hardware": {
+    "runner_labels": null,
+    "gpu_config": null,
+    "gpus": [
+      "NVIDIA B200, 183359 MiB, 580.126.09",
+      "NVIDIA B200, 183359 MiB, 580.126.09",
+      "NVIDIA B200, 183359 MiB, 580.126.09",
+      "NVIDIA B200, 183359 MiB, 580.126.09"
+    ],
+    "hardware_profile_override": "b200"
+  },
+  "sglang_runtime": {
+    "package_version": "0.5.14",
+    "module_path": "/sgl-workspace/sglang/python/sglang/__init__.py",
+    "git_root": "/sgl-workspace/sglang",
+    "git_commit": "1c2523b719d1e8a55c43bf1a9526b0c52b05e118"
+  },
+  "framework_runtime": {
+    "venv_root": "/scratch/sglang-diffusion-framework-venvs",
+    "install_specs": {
+      "vllm": "vllm",
+      "vllm_omni": "git+https://github.com/vllm-project/vllm-omni.git",
+      "lightx2v": "git+https://github.com/ModelTC/LightX2V.git",
+      "lightx2v_flash_attn": "flash-attn==2.8.3",
+      "lightx2v_flash_attn3": "",
+      "lightx2v_fa3_hf_repo": "varunneal/flash-attention-3",
+      "lightx2v_fa3_hf_revision": "de87b9b5af06dd9984df595bef90b2eba44b181a",
+      "lightx2v_fa3_hf_subdir": "build/torch28-cxx11-cu128-x86_64-linux/flash_attention_3",
+      "lightx2v_flashinfer": "flashinfer-python==0.6.11",
+      "trtllm": "tensorrt-llm==1.3.0rc18",
+      "torch_cuda_arch_list": "10.0"
+    },
+    "launchers": {
+      "vllm_omni_server_bin": "vllm",
+      "vllm_omni_required_help_args": "--omni",
+      "trtllm_visual_server_bin": "trtllm-serve"
+    },
+    "vllm-omni": {
+      "venv_path": "/scratch/sglang-diffusion-framework-venvs/vllm-omni",
+      "packages": {
+        "vllm": {
+          "Name": "vllm",
+          "Version": "0.24.0",
+          "Home-page": "https://github.com/vllm-project/vllm",
+          "Location": "/scratch/sglang-diffusion-framework-venvs/vllm-omni/lib/python3.12/site-packages"
+        },
+        "vllm-omni": {
+          "Name": "vllm-omni",
+          "Version": "0.24.0rc1",
+          "Home-page": "https://github.com/vllm-project/vllm-omni",
+          "Location": "/scratch/sglang-diffusion-framework-venvs/vllm-omni/lib/python3.12/site-packages"
+        }
+      },
+      "direct_urls": {
+        "vllm_omni-0.24.0rc1.dist-info": {
+          "url": "https://github.com/vllm-project/vllm-omni.git",
+          "vcs_info": {
+            "commit_id": "a560ed184d9197855f1cccf46cb1cac87b0a7138",
+            "vcs": "git"
+          }
+        }
+      }
+    },
+    "lightx2v": {
+      "venv_path": "/scratch/sglang-diffusion-framework-venvs/lightx2v",
+      "packages": {
+        "lightx2v": {
+          "Name": "lightx2v",
+          "Version": "0.1.0",
+          "Home-page": "https://github.com/ModelTC/LightX2V",
+          "Location": "/scratch/sglang-diffusion-framework-venvs/lightx2v/lib/python3.12/site-packages"
+        },
+        "flash_attn": {
+          "Name": "flash_attn",
+          "Version": "2.8.3",
+          "Home-page": "https://github.com/Dao-AILab/flash-attention",
+          "Location": "/scratch/sglang-diffusion-framework-venvs/lightx2v/lib/python3.12/site-packages"
+        },
+        "flashinfer-python": {
+          "Name": "flashinfer-python",
+          "Version": "0.6.11",
+          "Home-page": "https://github.com/flashinfer-ai/flashinfer",
+          "Location": "/scratch/sglang-diffusion-framework-venvs/lightx2v/lib/python3.12/site-packages"
+        }
+      },
+      "direct_urls": {
+        "lightx2v-0.1.0.dist-info": {
+          "url": "https://github.com/ModelTC/LightX2V.git",
+          "vcs_info": {
+            "commit_id": "16d7202472584953044a257c6a576399da0653c9",
+            "vcs": "git"
+          }
+        }
+      }
+    },
+    "trtllm-visual": {
+      "venv_path": "/scratch/sglang-diffusion-framework-venvs/trtllm-visual",
+      "packages": {
+        "tensorrt_llm": {
+          "Name": "tensorrt_llm",
+          "Version": "1.3.0rc18",
+          "Home-page": "https://github.com/NVIDIA/TensorRT-LLM",
+          "Location": "/scratch/sglang-diffusion-framework-venvs/trtllm-visual/lib/python3.12/site-packages"
+        },
+        "tensorrt": {
+          "Name": "tensorrt",
+          "Version": "10.15.1.29",
+          "Home-page": "https://github.com/nvidia/tensorrt",
+          "Location": "/scratch/sglang-diffusion-framework-venvs/trtllm-visual/lib/python3.12/site-packages"
+        }
+      }
+    }
+  },
+  "benchmark_env": {
+    "TORCH_COMPILE_DISABLE": "1"
+  },
+  "benchmark_framework_args": {
+    "vllm-omni": [
+      "--enforce-eager",
+      "--compilation-config",
+      "{\"mode\":0}"
+    ],
+    "lightx2v": {
+      "config": {
+        "compile": false,
+        "compile_shapes": []
+      }
+    }
+  },
+  "torch_compile_disabled": true,
+  "benchmark_modes": [
+    "throughput"
+  ],
+  "requested_sglang_profile": "auto",
+  "results": [],
+  "throughput_results": [
+    {
+      "case_id": "wan21_t2v_1_3b_480p",
+      "framework": "lightx2v",
+      "mode": "throughput",
+      "model": "Wan-AI/Wan2.1-T2V-1.3B",
+      "task": "text-to-video",
+      "width": 832,
+      "height": 480,
+      "num_frames": 81,
+      "fps": 16,
+      "num_inference_steps": 50,
+      "guidance_scale": 6.0,
+      "guidance_scale_2": null,
+      "true_cfg_scale": null,
+      "negative_prompt_set": false,
+      "num_gpus": 2,
+      "latency_s": 62.148,
+      "error": null,
+      "framework_metadata": {
+        "profile": "blackwell-fa2",
+        "profile_request": "auto",
+        "profile_source": "hardware",
+        "framework_ref": "lightx2v-0.1.0-configs/wan/wan_t2v.json+cfg_parallel+blackwell-fa2",
+        "hardware": [
+          "b200",
+          "gb200",
+          "b300",
+          "gb300"
+        ],
+        "hardware_candidates": [
+          "b200"
+        ],
+        "description": "Blackwell LightX2V profile using FlashAttention 2 (validated on B200 via the flux2 blackwell-fa2-flashinfer profile). Same precision class (full-precision, exact attention) as SGLang's FA4 and vLLM-Omni's FlashInfer backend on Blackwell -- flash_attn3/flash_attn4 hit Hopper-only precompiled kernels or a CUDA-toolkit>=13.1 CuTe-DSL requirement not met by this build, so FA2 is the fastest same-class (full-precision) option available here.",
+        "notes": "Uses the source-built FlashAttention 2 wheel (TORCH_CUDA_ARCH_LIST=10.0) already installed for Blackwell; no cache, torch compile, or quantized model path. Deliberately NOT using SageAttention here -- it is int8 QK-quantized, a different numeric class from the full-precision attention used elsewhere in this comparison.",
+        "install_specs": null,
+        "server_bin": null,
+        "use_omni_arg": null,
+        "required_help_args": null,
+        "serve_args": "",
+        "num_gpus": null,
+        "extra_env_keys": [],
+        "lightx2v_config_keys": [
+          "cpu_offload",
+          "cross_attn_1_type",
+          "cross_attn_2_type",
+          "enable_cfg",
+          "parallel",
+          "rope_type",
+          "sample_shift",
+          "self_attn_1_type",
+          "t5_cpu_offload",
+          "vae_cpu_offload"
+        ]
+      },
+      "server_command": "torchrun --nproc_per_node=2 -m lightx2v.server --model_path /cluster-storage/models/hub/models--Wan-AI--Wan2.1-T2V-1.3B/snapshots/37ec512624d61f7aa208f7ea8140a131f93afc9a --model_cls wan2.1 --task t2v --config_json /tmp/lightx2v_config_wan21_t2v_1_3b_480p.json --host 127.0.0.1 --port 30420",
+      "metrics": {
+        "duration_s": 249.589,
+        "num_requests": 8,
+        "completed_requests": 8,
+        "failed_requests": 0,
+        "max_concurrency": 2,
+        "throughput_rps": 0.0321,
+        "output_throughput_ops": 0.0321,
+        "latency_mean_s": 58.514,
+        "latency_p50_s": 62.148,
+        "latency_p90_s": 62.453,
+        "latency_p95_s": 62.801,
+        "latency_p99_s": 63.079,
+        "errors": [],
+        "server_startup_s": 28.06,
+        "warmup_s": 34.31
+      }
+    },
+    {
+      "case_id": "wan22_ti2v_5b_704p",
+      "framework": "lightx2v",
+      "mode": "throughput",
+      "model": "Wan-AI/Wan2.2-TI2V-5B",
+      "task": "text-image-to-video",
+      "width": 1280,
+      "height": 704,
+      "num_frames": 81,
+      "fps": 24,
+      "num_inference_steps": 50,
+      "guidance_scale": 5.0,
+      "guidance_scale_2": null,
+      "true_cfg_scale": null,
+      "negative_prompt_set": false,
+      "num_gpus": 2,
+      "latency_s": 59.145,
+      "error": null,
+      "framework_metadata": {
+        "profile": "blackwell-fa2",
+        "profile_request": "auto",
+        "profile_source": "hardware",
+        "framework_ref": "lightx2v-0.1.0-configs/wan22/wan_ti2v_i2v.json+cfg_parallel+blackwell-fa2",
+        "hardware": [
+          "b200",
+          "gb200",
+          "b300",
+          "gb300"
+        ],
+        "hardware_candidates": [
+          "b200"
+        ],
+        "description": "Blackwell LightX2V profile using FlashAttention 2 (validated on B200 via the flux2 blackwell-fa2-flashinfer profile). Same precision class (full-precision, exact attention) as SGLang's FA4 and vLLM-Omni's FlashInfer backend on Blackwell -- flash_attn3/flash_attn4 hit Hopper-only precompiled kernels or a CUDA-toolkit>=13.1 CuTe-DSL requirement not met by this build, so FA2 is the fastest same-class (full-precision) option available here.",
+        "notes": "Uses the source-built FlashAttention 2 wheel (TORCH_CUDA_ARCH_LIST=10.0) already installed for Blackwell; no cache, torch compile, or quantized model path. Deliberately NOT using SageAttention here -- it is int8 QK-quantized, a different numeric class from the full-precision attention used elsewhere in this comparison.",
+        "install_specs": null,
+        "server_bin": null,
+        "use_omni_arg": null,
+        "required_help_args": null,
+        "serve_args": "",
+        "num_gpus": null,
+        "extra_env_keys": [],
+        "lightx2v_config_keys": [
+          "aspect_ratio",
+          "bucket_shape",
+          "cpu_offload",
+          "cross_attn_1_type",
+          "cross_attn_2_type",
+          "enable_cfg",
+          "num_channels_latents",
+          "offload_granularity",
+          "parallel",
+          "resolution",
+          "rope_type",
+          "sample_shift",
+          "self_attn_1_type",
+          "t5_cpu_offload",
+          "use_image_encoder",
+          "vae_cpu_offload",
+          "vae_stride"
+        ]
+      },
+      "server_command": "torchrun --nproc_per_node=2 -m lightx2v.server --model_path /cluster-storage/models/hub/models--Wan-AI--Wan2.2-TI2V-5B/snapshots/921dbaf3f1674a56f47e83fb80a34bac8a8f203e --model_cls wan2.2 --task i2v --config_json /tmp/lightx2v_config_wan22_ti2v_5b_704p.json --host 127.0.0.1 --port 30420",
+      "metrics": {
+        "duration_s": 235.62,
+        "num_requests": 8,
+        "completed_requests": 8,
+        "failed_requests": 0,
+        "max_concurrency": 2,
+        "throughput_rps": 0.034,
+        "output_throughput_ops": 0.034,
+        "latency_mean_s": 55.272,
+        "latency_p50_s": 59.145,
+        "latency_p90_s": 59.162,
+        "latency_p95_s": 59.169,
+        "latency_p99_s": 59.175,
+        "errors": [],
+        "server_startup_s": 40.04,
+        "warmup_s": 32.11
+      }
+    },
+    {
+      "case_id": "ltx2.3_twostage_t2v_2gpus",
+      "framework": "lightx2v",
+      "mode": "throughput",
+      "model": "Lightricks/LTX-2.3",
+      "task": "text-to-video",
+      "width": 768,
+      "height": 512,
+      "num_frames": 121,
+      "fps": 24,
+      "num_inference_steps": 30,
+      "guidance_scale": 3.0,
+      "guidance_scale_2": null,
+      "true_cfg_scale": null,
+      "negative_prompt_set": false,
+      "num_gpus": 1,
+      "latency_s": 113.293,
+      "error": null,
+      "framework_metadata": {
+        "profile": "default",
+        "profile_request": "auto",
+        "profile_source": "default",
+        "framework_ref": "lightx2v-7efd05f8-ltx2.3+t2av",
+        "hardware": null,
+        "hardware_candidates": [
+          "b200"
+        ],
+        "description": "LightX2V upstream LTX-2.3 t2av path for the LTX-2.3 121-frame case.",
+        "notes": "Uses upstream LTX-2.3 audio-video runner. CFG parallel is not enabled because upstream mm_guider and cfg_parallel are not compatible.",
+        "install_specs": null,
+        "server_bin": null,
+        "use_omni_arg": null,
+        "required_help_args": null,
+        "serve_args": "",
+        "num_gpus": 1,
+        "extra_env_keys": [
+          "DTYPE",
+          "PROFILING_DEBUG_LEVEL",
+          "SENSITIVE_LAYER_DTYPE"
+        ],
+        "lightx2v_config_keys": [
+          "apply_gated_attention",
+          "attn_type",
+          "audio_fps",
+          "audio_mel_bins",
+          "caption_proj_before_connector",
+          "cpu_offload",
+          "cross_attention_adaln",
+          "dit_original_ckpt",
+          "double_precision_rope",
+          "enable_cfg",
+          "mm_guider",
+          "num_channels_latents",
+          "sample_guide_scale",
+          "sample_shift",
+          "use_tiling_vae"
+        ]
+      },
+      "server_command": "python3 -m lightx2v.server --model_path /cluster-storage/models/hub/models--Lightricks--LTX-2/snapshots/47da56e2ad66ce4125a9922b4a8826bf407f9d0a --model_cls ltx2 --task t2av --config_json /tmp/lightx2v_config_ltx2.3_twostage_t2v_2gpus.json --host 127.0.0.1 --port 30420",
+      "metrics": {
+        "duration_s": 452.209,
+        "num_requests": 8,
+        "completed_requests": 8,
+        "failed_requests": 0,
+        "max_concurrency": 2,
+        "throughput_rps": 0.0177,
+        "output_throughput_ops": 0.0177,
+        "latency_mean_s": 106.037,
+        "latency_p50_s": 113.293,
+        "latency_p90_s": 113.312,
+        "latency_p95_s": 113.314,
+        "latency_p99_s": 113.316,
+        "errors": [],
+        "server_startup_s": 88.09,
+        "warmup_s": 58.15
+      }
+    }
+  ]
+}

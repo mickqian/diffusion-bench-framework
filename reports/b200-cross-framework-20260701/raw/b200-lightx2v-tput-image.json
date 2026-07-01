@@ -1,0 +1,283 @@
+{
+  "timestamp": "2026-07-01T03:48:51.831319+00:00",
+  "commit_sha": "c280cb5b1ade9c4bafc63086d1c8294876d0f5b9",
+  "run_id": "b200-lightx2v-tput-image",
+  "hardware": {
+    "runner_labels": null,
+    "gpu_config": null,
+    "gpus": [
+      "NVIDIA B200, 183359 MiB, 580.126.09",
+      "NVIDIA B200, 183359 MiB, 580.126.09",
+      "NVIDIA B200, 183359 MiB, 580.126.09",
+      "NVIDIA B200, 183359 MiB, 580.126.09"
+    ],
+    "hardware_profile_override": "b200"
+  },
+  "sglang_runtime": {
+    "package_version": "0.5.14",
+    "module_path": "/sgl-workspace/sglang/python/sglang/__init__.py",
+    "git_root": "/sgl-workspace/sglang",
+    "git_commit": "1c2523b719d1e8a55c43bf1a9526b0c52b05e118"
+  },
+  "framework_runtime": {
+    "venv_root": "/scratch/sglang-diffusion-framework-venvs",
+    "install_specs": {
+      "vllm": "vllm",
+      "vllm_omni": "git+https://github.com/vllm-project/vllm-omni.git",
+      "lightx2v": "git+https://github.com/ModelTC/LightX2V.git",
+      "lightx2v_flash_attn": "flash-attn==2.8.3",
+      "lightx2v_flash_attn3": "",
+      "lightx2v_fa3_hf_repo": "varunneal/flash-attention-3",
+      "lightx2v_fa3_hf_revision": "de87b9b5af06dd9984df595bef90b2eba44b181a",
+      "lightx2v_fa3_hf_subdir": "build/torch28-cxx11-cu128-x86_64-linux/flash_attention_3",
+      "lightx2v_flashinfer": "flashinfer-python==0.6.11",
+      "trtllm": "tensorrt-llm==1.3.0rc18",
+      "torch_cuda_arch_list": "10.0"
+    },
+    "launchers": {
+      "vllm_omni_server_bin": "vllm",
+      "vllm_omni_required_help_args": "--omni",
+      "trtllm_visual_server_bin": "trtllm-serve"
+    },
+    "vllm-omni": {
+      "venv_path": "/scratch/sglang-diffusion-framework-venvs/vllm-omni",
+      "packages": {
+        "vllm": {
+          "Name": "vllm",
+          "Version": "0.24.0",
+          "Home-page": "https://github.com/vllm-project/vllm",
+          "Location": "/scratch/sglang-diffusion-framework-venvs/vllm-omni/lib/python3.12/site-packages"
+        },
+        "vllm-omni": {
+          "Name": "vllm-omni",
+          "Version": "0.24.0rc1",
+          "Home-page": "https://github.com/vllm-project/vllm-omni",
+          "Location": "/scratch/sglang-diffusion-framework-venvs/vllm-omni/lib/python3.12/site-packages"
+        }
+      },
+      "direct_urls": {
+        "vllm_omni-0.24.0rc1.dist-info": {
+          "url": "https://github.com/vllm-project/vllm-omni.git",
+          "vcs_info": {
+            "commit_id": "a560ed184d9197855f1cccf46cb1cac87b0a7138",
+            "vcs": "git"
+          }
+        }
+      }
+    },
+    "lightx2v": {
+      "venv_path": "/scratch/sglang-diffusion-framework-venvs/lightx2v",
+      "packages": {
+        "lightx2v": {
+          "Name": "lightx2v",
+          "Version": "0.1.0",
+          "Home-page": "https://github.com/ModelTC/LightX2V",
+          "Location": "/scratch/sglang-diffusion-framework-venvs/lightx2v/lib/python3.12/site-packages"
+        },
+        "flash_attn": {
+          "Name": "flash_attn",
+          "Version": "2.8.3",
+          "Home-page": "https://github.com/Dao-AILab/flash-attention",
+          "Location": "/scratch/sglang-diffusion-framework-venvs/lightx2v/lib/python3.12/site-packages"
+        },
+        "flashinfer-python": {
+          "Name": "flashinfer-python",
+          "Version": "0.6.11",
+          "Home-page": "https://github.com/flashinfer-ai/flashinfer",
+          "Location": "/scratch/sglang-diffusion-framework-venvs/lightx2v/lib/python3.12/site-packages"
+        }
+      },
+      "direct_urls": {
+        "lightx2v-0.1.0.dist-info": {
+          "url": "https://github.com/ModelTC/LightX2V.git",
+          "vcs_info": {
+            "commit_id": "16d7202472584953044a257c6a576399da0653c9",
+            "vcs": "git"
+          }
+        }
+      }
+    },
+    "trtllm-visual": {
+      "venv_path": "/scratch/sglang-diffusion-framework-venvs/trtllm-visual",
+      "packages": {
+        "tensorrt_llm": {
+          "Name": "tensorrt_llm",
+          "Version": "1.3.0rc18",
+          "Home-page": "https://github.com/NVIDIA/TensorRT-LLM",
+          "Location": "/scratch/sglang-diffusion-framework-venvs/trtllm-visual/lib/python3.12/site-packages"
+        },
+        "tensorrt": {
+          "Name": "tensorrt",
+          "Version": "10.15.1.29",
+          "Home-page": "https://github.com/nvidia/tensorrt",
+          "Location": "/scratch/sglang-diffusion-framework-venvs/trtllm-visual/lib/python3.12/site-packages"
+        }
+      }
+    }
+  },
+  "benchmark_env": {
+    "TORCH_COMPILE_DISABLE": "1"
+  },
+  "benchmark_framework_args": {
+    "vllm-omni": [
+      "--enforce-eager",
+      "--compilation-config",
+      "{\"mode\":0}"
+    ],
+    "lightx2v": {
+      "config": {
+        "compile": false,
+        "compile_shapes": []
+      }
+    }
+  },
+  "torch_compile_disabled": true,
+  "benchmark_modes": [
+    "throughput"
+  ],
+  "requested_sglang_profile": "auto",
+  "results": [],
+  "throughput_results": [
+    {
+      "case_id": "flux2_dev_t2i_1024",
+      "framework": "lightx2v",
+      "mode": "throughput",
+      "model": "black-forest-labs/FLUX.2-dev",
+      "task": "text-to-image",
+      "width": 1024,
+      "height": 1024,
+      "num_frames": null,
+      "fps": null,
+      "num_inference_steps": 50,
+      "guidance_scale": 4.0,
+      "guidance_scale_2": null,
+      "true_cfg_scale": null,
+      "negative_prompt_set": false,
+      "num_gpus": 2,
+      "latency_s": 66.218,
+      "error": null,
+      "framework_metadata": {
+        "profile": "blackwell-fa2-flashinfer",
+        "profile_request": "auto",
+        "profile_source": "hardware",
+        "framework_ref": "lightx2v-latest-flux2_dev+blackwell-fa2-flashinfer",
+        "hardware": [
+          "b200",
+          "gb200",
+          "b300",
+          "gb300"
+        ],
+        "hardware_candidates": [
+          "b200"
+        ],
+        "description": "Blackwell LightX2V FLUX.2 profile probe using source-built FlashAttention 2 plus FlashInfer RoPE.",
+        "notes": "Uses a source-built FlashAttention 2 wheel with TORCH_CUDA_ARCH_LIST=10.0; the upstream FA3 wheel used for H200 is Hopper-only.",
+        "install_specs": null,
+        "server_bin": null,
+        "use_omni_arg": null,
+        "required_help_args": null,
+        "serve_args": "",
+        "num_gpus": 2,
+        "extra_env_keys": [],
+        "lightx2v_config_keys": [
+          "attn_type",
+          "enable_cfg",
+          "feature_caching",
+          "patch_size",
+          "rope_type",
+          "sample_guide_scale",
+          "text_encoder_out_layers",
+          "tokenizer_max_length",
+          "vae_scale_factor"
+        ]
+      },
+      "server_command": "torchrun --nproc_per_node=2 -m lightx2v.server --model_path /cluster-storage/models/hub/models--black-forest-labs--FLUX.2-dev/snapshots/26afe3a78bb242c0a8bb181dcc8937bb16e5c66c --model_cls flux2_dev --task t2i --config_json /tmp/lightx2v_config_flux2_dev_t2i_1024.json --host 127.0.0.1 --port 30420",
+      "metrics": {
+        "duration_s": 531.752,
+        "num_requests": 32,
+        "completed_requests": 32,
+        "failed_requests": 0,
+        "max_concurrency": 4,
+        "throughput_rps": 0.0602,
+        "output_throughput_ops": 0.0602,
+        "latency_mean_s": 63.368,
+        "latency_p50_s": 66.218,
+        "latency_p90_s": 67.233,
+        "latency_p95_s": 67.246,
+        "latency_p99_s": 67.251,
+        "errors": [],
+        "server_startup_s": 88.09,
+        "warmup_s": 19.04
+      }
+    },
+    {
+      "case_id": "zimage_turbo_t2i_1024",
+      "framework": "lightx2v",
+      "mode": "throughput",
+      "model": "Tongyi-MAI/Z-Image-Turbo",
+      "task": "text-to-image",
+      "width": 1024,
+      "height": 1024,
+      "num_frames": null,
+      "fps": null,
+      "num_inference_steps": 9,
+      "guidance_scale": 0.0,
+      "guidance_scale_2": null,
+      "true_cfg_scale": null,
+      "negative_prompt_set": false,
+      "num_gpus": 2,
+      "latency_s": 4.015,
+      "error": null,
+      "framework_metadata": {
+        "profile": "blackwell-fa2",
+        "profile_request": "auto",
+        "profile_source": "hardware",
+        "framework_ref": "lightx2v-0.1.0-z_image+blackwell-fa2",
+        "hardware": [
+          "b200",
+          "gb200",
+          "b300",
+          "gb300"
+        ],
+        "hardware_candidates": [
+          "b200"
+        ],
+        "description": "Blackwell LightX2V profile using FlashAttention 2 (validated on B200 via the flux2 blackwell-fa2-flashinfer profile). Same precision class (full-precision, exact attention) as SGLang's FA4 and vLLM-Omni's FlashInfer backend on Blackwell -- flash_attn3/flash_attn4 hit Hopper-only precompiled kernels or a CUDA-toolkit>=13.1 CuTe-DSL requirement not met by this build, so FA2 is the fastest same-class (full-precision) option available here.",
+        "notes": "Uses the source-built FlashAttention 2 wheel (TORCH_CUDA_ARCH_LIST=10.0) already installed for Blackwell; no cache, torch compile, or quantized model path. Deliberately NOT using SageAttention here -- it is int8 QK-quantized, a different numeric class from the full-precision attention used elsewhere in this comparison.",
+        "install_specs": null,
+        "server_bin": null,
+        "use_omni_arg": null,
+        "required_help_args": null,
+        "serve_args": "",
+        "num_gpus": 2,
+        "extra_env_keys": [],
+        "lightx2v_config_keys": [
+          "aspect_ratio",
+          "attn_type",
+          "enable_cfg",
+          "num_channels_latents",
+          "patch_size",
+          "sample_guide_scale"
+        ]
+      },
+      "server_command": "torchrun --nproc_per_node=2 -m lightx2v.server --model_path /cluster-storage/models/hub/models--Tongyi-MAI--Z-Image-Turbo/snapshots/f332072aa78be7aecdf3ee76d5c247082da564a6 --model_cls z_image --task t2i --config_json /tmp/lightx2v_config_zimage_turbo_t2i_1024.json --host 127.0.0.1 --port 30420",
+      "metrics": {
+        "duration_s": 32.123,
+        "num_requests": 32,
+        "completed_requests": 32,
+        "failed_requests": 0,
+        "max_concurrency": 4,
+        "throughput_rps": 0.9962,
+        "output_throughput_ops": 0.9962,
+        "latency_mean_s": 3.827,
+        "latency_p50_s": 4.015,
+        "latency_p90_s": 4.017,
+        "latency_p95_s": 4.017,
+        "latency_p99_s": 4.019,
+        "errors": [],
+        "server_startup_s": 38.04,
+        "warmup_s": 4.23
+      }
+    }
+  ]
+}

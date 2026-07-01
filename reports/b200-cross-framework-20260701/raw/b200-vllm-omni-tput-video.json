@@ -1,0 +1,341 @@
+{
+  "timestamp": "2026-07-01T03:10:39.190057+00:00",
+  "commit_sha": "c280cb5b1ade9c4bafc63086d1c8294876d0f5b9",
+  "run_id": "b200-vllm-omni-tput-video",
+  "hardware": {
+    "runner_labels": null,
+    "gpu_config": null,
+    "gpus": [
+      "NVIDIA B200, 183359 MiB, 580.126.09",
+      "NVIDIA B200, 183359 MiB, 580.126.09",
+      "NVIDIA B200, 183359 MiB, 580.126.09",
+      "NVIDIA B200, 183359 MiB, 580.126.09"
+    ],
+    "hardware_profile_override": "b200"
+  },
+  "sglang_runtime": {
+    "package_version": "0.5.14",
+    "module_path": "/sgl-workspace/sglang/python/sglang/__init__.py",
+    "git_root": "/sgl-workspace/sglang",
+    "git_commit": "1c2523b719d1e8a55c43bf1a9526b0c52b05e118"
+  },
+  "framework_runtime": {
+    "venv_root": "/scratch/sglang-diffusion-framework-venvs",
+    "install_specs": {
+      "vllm": "vllm",
+      "vllm_omni": "git+https://github.com/vllm-project/vllm-omni.git",
+      "lightx2v": "git+https://github.com/ModelTC/LightX2V.git",
+      "lightx2v_flash_attn": "flash-attn==2.8.3",
+      "lightx2v_flash_attn3": "",
+      "lightx2v_fa3_hf_repo": "varunneal/flash-attention-3",
+      "lightx2v_fa3_hf_revision": "de87b9b5af06dd9984df595bef90b2eba44b181a",
+      "lightx2v_fa3_hf_subdir": "build/torch28-cxx11-cu128-x86_64-linux/flash_attention_3",
+      "lightx2v_flashinfer": "flashinfer-python==0.6.11",
+      "trtllm": "tensorrt-llm==1.3.0rc18",
+      "torch_cuda_arch_list": "10.0"
+    },
+    "launchers": {
+      "vllm_omni_server_bin": "vllm",
+      "vllm_omni_required_help_args": "--omni",
+      "trtllm_visual_server_bin": "trtllm-serve"
+    },
+    "vllm-omni": {
+      "venv_path": "/scratch/sglang-diffusion-framework-venvs/vllm-omni",
+      "packages": {
+        "vllm": {
+          "Name": "vllm",
+          "Version": "0.24.0",
+          "Home-page": "https://github.com/vllm-project/vllm",
+          "Location": "/scratch/sglang-diffusion-framework-venvs/vllm-omni/lib/python3.12/site-packages"
+        },
+        "vllm-omni": {
+          "Name": "vllm-omni",
+          "Version": "0.24.0rc1",
+          "Home-page": "https://github.com/vllm-project/vllm-omni",
+          "Location": "/scratch/sglang-diffusion-framework-venvs/vllm-omni/lib/python3.12/site-packages"
+        }
+      },
+      "direct_urls": {
+        "vllm_omni-0.24.0rc1.dist-info": {
+          "url": "https://github.com/vllm-project/vllm-omni.git",
+          "vcs_info": {
+            "commit_id": "a560ed184d9197855f1cccf46cb1cac87b0a7138",
+            "vcs": "git"
+          }
+        }
+      }
+    },
+    "lightx2v": {
+      "venv_path": "/scratch/sglang-diffusion-framework-venvs/lightx2v",
+      "packages": {
+        "lightx2v": {
+          "Name": "lightx2v",
+          "Version": "0.1.0",
+          "Home-page": "https://github.com/ModelTC/LightX2V",
+          "Location": "/scratch/sglang-diffusion-framework-venvs/lightx2v/lib/python3.12/site-packages"
+        },
+        "flash_attn": {
+          "Name": "flash_attn",
+          "Version": "2.8.3",
+          "Home-page": "https://github.com/Dao-AILab/flash-attention",
+          "Location": "/scratch/sglang-diffusion-framework-venvs/lightx2v/lib/python3.12/site-packages"
+        },
+        "flashinfer-python": {
+          "Name": "flashinfer-python",
+          "Version": "0.6.11",
+          "Home-page": "https://github.com/flashinfer-ai/flashinfer",
+          "Location": "/scratch/sglang-diffusion-framework-venvs/lightx2v/lib/python3.12/site-packages"
+        }
+      },
+      "direct_urls": {
+        "lightx2v-0.1.0.dist-info": {
+          "url": "https://github.com/ModelTC/LightX2V.git",
+          "vcs_info": {
+            "commit_id": "16d7202472584953044a257c6a576399da0653c9",
+            "vcs": "git"
+          }
+        }
+      }
+    },
+    "trtllm-visual": {
+      "venv_path": "/scratch/sglang-diffusion-framework-venvs/trtllm-visual",
+      "packages": {
+        "tensorrt_llm": {
+          "Name": "tensorrt_llm",
+          "Version": "1.3.0rc18",
+          "Home-page": "https://github.com/NVIDIA/TensorRT-LLM",
+          "Location": "/scratch/sglang-diffusion-framework-venvs/trtllm-visual/lib/python3.12/site-packages"
+        },
+        "tensorrt": {
+          "Name": "tensorrt",
+          "Version": "10.15.1.29",
+          "Home-page": "https://github.com/nvidia/tensorrt",
+          "Location": "/scratch/sglang-diffusion-framework-venvs/trtllm-visual/lib/python3.12/site-packages"
+        }
+      }
+    }
+  },
+  "benchmark_env": {
+    "TORCH_COMPILE_DISABLE": "1"
+  },
+  "benchmark_framework_args": {
+    "vllm-omni": [
+      "--enforce-eager",
+      "--compilation-config",
+      "{\"mode\":0}"
+    ],
+    "lightx2v": {
+      "config": {
+        "compile": false,
+        "compile_shapes": []
+      }
+    }
+  },
+  "torch_compile_disabled": true,
+  "benchmark_modes": [
+    "throughput"
+  ],
+  "requested_sglang_profile": "auto",
+  "results": [],
+  "throughput_results": [
+    {
+      "case_id": "wan21_t2v_1_3b_480p",
+      "framework": "vllm-omni",
+      "mode": "throughput",
+      "model": "Wan-AI/Wan2.1-T2V-1.3B-Diffusers",
+      "task": "text-to-video",
+      "width": 832,
+      "height": 480,
+      "num_frames": 81,
+      "fps": 16,
+      "num_inference_steps": 50,
+      "guidance_scale": 6.0,
+      "guidance_scale_2": null,
+      "true_cfg_scale": null,
+      "negative_prompt_set": false,
+      "num_gpus": 2,
+      "latency_s": 83.168,
+      "error": null,
+      "framework_metadata": {
+        "profile": "blackwell-flashinfer",
+        "profile_request": "auto",
+        "profile_source": "hardware",
+        "framework_ref": "vllm-omni-latest+blackwell-flashinfer",
+        "hardware": [
+          "b200",
+          "gb200",
+          "b300",
+          "gb300"
+        ],
+        "hardware_candidates": [
+          "b200"
+        ],
+        "description": "Blackwell vLLM-Omni profile using FlashInfer attention (validated on B200; the FLASH_ATTN backend hits Hopper-only precompiled kernels and fails with 'no kernel image' on sm_100).",
+        "notes": "Same case/model/steps as default; only the attention backend changes for Blackwell compatibility.",
+        "install_specs": null,
+        "server_bin": null,
+        "use_omni_arg": null,
+        "required_help_args": null,
+        "serve_args": "--tensor-parallel-size 2",
+        "num_gpus": 2,
+        "extra_env_keys": [
+          "DIFFUSION_ATTENTION_BACKEND"
+        ]
+      },
+      "server_command": "vllm serve Wan-AI/Wan2.1-T2V-1.3B-Diffusers --port 30420 --host 127.0.0.1 --omni --tensor-parallel-size 2 --enforce-eager --compilation-config '{\"mode\":0}'",
+      "metrics": {
+        "duration_s": 333.935,
+        "num_requests": 8,
+        "completed_requests": 8,
+        "failed_requests": 0,
+        "max_concurrency": 2,
+        "throughput_rps": 0.024,
+        "output_throughput_ops": 0.024,
+        "latency_mean_s": 78.349,
+        "latency_p50_s": 83.168,
+        "latency_p90_s": 83.649,
+        "latency_p95_s": 83.914,
+        "latency_p99_s": 84.127,
+        "errors": [],
+        "server_startup_s": 50.06,
+        "warmup_s": 10.02
+      }
+    },
+    {
+      "case_id": "wan22_ti2v_5b_704p",
+      "framework": "vllm-omni",
+      "mode": "throughput",
+      "model": "Wan-AI/Wan2.2-TI2V-5B-Diffusers",
+      "task": "text-image-to-video",
+      "width": 1280,
+      "height": 704,
+      "num_frames": 81,
+      "fps": 24,
+      "num_inference_steps": 50,
+      "guidance_scale": 5.0,
+      "guidance_scale_2": null,
+      "true_cfg_scale": null,
+      "negative_prompt_set": false,
+      "num_gpus": 2,
+      "latency_s": 80.93,
+      "error": null,
+      "framework_metadata": {
+        "profile": "blackwell-flashinfer",
+        "profile_request": "auto",
+        "profile_source": "hardware",
+        "framework_ref": "vllm-omni-latest+blackwell-flashinfer",
+        "hardware": [
+          "b200",
+          "gb200",
+          "b300",
+          "gb300"
+        ],
+        "hardware_candidates": [
+          "b200"
+        ],
+        "description": "Blackwell vLLM-Omni profile using FlashInfer attention (validated on B200; the FLASH_ATTN backend hits Hopper-only precompiled kernels and fails with 'no kernel image' on sm_100).",
+        "notes": "Same case/model/steps as default; only the attention backend changes for Blackwell compatibility.",
+        "install_specs": null,
+        "server_bin": null,
+        "use_omni_arg": null,
+        "required_help_args": null,
+        "serve_args": "--tensor-parallel-size 2",
+        "num_gpus": 2,
+        "extra_env_keys": [
+          "DIFFUSION_ATTENTION_BACKEND"
+        ]
+      },
+      "server_command": "vllm serve Wan-AI/Wan2.2-TI2V-5B-Diffusers --port 30420 --host 127.0.0.1 --omni --tensor-parallel-size 2 --enforce-eager --compilation-config '{\"mode\":0}'",
+      "metrics": {
+        "duration_s": 328.146,
+        "num_requests": 8,
+        "completed_requests": 8,
+        "failed_requests": 0,
+        "max_concurrency": 2,
+        "throughput_rps": 0.0244,
+        "output_throughput_ops": 0.0244,
+        "latency_mean_s": 77.009,
+        "latency_p50_s": 80.93,
+        "latency_p90_s": 84.903,
+        "latency_p95_s": 85.816,
+        "latency_p99_s": 86.545,
+        "errors": [],
+        "server_startup_s": 56.04,
+        "warmup_s": 15.55
+      }
+    },
+    {
+      "case_id": "cosmos3_nano_t2v_720p_189f",
+      "framework": "vllm-omni",
+      "mode": "throughput",
+      "model": "nvidia/Cosmos3-Nano",
+      "task": "text-to-video",
+      "width": 1280,
+      "height": 720,
+      "num_frames": 189,
+      "fps": 24,
+      "num_inference_steps": 35,
+      "guidance_scale": 6.0,
+      "guidance_scale_2": null,
+      "true_cfg_scale": null,
+      "negative_prompt_set": true,
+      "num_gpus": 4,
+      "latency_s": 150.624,
+      "error": null,
+      "framework_metadata": {
+        "profile": "blackwell-flashinfer",
+        "profile_request": "auto",
+        "profile_source": "hardware",
+        "framework_ref": "vllm-project/vllm-omni@40b2959183d7043cd9d35f5f6387fbb8d1375c57",
+        "hardware": [
+          "b200",
+          "gb200",
+          "b300",
+          "gb300"
+        ],
+        "hardware_candidates": [
+          "b200"
+        ],
+        "description": "Blackwell Cosmos3 Nano T2V profile using FlashInfer attention (validated on B200; FLASH_ATTN hits Hopper-only precompiled kernels on sm_100).",
+        "notes": "Same as default except --diffusion-attention-backend FLASHINFER_ATTN for Blackwell compatibility.",
+        "install_specs": {
+          "vllm": "vllm==0.22.0",
+          "vllm_omni": "git+https://github.com/vllm-project/vllm-omni.git@40b2959183d7043cd9d35f5f6387fbb8d1375c57"
+        },
+        "server_bin": "vllm",
+        "use_omni_arg": true,
+        "required_help_args": [
+          "--omni",
+          "--model-class-name",
+          "--stage-init-timeout",
+          "--no-guardrails",
+          "--diffusion-attention-backend",
+          "--cache-backend",
+          "--cfg-parallel-size",
+          "--ulysses-degree"
+        ],
+        "serve_args": "--num-gpus 4 --cfg-parallel-size 2 --ulysses-degree 2 --model-class-name Cosmos3OmniDiffusersPipeline --stage-init-timeout 900 --init-timeout 1800 --no-guardrails --diffusion-attention-backend FLASHINFER_ATTN --cache-backend none",
+        "num_gpus": 4,
+        "extra_env_keys": []
+      },
+      "server_command": "vllm serve nvidia/Cosmos3-Nano --port 30420 --host 127.0.0.1 --omni --num-gpus 4 --cfg-parallel-size 2 --ulysses-degree 2 --model-class-name Cosmos3OmniDiffusersPipeline --stage-init-timeout 900 --init-timeout 1800 --no-guardrails --diffusion-attention-backend FLASHINFER_ATTN --cache-backend none --enforce-eager --compilation-config '{\"mode\":0}'",
+      "metrics": {
+        "duration_s": 602.748,
+        "num_requests": 8,
+        "completed_requests": 8,
+        "failed_requests": 0,
+        "max_concurrency": 2,
+        "throughput_rps": 0.0133,
+        "output_throughput_ops": 0.0133,
+        "latency_mean_s": 141.295,
+        "latency_p50_s": 150.624,
+        "latency_p90_s": 152.159,
+        "latency_p95_s": 152.371,
+        "latency_p99_s": 152.542,
+        "errors": [],
+        "server_startup_s": 54.04,
+        "warmup_s": 35.48
+      }
+    }
+  ]
+}

@@ -1,0 +1,81 @@
+{
+  "id": "b200-cross-framework-20260701",
+  "format_version": 1,
+  "created_at": "2026-07-01",
+  "description": "Latest-vs-latest cross-framework diffusion benchmark on 4x B200 (b200-verda-k8s): SGLang-Diffusion vs vLLM-Omni vs LightX2V vs TensorRT-LLM VisualGen. Single-request e2e + high-pressure throughput, no cache, torch compile disabled. Cosmos3 benchmarked as text-to-video.",
+  "benchmark_repo": {
+    "base_commit": "c280cb5b1ade9c4bafc63086d1c8294876d0f5b9",
+    "script": "scripts/run_b200_cross_framework_20260701.sh",
+    "config": "configs/comparison_configs.json",
+    "report_generator": "scripts/generate_h200_report_artifacts.sh"
+  },
+  "policy": {
+    "version_policy": "latest-vs-latest (sglang origin/main HEAD vs each competitor's newest line)",
+    "latency_source": "client-side wall clock, unified across frameworks (server-side timers are framework-specific and kept only as sglang diagnostics). single_e2e = median of back-to-back measured requests after warmup (image 5 repeats; video 3 warmups + 2 repeats), not a single isolated request.",
+    "single_e2e_anomaly_handling": "vLLM-Omni 0.24.0rc1 has an intermittent ~55s concurrency-1 idle/scheduler stall (engine runs in ~1s; confirmed by controlled repeat timing and by historical 0.22 = 5s). Its isolated single-request latencies do not converge or exceed the steady-state throughput p50 by >=1.8x, so the four image cases are marked `anomaly` and their number is withheld; the video cases (real compute >> stall) are unaffected. Throughput (continuous load) never triggers the stall and is clean for all frameworks.",
+    "throughput": "bench_serving; image 32 req / concurrency 4, video 8 req / concurrency 2",
+    "cache": "no response cache or Cache-DiT",
+    "torch_compile": "disabled (TORCH_COMPILE_DISABLE=1); vLLM-Omni --enforce-eager --compilation-config mode 0",
+    "attention_backends": "full-precision / exact only, kept semantically consistent across frameworks. sglang uses FA (set_fa_ver(4) on Blackwell); vLLM-Omni uses FlashInfer (blackwell-flashinfer) or FLASH_ATTN where the Hopper kernel loads; LightX2V uses FlashAttention 2 (blackwell-fa2) -- deliberately NOT SageAttention (int8 QK, different numeric class). trtllm-visual uses its default PyTorch-backend attention.",
+    "ci_machines": "not run on CI/runner/shared automation machines"
+  },
+  "hardware": {
+    "b200": {
+      "cluster": "b200-verda-k8s",
+      "devbox": "xfw-bench",
+      "gpu_model": "NVIDIA B200 (183359 MiB)",
+      "driver": "580.126.09",
+      "gpus_available": 4,
+      "profile": "b200 (selects blackwell-* command_profiles; default elsewhere)"
+    }
+  },
+  "frameworks": {
+    "sglang": {
+      "version": "0.5.14",
+      "commit": "1c2523b719d1e8a55c43bf1a9526b0c52b05e118",
+      "label": "SGLang-Diffusion origin/main 2026-07-01"
+    },
+    "vllm_omni": {
+      "vllm_omni_version": "0.24.0rc1",
+      "vllm_version": "0.24.0",
+      "install_spec": "git+https://github.com/vllm-project/vllm-omni.git (main HEAD)",
+      "label": "vLLM-Omni main"
+    },
+    "lightx2v": {
+      "version": "0.1.0",
+      "commit": "16d7202",
+      "install_spec": "git+https://github.com/ModelTC/LightX2V.git (main HEAD)",
+      "notes": "torch 2.8.0+cu128 isolated venv; flash-attn 2.8.3 (source, TORCH_CUDA_ARCH_LIST=10.0), sageattention 1.0.6, flashinfer-python 0.6.11 installed. FA3/FA4 unavailable on this Blackwell build (Hopper-only FA3 kernel; FA4 CuTe-DSL needs CUDA toolkit >= 13.1, system is 13.0).",
+      "label": "LightX2V main"
+    },
+    "trtllm_visual": {
+      "version": "1.3.0rc18",
+      "tensorrt_version": "10.15.1.29",
+      "install_spec": "tensorrt-llm==1.3.0rc18 (NVIDIA PyPI index), torch 2.10.0/cu130",
+      "label": "TensorRT-LLM VisualGen 1.3.0rc18"
+    }
+  },
+  "cases": [
+    {"id": "flux1_dev_t2i_1024", "model": "black-forest-labs/FLUX.1-dev", "task": "text-to-image", "size": "1024x1024", "steps": 50, "cfg": 3.5},
+    {"id": "flux2_dev_t2i_1024", "model": "black-forest-labs/FLUX.2-dev", "task": "text-to-image", "size": "1024x1024", "steps": 50, "cfg": 4.0},
+    {"id": "qwen_image_2512_t2i_1024", "model": "Qwen/Qwen-Image-2512", "task": "text-to-image", "size": "1024x1024", "steps": 50, "cfg": 1.0},
+    {"id": "zimage_turbo_t2i_1024", "model": "Tongyi-MAI/Z-Image-Turbo", "task": "text-to-image", "size": "1024x1024", "steps": 9, "cfg": 0.0},
+    {"id": "wan21_t2v_1_3b_480p", "model": "Wan-AI/Wan2.1-T2V-1.3B-Diffusers", "task": "text-to-video", "size": "832x480x81", "steps": 50, "cfg": 6.0},
+    {"id": "wan22_ti2v_5b_704p", "model": "Wan-AI/Wan2.2-TI2V-5B-Diffusers", "task": "text-image-to-video", "size": "1280x704x81", "steps": 50, "cfg": 5.0},
+    {"id": "ltx2.3_twostage_t2v_2gpus", "model": "Lightricks/LTX-2.3", "task": "text-to-video", "size": "768x512x121", "steps": 30, "cfg": 3.0},
+    {"id": "cosmos3_nano_t2v_720p_189f", "model": "nvidia/Cosmos3-Nano", "task": "text-to-video", "size": "1280x720x189", "steps": 35, "cfg": 6.0}
+  ],
+  "raw_results": [
+    "raw/b200-sglang-single.json",
+    "raw/b200-sglang-tput-image.json",
+    "raw/b200-sglang-tput-video.json",
+    "raw/b200-vllm-omni-single.json",
+    "raw/b200-vllm-omni-tput-image.json",
+    "raw/b200-vllm-omni-tput-video.json",
+    "raw/b200-lightx2v-single.json",
+    "raw/b200-lightx2v-tput-image.json",
+    "raw/b200-lightx2v-tput-video.json",
+    "raw/b200-trtllm-visual-single.json",
+    "raw/b200-trtllm-visual-tput-image.json"
+  ]
+}

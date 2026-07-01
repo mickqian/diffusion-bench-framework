@@ -1,6 +1,6 @@
 {
-  "id": "historical-cross-framework-20260610",
-  "updated_at": "2026-06-14",
+  "id": "historical-cross-framework-20260701",
+  "updated_at": "2026-07-01",
   "frameworks": {
     "sglang": "SGLang-Diffusion",
     "vllm-omni": "vLLM-Omni",
@@ -19,6 +19,784 @@
     "note": "Single consolidated coverage matrix across all models and frameworks."
   },
   "sections": [
+    {
+      "id": "b200-cross-framework-single-20260701",
+      "title": "Single-request latency · B200 · cache-free · steady-state",
+      "subtitle": "SGLang origin/main vs vLLM-Omni 0.24 vs LightX2V main vs trtllm-visual 1.3.0rc18; median of back-to-back requests",
+      "mode": "single_e2e",
+      "source_manifest": "reports/b200-cross-framework-20260701/manifest.json",
+      "reproduce": "scripts/run_b200_cross_framework_20260701.sh",
+      "summary": {
+        "rows": 8,
+        "comparable_rows": 8,
+        "sglang_diffusion_wins": 8,
+        "other_wins": 0,
+        "note": "vLLM-Omni image cells marked anomaly (0.24 concurrency-1 ~55s stall); see throughput for steady-state."
+      },
+      "rows": [
+        {
+          "case_id": "flux1_dev_t2i_1024",
+          "case": "FLUX.1-dev T2I",
+          "details": "1024x1024 · 50 steps · cfg 3.5",
+          "mode": "single_e2e",
+          "winner": "sglang",
+          "cells": {
+            "sglang": {
+              "gpus": 2,
+              "profile": "blackwell-2gpu-tp-compile",
+              "status": "ok",
+              "latency_s": 2.776,
+              "ratio_to_sglang": 1.0,
+              "server_latency_s": 2.65
+            },
+            "vllm-omni": {
+              "status": "anomaly",
+              "reason": "single-request latency 59.2s is 3.5x the steady-state throughput p50 (16.7s) -- isolated-request stall, not compute"
+            },
+            "lightx2v": {
+              "status": "unsupported",
+              "reason": "no validated aligned serving profile in this benchmark"
+            },
+            "trtllm-visual": {
+              "gpus": 2,
+              "profile": "default",
+              "status": "ok",
+              "latency_s": 5.276,
+              "ratio_to_sglang": 1.901
+            }
+          }
+        },
+        {
+          "case_id": "flux2_dev_t2i_1024",
+          "case": "FLUX.2-dev T2I",
+          "details": "1024x1024 · 50 steps · cfg 4",
+          "mode": "single_e2e",
+          "winner": "sglang",
+          "cells": {
+            "sglang": {
+              "gpus": 2,
+              "profile": "blackwell-2gpu-tp-compile",
+              "status": "ok",
+              "latency_s": 7.795,
+              "ratio_to_sglang": 1.0,
+              "server_latency_s": 7.681
+            },
+            "vllm-omni": {
+              "status": "anomaly",
+              "reason": "single-request latency did not converge (samples: 66.575s, 66.568s, 66.574s, 14.371s, 66.58s); intermittent concurrency-1 stall -- see throughput"
+            },
+            "lightx2v": {
+              "gpus": 2,
+              "profile": "blackwell-fa2-flashinfer",
+              "status": "ok",
+              "latency_s": 17.034,
+              "ratio_to_sglang": 2.185
+            },
+            "trtllm-visual": {
+              "gpus": 2,
+              "profile": "default",
+              "status": "ok",
+              "latency_s": 13.918,
+              "ratio_to_sglang": 1.786
+            }
+          }
+        },
+        {
+          "case_id": "qwen_image_2512_t2i_1024",
+          "case": "Qwen-Image-2512 T2I",
+          "details": "1024x1024 · 50 steps · cfg 1",
+          "mode": "single_e2e",
+          "winner": "sglang",
+          "cells": {
+            "sglang": {
+              "gpus": 2,
+              "profile": "default",
+              "status": "ok",
+              "latency_s": 3.601,
+              "ratio_to_sglang": 1.0,
+              "server_latency_s": 3.542
+            },
+            "vllm-omni": {
+              "status": "anomaly",
+              "reason": "single-request latency did not converge (samples: 5.107s, 59.612s, 59.607s, 5.107s, 59.621s); intermittent concurrency-1 stall -- see throughput"
+            },
+            "lightx2v": {
+              "status": "unsupported",
+              "reason": "no validated aligned serving profile in this benchmark"
+            },
+            "trtllm-visual": {
+              "gpus": 2,
+              "profile": "default",
+              "status": "ok",
+              "latency_s": 5.691,
+              "ratio_to_sglang": 1.58
+            }
+          }
+        },
+        {
+          "case_id": "zimage_turbo_t2i_1024",
+          "case": "Z-Image-Turbo T2I",
+          "details": "1024x1024 · 9 steps · cfg 0",
+          "mode": "single_e2e",
+          "winner": "sglang",
+          "cells": {
+            "sglang": {
+              "gpus": 2,
+              "profile": "default",
+              "status": "ok",
+              "latency_s": 0.484,
+              "ratio_to_sglang": 1.0,
+              "server_latency_s": 0.362
+            },
+            "vllm-omni": {
+              "status": "anomaly",
+              "reason": "single-request latency did not converge (samples: 55.976s, 1.459s, 55.972s, 55.976s, 1.467s); intermittent concurrency-1 stall -- see throughput"
+            },
+            "lightx2v": {
+              "gpus": 2,
+              "profile": "blackwell-fa2",
+              "status": "ok",
+              "latency_s": 1.004,
+              "ratio_to_sglang": 2.074
+            },
+            "trtllm-visual": {
+              "status": "no_profile",
+              "reason": "no validated aligned serving profile in this benchmark"
+            }
+          }
+        },
+        {
+          "case_id": "wan21_t2v_1_3b_480p",
+          "case": "Wan2.1 T2V 1.3B 480p",
+          "details": "832x480x81f · 50 steps · cfg 6",
+          "mode": "single_e2e",
+          "winner": "sglang",
+          "cells": {
+            "sglang": {
+              "gpus": 2,
+              "profile": "default",
+              "status": "ok",
+              "latency_s": 14.025,
+              "ratio_to_sglang": 1.0,
+              "server_latency_s": 12.807
+            },
+            "vllm-omni": {
+              "gpus": 2,
+              "profile": "blackwell-flashinfer",
+              "status": "ok",
+              "latency_s": 42.071,
+              "ratio_to_sglang": 3.0
+            },
+            "lightx2v": {
+              "gpus": 2,
+              "profile": "blackwell-fa2",
+              "status": "ok",
+              "latency_s": 32.058,
+              "ratio_to_sglang": 2.286
+            },
+            "trtllm-visual": {
+              "status": "no_profile",
+              "reason": "no validated aligned serving profile in this benchmark"
+            }
+          }
+        },
+        {
+          "case_id": "wan22_ti2v_5b_704p",
+          "case": "Wan2.2 TI2V 5B 704p",
+          "details": "1280x704x81f · 50 steps · cfg 5",
+          "mode": "single_e2e",
+          "winner": "sglang",
+          "cells": {
+            "sglang": {
+              "gpus": 2,
+              "profile": "default",
+              "status": "ok",
+              "latency_s": 19.041,
+              "ratio_to_sglang": 1.0
+            },
+            "vllm-omni": {
+              "gpus": 2,
+              "profile": "blackwell-flashinfer",
+              "status": "ok",
+              "latency_s": 41.604,
+              "ratio_to_sglang": 2.185
+            },
+            "lightx2v": {
+              "gpus": 2,
+              "profile": "blackwell-fa2",
+              "status": "ok",
+              "latency_s": 29.054,
+              "ratio_to_sglang": 1.526
+            },
+            "trtllm-visual": {
+              "status": "no_profile",
+              "reason": "no validated aligned serving profile in this benchmark"
+            }
+          }
+        },
+        {
+          "case_id": "ltx2.3_twostage_t2v_2gpus",
+          "case": "LTX-2.3 two-stage T2V",
+          "details": "768x512x121f · 30 steps · cfg 3",
+          "mode": "single_e2e",
+          "winner": "sglang",
+          "cells": {
+            "sglang": {
+              "gpus": 2,
+              "profile": "default",
+              "status": "ok",
+              "latency_s": 9.018,
+              "ratio_to_sglang": 1.0,
+              "server_latency_s": 5.294
+            },
+            "vllm-omni": {
+              "status": "no_profile",
+              "reason": "no validated aligned serving profile in this benchmark"
+            },
+            "lightx2v": {
+              "gpus": 1,
+              "profile": "default",
+              "status": "ok",
+              "latency_s": 57.116,
+              "ratio_to_sglang": 6.334
+            },
+            "trtllm-visual": {
+              "status": "no_profile",
+              "reason": "no validated aligned serving profile in this benchmark"
+            }
+          }
+        },
+        {
+          "case_id": "cosmos3_nano_t2v_720p_189f",
+          "case": "Cosmos3 Nano T2V 720p",
+          "details": "1280x720x189f · 35 steps · cfg 6",
+          "mode": "single_e2e",
+          "winner": "sglang",
+          "cells": {
+            "sglang": {
+              "gpus": 4,
+              "profile": "default",
+              "status": "ok",
+              "latency_s": 29.055,
+              "ratio_to_sglang": 1.0,
+              "server_latency_s": 27.04
+            },
+            "vllm-omni": {
+              "gpus": 4,
+              "profile": "blackwell-flashinfer",
+              "status": "ok",
+              "latency_s": 76.22,
+              "ratio_to_sglang": 2.623
+            },
+            "lightx2v": {
+              "status": "unsupported",
+              "reason": "no validated aligned serving profile in this benchmark"
+            },
+            "trtllm-visual": {
+              "status": "no_profile",
+              "reason": "no validated aligned serving profile in this benchmark"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "b200-cross-framework-throughput-20260701",
+      "title": "High-pressure throughput · B200 · cache-free",
+      "subtitle": "image 32 req @ concurrency 4; video 8 req @ concurrency 2",
+      "mode": "throughput",
+      "source_manifest": "reports/b200-cross-framework-20260701/manifest.json",
+      "reproduce": "scripts/run_b200_cross_framework_20260701.sh",
+      "summary": {
+        "rows": 8,
+        "comparable_rows": 8,
+        "sglang_diffusion_wins": 8,
+        "other_wins": 0,
+        "note": "Continuous load; no idle stall. All frameworks clean."
+      },
+      "rows": [
+        {
+          "case_id": "flux1_dev_t2i_1024",
+          "case": "FLUX.1-dev T2I",
+          "details": "1024x1024 · 50 steps · cfg 3.5",
+          "mode": "throughput",
+          "winner": "sglang",
+          "cells": {
+            "sglang": {
+              "gpus": 2,
+              "profile": "blackwell-2gpu-tp-compile",
+              "status": "ok",
+              "qps": 0.368,
+              "p50_s": 10.872,
+              "p95_s": 10.927,
+              "p99_s": 10.935,
+              "ratio_to_sglang": 1.0
+            },
+            "vllm-omni": {
+              "gpus": 2,
+              "profile": "blackwell-2gpu-tp-compile",
+              "status": "ok",
+              "qps": 0.239,
+              "p50_s": 16.696,
+              "p95_s": 16.736,
+              "p99_s": 16.744,
+              "ratio_to_sglang": 0.649
+            },
+            "lightx2v": {
+              "status": "unsupported",
+              "reason": "no validated aligned serving profile in this benchmark"
+            },
+            "trtllm-visual": {
+              "gpus": 2,
+              "profile": "default",
+              "status": "ok",
+              "qps": 0.189,
+              "p50_s": 21.119,
+              "p95_s": 21.202,
+              "p99_s": 21.333,
+              "ratio_to_sglang": 0.514
+            }
+          }
+        },
+        {
+          "case_id": "flux2_dev_t2i_1024",
+          "case": "FLUX.2-dev T2I",
+          "details": "1024x1024 · 50 steps · cfg 4",
+          "mode": "throughput",
+          "winner": "sglang",
+          "cells": {
+            "sglang": {
+              "gpus": 2,
+              "profile": "blackwell-2gpu-tp-compile",
+              "status": "ok",
+              "qps": 0.135,
+              "p50_s": 29.617,
+              "p95_s": 29.669,
+              "p99_s": 29.684,
+              "ratio_to_sglang": 1.0
+            },
+            "vllm-omni": {
+              "gpus": 2,
+              "profile": "blackwell-2gpu-tp-compile",
+              "status": "ok",
+              "qps": 0.072,
+              "p50_s": 55.628,
+              "p95_s": 55.778,
+              "p99_s": 55.797,
+              "ratio_to_sglang": 0.533
+            },
+            "lightx2v": {
+              "gpus": 2,
+              "profile": "blackwell-fa2-flashinfer",
+              "status": "ok",
+              "qps": 0.06,
+              "p50_s": 66.218,
+              "p95_s": 67.246,
+              "p99_s": 67.251,
+              "ratio_to_sglang": 0.444
+            },
+            "trtllm-visual": {
+              "gpus": 2,
+              "profile": "default",
+              "status": "ok",
+              "qps": 0.072,
+              "p50_s": 55.752,
+              "p95_s": 55.948,
+              "p99_s": 55.957,
+              "ratio_to_sglang": 0.533
+            }
+          }
+        },
+        {
+          "case_id": "qwen_image_2512_t2i_1024",
+          "case": "Qwen-Image-2512 T2I",
+          "details": "1024x1024 · 50 steps · cfg 1",
+          "mode": "throughput",
+          "winner": "sglang",
+          "cells": {
+            "sglang": {
+              "gpus": 2,
+              "profile": "default",
+              "status": "ok",
+              "qps": 0.295,
+              "p50_s": 13.4,
+              "p95_s": 14.551,
+              "p99_s": 14.553,
+              "ratio_to_sglang": 1.0
+            },
+            "vllm-omni": {
+              "gpus": 2,
+              "profile": "blackwell-flashinfer",
+              "status": "ok",
+              "qps": 0.216,
+              "p50_s": 18.475,
+              "p95_s": 18.491,
+              "p99_s": 18.532,
+              "ratio_to_sglang": 0.732
+            },
+            "lightx2v": {
+              "status": "unsupported",
+              "reason": "no validated aligned serving profile in this benchmark"
+            },
+            "trtllm-visual": {
+              "gpus": 2,
+              "profile": "default",
+              "status": "ok",
+              "qps": 0.176,
+              "p50_s": 22.744,
+              "p95_s": 22.781,
+              "p99_s": 22.92,
+              "ratio_to_sglang": 0.597
+            }
+          }
+        },
+        {
+          "case_id": "zimage_turbo_t2i_1024",
+          "case": "Z-Image-Turbo T2I",
+          "details": "1024x1024 · 9 steps · cfg 0",
+          "mode": "throughput",
+          "winner": "sglang",
+          "cells": {
+            "sglang": {
+              "gpus": 2,
+              "profile": "default",
+              "status": "ok",
+              "qps": 2.38,
+              "p50_s": 1.659,
+              "p95_s": 1.834,
+              "p99_s": 1.834,
+              "ratio_to_sglang": 1.0
+            },
+            "vllm-omni": {
+              "gpus": 2,
+              "profile": "blackwell-flashinfer",
+              "status": "ok",
+              "qps": 1.017,
+              "p50_s": 3.918,
+              "p95_s": 3.946,
+              "p99_s": 3.979,
+              "ratio_to_sglang": 0.427
+            },
+            "lightx2v": {
+              "gpus": 2,
+              "profile": "blackwell-fa2",
+              "status": "ok",
+              "qps": 0.996,
+              "p50_s": 4.015,
+              "p95_s": 4.017,
+              "p99_s": 4.019,
+              "ratio_to_sglang": 0.418
+            },
+            "trtllm-visual": {
+              "status": "no_profile",
+              "reason": "no validated aligned serving profile in this benchmark"
+            }
+          }
+        },
+        {
+          "case_id": "wan21_t2v_1_3b_480p",
+          "case": "Wan2.1 T2V 1.3B 480p",
+          "details": "832x480x81f · 50 steps · cfg 6",
+          "mode": "throughput",
+          "winner": "sglang",
+          "cells": {
+            "sglang": {
+              "gpus": 2,
+              "profile": "default",
+              "status": "ok",
+              "qps": 0.075,
+              "p50_s": 26.064,
+              "p95_s": 27.074,
+              "p99_s": 27.078,
+              "ratio_to_sglang": 1.0
+            },
+            "vllm-omni": {
+              "gpus": 2,
+              "profile": "blackwell-flashinfer",
+              "status": "ok",
+              "qps": 0.024,
+              "p50_s": 83.168,
+              "p95_s": 83.914,
+              "p99_s": 84.127,
+              "ratio_to_sglang": 0.32
+            },
+            "lightx2v": {
+              "gpus": 2,
+              "profile": "blackwell-fa2",
+              "status": "ok",
+              "qps": 0.032,
+              "p50_s": 62.148,
+              "p95_s": 62.801,
+              "p99_s": 63.079,
+              "ratio_to_sglang": 0.427
+            },
+            "trtllm-visual": {
+              "status": "no_profile",
+              "reason": "no validated aligned serving profile in this benchmark"
+            }
+          }
+        },
+        {
+          "case_id": "wan22_ti2v_5b_704p",
+          "case": "Wan2.2 TI2V 5B 704p",
+          "details": "1280x704x81f · 50 steps · cfg 5",
+          "mode": "throughput",
+          "winner": "sglang",
+          "cells": {
+            "sglang": {
+              "gpus": 2,
+              "profile": "default",
+              "status": "ok",
+              "qps": 0.054,
+              "p50_s": 37.088,
+              "p95_s": 37.095,
+              "p99_s": 37.096,
+              "ratio_to_sglang": 1.0
+            },
+            "vllm-omni": {
+              "gpus": 2,
+              "profile": "blackwell-flashinfer",
+              "status": "ok",
+              "qps": 0.024,
+              "p50_s": 80.93,
+              "p95_s": 85.816,
+              "p99_s": 86.545,
+              "ratio_to_sglang": 0.444
+            },
+            "lightx2v": {
+              "gpus": 2,
+              "profile": "blackwell-fa2",
+              "status": "ok",
+              "qps": 0.034,
+              "p50_s": 59.145,
+              "p95_s": 59.169,
+              "p99_s": 59.175,
+              "ratio_to_sglang": 0.63
+            },
+            "trtllm-visual": {
+              "status": "no_profile",
+              "reason": "no validated aligned serving profile in this benchmark"
+            }
+          }
+        },
+        {
+          "case_id": "ltx2.3_twostage_t2v_2gpus",
+          "case": "LTX-2.3 two-stage T2V",
+          "details": "768x512x121f · 30 steps · cfg 3",
+          "mode": "throughput",
+          "winner": "sglang",
+          "cells": {
+            "sglang": {
+              "gpus": 2,
+              "profile": "default",
+              "status": "ok",
+              "qps": 0.135,
+              "p50_s": 15.036,
+              "p95_s": 15.044,
+              "p99_s": 15.044,
+              "ratio_to_sglang": 1.0
+            },
+            "vllm-omni": {
+              "status": "no_profile",
+              "reason": "no validated aligned serving profile in this benchmark"
+            },
+            "lightx2v": {
+              "gpus": 1,
+              "profile": "default",
+              "status": "ok",
+              "qps": 0.018,
+              "p50_s": 113.293,
+              "p95_s": 113.314,
+              "p99_s": 113.316,
+              "ratio_to_sglang": 0.133
+            },
+            "trtllm-visual": {
+              "status": "no_profile",
+              "reason": "no validated aligned serving profile in this benchmark"
+            }
+          }
+        },
+        {
+          "case_id": "cosmos3_nano_t2v_720p_189f",
+          "case": "Cosmos3 Nano T2V 720p",
+          "details": "1280x720x189f · 35 steps · cfg 6",
+          "mode": "throughput",
+          "winner": "sglang",
+          "cells": {
+            "sglang": {
+              "gpus": 4,
+              "profile": "default",
+              "status": "ok",
+              "qps": 0.035,
+              "p50_s": 56.13,
+              "p95_s": 56.792,
+              "p99_s": 57.075,
+              "ratio_to_sglang": 1.0
+            },
+            "vllm-omni": {
+              "gpus": 4,
+              "profile": "blackwell-flashinfer",
+              "status": "ok",
+              "qps": 0.013,
+              "p50_s": 150.624,
+              "p95_s": 152.371,
+              "p99_s": 152.542,
+              "ratio_to_sglang": 0.371
+            },
+            "lightx2v": {
+              "status": "unsupported",
+              "reason": "no validated aligned serving profile in this benchmark"
+            },
+            "trtllm-visual": {
+              "status": "no_profile",
+              "reason": "no validated aligned serving profile in this benchmark"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "h200-sglang-native-vs-trtllm-20260614",
+      "title": "H200 SGLang-Diffusion (native) vs TensorRT-LLM VisualGen · H200",
+      "subtitle": "H200 2026-06-14: SGLang native re-bench (--backend sglang, latest main) + trtllm-visual 1.3.0rc18 H200",
+      "mode": "single_e2e",
+      "source_manifest": "exp_native.py (--backend sglang, first-vs-second request) + scripts/run_trtllm_visual_h200.md",
+      "reproduce": "exp_native.py (--backend sglang, first-vs-second request) + scripts/run_trtllm_visual_h200.md",
+      "summary": {
+        "cases": 6,
+        "sglang_wins": 6,
+        "trtllm_wins": 0,
+        "note": "SGLang's native pipeline wins all 3 models in both eager and compiled, on the same H200, cache-free. Earlier dashboards measured SGLang's diffusers fallback path and are superseded."
+      },
+      "rows": [
+        {
+          "case_id": "flux1_dev_t2i_1024_eager",
+          "case": "FLUX.1-dev T2I",
+          "details": "1024x1024 · 50 steps · cfg 3.5 · eager",
+          "mode": "single_e2e",
+          "winner": "SGLang-Diffusion",
+          "cells": {
+            "sglang": {
+              "profile": "native eager (FA3)",
+              "status": "ok",
+              "latency_s": 7.0,
+              "ratio_to_sglang": 1.0
+            },
+            "trtllm-visual": {
+              "profile": "eager (patched)",
+              "status": "ok",
+              "latency_s": 8.7,
+              "ratio_to_sglang": 1.243
+            }
+          }
+        },
+        {
+          "case_id": "flux1_dev_t2i_1024_compiled",
+          "case": "FLUX.1-dev T2I",
+          "details": "1024x1024 · 50 steps · cfg 3.5 · compiled",
+          "mode": "single_e2e",
+          "winner": "SGLang-Diffusion",
+          "cells": {
+            "sglang": {
+              "profile": "native compile (default mode)",
+              "status": "ok",
+              "latency_s": 6.6,
+              "ratio_to_sglang": 1.0
+            },
+            "trtllm-visual": {
+              "profile": "_torch compiled",
+              "status": "ok",
+              "latency_s": 7.08,
+              "ratio_to_sglang": 1.073
+            }
+          }
+        },
+        {
+          "case_id": "flux2_dev_t2i_1024_eager",
+          "case": "FLUX.2-dev T2I",
+          "details": "1024x1024 · 50 steps · cfg 4 · eager",
+          "mode": "single_e2e",
+          "winner": "SGLang-Diffusion",
+          "cells": {
+            "sglang": {
+              "profile": "native eager (FA3)",
+              "status": "ok",
+              "latency_s": 24.1,
+              "ratio_to_sglang": 1.0
+            },
+            "trtllm-visual": {
+              "profile": "eager (patched)",
+              "status": "ok",
+              "latency_s": 25.77,
+              "ratio_to_sglang": 1.069
+            }
+          }
+        },
+        {
+          "case_id": "flux2_dev_t2i_1024_compiled",
+          "case": "FLUX.2-dev T2I",
+          "details": "1024x1024 · 50 steps · cfg 4 · compiled",
+          "mode": "single_e2e",
+          "winner": "SGLang-Diffusion",
+          "cells": {
+            "sglang": {
+              "profile": "native compile (default mode)",
+              "status": "ok",
+              "latency_s": 22.4,
+              "ratio_to_sglang": 1.0
+            },
+            "trtllm-visual": {
+              "profile": "_torch compiled",
+              "status": "ok",
+              "latency_s": 23.18,
+              "ratio_to_sglang": 1.035
+            }
+          }
+        },
+        {
+          "case_id": "qwen_image_2512_t2i_1024_eager",
+          "case": "Qwen-Image-2512 T2I",
+          "details": "1024x1024 · 50 steps · cfg 1 · eager",
+          "mode": "single_e2e",
+          "winner": "SGLang-Diffusion",
+          "cells": {
+            "sglang": {
+              "profile": "native eager (FA3)",
+              "status": "ok",
+              "latency_s": 6.2,
+              "ratio_to_sglang": 1.0
+            },
+            "trtllm-visual": {
+              "profile": "eager (patched)",
+              "status": "ok",
+              "latency_s": 8.34,
+              "ratio_to_sglang": 1.345
+            }
+          }
+        },
+        {
+          "case_id": "qwen_image_2512_t2i_1024_compiled",
+          "case": "Qwen-Image-2512 T2I",
+          "details": "1024x1024 · 50 steps · cfg 1 · compiled",
+          "mode": "single_e2e",
+          "winner": "SGLang-Diffusion",
+          "cells": {
+            "sglang": {
+              "profile": "native compile (default mode)",
+              "status": "ok",
+              "latency_s": 6.2,
+              "ratio_to_sglang": 1.0
+            },
+            "trtllm-visual": {
+              "profile": "_torch compiled",
+              "status": "ok",
+              "latency_s": 7.25,
+              "ratio_to_sglang": 1.169
+            }
+          }
+        }
+      ]
+    },
     {
       "id": "h200-cross-framework-coverage-20260614",
       "title": "Single-request latency · H200 · cache-free",
