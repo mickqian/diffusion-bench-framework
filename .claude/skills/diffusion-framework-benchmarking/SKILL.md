@@ -39,7 +39,9 @@ Before accepting a number, verify:
 - intended GPU class and GPU count are recorded; H100/H200 may need different profiles
 - warmup is comparable and not dominated by cold model download or compile
 - framework-specific fast paths are fair: fast attention is fine; hidden caches or lower-quality models are not
-- single request uses one request; throughput records `num_requests`, concurrency, p50, p99, and QPS
+- attention backend choice is semantically consistent across the frameworks being compared, not just "whatever runs without crashing." Exact/full-precision attention (FlashAttention 2/3/4, FlashInfer, Torch SDPA) is one fair-swappable family — picking the fastest available member of that family for the hardware is fine. Quantized or approximate attention (SageAttention int8 QK, block-sparse/sparse attention, distilled attention) is a *different numeric class*. Do not silently substitute a quantized/approximate backend for a competitor when the reference (e.g. SGLang's backend for that case) runs full precision — that lets the competitor trade away accuracy the reference isn't trading away, which inflates its speed unfairly. If the only working backend on the target hardware is a different numeric class, either keep hunting for a same-class option, mark the cell `no_profile`/`failed` with the root cause, or run and report it as an explicitly labeled different-precision data point — never fold it into the main comparison unlabeled.
+- latency metric is unified across frameworks on **client-side wall clock** — it is the only framework-agnostic, consistently-defined number. Server-side timers (e.g. SGLang's perf-dump `total_duration_ms`) are framework-specific and not emitted by every framework, so keep them only as per-framework diagnostic annotations, never as the cross-framework headline.
+- single-request latency is a **steady-state median of several back-to-back requests after warmup**, not one isolated request. A single shot can absorb a cold/idle-path artifact — e.g. vLLM-Omni 0.24 stalls ~55s on spaced concurrency-1 requests while its engine runs in ~1s. Image cases repeat cheaply (≈5); video is expensive, so warm harder (≈3) and repeat fewer (≈2). If the repeats do not converge — or the single-request median exceeds the steady-state throughput p50 for the same case — the number is untrustworthy: mark the cell an anomaly and withhold the value (do not publish a stalled number as if it were latency). throughput records `num_requests`, concurrency, p50, p95, p99, and QPS; continuous load does not hit the isolated-request stall.
 - framework version parity: when sglang runs `origin/main` (latest), competitors must also run latest (git main HEAD / newest release), not a stale pinned ref — latest-sglang vs an old competitor pin is not a fair comparison
 
 ## Command Profiles
@@ -53,12 +55,13 @@ Every framework entry should carry `command_profiles`, not just inline args.
 - For SGLang failures, fix the backend or add a stable hardware-specific profile before using the comparison.
 - For non-SGLang frameworks, seek the fastest fair command too; do not leave a slow default if upstream has a documented faster path.
 - When upstream support changes, update install specs and profiles before claiming unsupported. Example: latest LightX2V supports LTX-2/LTX-2.3 even if an older pinned commit did not.
+- When a case's default attention backend fails only on specific hardware (e.g. a Hopper-only precompiled kernel on Blackwell), the hardware-specific profile should first try another backend from the *same precision class* (another full-precision kernel: FA2/FA3/FA4/FlashInfer/SDPA). Only reach for a cross-class substitution (full-precision -> quantized/approximate) as a last resort, and label it explicitly in the profile `description`/`notes` and in the report — it is not a drop-in "fastest working" pick.
 
 ## Framework-Specific Pitfalls
 
 - SGLang-Diffusion should not have failed cells in the final matrix. Treat SGLang import errors, NaNs, wrong scheduler behavior, OOMs, or request failures as bugs or bad profiles to fix before publishing.
 - vLLM-Omni diffusion paths are usually single-GPU. Do not make SGLang multi-GPU only because another framework is slower; compare same-GPU-count data when possible and label intentional differences.
-- LightX2V often needs model-specific attention, parallelism, and offload settings. Check upstream cookbook/configs before marking a case unsupported or before accepting FA2/SDPA when FA3/SageAttention is available and fair.
+- LightX2V often needs model-specific attention, parallelism, and offload settings. Check upstream cookbook/configs before marking a case unsupported. Prefer another full-precision attention type (FA2/FA3/FA4/SDPA) over SageAttention when a same-precision-class option works — SageAttention (`sage_attn2`/`sage_attn3`) is a legitimate LightX2V fast path but is int8 QK-quantized, a different numeric class from full-precision FA3/FA4; it is not an automatic "fair" swap and must be labeled as a distinct precision path if used (see the Fairness Checklist attention-backend rule).
 - diffusers is useful as a correctness and baseline reference, but it is not always a serving-optimized framework. Label it clearly and still use its fastest fair non-compile path.
 - For Wan, LTX, Flux, Qwen-Image, and Z-Image, verify official model-family semantics first: scheduler, frame count, guidance fields, VAE dtype/offload, and whether the upstream implementation is one-stage or two-stage.
 
@@ -86,7 +89,7 @@ For throughput, use enough warmup to avoid first-request artifacts, then record 
 - QPS
 - failure count
 
-Also record p95 latency when available. For very fast image cases, run multiple requests at realistic concurrency; for long video cases, one single request per model is acceptable unless throughput behavior is the question.
+Also record p95 latency when available. For very fast image cases, run multiple requests at realistic concurrency; for long video cases, a small number of measured requests (with extra warmup) is enough — but single-request latency is still the steady-state median of those repeats, never one isolated shot (see the Fairness Checklist).
 For high-pressure cross-framework throughput reports, prefer cases supported by every framework in scope. It is fine to include one or two video cases, but use a smaller request/concurrency budget than fast image cases and keep the image/video budgets explicit in the reproduce script.
 
 Use `py-spy` only for diagnosis, not as part of the benchmark timing path.
