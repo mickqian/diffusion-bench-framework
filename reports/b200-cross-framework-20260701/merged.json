@@ -1,6 +1,6 @@
 {
-  "timestamp": "2026-07-01T11:19:49.004114+00:00",
-  "commit_sha": "97bbeee92fb3d936f81be05c2542cb05e988f125",
+  "timestamp": "2026-07-01T11:48:10.730980+00:00",
+  "commit_sha": "b9d159bca06a3eb296de9ff738a93c9b10325b9a",
   "run_id": "b200-cross-framework-20260701",
   "hardware": {
     "runner_labels": null,
@@ -139,67 +139,67 @@
   "reproduce_script": "scripts/generate_h200_report_artifacts.sh",
   "source_results": [
     {
-      "path": "runs/b200-sglang-single.json",
+      "path": "reports/b200-cross-framework-20260701/raw/b200-sglang-single.json",
       "run_id": "b200-sglang-single",
       "commit_sha": "c280cb5b1ade9c4bafc63086d1c8294876d0f5b9",
       "timestamp": "2026-07-01T09:24:59.045179+00:00"
     },
     {
-      "path": "runs/b200-sglang-tput-image.json",
+      "path": "reports/b200-cross-framework-20260701/raw/b200-sglang-tput-image.json",
       "run_id": "b200-sglang-tput-image",
       "commit_sha": "c280cb5b1ade9c4bafc63086d1c8294876d0f5b9",
       "timestamp": "2026-06-30T18:11:02.988194+00:00"
     },
     {
-      "path": "runs/b200-sglang-tput-video.json",
+      "path": "reports/b200-cross-framework-20260701/raw/b200-sglang-tput-video.json",
       "run_id": "b200-sglang-tput-video",
       "commit_sha": "c280cb5b1ade9c4bafc63086d1c8294876d0f5b9",
       "timestamp": "2026-06-30T18:26:21.160106+00:00"
     },
     {
-      "path": "runs/b200-vllm-omni-single.json",
+      "path": "reports/b200-cross-framework-20260701/raw/b200-vllm-omni-single.json",
       "run_id": "b200-vllm-omni-single",
       "commit_sha": "c280cb5b1ade9c4bafc63086d1c8294876d0f5b9",
       "timestamp": "2026-07-01T09:46:30.340403+00:00"
     },
     {
-      "path": "runs/b200-vllm-omni-tput-image.json",
+      "path": "reports/b200-cross-framework-20260701/raw/b200-vllm-omni-tput-image.json",
       "run_id": "b200-vllm-omni-tput-image",
       "commit_sha": "c280cb5b1ade9c4bafc63086d1c8294876d0f5b9",
       "timestamp": "2026-07-01T02:45:58.847492+00:00"
     },
     {
-      "path": "runs/b200-vllm-omni-tput-video.json",
+      "path": "reports/b200-cross-framework-20260701/raw/b200-vllm-omni-tput-video.json",
       "run_id": "b200-vllm-omni-tput-video",
       "commit_sha": "c280cb5b1ade9c4bafc63086d1c8294876d0f5b9",
       "timestamp": "2026-07-01T03:10:39.190057+00:00"
     },
     {
-      "path": "runs/b200-lightx2v-single.json",
+      "path": "reports/b200-cross-framework-20260701/raw/b200-lightx2v-single.json",
       "run_id": "b200-lightx2v-single",
       "commit_sha": "c280cb5b1ade9c4bafc63086d1c8294876d0f5b9",
       "timestamp": "2026-07-01T10:26:15.146214+00:00"
     },
     {
-      "path": "runs/b200-lightx2v-tput-image.json",
+      "path": "reports/b200-cross-framework-20260701/raw/b200-lightx2v-tput-image.json",
       "run_id": "b200-lightx2v-tput-image",
       "commit_sha": "c280cb5b1ade9c4bafc63086d1c8294876d0f5b9",
       "timestamp": "2026-07-01T03:48:51.831319+00:00"
     },
     {
-      "path": "runs/b200-lightx2v-tput-video.json",
+      "path": "reports/b200-cross-framework-20260701/raw/b200-lightx2v-tput-video.json",
       "run_id": "b200-lightx2v-tput-video",
       "commit_sha": "c280cb5b1ade9c4bafc63086d1c8294876d0f5b9",
       "timestamp": "2026-07-01T04:01:58.800780+00:00"
     },
     {
-      "path": "runs/b200-trtllm-visual-single.json",
+      "path": "reports/b200-cross-framework-20260701/raw/b200-trtllm-visual-single.json",
       "run_id": "b200-trtllm-visual-single",
       "commit_sha": "c280cb5b1ade9c4bafc63086d1c8294876d0f5b9",
       "timestamp": "2026-07-01T10:40:50.326635+00:00"
     },
     {
-      "path": "runs/b200-trtllm-visual-tput-image.json",
+      "path": "reports/b200-cross-framework-20260701/raw/b200-trtllm-visual-tput-image.json",
       "run_id": "b200-trtllm-visual-tput-image",
       "commit_sha": "c280cb5b1ade9c4bafc63086d1c8294876d0f5b9",
       "timestamp": "2026-07-01T06:06:48.643579+00:00"
@@ -263,7 +263,7 @@
         "server_startup_s": 71.62,
         "warmup_s": 5.56
       },
-      "source_result": "runs/b200-sglang-single.json"
+      "source_result": "reports/b200-cross-framework-20260701/raw/b200-sglang-single.json"
     },
     {
       "case_id": "flux1_dev_t2i_1024",
@@ -320,7 +320,7 @@
         "latency_unstable": true,
         "latency_anomaly_reason": "single-request latency 59.2s is 3.5x the steady-state throughput p50 (16.7s) -- isolated-request stall, not compute"
       },
-      "source_result": "runs/b200-vllm-omni-single.json"
+      "source_result": "reports/b200-cross-framework-20260701/raw/b200-vllm-omni-single.json"
     },
     {
       "case_id": "flux1_dev_t2i_1024",
@@ -368,7 +368,7 @@
         "server_startup_s": 52.04,
         "warmup_s": 1.17
       },
-      "source_result": "runs/b200-trtllm-visual-single.json"
+      "source_result": "reports/b200-cross-framework-20260701/raw/b200-trtllm-visual-single.json"
     },
     {
       "case_id": "flux2_dev_t2i_1024",
@@ -427,7 +427,7 @@
         "server_startup_s": 153.73,
         "warmup_s": 15.57
       },
-      "source_result": "runs/b200-sglang-single.json"
+      "source_result": "reports/b200-cross-framework-20260701/raw/b200-sglang-single.json"
     },
     {
       "case_id": "flux2_dev_t2i_1024",
@@ -490,7 +490,7 @@
         "server_startup_s": 76.05,
         "warmup_s": 133.17
       },
-      "source_result": "runs/b200-vllm-omni-single.json"
+      "source_result": "reports/b200-cross-framework-20260701/raw/b200-vllm-omni-single.json"
     },
     {
       "case_id": "flux2_dev_t2i_1024",
@@ -554,7 +554,7 @@
         "server_startup_s": 100.07,
         "warmup_s": 19.13
       },
-      "source_result": "runs/b200-lightx2v-single.json"
+      "source_result": "reports/b200-cross-framework-20260701/raw/b200-lightx2v-single.json"
     },
     {
       "case_id": "flux2_dev_t2i_1024",
@@ -602,7 +602,7 @@
         "server_startup_s": 104.07,
         "warmup_s": 2.7
       },
-      "source_result": "runs/b200-trtllm-visual-single.json"
+      "source_result": "reports/b200-cross-framework-20260701/raw/b200-trtllm-visual-single.json"
     },
     {
       "case_id": "qwen_image_2512_t2i_1024",
@@ -656,7 +656,7 @@
         "server_startup_s": 111.98,
         "warmup_s": 0.79
       },
-      "source_result": "runs/b200-sglang-single.json"
+      "source_result": "reports/b200-cross-framework-20260701/raw/b200-sglang-single.json"
     },
     {
       "case_id": "qwen_image_2512_t2i_1024",
@@ -719,7 +719,7 @@
         "server_startup_s": 64.05,
         "warmup_s": 110.76
       },
-      "source_result": "runs/b200-vllm-omni-single.json"
+      "source_result": "reports/b200-cross-framework-20260701/raw/b200-vllm-omni-single.json"
     },
     {
       "case_id": "qwen_image_2512_t2i_1024",
@@ -767,7 +767,7 @@
         "server_startup_s": 68.04,
         "warmup_s": 1.43
       },
-      "source_result": "runs/b200-trtllm-visual-single.json"
+      "source_result": "reports/b200-cross-framework-20260701/raw/b200-trtllm-visual-single.json"
     },
     {
       "case_id": "zimage_turbo_t2i_1024",
@@ -821,7 +821,7 @@
         "server_startup_s": 67.38,
         "warmup_s": 0.6
       },
-      "source_result": "runs/b200-sglang-single.json"
+      "source_result": "reports/b200-cross-framework-20260701/raw/b200-sglang-single.json"
     },
     {
       "case_id": "zimage_turbo_t2i_1024",
@@ -884,7 +884,7 @@
         "server_startup_s": 46.03,
         "warmup_s": 110.86
       },
-      "source_result": "runs/b200-vllm-omni-single.json"
+      "source_result": "reports/b200-cross-framework-20260701/raw/b200-vllm-omni-single.json"
     },
     {
       "case_id": "zimage_turbo_t2i_1024",
@@ -945,7 +945,7 @@
         "server_startup_s": 36.04,
         "warmup_s": 4.53
       },
-      "source_result": "runs/b200-lightx2v-single.json"
+      "source_result": "reports/b200-cross-framework-20260701/raw/b200-lightx2v-single.json"
     },
     {
       "case_id": "wan21_t2v_1_3b_480p",
@@ -999,7 +999,7 @@
         "server_startup_s": 68.68,
         "warmup_s": 9.05
       },
-      "source_result": "runs/b200-sglang-single.json"
+      "source_result": "reports/b200-cross-framework-20260701/raw/b200-sglang-single.json"
     },
     {
       "case_id": "wan21_t2v_1_3b_480p",
@@ -1054,7 +1054,7 @@
         "server_startup_s": 48.06,
         "warmup_s": 15.04
       },
-      "source_result": "runs/b200-vllm-omni-single.json"
+      "source_result": "reports/b200-cross-framework-20260701/raw/b200-vllm-omni-single.json"
     },
     {
       "case_id": "wan21_t2v_1_3b_480p",
@@ -1119,7 +1119,7 @@
         "server_startup_s": 24.03,
         "warmup_s": 34.15
       },
-      "source_result": "runs/b200-lightx2v-single.json"
+      "source_result": "reports/b200-cross-framework-20260701/raw/b200-lightx2v-single.json"
     },
     {
       "case_id": "wan22_ti2v_5b_704p",
@@ -1171,7 +1171,7 @@
         "server_startup_s": 69.14,
         "warmup_s": 16.2
       },
-      "source_result": "runs/b200-sglang-single.json"
+      "source_result": "reports/b200-cross-framework-20260701/raw/b200-sglang-single.json"
     },
     {
       "case_id": "wan22_ti2v_5b_704p",
@@ -1226,7 +1226,7 @@
         "server_startup_s": 52.04,
         "warmup_s": 30.61
       },
-      "source_result": "runs/b200-vllm-omni-single.json"
+      "source_result": "reports/b200-cross-framework-20260701/raw/b200-vllm-omni-single.json"
     },
     {
       "case_id": "wan22_ti2v_5b_704p",
@@ -1298,7 +1298,7 @@
         "server_startup_s": 46.05,
         "warmup_s": 33.13
       },
-      "source_result": "runs/b200-lightx2v-single.json"
+      "source_result": "reports/b200-cross-framework-20260701/raw/b200-lightx2v-single.json"
     },
     {
       "case_id": "ltx2.3_twostage_t2v_2gpus",
@@ -1352,7 +1352,7 @@
         "server_startup_s": 198.22,
         "warmup_s": 15.05
       },
-      "source_result": "runs/b200-sglang-single.json"
+      "source_result": "reports/b200-cross-framework-20260701/raw/b200-sglang-single.json"
     },
     {
       "case_id": "ltx2.3_twostage_t2v_2gpus",
@@ -1421,7 +1421,7 @@
         "server_startup_s": 78.07,
         "warmup_s": 58.13
       },
-      "source_result": "runs/b200-lightx2v-single.json"
+      "source_result": "reports/b200-cross-framework-20260701/raw/b200-lightx2v-single.json"
     },
     {
       "case_id": "cosmos3_nano_t2v_720p_189f",
@@ -1477,7 +1477,7 @@
         "server_startup_s": 98.78,
         "warmup_s": 19.06
       },
-      "source_result": "runs/b200-sglang-single.json"
+      "source_result": "reports/b200-cross-framework-20260701/raw/b200-sglang-single.json"
     },
     {
       "case_id": "cosmos3_nano_t2v_720p_189f",
@@ -1542,7 +1542,7 @@
         "server_startup_s": 48.03,
         "warmup_s": 51.73
       },
-      "source_result": "runs/b200-vllm-omni-single.json"
+      "source_result": "reports/b200-cross-framework-20260701/raw/b200-vllm-omni-single.json"
     }
   ],
   "throughput_results": [
@@ -1610,7 +1610,7 @@
         "server_startup_s": 63.06,
         "warmup_s": 5.54
       },
-      "source_result": "runs/b200-sglang-tput-image.json"
+      "source_result": "reports/b200-cross-framework-20260701/raw/b200-sglang-tput-image.json"
     },
     {
       "case_id": "flux1_dev_t2i_1024",
@@ -1674,7 +1674,7 @@
         "server_startup_s": 46.03,
         "warmup_s": 63.64
       },
-      "source_result": "runs/b200-vllm-omni-tput-image.json"
+      "source_result": "reports/b200-cross-framework-20260701/raw/b200-vllm-omni-tput-image.json"
     },
     {
       "case_id": "flux1_dev_t2i_1024",
@@ -1731,7 +1731,7 @@
         "server_startup_s": 46.04,
         "warmup_s": 1.62
       },
-      "source_result": "runs/b200-trtllm-visual-tput-image.json"
+      "source_result": "reports/b200-cross-framework-20260701/raw/b200-trtllm-visual-tput-image.json"
     },
     {
       "case_id": "flux2_dev_t2i_1024",
@@ -1797,7 +1797,7 @@
         "server_startup_s": 128.02,
         "warmup_s": 15.76
       },
-      "source_result": "runs/b200-sglang-tput-image.json"
+      "source_result": "reports/b200-cross-framework-20260701/raw/b200-sglang-tput-image.json"
     },
     {
       "case_id": "flux2_dev_t2i_1024",
@@ -1861,7 +1861,7 @@
         "server_startup_s": 84.05,
         "warmup_s": 133.18
       },
-      "source_result": "runs/b200-vllm-omni-tput-image.json"
+      "source_result": "reports/b200-cross-framework-20260701/raw/b200-vllm-omni-tput-image.json"
     },
     {
       "case_id": "flux2_dev_t2i_1024",
@@ -1934,7 +1934,7 @@
         "server_startup_s": 88.09,
         "warmup_s": 19.04
       },
-      "source_result": "runs/b200-lightx2v-tput-image.json"
+      "source_result": "reports/b200-cross-framework-20260701/raw/b200-lightx2v-tput-image.json"
     },
     {
       "case_id": "flux2_dev_t2i_1024",
@@ -1991,7 +1991,7 @@
         "server_startup_s": 96.05,
         "warmup_s": 2.51
       },
-      "source_result": "runs/b200-trtllm-visual-tput-image.json"
+      "source_result": "reports/b200-cross-framework-20260701/raw/b200-trtllm-visual-tput-image.json"
     },
     {
       "case_id": "qwen_image_2512_t2i_1024",
@@ -2052,7 +2052,7 @@
         "server_startup_s": 118.14,
         "warmup_s": 3.13
       },
-      "source_result": "runs/b200-sglang-tput-image.json"
+      "source_result": "reports/b200-cross-framework-20260701/raw/b200-sglang-tput-image.json"
     },
     {
       "case_id": "qwen_image_2512_t2i_1024",
@@ -2116,7 +2116,7 @@
         "server_startup_s": 64.04,
         "warmup_s": 110.77
       },
-      "source_result": "runs/b200-vllm-omni-tput-image.json"
+      "source_result": "reports/b200-cross-framework-20260701/raw/b200-vllm-omni-tput-image.json"
     },
     {
       "case_id": "qwen_image_2512_t2i_1024",
@@ -2173,7 +2173,7 @@
         "server_startup_s": 64.05,
         "warmup_s": 1.48
       },
-      "source_result": "runs/b200-trtllm-visual-tput-image.json"
+      "source_result": "reports/b200-cross-framework-20260701/raw/b200-trtllm-visual-tput-image.json"
     },
     {
       "case_id": "zimage_turbo_t2i_1024",
@@ -2234,7 +2234,7 @@
         "server_startup_s": 64.88,
         "warmup_s": 0.6
       },
-      "source_result": "runs/b200-sglang-tput-image.json"
+      "source_result": "reports/b200-cross-framework-20260701/raw/b200-sglang-tput-image.json"
     },
     {
       "case_id": "zimage_turbo_t2i_1024",
@@ -2298,7 +2298,7 @@
         "server_startup_s": 52.04,
         "warmup_s": 56.41
       },
-      "source_result": "runs/b200-vllm-omni-tput-image.json"
+      "source_result": "reports/b200-cross-framework-20260701/raw/b200-vllm-omni-tput-image.json"
     },
     {
       "case_id": "zimage_turbo_t2i_1024",
@@ -2368,7 +2368,7 @@
         "server_startup_s": 38.04,
         "warmup_s": 4.23
       },
-      "source_result": "runs/b200-lightx2v-tput-image.json"
+      "source_result": "reports/b200-cross-framework-20260701/raw/b200-lightx2v-tput-image.json"
     },
     {
       "case_id": "wan21_t2v_1_3b_480p",
@@ -2429,7 +2429,7 @@
         "server_startup_s": 61.2,
         "warmup_s": 6.03
       },
-      "source_result": "runs/b200-sglang-tput-video.json"
+      "source_result": "reports/b200-cross-framework-20260701/raw/b200-sglang-tput-video.json"
     },
     {
       "case_id": "wan21_t2v_1_3b_480p",
@@ -2493,7 +2493,7 @@
         "server_startup_s": 50.06,
         "warmup_s": 10.02
       },
-      "source_result": "runs/b200-vllm-omni-tput-video.json"
+      "source_result": "reports/b200-cross-framework-20260701/raw/b200-vllm-omni-tput-video.json"
     },
     {
       "case_id": "wan21_t2v_1_3b_480p",
@@ -2567,7 +2567,7 @@
         "server_startup_s": 28.06,
         "warmup_s": 34.31
       },
-      "source_result": "runs/b200-lightx2v-tput-video.json"
+      "source_result": "reports/b200-cross-framework-20260701/raw/b200-lightx2v-tput-video.json"
     },
     {
       "case_id": "wan22_ti2v_5b_704p",
@@ -2628,7 +2628,7 @@
         "server_startup_s": 67.15,
         "warmup_s": 11.45
       },
-      "source_result": "runs/b200-sglang-tput-video.json"
+      "source_result": "reports/b200-cross-framework-20260701/raw/b200-sglang-tput-video.json"
     },
     {
       "case_id": "wan22_ti2v_5b_704p",
@@ -2692,7 +2692,7 @@
         "server_startup_s": 56.04,
         "warmup_s": 15.55
       },
-      "source_result": "runs/b200-vllm-omni-tput-video.json"
+      "source_result": "reports/b200-cross-framework-20260701/raw/b200-vllm-omni-tput-video.json"
     },
     {
       "case_id": "wan22_ti2v_5b_704p",
@@ -2773,7 +2773,7 @@
         "server_startup_s": 40.04,
         "warmup_s": 32.11
       },
-      "source_result": "runs/b200-lightx2v-tput-video.json"
+      "source_result": "reports/b200-cross-framework-20260701/raw/b200-lightx2v-tput-video.json"
     },
     {
       "case_id": "ltx2.3_twostage_t2v_2gpus",
@@ -2834,7 +2834,7 @@
         "server_startup_s": 190.23,
         "warmup_s": 9.04
       },
-      "source_result": "runs/b200-sglang-tput-video.json"
+      "source_result": "reports/b200-cross-framework-20260701/raw/b200-sglang-tput-video.json"
     },
     {
       "case_id": "ltx2.3_twostage_t2v_2gpus",
@@ -2912,7 +2912,7 @@
         "server_startup_s": 88.09,
         "warmup_s": 58.15
       },
-      "source_result": "runs/b200-lightx2v-tput-video.json"
+      "source_result": "reports/b200-cross-framework-20260701/raw/b200-lightx2v-tput-video.json"
     },
     {
       "case_id": "cosmos3_nano_t2v_720p_189f",
@@ -2975,7 +2975,7 @@
         "server_startup_s": 96.32,
         "warmup_s": 13.04
       },
-      "source_result": "runs/b200-sglang-tput-video.json"
+      "source_result": "reports/b200-cross-framework-20260701/raw/b200-sglang-tput-video.json"
     },
     {
       "case_id": "cosmos3_nano_t2v_720p_189f",
@@ -3049,7 +3049,7 @@
         "server_startup_s": 54.04,
         "warmup_s": 35.48
       },
-      "source_result": "runs/b200-vllm-omni-tput-video.json"
+      "source_result": "reports/b200-cross-framework-20260701/raw/b200-vllm-omni-tput-video.json"
     }
   ]
 }

@@ -1,10 +1,10 @@
-## Diffusion Benchmark Data - 2026-07-01T11:19:49.004114+00:00
+## Diffusion Benchmark Data - 2026-07-01T11:48:10.730980+00:00
 
 | item | value |
 | --- | --- |
 | run_id | b200-cross-framework-20260701 |
 | data | single_e2e, throughput |
-| bench_commit | 97bbeee92fb3d936f81be05c2542cb05e988f125 |
+| bench_commit | b9d159bca06a3eb296de9ff738a93c9b10325b9a |
 | gpu | 4 x NVIDIA B200, 183359 MiB, 580.126.09 |
 | reproduce | scripts/generate_h200_report_artifacts.sh; inputs: b200-sglang-single.json, b200-sglang-tput-image.json, b200-sglang-tput-video.json, b200-vllm-omni-single.json, b200-vllm-omni-tput-image.json, b200-vllm-omni-tput-video.json, b200-lightx2v-single.json, b200-lightx2v-tput-image.json, b200-lightx2v-tput-video.json, b200-trtllm-visual-single.json, b200-trtllm-visual-tput-image.json |
 
