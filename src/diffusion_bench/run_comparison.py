@@ -158,7 +158,13 @@ def _vllm_torch_compile_args() -> list[str]:
 
 
 def _lightx2v_torch_compile_config() -> dict:
-    return LIGHTX2V_DISABLE_TORCH_COMPILE_CONFIG if _torch_compile_disabled() else {}
+    # compile OFF -> force it off (+ clear shapes). compile ON ("no precision
+    # loss, best perf" mode) -> request torch.compile; the caller applies this
+    # with setdefault so a profile's lightx2v_config may still opt a specific
+    # model out (compile:false) if that model's compile path breaks.
+    if _torch_compile_disabled():
+        return dict(LIGHTX2V_DISABLE_TORCH_COMPILE_CONFIG)
+    return {"compile": True}
 
 
 # ---------------------------------------------------------------------------
@@ -396,7 +402,12 @@ def _write_lightx2v_config(
         )
     if fw_cfg.get("model_cls") == "ltx2":
         _merge_ltx2_single_file_metadata(cfg)
-    cfg.update(_lightx2v_torch_compile_config())
+    if _torch_compile_disabled():
+        cfg.update(LIGHTX2V_DISABLE_TORCH_COMPILE_CONFIG)
+    else:
+        # best lossless perf: torch.compile on by default; a profile's
+        # lightx2v_config may set compile:false to opt a model out if it breaks.
+        cfg.setdefault("compile", True)
 
     config_path = os.path.join(
         tempfile.gettempdir(), f"lightx2v_config_{case['id']}.json"
