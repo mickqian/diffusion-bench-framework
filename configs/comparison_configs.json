@@ -527,6 +527,21 @@
                             "extra_env": {
                                 "DIFFUSION_ATTENTION_BACKEND": "FLASH_ATTN"
                             }
+                        },
+                        "blackwell-flashinfer": {
+                            "description": "Blackwell vLLM-Omni profile using FlashInfer attention (validated on B200; the FLASH_ATTN backend hits Hopper-only precompiled kernels and fails with 'no kernel image' on sm_100).",
+                            "hardware": [
+                                "b200",
+                                "gb200",
+                                "b300",
+                                "gb300"
+                            ],
+                            "framework_ref": "vllm-omni-latest+blackwell-flashinfer",
+                            "serve_args": "",
+                            "notes": "Same case/model/steps as default; only the attention backend changes for Blackwell compatibility.",
+                            "extra_env": {
+                                "DIFFUSION_ATTENTION_BACKEND": "FLASHINFER_ATTN"
+                            }
                         }
                     }
                 },
@@ -664,6 +679,21 @@
                             "extra_env": {
                                 "DIFFUSION_ATTENTION_BACKEND": "FLASH_ATTN"
                             }
+                        },
+                        "blackwell-flashinfer": {
+                            "description": "Blackwell vLLM-Omni profile using FlashInfer attention (validated on B200; the FLASH_ATTN backend hits Hopper-only precompiled kernels and fails with 'no kernel image' on sm_100).",
+                            "hardware": [
+                                "b200",
+                                "gb200",
+                                "b300",
+                                "gb300"
+                            ],
+                            "framework_ref": "vllm-omni-latest+blackwell-flashinfer",
+                            "serve_args": "",
+                            "notes": "Same case/model/steps as default; only the attention backend changes for Blackwell compatibility.",
+                            "extra_env": {
+                                "DIFFUSION_ATTENTION_BACKEND": "FLASHINFER_ATTN"
+                            }
                         }
                     }
                 },
@@ -688,6 +718,21 @@
                             "framework_ref": "lightx2v-0.1.0-z_image",
                             "serve_args": "",
                             "notes": "Uses explicit fast attention/offload settings; no cache, torch compile, or quantized model path."
+                        },
+                        "blackwell-fa2": {
+                            "description": "Blackwell LightX2V profile using FlashAttention 2 (validated on B200 via the flux2 blackwell-fa2-flashinfer profile). Same precision class (full-precision, exact attention) as SGLang's FA4 and vLLM-Omni's FlashInfer backend on Blackwell -- flash_attn3/flash_attn4 hit Hopper-only precompiled kernels or a CUDA-toolkit>=13.1 CuTe-DSL requirement not met by this build, so FA2 is the fastest same-class (full-precision) option available here.",
+                            "hardware": [
+                                "b200",
+                                "gb200",
+                                "b300",
+                                "gb300"
+                            ],
+                            "framework_ref": "lightx2v-0.1.0-z_image+blackwell-fa2",
+                            "serve_args": "",
+                            "notes": "Uses the source-built FlashAttention 2 wheel (TORCH_CUDA_ARCH_LIST=10.0) already installed for Blackwell; no cache, torch compile, or quantized model path. Deliberately NOT using SageAttention here -- it is int8 QK-quantized, a different numeric class from the full-precision attention used elsewhere in this comparison.",
+                            "lightx2v_config": {
+                                "attn_type": "flash_attn2"
+                            }
                         },
                         "h200-fa3-flashinfer": {
                             "description": "H200 fastest available LightX2V command/config for aligned non-cache benchmark runs.",
@@ -808,6 +853,22 @@
                                 "DIFFUSION_ATTENTION_BACKEND": "FLASH_ATTN"
                             }
                         },
+                        "blackwell-flashinfer": {
+                            "description": "Blackwell vLLM-Omni profile using FlashInfer attention (validated on B200; the FLASH_ATTN backend hits Hopper-only precompiled kernels and fails with 'no kernel image' on sm_100).",
+                            "hardware": [
+                                "b200",
+                                "gb200",
+                                "b300",
+                                "gb300"
+                            ],
+                            "framework_ref": "vllm-omni-latest+blackwell-flashinfer",
+                            "num_gpus": 2,
+                            "serve_args": "--tensor-parallel-size 2",
+                            "notes": "Same case/model/steps as default; only the attention backend changes for Blackwell compatibility.",
+                            "extra_env": {
+                                "DIFFUSION_ATTENTION_BACKEND": "FLASHINFER_ATTN"
+                            }
+                        },
                         "h200-2gpu-tp": {
                             "description": "H200 vLLM-Omni Wan tensor-parallel command.",
                             "hardware": [
@@ -875,6 +936,23 @@
                             "framework_ref": "lightx2v-0.1.0-configs/wan/wan_t2v.json+cfg_parallel",
                             "serve_args": "",
                             "notes": "Uses explicit fast attention/offload settings; no cache, torch compile, or quantized model path."
+                        },
+                        "blackwell-fa2": {
+                            "description": "Blackwell LightX2V profile using FlashAttention 2 (validated on B200 via the flux2 blackwell-fa2-flashinfer profile). Same precision class (full-precision, exact attention) as SGLang's FA4 and vLLM-Omni's FlashInfer backend on Blackwell -- flash_attn3/flash_attn4 hit Hopper-only precompiled kernels or a CUDA-toolkit>=13.1 CuTe-DSL requirement not met by this build, so FA2 is the fastest same-class (full-precision) option available here.",
+                            "hardware": [
+                                "b200",
+                                "gb200",
+                                "b300",
+                                "gb300"
+                            ],
+                            "framework_ref": "lightx2v-0.1.0-configs/wan/wan_t2v.json+cfg_parallel+blackwell-fa2",
+                            "serve_args": "",
+                            "notes": "Uses the source-built FlashAttention 2 wheel (TORCH_CUDA_ARCH_LIST=10.0) already installed for Blackwell; no cache, torch compile, or quantized model path. Deliberately NOT using SageAttention here -- it is int8 QK-quantized, a different numeric class from the full-precision attention used elsewhere in this comparison.",
+                            "lightx2v_config": {
+                                "self_attn_1_type": "flash_attn2",
+                                "cross_attn_1_type": "flash_attn2",
+                                "cross_attn_2_type": "flash_attn2"
+                            }
                         },
                         "h200-fa3": {
                             "description": "H200 fastest available LightX2V command/config for aligned non-cache benchmark runs.",
@@ -1227,6 +1305,22 @@
                                 "DIFFUSION_ATTENTION_BACKEND": "FLASH_ATTN"
                             }
                         },
+                        "blackwell-flashinfer": {
+                            "description": "Blackwell vLLM-Omni profile using FlashInfer attention (validated on B200; the FLASH_ATTN backend hits Hopper-only precompiled kernels and fails with 'no kernel image' on sm_100).",
+                            "hardware": [
+                                "b200",
+                                "gb200",
+                                "b300",
+                                "gb300"
+                            ],
+                            "framework_ref": "vllm-omni-latest+blackwell-flashinfer",
+                            "num_gpus": 2,
+                            "serve_args": "--tensor-parallel-size 2",
+                            "notes": "Same case/model/steps as default; only the attention backend changes for Blackwell compatibility.",
+                            "extra_env": {
+                                "DIFFUSION_ATTENTION_BACKEND": "FLASHINFER_ATTN"
+                            }
+                        },
                         "h200-2gpu-tp": {
                             "description": "H200 vLLM-Omni Wan tensor-parallel command.",
                             "hardware": [
@@ -1348,6 +1442,23 @@
                             "framework_ref": "lightx2v-0.1.0-configs/wan22/wan_ti2v_i2v.json+cfg_parallel",
                             "serve_args": "",
                             "notes": "Uses explicit fast attention/offload settings; no cache, torch compile, or quantized model path."
+                        },
+                        "blackwell-fa2": {
+                            "description": "Blackwell LightX2V profile using FlashAttention 2 (validated on B200 via the flux2 blackwell-fa2-flashinfer profile). Same precision class (full-precision, exact attention) as SGLang's FA4 and vLLM-Omni's FlashInfer backend on Blackwell -- flash_attn3/flash_attn4 hit Hopper-only precompiled kernels or a CUDA-toolkit>=13.1 CuTe-DSL requirement not met by this build, so FA2 is the fastest same-class (full-precision) option available here.",
+                            "hardware": [
+                                "b200",
+                                "gb200",
+                                "b300",
+                                "gb300"
+                            ],
+                            "framework_ref": "lightx2v-0.1.0-configs/wan22/wan_ti2v_i2v.json+cfg_parallel+blackwell-fa2",
+                            "serve_args": "",
+                            "notes": "Uses the source-built FlashAttention 2 wheel (TORCH_CUDA_ARCH_LIST=10.0) already installed for Blackwell; no cache, torch compile, or quantized model path. Deliberately NOT using SageAttention here -- it is int8 QK-quantized, a different numeric class from the full-precision attention used elsewhere in this comparison.",
+                            "lightx2v_config": {
+                                "self_attn_1_type": "flash_attn2",
+                                "cross_attn_1_type": "flash_attn2",
+                                "cross_attn_2_type": "flash_attn2"
+                            }
                         },
                         "h200-fa3": {
                             "description": "H200 fastest available LightX2V command/config for aligned non-cache benchmark runs.",
@@ -2234,6 +2345,19 @@
                             "num_gpus": 4,
                             "serve_args": "--num-gpus 4 --cfg-parallel-size 2 --ulysses-degree 2 --model-class-name Cosmos3OmniDiffusersPipeline --stage-init-timeout 900 --init-timeout 1800 --no-guardrails --diffusion-attention-backend FLASH_ATTN --cache-backend none",
                             "notes": "Uses vLLM-Omni recommended context parallelism for extra GPUs plus CFG parallel; no cache, eager/compile-off harness args."
+                        },
+                        "blackwell-flashinfer": {
+                            "description": "Blackwell Cosmos3 Nano T2V profile using FlashInfer attention (validated on B200; FLASH_ATTN hits Hopper-only precompiled kernels on sm_100).",
+                            "hardware": [
+                                "b200",
+                                "gb200",
+                                "b300",
+                                "gb300"
+                            ],
+                            "framework_ref": "vllm-project/vllm-omni@40b2959183d7043cd9d35f5f6387fbb8d1375c57",
+                            "num_gpus": 4,
+                            "serve_args": "--num-gpus 4 --cfg-parallel-size 2 --ulysses-degree 2 --model-class-name Cosmos3OmniDiffusersPipeline --stage-init-timeout 900 --init-timeout 1800 --no-guardrails --diffusion-attention-backend FLASHINFER_ATTN --cache-backend none",
+                            "notes": "Same as default except --diffusion-attention-backend FLASHINFER_ATTN for Blackwell compatibility."
                         },
                         "h200-4gpu-cfg-ulysses": {
                             "description": "H200 4-GPU Cosmos3 Nano video profile.",

@@ -28,6 +28,7 @@ import json
 import os
 import shlex
 import signal
+import statistics
 import subprocess
 import sys
 import tempfile
@@ -55,7 +56,13 @@ GPU_CLEAR_WAIT = 15  # seconds between framework runs
 MODE_SINGLE_E2E = "single_e2e"
 MODE_THROUGHPUT = "throughput"
 DEFAULT_BENCHMARK = {
-    "warmup": {"num_requests": 2, "num_inference_steps": 3},
+    # video_num_requests: extra warmups for expensive video cases so a single
+    # measured request lands in steady state instead of catching a cold path.
+    "warmup": {"num_requests": 2, "num_inference_steps": 3, "video_num_requests": 3},
+    # single_e2e is measured as the median of several back-to-back requests
+    # (not one isolated request, which can catch a cold/idle stall). Video is
+    # expensive, so it repeats fewer times and leans on extra warmup instead.
+    "single": {"image_repeats": 5, "video_repeats": 2},
     "throughput": {"num_requests": 4, "max_concurrency": 2},
 }
 SGLANG_DEFAULT_WARMUP_STEPS = 3
@@ -1501,14 +1508,6 @@ def send_request(
         raise ValueError(f"Unknown task type: {task}")
 
 
-def _single_request_metrics(latency: LatencyBreakdown) -> dict:
-    metrics = {"client_latency_s": round(latency.client_s, 3)}
-    if latency.server_s is not None:
-        metrics["server_latency_s"] = round(latency.server_s, 3)
-        metrics["client_overhead_s"] = round(latency.client_s - latency.server_s, 3)
-    return metrics
-
-
 # ---------------------------------------------------------------------------
 # Main orchestrator
 # ---------------------------------------------------------------------------
@@ -1762,6 +1761,10 @@ def _run_warmups(
         # lightx2v takes infer_steps from launch config; per-request overrides corrupt server reuse
         warmup_requests = min(warmup_requests, 1)
         warmup_steps = None
+    elif case.get("num_frames"):
+        # video is too slow to repeat many measured requests, so warm harder to
+        # reach steady state before the (few) measured requests
+        warmup_requests = max(warmup_requests, int(warmup_cfg.get("video_num_requests", 3)))
     if warmup_requests <= 0:
         return
     warmup_case = dict(case)
@@ -1781,20 +1784,57 @@ def run_single_request(
     framework: str,
     log_dir: Path,
     config: dict | None = None,
+    bench_cfg: dict | None = None,
 ) -> dict:
     result = _base_result(case, framework, MODE_SINGLE_E2E)
+
+    # 1. Measure client wall-clock as the median of several back-to-back requests
+    #    (already warmed). A single isolated request can catch a cold/idle stall
+    #    -- e.g. vLLM-Omni 0.24 stalls ~55s on spaced concurrency-1 requests while
+    #    its engine runs in ~1s -- so one shot is not a trustworthy latency.
+    # 2. client wall-clock is the cross-framework metric; server_latency (sglang
+    #    perf dump) is kept only as a per-framework diagnostic annotation.
+    single_cfg = (bench_cfg or {}).get("single", {})
+    is_video = bool(case.get("num_frames"))
+    default_repeats = single_cfg.get("video_repeats", 2) if is_video else single_cfg.get("image_repeats", 5)
+    repeats = max(1, int(single_cfg.get("measured_repeats", default_repeats) or 1))
 
     perf_dump_path = None
     if framework == "sglang":
         perf_dump_path = os.path.join(str(log_dir), f"perf_{case['id']}_measured.json")
-    if perf_dump_path and os.path.exists(perf_dump_path):
-        os.remove(perf_dump_path)
-    print("  Sending measured single request...")
-    latency = send_request(
-        base_url, case, framework, config, perf_dump_path=perf_dump_path
-    )
-    result["latency_s"] = round(latency.client_s, 3)
-    result["metrics"] = _single_request_metrics(latency)
+
+    client_lats: list[float] = []
+    server_lats: list[float] = []
+    for i in range(1, repeats + 1):
+        if perf_dump_path and os.path.exists(perf_dump_path):
+            os.remove(perf_dump_path)
+        print(f"  Sending measured single request ({i}/{repeats})...")
+        latency = send_request(
+            base_url, case, framework, config, perf_dump_path=perf_dump_path
+        )
+        client_lats.append(latency.client_s)
+        if latency.server_s is not None:
+            server_lats.append(latency.server_s)
+
+    median_client = statistics.median(client_lats)
+    result["latency_s"] = round(median_client, 3)
+    metrics = {
+        "client_latency_s": round(median_client, 3),
+        "client_latency_min_s": round(min(client_lats), 3),
+        "client_latency_max_s": round(max(client_lats), 3),
+        "measured_repeats": repeats,
+    }
+    if server_lats:
+        median_server = statistics.median(server_lats)
+        metrics["server_latency_s"] = round(median_server, 3)
+        metrics["client_overhead_s"] = round(median_client - median_server, 3)
+    # A framework whose repeated measured latencies do not converge (e.g. an
+    # intermittent idle/scheduler stall) has no trustworthy single number: flag
+    # it and keep the raw samples so the report marks it anomalous, not fast.
+    if repeats >= 3 and min(client_lats) > 0 and max(client_lats) / min(client_lats) >= 3.0:
+        metrics["latency_unstable"] = True
+        metrics["latency_samples_s"] = [round(x, 3) for x in client_lats]
+    result["metrics"] = metrics
     return result
 
 
@@ -2007,7 +2047,7 @@ def run_case_framework(
 
         if MODE_SINGLE_E2E in modes:
             single_result = run_single_request(
-                base_url, case, framework, log_dir, config
+                base_url, case, framework, log_dir, config, bench_cfg
             )
         if MODE_THROUGHPUT in modes:
             throughput_result = run_throughput(

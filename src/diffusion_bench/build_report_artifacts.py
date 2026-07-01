@@ -1,4 +1,4 @@
-"""Build merged JSON, Markdown reports, and image artifacts for benchmark runs."""
+"""Build merged JSON and Markdown reports for benchmark runs."""
 
 from __future__ import annotations
 
@@ -13,7 +13,6 @@ from diffusion_bench.generate_dashboard import (
     build_issue_report_comment,
     generate_dashboard,
 )
-from diffusion_bench.generate_report_image import render_report_image
 
 
 FRAMEWORK_ORDER = {"sglang": 0, "vllm-omni": 1, "lightx2v": 2, "trtllm-visual": 3, "diffusers": 4}
@@ -125,19 +124,49 @@ def merge_results(paths: list[Path], output_json: Path, config_path: Path, run_i
             modes.add("throughput")
 
     merged["benchmark_modes"] = sorted(modes)
+    _flag_isolated_request_anomalies(merged)
     output_json.parent.mkdir(parents=True, exist_ok=True)
     output_json.write_text(json.dumps(merged, indent=2) + "\n", encoding="utf-8")
     return merged
 
 
+def _flag_isolated_request_anomalies(merged: dict, threshold: float = 1.8) -> None:
+    # A single isolated request that is much slower than the steady-state
+    # throughput p50 for the same case/framework is an isolated-request artifact
+    # (idle/scheduler stall), not compute -- flag it so the report renders it as
+    # an anomaly instead of a trustworthy latency. This catches the case the
+    # harness's own repeat-spread check misses: every measured request stalled
+    # (internally consistent but uniformly inflated), so there is no fast sample.
+    p50_by_key: dict[tuple, float] = {}
+    for entry in merged.get("throughput_results") or []:
+        if entry.get("error"):
+            continue
+        metrics = entry.get("metrics") or {}
+        p50 = metrics.get("latency_p50_s") or metrics.get("latency_p50")
+        if p50:
+            p50_by_key[(entry.get("case_id"), entry.get("framework"))] = float(p50)
+    for entry in merged.get("results") or []:
+        if entry.get("error"):
+            continue
+        metrics = entry.setdefault("metrics", {})
+        if metrics.get("latency_unstable"):
+            continue
+        latency = entry.get("latency_s")
+        p50 = p50_by_key.get((entry.get("case_id"), entry.get("framework")))
+        if latency and p50 and float(latency) >= threshold * p50:
+            metrics["latency_unstable"] = True
+            metrics["latency_anomaly_reason"] = (
+                f"single-request latency {float(latency):.1f}s is "
+                f"{float(latency) / p50:.1f}x the steady-state throughput p50 "
+                f"({p50:.1f}s) -- isolated-request stall, not compute"
+            )
+    return
+
+
 def write_artifacts(
     merged: dict,
-    output_json: Path,
     dashboard_md: Path,
     issue_md: Path,
-    image_png: Path,
-    image_svg: Path | None,
-    config_path: Path,
 ) -> None:
     dashboard_md.parent.mkdir(parents=True, exist_ok=True)
     dashboard, _ = generate_dashboard(merged, history=[], charts_dir=None)
@@ -145,8 +174,6 @@ def write_artifacts(
 
     issue_md.parent.mkdir(parents=True, exist_ok=True)
     issue_md.write_text(build_issue_report_comment(merged), encoding="utf-8")
-
-    render_report_image(output_json, config_path, image_png, image_svg)
 
 
 def main() -> None:
@@ -156,27 +183,14 @@ def main() -> None:
     parser.add_argument("--output-json", required=True, type=Path)
     parser.add_argument("--dashboard-md", required=True, type=Path)
     parser.add_argument("--issue-md", required=True, type=Path)
-    parser.add_argument("--image-png", required=True, type=Path)
-    parser.add_argument("--image-svg", type=Path)
     parser.add_argument("--run-id")
     args = parser.parse_args()
 
     merged = merge_results(args.results, args.output_json, args.config, args.run_id)
-    write_artifacts(
-        merged,
-        args.output_json,
-        args.dashboard_md,
-        args.issue_md,
-        args.image_png,
-        args.image_svg,
-        args.config,
-    )
+    write_artifacts(merged, args.dashboard_md, args.issue_md)
     print(args.output_json)
     print(args.dashboard_md)
     print(args.issue_md)
-    print(args.image_png)
-    if args.image_svg:
-        print(args.image_svg)
 
 
 if __name__ == "__main__":

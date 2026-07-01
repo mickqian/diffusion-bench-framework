@@ -7,8 +7,6 @@ CONFIG="${CONFIG:-configs/comparison_configs.json}"
 OUTPUT_JSON="${OUTPUT_JSON:-tmp/report/h200-framework-comparison-merged.json}"
 DASHBOARD_MD="${DASHBOARD_MD:-${OUTPUT_JSON%.json}.dashboard.md}"
 ISSUE_MD="${ISSUE_MD:-${OUTPUT_JSON%.json}.issue.md}"
-IMAGE_PNG="${IMAGE_PNG:-${OUTPUT_JSON%.json}.png}"
-IMAGE_SVG="${IMAGE_SVG:-${OUTPUT_JSON%.json}.svg}"
 RUN_ID="${RUN_ID:-$(basename "${OUTPUT_JSON%.json}")}"
 PYTHON_BIN="${PYTHON_BIN:-python3}"
 
@@ -39,6 +37,4 @@ fi
   --output-json "${OUTPUT_JSON}" \
   --dashboard-md "${DASHBOARD_MD}" \
   --issue-md "${ISSUE_MD}" \
-  --image-png "${IMAGE_PNG}" \
-  --image-svg "${IMAGE_SVG}" \
   --run-id "${RUN_ID}"

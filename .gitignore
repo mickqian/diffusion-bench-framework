@@ -21,3 +21,6 @@ outputs/
 tmp/
 .DS_Store
 
+
+# local run scratch (canonical results live under reports/<run>/raw/)
+runs/

@@ -785,6 +785,10 @@ def _result_status(entry: dict | None) -> str:
         return "partial"
     error = str(entry.get("error") or "")
     if not error:
+        # repeated single-request latencies that did not converge (e.g. an
+        # intermittent idle/scheduler stall) have no trustworthy headline number
+        if metrics.get("latency_unstable"):
+            return "anomaly"
         return "ok"
     if "partial failure" in error:
         return "partial"
@@ -813,6 +817,16 @@ def _result_reason(entry: dict | None, case_cfg: dict | None, framework: str) ->
         if framework in reasons:
             reason = f"{reason}; {_md_cell(reasons[framework])}"
         return reason
+    if entry and ((entry.get("metrics") or {}).get("latency_unstable")):
+        m = entry.get("metrics") or {}
+        if m.get("latency_anomaly_reason"):
+            return _md_cell(str(m["latency_anomaly_reason"]) + "; see throughput for steady-state")
+        samples = m.get("latency_samples_s") or []
+        sample_str = ", ".join(f"{s:g}s" for s in samples)
+        return _md_cell(
+            f"single-request latency did not converge across {m.get('measured_repeats', len(samples))} "
+            f"back-to-back requests (samples: {sample_str}); intermittent stall -- see throughput for steady-state"
+        )
     if framework in reasons:
         return _md_cell(reasons[framework])
     if not entry:
@@ -978,6 +992,13 @@ def _framework_version(results: dict, manifest: dict, framework: str) -> str:
         manifest_version = _manifest_framework_version(manifest, "lightx2v")
         if manifest_version:
             return manifest_version
+    elif framework == "trtllm-visual":
+        version = _package_version(framework_runtime, framework, "tensorrt-llm")
+        if version:
+            return version
+        manifest_version = _manifest_framework_version(manifest, "trtllm_visual")
+        if manifest_version:
+            return manifest_version
 
     for ref in sorted(_framework_refs(results, framework)):
         version = _version_from_ref(ref, framework)
@@ -1121,7 +1142,9 @@ def build_issue_report_comment(results: dict) -> str:
             single_entry = single_fws.get(framework)
             throughput_entry = throughput_fws.get(framework)
             entry = single_entry or throughput_entry or {}
-            single_latency = (single_entry or {}).get("latency_s")
+            # only surface a latency number when the cell is genuinely ok; an
+            # anomaly/failed/partial cell must not show a misleading value
+            single_latency = _successful_metric(single_entry, "latency_s")
             throughput_p50 = _throughput_p50(throughput_entry)
             throughput_rps = _throughput_rps(throughput_entry)
             row = [

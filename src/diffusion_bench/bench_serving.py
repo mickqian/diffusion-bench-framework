@@ -942,7 +942,7 @@ def main() -> None:
         "--backend",
         type=str,
         default="sglang",
-        choices=["sglang", "vllm-omni", "lightx2v"],
+        choices=["sglang", "vllm-omni", "lightx2v", "trtllm-visual"],
         help="Serving backend API to benchmark.",
     )
     parser.add_argument(
