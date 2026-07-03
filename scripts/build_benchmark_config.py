@@ -16,6 +16,7 @@ Regenerate after editing:  python3 scripts/build_benchmark_config.py
 import glob
 import json
 import os
+import re
 import sys
 
 REPO = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -25,6 +26,55 @@ OUT_EDITABLE = os.path.join(REPO, "configs", "comparison_configs.json")
 OUT_PACKAGED = os.path.join(REPO, "src", "diffusion_bench", "comparison_configs.json")
 
 VALID_STATUS = {"supported", "unsupported", "no_profile", "failed", "not_run", "invalid"}
+
+
+# The benchmark's published hardware. The lint checks the profile that the
+# harness would actually SELECT there (first hardware match, else `default`)
+# — patching an unselected profile is a recurring footgun.
+POLICY_HARDWARE = ("h100",)
+# "Best lossless" policy: the selected sglang profile must run compiled and
+# resident. A profile may opt out ONLY with a `policy_exception` string
+# carrying measured evidence (e.g. zimage: compile measured slower).
+_OFFLOAD_ENABLE_RE = re.compile(
+    r"--(?:text-encoder|image-encoder|vae|dit)-cpu-offload(?!\s+false)"
+    r"|--dit-layerwise-offload(?!\s+false)"
+)
+
+
+def _selected_profile(profiles: dict, hardware: str):
+    for name, p in profiles.items():
+        hw = p.get("hardware") or []
+        if hardware in hw:
+            return name, p
+    if "default" in profiles:
+        return "default", profiles["default"]
+    return None, None
+
+
+def _lint_sglang_policy(cid: str, body: dict) -> list[str]:
+    errs = []
+    profiles = body.get("command_profiles") or {}
+    if not profiles:
+        return errs
+    for hw in POLICY_HARDWARE:
+        name, prof = _selected_profile(profiles, hw)
+        if prof is None:
+            continue
+        if prof.get("policy_exception"):
+            continue
+        args = prof.get("serve_args", "")
+        if not re.search(r"--enable-torch-compile(?!\s+false)", args):
+            errs.append(
+                f"{cid}/sglang[{name}] (selected on {hw}): missing "
+                f"--enable-torch-compile and no policy_exception"
+            )
+        m = _OFFLOAD_ENABLE_RE.search(args)
+        if m:
+            errs.append(
+                f"{cid}/sglang[{name}] (selected on {hw}): offload enabled "
+                f"({m.group(0)!r}) and no policy_exception"
+            )
+    return errs
 
 
 def load(path):
@@ -51,6 +101,7 @@ def build():
     case_files = glob.glob(os.path.join(CASES, "**", "*.json"), recursive=True)
     cases_by_id = {}
     errors = []
+    policy_errors = []
     for path in sorted(case_files):
         if os.path.basename(path).startswith("_"):
             continue
@@ -76,6 +127,8 @@ def build():
                 body = {k: v for k, v in entry.items() if k != "status"}
                 if not (body.get("command_profiles") or body.get("serve_args") is not None):
                     errors.append(f"{cid}/{fw}: status=supported but no command_profiles/serve_args")
+                if fw == "sglang":
+                    policy_errors.extend(_lint_sglang_policy(cid, body))
                 frameworks[fw] = body
             else:
                 statuses[fw] = status
@@ -102,6 +155,16 @@ def build():
     if errors:
         print("BUILD FAILED — matrix/validation errors:", file=sys.stderr)
         for e in errors:
+            print("  -", e, file=sys.stderr)
+        sys.exit(1)
+
+    if policy_errors:
+        print(
+            "BUILD FAILED — best-lossless policy violations (add the measured "
+            "fastest command, or a `policy_exception` with evidence):",
+            file=sys.stderr,
+        )
+        for e in policy_errors:
             print("  -", e, file=sys.stderr)
         sys.exit(1)
 

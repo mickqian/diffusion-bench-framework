@@ -1,53 +1,53 @@
 {
-  "id": "ideogram4_t2i_1024_2gpu_tp",
-  "model": "ideogram-ai/ideogram-4-fp8",
-  "task": "text-to-image",
-  "prompt": "A futuristic cyberpunk city at night, neon lights reflecting on wet streets",
-  "width": 1024,
-  "height": 1024,
-  "seed": 42,
-  "num_gpus": 2,
-  "num_inference_steps": 20,
-  "_note": "Ideogram-4 derives steps and guidance from its sampling preset (V4_DEFAULT_20: 20 steps, final guidance 7); guidance_scale is intentionally omitted because the model rejects an explicit value.",
-  "frameworks": {
-    "sglang": {
-      "status": "supported",
-      "serve_args": "--model-type diffusion --warmup --dit-layerwise-offload false --tp-size 2",
-      "extra_env": {},
-      "command_profiles": {
-        "default": {
-          "description": "Best known SGLang command for Ideogram-4 T2I at 2-GPU TP.",
-          "sglang_ref": "current-main",
-          "serve_args": "--model-type diffusion --warmup --dit-layerwise-offload false --tp-size 2",
-          "notes": "Tensor-parallel across 2 GPUs; no cache, no torch compile. Keep updated as the best command changes."
-        },
-        "h100-h200-2gpu-tp-speed": {
-          "description": "Hopper 2-GPU TP fastest Ideogram-4 profile probe.",
-          "hardware": [
-            "h100",
-            "h200"
-          ],
-          "num_gpus": 2,
-          "sglang_ref": "current-main",
-          "serve_args": "--model-type diffusion --warmup --dit-layerwise-offload false --tp-size 2 --performance-mode speed",
-          "extra_env": {
-            "FLASHINFER_USE_CUDA_NORM": "1"
-          },
-          "notes": "Speed mode + CUDA norm on Hopper; TP is explicit. Torch compile left off pending FP8 compile validation on GPU."
-        }
-      }
+ "id": "ideogram4_t2i_1024_2gpu_tp",
+ "model": "ideogram-ai/ideogram-4-fp8",
+ "task": "text-to-image",
+ "prompt": "A futuristic cyberpunk city at night, neon lights reflecting on wet streets",
+ "width": 1024,
+ "height": 1024,
+ "seed": 42,
+ "num_gpus": 2,
+ "num_inference_steps": 20,
+ "_note": "Ideogram-4 derives steps and guidance from its sampling preset (V4_DEFAULT_20: 20 steps, final guidance 7); guidance_scale is intentionally omitted because the model rejects an explicit value.",
+ "frameworks": {
+  "sglang": {
+   "status": "supported",
+   "serve_args": "--model-type diffusion --warmup --dit-layerwise-offload false --tp-size 2",
+   "extra_env": {},
+   "command_profiles": {
+    "default": {
+     "description": "Best known SGLang command for Ideogram-4 T2I at 2-GPU TP.",
+     "sglang_ref": "current-main",
+     "serve_args": "--model-type diffusion --warmup --dit-layerwise-offload false --tp-size 2",
+     "notes": "Tensor-parallel across 2 GPUs; no cache, no torch compile. Keep updated as the best command changes."
     },
-    "vllm-omni": {
-      "status": "unsupported",
-      "reason": "Latest vLLM-Omni has no Ideogram-4 serving path (image-gen coverage is FLUX/Qwen-Image/Wan)."
-    },
-    "lightx2v": {
-      "status": "unsupported",
-      "reason": "Latest LightX2V has no Ideogram-4 serving path."
-    },
-    "trtllm-visual": {
-      "status": "unsupported",
-      "reason": "Latest TensorRT-LLM VisualGen has no Ideogram-4 serving path (coverage is FLUX/Wan/LTX-2/Qwen-Image/Cosmos3)."
+    "h100-h200-2gpu-tp-speed": {
+     "description": "Hopper 2-GPU TP fastest Ideogram-4 profile probe.",
+     "hardware": [
+      "h100",
+      "h200"
+     ],
+     "num_gpus": 2,
+     "sglang_ref": "current-main",
+     "serve_args": "--model-type diffusion --warmup --dit-layerwise-offload false --tp-size 2 --performance-mode speed --enable-torch-compile",
+     "extra_env": {
+      "FLASHINFER_USE_CUDA_NORM": "1"
+     },
+     "notes": "Speed mode + CUDA norm on Hopper; TP is explicit. Torch compile left off pending FP8 compile validation on GPU. Policy-aligned candidate (compile on, offload off) — NOT yet validated on H100; validate (incl. OOM risk) before publishing."
     }
+   }
+  },
+  "vllm-omni": {
+   "status": "unsupported",
+   "reason": "Latest vLLM-Omni has no Ideogram-4 serving path (image-gen coverage is FLUX/Qwen-Image/Wan)."
+  },
+  "lightx2v": {
+   "status": "unsupported",
+   "reason": "Latest LightX2V has no Ideogram-4 serving path."
+  },
+  "trtllm-visual": {
+   "status": "unsupported",
+   "reason": "Latest TensorRT-LLM VisualGen has no Ideogram-4 serving path (coverage is FLUX/Wan/LTX-2/Qwen-Image/Cosmos3)."
   }
+ }
 }

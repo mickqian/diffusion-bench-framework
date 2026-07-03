@@ -1,170 +1,170 @@
 {
-  "id": "cosmos3_nano_t2i_720p",
-  "model": "nvidia/Cosmos3-Nano",
-  "task": "text-to-image",
-  "prompt": "A warehouse robot folds a blue cloth on a clean workbench.",
-  "width": 1280,
-  "height": 720,
-  "seed": 0,
-  "num_gpus": 2,
-  "num_inference_steps": 35,
-  "guidance_scale": 6.0,
-  "request_extra": {
-    "flow_shift": 10.0,
-    "extra_params": {
-      "max_sequence_length": 4096,
-      "use_resolution_template": false,
-      "guardrails": false
-    }
-  },
-  "benchmark": {
-    "throughput": {
-      "num_requests": 8,
-      "max_concurrency": 2,
-      "request_rate": "inf"
-    }
-  },
-  "frameworks": {
-    "sglang": {
-      "status": "supported",
-      "serve_args": "--model-type diffusion --warmup --attention-backend fa --tp-size 2",
-      "extra_env": {
-        "SGLANG_DISABLE_COSMOS3_GUARDRAILS": "1"
-      },
-      "command_profiles": {
-        "default": {
-          "description": "Cosmos3 Nano T2I profile for SGLang-Diffusion main 3d540563.",
-          "sglang_ref": "sgl-project/sglang@3d540563916394115f9612f30601ae3fa97ada7c",
-          "serve_args": "--model-type diffusion --warmup --attention-backend fa --tp-size 2",
-          "notes": "Guardrails disabled for framework-only serving performance; no cache or torch compile path.",
-          "extra_env": {
-            "SGLANG_DISABLE_COSMOS3_GUARDRAILS": "1"
-          }
-        },
-        "h200-2gpu-tp-fa": {
-          "description": "H200 2-GPU TP SGLang-Diffusion Cosmos3 image profile.",
-          "hardware": [
-            "h200"
-          ],
-          "num_gpus": 2,
-          "sglang_ref": "current-main",
-          "serve_args": "--model-type diffusion --warmup --attention-backend fa --tp-size 2",
-          "notes": "Tensor-parallel across 2 GPUs; no cache, no torch compile."
-        },
-        "h200-2gpu-tp-fa-speed": {
-          "description": "H200 2-GPU TP SGLang-Diffusion Cosmos3 image speed profile.",
-          "hardware": [
-            "h200"
-          ],
-          "num_gpus": 2,
-          "sglang_ref": "current-main",
-          "serve_args": "--model-type diffusion --warmup --attention-backend fa --tp-size 2 --performance-mode speed",
-          "notes": "Tensor-parallel across 2 GPUs with performance-mode speed; no cache, no torch compile."
-        },
-        "h200-2gpu-tp-fa-batch4": {
-          "description": "H200 2-GPU TP SGLang-Diffusion Cosmos3 image batching profile.",
-          "hardware": [
-            "h200"
-          ],
-          "num_gpus": 2,
-          "sglang_ref": "current-main",
-          "serve_args": "--model-type diffusion --warmup --attention-backend fa --tp-size 2 --batching-max-size 4 --enable-batching-metrics",
-          "notes": "Tensor-parallel across 2 GPUs plus batch-4 serving pressure; no cache, no torch compile."
-        }
-      }
-    },
-    "vllm-omni": {
-      "status": "supported",
-      "num_gpus": 2,
-      "install_specs": {
-        "vllm": "vllm==0.22.0",
-        "vllm_omni": "git+https://github.com/vllm-project/vllm-omni.git@40b2959183d7043cd9d35f5f6387fbb8d1375c57"
-      },
-      "server_bin": "vllm",
-      "use_omni_arg": true,
-      "required_help_args": [
-        "--omni",
-        "--model-class-name",
-        "--stage-init-timeout",
-        "--no-guardrails",
-        "--diffusion-attention-backend",
-        "--cache-backend",
-        "--cfg-parallel-size",
-        "--ulysses-degree"
-      ],
-      "serve_args": "--stage-configs-path configs/vllm_omni_cosmos3_h200_2gpu_cfg_guardrails_off.yaml --stage-init-timeout 900 --init-timeout 1800",
-      "extra_env": {},
-      "command_profiles": {
-        "default": {
-          "description": "Best known vLLM-Omni command for Cosmos3 image benchmark runs.",
-          "hardware": [
-            "h200"
-          ],
-          "num_gpus": 2,
-          "framework_ref": "vllm-project/vllm-omni@40b2959183d7043cd9d35f5f6387fbb8d1375c57",
-          "serve_args": "--stage-configs-path configs/vllm_omni_cosmos3_h200_2gpu_cfg_guardrails_off.yaml --stage-init-timeout 900 --init-timeout 1800",
-          "notes": "Uses a 2-GPU CFG-parallel stage config with Cosmos3 guardrails=false; no cache or torch compile path."
-        },
-        "h200-2gpu-cfg": {
-          "description": "H200 2-GPU CFG-parallel vLLM-Omni Cosmos3 image profile.",
-          "hardware": [
-            "h200"
-          ],
-          "num_gpus": 2,
-          "framework_ref": "vllm-omni-cosmos3+h200-cfg2",
-          "serve_args": "--stage-configs-path configs/vllm_omni_cosmos3_h200_2gpu_cfg_guardrails_off.yaml --stage-init-timeout 900 --init-timeout 1800",
-          "notes": "Uses the two GPUs for CFG parallelism through the stage config; no cache or torch compile path."
-        }
-      }
-    },
-    "lightx2v": {
-      "status": "unsupported",
-      "reason": "No tracked LightX2V Cosmos3 serving path in this benchmark."
-    },
-    "trtllm-visual": {
-      "status": "supported",
-      "num_gpus": 2,
-      "serve_args": "--backend pytorch",
-      "extra_env": {
-        "TRTLLM_DISABLE_COSMOS3_GUARDRAILS": "1"
-      },
-      "http_server": {
-        "bin": "trtllm-serve",
-        "args_template": [
-          "serve",
-          "{model}",
-          "--host",
-          "{host}",
-          "--port",
-          "{port}"
-        ],
-        "tp_flag": "--tp_size",
-        "health_path": "/health"
-      },
-      "http_request": {
-        "text-to-image": {
-          "endpoint": "/v1/images/generations"
-        }
-      },
-      "command_profiles": {
-        "default": {
-          "description": "Best known TensorRT-LLM VisualGen command for aligned non-cache Cosmos3 runs.",
-          "framework_ref": "tensorrt-llm-visualgen-trtllm-serve",
-          "serve_args": "--backend pytorch",
-          "notes": "Keep this profile updated as the best command changes. trtllm-serve auto-detects the Cosmos3 diffusion model; add --extra_visual_gen_options <model>.yml for steady-state tuning. PyTorch backend, no TeaCache and no torch compile so the row stays cache-free and comparable. Needs GPU validation."
-        },
-        "h100-h200-2gpu-tp-speed": {
-          "description": "Hopper 2-GPU TP TensorRT-LLM VisualGen Cosmos3 profile probe.",
-          "hardware": [
-            "h100",
-            "h200"
-          ],
-          "num_gpus": 2,
-          "framework_ref": "tensorrt-llm-visualgen+tp2",
-          "serve_args": "--backend pytorch",
-          "notes": "Harness appends --tp_size 2 when num_gpus=2. trtllm-serve auto-detects the Cosmos3 diffusion model; add --extra_visual_gen_options <model>.yml for steady-state tuning. PyTorch backend, no TeaCache and no torch compile so the row stays cache-free and comparable. Needs GPU validation."
-        }
-      }
-    }
+ "id": "cosmos3_nano_t2i_720p",
+ "model": "nvidia/Cosmos3-Nano",
+ "task": "text-to-image",
+ "prompt": "A warehouse robot folds a blue cloth on a clean workbench.",
+ "width": 1280,
+ "height": 720,
+ "seed": 0,
+ "num_gpus": 2,
+ "num_inference_steps": 35,
+ "guidance_scale": 6.0,
+ "request_extra": {
+  "flow_shift": 10.0,
+  "extra_params": {
+   "max_sequence_length": 4096,
+   "use_resolution_template": false,
+   "guardrails": false
   }
+ },
+ "benchmark": {
+  "throughput": {
+   "num_requests": 8,
+   "max_concurrency": 2,
+   "request_rate": "inf"
+  }
+ },
+ "frameworks": {
+  "sglang": {
+   "status": "supported",
+   "serve_args": "--model-type diffusion --warmup --attention-backend fa --tp-size 2",
+   "extra_env": {
+    "SGLANG_DISABLE_COSMOS3_GUARDRAILS": "1"
+   },
+   "command_profiles": {
+    "default": {
+     "description": "Cosmos3 Nano T2I profile for SGLang-Diffusion main 3d540563.",
+     "sglang_ref": "sgl-project/sglang@3d540563916394115f9612f30601ae3fa97ada7c",
+     "serve_args": "--model-type diffusion --warmup --attention-backend fa --tp-size 2 --dit-layerwise-offload false --performance-mode speed --enable-torch-compile",
+     "notes": "Guardrails disabled for framework-only serving performance; no cache or torch compile path. Policy-aligned candidate (compile on, offload off) — NOT yet validated on H100; validate (incl. OOM risk) before publishing.",
+     "extra_env": {
+      "SGLANG_DISABLE_COSMOS3_GUARDRAILS": "1"
+     }
+    },
+    "h200-2gpu-tp-fa": {
+     "description": "H200 2-GPU TP SGLang-Diffusion Cosmos3 image profile.",
+     "hardware": [
+      "h200"
+     ],
+     "num_gpus": 2,
+     "sglang_ref": "current-main",
+     "serve_args": "--model-type diffusion --warmup --attention-backend fa --tp-size 2",
+     "notes": "Tensor-parallel across 2 GPUs; no cache, no torch compile."
+    },
+    "h200-2gpu-tp-fa-speed": {
+     "description": "H200 2-GPU TP SGLang-Diffusion Cosmos3 image speed profile.",
+     "hardware": [
+      "h200"
+     ],
+     "num_gpus": 2,
+     "sglang_ref": "current-main",
+     "serve_args": "--model-type diffusion --warmup --attention-backend fa --tp-size 2 --performance-mode speed",
+     "notes": "Tensor-parallel across 2 GPUs with performance-mode speed; no cache, no torch compile."
+    },
+    "h200-2gpu-tp-fa-batch4": {
+     "description": "H200 2-GPU TP SGLang-Diffusion Cosmos3 image batching profile.",
+     "hardware": [
+      "h200"
+     ],
+     "num_gpus": 2,
+     "sglang_ref": "current-main",
+     "serve_args": "--model-type diffusion --warmup --attention-backend fa --tp-size 2 --batching-max-size 4 --enable-batching-metrics",
+     "notes": "Tensor-parallel across 2 GPUs plus batch-4 serving pressure; no cache, no torch compile."
+    }
+   }
+  },
+  "vllm-omni": {
+   "status": "supported",
+   "num_gpus": 2,
+   "install_specs": {
+    "vllm": "vllm==0.22.0",
+    "vllm_omni": "git+https://github.com/vllm-project/vllm-omni.git@40b2959183d7043cd9d35f5f6387fbb8d1375c57"
+   },
+   "server_bin": "vllm",
+   "use_omni_arg": true,
+   "required_help_args": [
+    "--omni",
+    "--model-class-name",
+    "--stage-init-timeout",
+    "--no-guardrails",
+    "--diffusion-attention-backend",
+    "--cache-backend",
+    "--cfg-parallel-size",
+    "--ulysses-degree"
+   ],
+   "serve_args": "--stage-configs-path configs/vllm_omni_cosmos3_h200_2gpu_cfg_guardrails_off.yaml --stage-init-timeout 900 --init-timeout 1800",
+   "extra_env": {},
+   "command_profiles": {
+    "default": {
+     "description": "Best known vLLM-Omni command for Cosmos3 image benchmark runs.",
+     "hardware": [
+      "h200"
+     ],
+     "num_gpus": 2,
+     "framework_ref": "vllm-project/vllm-omni@40b2959183d7043cd9d35f5f6387fbb8d1375c57",
+     "serve_args": "--stage-configs-path configs/vllm_omni_cosmos3_h200_2gpu_cfg_guardrails_off.yaml --stage-init-timeout 900 --init-timeout 1800",
+     "notes": "Uses a 2-GPU CFG-parallel stage config with Cosmos3 guardrails=false; no cache or torch compile path."
+    },
+    "h200-2gpu-cfg": {
+     "description": "H200 2-GPU CFG-parallel vLLM-Omni Cosmos3 image profile.",
+     "hardware": [
+      "h200"
+     ],
+     "num_gpus": 2,
+     "framework_ref": "vllm-omni-cosmos3+h200-cfg2",
+     "serve_args": "--stage-configs-path configs/vllm_omni_cosmos3_h200_2gpu_cfg_guardrails_off.yaml --stage-init-timeout 900 --init-timeout 1800",
+     "notes": "Uses the two GPUs for CFG parallelism through the stage config; no cache or torch compile path."
+    }
+   }
+  },
+  "lightx2v": {
+   "status": "unsupported",
+   "reason": "No tracked LightX2V Cosmos3 serving path in this benchmark."
+  },
+  "trtllm-visual": {
+   "status": "supported",
+   "num_gpus": 2,
+   "serve_args": "--backend pytorch",
+   "extra_env": {
+    "TRTLLM_DISABLE_COSMOS3_GUARDRAILS": "1"
+   },
+   "http_server": {
+    "bin": "trtllm-serve",
+    "args_template": [
+     "serve",
+     "{model}",
+     "--host",
+     "{host}",
+     "--port",
+     "{port}"
+    ],
+    "tp_flag": "--tp_size",
+    "health_path": "/health"
+   },
+   "http_request": {
+    "text-to-image": {
+     "endpoint": "/v1/images/generations"
+    }
+   },
+   "command_profiles": {
+    "default": {
+     "description": "Best known TensorRT-LLM VisualGen command for aligned non-cache Cosmos3 runs.",
+     "framework_ref": "tensorrt-llm-visualgen-trtllm-serve",
+     "serve_args": "--backend pytorch",
+     "notes": "Keep this profile updated as the best command changes. trtllm-serve auto-detects the Cosmos3 diffusion model; add --extra_visual_gen_options <model>.yml for steady-state tuning. PyTorch backend, no TeaCache and no torch compile so the row stays cache-free and comparable. Needs GPU validation."
+    },
+    "h100-h200-2gpu-tp-speed": {
+     "description": "Hopper 2-GPU TP TensorRT-LLM VisualGen Cosmos3 profile probe.",
+     "hardware": [
+      "h100",
+      "h200"
+     ],
+     "num_gpus": 2,
+     "framework_ref": "tensorrt-llm-visualgen+tp2",
+     "serve_args": "--backend pytorch",
+     "notes": "Harness appends --tp_size 2 when num_gpus=2. trtllm-serve auto-detects the Cosmos3 diffusion model; add --extra_visual_gen_options <model>.yml for steady-state tuning. PyTorch backend, no TeaCache and no torch compile so the row stays cache-free and comparable. Needs GPU validation."
+    }
+   }
+  }
+ }
 }

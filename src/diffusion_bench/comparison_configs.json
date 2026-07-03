@@ -704,8 +704,8 @@
                         "default": {
                             "description": "Best known SGLang command for the benchmark repo default profile.",
                             "sglang_ref": "current-main",
-                            "serve_args": "--model-type diffusion --warmup --tp-size 2",
-                            "notes": "Keep this profile updated when the best command changes for a SGLang release or commit."
+                            "serve_args": "--model-type diffusion --warmup --tp-size 2 --dit-layerwise-offload false --performance-mode speed --enable-torch-compile",
+                            "notes": "Keep this profile updated when the best command changes for a SGLang release or commit. Policy-aligned candidate (compile on, offload off) — NOT yet validated on H100; validate (incl. OOM risk) before publishing."
                         }
                     }
                 },
@@ -758,6 +758,17 @@
                             "sglang_ref": "current-main",
                             "serve_args": "--model-type diffusion --warmup --tp-size 2",
                             "notes": "Keep this profile updated when the best command changes for a SGLang release or commit. Best-lossless = eager: validated compile (0.975s) is slower than eager (0.79s) for this 9-step turbo model, so no compile profile."
+                        },
+                        "h100-h200-2gpu-tp-resident-eager": {
+                            "description": "Hopper 2-GPU TP, resident components, eager DiT — measured fastest.",
+                            "hardware": [
+                                "h100",
+                                "h200"
+                            ],
+                            "sglang_ref": "current-main",
+                            "serve_args": "--model-type diffusion --warmup --tp-size 2 --dit-layerwise-offload false --performance-mode speed --enable-torch-compile false",
+                            "policy_exception": "Measured H100 A/B 2026-07-03 (steady-state single_e2e): speed+compile 0.987/0.997s vs speed-eager 0.701/0.699s vs auto-offload default 0.793/0.799s — compile loses on this 9-step turbo model. Explicit --enable-torch-compile false also future-proofs against speed-mode auto-compile (sglang PR #30016).",
+                            "notes": "Validated on H100; hardware list includes h200 for selection parity — re-validate there before publishing h200 numbers."
                         }
                     }
                 },
@@ -883,11 +894,11 @@
                             ],
                             "num_gpus": 2,
                             "sglang_ref": "current-main",
-                            "serve_args": "--model-type diffusion --warmup --dit-layerwise-offload false --tp-size 2 --performance-mode speed",
+                            "serve_args": "--model-type diffusion --warmup --dit-layerwise-offload false --tp-size 2 --performance-mode speed --enable-torch-compile",
                             "extra_env": {
                                 "FLASHINFER_USE_CUDA_NORM": "1"
                             },
-                            "notes": "Speed mode + CUDA norm on Hopper; TP is explicit. Torch compile left off pending FP8 compile validation on GPU."
+                            "notes": "Speed mode + CUDA norm on Hopper; TP is explicit. Torch compile left off pending FP8 compile validation on GPU. Policy-aligned candidate (compile on, offload off) — NOT yet validated on H100; validate (incl. OOM risk) before publishing."
                         }
                     }
                 }
@@ -936,6 +947,15 @@
                             "num_gpus": 2,
                             "serve_args": "--model-type diffusion --warmup --enable-cfg-parallel --dit-cpu-offload false --vae-precision bf16 --text-encoder-cpu-offload false --image-encoder-cpu-offload false --vae-cpu-offload false",
                             "notes": "Keeps DiT, text/image encoders, and VAE resident on high-memory H200; BF16 VAE aligns with LightX2V best-performance Wan serving path. No cache or torch compile path."
+                        },
+                        "h100-2gpu-cfg-speed-compile": {
+                            "description": "Hopper 2-GPU CFG-parallel + resident + torch.compile — measured fastest.",
+                            "hardware": [
+                                "h100"
+                            ],
+                            "sglang_ref": "current-main",
+                            "serve_args": "--model-type diffusion --warmup --enable-cfg-parallel --dit-layerwise-offload false --performance-mode speed --enable-torch-compile",
+                            "notes": "Measured H100 A/B 2026-07-03 (steady-state single_e2e): 26.556s (auto default) -> 25.046s (-5.7%)."
                         }
                     }
                 },
@@ -1103,8 +1123,8 @@
                         "default": {
                             "description": "Best known SGLang command for the benchmark repo default profile.",
                             "sglang_ref": "current-main",
-                            "serve_args": "--model-type diffusion --warmup --enable-cfg-parallel --ulysses-degree 2 --dit-cpu-offload false --text-encoder-cpu-offload --pin-cpu-memory",
-                            "notes": "Keep this profile updated when the best command changes for a SGLang release or commit."
+                            "serve_args": "--model-type diffusion --warmup --enable-cfg-parallel --ulysses-degree 2 --dit-cpu-offload false --pin-cpu-memory --dit-layerwise-offload false --performance-mode speed --enable-torch-compile",
+                            "notes": "Keep this profile updated when the best command changes for a SGLang release or commit. Policy-aligned candidate (compile on, offload off) — NOT yet validated on H100; validate (incl. OOM risk) before publishing."
                         }
                     }
                 },
@@ -1241,8 +1261,8 @@
                         "default": {
                             "description": "Best known SGLang command for the benchmark repo default profile.",
                             "sglang_ref": "current-main",
-                            "serve_args": "--model-type diffusion --warmup --enable-cfg-parallel --ulysses-degree 2 --dit-cpu-offload false --text-encoder-cpu-offload --pin-cpu-memory",
-                            "notes": "Keep this profile updated when the best command changes for a SGLang release or commit."
+                            "serve_args": "--model-type diffusion --warmup --enable-cfg-parallel --ulysses-degree 2 --dit-cpu-offload false --pin-cpu-memory --dit-layerwise-offload false --performance-mode speed --enable-torch-compile",
+                            "notes": "Keep this profile updated when the best command changes for a SGLang release or commit. Policy-aligned candidate (compile on, offload off) — NOT yet validated on H100; validate (incl. OOM risk) before publishing."
                         }
                     }
                 },
@@ -1397,15 +1417,15 @@
                             "notes": "Keeps DiT, text/image encoders, and VAE resident on high-memory H200; BF16 VAE aligns with LightX2V best-performance Wan serving path. No cache or torch compile path."
                         },
                         "h100-h200-2gpu": {
-                            "description": "H100/H200 command for the Wan2.2 TI2V 5B 704p case.",
+                            "description": "Hopper 2-GPU CFG-parallel, all components resident, torch.compile — measured fastest.",
                             "hardware": [
                                 "h100",
                                 "h200"
                             ],
                             "sglang_ref": "current-main",
                             "num_gpus": 2,
-                            "serve_args": "--model-type diffusion --warmup --enable-cfg-parallel --dit-cpu-offload false --text-encoder-cpu-offload --pin-cpu-memory",
-                            "notes": "Keep DiT resident on high-memory GPUs to avoid CPU offload in performance runs."
+                            "serve_args": "--model-type diffusion --warmup --enable-cfg-parallel --dit-cpu-offload false --pin-cpu-memory --dit-layerwise-offload false --performance-mode speed --enable-torch-compile",
+                            "notes": "Measured H100 A/B 2026-07-03 (steady-state single_e2e): 35.07s (textenc-offload default) -> 31.068s (-11.4%). Measured on H100; re-validate before publishing new h200 numbers."
                         }
                     }
                 },
@@ -1626,8 +1646,8 @@
                         "default": {
                             "description": "Best known SGLang command for the benchmark repo default profile.",
                             "sglang_ref": "current-main",
-                            "serve_args": "--model-type diffusion --warmup --enable-cfg-parallel --pipeline-class-name LTX2TwoStagePipeline",
-                            "notes": "Keep this profile updated when the best command changes for a SGLang release or commit."
+                            "serve_args": "--model-type diffusion --warmup --enable-cfg-parallel --pipeline-class-name LTX2TwoStagePipeline --dit-layerwise-offload false --performance-mode speed --enable-torch-compile",
+                            "notes": "Keep this profile updated when the best command changes for a SGLang release or commit. Policy-aligned candidate (compile on, offload off) — NOT yet validated on H100; validate (incl. OOM risk) before publishing."
                         },
                         "h200-2gpu": {
                             "description": "H200 command for the LTX2 two-stage 121-frame case.",
@@ -1774,7 +1794,8 @@
                             "sglang_ref": "current-main",
                             "num_gpus": 2,
                             "serve_args": "--model-type diffusion --warmup --enable-cfg-parallel --pipeline-class-name LTX2TwoStagePipeline --ltx2-two-stage-device-mode snapshot",
-                            "notes": "Snapshot mode avoids H100 resident VRAM pressure."
+                            "notes": "Snapshot mode avoids H100 resident VRAM pressure.",
+                            "policy_exception": "Measured H100 A/B 2026-07-03 (steady-state single_e2e): speed+compile OOMs on 2x80GB (79.1/79.2 GiB used, 30MiB alloc failure during request) — two-stage residency + compile workspace does not fit. Snapshot device mode is the fastest configuration that fits (12.03s)."
                         },
                         "h200-2gpu": {
                             "description": "Cookbook-aligned H200 command for the LTX2.3 two-stage 121-frame case.",
@@ -1829,8 +1850,8 @@
                         "default": {
                             "description": "Best known SGLang command for the benchmark repo default profile.",
                             "sglang_ref": "current-main",
-                            "serve_args": "--model-type diffusion --warmup --enable-cfg-parallel --ulysses-degree 2 --dit-cpu-offload false --text-encoder-cpu-offload --pin-cpu-memory",
-                            "notes": "Tracks Wan2.1 720P I2V SGLang coverage; add other frameworks only after confirming compatible model support."
+                            "serve_args": "--model-type diffusion --warmup --enable-cfg-parallel --ulysses-degree 2 --dit-cpu-offload false --pin-cpu-memory --dit-layerwise-offload false --performance-mode speed --enable-torch-compile",
+                            "notes": "Tracks Wan2.1 720P I2V SGLang coverage; add other frameworks only after confirming compatible model support. Policy-aligned candidate (compile on, offload off) — NOT yet validated on H100; validate (incl. OOM risk) before publishing."
                         }
                     }
                 },
@@ -1970,8 +1991,8 @@
                         "default": {
                             "description": "Best known SGLang command for the benchmark repo default profile.",
                             "sglang_ref": "current-main",
-                            "serve_args": "--model-type diffusion --warmup --enable-cfg-parallel --ulysses-degree 2 --dit-cpu-offload false --text-encoder-cpu-offload --pin-cpu-memory",
-                            "notes": "Keep this profile updated when the best command changes for a SGLang release or commit."
+                            "serve_args": "--model-type diffusion --warmup --enable-cfg-parallel --ulysses-degree 2 --dit-cpu-offload false --pin-cpu-memory --dit-layerwise-offload false --performance-mode speed --enable-torch-compile",
+                            "notes": "Keep this profile updated when the best command changes for a SGLang release or commit. Policy-aligned candidate (compile on, offload off) — NOT yet validated on H100; validate (incl. OOM risk) before publishing."
                         }
                     }
                 },
@@ -2127,8 +2148,8 @@
                         "default": {
                             "description": "Cosmos3 Nano T2I profile for SGLang-Diffusion main 3d540563.",
                             "sglang_ref": "sgl-project/sglang@3d540563916394115f9612f30601ae3fa97ada7c",
-                            "serve_args": "--model-type diffusion --warmup --attention-backend fa --tp-size 2",
-                            "notes": "Guardrails disabled for framework-only serving performance; no cache or torch compile path.",
+                            "serve_args": "--model-type diffusion --warmup --attention-backend fa --tp-size 2 --dit-layerwise-offload false --performance-mode speed --enable-torch-compile",
+                            "notes": "Guardrails disabled for framework-only serving performance; no cache or torch compile path. Policy-aligned candidate (compile on, offload off) — NOT yet validated on H100; validate (incl. OOM risk) before publishing.",
                             "extra_env": {
                                 "SGLANG_DISABLE_COSMOS3_GUARDRAILS": "1"
                             }
@@ -2350,6 +2371,15 @@
                                 "FLASHINFER_USE_CUDA_NORM": "1",
                                 "SGLANG_DISABLE_COSMOS3_GUARDRAILS": "1"
                             }
+                        },
+                        "h100-4gpu-cfg-ulysses-speed-compile": {
+                            "description": "Hopper 4-GPU CFG+Ulysses, resident + torch.compile — measured fastest.",
+                            "hardware": [
+                                "h100"
+                            ],
+                            "sglang_ref": "current-main",
+                            "serve_args": "--model-type diffusion --warmup --attention-backend fa --cfg-parallel-size 2 --ulysses-degree 2 --dit-layerwise-offload false --performance-mode speed --enable-torch-compile",
+                            "notes": "Measured H100 A/B 2026-07-03 (steady-state single_e2e): 55.115s (auto default) -> 53.614s (-2.7%)."
                         }
                     }
                 },
@@ -2523,8 +2553,8 @@
                             "description": "Cosmos3 Nano I2V profile for SGLang-Diffusion main 3d540563.",
                             "sglang_ref": "sgl-project/sglang@3d540563916394115f9612f30601ae3fa97ada7c",
                             "num_gpus": 4,
-                            "serve_args": "--model-type diffusion --warmup --attention-backend fa --cfg-parallel-size 2 --ulysses-degree 2",
-                            "notes": "4-GPU CFG parallel plus Ulysses SP for long-video H200 serving; guardrails disabled, no cache."
+                            "serve_args": "--model-type diffusion --warmup --attention-backend fa --cfg-parallel-size 2 --ulysses-degree 2 --dit-layerwise-offload false --performance-mode speed --enable-torch-compile",
+                            "notes": "4-GPU CFG parallel plus Ulysses SP for long-video H200 serving; guardrails disabled, no cache. Policy-aligned candidate (compile on, offload off) — NOT yet validated on H100; validate (incl. OOM risk) before publishing."
                         },
                         "h200-4gpu-cfg-ulysses": {
                             "description": "H200 4-GPU Cosmos3 Nano I2V profile.",
