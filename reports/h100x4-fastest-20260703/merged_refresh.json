@@ -1,7 +1,7 @@
 {
-  "timestamp": "2026-07-03T07:58:35.570301+00:00",
+  "timestamp": "2026-07-03T11:02:29.904050+00:00",
   "commit_sha": "unknown",
-  "run_id": "h100x4-fastest-20260703",
+  "run_id": "h100x4-ulysses-20260703",
   "hardware": {
     "runner_labels": null,
     "gpu_config": null,
@@ -14,10 +14,10 @@
     "hardware_profile_override": "h100"
   },
   "sglang_runtime": {
-    "package_version": "0.0.0",
+    "package_version": "0.0.0.dev14567+ga6067f523",
     "module_path": "/sgl-workspace/sglang/python/sglang/__init__.py",
     "git_root": "/sgl-workspace/sglang",
-    "git_commit": "f89f4b3efff190545f3a1ec0955b97aadaf87543"
+    "git_commit": "a6067f52356195324bdbd52c1769485639eb7e02"
   },
   "framework_runtime": {
     "venv_root": "/persistent/fw-venvs",
@@ -133,34 +133,16 @@
   "reproduce_script": "scripts/generate_h200_report_artifacts.sh",
   "source_results": [
     {
-      "path": "/persistent/logs/base_filtered.json",
-      "run_id": "h100x4-final",
+      "path": "/persistent/logs/base_noqwen.json",
+      "run_id": "h100x4-fastest-20260703",
       "commit_sha": "unknown",
-      "timestamp": "2026-07-03T01:32:10.307826+00:00"
+      "timestamp": "2026-07-03T07:58:35.570301+00:00"
     },
     {
-      "path": "/persistent/logs/rebench_zimage_turbo_t2i_1024.json",
+      "path": "/persistent/logs/run_qwenulys_qwen_image_2512_t2i_1024.json",
       "run_id": "local",
       "commit_sha": "unknown",
-      "timestamp": "2026-07-03T07:40:05.361019+00:00"
-    },
-    {
-      "path": "/persistent/logs/rebench_wan21_t2v_1_3b_480p.json",
-      "run_id": "local",
-      "commit_sha": "unknown",
-      "timestamp": "2026-07-03T07:41:09.033100+00:00"
-    },
-    {
-      "path": "/persistent/logs/rebench_wan22_ti2v_5b_704p.json",
-      "run_id": "local",
-      "commit_sha": "unknown",
-      "timestamp": "2026-07-03T07:45:15.385085+00:00"
-    },
-    {
-      "path": "/persistent/logs/rebench_cosmos3_nano_t2v_720p_189f.json",
-      "run_id": "local",
-      "commit_sha": "unknown",
-      "timestamp": "2026-07-03T07:51:03.910058+00:00"
+      "timestamp": "2026-07-03T10:57:20.998140+00:00"
     }
   ],
   "results": [
@@ -495,46 +477,45 @@
       "true_cfg_scale": null,
       "negative_prompt_set": false,
       "num_gpus": 2,
-      "latency_s": 5.043,
+      "latency_s": 4.954,
       "error": null,
       "framework_metadata": {
-        "profile": "h100-h200-2gpu-tp-speed-compile",
+        "profile": "h100-2gpu-ulysses-speed-compile",
         "profile_request": "auto",
         "profile_source": "hardware",
         "framework_ref": null,
         "hardware": [
-          "h100",
-          "h200"
+          "h100"
         ],
         "hardware_candidates": [
           "h100"
         ],
-        "description": "Hopper 2-GPU TP SGLang qwen_image_2512_t2i_1024: resident DiT + torch.compile (best-lossless). Same validated command as flux1/flux2 speed-compile.",
-        "notes": "Command reused verbatim from flux1/flux2 h100-h200-2gpu-tp-speed-compile (validated in prior report runs). --performance-mode speed keeps components GPU-resident (disables CPU offload); offload-during-compile handles the compile-time peak. Larger DiTs may OOM under speed on 2xH100 \u2014 validate on target hardware and fall back if it does.",
+        "description": "Hopper 2-GPU Ulysses/SP (sequence-parallel), resident + torch.compile \u2014 measured fastest for qwen no-CFG.",
+        "notes": "Validated H100 only. --enable-cfg-parallel false required (no-CFG single branch; also prevents speed-mode auto-cfg from overriding sp_degree, PR #30016).",
         "install_specs": null,
         "server_bin": null,
         "use_omni_arg": null,
         "required_help_args": null,
-        "serve_args": "--model-type diffusion --warmup --dit-layerwise-offload false --tp-size 2 --performance-mode speed --enable-torch-compile",
+        "serve_args": "--model-type diffusion --warmup --dit-layerwise-offload false --tp-size 1 --ulysses-degree 2 --enable-cfg-parallel false --performance-mode speed --enable-torch-compile",
         "num_gpus": null,
         "extra_env_keys": [],
-        "sglang_profile": "h100-h200-2gpu-tp-speed-compile",
+        "sglang_profile": "h100-2gpu-ulysses-speed-compile",
         "sglang_profile_request": "auto",
         "sglang_profile_source": "hardware",
         "sglang_ref": "current-main"
       },
-      "server_command": "sglang serve --model-path Qwen/Qwen-Image-2512 --port 8322 --host 127.0.0.1 --backend sglang --num-gpus 2 --model-type diffusion --warmup --dit-layerwise-offload false --tp-size 2 --performance-mode speed --enable-torch-compile --warmup-steps 3",
+      "server_command": "sglang serve --model-path Qwen/Qwen-Image-2512 --port 41001 --host 127.0.0.1 --backend sglang --num-gpus 2 --model-type diffusion --warmup --dit-layerwise-offload false --tp-size 1 --ulysses-degree 2 --enable-cfg-parallel false --performance-mode speed --enable-torch-compile --warmup-steps 3",
       "metrics": {
-        "client_latency_s": 5.043,
-        "client_latency_min_s": 5.024,
-        "client_latency_max_s": 5.066,
+        "client_latency_s": 4.954,
+        "client_latency_min_s": 4.949,
+        "client_latency_max_s": 4.99,
         "measured_repeats": 5,
-        "server_latency_s": 4.976,
-        "client_overhead_s": 0.067,
-        "server_startup_s": 67.05,
-        "warmup_s": 4.11
+        "server_latency_s": 4.878,
+        "client_overhead_s": 0.076,
+        "server_startup_s": 93.86,
+        "warmup_s": 8.44
       },
-      "source_result": "/persistent/logs/sglang_qwenselfinal.json"
+      "source_result": "/persistent/logs/run_qwenulys_qwen_image_2512_t2i_1024.json"
     },
     {
       "case_id": "qwen_image_2512_t2i_1024",
@@ -1807,53 +1788,52 @@
       "true_cfg_scale": null,
       "negative_prompt_set": false,
       "num_gpus": 2,
-      "latency_s": 10.083,
+      "latency_s": 9.808,
       "error": null,
       "framework_metadata": {
-        "profile": "h100-h200-2gpu-tp-speed-compile",
+        "profile": "h100-2gpu-ulysses-speed-compile",
         "profile_request": "auto",
         "profile_source": "hardware",
         "framework_ref": null,
         "hardware": [
-          "h100",
-          "h200"
+          "h100"
         ],
         "hardware_candidates": [
           "h100"
         ],
-        "description": "Hopper 2-GPU TP SGLang qwen_image_2512_t2i_1024: resident DiT + torch.compile (best-lossless). Same validated command as flux1/flux2 speed-compile.",
-        "notes": "Command reused verbatim from flux1/flux2 h100-h200-2gpu-tp-speed-compile (validated in prior report runs). --performance-mode speed keeps components GPU-resident (disables CPU offload); offload-during-compile handles the compile-time peak. Larger DiTs may OOM under speed on 2xH100 \u2014 validate on target hardware and fall back if it does.",
+        "description": "Hopper 2-GPU Ulysses/SP (sequence-parallel), resident + torch.compile \u2014 measured fastest for qwen no-CFG.",
+        "notes": "Validated H100 only. --enable-cfg-parallel false required (no-CFG single branch; also prevents speed-mode auto-cfg from overriding sp_degree, PR #30016).",
         "install_specs": null,
         "server_bin": null,
         "use_omni_arg": null,
         "required_help_args": null,
-        "serve_args": "--model-type diffusion --warmup --dit-layerwise-offload false --tp-size 2 --performance-mode speed --enable-torch-compile",
+        "serve_args": "--model-type diffusion --warmup --dit-layerwise-offload false --tp-size 1 --ulysses-degree 2 --enable-cfg-parallel false --performance-mode speed --enable-torch-compile",
         "num_gpus": null,
         "extra_env_keys": [],
-        "sglang_profile": "h100-h200-2gpu-tp-speed-compile",
+        "sglang_profile": "h100-2gpu-ulysses-speed-compile",
         "sglang_profile_request": "auto",
         "sglang_profile_source": "hardware",
         "sglang_ref": "current-main"
       },
-      "server_command": "sglang serve --model-path Qwen/Qwen-Image-2512 --port 8322 --host 127.0.0.1 --backend sglang --num-gpus 2 --model-type diffusion --warmup --dit-layerwise-offload false --tp-size 2 --performance-mode speed --enable-torch-compile --warmup-steps 3",
+      "server_command": "sglang serve --model-path Qwen/Qwen-Image-2512 --port 41001 --host 127.0.0.1 --backend sglang --num-gpus 2 --model-type diffusion --warmup --dit-layerwise-offload false --tp-size 1 --ulysses-degree 2 --enable-cfg-parallel false --performance-mode speed --enable-torch-compile --warmup-steps 3",
       "metrics": {
-        "duration_s": 20.182,
+        "duration_s": 19.664,
         "num_requests": 4,
         "completed_requests": 4,
         "failed_requests": 0,
         "max_concurrency": 2,
-        "throughput_rps": 0.1982,
-        "output_throughput_ops": 0.1982,
-        "latency_mean_s": 8.83,
-        "latency_p50_s": 10.083,
-        "latency_p90_s": 10.108,
-        "latency_p95_s": 10.11,
-        "latency_p99_s": 10.112,
+        "throughput_rps": 0.2034,
+        "output_throughput_ops": 0.2034,
+        "latency_mean_s": 8.602,
+        "latency_p50_s": 9.808,
+        "latency_p90_s": 9.835,
+        "latency_p95_s": 9.838,
+        "latency_p99_s": 9.841,
         "errors": [],
-        "server_startup_s": 67.05,
-        "warmup_s": 4.11
+        "server_startup_s": 93.86,
+        "warmup_s": 8.44
       },
-      "source_result": "/persistent/logs/sglang_qwenselfinal.json"
+      "source_result": "/persistent/logs/run_qwenulys_qwen_image_2512_t2i_1024.json"
     },
     {
       "case_id": "qwen_image_2512_t2i_1024",

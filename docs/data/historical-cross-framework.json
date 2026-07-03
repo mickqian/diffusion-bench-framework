@@ -117,9 +117,9 @@
           "cells": {
             "sglang": {
               "gpus": 2,
-              "profile": "h100-h200-2gpu-tp-speed-compile",
+              "profile": "h100-2gpu-ulysses-speed-compile",
               "status": "ok",
-              "latency_s": 5.043,
+              "latency_s": 4.954,
               "ratio_to_sglang": 1.0
             },
             "vllm-omni": {
@@ -127,7 +127,7 @@
               "profile": "default",
               "status": "ok",
               "latency_s": 5.168,
-              "ratio_to_sglang": 1.025
+              "ratio_to_sglang": 1.043
             },
             "lightx2v": {
               "status": "unsupported",
@@ -138,7 +138,7 @@
               "profile": "h100-h200-2gpu-tp-speed",
               "status": "ok",
               "latency_s": 7.528,
-              "ratio_to_sglang": 1.493
+              "ratio_to_sglang": 1.52
             }
           }
         },
@@ -425,7 +425,7 @@
             "sglang": {
               "status": "ok",
               "qps": 0.2,
-              "p95_s": 10.11,
+              "p95_s": 9.84,
               "ratio_to_sglang": 1.0
             },
             "vllm-omni": {

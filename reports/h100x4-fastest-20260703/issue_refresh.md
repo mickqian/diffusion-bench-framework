@@ -1,16 +1,16 @@
-## Diffusion Benchmark Data - 2026-07-03T07:58:35.570301+00:00
+## Diffusion Benchmark Data - 2026-07-03T11:02:29.904050+00:00
 
 | item | value |
 | --- | --- |
-| run_id | h100x4-fastest-20260703 |
+| run_id | h100x4-ulysses-20260703 |
 | data | single_e2e, throughput |
 | bench_commit | unknown |
 | gpu | 4 x NVIDIA H100 80GB HBM3, 81559 MiB, 580.126.20 |
-| reproduce | scripts/generate_h200_report_artifacts.sh; inputs: base_filtered.json, rebench_zimage_turbo_t2i_1024.json, rebench_wan21_t2v_1_3b_480p.json, rebench_wan22_ti2v_5b_704p.json, rebench_cosmos3_nano_t2v_720p_189f.json |
+| reproduce | scripts/generate_h200_report_artifacts.sh; inputs: base_noqwen.json, run_qwenulys_qwen_image_2512_t2i_1024.json |
 
 | framework | version/ref |
 | --- | --- |
-| SGLang-Diffusion | 0.0.0 (f89f4b3) |
+| SGLang-Diffusion | 0.0.0.dev14567+ga6067f523 (a6067f5) |
 | vLLM-Omni | vllm-omni 0.24.0rc2.dev8+g4d2ee1515; vllm 0.24.0 |
 | LightX2V | 0.1.0 (7efd05f) |
 | trtllm-visual | 1.3.0rc18 |
@@ -52,10 +52,10 @@ Statuses: `not_run` means configured but absent from this artifact; `unsupported
 
 | framework | profile | gpus | single_e2e_s | single/SGLang-Diffusion | single_status | done/reqs | concurrency | p50_s | p50/SGLang-Diffusion | p95_s | p99_s | qps | qps/SGLang-Diffusion | throughput_status | reason |
 | --- | --- | ---: | ---: | ---: | --- | --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | --- | --- |
-| SGLang-Diffusion | h100-h200-2gpu-tp-speed-compile | 2 | 5.043 | 1.000x | ok | 4/4 | 2 | 10.083 | 1.000x | 10.110 | 10.112 | 0.1982 | 1.000x | ok | - |
-| vLLM-Omni | default | 2 | 5.168 | 1.025x | ok | 4/4 | 2 | 10.166 | 1.008x | 10.242 | 10.253 | 0.1959 | 0.988x | ok | - |
+| SGLang-Diffusion | h100-2gpu-ulysses-speed-compile | 2 | 4.954 | 1.000x | ok | 4/4 | 2 | 9.808 | 1.000x | 9.838 | 9.841 | 0.2034 | 1.000x | ok | - |
+| vLLM-Omni | default | 2 | 5.168 | 1.043x | ok | 4/4 | 2 | 10.166 | 1.037x | 10.242 | 10.253 | 0.1959 | 0.963x | ok | - |
 | LightX2V | - | - | - | - | unsupported | - | - | - | - | - | - | - | - | unsupported | Tracked LightX2V version has no Qwen-Image text-to-image serving path. |
-| trtllm-visual | h100-h200-2gpu-tp-speed | 2 | 7.528 | 1.493x | ok | 4/4 | 2 | 15.083 | 1.496x | 15.110 | 15.113 | 0.1325 | 0.669x | ok | - |
+| trtllm-visual | h100-h200-2gpu-tp-speed | 2 | 7.528 | 1.520x | ok | 4/4 | 2 | 15.083 | 1.538x | 15.110 | 15.113 | 0.1325 | 0.651x | ok | - |
 
 ### qwen_image_2512_t2i_1024_truecfg
 

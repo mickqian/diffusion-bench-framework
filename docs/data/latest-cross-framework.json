@@ -113,8 +113,8 @@
       "winner": "sglang",
       "cells": {
         "sglang": {
-          "client_latency_s": 5.043,
-          "profile": "h100-h200-2gpu-tp-speed-compile"
+          "client_latency_s": 4.954,
+          "profile": "h100-2gpu-ulysses-speed-compile"
         },
         "vllm-omni": {
           "client_latency_s": 5.168,
@@ -129,7 +129,7 @@
           "profile": "h100-h200-2gpu-tp-speed"
         }
       },
-      "winner_speedup": "1.02x"
+      "winner_speedup": "1.04x"
     },
     {
       "case_id": "qwen_image_2512_t2i_1024_truecfg",
