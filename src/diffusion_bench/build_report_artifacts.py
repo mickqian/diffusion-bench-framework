@@ -9,6 +9,7 @@ import subprocess
 from datetime import datetime, timezone
 from pathlib import Path
 
+from diffusion_bench.config_guard import verify_merged_commands
 from diffusion_bench.generate_dashboard import (
     build_issue_report_comment,
     generate_dashboard,
@@ -97,6 +98,24 @@ def merge_results(paths: list[Path], output_json: Path, config_path: Path, run_i
         "results": _merge_entries(runs, "results", case_rank),
         "throughput_results": _merge_entries(runs, "throughput_results", case_rank),
     }
+
+    # Guard: published rows must describe what the CURRENT config would run.
+    # (Origin: a run was published whose commands had drifted from the declared
+    # policy/config.) Warn by default; DIFFUSION_BENCH_STRICT_COMMANDS=1 fails.
+    import os as _os
+
+    config_data = _load(config_path)
+    drift = verify_merged_commands(merged, config_data)
+    if drift:
+        merged["command_drift_warnings"] = drift
+        print("COMMAND DRIFT — published rows vs current config:")
+        for w in drift:
+            print("  -", w)
+        if _os.environ.get("DIFFUSION_BENCH_STRICT_COMMANDS") == "1":
+            raise RuntimeError(
+                f"{len(drift)} command-drift finding(s); re-run the affected "
+                "cells or unset DIFFUSION_BENCH_STRICT_COMMANDS"
+            )
 
     modes = set()
     for path, data in runs:

@@ -632,11 +632,21 @@ def _select_command_profile(
             )
         return explicit_profile, "explicit", candidates
 
-    for profile_name, profile_cfg in profiles.items():
-        if profile_name == DEFAULT_PROFILE:
-            continue
-        if _profile_matches_hardware(profile_name, profile_cfg, candidates):
-            return profile_name, "hardware", candidates
+    hardware_matches = [
+        profile_name
+        for profile_name, profile_cfg in profiles.items()
+        if profile_name != DEFAULT_PROFILE
+        and _profile_matches_hardware(profile_name, profile_cfg, candidates)
+    ]
+    if hardware_matches:
+        if len(hardware_matches) > 1:
+            print(
+                f"  WARNING: {framework}: {len(hardware_matches)} profiles match "
+                f"hardware {candidates}: {hardware_matches} — dict order selects "
+                f"{hardware_matches[0]!r}. Edit THAT profile (see "
+                f"configs/benchmark/SELECTED.md) or remove the ambiguity."
+            )
+        return hardware_matches[0], "hardware", candidates
 
     if DEFAULT_PROFILE in profiles:
         return DEFAULT_PROFILE, "default", candidates
