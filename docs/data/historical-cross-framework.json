@@ -21,15 +21,15 @@
   },
   "sections": [
     {
-      "id": "h100x4-final-20260702_single_e2e",
-      "run": "h100x4-final-20260702",
-      "run_label": "H100 best-lossless (compile on)",
+      "id": "h100x4-fastest-20260703_single_e2e",
+      "run": "h100x4-fastest-20260703",
+      "run_label": "H100 best-lossless (measured-fastest)",
       "date": "2026-07-03",
       "gpu": "4x NVIDIA H100 80GB",
-      "title": "H100 best-lossless (compile on)",
+      "title": "H100 best-lossless (measured-fastest)",
       "subtitle": "Steady-state single-request latency on H100, best lossless config per framework (torch.compile on everywhere). SGLang fastest on every comparable case, including both Qwen-Image semantics after the TP selective-sharding work (sglang PRs #29774/#30004). Throughput tables live in the report.",
       "mode": "single_e2e",
-      "source_manifest": "reports/h100x4-final-20260702/",
+      "source_manifest": "reports/h100x4-fastest-20260703/",
       "reproduce": "configs/benchmark/ (explicit matrix) + scripts/build_benchmark_config.py",
       "framework_versions": {
         "sglang": "c05c48b+#29774",
@@ -182,9 +182,9 @@
           "cells": {
             "sglang": {
               "gpus": 2,
-              "profile": "default",
+              "profile": "h100-h200-2gpu-tp-resident-eager",
               "status": "ok",
-              "latency_s": 0.793,
+              "latency_s": 0.696,
               "ratio_to_sglang": 1.0
             },
             "vllm-omni": {
@@ -192,7 +192,7 @@
               "profile": "default",
               "status": "ok",
               "latency_s": 1.245,
-              "ratio_to_sglang": 1.57
+              "ratio_to_sglang": 1.789
             },
             "lightx2v": {
               "status": "not_run"
@@ -212,9 +212,9 @@
           "cells": {
             "sglang": {
               "gpus": 2,
-              "profile": "default",
+              "profile": "h100-2gpu-cfg-speed-compile",
               "status": "ok",
-              "latency_s": 26.053,
+              "latency_s": 25.049,
               "ratio_to_sglang": 1.0
             },
             "vllm-omni": {
@@ -222,14 +222,14 @@
               "profile": "default",
               "status": "ok",
               "latency_s": 31.048,
-              "ratio_to_sglang": 1.192
+              "ratio_to_sglang": 1.239
             },
             "lightx2v": {
               "gpus": 2,
               "profile": "default",
               "status": "ok",
               "latency_s": 29.058,
-              "ratio_to_sglang": 1.115
+              "ratio_to_sglang": 1.16
             },
             "trtllm-visual": {
               "status": "not_run",
@@ -248,7 +248,7 @@
               "gpus": 2,
               "profile": "h100-h200-2gpu",
               "status": "ok",
-              "latency_s": 35.072,
+              "latency_s": 31.062,
               "ratio_to_sglang": 1.0
             },
             "vllm-omni": {
@@ -256,14 +256,14 @@
               "profile": "default",
               "status": "ok",
               "latency_s": 38.149,
-              "ratio_to_sglang": 1.088
+              "ratio_to_sglang": 1.228
             },
             "lightx2v": {
               "gpus": 2,
               "profile": "default",
               "status": "ok",
               "latency_s": 36.239,
-              "ratio_to_sglang": 1.033
+              "ratio_to_sglang": 1.167
             },
             "trtllm-visual": {
               "status": "not_run",
@@ -308,9 +308,9 @@
           "cells": {
             "sglang": {
               "gpus": 4,
-              "profile": "default",
+              "profile": "h100-4gpu-cfg-ulysses-speed-compile",
               "status": "ok",
-              "latency_s": 55.101,
+              "latency_s": 54.106,
               "ratio_to_sglang": 1.0
             },
             "vllm-omni": {
@@ -318,7 +318,7 @@
               "profile": "default",
               "status": "ok",
               "latency_s": 65.933,
-              "ratio_to_sglang": 1.197
+              "ratio_to_sglang": 1.219
             },
             "lightx2v": {
               "status": "unsupported",
@@ -333,15 +333,15 @@
       ]
     },
     {
-      "id": "h100x4-final-20260702_throughput",
-      "run": "h100x4-final-20260702",
-      "run_label": "H100 best-lossless (compile on)",
+      "id": "h100x4-fastest-20260703_throughput",
+      "run": "h100x4-fastest-20260703",
+      "run_label": "H100 best-lossless (measured-fastest)",
       "date": "2026-07-03",
       "gpu": "4x NVIDIA H100 80GB",
       "title": "H100 high-pressure throughput",
       "subtitle": "Image requests at concurrency 2; qps and p95 from the committed report dashboard.",
       "mode": "throughput",
-      "source_manifest": "reports/h100x4-final-20260702/",
+      "source_manifest": "reports/h100x4-fastest-20260703/",
       "reproduce": "configs/benchmark/ (explicit matrix) + scripts/build_benchmark_config.py",
       "framework_versions": {
         "sglang": "c05c48b+#29774",
@@ -484,15 +484,15 @@
           "cells": {
             "sglang": {
               "status": "ok",
-              "qps": 1.26,
-              "p95_s": 1.58,
+              "qps": 1.39,
+              "p95_s": 1.47,
               "ratio_to_sglang": 1.0
             },
             "vllm-omni": {
               "status": "ok",
               "qps": 0.84,
               "p95_s": 2.42,
-              "ratio_to_sglang": 0.667
+              "ratio_to_sglang": 0.604
             },
             "lightx2v": {
               "status": "not_run"
@@ -513,7 +513,7 @@
             "sglang": {
               "status": "ok",
               "qps": 0.04,
-              "p95_s": 51.13,
+              "p95_s": 50.13,
               "ratio_to_sglang": 1.0
             },
             "vllm-omni": {
@@ -544,7 +544,7 @@
             "sglang": {
               "status": "ok",
               "qps": 0.03,
-              "p95_s": 69.04,
+              "p95_s": 61.01,
               "ratio_to_sglang": 1.0
             },
             "vllm-omni": {
@@ -602,7 +602,7 @@
             "sglang": {
               "status": "ok",
               "qps": 0.02,
-              "p95_s": 109.28,
+              "p95_s": 107.12,
               "ratio_to_sglang": 1.0
             },
             "vllm-omni": {

@@ -1,8 +1,8 @@
 {
-  "id": "h100x4-final-20260702",
+  "id": "h100x4-fastest-20260703",
   "title": "H100 SGLang-Diffusion vs vLLM-Omni vs LightX2V vs TensorRT-LLM VisualGen (best lossless, compile on)",
   "updated_at": "2026-07-03",
-  "source_report": "reports/h100x4-final-20260702/",
+  "source_report": "reports/h100x4-fastest-20260703/",
   "source_script": "configs/benchmark/ (explicit matrix) + scripts/build_benchmark_config.py",
   "hardware": {
     "label": "4x NVIDIA H100 80GB",
@@ -165,8 +165,8 @@
       "winner": "sglang",
       "cells": {
         "sglang": {
-          "client_latency_s": 0.793,
-          "profile": "default"
+          "client_latency_s": 0.696,
+          "profile": "h100-h200-2gpu-tp-resident-eager"
         },
         "vllm-omni": {
           "client_latency_s": 1.245,
@@ -180,7 +180,7 @@
           "reason": "Not yet classified. Confirm framework support and add a validated command profile, or mark unsupported."
         }
       },
-      "winner_speedup": "1.57x"
+      "winner_speedup": "1.79x"
     },
     {
       "case_id": "wan21_t2v_1_3b_480p",
@@ -190,8 +190,8 @@
       "winner": "sglang",
       "cells": {
         "sglang": {
-          "client_latency_s": 26.053,
-          "profile": "default"
+          "client_latency_s": 25.049,
+          "profile": "h100-2gpu-cfg-speed-compile"
         },
         "vllm-omni": {
           "client_latency_s": 31.048,
@@ -206,7 +206,7 @@
           "reason": "Not yet classified. Confirm framework support and add a validated command profile, or mark unsupported."
         }
       },
-      "winner_speedup": "1.12x"
+      "winner_speedup": "1.16x"
     },
     {
       "case_id": "wan22_ti2v_5b_704p",
@@ -216,7 +216,7 @@
       "winner": "sglang",
       "cells": {
         "sglang": {
-          "client_latency_s": 35.072,
+          "client_latency_s": 31.062,
           "profile": "h100-h200-2gpu"
         },
         "vllm-omni": {
@@ -232,7 +232,7 @@
           "reason": "Not yet classified. Confirm framework support and add a validated command profile, or mark unsupported."
         }
       },
-      "winner_speedup": "1.03x"
+      "winner_speedup": "1.17x"
     },
     {
       "case_id": "ltx2.3_twostage_t2v_2gpus",
@@ -267,8 +267,8 @@
       "winner": "sglang",
       "cells": {
         "sglang": {
-          "client_latency_s": 55.101,
-          "profile": "default"
+          "client_latency_s": 54.106,
+          "profile": "h100-4gpu-cfg-ulysses-speed-compile"
         },
         "vllm-omni": {
           "client_latency_s": 65.933,
@@ -283,7 +283,7 @@
           "reason": "Not yet classified. Confirm framework support and add a validated command profile, or mark unsupported."
         }
       },
-      "winner_speedup": "1.20x"
+      "winner_speedup": "1.22x"
     }
   ]
 }
