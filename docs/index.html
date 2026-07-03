@@ -1145,11 +1145,13 @@
       }
       .bnx-metricnote { font-size: 12.5px; color: var(--muted); opacity: 0.8; margin: 0 0 6px; }
 
-      /* per-cell hover highlight */
-      .bnx-row { border-radius: 10px; transition: background 140ms ease; }
-      .bnx-row:hover { background: var(--ink-04); }
-      .bnx-brow { border-radius: 8px; transition: background 140ms ease; padding: 2px 6px; margin: 0 -6px; }
-      .bnx-brow:hover { background: var(--ink-04); }
+      /* Hover feedback stays ink-only: background pills read cheap here and the
+         old negative-margin version bled past the container gutter. The row's
+         hairline darkens and the hovered framework line sharpens instead. */
+      .bnx-row { transition: border-color 160ms ease; }
+      .bnx-row:hover { border-bottom-color: var(--hair-strong); }
+      .bnx-brow .bnx-fw, .bnx-brow .bnx-val { transition: color 160ms ease; }
+      .bnx-brow:hover .bnx-fw, .bnx-brow:hover .bnx-val { color: var(--ink); }
 
       /* sglang-only generated-media thumbnail, hover to enlarge */
       .bnx-sample {
@@ -1304,20 +1306,9 @@
         transition: color 180ms ease;
       }
 
-      /* Modern hover highlight on chart bars — the chart view had none (only the
-         table rows did). Hovering a row floats a glassy tint, brightens the bar
-         fill, and pulls the value into the SGLang accent. No layout shift: the
-         6px box-shadow halo reuses the row tint so adjacent rows never overlap. */
-      .bar-row:not(.status) {
-        border-radius: 12px;
-        transition: background 180ms ease, box-shadow 180ms ease;
-      }
-
-      .bar-row:not(.status):hover {
-        background: var(--hover-bg);
-        box-shadow: 0 0 0 6px var(--hover-bg);
-      }
-
+      /* Chart-bar hover keeps the same ink-only language as the table rows:
+         no background tint or halo (both bled outside the row box), just a
+         brighter bar fill and the value pulled into the accent. */
       .bar-row:not(.status):hover .bar-track i {
         filter: brightness(1.07) saturate(1.05);
       }
