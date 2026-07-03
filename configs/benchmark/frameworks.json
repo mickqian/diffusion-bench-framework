@@ -1,0 +1,34 @@
+{
+  "_comment": "Frameworks in scope for a complete cross-framework run. Version policy: latest-vs-latest (SGLang origin/main HEAD vs each competitor's newest line). A complete run includes every framework here for every case; a cell a framework cannot run must be classified in the case file (unsupported / no_profile / failed / not_run / invalid) — never silently dropped.",
+  "frameworks": {
+    "sglang": {
+      "role": "reference (SGLang-Diffusion — the system this benchmark guards)",
+      "version_policy": "origin/main HEAD (latest)",
+      "launch": "sglang serve | sglang generate",
+      "scope": "all cases"
+    },
+    "vllm-omni": {
+      "role": "competitor",
+      "version_policy": "vllm newest + vllm-omni main HEAD",
+      "launch": "vllm serve --omni",
+      "attention": "env DIFFUSION_ATTENTION_BACKEND (exact: FLASH_ATTN on Hopper, FLASHINFER_ATTN on Blackwell)",
+      "scope": "image + video where a serving path exists"
+    },
+    "lightx2v": {
+      "role": "competitor",
+      "version_policy": "LightX2V main HEAD",
+      "launch": "python3 -m lightx2v.server (single GPU) | torchrun --nproc_per_node=N (multi-GPU)",
+      "attention": "attn_type in lightx2v_config; exact default flash_attn3. NEVER sage_attn2/svg (lossy) in the main comparison.",
+      "parallel": "lightx2v_config.parallel: tensor_p_size (shard weights) | seq_p_size (shard activations, ulysses all-to-all, lossless) | cfg_p_size",
+      "scope": "image + video where a serving path exists"
+    },
+    "trtllm-visual": {
+      "role": "competitor (TensorRT-LLM VisualGen)",
+      "version_policy": "newest trtllm release candidate",
+      "launch": "trtllm-serve (--backend pytorch; --tp_size N appended when num_gpus=N)",
+      "engines": "TensorRT engines same-dtype, no quantization, no TeaCache, no torch compile (cache-free, comparable)",
+      "coverage": "FLUX / Wan / LTX-2 / Qwen-Image / Cosmos3",
+      "scope": "required for image cases; video (Wan / LTX-2 / Cosmos3) supported per coverage — classify per case, do not drop"
+    }
+  }
+}

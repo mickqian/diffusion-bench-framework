@@ -2,14 +2,19 @@
     "_comment": "Per-model comparison config. Sampling params omitted where model defaults are correct — only override resolution, seed, and params that differ from defaults.",
     "test_image_url": "https://huggingface.co/datasets/huggingface/documentation-images/resolve/main/diffusers/cat.png",
     "benchmark_defaults": {
-        "warmup": {
-            "num_requests": 2,
-            "num_inference_steps": 3
-        },
         "throughput": {
-            "num_requests": 4,
             "max_concurrency": 2,
+            "num_requests": 4,
             "request_rate": "inf"
+        },
+        "warmup": {
+            "num_inference_steps": 3,
+            "num_requests": 2,
+            "video_num_requests": 3
+        },
+        "single": {
+            "image_repeats": 5,
+            "video_repeats": 2
         }
     },
     "cases": [
@@ -21,42 +26,19 @@
             "width": 1024,
             "height": 1024,
             "seed": 42,
-            "num_gpus": 1,
+            "num_gpus": 2,
             "num_inference_steps": 50,
             "guidance_scale": 3.5,
-            "report_framework_statuses": {
-                "lightx2v": "unsupported"
-            },
-            "report_framework_reasons": {
-                "lightx2v": "Tracked LightX2V version has no FLUX.1 serving path; FLUX coverage starts at FLUX.2."
-            },
             "frameworks": {
                 "sglang": {
-                    "serve_args": "--model-type diffusion --warmup --dit-layerwise-offload false",
+                    "serve_args": "--model-type diffusion --warmup --dit-layerwise-offload false --tp-size 2",
                     "extra_env": {},
                     "command_profiles": {
                         "default": {
                             "description": "Best known SGLang command for the benchmark repo default profile.",
                             "sglang_ref": "current-main",
-                            "serve_args": "--model-type diffusion --warmup --dit-layerwise-offload false",
+                            "serve_args": "--model-type diffusion --warmup --dit-layerwise-offload false --tp-size 2",
                             "notes": "Keep this profile updated when the best command changes for a SGLang release or commit."
-                        },
-                        "h100-h200-1gpu-compile": {
-                            "description": "Hopper single-GPU legacy-compatible FLUX compile profile.",
-                            "hardware": [
-                                "h100",
-                                "h200"
-                            ],
-                            "num_gpus": 1,
-                            "sglang_ref": "legacy-compatible",
-                            "serve_args": "--model-type diffusion --warmup --dit-layerwise-offload false --enable-torch-compile",
-                            "benchmark": {
-                                "warmup": {
-                                    "num_requests": 2,
-                                    "num_inference_steps": 50
-                                }
-                            },
-                            "notes": "Use for SGLang commits before --performance-mode speed existed; keep compile enabled for fastest available legacy path."
                         },
                         "h100-h200-2gpu-tp-compile": {
                             "description": "Hopper 2-GPU TP legacy-compatible FLUX compile profile.",
@@ -74,25 +56,6 @@
                                 }
                             },
                             "notes": "Use for SGLang commits before --performance-mode speed existed; TP remains explicit."
-                        },
-                        "blackwell-1gpu-compile": {
-                            "description": "Blackwell single-GPU legacy-compatible FLUX compile profile.",
-                            "hardware": [
-                                "b200",
-                                "gb200",
-                                "b300",
-                                "gb300"
-                            ],
-                            "num_gpus": 1,
-                            "sglang_ref": "legacy-compatible",
-                            "serve_args": "--model-type diffusion --warmup --dit-layerwise-offload false --enable-torch-compile",
-                            "benchmark": {
-                                "warmup": {
-                                    "num_requests": 2,
-                                    "num_inference_steps": 50
-                                }
-                            },
-                            "notes": "Use for SGLang commits before --performance-mode speed existed; keep compile enabled for fastest available legacy path."
                         },
                         "blackwell-2gpu-tp-compile": {
                             "description": "Blackwell 2-GPU TP legacy-compatible FLUX compile profile.",
@@ -113,26 +76,6 @@
                             },
                             "notes": "Use for SGLang commits before --performance-mode speed existed; TP remains explicit."
                         },
-                        "h100-h200-1gpu-speed-compile": {
-                            "description": "Hopper single-GPU fastest FLUX profile probe.",
-                            "hardware": [
-                                "h100",
-                                "h200"
-                            ],
-                            "num_gpus": 1,
-                            "sglang_ref": "current-main",
-                            "serve_args": "--model-type diffusion --warmup --dit-layerwise-offload false --performance-mode speed --enable-torch-compile",
-                            "benchmark": {
-                                "warmup": {
-                                    "num_requests": 2,
-                                    "num_inference_steps": 50
-                                }
-                            },
-                            "extra_env": {
-                                "FLASHINFER_USE_CUDA_NORM": "1"
-                            },
-                            "notes": "Steady-state fastest profile candidate; use CUDA norm to avoid FlashInfer CUTE norm JIT on Hopper."
-                        },
                         "h100-h200-2gpu-tp-speed-compile": {
                             "description": "Hopper 2-GPU TP fastest FLUX profile probe.",
                             "hardware": [
@@ -152,25 +95,6 @@
                                 "FLASHINFER_USE_CUDA_NORM": "1"
                             },
                             "notes": "Steady-state fastest profile candidate; TP is explicit and CUDA norm avoids FlashInfer CUTE norm JIT on Hopper."
-                        },
-                        "blackwell-1gpu-speed-compile": {
-                            "description": "Blackwell single-GPU fastest FLUX profile probe.",
-                            "hardware": [
-                                "b200",
-                                "gb200",
-                                "b300",
-                                "gb300"
-                            ],
-                            "num_gpus": 1,
-                            "sglang_ref": "current-main",
-                            "serve_args": "--model-type diffusion --warmup --dit-layerwise-offload false --performance-mode speed --enable-torch-compile",
-                            "benchmark": {
-                                "warmup": {
-                                    "num_requests": 2,
-                                    "num_inference_steps": 50
-                                }
-                            },
-                            "notes": "Steady-state fastest profile candidate for Blackwell; use with DIFFUSION_BENCH_DISABLE_TORCH_COMPILE=0."
                         },
                         "blackwell-2gpu-tp-speed-compile": {
                             "description": "Blackwell 2-GPU TP fastest FLUX profile probe.",
@@ -194,7 +118,7 @@
                     }
                 },
                 "vllm-omni": {
-                    "num_gpus": 1,
+                    "num_gpus": 2,
                     "serve_args": "",
                     "extra_env": {
                         "DIFFUSION_ATTENTION_BACKEND": "FLASH_ATTN"
@@ -205,26 +129,6 @@
                             "framework_ref": "vllm-omni-0.18.0-cli-env",
                             "serve_args": "",
                             "notes": "Uses env-selected FlashAttention; torch compile is disabled by the benchmark harness.",
-                            "extra_env": {
-                                "DIFFUSION_ATTENTION_BACKEND": "FLASH_ATTN"
-                            }
-                        },
-                        "h100-h200-1gpu-compile": {
-                            "description": "Hopper single-GPU fastest vLLM-Omni FLUX profile probe.",
-                            "hardware": [
-                                "h100",
-                                "h200"
-                            ],
-                            "num_gpus": 1,
-                            "framework_ref": "vllm-omni-latest+compile-allowed",
-                            "serve_args": "",
-                            "benchmark": {
-                                "warmup": {
-                                    "num_requests": 2,
-                                    "num_inference_steps": 50
-                                }
-                            },
-                            "notes": "Use with DIFFUSION_BENCH_DISABLE_TORCH_COMPILE=0 so the harness does not append eager/compile-off args.",
                             "extra_env": {
                                 "DIFFUSION_ATTENTION_BACKEND": "FLASH_ATTN"
                             }
@@ -247,28 +151,6 @@
                             "notes": "The harness adds --tensor-parallel-size 2 when num_gpus=2; use with compile allowed.",
                             "extra_env": {
                                 "DIFFUSION_ATTENTION_BACKEND": "FLASH_ATTN"
-                            }
-                        },
-                        "blackwell-1gpu-compile": {
-                            "description": "Blackwell single-GPU fastest vLLM-Omni FLUX profile probe.",
-                            "hardware": [
-                                "b200",
-                                "gb200",
-                                "b300",
-                                "gb300"
-                            ],
-                            "num_gpus": 1,
-                            "framework_ref": "vllm-omni-latest+blackwell+compile-allowed",
-                            "serve_args": "",
-                            "benchmark": {
-                                "warmup": {
-                                    "num_requests": 2,
-                                    "num_inference_steps": 50
-                                }
-                            },
-                            "notes": "Use with DIFFUSION_BENCH_DISABLE_TORCH_COMPILE=0 so the harness does not append eager/compile-off args.",
-                            "extra_env": {
-                                "DIFFUSION_ATTENTION_BACKEND": "FLASHINFER_ATTN"
                             }
                         },
                         "blackwell-2gpu-tp-compile": {
@@ -296,7 +178,7 @@
                     }
                 },
                 "trtllm-visual": {
-                    "num_gpus": 1,
+                    "num_gpus": 2,
                     "serve_args": "--backend pytorch",
                     "extra_env": {},
                     "http_server": {
@@ -324,17 +206,6 @@
                             "serve_args": "--backend pytorch",
                             "notes": "Keep this profile updated as the best command changes. trtllm-serve auto-detects the FLUX.1 diffusion model; add --extra_visual_gen_options <model>.yml for steady-state tuning. PyTorch backend, no TeaCache and no torch compile so the row stays cache-free and comparable. Needs GPU validation."
                         },
-                        "h100-h200-1gpu-speed": {
-                            "description": "Hopper single-GPU TensorRT-LLM VisualGen FLUX.1 profile probe.",
-                            "hardware": [
-                                "h100",
-                                "h200"
-                            ],
-                            "num_gpus": 1,
-                            "framework_ref": "tensorrt-llm-visualgen+trtllm-kernels",
-                            "serve_args": "--backend pytorch",
-                            "notes": "TRTLLM attention-backend kernels on Hopper. trtllm-serve auto-detects the FLUX.1 diffusion model; add --extra_visual_gen_options <model>.yml for steady-state tuning. PyTorch backend, no TeaCache and no torch compile so the row stays cache-free and comparable. Needs GPU validation."
-                        },
                         "h100-h200-2gpu-tp-speed": {
                             "description": "Hopper 2-GPU TP TensorRT-LLM VisualGen FLUX.1 profile probe.",
                             "hardware": [
@@ -348,6 +219,12 @@
                         }
                     }
                 }
+            },
+            "report_framework_statuses": {
+                "lightx2v": "unsupported"
+            },
+            "report_framework_reasons": {
+                "lightx2v": "Tracked LightX2V version has no FLUX.1 serving path; FLUX coverage starts at FLUX.2."
             }
         },
         {
@@ -358,36 +235,19 @@
             "width": 1024,
             "height": 1024,
             "seed": 42,
-            "num_gpus": 1,
+            "num_gpus": 2,
             "num_inference_steps": 50,
             "guidance_scale": 4.0,
             "frameworks": {
                 "sglang": {
-                    "serve_args": "--model-type diffusion --warmup --dit-layerwise-offload false",
+                    "serve_args": "--model-type diffusion --warmup --dit-layerwise-offload false --tp-size 2",
                     "extra_env": {},
                     "command_profiles": {
                         "default": {
                             "description": "Best known SGLang command for the benchmark repo default profile.",
                             "sglang_ref": "current-main",
-                            "serve_args": "--model-type diffusion --warmup --dit-layerwise-offload false",
+                            "serve_args": "--model-type diffusion --warmup --dit-layerwise-offload false --tp-size 2",
                             "notes": "Keep this profile updated when the best command changes for a SGLang release or commit."
-                        },
-                        "h100-h200-1gpu-compile": {
-                            "description": "Hopper single-GPU legacy-compatible FLUX.2 compile profile.",
-                            "hardware": [
-                                "h100",
-                                "h200"
-                            ],
-                            "num_gpus": 1,
-                            "sglang_ref": "legacy-compatible",
-                            "serve_args": "--model-type diffusion --warmup --dit-layerwise-offload false --enable-torch-compile",
-                            "benchmark": {
-                                "warmup": {
-                                    "num_requests": 2,
-                                    "num_inference_steps": 50
-                                }
-                            },
-                            "notes": "Use for SGLang commits before --performance-mode speed existed; keep compile enabled for fastest available legacy path."
                         },
                         "h100-h200-2gpu-tp-compile": {
                             "description": "Hopper 2-GPU TP legacy-compatible FLUX.2 compile profile.",
@@ -405,25 +265,6 @@
                                 }
                             },
                             "notes": "Use for SGLang commits before --performance-mode speed existed; TP remains explicit."
-                        },
-                        "blackwell-1gpu-compile": {
-                            "description": "Blackwell single-GPU legacy-compatible FLUX.2 compile profile.",
-                            "hardware": [
-                                "b200",
-                                "gb200",
-                                "b300",
-                                "gb300"
-                            ],
-                            "num_gpus": 1,
-                            "sglang_ref": "legacy-compatible",
-                            "serve_args": "--model-type diffusion --warmup --dit-layerwise-offload false --enable-torch-compile",
-                            "benchmark": {
-                                "warmup": {
-                                    "num_requests": 2,
-                                    "num_inference_steps": 50
-                                }
-                            },
-                            "notes": "Use for SGLang commits before --performance-mode speed existed; keep compile enabled for fastest available legacy path."
                         },
                         "blackwell-2gpu-tp-compile": {
                             "description": "Blackwell 2-GPU TP legacy-compatible FLUX.2 compile profile.",
@@ -444,26 +285,6 @@
                             },
                             "notes": "Use for SGLang commits before --performance-mode speed existed; TP remains explicit."
                         },
-                        "h100-h200-1gpu-speed-compile": {
-                            "description": "Hopper single-GPU fastest FLUX.2 profile probe.",
-                            "hardware": [
-                                "h100",
-                                "h200"
-                            ],
-                            "num_gpus": 1,
-                            "sglang_ref": "current-main",
-                            "serve_args": "--model-type diffusion --warmup --dit-layerwise-offload false --performance-mode speed --enable-torch-compile",
-                            "benchmark": {
-                                "warmup": {
-                                    "num_requests": 2,
-                                    "num_inference_steps": 50
-                                }
-                            },
-                            "extra_env": {
-                                "FLASHINFER_USE_CUDA_NORM": "1"
-                            },
-                            "notes": "Steady-state fastest profile candidate; use CUDA norm to avoid FlashInfer CUTE norm JIT on Hopper."
-                        },
                         "h100-h200-2gpu-tp-speed-compile": {
                             "description": "Hopper 2-GPU TP fastest FLUX.2 profile probe.",
                             "hardware": [
@@ -483,25 +304,6 @@
                                 "FLASHINFER_USE_CUDA_NORM": "1"
                             },
                             "notes": "Steady-state fastest profile candidate; TP is explicit and CUDA norm avoids FlashInfer CUTE norm JIT on Hopper."
-                        },
-                        "blackwell-1gpu-speed-compile": {
-                            "description": "Blackwell single-GPU fastest FLUX.2 profile probe.",
-                            "hardware": [
-                                "b200",
-                                "gb200",
-                                "b300",
-                                "gb300"
-                            ],
-                            "num_gpus": 1,
-                            "sglang_ref": "current-main",
-                            "serve_args": "--model-type diffusion --warmup --dit-layerwise-offload false --performance-mode speed --enable-torch-compile",
-                            "benchmark": {
-                                "warmup": {
-                                    "num_requests": 2,
-                                    "num_inference_steps": 50
-                                }
-                            },
-                            "notes": "Steady-state fastest profile candidate for Blackwell; use with DIFFUSION_BENCH_DISABLE_TORCH_COMPILE=0."
                         },
                         "blackwell-2gpu-tp-speed-compile": {
                             "description": "Blackwell 2-GPU TP fastest FLUX.2 profile probe.",
@@ -525,7 +327,7 @@
                     }
                 },
                 "vllm-omni": {
-                    "num_gpus": 1,
+                    "num_gpus": 2,
                     "serve_args": "",
                     "extra_env": {
                         "DIFFUSION_ATTENTION_BACKEND": "FLASH_ATTN"
@@ -536,26 +338,6 @@
                             "framework_ref": "vllm-omni-0.18.0-cli-env",
                             "serve_args": "",
                             "notes": "Uses env-selected FlashAttention; torch compile is disabled by the benchmark harness.",
-                            "extra_env": {
-                                "DIFFUSION_ATTENTION_BACKEND": "FLASH_ATTN"
-                            }
-                        },
-                        "h100-h200-1gpu-compile": {
-                            "description": "Hopper single-GPU fastest vLLM-Omni FLUX.2 profile probe.",
-                            "hardware": [
-                                "h100",
-                                "h200"
-                            ],
-                            "num_gpus": 1,
-                            "framework_ref": "vllm-omni-latest+compile-allowed",
-                            "serve_args": "",
-                            "benchmark": {
-                                "warmup": {
-                                    "num_requests": 2,
-                                    "num_inference_steps": 50
-                                }
-                            },
-                            "notes": "Use with DIFFUSION_BENCH_DISABLE_TORCH_COMPILE=0 so the harness does not append eager/compile-off args.",
                             "extra_env": {
                                 "DIFFUSION_ATTENTION_BACKEND": "FLASH_ATTN"
                             }
@@ -578,28 +360,6 @@
                             "notes": "The harness adds --tensor-parallel-size 2 when num_gpus=2; use with compile allowed.",
                             "extra_env": {
                                 "DIFFUSION_ATTENTION_BACKEND": "FLASH_ATTN"
-                            }
-                        },
-                        "blackwell-1gpu-compile": {
-                            "description": "Blackwell single-GPU fastest vLLM-Omni FLUX.2 profile probe.",
-                            "hardware": [
-                                "b200",
-                                "gb200",
-                                "b300",
-                                "gb300"
-                            ],
-                            "num_gpus": 1,
-                            "framework_ref": "vllm-omni-latest+blackwell+compile-allowed",
-                            "serve_args": "",
-                            "benchmark": {
-                                "warmup": {
-                                    "num_requests": 2,
-                                    "num_inference_steps": 50
-                                }
-                            },
-                            "notes": "Use with DIFFUSION_BENCH_DISABLE_TORCH_COMPILE=0 so the harness does not append eager/compile-off args.",
-                            "extra_env": {
-                                "DIFFUSION_ATTENTION_BACKEND": "FLASHINFER_ATTN"
                             }
                         },
                         "blackwell-2gpu-tp-compile": {
@@ -630,7 +390,7 @@
                     "model": "black-forest-labs/FLUX.2-dev",
                     "model_cls": "flux2_dev",
                     "lightx2v_task": "t2i",
-                    "num_gpus": 1,
+                    "num_gpus": 2,
                     "serve_args": "",
                     "extra_env": {},
                     "lightx2v_config": {
@@ -684,7 +444,7 @@
                     }
                 },
                 "trtllm-visual": {
-                    "num_gpus": 1,
+                    "num_gpus": 2,
                     "serve_args": "--backend pytorch",
                     "extra_env": {},
                     "http_server": {
@@ -712,17 +472,6 @@
                             "serve_args": "--backend pytorch",
                             "notes": "Keep this profile updated as the best command changes. trtllm-serve auto-detects the FLUX.2 diffusion model; add --extra_visual_gen_options <model>.yml for steady-state tuning. PyTorch backend, no TeaCache and no torch compile so the row stays cache-free and comparable. Needs GPU validation."
                         },
-                        "h100-h200-1gpu-speed": {
-                            "description": "Hopper single-GPU TensorRT-LLM VisualGen FLUX.2 profile probe.",
-                            "hardware": [
-                                "h100",
-                                "h200"
-                            ],
-                            "num_gpus": 1,
-                            "framework_ref": "tensorrt-llm-visualgen+trtllm-kernels",
-                            "serve_args": "--backend pytorch",
-                            "notes": "TRTLLM attention-backend kernels on Hopper. trtllm-serve auto-detects the FLUX.2 diffusion model; add --extra_visual_gen_options <model>.yml for steady-state tuning. PyTorch backend, no TeaCache and no torch compile so the row stays cache-free and comparable. Needs GPU validation."
-                        },
                         "h100-h200-2gpu-tp-speed": {
                             "description": "Hopper 2-GPU TP TensorRT-LLM VisualGen FLUX.2 profile probe.",
                             "hardware": [
@@ -746,30 +495,34 @@
             "width": 1024,
             "height": 1024,
             "seed": 42,
-            "num_gpus": 1,
+            "num_gpus": 2,
             "num_inference_steps": 50,
             "guidance_scale": 1.0,
-            "report_framework_statuses": {
-                "lightx2v": "unsupported"
-            },
-            "report_framework_reasons": {
-                "lightx2v": "Tracked LightX2V version has no Qwen-Image text-to-image serving path."
-            },
             "frameworks": {
                 "sglang": {
-                    "serve_args": "--model-type diffusion --warmup",
+                    "serve_args": "--model-type diffusion --warmup --tp-size 2",
                     "extra_env": {},
                     "command_profiles": {
                         "default": {
                             "description": "Best known SGLang command for the benchmark repo default profile.",
                             "sglang_ref": "current-main",
-                            "serve_args": "--model-type diffusion --warmup",
+                            "serve_args": "--model-type diffusion --warmup --tp-size 2",
                             "notes": "Keep this profile updated when the best command changes for a SGLang release or commit."
+                        },
+                        "h100-h200-2gpu-tp-speed-compile": {
+                            "description": "Hopper 2-GPU TP SGLang qwen_image_2512_t2i_1024: resident DiT + torch.compile (best-lossless). Same validated command as flux1/flux2 speed-compile.",
+                            "hardware": [
+                                "h100",
+                                "h200"
+                            ],
+                            "sglang_ref": "origin/main + PR #29774 (QwenImage TP shard) + selective txt_mlp ReplicatedLinear (proposed #29774 follow-up)",
+                            "serve_args": "--model-type diffusion --warmup --dit-layerwise-offload false --tp-size 2 --performance-mode speed --enable-torch-compile",
+                            "notes": "no-CFG single-branch: TP shard (#29774) but keep text-branch txt_mlp ReplicatedLinear to skip its per-block all-reduce. Measured H100: full-shard 5.65s -> txt_mlp-replicated 5.076s, beats vLLM 5.17s. (true-CFG uses CFG-parallel instead — see the truecfg case.) offload-during-compile is in main. Selective-shard qwen_image.py kept at reports/h100x4-final-20260702/qwen_image_selective_shard.py."
                         }
                     }
                 },
                 "vllm-omni": {
-                    "num_gpus": 1,
+                    "num_gpus": 2,
                     "serve_args": "",
                     "extra_env": {
                         "DIFFUSION_ATTENTION_BACKEND": "FLASH_ATTN"
@@ -783,11 +536,26 @@
                             "extra_env": {
                                 "DIFFUSION_ATTENTION_BACKEND": "FLASH_ATTN"
                             }
+                        },
+                        "blackwell-flashinfer": {
+                            "description": "Blackwell vLLM-Omni profile using FlashInfer attention (validated on B200; the FLASH_ATTN backend hits Hopper-only precompiled kernels and fails with 'no kernel image' on sm_100).",
+                            "hardware": [
+                                "b200",
+                                "gb200",
+                                "b300",
+                                "gb300"
+                            ],
+                            "framework_ref": "vllm-omni-latest+blackwell-flashinfer",
+                            "serve_args": "",
+                            "notes": "Same case/model/steps as default; only the attention backend changes for Blackwell compatibility.",
+                            "extra_env": {
+                                "DIFFUSION_ATTENTION_BACKEND": "FLASHINFER_ATTN"
+                            }
                         }
                     }
                 },
                 "trtllm-visual": {
-                    "num_gpus": 1,
+                    "num_gpus": 2,
                     "serve_args": "--backend pytorch",
                     "extra_env": {},
                     "http_server": {
@@ -815,17 +583,6 @@
                             "serve_args": "--backend pytorch",
                             "notes": "Keep this profile updated as the best command changes. trtllm-serve auto-detects the Qwen-Image diffusion model; add --extra_visual_gen_options <model>.yml for steady-state tuning. PyTorch backend, no TeaCache and no torch compile so the row stays cache-free and comparable. Needs GPU validation."
                         },
-                        "h100-h200-1gpu-speed": {
-                            "description": "Hopper single-GPU TensorRT-LLM VisualGen Qwen-Image profile probe.",
-                            "hardware": [
-                                "h100",
-                                "h200"
-                            ],
-                            "num_gpus": 1,
-                            "framework_ref": "tensorrt-llm-visualgen+trtllm-kernels",
-                            "serve_args": "--backend pytorch",
-                            "notes": "TRTLLM attention-backend kernels on Hopper. trtllm-serve auto-detects the Qwen-Image diffusion model; add --extra_visual_gen_options <model>.yml for steady-state tuning. PyTorch backend, no TeaCache and no torch compile so the row stays cache-free and comparable. Needs GPU validation."
-                        },
                         "h100-h200-2gpu-tp-speed": {
                             "description": "Hopper 2-GPU TP TensorRT-LLM VisualGen Qwen-Image profile probe.",
                             "hardware": [
@@ -839,6 +596,92 @@
                         }
                     }
                 }
+            },
+            "report_framework_statuses": {
+                "lightx2v": "unsupported"
+            },
+            "report_framework_reasons": {
+                "lightx2v": "Tracked LightX2V version has no Qwen-Image text-to-image serving path."
+            }
+        },
+        {
+            "id": "qwen_image_2512_t2i_1024_truecfg",
+            "model": "Qwen/Qwen-Image-2512",
+            "task": "text-to-image",
+            "prompt": "A futuristic cyberpunk city at night, neon lights reflecting on wet streets",
+            "width": 1024,
+            "height": 1024,
+            "seed": 42,
+            "num_gpus": 2,
+            "num_inference_steps": 50,
+            "guidance_scale": 1.0,
+            "true_cfg_scale": 4.0,
+            "negative_prompt": "低分辨率，低画质，肢体畸形，手指畸形，画面过饱和，蜡像感，人脸无细节，过度光滑，画面具有AI感。构图混乱。文字模糊，扭曲。",
+            "_note": "Qwen-Image quality path = official diffusers true-CFG (true_cfg_scale=4.0 + negative_prompt), two transformer forwards per step. Sibling of the no-CFG qwen_image_2512_t2i_1024 (single forward). Both sglang and vLLM-Omni receive identical true_cfg_scale+negative_prompt via the shared payload, so the two-pass comparison is apples-to-apples. Provenance: sglang notes qwen_image_perf_issue_20260508.md.",
+            "frameworks": {
+                "sglang": {
+                    "serve_args": "--model-type diffusion --warmup --tp-size 2",
+                    "extra_env": {},
+                    "command_profiles": {
+                        "default": {
+                            "description": "Best known SGLang command for the benchmark repo default profile.",
+                            "sglang_ref": "current-main",
+                            "serve_args": "--model-type diffusion --warmup --tp-size 2",
+                            "notes": "Keep this profile updated when the best command changes for a SGLang release or commit."
+                        },
+                        "h100-h200-2gpu-tp-speed-compile": {
+                            "description": "H100 2-GPU SGLang Qwen-Image true-CFG: CFG parallelism (each GPU runs one CFG branch, no per-layer all-reduce) + resident + compile. Fastest for the 2-branch quality path.",
+                            "hardware": [
+                                "h100",
+                                "h200"
+                            ],
+                            "sglang_ref": "origin/main + PR #29774 (Shard QwenImage DiT across TP ranks; open, not yet merged)",
+                            "serve_args": "--model-type diffusion --warmup --enable-cfg-parallel --performance-mode speed --enable-torch-compile",
+                            "notes": "CFG parallelism is the cookbook-recommended Qwen multi-GPU path. Measured: 6.49s vs TP #29774 11.07s vs vLLM 10.14s (CFG-parallel 1.56x faster than vLLM). TP shards the DiT but RowParallel all-reduce dominates (~70% kernel time) for the 2-branch case; CFG-parallel avoids it. No #29774 needed here (DiT replicated, one branch per GPU)."
+                        }
+                    }
+                },
+                "vllm-omni": {
+                    "num_gpus": 2,
+                    "serve_args": "",
+                    "extra_env": {
+                        "DIFFUSION_ATTENTION_BACKEND": "FLASH_ATTN"
+                    },
+                    "command_profiles": {
+                        "default": {
+                            "description": "Best known vLLM-Omni command for aligned non-cache benchmark runs.",
+                            "framework_ref": "vllm-omni-0.18.0-cli-env",
+                            "serve_args": "",
+                            "notes": "Uses env-selected FlashAttention; torch compile is disabled by the benchmark harness. Same negative_prompt+true_cfg_scale as sglang enables vLLM-Omni's true CFG (do_true_cfg=True).",
+                            "extra_env": {
+                                "DIFFUSION_ATTENTION_BACKEND": "FLASH_ATTN"
+                            }
+                        },
+                        "blackwell-flashinfer": {
+                            "description": "Blackwell vLLM-Omni profile using FlashInfer attention (validated on B200; the FLASH_ATTN backend hits Hopper-only precompiled kernels and fails with 'no kernel image' on sm_100).",
+                            "hardware": [
+                                "b200",
+                                "gb200",
+                                "b300",
+                                "gb300"
+                            ],
+                            "framework_ref": "vllm-omni-latest+blackwell-flashinfer",
+                            "serve_args": "",
+                            "notes": "Same case/model/steps as default; only the attention backend changes for Blackwell compatibility.",
+                            "extra_env": {
+                                "DIFFUSION_ATTENTION_BACKEND": "FLASHINFER_ATTN"
+                            }
+                        }
+                    }
+                }
+            },
+            "report_framework_statuses": {
+                "lightx2v": "unsupported",
+                "trtllm-visual": "unsupported"
+            },
+            "report_framework_reasons": {
+                "lightx2v": "Tracked LightX2V version has no Qwen-Image text-to-image serving path.",
+                "trtllm-visual": "true_cfg_scale honoring unverified for TensorRT-LLM VisualGen; excluded from the true-CFG quality-path comparison to avoid a mismatched single- vs two-pass row."
             }
         },
         {
@@ -850,30 +693,24 @@
             "width": 1024,
             "height": 1024,
             "seed": 42,
-            "num_gpus": 1,
+            "num_gpus": 2,
             "num_inference_steps": 40,
             "guidance_scale": 1.0,
-            "report_framework_statuses": {
-                "lightx2v": "unsupported"
-            },
-            "report_framework_reasons": {
-                "lightx2v": "Tracked LightX2V version has no Qwen-Image-Edit serving path."
-            },
             "frameworks": {
                 "sglang": {
-                    "serve_args": "--model-type diffusion --warmup",
+                    "serve_args": "--model-type diffusion --warmup --tp-size 2",
                     "extra_env": {},
                     "command_profiles": {
                         "default": {
                             "description": "Best known SGLang command for the benchmark repo default profile.",
                             "sglang_ref": "current-main",
-                            "serve_args": "--model-type diffusion --warmup",
+                            "serve_args": "--model-type diffusion --warmup --tp-size 2",
                             "notes": "Keep this profile updated when the best command changes for a SGLang release or commit."
                         }
                     }
                 },
                 "vllm-omni": {
-                    "num_gpus": 1,
+                    "num_gpus": 2,
                     "serve_args": "",
                     "extra_env": {
                         "DIFFUSION_ATTENTION_BACKEND": "FLASH_ATTN"
@@ -890,6 +727,14 @@
                         }
                     }
                 }
+            },
+            "report_framework_statuses": {
+                "lightx2v": "unsupported",
+                "trtllm-visual": "not_run"
+            },
+            "report_framework_reasons": {
+                "lightx2v": "Tracked LightX2V version has no Qwen-Image-Edit serving path.",
+                "trtllm-visual": "Not yet classified. Confirm framework support and add a validated command profile, or mark unsupported."
             }
         },
         {
@@ -900,24 +745,24 @@
             "width": 1024,
             "height": 1024,
             "seed": 42,
-            "num_gpus": 1,
+            "num_gpus": 2,
             "num_inference_steps": 9,
             "guidance_scale": 0.0,
             "frameworks": {
                 "sglang": {
-                    "serve_args": "--model-type diffusion --warmup",
+                    "serve_args": "--model-type diffusion --warmup --tp-size 2",
                     "extra_env": {},
                     "command_profiles": {
                         "default": {
                             "description": "Best known SGLang command for the benchmark repo default profile.",
                             "sglang_ref": "current-main",
-                            "serve_args": "--model-type diffusion --warmup",
-                            "notes": "Keep this profile updated when the best command changes for a SGLang release or commit."
+                            "serve_args": "--model-type diffusion --warmup --tp-size 2",
+                            "notes": "Keep this profile updated when the best command changes for a SGLang release or commit. Best-lossless = eager: validated compile (0.975s) is slower than eager (0.79s) for this 9-step turbo model, so no compile profile."
                         }
                     }
                 },
                 "vllm-omni": {
-                    "num_gpus": 1,
+                    "num_gpus": 2,
                     "serve_args": "",
                     "extra_env": {
                         "DIFFUSION_ATTENTION_BACKEND": "FLASH_ATTN"
@@ -931,6 +776,21 @@
                             "extra_env": {
                                 "DIFFUSION_ATTENTION_BACKEND": "FLASH_ATTN"
                             }
+                        },
+                        "blackwell-flashinfer": {
+                            "description": "Blackwell vLLM-Omni profile using FlashInfer attention (validated on B200; the FLASH_ATTN backend hits Hopper-only precompiled kernels and fails with 'no kernel image' on sm_100).",
+                            "hardware": [
+                                "b200",
+                                "gb200",
+                                "b300",
+                                "gb300"
+                            ],
+                            "framework_ref": "vllm-omni-latest+blackwell-flashinfer",
+                            "serve_args": "",
+                            "notes": "Same case/model/steps as default; only the attention backend changes for Blackwell compatibility.",
+                            "extra_env": {
+                                "DIFFUSION_ATTENTION_BACKEND": "FLASHINFER_ATTN"
+                            }
                         }
                     }
                 },
@@ -938,7 +798,7 @@
                     "model": "Tongyi-MAI/Z-Image-Turbo",
                     "model_cls": "z_image",
                     "lightx2v_task": "t2i",
-                    "num_gpus": 1,
+                    "num_gpus": 2,
                     "serve_args": "",
                     "extra_env": {},
                     "lightx2v_config": {
@@ -956,6 +816,21 @@
                             "serve_args": "",
                             "notes": "Uses explicit fast attention/offload settings; no cache, torch compile, or quantized model path."
                         },
+                        "blackwell-fa2": {
+                            "description": "Blackwell LightX2V profile using FlashAttention 2 (validated on B200 via the flux2 blackwell-fa2-flashinfer profile). Same precision class (full-precision, exact attention) as SGLang's FA4 and vLLM-Omni's FlashInfer backend on Blackwell -- flash_attn3/flash_attn4 hit Hopper-only precompiled kernels or a CUDA-toolkit>=13.1 CuTe-DSL requirement not met by this build, so FA2 is the fastest same-class (full-precision) option available here.",
+                            "hardware": [
+                                "b200",
+                                "gb200",
+                                "b300",
+                                "gb300"
+                            ],
+                            "framework_ref": "lightx2v-0.1.0-z_image+blackwell-fa2",
+                            "serve_args": "",
+                            "notes": "Uses the source-built FlashAttention 2 wheel (TORCH_CUDA_ARCH_LIST=10.0) already installed for Blackwell; no cache, torch compile, or quantized model path. Deliberately NOT using SageAttention here -- it is int8 QK-quantized, a different numeric class from the full-precision attention used elsewhere in this comparison.",
+                            "lightx2v_config": {
+                                "attn_type": "flash_attn2"
+                            }
+                        },
                         "h200-fa3-flashinfer": {
                             "description": "H200 fastest available LightX2V command/config for aligned non-cache benchmark runs.",
                             "hardware": [
@@ -970,6 +845,12 @@
                         }
                     }
                 }
+            },
+            "report_framework_statuses": {
+                "trtllm-visual": "not_run"
+            },
+            "report_framework_reasons": {
+                "trtllm-visual": "Not yet classified. Confirm framework support and add a validated command profile, or mark unsupported."
             }
         },
         {
@@ -983,16 +864,6 @@
             "num_gpus": 2,
             "num_inference_steps": 20,
             "_note": "Ideogram-4 derives steps and guidance from its sampling preset (V4_DEFAULT_20: 20 steps, final guidance 7); guidance_scale is intentionally omitted because the model rejects an explicit value.",
-            "report_framework_statuses": {
-                "vllm-omni": "unsupported",
-                "lightx2v": "unsupported",
-                "trtllm-visual": "unsupported"
-            },
-            "report_framework_reasons": {
-                "vllm-omni": "Latest vLLM-Omni has no Ideogram-4 serving path (image-gen coverage is FLUX/Qwen-Image/Wan).",
-                "lightx2v": "Latest LightX2V has no Ideogram-4 serving path.",
-                "trtllm-visual": "Latest TensorRT-LLM VisualGen has no Ideogram-4 serving path (coverage is FLUX/Wan/LTX-2/Qwen-Image/Cosmos3)."
-            },
             "frameworks": {
                 "sglang": {
                     "serve_args": "--model-type diffusion --warmup --dit-layerwise-offload false --tp-size 2",
@@ -1020,6 +891,16 @@
                         }
                     }
                 }
+            },
+            "report_framework_statuses": {
+                "vllm-omni": "unsupported",
+                "lightx2v": "unsupported",
+                "trtllm-visual": "unsupported"
+            },
+            "report_framework_reasons": {
+                "vllm-omni": "Latest vLLM-Omni has no Ideogram-4 serving path (image-gen coverage is FLUX/Qwen-Image/Wan).",
+                "lightx2v": "Latest LightX2V has no Ideogram-4 serving path.",
+                "trtllm-visual": "Latest TensorRT-LLM VisualGen has no Ideogram-4 serving path (coverage is FLUX/Wan/LTX-2/Qwen-Image/Cosmos3)."
             }
         },
         {
@@ -1045,6 +926,16 @@
                             "sglang_ref": "current-main",
                             "serve_args": "--model-type diffusion --warmup --enable-cfg-parallel",
                             "notes": "Keep this profile updated when the best command changes for a SGLang release or commit."
+                        },
+                        "h200-2gpu-cfg-bf16-vae-resident": {
+                            "description": "H200 full-resident 2-GPU CFG profile for LightX2V-aligned Wan best-performance rows.",
+                            "hardware": [
+                                "h200"
+                            ],
+                            "sglang_ref": "current-main",
+                            "num_gpus": 2,
+                            "serve_args": "--model-type diffusion --warmup --enable-cfg-parallel --dit-cpu-offload false --vae-precision bf16 --text-encoder-cpu-offload false --image-encoder-cpu-offload false --vae-cpu-offload false",
+                            "notes": "Keeps DiT, text/image encoders, and VAE resident on high-memory H200; BF16 VAE aligns with LightX2V best-performance Wan serving path. No cache or torch compile path."
                         }
                     }
                 },
@@ -1063,6 +954,22 @@
                             "notes": "Uses vLLM-Omni's Wan /v1/videos path with same GPU budget; torch compile is disabled by the benchmark harness.",
                             "extra_env": {
                                 "DIFFUSION_ATTENTION_BACKEND": "FLASH_ATTN"
+                            }
+                        },
+                        "blackwell-flashinfer": {
+                            "description": "Blackwell vLLM-Omni profile using FlashInfer attention (validated on B200; the FLASH_ATTN backend hits Hopper-only precompiled kernels and fails with 'no kernel image' on sm_100).",
+                            "hardware": [
+                                "b200",
+                                "gb200",
+                                "b300",
+                                "gb300"
+                            ],
+                            "framework_ref": "vllm-omni-latest+blackwell-flashinfer",
+                            "num_gpus": 2,
+                            "serve_args": "--tensor-parallel-size 2",
+                            "notes": "Same case/model/steps as default; only the attention backend changes for Blackwell compatibility.",
+                            "extra_env": {
+                                "DIFFUSION_ATTENTION_BACKEND": "FLASHINFER_ATTN"
                             }
                         },
                         "h200-2gpu-tp": {
@@ -1133,6 +1040,23 @@
                             "serve_args": "",
                             "notes": "Uses explicit fast attention/offload settings; no cache, torch compile, or quantized model path."
                         },
+                        "blackwell-fa2": {
+                            "description": "Blackwell LightX2V profile using FlashAttention 2 (validated on B200 via the flux2 blackwell-fa2-flashinfer profile). Same precision class (full-precision, exact attention) as SGLang's FA4 and vLLM-Omni's FlashInfer backend on Blackwell -- flash_attn3/flash_attn4 hit Hopper-only precompiled kernels or a CUDA-toolkit>=13.1 CuTe-DSL requirement not met by this build, so FA2 is the fastest same-class (full-precision) option available here.",
+                            "hardware": [
+                                "b200",
+                                "gb200",
+                                "b300",
+                                "gb300"
+                            ],
+                            "framework_ref": "lightx2v-0.1.0-configs/wan/wan_t2v.json+cfg_parallel+blackwell-fa2",
+                            "serve_args": "",
+                            "notes": "Uses the source-built FlashAttention 2 wheel (TORCH_CUDA_ARCH_LIST=10.0) already installed for Blackwell; no cache, torch compile, or quantized model path. Deliberately NOT using SageAttention here -- it is int8 QK-quantized, a different numeric class from the full-precision attention used elsewhere in this comparison.",
+                            "lightx2v_config": {
+                                "self_attn_1_type": "flash_attn2",
+                                "cross_attn_1_type": "flash_attn2",
+                                "cross_attn_2_type": "flash_attn2"
+                            }
+                        },
                         "h200-fa3": {
                             "description": "H200 fastest available LightX2V command/config for aligned non-cache benchmark runs.",
                             "hardware": [
@@ -1149,6 +1073,12 @@
                         }
                     }
                 }
+            },
+            "report_framework_statuses": {
+                "trtllm-visual": "not_run"
+            },
+            "report_framework_reasons": {
+                "trtllm-visual": "Not yet classified. Confirm framework support and add a validated command profile, or mark unsupported."
             }
         },
         {
@@ -1281,6 +1211,12 @@
                         }
                     }
                 }
+            },
+            "report_framework_statuses": {
+                "trtllm-visual": "not_run"
+            },
+            "report_framework_reasons": {
+                "trtllm-visual": "Not yet classified. Confirm framework support and add a validated command profile, or mark unsupported."
             }
         },
         {
@@ -1417,6 +1353,12 @@
                         }
                     }
                 }
+            },
+            "report_framework_statuses": {
+                "trtllm-visual": "not_run"
+            },
+            "report_framework_reasons": {
+                "trtllm-visual": "Not yet classified. Confirm framework support and add a validated command profile, or mark unsupported."
             }
         },
         {
@@ -1443,6 +1385,16 @@
                             "sglang_ref": "current-main",
                             "serve_args": "--model-type diffusion --warmup --enable-cfg-parallel",
                             "notes": "Keep this profile updated when the best command changes for a SGLang release or commit."
+                        },
+                        "h200-2gpu-cfg-bf16-vae-resident": {
+                            "description": "H200 full-resident 2-GPU CFG profile for LightX2V-aligned Wan best-performance rows.",
+                            "hardware": [
+                                "h200"
+                            ],
+                            "sglang_ref": "current-main",
+                            "num_gpus": 2,
+                            "serve_args": "--model-type diffusion --warmup --enable-cfg-parallel --dit-cpu-offload false --vae-precision bf16 --text-encoder-cpu-offload false --image-encoder-cpu-offload false --vae-cpu-offload false",
+                            "notes": "Keeps DiT, text/image encoders, and VAE resident on high-memory H200; BF16 VAE aligns with LightX2V best-performance Wan serving path. No cache or torch compile path."
                         },
                         "h100-h200-2gpu": {
                             "description": "H100/H200 command for the Wan2.2 TI2V 5B 704p case.",
@@ -1472,6 +1424,22 @@
                             "notes": "Uses vLLM-Omni's Wan /v1/videos path with same GPU budget; torch compile is disabled by the benchmark harness.",
                             "extra_env": {
                                 "DIFFUSION_ATTENTION_BACKEND": "FLASH_ATTN"
+                            }
+                        },
+                        "blackwell-flashinfer": {
+                            "description": "Blackwell vLLM-Omni profile using FlashInfer attention (validated on B200; the FLASH_ATTN backend hits Hopper-only precompiled kernels and fails with 'no kernel image' on sm_100).",
+                            "hardware": [
+                                "b200",
+                                "gb200",
+                                "b300",
+                                "gb300"
+                            ],
+                            "framework_ref": "vllm-omni-latest+blackwell-flashinfer",
+                            "num_gpus": 2,
+                            "serve_args": "--tensor-parallel-size 2",
+                            "notes": "Same case/model/steps as default; only the attention backend changes for Blackwell compatibility.",
+                            "extra_env": {
+                                "DIFFUSION_ATTENTION_BACKEND": "FLASHINFER_ATTN"
                             }
                         },
                         "h200-2gpu-tp": {
@@ -1596,6 +1564,23 @@
                             "serve_args": "",
                             "notes": "Uses explicit fast attention/offload settings; no cache, torch compile, or quantized model path."
                         },
+                        "blackwell-fa2": {
+                            "description": "Blackwell LightX2V profile using FlashAttention 2 (validated on B200 via the flux2 blackwell-fa2-flashinfer profile). Same precision class (full-precision, exact attention) as SGLang's FA4 and vLLM-Omni's FlashInfer backend on Blackwell -- flash_attn3/flash_attn4 hit Hopper-only precompiled kernels or a CUDA-toolkit>=13.1 CuTe-DSL requirement not met by this build, so FA2 is the fastest same-class (full-precision) option available here.",
+                            "hardware": [
+                                "b200",
+                                "gb200",
+                                "b300",
+                                "gb300"
+                            ],
+                            "framework_ref": "lightx2v-0.1.0-configs/wan22/wan_ti2v_i2v.json+cfg_parallel+blackwell-fa2",
+                            "serve_args": "",
+                            "notes": "Uses the source-built FlashAttention 2 wheel (TORCH_CUDA_ARCH_LIST=10.0) already installed for Blackwell; no cache, torch compile, or quantized model path. Deliberately NOT using SageAttention here -- it is int8 QK-quantized, a different numeric class from the full-precision attention used elsewhere in this comparison.",
+                            "lightx2v_config": {
+                                "self_attn_1_type": "flash_attn2",
+                                "cross_attn_1_type": "flash_attn2",
+                                "cross_attn_2_type": "flash_attn2"
+                            }
+                        },
                         "h200-fa3": {
                             "description": "H200 fastest available LightX2V command/config for aligned non-cache benchmark runs.",
                             "hardware": [
@@ -1612,6 +1597,12 @@
                         }
                     }
                 }
+            },
+            "report_framework_statuses": {
+                "trtllm-visual": "not_run"
+            },
+            "report_framework_reasons": {
+                "trtllm-visual": "Not yet classified. Confirm framework support and add a validated command profile, or mark unsupported."
             }
         },
         {
@@ -1627,9 +1618,6 @@
             "fps": 24,
             "num_inference_steps": 40,
             "guidance_scale": 4.0,
-            "report_framework_reasons": {
-                "vllm-omni": "Server log shows TypeError: LTX2TextConnectors.forward() got an unexpected keyword argument 'additive_mask'."
-            },
             "frameworks": {
                 "sglang": {
                     "serve_args": "--model-type diffusion --warmup --enable-cfg-parallel --pipeline-class-name LTX2TwoStagePipeline",
@@ -1686,7 +1674,7 @@
                     },
                     "lightx2v_config": {
                         "sample_guide_scale": 4.0,
-                        "attn_type": "sage_attn2",
+                        "attn_type": "flash_attn3",
                         "sample_shift": [
                             2.05,
                             0.95
@@ -1746,6 +1734,12 @@
                         }
                     }
                 }
+            },
+            "report_framework_statuses": {
+                "trtllm-visual": "not_run"
+            },
+            "report_framework_reasons": {
+                "trtllm-visual": "Not yet classified. Confirm framework support and add a validated command profile, or mark unsupported."
             }
         },
         {
@@ -1761,12 +1755,6 @@
             "fps": 24,
             "num_inference_steps": 30,
             "guidance_scale": 3.0,
-            "report_framework_statuses": {
-                "vllm-omni": "no_profile"
-            },
-            "report_framework_reasons": {
-                "vllm-omni": "No compatible vLLM-Omni LTX2.3 serving profile is configured."
-            },
             "frameworks": {
                 "sglang": {
                     "serve_args": "--model-type diffusion --warmup --enable-cfg-parallel --pipeline-class-name LTX2TwoStagePipeline",
@@ -1806,112 +1794,17 @@
                             "notes": "Use this only when official switching semantics are more important than latency."
                         }
                     }
-                },
-                "lightx2v": {
-                    "model": "Lightricks/LTX-2.3",
-                    "model_path": "Lightricks/LTX-2",
-                    "model_cls": "ltx2",
-                    "lightx2v_task": "t2av",
-                    "num_gpus": 1,
-                    "serve_args": "",
-                    "extra_env": {
-                        "DTYPE": "BF16",
-                        "SENSITIVE_LAYER_DTYPE": "None",
-                        "PROFILING_DEBUG_LEVEL": "0"
-                    },
-                    "lightx2v_config": {
-                        "sample_guide_scale": 3.0,
-                        "attn_type": "sage_attn2",
-                        "sample_shift": [
-                            2.05,
-                            0.95
-                        ],
-                        "enable_cfg": true,
-                        "cpu_offload": false,
-                        "num_channels_latents": 128,
-                        "audio_fps": 24000,
-                        "audio_mel_bins": 16,
-                        "double_precision_rope": true,
-                        "use_tiling_vae": false,
-                        "dit_original_ckpt": "Lightricks/LTX-2.3/ltx-2.3-22b-dev.safetensors",
-                        "caption_proj_before_connector": true,
-                        "cross_attention_adaln": true,
-                        "apply_gated_attention": true,
-                        "mm_guider": {
-                            "enabled": true,
-                            "video": {
-                                "cfg_scale": 3.0,
-                                "stg_scale": 1.0,
-                                "stg_blocks": [
-                                    28
-                                ],
-                                "modality_scale": 3.0,
-                                "rescale_scale": 0.7,
-                                "skip_step": 0
-                            },
-                            "audio": {
-                                "cfg_scale": 7.0,
-                                "stg_scale": 1.0,
-                                "stg_blocks": [
-                                    28
-                                ],
-                                "modality_scale": 3.0,
-                                "rescale_scale": 0.7,
-                                "skip_step": 0
-                            }
-                        }
-                    },
-                    "command_profiles": {
-                        "default": {
-                            "description": "LightX2V upstream LTX-2.3 t2av path for the LTX-2.3 121-frame case.",
-                            "framework_ref": "lightx2v-7efd05f8-ltx2.3+t2av",
-                            "num_gpus": 1,
-                            "serve_args": "",
-                            "notes": "Uses upstream LTX-2.3 audio-video runner. CFG parallel is not enabled because upstream mm_guider and cfg_parallel are not compatible."
-                        },
-                        "h200-2gpu-tp": {
-                            "description": "H200 same-GPU LightX2V LTX-2.3 t2av tensor-parallel command/config.",
-                            "hardware": [
-                                "h200"
-                            ],
-                            "framework_ref": "lightx2v-7efd05f8-ltx2.3+t2av+h200+tensor_parallel",
-                            "num_gpus": 2,
-                            "serve_args": "",
-                            "lightx2v_config": {
-                                "parallel": {
-                                    "tensor_p_size": 2
-                                }
-                            },
-                            "notes": "Use tensor parallelism for same-GPU comparison because upstream mm_guider raises when combined with cfg_parallel."
-                        },
-                        "h200-1gpu": {
-                            "description": "H200 LightX2V LTX-2.3 t2av command/config.",
-                            "hardware": [
-                                "h200"
-                            ],
-                            "framework_ref": "lightx2v-7efd05f8-ltx2.3+t2av+h200",
-                            "num_gpus": 1,
-                            "serve_args": "",
-                            "notes": "Single-GPU profile follows current upstream LTX-2.3 scripts; no cache, torch compile, or quantized model path."
-                        },
-                        "h100-1gpu": {
-                            "description": "H100 LightX2V LTX-2.3 t2av block-offload command/config.",
-                            "hardware": [
-                                "h100"
-                            ],
-                            "framework_ref": "lightx2v-7efd05f8-ltx2.3+t2av+offload+h100",
-                            "num_gpus": 1,
-                            "serve_args": "",
-                            "lightx2v_config": {
-                                "cpu_offload": true,
-                                "offload_granularity": "block",
-                                "gemma_cpu_offload": true,
-                                "vae_cpu_offload": true
-                            },
-                            "notes": "Best attempted H100 server profile. Upstream ltx2_3_offload and this full Gemma/VAE offload path still OOM after warmup on 80GB GPUs."
-                        }
-                    }
                 }
+            },
+            "report_framework_statuses": {
+                "vllm-omni": "no_profile",
+                "lightx2v": "failed",
+                "trtllm-visual": "not_run"
+            },
+            "report_framework_reasons": {
+                "vllm-omni": "No compatible vLLM-Omni LTX2.3 serving profile is configured.",
+                "lightx2v": "OOM on H100 80GB: LTX-2.3 22B two-stage 121-frame t2av peak exceeds 80GB even with every lossless lever (seq_p_size=2 activation sharding + block cpu_offload + Gemma/VAE offload + exact flash_attn3). Upstream profiles target H200 141GB. command_profiles below are the best-attempted lossless config, kept for provenance.",
+                "trtllm-visual": "Not yet classified. Confirm framework support and add a validated command profile, or mark unsupported."
             }
         },
         {
@@ -2046,6 +1939,12 @@
                         }
                     }
                 }
+            },
+            "report_framework_statuses": {
+                "trtllm-visual": "not_run"
+            },
+            "report_framework_reasons": {
+                "trtllm-visual": "Not yet classified. Confirm framework support and add a validated command profile, or mark unsupported."
             }
         },
         {
@@ -2184,6 +2083,12 @@
                         }
                     }
                 }
+            },
+            "report_framework_statuses": {
+                "trtllm-visual": "not_run"
+            },
+            "report_framework_reasons": {
+                "trtllm-visual": "Not yet classified. Confirm framework support and add a validated command profile, or mark unsupported."
             }
         },
         {
@@ -2194,7 +2099,7 @@
             "width": 1280,
             "height": 720,
             "seed": 0,
-            "num_gpus": 1,
+            "num_gpus": 2,
             "num_inference_steps": 35,
             "guidance_scale": 6.0,
             "request_extra": {
@@ -2212,15 +2117,9 @@
                     "request_rate": "inf"
                 }
             },
-            "report_framework_statuses": {
-                "lightx2v": "unsupported"
-            },
-            "report_framework_reasons": {
-                "lightx2v": "No tracked LightX2V Cosmos3 serving path in this benchmark."
-            },
             "frameworks": {
                 "sglang": {
-                    "serve_args": "--model-type diffusion --warmup --attention-backend fa",
+                    "serve_args": "--model-type diffusion --warmup --attention-backend fa --tp-size 2",
                     "extra_env": {
                         "SGLANG_DISABLE_COSMOS3_GUARDRAILS": "1"
                     },
@@ -2228,56 +2127,46 @@
                         "default": {
                             "description": "Cosmos3 Nano T2I profile for SGLang-Diffusion main 3d540563.",
                             "sglang_ref": "sgl-project/sglang@3d540563916394115f9612f30601ae3fa97ada7c",
-                            "serve_args": "--model-type diffusion --warmup --attention-backend fa",
+                            "serve_args": "--model-type diffusion --warmup --attention-backend fa --tp-size 2",
                             "notes": "Guardrails disabled for framework-only serving performance; no cache or torch compile path.",
                             "extra_env": {
                                 "SGLANG_DISABLE_COSMOS3_GUARDRAILS": "1"
                             }
                         },
-                        "h200-1gpu-fa": {
-                            "description": "H200 single-GPU Cosmos3 Nano T2I profile.",
+                        "h200-2gpu-tp-fa": {
+                            "description": "H200 2-GPU TP SGLang-Diffusion Cosmos3 image profile.",
                             "hardware": [
                                 "h200"
                             ],
-                            "sglang_ref": "sgl-project/sglang@3d540563916394115f9612f30601ae3fa97ada7c",
-                            "num_gpus": 1,
-                            "serve_args": "--model-type diffusion --warmup --attention-backend fa",
-                            "notes": "Single-card image serving profile; guardrails disabled, no cache, torch compile disabled by harness.",
-                            "extra_env": {
-                                "SGLANG_DISABLE_COSMOS3_GUARDRAILS": "1"
-                            }
+                            "num_gpus": 2,
+                            "sglang_ref": "current-main",
+                            "serve_args": "--model-type diffusion --warmup --attention-backend fa --tp-size 2",
+                            "notes": "Tensor-parallel across 2 GPUs; no cache, no torch compile."
                         },
-                        "h200-1gpu-fa-speed": {
-                            "description": "H200 single-GPU Cosmos3 Nano T2I speed-mode probe profile.",
+                        "h200-2gpu-tp-fa-speed": {
+                            "description": "H200 2-GPU TP SGLang-Diffusion Cosmos3 image speed profile.",
                             "hardware": [
                                 "h200"
                             ],
-                            "sglang_ref": "sgl-project/sglang@3d540563916394115f9612f30601ae3fa97ada7c",
-                            "num_gpus": 1,
-                            "serve_args": "--model-type diffusion --warmup --attention-backend fa --performance-mode speed",
-                            "notes": "Same as the formal single-card profile plus explicit speed mode; guardrails disabled, no cache, torch compile disabled by harness.",
-                            "extra_env": {
-                                "FLASHINFER_USE_CUDA_NORM": "1",
-                                "SGLANG_DISABLE_COSMOS3_GUARDRAILS": "1"
-                            }
+                            "num_gpus": 2,
+                            "sglang_ref": "current-main",
+                            "serve_args": "--model-type diffusion --warmup --attention-backend fa --tp-size 2 --performance-mode speed",
+                            "notes": "Tensor-parallel across 2 GPUs with performance-mode speed; no cache, no torch compile."
                         },
-                        "h200-1gpu-fa-batch4": {
-                            "description": "H200 single-GPU Cosmos3 Nano T2I batch-size-4 probe profile.",
+                        "h200-2gpu-tp-fa-batch4": {
+                            "description": "H200 2-GPU TP SGLang-Diffusion Cosmos3 image batching profile.",
                             "hardware": [
                                 "h200"
                             ],
-                            "sglang_ref": "sgl-project/sglang@3d540563916394115f9612f30601ae3fa97ada7c",
-                            "num_gpus": 1,
-                            "serve_args": "--model-type diffusion --warmup --attention-backend fa --batching-max-size 4 --enable-batching-metrics",
-                            "notes": "Batching probe for high-pressure throughput; guardrails disabled, no cache, torch compile disabled by harness.",
-                            "extra_env": {
-                                "SGLANG_DISABLE_COSMOS3_GUARDRAILS": "1"
-                            }
+                            "num_gpus": 2,
+                            "sglang_ref": "current-main",
+                            "serve_args": "--model-type diffusion --warmup --attention-backend fa --tp-size 2 --batching-max-size 4 --enable-batching-metrics",
+                            "notes": "Tensor-parallel across 2 GPUs plus batch-4 serving pressure; no cache, no torch compile."
                         }
                     }
                 },
                 "vllm-omni": {
-                    "num_gpus": 1,
+                    "num_gpus": 2,
                     "install_specs": {
                         "vllm": "vllm==0.22.0",
                         "vllm_omni": "git+https://github.com/vllm-project/vllm-omni.git@40b2959183d7043cd9d35f5f6387fbb8d1375c57"
@@ -2294,30 +2183,33 @@
                         "--cfg-parallel-size",
                         "--ulysses-degree"
                     ],
-                    "serve_args": "--stage-configs-path configs/vllm_omni_cosmos3_h200_1gpu_guardrails_off.yaml --stage-init-timeout 900 --init-timeout 1800",
+                    "serve_args": "--stage-configs-path configs/vllm_omni_cosmos3_h200_2gpu_cfg_guardrails_off.yaml --stage-init-timeout 900 --init-timeout 1800",
                     "extra_env": {},
                     "command_profiles": {
                         "default": {
-                            "description": "Cosmos3 Nano T2I profile for vLLM-Omni main 40b2959.",
-                            "framework_ref": "vllm-project/vllm-omni@40b2959183d7043cd9d35f5f6387fbb8d1375c57",
-                            "num_gpus": 1,
-                            "serve_args": "--stage-configs-path configs/vllm_omni_cosmos3_h200_1gpu_guardrails_off.yaml --stage-init-timeout 900 --init-timeout 1800",
-                            "notes": "Uses a legacy stage config to set Cosmos3 guardrails=false at the diffusion stage; FlashAttention, no cache, eager/compile-off harness args."
-                        },
-                        "h200-1gpu-fa": {
-                            "description": "H200 single-GPU Cosmos3 Nano T2I profile.",
+                            "description": "Best known vLLM-Omni command for Cosmos3 image benchmark runs.",
                             "hardware": [
                                 "h200"
                             ],
+                            "num_gpus": 2,
                             "framework_ref": "vllm-project/vllm-omni@40b2959183d7043cd9d35f5f6387fbb8d1375c57",
-                            "num_gpus": 1,
-                            "serve_args": "--stage-configs-path configs/vllm_omni_cosmos3_h200_1gpu_guardrails_off.yaml --stage-init-timeout 900 --init-timeout 1800",
-                            "notes": "Single-card image serving profile; guardrails disabled via legacy stage config, no cache, torch compile disabled by harness."
+                            "serve_args": "--stage-configs-path configs/vllm_omni_cosmos3_h200_2gpu_cfg_guardrails_off.yaml --stage-init-timeout 900 --init-timeout 1800",
+                            "notes": "Uses a 2-GPU CFG-parallel stage config with Cosmos3 guardrails=false; no cache or torch compile path."
+                        },
+                        "h200-2gpu-cfg": {
+                            "description": "H200 2-GPU CFG-parallel vLLM-Omni Cosmos3 image profile.",
+                            "hardware": [
+                                "h200"
+                            ],
+                            "num_gpus": 2,
+                            "framework_ref": "vllm-omni-cosmos3+h200-cfg2",
+                            "serve_args": "--stage-configs-path configs/vllm_omni_cosmos3_h200_2gpu_cfg_guardrails_off.yaml --stage-init-timeout 900 --init-timeout 1800",
+                            "notes": "Uses the two GPUs for CFG parallelism through the stage config; no cache or torch compile path."
                         }
                     }
                 },
                 "trtllm-visual": {
-                    "num_gpus": 1,
+                    "num_gpus": 2,
                     "serve_args": "--backend pytorch",
                     "extra_env": {
                         "TRTLLM_DISABLE_COSMOS3_GUARDRAILS": "1"
@@ -2347,17 +2239,6 @@
                             "serve_args": "--backend pytorch",
                             "notes": "Keep this profile updated as the best command changes. trtllm-serve auto-detects the Cosmos3 diffusion model; add --extra_visual_gen_options <model>.yml for steady-state tuning. PyTorch backend, no TeaCache and no torch compile so the row stays cache-free and comparable. Needs GPU validation."
                         },
-                        "h100-h200-1gpu-speed": {
-                            "description": "Hopper single-GPU TensorRT-LLM VisualGen Cosmos3 profile probe.",
-                            "hardware": [
-                                "h100",
-                                "h200"
-                            ],
-                            "num_gpus": 1,
-                            "framework_ref": "tensorrt-llm-visualgen+trtllm-kernels",
-                            "serve_args": "--backend pytorch",
-                            "notes": "TRTLLM attention-backend kernels on Hopper. trtllm-serve auto-detects the Cosmos3 diffusion model; add --extra_visual_gen_options <model>.yml for steady-state tuning. PyTorch backend, no TeaCache and no torch compile so the row stays cache-free and comparable. Needs GPU validation."
-                        },
                         "h100-h200-2gpu-tp-speed": {
                             "description": "Hopper 2-GPU TP TensorRT-LLM VisualGen Cosmos3 profile probe.",
                             "hardware": [
@@ -2371,6 +2252,12 @@
                         }
                     }
                 }
+            },
+            "report_framework_statuses": {
+                "lightx2v": "unsupported"
+            },
+            "report_framework_reasons": {
+                "lightx2v": "No tracked LightX2V Cosmos3 serving path in this benchmark."
             }
         },
         {
@@ -2395,12 +2282,6 @@
                     "use_duration_template": false,
                     "guardrails": false
                 }
-            },
-            "report_framework_statuses": {
-                "lightx2v": "unsupported"
-            },
-            "report_framework_reasons": {
-                "lightx2v": "No tracked LightX2V Cosmos3 serving path in this benchmark."
             },
             "frameworks": {
                 "sglang": {
@@ -2500,6 +2381,19 @@
                             "serve_args": "--num-gpus 4 --cfg-parallel-size 2 --ulysses-degree 2 --model-class-name Cosmos3OmniDiffusersPipeline --stage-init-timeout 900 --init-timeout 1800 --no-guardrails --diffusion-attention-backend FLASH_ATTN --cache-backend none",
                             "notes": "Uses vLLM-Omni recommended context parallelism for extra GPUs plus CFG parallel; no cache, eager/compile-off harness args."
                         },
+                        "blackwell-flashinfer": {
+                            "description": "Blackwell Cosmos3 Nano T2V profile using FlashInfer attention (validated on B200; FLASH_ATTN hits Hopper-only precompiled kernels on sm_100).",
+                            "hardware": [
+                                "b200",
+                                "gb200",
+                                "b300",
+                                "gb300"
+                            ],
+                            "framework_ref": "vllm-project/vllm-omni@40b2959183d7043cd9d35f5f6387fbb8d1375c57",
+                            "num_gpus": 4,
+                            "serve_args": "--num-gpus 4 --cfg-parallel-size 2 --ulysses-degree 2 --model-class-name Cosmos3OmniDiffusersPipeline --stage-init-timeout 900 --init-timeout 1800 --no-guardrails --diffusion-attention-backend FLASHINFER_ATTN --cache-backend none",
+                            "notes": "Same as default except --diffusion-attention-backend FLASHINFER_ATTN for Blackwell compatibility."
+                        },
                         "h200-4gpu-cfg-ulysses": {
                             "description": "H200 4-GPU Cosmos3 Nano video profile.",
                             "hardware": [
@@ -2582,6 +2476,14 @@
                         }
                     }
                 }
+            },
+            "report_framework_statuses": {
+                "lightx2v": "unsupported",
+                "trtllm-visual": "not_run"
+            },
+            "report_framework_reasons": {
+                "lightx2v": "No tracked LightX2V Cosmos3 serving path in this benchmark.",
+                "trtllm-visual": "Not yet classified. Confirm framework support and add a validated command profile, or mark unsupported."
             }
         },
         {
@@ -2608,12 +2510,6 @@
                     "use_duration_template": false,
                     "guardrails": false
                 }
-            },
-            "report_framework_statuses": {
-                "lightx2v": "unsupported"
-            },
-            "report_framework_reasons": {
-                "lightx2v": "No tracked LightX2V Cosmos3 serving path in this benchmark."
             },
             "frameworks": {
                 "sglang": {
@@ -2794,6 +2690,14 @@
                         }
                     }
                 }
+            },
+            "report_framework_statuses": {
+                "lightx2v": "unsupported",
+                "trtllm-visual": "not_run"
+            },
+            "report_framework_reasons": {
+                "lightx2v": "No tracked LightX2V Cosmos3 serving path in this benchmark.",
+                "trtllm-visual": "Not yet classified. Confirm framework support and add a validated command profile, or mark unsupported."
             }
         }
     ]

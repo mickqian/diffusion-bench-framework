@@ -1,0 +1,117 @@
+{
+  "id": "zimage_turbo_t2i_1024",
+  "model": "Tongyi-MAI/Z-Image-Turbo",
+  "task": "text-to-image",
+  "prompt": "A futuristic cyberpunk city at night, neon lights reflecting on wet streets",
+  "width": 1024,
+  "height": 1024,
+  "seed": 42,
+  "num_gpus": 2,
+  "num_inference_steps": 9,
+  "guidance_scale": 0.0,
+  "frameworks": {
+    "sglang": {
+      "status": "supported",
+      "serve_args": "--model-type diffusion --warmup --tp-size 2",
+      "extra_env": {},
+      "command_profiles": {
+        "default": {
+          "description": "Best known SGLang command for the benchmark repo default profile.",
+          "sglang_ref": "current-main",
+          "serve_args": "--model-type diffusion --warmup --tp-size 2",
+          "notes": "Keep this profile updated when the best command changes for a SGLang release or commit. Best-lossless = eager: validated compile (0.975s) is slower than eager (0.79s) for this 9-step turbo model, so no compile profile."
+        }
+      }
+    },
+    "vllm-omni": {
+      "status": "supported",
+      "num_gpus": 2,
+      "serve_args": "",
+      "extra_env": {
+        "DIFFUSION_ATTENTION_BACKEND": "FLASH_ATTN"
+      },
+      "command_profiles": {
+        "default": {
+          "description": "Best known vLLM-Omni command for aligned non-cache benchmark runs.",
+          "framework_ref": "vllm-omni-0.18.0-cli-env",
+          "serve_args": "",
+          "notes": "Uses env-selected FlashAttention; torch compile is disabled by the benchmark harness.",
+          "extra_env": {
+            "DIFFUSION_ATTENTION_BACKEND": "FLASH_ATTN"
+          }
+        },
+        "blackwell-flashinfer": {
+          "description": "Blackwell vLLM-Omni profile using FlashInfer attention (validated on B200; the FLASH_ATTN backend hits Hopper-only precompiled kernels and fails with 'no kernel image' on sm_100).",
+          "hardware": [
+            "b200",
+            "gb200",
+            "b300",
+            "gb300"
+          ],
+          "framework_ref": "vllm-omni-latest+blackwell-flashinfer",
+          "serve_args": "",
+          "notes": "Same case/model/steps as default; only the attention backend changes for Blackwell compatibility.",
+          "extra_env": {
+            "DIFFUSION_ATTENTION_BACKEND": "FLASHINFER_ATTN"
+          }
+        }
+      }
+    },
+    "lightx2v": {
+      "status": "supported",
+      "model": "Tongyi-MAI/Z-Image-Turbo",
+      "model_cls": "z_image",
+      "lightx2v_task": "t2i",
+      "num_gpus": 2,
+      "serve_args": "",
+      "extra_env": {},
+      "lightx2v_config": {
+        "aspect_ratio": "1:1",
+        "num_channels_latents": 16,
+        "attn_type": "flash_attn3",
+        "enable_cfg": false,
+        "sample_guide_scale": 0.0,
+        "patch_size": 2
+      },
+      "command_profiles": {
+        "default": {
+          "description": "Best known LightX2V command/config for aligned non-cache benchmark runs.",
+          "framework_ref": "lightx2v-0.1.0-z_image",
+          "serve_args": "",
+          "notes": "Uses explicit fast attention/offload settings; no cache, torch compile, or quantized model path."
+        },
+        "blackwell-fa2": {
+          "description": "Blackwell LightX2V profile using FlashAttention 2 (validated on B200 via the flux2 blackwell-fa2-flashinfer profile). Same precision class (full-precision, exact attention) as SGLang's FA4 and vLLM-Omni's FlashInfer backend on Blackwell -- flash_attn3/flash_attn4 hit Hopper-only precompiled kernels or a CUDA-toolkit>=13.1 CuTe-DSL requirement not met by this build, so FA2 is the fastest same-class (full-precision) option available here.",
+          "hardware": [
+            "b200",
+            "gb200",
+            "b300",
+            "gb300"
+          ],
+          "framework_ref": "lightx2v-0.1.0-z_image+blackwell-fa2",
+          "serve_args": "",
+          "notes": "Uses the source-built FlashAttention 2 wheel (TORCH_CUDA_ARCH_LIST=10.0) already installed for Blackwell; no cache, torch compile, or quantized model path. Deliberately NOT using SageAttention here -- it is int8 QK-quantized, a different numeric class from the full-precision attention used elsewhere in this comparison.",
+          "lightx2v_config": {
+            "attn_type": "flash_attn2"
+          }
+        },
+        "h200-fa3-flashinfer": {
+          "description": "H200 fastest available LightX2V command/config for aligned non-cache benchmark runs.",
+          "hardware": [
+            "h200"
+          ],
+          "framework_ref": "lightx2v-0.1.0-z_image+h200-fa3-flashinfer",
+          "serve_args": "",
+          "notes": "Uses FlashAttention 3 with FlashInfer RoPE in the isolated H200 LightX2V venv; no cache, torch compile, or quantized model path.",
+          "lightx2v_config": {
+            "attn_type": "flash_attn3"
+          }
+        }
+      }
+    },
+    "trtllm-visual": {
+      "status": "not_run",
+      "reason": "Not yet classified. Confirm framework support and add a validated command profile, or mark unsupported."
+    }
+  }
+}

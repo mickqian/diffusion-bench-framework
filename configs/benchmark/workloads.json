@@ -1,0 +1,23 @@
+{
+  "_comment": "Workload definitions. A complete cross-framework run includes BOTH single_e2e and throughput (at least for image cases); a single-request-only run is incomplete. These values are assembled into the generated config's benchmark_defaults, which the harness reads.",
+  "workloads": {
+    "single_e2e": {
+      "description": "Steady-state median latency of back-to-back requests after warmup. Metric = client-side wall clock p50 (the only framework-agnostic number). If repeats do not converge, or median exceeds the throughput p50 for the same case, mark the cell an anomaly and withhold the value.",
+      "image_repeats": 5,
+      "video_repeats": 2
+    },
+    "throughput": {
+      "description": "Multi-request server throughput under real concurrency. Records num_requests, concurrency, p50, p95, p99, QPS.",
+      "max_concurrency": 2,
+      "num_requests": 4,
+      "request_rate": "inf"
+    },
+    "warmup": {
+      "description": "Warmup before measured repeats. Video warms harder (more requests) because it is expensive; LightX2V is capped to 1 warmup request.",
+      "num_inference_steps": 3,
+      "num_requests": 2,
+      "video_num_requests": 3
+    }
+  },
+  "_benchmark_defaults_mapping": "build_benchmark_config.py maps workloads.throughput -> benchmark_defaults.throughput, workloads.warmup -> benchmark_defaults.warmup, and single_e2e.{image,video}_repeats -> benchmark_defaults.single.{image,video}_repeats."
+}

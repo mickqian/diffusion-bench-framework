@@ -1,0 +1,118 @@
+{
+  "id": "qwen_image_2512_t2i_1024",
+  "model": "Qwen/Qwen-Image-2512",
+  "task": "text-to-image",
+  "prompt": "A futuristic cyberpunk city at night, neon lights reflecting on wet streets",
+  "width": 1024,
+  "height": 1024,
+  "seed": 42,
+  "num_gpus": 2,
+  "num_inference_steps": 50,
+  "guidance_scale": 1.0,
+  "frameworks": {
+    "sglang": {
+      "status": "supported",
+      "serve_args": "--model-type diffusion --warmup --tp-size 2",
+      "extra_env": {},
+      "command_profiles": {
+        "default": {
+          "description": "Best known SGLang command for the benchmark repo default profile.",
+          "sglang_ref": "current-main",
+          "serve_args": "--model-type diffusion --warmup --tp-size 2",
+          "notes": "Keep this profile updated when the best command changes for a SGLang release or commit."
+        },
+        "h100-h200-2gpu-tp-speed-compile": {
+          "description": "Hopper 2-GPU TP SGLang qwen_image_2512_t2i_1024: resident DiT + torch.compile (best-lossless). Same validated command as flux1/flux2 speed-compile.",
+          "hardware": [
+            "h100",
+            "h200"
+          ],
+          "sglang_ref": "origin/main + PR #29774 (QwenImage TP shard) + selective txt_mlp ReplicatedLinear (proposed #29774 follow-up)",
+          "serve_args": "--model-type diffusion --warmup --dit-layerwise-offload false --tp-size 2 --performance-mode speed --enable-torch-compile",
+          "notes": "no-CFG single-branch: TP shard (#29774) but keep text-branch txt_mlp ReplicatedLinear to skip its per-block all-reduce. Measured H100: full-shard 5.65s -> txt_mlp-replicated 5.076s, beats vLLM 5.17s. (true-CFG uses CFG-parallel instead — see the truecfg case.) offload-during-compile is in main. Selective-shard qwen_image.py kept at reports/h100x4-final-20260702/qwen_image_selective_shard.py."
+        }
+      }
+    },
+    "vllm-omni": {
+      "status": "supported",
+      "num_gpus": 2,
+      "serve_args": "",
+      "extra_env": {
+        "DIFFUSION_ATTENTION_BACKEND": "FLASH_ATTN"
+      },
+      "command_profiles": {
+        "default": {
+          "description": "Best known vLLM-Omni command for aligned non-cache benchmark runs.",
+          "framework_ref": "vllm-omni-0.18.0-cli-env",
+          "serve_args": "",
+          "notes": "Uses env-selected FlashAttention; torch compile is disabled by the benchmark harness.",
+          "extra_env": {
+            "DIFFUSION_ATTENTION_BACKEND": "FLASH_ATTN"
+          }
+        },
+        "blackwell-flashinfer": {
+          "description": "Blackwell vLLM-Omni profile using FlashInfer attention (validated on B200; the FLASH_ATTN backend hits Hopper-only precompiled kernels and fails with 'no kernel image' on sm_100).",
+          "hardware": [
+            "b200",
+            "gb200",
+            "b300",
+            "gb300"
+          ],
+          "framework_ref": "vllm-omni-latest+blackwell-flashinfer",
+          "serve_args": "",
+          "notes": "Same case/model/steps as default; only the attention backend changes for Blackwell compatibility.",
+          "extra_env": {
+            "DIFFUSION_ATTENTION_BACKEND": "FLASHINFER_ATTN"
+          }
+        }
+      }
+    },
+    "lightx2v": {
+      "status": "unsupported",
+      "reason": "Tracked LightX2V version has no Qwen-Image text-to-image serving path."
+    },
+    "trtllm-visual": {
+      "status": "supported",
+      "num_gpus": 2,
+      "serve_args": "--backend pytorch",
+      "extra_env": {},
+      "http_server": {
+        "bin": "trtllm-serve",
+        "args_template": [
+          "serve",
+          "{model}",
+          "--host",
+          "{host}",
+          "--port",
+          "{port}"
+        ],
+        "tp_flag": "--tp_size",
+        "health_path": "/health"
+      },
+      "http_request": {
+        "text-to-image": {
+          "endpoint": "/v1/images/generations"
+        }
+      },
+      "command_profiles": {
+        "default": {
+          "description": "Best known TensorRT-LLM VisualGen command for aligned non-cache Qwen-Image runs.",
+          "framework_ref": "tensorrt-llm-visualgen-trtllm-serve",
+          "serve_args": "--backend pytorch",
+          "notes": "Keep this profile updated as the best command changes. trtllm-serve auto-detects the Qwen-Image diffusion model; add --extra_visual_gen_options <model>.yml for steady-state tuning. PyTorch backend, no TeaCache and no torch compile so the row stays cache-free and comparable. Needs GPU validation."
+        },
+        "h100-h200-2gpu-tp-speed": {
+          "description": "Hopper 2-GPU TP TensorRT-LLM VisualGen Qwen-Image profile probe.",
+          "hardware": [
+            "h100",
+            "h200"
+          ],
+          "num_gpus": 2,
+          "framework_ref": "tensorrt-llm-visualgen+tp2",
+          "serve_args": "--backend pytorch",
+          "notes": "Harness appends --tp_size 2 when num_gpus=2. trtllm-serve auto-detects the Qwen-Image diffusion model; add --extra_visual_gen_options <model>.yml for steady-state tuning. PyTorch backend, no TeaCache and no torch compile so the row stays cache-free and comparable. Needs GPU validation."
+        }
+      }
+    }
+  }
+}

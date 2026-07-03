@@ -1,0 +1,82 @@
+{
+  "id": "qwen_image_2512_t2i_1024_truecfg",
+  "model": "Qwen/Qwen-Image-2512",
+  "task": "text-to-image",
+  "prompt": "A futuristic cyberpunk city at night, neon lights reflecting on wet streets",
+  "width": 1024,
+  "height": 1024,
+  "seed": 42,
+  "num_gpus": 2,
+  "num_inference_steps": 50,
+  "guidance_scale": 1.0,
+  "true_cfg_scale": 4.0,
+  "negative_prompt": "低分辨率，低画质，肢体畸形，手指畸形，画面过饱和，蜡像感，人脸无细节，过度光滑，画面具有AI感。构图混乱。文字模糊，扭曲。",
+  "_note": "Qwen-Image quality path = official diffusers true-CFG (true_cfg_scale=4.0 + negative_prompt), two transformer forwards per step. Sibling of the no-CFG qwen_image_2512_t2i_1024 (single forward). Both sglang and vLLM-Omni receive identical true_cfg_scale+negative_prompt via the shared payload, so the two-pass comparison is apples-to-apples. Provenance: sglang notes qwen_image_perf_issue_20260508.md.",
+  "frameworks": {
+    "sglang": {
+      "status": "supported",
+      "serve_args": "--model-type diffusion --warmup --tp-size 2",
+      "extra_env": {},
+      "command_profiles": {
+        "default": {
+          "description": "Best known SGLang command for the benchmark repo default profile.",
+          "sglang_ref": "current-main",
+          "serve_args": "--model-type diffusion --warmup --tp-size 2",
+          "notes": "Keep this profile updated when the best command changes for a SGLang release or commit."
+        },
+        "h100-h200-2gpu-tp-speed-compile": {
+          "description": "H100 2-GPU SGLang Qwen-Image true-CFG: CFG parallelism (each GPU runs one CFG branch, no per-layer all-reduce) + resident + compile. Fastest for the 2-branch quality path.",
+          "hardware": [
+            "h100",
+            "h200"
+          ],
+          "sglang_ref": "origin/main + PR #29774 (Shard QwenImage DiT across TP ranks; open, not yet merged)",
+          "serve_args": "--model-type diffusion --warmup --enable-cfg-parallel --performance-mode speed --enable-torch-compile",
+          "notes": "CFG parallelism is the cookbook-recommended Qwen multi-GPU path. Measured: 6.49s vs TP #29774 11.07s vs vLLM 10.14s (CFG-parallel 1.56x faster than vLLM). TP shards the DiT but RowParallel all-reduce dominates (~70% kernel time) for the 2-branch case; CFG-parallel avoids it. No #29774 needed here (DiT replicated, one branch per GPU)."
+        }
+      }
+    },
+    "vllm-omni": {
+      "status": "supported",
+      "num_gpus": 2,
+      "serve_args": "",
+      "extra_env": {
+        "DIFFUSION_ATTENTION_BACKEND": "FLASH_ATTN"
+      },
+      "command_profiles": {
+        "default": {
+          "description": "Best known vLLM-Omni command for aligned non-cache benchmark runs.",
+          "framework_ref": "vllm-omni-0.18.0-cli-env",
+          "serve_args": "",
+          "notes": "Uses env-selected FlashAttention; torch compile is disabled by the benchmark harness. Same negative_prompt+true_cfg_scale as sglang enables vLLM-Omni's true CFG (do_true_cfg=True).",
+          "extra_env": {
+            "DIFFUSION_ATTENTION_BACKEND": "FLASH_ATTN"
+          }
+        },
+        "blackwell-flashinfer": {
+          "description": "Blackwell vLLM-Omni profile using FlashInfer attention (validated on B200; the FLASH_ATTN backend hits Hopper-only precompiled kernels and fails with 'no kernel image' on sm_100).",
+          "hardware": [
+            "b200",
+            "gb200",
+            "b300",
+            "gb300"
+          ],
+          "framework_ref": "vllm-omni-latest+blackwell-flashinfer",
+          "serve_args": "",
+          "notes": "Same case/model/steps as default; only the attention backend changes for Blackwell compatibility.",
+          "extra_env": {
+            "DIFFUSION_ATTENTION_BACKEND": "FLASHINFER_ATTN"
+          }
+        }
+      }
+    },
+    "lightx2v": {
+      "status": "unsupported",
+      "reason": "Tracked LightX2V version has no Qwen-Image text-to-image serving path."
+    },
+    "trtllm-visual": {
+      "status": "unsupported",
+      "reason": "true_cfg_scale honoring unverified for TensorRT-LLM VisualGen; excluded from the true-CFG quality-path comparison to avoid a mismatched single- vs two-pass row."
+    }
+  }
+}

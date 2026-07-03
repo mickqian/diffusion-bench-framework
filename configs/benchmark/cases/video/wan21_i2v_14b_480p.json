@@ -1,0 +1,139 @@
+{
+  "id": "wan21_i2v_14b_480p",
+  "model": "Wan-AI/Wan2.1-I2V-14B-480P-Diffusers",
+  "task": "image-to-video",
+  "prompt": "The cat starts walking slowly towards the camera.",
+  "reference_image": true,
+  "width": 832,
+  "height": 480,
+  "num_frames": 81,
+  "seed": 42,
+  "num_gpus": 4,
+  "fps": 16,
+  "num_inference_steps": 40,
+  "guidance_scale": 5.0,
+  "frameworks": {
+    "sglang": {
+      "status": "supported",
+      "serve_args": "--model-type diffusion --warmup --enable-cfg-parallel --ulysses-degree 2 --dit-cpu-offload false --text-encoder-cpu-offload --pin-cpu-memory",
+      "extra_env": {},
+      "command_profiles": {
+        "default": {
+          "description": "Best known SGLang command for the benchmark repo default profile.",
+          "sglang_ref": "current-main",
+          "serve_args": "--model-type diffusion --warmup --enable-cfg-parallel --ulysses-degree 2 --dit-cpu-offload false --text-encoder-cpu-offload --pin-cpu-memory",
+          "notes": "Keep this profile updated when the best command changes for a SGLang release or commit."
+        }
+      }
+    },
+    "vllm-omni": {
+      "status": "supported",
+      "num_gpus": 4,
+      "serve_args": "--tensor-parallel-size 4",
+      "extra_env": {
+        "DIFFUSION_ATTENTION_BACKEND": "FLASH_ATTN"
+      },
+      "command_profiles": {
+        "default": {
+          "description": "Best known vLLM-Omni Wan command for aligned non-cache benchmark runs.",
+          "framework_ref": "vllm-omni-0.18.0-wan+tp4",
+          "num_gpus": 4,
+          "serve_args": "--tensor-parallel-size 4",
+          "notes": "Uses vLLM-Omni's Wan /v1/videos path with same GPU budget; torch compile is disabled by the benchmark harness.",
+          "extra_env": {
+            "DIFFUSION_ATTENTION_BACKEND": "FLASH_ATTN"
+          }
+        },
+        "h200-4gpu-tp": {
+          "description": "H200 vLLM-Omni Wan tensor-parallel command.",
+          "hardware": [
+            "h200"
+          ],
+          "framework_ref": "vllm-omni-0.18.0-wan+h200-tp4",
+          "num_gpus": 4,
+          "serve_args": "--tensor-parallel-size 4",
+          "notes": "Same-GPU H200 comparison profile; no cache or torch compile path.",
+          "extra_env": {
+            "DIFFUSION_ATTENTION_BACKEND": "FLASH_ATTN"
+          }
+        },
+        "h200-4gpu-ulysses": {
+          "description": "H200 vLLM-Omni Wan 4-GPU Ulysses sequence-parallel probe.",
+          "hardware": [
+            "h200"
+          ],
+          "framework_ref": "vllm-omni-wan+h200-ulysses4",
+          "num_gpus": 4,
+          "serve_args": "--num-gpus 4 --ulysses-degree 4",
+          "notes": "Probe whether vLLM-Omni Wan benefits from Ulysses SP instead of tensor parallelism; no cache or torch compile path.",
+          "extra_env": {
+            "DIFFUSION_ATTENTION_BACKEND": "FLASH_ATTN"
+          }
+        },
+        "h200-4gpu-cfg-ulysses": {
+          "description": "H200 vLLM-Omni Wan 4-GPU CFG plus Ulysses sequence-parallel probe.",
+          "hardware": [
+            "h200"
+          ],
+          "framework_ref": "vllm-omni-wan+h200-cfg2-ulysses2",
+          "num_gpus": 4,
+          "serve_args": "--num-gpus 4 --cfg-parallel-size 2 --ulysses-degree 2",
+          "notes": "Matches SGLang-Diffusion 4-GPU CFG+SP shape when vLLM-Omni supports it; no cache or torch compile path.",
+          "extra_env": {
+            "DIFFUSION_ATTENTION_BACKEND": "FLASH_ATTN"
+          }
+        }
+      }
+    },
+    "lightx2v": {
+      "status": "supported",
+      "model": "Wan-AI/Wan2.1-I2V-14B-480P",
+      "model_cls": "wan2.1",
+      "lightx2v_task": "i2v",
+      "serve_args": "",
+      "extra_env": {},
+      "lightx2v_config": {
+        "sample_shift": 3.0,
+        "self_attn_1_type": "flash_attn3",
+        "cross_attn_1_type": "flash_attn3",
+        "cross_attn_2_type": "flash_attn3",
+        "enable_cfg": true,
+        "parallel": {
+          "cfg_p_size": 2,
+          "seq_p_size": 2,
+          "seq_p_attn_type": "ulysses"
+        },
+        "rope_type": "torch",
+        "cpu_offload": false,
+        "t5_cpu_offload": false,
+        "vae_cpu_offload": false
+      },
+      "command_profiles": {
+        "default": {
+          "description": "Best known LightX2V command/config for aligned non-cache benchmark runs.",
+          "framework_ref": "lightx2v-0.1.0-configs/wan/wan_i2v.json+cfg_parallel",
+          "serve_args": "",
+          "notes": "Uses explicit fast attention/offload settings; no cache, torch compile, or quantized model path."
+        },
+        "h200-fa3": {
+          "description": "H200 fastest available LightX2V command/config for aligned non-cache benchmark runs.",
+          "hardware": [
+            "h200"
+          ],
+          "framework_ref": "lightx2v-0.1.0-configs/wan/wan_i2v.json+cfg_parallel+h200-fa3",
+          "serve_args": "",
+          "notes": "Uses FlashAttention 3 while preserving CFG/sequence parallelism and offload settings; no cache, torch compile, or quantized model path.",
+          "lightx2v_config": {
+            "self_attn_1_type": "flash_attn3",
+            "cross_attn_1_type": "flash_attn3",
+            "cross_attn_2_type": "flash_attn3"
+          }
+        }
+      }
+    },
+    "trtllm-visual": {
+      "status": "not_run",
+      "reason": "Not yet classified. Confirm framework support and add a validated command profile, or mark unsupported."
+    }
+  }
+}

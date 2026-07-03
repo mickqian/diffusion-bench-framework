@@ -1,0 +1,7 @@
+# TensorRT-LLM VisualGen: fastest exact-precision attention backend.
+# Default is VANILLA (PyTorch SDPA, slow). TRTLLM is TensorRT-LLM's own exact
+# attention kernel — the fair "fastest exact kernel" for trtllm-visual on Hopper.
+# (FA4 = FlashAttention-4, tuned for Blackwell sm100; use FA4 there instead.)
+# quant_attention_config / sparse_attention_config are left unset -> lossless.
+attention_config:
+  backend: TRTLLM

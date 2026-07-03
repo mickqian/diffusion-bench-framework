@@ -1,0 +1,55 @@
+{
+  "id": "qwen_image_edit_2511",
+  "model": "Qwen/Qwen-Image-Edit-2511",
+  "task": "image-edit",
+  "prompt": "Make the cat wear a red hat",
+  "reference_image": true,
+  "width": 1024,
+  "height": 1024,
+  "seed": 42,
+  "num_gpus": 2,
+  "num_inference_steps": 40,
+  "guidance_scale": 1.0,
+  "frameworks": {
+    "sglang": {
+      "status": "supported",
+      "serve_args": "--model-type diffusion --warmup --tp-size 2",
+      "extra_env": {},
+      "command_profiles": {
+        "default": {
+          "description": "Best known SGLang command for the benchmark repo default profile.",
+          "sglang_ref": "current-main",
+          "serve_args": "--model-type diffusion --warmup --tp-size 2",
+          "notes": "Keep this profile updated when the best command changes for a SGLang release or commit."
+        }
+      }
+    },
+    "vllm-omni": {
+      "status": "supported",
+      "num_gpus": 2,
+      "serve_args": "",
+      "extra_env": {
+        "DIFFUSION_ATTENTION_BACKEND": "FLASH_ATTN"
+      },
+      "command_profiles": {
+        "default": {
+          "description": "Best known vLLM-Omni command for aligned non-cache benchmark runs.",
+          "framework_ref": "vllm-omni-0.18.0-cli-env",
+          "serve_args": "",
+          "notes": "Uses env-selected FlashAttention; torch compile is disabled by the benchmark harness.",
+          "extra_env": {
+            "DIFFUSION_ATTENTION_BACKEND": "FLASH_ATTN"
+          }
+        }
+      }
+    },
+    "lightx2v": {
+      "status": "unsupported",
+      "reason": "Tracked LightX2V version has no Qwen-Image-Edit serving path."
+    },
+    "trtllm-visual": {
+      "status": "not_run",
+      "reason": "Not yet classified. Confirm framework support and add a validated command profile, or mark unsupported."
+    }
+  }
+}
