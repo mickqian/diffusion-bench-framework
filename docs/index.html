@@ -96,6 +96,11 @@
         --r-lg: 22px;
         --r-md: 16px;
         --r-sm: 11px;
+        /* Critically-damped spring (Apple: damping 1.0, response ~0.35) approximated
+           with linear() — settles gracefully, no overshoot. --spring-settle carries a
+           barely-perceptible 0.4% overshoot for momentum-flavored moves. */
+        --spring: linear(0, 0.008 1.1%, 0.031 2.2%, 0.129 4.8%, 0.257 7.2%, 0.512 11.3%, 0.671 14.2%, 0.847 18.7%, 0.925 22.4%, 0.968 26.7%, 0.99 32%, 0.998 39%, 1);
+        --spring-settle: linear(0, 0.01 1.2%, 0.12 4.6%, 0.36 8.8%, 0.628 12.8%, 0.834 17%, 0.943 21%, 1.001 26.4%, 1.004 32%, 1.001 40%, 1);
       }
 
       [data-theme="dark"] {
@@ -257,7 +262,14 @@
         top: 0;
         z-index: 30;
         background: var(--paper);
-        border-bottom: 1px solid var(--hair);
+        /* scroll edge: no divider while at rest at the top; a soft edge fades in
+           only once content actually scrolls beneath the bar (.is-scrolled). */
+        border-bottom: 1px solid transparent;
+        transition: border-color 240ms ease, box-shadow 240ms ease;
+      }
+      .topbar.is-scrolled {
+        border-bottom-color: var(--hair);
+        box-shadow: 0 8px 24px -18px color-mix(in srgb, var(--ink) 38%, transparent);
       }
 
       @supports ((backdrop-filter: blur(2px)) or (-webkit-backdrop-filter: blur(2px))) {
@@ -265,7 +277,9 @@
           background: var(--glass-bg);
           -webkit-backdrop-filter: blur(20px) saturate(1.6);
           backdrop-filter: blur(20px) saturate(1.6);
-          box-shadow: inset 0 1px 0 var(--glass-hi);
+        }
+        .topbar.is-scrolled {
+          box-shadow: inset 0 1px 0 var(--glass-hi), 0 8px 24px -18px color-mix(in srgb, var(--ink) 38%, transparent);
         }
       }
 
@@ -294,11 +308,17 @@
       .nav-links a {
         font-size: 15px;
         color: var(--muted);
-        transition: color 160ms ease;
+        transition: color 160ms ease, opacity 140ms ease;
       }
 
       .nav-links a:hover {
         color: var(--ink);
+      }
+
+      /* press feedback on the touch, not the release */
+      .nav-links a:active {
+        color: var(--ink);
+        opacity: 0.55;
       }
 
       .topbar-controls {
@@ -317,7 +337,7 @@
         padding: 7px 16px;
         backdrop-filter: blur(12px) saturate(140%);
         -webkit-backdrop-filter: blur(12px) saturate(140%);
-        transition: transform 220ms cubic-bezier(0.16, 1, 0.3, 1), background 200ms ease,
+        transition: transform 220ms var(--spring), scale 200ms var(--spring), background 200ms ease,
           border-color 200ms ease, color 200ms ease, box-shadow 200ms ease;
       }
 
@@ -331,6 +351,7 @@
 
       .theme-toggle:active {
         transform: translateY(0);
+        scale: 0.96;
       }
 
       /* ---- hero ---- */
@@ -365,6 +386,14 @@
         gap: 14px 28px;
         margin-top: 40px;
         font-size: 16px;
+      }
+
+      .hero-actions a {
+        transition: opacity 140ms ease;
+      }
+
+      .hero-actions a:active {
+        opacity: 0.55;
       }
 
       .thesis {
@@ -541,7 +570,7 @@
         height: 60%;
         border-radius: 2px;
         background: var(--accent);
-        transition: transform 200ms cubic-bezier(0.16, 1, 0.3, 1);
+        transition: transform 200ms var(--spring);
       }
 
       .capability-button span {
@@ -767,7 +796,7 @@
         font-size: 18px;
         font-weight: 300;
         color: var(--muted);
-        transition: transform 220ms cubic-bezier(0.16, 1, 0.3, 1), color 160ms ease, border-color 160ms ease;
+        transition: transform 220ms var(--spring), color 160ms ease, border-color 160ms ease;
       }
 
       details[open] .marker {
@@ -861,12 +890,16 @@
         padding: 7px 15px;
         border-radius: 999px;
         border: 1px solid var(--hair-strong);
-        transition: color 160ms ease, border-color 160ms ease, background 160ms ease;
+        transition: color 160ms ease, border-color 160ms ease, background 160ms ease, scale 200ms var(--spring);
       }
 
       .chip:hover {
         color: var(--ink);
         border-color: var(--ink);
+      }
+
+      .chip:active {
+        scale: 0.96;
       }
 
       .chip[aria-pressed="true"] {
@@ -1032,7 +1065,7 @@
         border-radius: 999px;
         transform: scaleX(0);
         transform-origin: left center;
-        transition: transform 0.9s cubic-bezier(0.16, 1, 0.3, 1),
+        transition: transform 0.9s var(--spring),
           filter 200ms ease;
       }
 
@@ -1409,7 +1442,7 @@
         pointer-events: none;
         opacity: 0;
         transform: translateY(6px);
-        transition: opacity 160ms ease, transform 160ms ease;
+        transition: opacity 160ms ease, transform 240ms var(--spring);
       }
 
       @supports ((backdrop-filter: blur(2px)) or (-webkit-backdrop-filter: blur(2px))) {
@@ -1676,9 +1709,10 @@
         break-inside: avoid; border-radius: var(--r-md); overflow: hidden;
         border: 1px solid var(--hair); background: var(--ink-04); cursor: pointer;
         -webkit-tap-highlight-color: transparent; line-height: 0;
-        transition: transform 0.25s cubic-bezier(0.16,1,0.3,1), box-shadow 0.25s ease;
+        transition: transform 0.25s var(--spring), scale 0.25s var(--spring), box-shadow 0.25s ease;
       }
       .g-tile:hover { transform: translateY(-2px); box-shadow: var(--shadow-1); }
+      .g-tile:active { scale: 0.985; }
       .g-tile img, .g-tile video { display: block; width: 100%; height: auto; }
       /* 3D preview tile: auto-rotating, non-interactive in the wall (click opens the lightbox) */
       .g-mv { display: block; width: 100%; pointer-events: none; background: transparent;
@@ -1727,6 +1761,16 @@
       }
       .lightbox.open { opacity: 1; }
       .lightbox[hidden] { display: none; }
+      /* materialize: the figure arrives as a surface (scale + blur settle together),
+         and leaves along the same path — not a plain fade. */
+      .lightbox .lb-figure {
+        scale: 0.965; filter: blur(7px);
+        transition: scale 0.24s ease, filter 0.2s ease; /* exit: same path, slightly quicker */
+      }
+      .lightbox.open .lb-figure {
+        scale: 1; filter: blur(0);
+        transition: scale 0.42s var(--spring-settle), filter 0.3s ease;
+      }
       .lb-figure { margin: 0; max-width: min(1100px, 100%); display: flex; flex-direction: column; gap: 14px; }
       .lb-stage { display: flex; align-items: center; justify-content: center; }
       .lb-stage img, .lb-stage video { max-width: 100%; max-height: 78vh; border-radius: var(--r-md); display: block; }
@@ -1738,9 +1782,11 @@
       .lb-close, .lb-nav {
         position: fixed; z-index: 101; color: #f0ebe0; background: rgba(0,0,0,0.32);
         border-radius: 999px; width: 44px; height: 44px; font-size: 26px; line-height: 1;
-        display: flex; align-items: center; justify-content: center; transition: background 0.18s ease;
+        display: flex; align-items: center; justify-content: center;
+        transition: background 0.18s ease, scale 200ms var(--spring);
       }
       .lb-close:hover, .lb-nav:hover { background: rgba(0,0,0,0.55); }
+      .lb-close:active, .lb-nav:active { scale: 0.9; background: rgba(0,0,0,0.65); }
       .lb-close { top: 18px; right: 20px; font-size: 30px; }
       .lb-nav { top: 50%; transform: translateY(-50%); }
       .lb-prev { left: 16px; }
@@ -1761,7 +1807,11 @@
         border-radius: 999px;
         padding: 8px 16px;
         cursor: pointer;
-        transition: background 160ms ease, color 160ms ease, box-shadow 160ms ease;
+        transition: background 160ms ease, color 160ms ease, box-shadow 160ms ease, scale 200ms var(--spring);
+      }
+
+      .nightly-pill:active {
+        scale: 0.96;
       }
 
       .nightly-pill::before {
@@ -2019,6 +2069,50 @@
         }
         .bar-track i {
           transform: scaleX(1) !important;
+        }
+        /* reduced motion still deserves feedback: keep the lightbox as a plain
+           cross-fade (no scale/blur travel) instead of killing it entirely. */
+        .lightbox {
+          transition: opacity 200ms ease !important;
+        }
+        .lightbox .lb-figure {
+          scale: 1 !important;
+          filter: none !important;
+        }
+      }
+
+      /* translucency and contrast are independent accessibility signals: frost the
+         glass solid when transparency is reduced; harden edges when contrast is up. */
+      @media (prefers-reduced-transparency: reduce) {
+        .glass,
+        .topbar,
+        .theme-toggle,
+        .hover-card,
+        .g-tag,
+        .g-time {
+          -webkit-backdrop-filter: none !important;
+          backdrop-filter: none !important;
+          background: var(--paper-2) !important;
+        }
+      }
+
+      @media (prefers-contrast: more) {
+        :root,
+        [data-theme="dark"] {
+          --hair: var(--hair-strong);
+        }
+        .glass,
+        .topbar,
+        .theme-toggle,
+        .hover-card {
+          -webkit-backdrop-filter: none !important;
+          backdrop-filter: none !important;
+          background: var(--paper-2) !important;
+          border-color: var(--muted) !important;
+        }
+        .chip,
+        .nightly-pill {
+          border: 1px solid var(--muted);
         }
       }
 
@@ -2346,6 +2440,18 @@
     <script src="vendor/model-viewer.min.js"></script>
 
     <script>
+      /* ---------- scroll edge: the topbar earns its divider only once content
+         actually scrolls beneath it (sentinel + IO, no scroll listener) ---------- */
+      {
+        const bar = document.querySelector(".topbar");
+        const sentinel = document.createElement("div");
+        sentinel.style.cssText = "position:absolute;top:0;height:1px;width:1px;pointer-events:none;";
+        document.body.prepend(sentinel);
+        new IntersectionObserver(([e]) => {
+          bar.classList.toggle("is-scrolled", !e.isIntersecting);
+        }).observe(sentinel);
+      }
+
       /* ---------- theme ---------- */
       const themeToggle = document.getElementById("themeToggle");
 
@@ -3866,7 +3972,7 @@
           lb.setAttribute("aria-hidden", "true");
           document.body.style.overflow = "";
           zDrag = false; zImg = null;
-          setTimeout(() => { lb.hidden = true; lbStage.innerHTML = ""; }, 200);
+          setTimeout(() => { lb.hidden = true; lbStage.innerHTML = ""; }, 250);
         }
         const step = (d) => openLb((cur + d + items.length) % items.length);
 
