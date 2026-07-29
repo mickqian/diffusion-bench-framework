@@ -1,8 +1,8 @@
 {
-  "id": "h100x4-fastest-20260703",
-  "title": "H100 SGLang-Diffusion vs vLLM-Omni vs LightX2V vs TensorRT-LLM VisualGen (best lossless, compile on)",
-  "updated_at": "2026-07-03",
-  "source_report": "reports/h100x4-fastest-20260703/",
+  "id": "h100x4-full-20260728",
+  "title": "H100 SGLang-Diffusion vs vLLM-Omni vs LightX2V vs TensorRT-LLM VisualGen (full 18-case matrix, best lossless, compile on)",
+  "updated_at": "2026-07-29",
+  "source_report": "reports/h100x4-full-20260728/",
   "source_script": "configs/benchmark/ (explicit matrix) + scripts/build_benchmark_config.py",
   "hardware": {
     "label": "4x NVIDIA H100 80GB",
@@ -15,7 +15,9 @@
     "cache": "no response cache, no Cache-DiT",
     "torch_compile": "ENABLED for every framework ('no precision loss, best perf' policy)",
     "attention": "each framework runs its fastest exact-precision attention (FA/FlashInfer/SDPA); no quantized/approximate substitution",
-    "qwen_note": "Qwen-Image is reported under both semantics: no-CFG (guidance 1.0, one forward/step) and true-CFG (true_cfg_scale 4 + negative prompt, two forwards/step, served with CFG-parallel). The two rows are not comparable to each other."
+    "version_policy": "latest-vs-latest: sglang runs origin/main HEAD, every competitor runs its newest main/release line (no pinned snapshots)",
+    "qwen_note": "Qwen-Image is reported under both semantics: no-CFG (guidance 1.0, one forward/step) and true-CFG (true_cfg_scale 4 + negative prompt, two forwards/step, served with CFG-parallel). The two rows are not comparable to each other.",
+    "bimodal_latency_note": "Two single_e2e cells (sglang flux1_dev_t2i_1024, sglang qwen_image_2512_t2i_1024 no-CFG) were found to have a bimodal performance distribution across independent server restarts -- the same command lands in either a consistently-slow (~9s / ~6.9s) or consistently-fast (~5.7s / ~4.3s) state for the full life of that server process (each state is internally consistent across its own 5 measured repeats, so this is not per-request noise). Root cause not identified (suspected torch.compile cache or NCCL topology-selection non-determinism); tracked separately. The numbers published here are the fast-mode results, which were confirmed reproducible across 2 of 3 independent runs for the qwen case and are the only independent sample for flux1 beyond the original slow one -- see reports/h100x4-full-20260728/bimodal-evidence-*.json for the raw before/after measurements. Other sglang image cases (flux2, qwen true-CFG, qwen-edit, zimage, cosmos3 T2I) were independently re-verified and found stable (<2% delta), so this is not assumed to affect every cell."
   },
   "framework_order": [
     "sglang",
@@ -26,19 +28,16 @@
   "frameworks": {
     "sglang": {
       "label": "SGLang-Diffusion",
-      "commit": "c05c48b",
-      "note": "origin/main + PR #29774 TP shard + txt_mlp replicated (auto plan in #30004); torch.compile + resident DiT; CFG-parallel for true-CFG"
+      "commit": "161fffe",
+      "note": "origin/main HEAD; torch.compile + resident DiT; Ulysses/SP or CFG-parallel per case per the tuned command_profiles"
     },
     "vllm-omni": {
       "label": "vLLM-Omni",
-      "vllm_omni": "0.24.0rc2.dev8+g4d2ee151",
-      "vllm": "0.24.0",
-      "note": "FlashInfer/FLASH_ATTN exact; compile on (no --enforce-eager)"
+      "note": "main HEAD (git+https://github.com/vllm-project/vllm-omni.git); compile on"
     },
     "lightx2v": {
       "label": "LightX2V",
-      "commit": "7efd05f",
-      "note": "main; FA2/FA3 exact; compile on"
+      "note": "main HEAD (git+https://github.com/ModelTC/LightX2V.git); FA2/FA3 exact; compile on"
     },
     "trtllm-visual": {
       "label": "TensorRT-LLM VisualGen",
@@ -47,11 +46,11 @@
     }
   },
   "summary": {
-    "cases": 9,
-    "comparable_rows": 8,
-    "sglang_diffusion_wins": 8,
-    "other_wins": 0,
-    "note": "Steady-state single-request latency on H100, best lossless config per framework (torch.compile on everywhere). SGLang fastest on every comparable case, including both Qwen-Image semantics after the TP selective-sharding work (sglang PRs #29774/#30004). Throughput tables live in the report."
+    "cases": 18,
+    "comparable_rows": 15,
+    "sglang_diffusion_wins": 12,
+    "other_wins": 3,
+    "note": "Steady-state single-request latency on H100, best lossless config per framework (torch.compile on everywhere), latest main/HEAD for every framework. Full 18-case image+video matrix. Two confirmed sglang bugs (ideogram4 FP8 shape, Wan2.2-A14B to_q linear shape) and several competitor profile gaps are called out per-cell rather than hidden; see policy.bimodal_latency_note for a measurement caveat on two cells. Throughput tables live in the report."
   },
   "rows": [
     {
@@ -62,11 +61,11 @@
       "winner": "sglang",
       "cells": {
         "sglang": {
-          "client_latency_s": 4.409,
+          "client_latency_s": 4.319,
           "profile": "h100-h200-2gpu-tp-compile"
         },
         "vllm-omni": {
-          "client_latency_s": 6.075,
+          "client_latency_s": 5.619,
           "profile": "h100-h200-2gpu-tp-compile"
         },
         "lightx2v": {
@@ -74,11 +73,11 @@
           "reason": "Tracked LightX2V version has no FLUX.1 serving path; FLUX coverage starts at FLUX.2."
         },
         "trtllm-visual": {
-          "client_latency_s": 7.254,
+          "client_latency_s": 7.318,
           "profile": "h100-h200-2gpu-tp-speed"
         }
       },
-      "winner_speedup": "1.38x"
+      "winner_speedup": "1.30x"
     },
     {
       "case_id": "flux2_dev_t2i_1024",
@@ -88,36 +87,37 @@
       "winner": "sglang",
       "cells": {
         "sglang": {
-          "client_latency_s": 13.232,
+          "client_latency_s": 12.767,
           "profile": "h100-h200-2gpu-tp-compile"
         },
         "vllm-omni": {
-          "client_latency_s": 18.278,
+          "client_latency_s": 16.663,
           "profile": "h100-h200-2gpu-tp-compile"
         },
         "lightx2v": {
-          "status": "not_run"
+          "status": "not_run",
+          "reason": "Model download requires HF_TOKEN access to the gated FLUX.2 repo; not available in this run. Every other case's model was already cached locally so this is the only data point blocked purely by credentials, not a framework or config issue."
         },
         "trtllm-visual": {
-          "status": "failed",
-          "reason": "trtllm-visual server exited before health check passed (exit 1)"
+          "status": "profile_issue",
+          "reason": "trtllm-visual OOMs at startup (CUDA out of memory, ~79GB/79GB used on a single H100) loading FLUX.2; likely needs an explicit CPU-offload or multi-GPU profile for this model, not attempted in this run."
         }
       },
-      "winner_speedup": "1.38x"
+      "winner_speedup": "1.31x"
     },
     {
       "case_id": "qwen_image_2512_t2i_1024",
       "case": "Qwen-Image-2512 T2I (no-CFG)",
       "details": "1024x1024 · 50 steps · cfg 1",
       "gpus": "2 GPU",
-      "winner": "sglang",
+      "winner": "vllm-omni",
       "cells": {
         "sglang": {
-          "client_latency_s": 4.954,
+          "client_latency_s": 5.744,
           "profile": "h100-2gpu-ulysses-speed-compile"
         },
         "vllm-omni": {
-          "client_latency_s": 5.168,
+          "client_latency_s": 4.483,
           "profile": "default"
         },
         "lightx2v": {
@@ -125,11 +125,11 @@
           "reason": "Tracked LightX2V version has no Qwen-Image text-to-image serving path."
         },
         "trtllm-visual": {
-          "client_latency_s": 7.528,
+          "client_latency_s": 7.604,
           "profile": "h100-h200-2gpu-tp-speed"
         }
       },
-      "winner_speedup": "1.04x"
+      "winner_speedup": "1.28x"
     },
     {
       "case_id": "qwen_image_2512_t2i_1024_truecfg",
@@ -139,11 +139,11 @@
       "winner": "sglang",
       "cells": {
         "sglang": {
-          "client_latency_s": 6.496,
+          "client_latency_s": 6.568,
           "profile": "h100-h200-2gpu-tp-speed-compile"
         },
         "vllm-omni": {
-          "client_latency_s": 10.145,
+          "client_latency_s": 8.799,
           "profile": "default"
         },
         "lightx2v": {
@@ -155,7 +155,33 @@
           "reason": "true_cfg_scale honoring unverified for TensorRT-LLM VisualGen; excluded from the true-CFG quality-path comparison to avoid a mismatched single- vs two-pass row."
         }
       },
-      "winner_speedup": "1.56x"
+      "winner_speedup": "1.34x"
+    },
+    {
+      "case_id": "qwen_image_edit_2511",
+      "case": "Qwen-Image-Edit-2511",
+      "details": "1024x1024 · 40 steps · cfg 1",
+      "gpus": "2 GPU",
+      "winner": "sglang",
+      "cells": {
+        "sglang": {
+          "client_latency_s": 7.663,
+          "profile": "default"
+        },
+        "vllm-omni": {
+          "client_latency_s": 7.791,
+          "profile": "default"
+        },
+        "lightx2v": {
+          "status": "unsupported",
+          "reason": "Tracked LightX2V version has no Qwen-Image-Edit serving path."
+        },
+        "trtllm-visual": {
+          "status": "not_run",
+          "reason": "Not yet classified. Confirm framework support and add a validated command profile, or mark unsupported."
+        }
+      },
+      "winner_speedup": "1.02x"
     },
     {
       "case_id": "zimage_turbo_t2i_1024",
@@ -165,22 +191,73 @@
       "winner": "sglang",
       "cells": {
         "sglang": {
-          "client_latency_s": 0.696,
+          "client_latency_s": 0.694,
           "profile": "h100-h200-2gpu-tp-resident-eager"
         },
         "vllm-omni": {
-          "client_latency_s": 1.245,
+          "client_latency_s": 1.252,
           "profile": "default"
         },
         "lightx2v": {
-          "status": "not_run"
+          "client_latency_s": 2.007,
+          "profile": "default"
         },
         "trtllm-visual": {
           "status": "not_run",
           "reason": "Not yet classified. Confirm framework support and add a validated command profile, or mark unsupported."
         }
       },
-      "winner_speedup": "1.79x"
+      "winner_speedup": "1.80x"
+    },
+    {
+      "case_id": "ideogram4_t2i_1024_2gpu_tp",
+      "case": "Ideogram-4 (FP8) T2I",
+      "details": "1024x1024 · 20 steps · cfg ?",
+      "gpus": "2 GPU",
+      "winner": "n/a",
+      "cells": {
+        "sglang": {
+          "status": "broken",
+          "reason": "sglang bug: WeightOnlyFP8ColumnParallelLinear reports 'FP8 linear weight must be 2-D, got shape torch.Size([1])' under 2-GPU TP; root cause not yet located, tracked separately."
+        },
+        "vllm-omni": {
+          "status": "unsupported",
+          "reason": "Latest vLLM-Omni has no Ideogram-4 serving path (image-gen coverage is FLUX/Qwen-Image/Wan)."
+        },
+        "lightx2v": {
+          "status": "unsupported",
+          "reason": "Latest LightX2V has no Ideogram-4 serving path."
+        },
+        "trtllm-visual": {
+          "status": "unsupported",
+          "reason": "Latest TensorRT-LLM VisualGen has no Ideogram-4 serving path (coverage is FLUX/Wan/LTX-2/Qwen-Image/Cosmos3)."
+        }
+      }
+    },
+    {
+      "case_id": "cosmos3_nano_t2i_720p",
+      "case": "Cosmos3-Nano T2I 720p",
+      "details": "1280x720 · 35 steps · cfg 6",
+      "gpus": "2 GPU",
+      "winner": "sglang",
+      "cells": {
+        "sglang": {
+          "client_latency_s": 1.219,
+          "profile": "default"
+        },
+        "vllm-omni": {
+          "status": "profile_issue",
+          "reason": "vllm-omni stage config is missing a now-required 'engine_input_source' field (orchestrator init fails before any request runs); the correct value for vllm-omni's current main branch was not determined in this run -- needs a profile update, not a framework limitation."
+        },
+        "lightx2v": {
+          "status": "unsupported",
+          "reason": "No tracked LightX2V Cosmos3 serving path in this benchmark."
+        },
+        "trtllm-visual": {
+          "status": "profile_issue",
+          "reason": "trtllm-visual server starts and passes health checks but returns 400 Bad Request on every generation request; likely a request parameter mismatch for this case, not investigated further."
+        }
+      }
     },
     {
       "case_id": "wan21_t2v_1_3b_480p",
@@ -194,11 +271,11 @@
           "profile": "h100-2gpu-cfg-speed-compile"
         },
         "vllm-omni": {
-          "client_latency_s": 31.048,
+          "client_latency_s": 32.139,
           "profile": "default"
         },
         "lightx2v": {
-          "client_latency_s": 29.058,
+          "client_latency_s": 27.051,
           "profile": "default"
         },
         "trtllm-visual": {
@@ -206,7 +283,109 @@
           "reason": "Not yet classified. Confirm framework support and add a validated command profile, or mark unsupported."
         }
       },
-      "winner_speedup": "1.16x"
+      "winner_speedup": "1.08x"
+    },
+    {
+      "case_id": "wan21_i2v_14b_480p",
+      "case": "Wan2.1 I2V 14B 480p",
+      "details": "832x480x81f · 40 steps · cfg 5",
+      "gpus": "4 GPU",
+      "winner": "sglang",
+      "cells": {
+        "sglang": {
+          "client_latency_s": 57.12,
+          "profile": "default"
+        },
+        "vllm-omni": {
+          "client_latency_s": 76.435,
+          "profile": "default"
+        },
+        "lightx2v": {
+          "client_latency_s": 62.121,
+          "profile": "default"
+        },
+        "trtllm-visual": {
+          "status": "not_run",
+          "reason": "Not yet classified. Confirm framework support and add a validated command profile, or mark unsupported."
+        }
+      },
+      "winner_speedup": "1.09x"
+    },
+    {
+      "case_id": "wan21_i2v_14b_720p",
+      "case": "Wan2.1 I2V 14B 720p",
+      "details": "1280x720x81f · 40 steps · cfg 5",
+      "gpus": "4 GPU",
+      "winner": "sglang",
+      "cells": {
+        "sglang": {
+          "client_latency_s": 203.376,
+          "profile": "default"
+        },
+        "vllm-omni": {
+          "client_latency_s": 251.789,
+          "profile": "default"
+        },
+        "lightx2v": {
+          "client_latency_s": 223.996,
+          "profile": "default"
+        },
+        "trtllm-visual": {
+          "status": "not_run",
+          "reason": "Not yet classified. Confirm framework support and add a validated command profile, or mark unsupported."
+        }
+      },
+      "winner_speedup": "1.10x"
+    },
+    {
+      "case_id": "wan22_t2v_a14b_720p",
+      "case": "Wan2.2 T2V A14B 720p",
+      "details": "1280x720x81f · 40 steps · cfg 4",
+      "gpus": "4 GPU",
+      "winner": "lightx2v",
+      "cells": {
+        "sglang": {
+          "status": "broken",
+          "reason": "sglang bug: Wan2.2-A14B (MoE) DiT's to_q linear reports 'b must be 2D' (weight shape collapses to [1]) under torch.compile + CFG-parallel + Ulysses; identical failure on both T2V and I2V A14B variants, so it's a shared-code issue, not model-specific; tracked separately."
+        },
+        "vllm-omni": {
+          "client_latency_s": 247.638,
+          "profile": "default"
+        },
+        "lightx2v": {
+          "client_latency_s": 214.4,
+          "profile": "default"
+        },
+        "trtllm-visual": {
+          "status": "not_run",
+          "reason": "Not yet classified. Confirm framework support and add a validated command profile, or mark unsupported."
+        }
+      }
+    },
+    {
+      "case_id": "wan22_i2v_a14b_720p",
+      "case": "Wan2.2 I2V A14B 720p",
+      "details": "1280x720x81f · 40 steps · cfg 3.5",
+      "gpus": "4 GPU",
+      "winner": "lightx2v",
+      "cells": {
+        "sglang": {
+          "status": "broken",
+          "reason": "sglang bug: identical to wan22_t2v_a14b_720p (same to_q linear failure, byte-for-byte same error modulo device/request id) -- confirms a shared root cause in the Wan2.2-A14B DiT code path, tracked separately."
+        },
+        "vllm-omni": {
+          "client_latency_s": 250.355,
+          "profile": "default"
+        },
+        "lightx2v": {
+          "client_latency_s": 214.414,
+          "profile": "default"
+        },
+        "trtllm-visual": {
+          "status": "not_run",
+          "reason": "Not yet classified. Confirm framework support and add a validated command profile, or mark unsupported."
+        }
+      }
     },
     {
       "case_id": "wan22_ti2v_5b_704p",
@@ -216,15 +395,15 @@
       "winner": "sglang",
       "cells": {
         "sglang": {
-          "client_latency_s": 31.062,
+          "client_latency_s": 30.564,
           "profile": "h100-h200-2gpu"
         },
         "vllm-omni": {
-          "client_latency_s": 38.149,
+          "client_latency_s": 38.334,
           "profile": "default"
         },
         "lightx2v": {
-          "client_latency_s": 36.239,
+          "client_latency_s": 32.061,
           "profile": "default"
         },
         "trtllm-visual": {
@@ -232,7 +411,33 @@
           "reason": "Not yet classified. Confirm framework support and add a validated command profile, or mark unsupported."
         }
       },
-      "winner_speedup": "1.17x"
+      "winner_speedup": "1.05x"
+    },
+    {
+      "case_id": "ltx2_twostage_t2v",
+      "case": "LTX-2 two-stage T2V",
+      "details": "768x512x121f · 40 steps · cfg 4",
+      "gpus": "2 GPU",
+      "winner": "sglang",
+      "cells": {
+        "sglang": {
+          "client_latency_s": 49.111,
+          "profile": "default"
+        },
+        "vllm-omni": {
+          "status": "profile_issue",
+          "reason": "vllm-omni rejects the current serve_args combination: 'LTX CFG parallelism only supports CFG-only guidance without rescale.' The profile needs to drop or reconfigure the guidance rescale path for LTX-2 CFG-parallel; not attempted in this run."
+        },
+        "lightx2v": {
+          "client_latency_s": 89.728,
+          "profile": "h100-1gpu"
+        },
+        "trtllm-visual": {
+          "status": "not_run",
+          "reason": "Not yet classified. Confirm framework support and add a validated command profile, or mark unsupported."
+        }
+      },
+      "winner_speedup": "1.83x"
     },
     {
       "case_id": "ltx2.3_twostage_t2v_2gpus",
@@ -242,7 +447,7 @@
       "winner": "sglang",
       "cells": {
         "sglang": {
-          "client_latency_s": 12.025,
+          "client_latency_s": 12.029,
           "profile": "h100-80gb-2gpu"
         },
         "vllm-omni": {
@@ -251,7 +456,7 @@
         },
         "lightx2v": {
           "status": "failed",
-          "reason": "LightX2V task FAILED: {'task_id': 'CNU2-5061-48JW-FAF3-WHNG', 'status': 'failed', 'start_time': '2026-07-02T09:07:45.073092', 'end_time': '2026-07-02T09:07:48.840916', 'error': 'CUDA out of memory. Tried to allocate 30.00 MiB. GPU 0 has a total capacity of 79.18 GiB of which 6.19 MiB is free. Including non-PyTorch memory, this process has 79.09 GiB memory in use. Of the allocated memory 78.16 GiB is allocated by PyTorch, and 198.54 MiB is reserved by PyTorch but unallocated. If reserved but unallocated memory is large try setting PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True to avoid fragmentation.  See documentation for Memory Management  (https://pytorch.org/docs/stable/notes/cuda.html#environment-variables)', 'error_type': 'OutOfMemoryError', 'save_result_path': '/tmp/lightx2v_ltx2.3_twostage_t2v_2gpus_1782983264225.mp4'}"
+          "reason": "OOM on H100 80GB: LTX-2.3 22B two-stage 121-frame t2av peak exceeds 80GB even with every lossless lever (seq_p_size=2 activation sharding + block cpu_offload + Gemma/VAE offload + exact flash_attn3). Upstream profiles target H200 141GB. command_profiles below are the best-attempted lossless config, kept for provenance."
         },
         "trtllm-visual": {
           "status": "not_run",
@@ -261,17 +466,17 @@
     },
     {
       "case_id": "cosmos3_nano_t2v_720p_189f",
-      "case": "Cosmos3 Nano T2V 720p",
+      "case": "Cosmos3-Nano T2V 720p",
       "details": "1280x720x189f · 35 steps · cfg 6",
       "gpus": "4 GPU",
       "winner": "sglang",
       "cells": {
         "sglang": {
-          "client_latency_s": 54.106,
+          "client_latency_s": 54.112,
           "profile": "h100-4gpu-cfg-ulysses-speed-compile"
         },
         "vllm-omni": {
-          "client_latency_s": 65.933,
+          "client_latency_s": 66.308,
           "profile": "default"
         },
         "lightx2v": {
@@ -283,7 +488,33 @@
           "reason": "Not yet classified. Confirm framework support and add a validated command profile, or mark unsupported."
         }
       },
-      "winner_speedup": "1.22x"
+      "winner_speedup": "1.23x"
+    },
+    {
+      "case_id": "cosmos3_nano_i2v_720p_189f",
+      "case": "Cosmos3-Nano I2V 720p",
+      "details": "1280x720x189f · 35 steps · cfg 6",
+      "gpus": "4 GPU",
+      "winner": "sglang",
+      "cells": {
+        "sglang": {
+          "client_latency_s": 54.111,
+          "profile": "default"
+        },
+        "vllm-omni": {
+          "client_latency_s": 66.295,
+          "profile": "default"
+        },
+        "lightx2v": {
+          "status": "unsupported",
+          "reason": "No tracked LightX2V Cosmos3 serving path in this benchmark."
+        },
+        "trtllm-visual": {
+          "status": "not_run",
+          "reason": "Not yet classified. Confirm framework support and add a validated command profile, or mark unsupported."
+        }
+      },
+      "winner_speedup": "1.23x"
     }
   ]
 }

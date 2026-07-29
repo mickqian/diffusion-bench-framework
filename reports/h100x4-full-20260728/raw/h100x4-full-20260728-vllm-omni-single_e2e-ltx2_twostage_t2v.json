@@ -1,0 +1,137 @@
+{
+  "timestamp": "2026-07-28T20:59:49.305179+00:00",
+  "commit_sha": "71f4c703bfcce202239646d44875a5773993a0d8",
+  "run_id": "h100x4-full-20260728-vllm-omni-single_e2e-ltx2_twostage_t2v",
+  "hardware": {
+    "runner_labels": null,
+    "gpu_config": null,
+    "gpus": [
+      "NVIDIA H100 80GB HBM3, 81559 MiB, 580.126.20",
+      "NVIDIA H100 80GB HBM3, 81559 MiB, 580.126.20",
+      "NVIDIA H100 80GB HBM3, 81559 MiB, 580.126.20",
+      "NVIDIA H100 80GB HBM3, 81559 MiB, 580.126.20"
+    ],
+    "hardware_profile_override": "h100"
+  },
+  "sglang_runtime": {
+    "package_version": "0.0.0.dev15737+g50beeeb8c",
+    "module_path": "/persistent/sglang-ltx23-tp-sp-experiment/python/sglang/__init__.py",
+    "git_root": "/persistent/sglang-ltx23-tp-sp-experiment",
+    "git_commit": "161fffedfc99974a75f041e64589f6e1eb287fa9"
+  },
+  "framework_runtime": {
+    "venv_root": "/persistent/fw-venvs",
+    "install_specs": {
+      "vllm": "vllm",
+      "vllm_omni": "git+https://github.com/vllm-project/vllm-omni.git",
+      "lightx2v": "git+https://github.com/ModelTC/LightX2V.git",
+      "lightx2v_flash_attn": "flash-attn==2.8.3",
+      "lightx2v_flash_attn3": "",
+      "lightx2v_fa3_hf_repo": "varunneal/flash-attention-3",
+      "lightx2v_fa3_hf_revision": "de87b9b5af06dd9984df595bef90b2eba44b181a",
+      "lightx2v_fa3_hf_subdir": "build/torch28-cxx11-cu128-x86_64-linux/flash_attention_3",
+      "lightx2v_flashinfer": "flashinfer-python==0.6.11",
+      "trtllm": "tensorrt-llm==1.3.0rc18",
+      "torch_cuda_arch_list": "9.0"
+    },
+    "launchers": {
+      "vllm_omni_server_bin": "vllm",
+      "vllm_omni_required_help_args": "--omni",
+      "trtllm_visual_server_bin": "trtllm-serve"
+    },
+    "vllm-omni": {
+      "venv_path": "/persistent/fw-venvs/vllm-omni",
+      "packages": {
+        "vllm": {
+          "Name": "vllm",
+          "Version": "0.26.0",
+          "Home-page": "https://github.com/vllm-project/vllm",
+          "Location": "/persistent/fw-venvs/vllm-omni/lib/python3.12/site-packages"
+        },
+        "vllm-omni": {
+          "Name": "vllm-omni",
+          "Version": "0.26.0rc2.dev11+gc2b55de5b",
+          "Home-page": "https://github.com/vllm-project/vllm-omni",
+          "Location": "/persistent/fw-venvs/vllm-omni/lib/python3.12/site-packages"
+        }
+      },
+      "direct_urls": {
+        "vllm_omni-0.26.0rc2.dev11+gc2b55de5b.dist-info": {
+          "url": "https://github.com/vllm-project/vllm-omni.git",
+          "vcs_info": {
+            "commit_id": "c2b55de5b9ea618cd296665c31c1ffb82b366900",
+            "vcs": "git"
+          }
+        }
+      }
+    },
+    "lightx2v": {
+      "venv_path": "/persistent/fw-venvs/lightx2v"
+    },
+    "trtllm-visual": {
+      "venv_path": "/persistent/fw-venvs/trtllm-visual"
+    }
+  },
+  "benchmark_env": {},
+  "benchmark_framework_args": {
+    "vllm-omni": [],
+    "lightx2v": {
+      "config": {
+        "compile": true
+      }
+    }
+  },
+  "torch_compile_disabled": false,
+  "benchmark_modes": [
+    "single_e2e"
+  ],
+  "requested_sglang_profile": "auto",
+  "results": [
+    {
+      "case_id": "ltx2_twostage_t2v",
+      "framework": "vllm-omni",
+      "mode": "single_e2e",
+      "model": "rootonchair/LTX-2-19b-distilled",
+      "task": "text-to-video",
+      "width": 768,
+      "height": 512,
+      "num_frames": 121,
+      "fps": 24,
+      "num_inference_steps": 40,
+      "guidance_scale": 4.0,
+      "guidance_scale_2": null,
+      "true_cfg_scale": null,
+      "negative_prompt_set": false,
+      "num_gpus": 2,
+      "latency_s": null,
+      "error": "500 Server Error: Internal Server Error for url: http://127.0.0.1:31262/v1/videos/video_gen_47c49e5f34e64de0bf2eadb2d86b8635",
+      "framework_metadata": {
+        "profile": "default",
+        "profile_request": "auto",
+        "profile_source": "default",
+        "framework_ref": "vllm-omni-0.18.0-cli-env",
+        "hardware": null,
+        "hardware_candidates": [
+          "h100"
+        ],
+        "description": "Best known vLLM-Omni command for the LTX-2 two-stage 2-GPU case.",
+        "notes": "Uses diffusion CFG parallelism and env-selected FlashAttention; no torch compile or cache path.",
+        "install_specs": null,
+        "server_bin": null,
+        "use_omni_arg": null,
+        "required_help_args": null,
+        "serve_args": "--num-gpus 2 --cfg-parallel-size 2",
+        "num_gpus": 2,
+        "extra_env_keys": [
+          "DIFFUSION_ATTENTION_BACKEND"
+        ]
+      },
+      "server_command": "vllm serve rootonchair/LTX-2-19b-distilled --port 31262 --host 127.0.0.1 --omni --num-gpus 2 --cfg-parallel-size 2",
+      "metrics": {
+        "server_startup_s": 112.05,
+        "warmup_s": 3.01
+      }
+    }
+  ],
+  "throughput_results": []
+}

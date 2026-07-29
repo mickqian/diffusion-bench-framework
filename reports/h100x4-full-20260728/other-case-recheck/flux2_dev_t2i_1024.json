@@ -1,0 +1,125 @@
+{
+  "timestamp": "2026-07-29T03:41:28.475143+00:00",
+  "commit_sha": "71f4c703bfcce202239646d44875a5773993a0d8",
+  "run_id": "verify-flux2_dev_t2i_1024",
+  "hardware": {
+    "runner_labels": null,
+    "gpu_config": null,
+    "gpus": [
+      "NVIDIA H100 80GB HBM3, 81559 MiB, 580.126.20",
+      "NVIDIA H100 80GB HBM3, 81559 MiB, 580.126.20",
+      "NVIDIA H100 80GB HBM3, 81559 MiB, 580.126.20",
+      "NVIDIA H100 80GB HBM3, 81559 MiB, 580.126.20"
+    ],
+    "hardware_profile_override": "h100"
+  },
+  "sglang_runtime": {
+    "package_version": "0.0.0.dev15737+g50beeeb8c",
+    "module_path": "/persistent/sglang-ltx23-tp-sp-experiment/python/sglang/__init__.py",
+    "git_root": "/persistent/sglang-ltx23-tp-sp-experiment",
+    "git_commit": "161fffedfc99974a75f041e64589f6e1eb287fa9"
+  },
+  "framework_runtime": {
+    "venv_root": "/tmp/sglang-diffusion-framework-venvs",
+    "install_specs": {
+      "vllm": "vllm==0.18.0",
+      "vllm_omni": "vllm-omni==0.18.0",
+      "lightx2v": "git+https://github.com/ModelTC/LightX2V.git@7efd05f8e1425b83321fd4f1cef779ef6504076f",
+      "lightx2v_flash_attn": "flash-attn==2.8.3",
+      "lightx2v_flash_attn3": "",
+      "lightx2v_fa3_hf_repo": "varunneal/flash-attention-3",
+      "lightx2v_fa3_hf_revision": "de87b9b5af06dd9984df595bef90b2eba44b181a",
+      "lightx2v_fa3_hf_subdir": "build/torch28-cxx11-cu128-x86_64-linux/flash_attention_3",
+      "lightx2v_flashinfer": "flashinfer-python==0.6.11",
+      "trtllm": "tensorrt-llm==1.3.0rc18",
+      "torch_cuda_arch_list": "9.0"
+    },
+    "launchers": {
+      "vllm_omni_server_bin": "vllm",
+      "vllm_omni_required_help_args": "--omni",
+      "trtllm_visual_server_bin": "trtllm-serve"
+    },
+    "vllm-omni": {
+      "venv_path": "/tmp/sglang-diffusion-framework-venvs/vllm-omni"
+    },
+    "lightx2v": {
+      "venv_path": "/tmp/sglang-diffusion-framework-venvs/lightx2v"
+    },
+    "trtllm-visual": {
+      "venv_path": "/tmp/sglang-diffusion-framework-venvs/trtllm-visual"
+    }
+  },
+  "benchmark_env": {},
+  "benchmark_framework_args": {
+    "vllm-omni": [],
+    "lightx2v": {
+      "config": {
+        "compile": true
+      }
+    }
+  },
+  "torch_compile_disabled": false,
+  "benchmark_modes": [
+    "single_e2e"
+  ],
+  "requested_sglang_profile": "auto",
+  "results": [
+    {
+      "case_id": "flux2_dev_t2i_1024",
+      "framework": "sglang",
+      "mode": "single_e2e",
+      "model": "black-forest-labs/FLUX.2-dev",
+      "task": "text-to-image",
+      "width": 1024,
+      "height": 1024,
+      "num_frames": null,
+      "fps": null,
+      "num_inference_steps": 50,
+      "guidance_scale": 4.0,
+      "guidance_scale_2": null,
+      "true_cfg_scale": null,
+      "negative_prompt_set": false,
+      "num_gpus": 2,
+      "latency_s": 12.734,
+      "error": null,
+      "framework_metadata": {
+        "profile": "h100-h200-2gpu-tp-compile",
+        "profile_request": "auto",
+        "profile_source": "hardware",
+        "framework_ref": null,
+        "hardware": [
+          "h100",
+          "h200"
+        ],
+        "hardware_candidates": [
+          "h100"
+        ],
+        "description": "Hopper 2-GPU TP legacy-compatible FLUX.2 compile profile.",
+        "notes": "Use for SGLang commits before --performance-mode speed existed; TP remains explicit.",
+        "install_specs": null,
+        "server_bin": null,
+        "use_omni_arg": null,
+        "required_help_args": null,
+        "serve_args": "--model-type diffusion --warmup --dit-layerwise-offload false --tp-size 2 --enable-torch-compile",
+        "num_gpus": 2,
+        "extra_env_keys": [],
+        "sglang_profile": "h100-h200-2gpu-tp-compile",
+        "sglang_profile_request": "auto",
+        "sglang_profile_source": "hardware",
+        "sglang_ref": "legacy-compatible"
+      },
+      "server_command": "sglang serve --model-path black-forest-labs/FLUX.2-dev --port 30871 --host 127.0.0.1 --backend sglang --num-gpus 2 --model-type diffusion --warmup --dit-layerwise-offload false --tp-size 2 --enable-torch-compile --warmup-steps 3",
+      "metrics": {
+        "client_latency_s": 12.734,
+        "client_latency_min_s": 12.724,
+        "client_latency_max_s": 12.788,
+        "measured_repeats": 5,
+        "server_latency_s": 12.678,
+        "client_overhead_s": 0.056,
+        "server_startup_s": 112.07,
+        "warmup_s": 28.75
+      }
+    }
+  ],
+  "throughput_results": []
+}

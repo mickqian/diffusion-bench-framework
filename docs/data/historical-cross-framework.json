@@ -1,6 +1,6 @@
 {
   "id": "historical-cross-framework-20260610",
-  "updated_at": "2026-07-03",
+  "updated_at": "2026-07-29",
   "frameworks": {
     "sglang": "SGLang-Diffusion",
     "vllm-omni": "vLLM-Omni",
@@ -12,7 +12,7 @@
     "cache": "No response cache, no Cache-DiT, no temporal cache in these rows."
   },
   "summary": {
-    "sections": 7,
+    "sections": 9,
     "h200_full_matrix_single_rows": 13,
     "h200_full_matrix_sglang_wins": 12,
     "h200_full_matrix_other_wins": 0,
@@ -20,6 +20,1134 @@
     "h200_throughput_other_wins": 0
   },
   "sections": [
+    {
+      "id": "h100x4-full-20260728_single_e2e",
+      "run": "h100x4-full-20260728",
+      "run_label": "H100 full 18-case matrix (best-lossless)",
+      "date": "2026-07-29",
+      "gpu": "4x NVIDIA H100 80GB",
+      "title": "H100 full 18-case matrix (best-lossless)",
+      "subtitle": "Steady-state single-request latency on H100, best lossless config per framework (torch.compile on everywhere), latest main/HEAD for every framework. Full 18-case image+video matrix. Two confirmed sglang bugs (ideogram4 FP8 shape, Wan2.2-A14B to_q linear shape) and several competitor profile gaps are called out per-cell rather than hidden; see policy.bimodal_latency_note for a measurement caveat on two cells. Throughput tables live in the report.",
+      "mode": "single_e2e",
+      "source_manifest": "reports/h100x4-full-20260728/",
+      "reproduce": "configs/benchmark/ (explicit matrix) + scripts/build_benchmark_config.py",
+      "framework_versions": {
+        "sglang": "161fffe (origin/main)",
+        "vllm-omni": "main HEAD",
+        "lightx2v": "main HEAD",
+        "trtllm-visual": "1.3.0rc18"
+      },
+      "summary": {
+        "rows": 18,
+        "comparable_rows": 15,
+        "sglang_diffusion_wins": 12,
+        "other_wins": 3
+      },
+      "rows": [
+        {
+          "case_id": "flux1_dev_t2i_1024",
+          "case": "FLUX.1-dev T2I",
+          "details": "1024x1024 · 50 steps · cfg 3.5",
+          "mode": "single_e2e",
+          "winner": "sglang",
+          "cells": {
+            "sglang": {
+              "gpus": 2,
+              "profile": "h100-h200-2gpu-tp-compile",
+              "status": "ok",
+              "latency_s": 4.319,
+              "ratio_to_sglang": 1.0
+            },
+            "vllm-omni": {
+              "gpus": 2,
+              "profile": "h100-h200-2gpu-tp-compile",
+              "status": "ok",
+              "latency_s": 5.619,
+              "ratio_to_sglang": 1.301
+            },
+            "lightx2v": {
+              "status": "unsupported",
+              "reason": "Tracked LightX2V version has no FLUX.1 serving path; FLUX coverage starts at FLUX.2."
+            },
+            "trtllm-visual": {
+              "gpus": 2,
+              "profile": "h100-h200-2gpu-tp-speed",
+              "status": "ok",
+              "latency_s": 7.318,
+              "ratio_to_sglang": 1.694
+            }
+          }
+        },
+        {
+          "case_id": "flux2_dev_t2i_1024",
+          "case": "FLUX.2-dev T2I",
+          "details": "1024x1024 · 50 steps · cfg 4",
+          "mode": "single_e2e",
+          "winner": "sglang",
+          "cells": {
+            "sglang": {
+              "gpus": 2,
+              "profile": "h100-h200-2gpu-tp-compile",
+              "status": "ok",
+              "latency_s": 12.767,
+              "ratio_to_sglang": 1.0
+            },
+            "vllm-omni": {
+              "gpus": 2,
+              "profile": "h100-h200-2gpu-tp-compile",
+              "status": "ok",
+              "latency_s": 16.663,
+              "ratio_to_sglang": 1.305
+            },
+            "lightx2v": {
+              "status": "not_run",
+              "reason": "Model download requires HF_TOKEN access to the gated FLUX.2 repo; not available in this run. Every other case's model was already cached locally so this is the only data point blocked purely by credentials, not a framework or config issue."
+            },
+            "trtllm-visual": {
+              "status": "profile_issue",
+              "reason": "trtllm-visual OOMs at startup (CUDA out of memory, ~79GB/79GB used on a single H100) loading FLUX.2; likely needs an explicit CPU-offload or multi-GPU profile for this model, not attempted in this run."
+            }
+          }
+        },
+        {
+          "case_id": "qwen_image_2512_t2i_1024",
+          "case": "Qwen-Image-2512 T2I (no-CFG)",
+          "details": "1024x1024 · 50 steps · cfg 1",
+          "mode": "single_e2e",
+          "winner": "vllm-omni",
+          "cells": {
+            "sglang": {
+              "gpus": 2,
+              "profile": "h100-2gpu-ulysses-speed-compile",
+              "status": "ok",
+              "latency_s": 5.744,
+              "ratio_to_sglang": 1.0
+            },
+            "vllm-omni": {
+              "gpus": 2,
+              "profile": "default",
+              "status": "ok",
+              "latency_s": 4.483,
+              "ratio_to_sglang": 0.78
+            },
+            "lightx2v": {
+              "status": "unsupported",
+              "reason": "Tracked LightX2V version has no Qwen-Image text-to-image serving path."
+            },
+            "trtllm-visual": {
+              "gpus": 2,
+              "profile": "h100-h200-2gpu-tp-speed",
+              "status": "ok",
+              "latency_s": 7.604,
+              "ratio_to_sglang": 1.324
+            }
+          }
+        },
+        {
+          "case_id": "qwen_image_2512_t2i_1024_truecfg",
+          "case": "Qwen-Image-2512 T2I (true-CFG)",
+          "details": "1024x1024 · 50 steps · true-cfg 4.0",
+          "mode": "single_e2e",
+          "winner": "sglang",
+          "cells": {
+            "sglang": {
+              "gpus": 2,
+              "profile": "h100-h200-2gpu-tp-speed-compile",
+              "status": "ok",
+              "latency_s": 6.568,
+              "ratio_to_sglang": 1.0
+            },
+            "vllm-omni": {
+              "gpus": 2,
+              "profile": "default",
+              "status": "ok",
+              "latency_s": 8.799,
+              "ratio_to_sglang": 1.34
+            },
+            "lightx2v": {
+              "status": "unsupported",
+              "reason": "Tracked LightX2V version has no Qwen-Image text-to-image serving path."
+            },
+            "trtllm-visual": {
+              "status": "unsupported",
+              "reason": "true_cfg_scale honoring unverified for TensorRT-LLM VisualGen; excluded from the true-CFG quality-path comparison to avoid a mismatched single- vs two-pass row."
+            }
+          }
+        },
+        {
+          "case_id": "qwen_image_edit_2511",
+          "case": "Qwen-Image-Edit-2511",
+          "details": "1024x1024 · 40 steps · cfg 1",
+          "mode": "single_e2e",
+          "winner": "sglang",
+          "cells": {
+            "sglang": {
+              "gpus": 2,
+              "profile": "default",
+              "status": "ok",
+              "latency_s": 7.663,
+              "ratio_to_sglang": 1.0
+            },
+            "vllm-omni": {
+              "gpus": 2,
+              "profile": "default",
+              "status": "ok",
+              "latency_s": 7.791,
+              "ratio_to_sglang": 1.017
+            },
+            "lightx2v": {
+              "status": "unsupported",
+              "reason": "Tracked LightX2V version has no Qwen-Image-Edit serving path."
+            },
+            "trtllm-visual": {
+              "status": "not_run",
+              "reason": "Not yet classified. Confirm framework support and add a validated command profile, or mark unsupported."
+            }
+          }
+        },
+        {
+          "case_id": "zimage_turbo_t2i_1024",
+          "case": "Z-Image-Turbo T2I",
+          "details": "1024x1024 · 9 steps · cfg 0",
+          "mode": "single_e2e",
+          "winner": "sglang",
+          "cells": {
+            "sglang": {
+              "gpus": 2,
+              "profile": "h100-h200-2gpu-tp-resident-eager",
+              "status": "ok",
+              "latency_s": 0.694,
+              "ratio_to_sglang": 1.0
+            },
+            "vllm-omni": {
+              "gpus": 2,
+              "profile": "default",
+              "status": "ok",
+              "latency_s": 1.252,
+              "ratio_to_sglang": 1.804
+            },
+            "lightx2v": {
+              "gpus": 2,
+              "profile": "default",
+              "status": "ok",
+              "latency_s": 2.007,
+              "ratio_to_sglang": 2.892
+            },
+            "trtllm-visual": {
+              "status": "not_run",
+              "reason": "Not yet classified. Confirm framework support and add a validated command profile, or mark unsupported."
+            }
+          }
+        },
+        {
+          "case_id": "ideogram4_t2i_1024_2gpu_tp",
+          "case": "Ideogram-4 (FP8) T2I",
+          "details": "1024x1024 · 20 steps · cfg ?",
+          "mode": "single_e2e",
+          "winner": "n/a",
+          "cells": {
+            "sglang": {
+              "status": "broken",
+              "reason": "sglang bug: WeightOnlyFP8ColumnParallelLinear reports 'FP8 linear weight must be 2-D, got shape torch.Size([1])' under 2-GPU TP; root cause not yet located, tracked separately."
+            },
+            "vllm-omni": {
+              "status": "unsupported",
+              "reason": "Latest vLLM-Omni has no Ideogram-4 serving path (image-gen coverage is FLUX/Qwen-Image/Wan)."
+            },
+            "lightx2v": {
+              "status": "unsupported",
+              "reason": "Latest LightX2V has no Ideogram-4 serving path."
+            },
+            "trtllm-visual": {
+              "status": "unsupported",
+              "reason": "Latest TensorRT-LLM VisualGen has no Ideogram-4 serving path (coverage is FLUX/Wan/LTX-2/Qwen-Image/Cosmos3)."
+            }
+          }
+        },
+        {
+          "case_id": "cosmos3_nano_t2i_720p",
+          "case": "Cosmos3-Nano T2I 720p",
+          "details": "1280x720 · 35 steps · cfg 6",
+          "mode": "single_e2e",
+          "winner": "sglang",
+          "cells": {
+            "sglang": {
+              "gpus": 2,
+              "profile": "default",
+              "status": "ok",
+              "latency_s": 1.219,
+              "ratio_to_sglang": 1.0
+            },
+            "vllm-omni": {
+              "status": "profile_issue",
+              "reason": "vllm-omni stage config is missing a now-required 'engine_input_source' field (orchestrator init fails before any request runs); the correct value for vllm-omni's current main branch was not determined in this run -- needs a profile update, not a framework limitation."
+            },
+            "lightx2v": {
+              "status": "unsupported",
+              "reason": "No tracked LightX2V Cosmos3 serving path in this benchmark."
+            },
+            "trtllm-visual": {
+              "status": "profile_issue",
+              "reason": "trtllm-visual server starts and passes health checks but returns 400 Bad Request on every generation request; likely a request parameter mismatch for this case, not investigated further."
+            }
+          }
+        },
+        {
+          "case_id": "wan21_t2v_1_3b_480p",
+          "case": "Wan2.1 T2V 1.3B 480p",
+          "details": "832x480x81f · 50 steps · cfg 6",
+          "mode": "single_e2e",
+          "winner": "sglang",
+          "cells": {
+            "sglang": {
+              "gpus": 2,
+              "profile": "h100-2gpu-cfg-speed-compile",
+              "status": "ok",
+              "latency_s": 25.049,
+              "ratio_to_sglang": 1.0
+            },
+            "vllm-omni": {
+              "gpus": 2,
+              "profile": "default",
+              "status": "ok",
+              "latency_s": 32.139,
+              "ratio_to_sglang": 1.283
+            },
+            "lightx2v": {
+              "gpus": 2,
+              "profile": "default",
+              "status": "ok",
+              "latency_s": 27.051,
+              "ratio_to_sglang": 1.08
+            },
+            "trtllm-visual": {
+              "status": "not_run",
+              "reason": "Not yet classified. Confirm framework support and add a validated command profile, or mark unsupported."
+            }
+          }
+        },
+        {
+          "case_id": "wan21_i2v_14b_480p",
+          "case": "Wan2.1 I2V 14B 480p",
+          "details": "832x480x81f · 40 steps · cfg 5",
+          "mode": "single_e2e",
+          "winner": "sglang",
+          "cells": {
+            "sglang": {
+              "gpus": 4,
+              "profile": "default",
+              "status": "ok",
+              "latency_s": 57.12,
+              "ratio_to_sglang": 1.0
+            },
+            "vllm-omni": {
+              "gpus": 4,
+              "profile": "default",
+              "status": "ok",
+              "latency_s": 76.435,
+              "ratio_to_sglang": 1.338
+            },
+            "lightx2v": {
+              "gpus": 4,
+              "profile": "default",
+              "status": "ok",
+              "latency_s": 62.121,
+              "ratio_to_sglang": 1.088
+            },
+            "trtllm-visual": {
+              "status": "not_run",
+              "reason": "Not yet classified. Confirm framework support and add a validated command profile, or mark unsupported."
+            }
+          }
+        },
+        {
+          "case_id": "wan21_i2v_14b_720p",
+          "case": "Wan2.1 I2V 14B 720p",
+          "details": "1280x720x81f · 40 steps · cfg 5",
+          "mode": "single_e2e",
+          "winner": "sglang",
+          "cells": {
+            "sglang": {
+              "gpus": 4,
+              "profile": "default",
+              "status": "ok",
+              "latency_s": 203.376,
+              "ratio_to_sglang": 1.0
+            },
+            "vllm-omni": {
+              "gpus": 4,
+              "profile": "default",
+              "status": "ok",
+              "latency_s": 251.789,
+              "ratio_to_sglang": 1.238
+            },
+            "lightx2v": {
+              "gpus": 4,
+              "profile": "default",
+              "status": "ok",
+              "latency_s": 223.996,
+              "ratio_to_sglang": 1.101
+            },
+            "trtllm-visual": {
+              "status": "not_run",
+              "reason": "Not yet classified. Confirm framework support and add a validated command profile, or mark unsupported."
+            }
+          }
+        },
+        {
+          "case_id": "wan22_t2v_a14b_720p",
+          "case": "Wan2.2 T2V A14B 720p",
+          "details": "1280x720x81f · 40 steps · cfg 4",
+          "mode": "single_e2e",
+          "winner": "lightx2v",
+          "cells": {
+            "sglang": {
+              "status": "broken",
+              "reason": "sglang bug: Wan2.2-A14B (MoE) DiT's to_q linear reports 'b must be 2D' (weight shape collapses to [1]) under torch.compile + CFG-parallel + Ulysses; identical failure on both T2V and I2V A14B variants, so it's a shared-code issue, not model-specific; tracked separately."
+            },
+            "vllm-omni": {
+              "gpus": 4,
+              "profile": "default",
+              "status": "ok",
+              "latency_s": 247.638
+            },
+            "lightx2v": {
+              "gpus": 4,
+              "profile": "default",
+              "status": "ok",
+              "latency_s": 214.4
+            },
+            "trtllm-visual": {
+              "status": "not_run",
+              "reason": "Not yet classified. Confirm framework support and add a validated command profile, or mark unsupported."
+            }
+          }
+        },
+        {
+          "case_id": "wan22_i2v_a14b_720p",
+          "case": "Wan2.2 I2V A14B 720p",
+          "details": "1280x720x81f · 40 steps · cfg 3.5",
+          "mode": "single_e2e",
+          "winner": "lightx2v",
+          "cells": {
+            "sglang": {
+              "status": "broken",
+              "reason": "sglang bug: identical to wan22_t2v_a14b_720p (same to_q linear failure, byte-for-byte same error modulo device/request id) -- confirms a shared root cause in the Wan2.2-A14B DiT code path, tracked separately."
+            },
+            "vllm-omni": {
+              "gpus": 4,
+              "profile": "default",
+              "status": "ok",
+              "latency_s": 250.355
+            },
+            "lightx2v": {
+              "gpus": 4,
+              "profile": "default",
+              "status": "ok",
+              "latency_s": 214.414
+            },
+            "trtllm-visual": {
+              "status": "not_run",
+              "reason": "Not yet classified. Confirm framework support and add a validated command profile, or mark unsupported."
+            }
+          }
+        },
+        {
+          "case_id": "wan22_ti2v_5b_704p",
+          "case": "Wan2.2 TI2V 5B 704p",
+          "details": "1280x704x81f · 50 steps · cfg 5",
+          "mode": "single_e2e",
+          "winner": "sglang",
+          "cells": {
+            "sglang": {
+              "gpus": 2,
+              "profile": "h100-h200-2gpu",
+              "status": "ok",
+              "latency_s": 30.564,
+              "ratio_to_sglang": 1.0
+            },
+            "vllm-omni": {
+              "gpus": 2,
+              "profile": "default",
+              "status": "ok",
+              "latency_s": 38.334,
+              "ratio_to_sglang": 1.254
+            },
+            "lightx2v": {
+              "gpus": 2,
+              "profile": "default",
+              "status": "ok",
+              "latency_s": 32.061,
+              "ratio_to_sglang": 1.049
+            },
+            "trtllm-visual": {
+              "status": "not_run",
+              "reason": "Not yet classified. Confirm framework support and add a validated command profile, or mark unsupported."
+            }
+          }
+        },
+        {
+          "case_id": "ltx2_twostage_t2v",
+          "case": "LTX-2 two-stage T2V",
+          "details": "768x512x121f · 40 steps · cfg 4",
+          "mode": "single_e2e",
+          "winner": "sglang",
+          "cells": {
+            "sglang": {
+              "gpus": 2,
+              "profile": "default",
+              "status": "ok",
+              "latency_s": 49.111,
+              "ratio_to_sglang": 1.0
+            },
+            "vllm-omni": {
+              "status": "profile_issue",
+              "reason": "vllm-omni rejects the current serve_args combination: 'LTX CFG parallelism only supports CFG-only guidance without rescale.' The profile needs to drop or reconfigure the guidance rescale path for LTX-2 CFG-parallel; not attempted in this run."
+            },
+            "lightx2v": {
+              "gpus": 2,
+              "profile": "h100-1gpu",
+              "status": "ok",
+              "latency_s": 89.728,
+              "ratio_to_sglang": 1.827
+            },
+            "trtllm-visual": {
+              "status": "not_run",
+              "reason": "Not yet classified. Confirm framework support and add a validated command profile, or mark unsupported."
+            }
+          }
+        },
+        {
+          "case_id": "ltx2.3_twostage_t2v_2gpus",
+          "case": "LTX-2.3 two-stage T2V",
+          "details": "768x512x121f · 30 steps · cfg 3",
+          "mode": "single_e2e",
+          "winner": "sglang",
+          "cells": {
+            "sglang": {
+              "gpus": 2,
+              "profile": "h100-80gb-2gpu",
+              "status": "ok",
+              "latency_s": 12.029,
+              "ratio_to_sglang": 1.0
+            },
+            "vllm-omni": {
+              "status": "no_profile",
+              "reason": "No compatible vLLM-Omni LTX2.3 serving profile is configured."
+            },
+            "lightx2v": {
+              "status": "failed",
+              "reason": "OOM on H100 80GB: LTX-2.3 22B two-stage 121-frame t2av peak exceeds 80GB even with every lossless lever (seq_p_size=2 activation sharding + block cpu_offload + Gemma/VAE offload + exact flash_attn3). Upstream profiles target H200 141GB. command_profiles below are the best-attempted lossless config, kept for provenance."
+            },
+            "trtllm-visual": {
+              "status": "not_run",
+              "reason": "Not yet classified. Confirm framework support and add a validated command profile, or mark unsupported."
+            }
+          }
+        },
+        {
+          "case_id": "cosmos3_nano_t2v_720p_189f",
+          "case": "Cosmos3-Nano T2V 720p",
+          "details": "1280x720x189f · 35 steps · cfg 6",
+          "mode": "single_e2e",
+          "winner": "sglang",
+          "cells": {
+            "sglang": {
+              "gpus": 4,
+              "profile": "h100-4gpu-cfg-ulysses-speed-compile",
+              "status": "ok",
+              "latency_s": 54.112,
+              "ratio_to_sglang": 1.0
+            },
+            "vllm-omni": {
+              "gpus": 4,
+              "profile": "default",
+              "status": "ok",
+              "latency_s": 66.308,
+              "ratio_to_sglang": 1.225
+            },
+            "lightx2v": {
+              "status": "unsupported",
+              "reason": "No tracked LightX2V Cosmos3 serving path in this benchmark."
+            },
+            "trtllm-visual": {
+              "status": "not_run",
+              "reason": "Not yet classified. Confirm framework support and add a validated command profile, or mark unsupported."
+            }
+          }
+        },
+        {
+          "case_id": "cosmos3_nano_i2v_720p_189f",
+          "case": "Cosmos3-Nano I2V 720p",
+          "details": "1280x720x189f · 35 steps · cfg 6",
+          "mode": "single_e2e",
+          "winner": "sglang",
+          "cells": {
+            "sglang": {
+              "gpus": 4,
+              "profile": "default",
+              "status": "ok",
+              "latency_s": 54.111,
+              "ratio_to_sglang": 1.0
+            },
+            "vllm-omni": {
+              "gpus": 4,
+              "profile": "default",
+              "status": "ok",
+              "latency_s": 66.295,
+              "ratio_to_sglang": 1.225
+            },
+            "lightx2v": {
+              "status": "unsupported",
+              "reason": "No tracked LightX2V Cosmos3 serving path in this benchmark."
+            },
+            "trtllm-visual": {
+              "status": "not_run",
+              "reason": "Not yet classified. Confirm framework support and add a validated command profile, or mark unsupported."
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "h100x4-full-20260728_throughput",
+      "run": "h100x4-full-20260728",
+      "run_label": "H100 full 18-case matrix (best-lossless)",
+      "date": "2026-07-29",
+      "gpu": "4x NVIDIA H100 80GB",
+      "title": "H100 high-pressure throughput",
+      "subtitle": "4 requests at concurrency 2 (image and video); qps and p95 from client-observed completions.",
+      "mode": "throughput",
+      "source_manifest": "reports/h100x4-full-20260728/",
+      "reproduce": "configs/benchmark/ (explicit matrix) + scripts/build_benchmark_config.py",
+      "framework_versions": {
+        "sglang": "161fffe (origin/main)",
+        "vllm-omni": "main HEAD",
+        "lightx2v": "main HEAD",
+        "trtllm-visual": "1.3.0rc18"
+      },
+      "summary": {
+        "rows": 18,
+        "comparable_rows": 15,
+        "sglang_diffusion_wins": 10,
+        "other_wins": 5
+      },
+      "rows": [
+        {
+          "case_id": "flux1_dev_t2i_1024",
+          "case": "FLUX.1-dev T2I",
+          "details": "1024x1024 · 50 steps · cfg 3.5",
+          "mode": "throughput",
+          "winner": "sglang",
+          "cells": {
+            "sglang": {
+              "status": "ok",
+              "qps": 0.233,
+              "p95_s": 8.59
+            },
+            "vllm-omni": {
+              "status": "ok",
+              "qps": 0.18,
+              "p95_s": 11.128,
+              "ratio_to_sglang": 0.774
+            },
+            "lightx2v": {
+              "status": "unsupported",
+              "reason": "Tracked LightX2V version has no FLUX.1 serving path; FLUX coverage starts at FLUX.2."
+            },
+            "trtllm-visual": {
+              "status": "ok",
+              "qps": 0.136,
+              "p95_s": 14.703,
+              "ratio_to_sglang": 0.585
+            }
+          }
+        },
+        {
+          "case_id": "flux2_dev_t2i_1024",
+          "case": "FLUX.2-dev T2I",
+          "details": "1024x1024 · 50 steps · cfg 4",
+          "mode": "throughput",
+          "winner": "sglang",
+          "cells": {
+            "sglang": {
+              "status": "ok",
+              "qps": 0.079,
+              "p95_s": 25.42
+            },
+            "vllm-omni": {
+              "status": "ok",
+              "qps": 0.06,
+              "p95_s": 33.283,
+              "ratio_to_sglang": 0.764
+            },
+            "lightx2v": {
+              "status": "not_run",
+              "reason": "Model download requires HF_TOKEN access to the gated FLUX.2 repo; not available in this run. Every other case's model was already cached locally so this is the only data point blocked purely by credentials, not a framework or config issue."
+            },
+            "trtllm-visual": {
+              "status": "profile_issue",
+              "reason": "trtllm-visual OOMs at startup (CUDA out of memory, ~79GB/79GB used on a single H100) loading FLUX.2; likely needs an explicit CPU-offload or multi-GPU profile for this model, not attempted in this run."
+            }
+          }
+        },
+        {
+          "case_id": "qwen_image_2512_t2i_1024",
+          "case": "Qwen-Image-2512 T2I (no-CFG)",
+          "details": "1024x1024 · 50 steps · cfg 1",
+          "mode": "throughput",
+          "winner": "vllm-omni",
+          "cells": {
+            "sglang": {
+              "status": "ok",
+              "qps": 0.17,
+              "p95_s": 11.798
+            },
+            "vllm-omni": {
+              "status": "ok",
+              "qps": 0.227,
+              "p95_s": 8.825,
+              "ratio_to_sglang": 1.338
+            },
+            "lightx2v": {
+              "status": "unsupported",
+              "reason": "Tracked LightX2V version has no Qwen-Image text-to-image serving path."
+            },
+            "trtllm-visual": {
+              "status": "ok",
+              "qps": 0.131,
+              "p95_s": 15.241,
+              "ratio_to_sglang": 0.774
+            }
+          }
+        },
+        {
+          "case_id": "qwen_image_2512_t2i_1024_truecfg",
+          "case": "Qwen-Image-2512 T2I (true-CFG)",
+          "details": "1024x1024 · 50 steps · true-cfg 4.0",
+          "mode": "throughput",
+          "winner": "sglang",
+          "cells": {
+            "sglang": {
+              "status": "ok",
+              "qps": 0.153,
+              "p95_s": 13.113
+            },
+            "vllm-omni": {
+              "status": "ok",
+              "qps": 0.115,
+              "p95_s": 17.469,
+              "ratio_to_sglang": 0.751
+            },
+            "lightx2v": {
+              "status": "unsupported",
+              "reason": "Tracked LightX2V version has no Qwen-Image text-to-image serving path."
+            },
+            "trtllm-visual": {
+              "status": "unsupported",
+              "reason": "true_cfg_scale honoring unverified for TensorRT-LLM VisualGen; excluded from the true-CFG quality-path comparison to avoid a mismatched single- vs two-pass row."
+            }
+          }
+        },
+        {
+          "case_id": "qwen_image_edit_2511",
+          "case": "Qwen-Image-Edit-2511",
+          "details": "1024x1024 · 40 steps · cfg 1",
+          "mode": "throughput",
+          "winner": "sglang",
+          "cells": {
+            "sglang": {
+              "status": "ok",
+              "qps": 0.131,
+              "p95_s": 15.35
+            },
+            "vllm-omni": {
+              "status": "ok",
+              "qps": 0.104,
+              "p95_s": 19.209,
+              "ratio_to_sglang": 0.8
+            },
+            "lightx2v": {
+              "status": "unsupported",
+              "reason": "Tracked LightX2V version has no Qwen-Image-Edit serving path."
+            },
+            "trtllm-visual": {
+              "status": "not_run",
+              "reason": "Not yet classified. Confirm framework support and add a validated command profile, or mark unsupported."
+            }
+          }
+        },
+        {
+          "case_id": "zimage_turbo_t2i_1024",
+          "case": "Z-Image-Turbo T2I",
+          "details": "1024x1024 · 9 steps · cfg 0",
+          "mode": "throughput",
+          "winner": "sglang",
+          "cells": {
+            "sglang": {
+              "status": "ok",
+              "qps": 1.446,
+              "p95_s": 1.385
+            },
+            "vllm-omni": {
+              "status": "ok",
+              "qps": 0.844,
+              "p95_s": 2.402,
+              "ratio_to_sglang": 0.584
+            },
+            "lightx2v": {
+              "status": "ok",
+              "qps": 0.664,
+              "p95_s": 3.864,
+              "ratio_to_sglang": 0.46
+            },
+            "trtllm-visual": {
+              "status": "not_run",
+              "reason": "Not yet classified. Confirm framework support and add a validated command profile, or mark unsupported."
+            }
+          }
+        },
+        {
+          "case_id": "ideogram4_t2i_1024_2gpu_tp",
+          "case": "Ideogram-4 (FP8) T2I",
+          "details": "1024x1024 · 20 steps · cfg ?",
+          "mode": "throughput",
+          "winner": "n/a",
+          "cells": {
+            "sglang": {
+              "status": "broken",
+              "reason": "sglang bug: WeightOnlyFP8ColumnParallelLinear reports 'FP8 linear weight must be 2-D, got shape torch.Size([1])' under 2-GPU TP; root cause not yet located, tracked separately."
+            },
+            "vllm-omni": {
+              "status": "unsupported",
+              "reason": "Latest vLLM-Omni has no Ideogram-4 serving path (image-gen coverage is FLUX/Qwen-Image/Wan)."
+            },
+            "lightx2v": {
+              "status": "unsupported",
+              "reason": "Latest LightX2V has no Ideogram-4 serving path."
+            },
+            "trtllm-visual": {
+              "status": "unsupported",
+              "reason": "Latest TensorRT-LLM VisualGen has no Ideogram-4 serving path (coverage is FLUX/Wan/LTX-2/Qwen-Image/Cosmos3)."
+            }
+          }
+        },
+        {
+          "case_id": "cosmos3_nano_t2i_720p",
+          "case": "Cosmos3-Nano T2I 720p",
+          "details": "1280x720 · 35 steps · cfg 6",
+          "mode": "throughput",
+          "winner": "sglang",
+          "cells": {
+            "sglang": {
+              "status": "ok",
+              "qps": 0.821,
+              "p95_s": 2.438
+            },
+            "vllm-omni": {
+              "status": "profile_issue",
+              "reason": "vllm-omni stage config is missing a now-required 'engine_input_source' field (orchestrator init fails before any request runs); the correct value for vllm-omni's current main branch was not determined in this run -- needs a profile update, not a framework limitation."
+            },
+            "lightx2v": {
+              "status": "unsupported",
+              "reason": "No tracked LightX2V Cosmos3 serving path in this benchmark."
+            },
+            "trtllm-visual": {
+              "status": "profile_issue",
+              "reason": "trtllm-visual server starts and passes health checks but returns 400 Bad Request on every generation request; likely a request parameter mismatch for this case, not investigated further."
+            }
+          }
+        },
+        {
+          "case_id": "wan21_t2v_1_3b_480p",
+          "case": "Wan2.1 T2V 1.3B 480p",
+          "details": "832x480x81f · 50 steps · cfg 6",
+          "mode": "throughput",
+          "winner": "sglang",
+          "cells": {
+            "sglang": {
+              "status": "ok",
+              "qps": 0.04,
+              "p95_s": 50.134
+            },
+            "vllm-omni": {
+              "status": "ok",
+              "qps": 0.032,
+              "p95_s": 62.236,
+              "ratio_to_sglang": 0.812
+            },
+            "lightx2v": {
+              "status": "ok",
+              "qps": 0.038,
+              "p95_s": 53.149,
+              "ratio_to_sglang": 0.942
+            },
+            "trtllm-visual": {
+              "status": "not_run",
+              "reason": "Not yet classified. Confirm framework support and add a validated command profile, or mark unsupported."
+            }
+          }
+        },
+        {
+          "case_id": "wan21_i2v_14b_480p",
+          "case": "Wan2.1 I2V 14B 480p",
+          "details": "832x480x81f · 40 steps · cfg 5",
+          "mode": "throughput",
+          "winner": "lightx2v",
+          "cells": {
+            "sglang": {
+              "status": "ok",
+              "qps": 0.014,
+              "p95_s": 140.378
+            },
+            "vllm-omni": {
+              "status": "ok",
+              "qps": 0.013,
+              "p95_s": 151.1,
+              "ratio_to_sglang": 0.93
+            },
+            "lightx2v": {
+              "status": "ok",
+              "qps": 0.016,
+              "p95_s": 124.342,
+              "ratio_to_sglang": 1.126
+            },
+            "trtllm-visual": {
+              "status": "not_run",
+              "reason": "Not yet classified. Confirm framework support and add a validated command profile, or mark unsupported."
+            }
+          }
+        },
+        {
+          "case_id": "wan21_i2v_14b_720p",
+          "case": "Wan2.1 I2V 14B 720p",
+          "details": "1280x720x81f · 40 steps · cfg 5",
+          "mode": "throughput",
+          "winner": "lightx2v",
+          "cells": {
+            "sglang": {
+              "status": "ok",
+              "qps": 0.004,
+              "p95_s": 505.425
+            },
+            "vllm-omni": {
+              "status": "ok",
+              "qps": 0.004,
+              "p95_s": 500.473,
+              "ratio_to_sglang": 1.0
+            },
+            "lightx2v": {
+              "status": "ok",
+              "qps": 0.005,
+              "p95_s": 432.815,
+              "ratio_to_sglang": 1.15
+            },
+            "trtllm-visual": {
+              "status": "not_run",
+              "reason": "Not yet classified. Confirm framework support and add a validated command profile, or mark unsupported."
+            }
+          }
+        },
+        {
+          "case_id": "wan22_t2v_a14b_720p",
+          "case": "Wan2.2 T2V A14B 720p",
+          "details": "1280x720x81f · 40 steps · cfg 4",
+          "mode": "throughput",
+          "winner": "lightx2v",
+          "cells": {
+            "sglang": {
+              "status": "broken",
+              "reason": "sglang bug: Wan2.2-A14B (MoE) DiT's to_q linear reports 'b must be 2D' (weight shape collapses to [1]) under torch.compile + CFG-parallel + Ulysses; identical failure on both T2V and I2V A14B variants, so it's a shared-code issue, not model-specific; tracked separately."
+            },
+            "vllm-omni": {
+              "status": "ok",
+              "qps": 0.004,
+              "p95_s": 491.948,
+              "ratio_to_sglang": null
+            },
+            "lightx2v": {
+              "status": "ok",
+              "qps": 0.005,
+              "p95_s": 429.016,
+              "ratio_to_sglang": null
+            },
+            "trtllm-visual": {
+              "status": "not_run",
+              "reason": "Not yet classified. Confirm framework support and add a validated command profile, or mark unsupported."
+            }
+          }
+        },
+        {
+          "case_id": "wan22_i2v_a14b_720p",
+          "case": "Wan2.2 I2V A14B 720p",
+          "details": "1280x720x81f · 40 steps · cfg 3.5",
+          "mode": "throughput",
+          "winner": "lightx2v",
+          "cells": {
+            "sglang": {
+              "status": "broken",
+              "reason": "sglang bug: identical to wan22_t2v_a14b_720p (same to_q linear failure, byte-for-byte same error modulo device/request id) -- confirms a shared root cause in the Wan2.2-A14B DiT code path, tracked separately."
+            },
+            "vllm-omni": {
+              "status": "ok",
+              "qps": 0.004,
+              "p95_s": 498.335,
+              "ratio_to_sglang": null
+            },
+            "lightx2v": {
+              "status": "ok",
+              "qps": 0.005,
+              "p95_s": 429.106,
+              "ratio_to_sglang": null
+            },
+            "trtllm-visual": {
+              "status": "not_run",
+              "reason": "Not yet classified. Confirm framework support and add a validated command profile, or mark unsupported."
+            }
+          }
+        },
+        {
+          "case_id": "wan22_ti2v_5b_704p",
+          "case": "Wan2.2 TI2V 5B 704p",
+          "details": "1280x704x81f · 50 steps · cfg 5",
+          "mode": "throughput",
+          "winner": "sglang",
+          "cells": {
+            "sglang": {
+              "status": "ok",
+              "qps": 0.033,
+              "p95_s": 61.015
+            },
+            "vllm-omni": {
+              "status": "ok",
+              "qps": 0.028,
+              "p95_s": 73.692,
+              "ratio_to_sglang": 0.833
+            },
+            "lightx2v": {
+              "status": "ok",
+              "qps": 0.031,
+              "p95_s": 64.026,
+              "ratio_to_sglang": 0.952
+            },
+            "trtllm-visual": {
+              "status": "not_run",
+              "reason": "Not yet classified. Confirm framework support and add a validated command profile, or mark unsupported."
+            }
+          }
+        },
+        {
+          "case_id": "ltx2_twostage_t2v",
+          "case": "LTX-2 two-stage T2V",
+          "details": "768x512x121f · 40 steps · cfg 4",
+          "mode": "throughput",
+          "winner": "sglang",
+          "cells": {
+            "sglang": {
+              "status": "ok",
+              "qps": 0.021,
+              "p95_s": 96.276
+            },
+            "vllm-omni": {
+              "status": "profile_issue",
+              "reason": "vllm-omni rejects the current serve_args combination: 'LTX CFG parallelism only supports CFG-only guidance without rescale.' The profile needs to drop or reconfigure the guidance rescale path for LTX-2 CFG-parallel; not attempted in this run."
+            },
+            "lightx2v": {
+              "status": "ok",
+              "qps": 0.013,
+              "p95_s": 158.449,
+              "ratio_to_sglang": 0.611
+            },
+            "trtllm-visual": {
+              "status": "not_run",
+              "reason": "Not yet classified. Confirm framework support and add a validated command profile, or mark unsupported."
+            }
+          }
+        },
+        {
+          "case_id": "ltx2.3_twostage_t2v_2gpus",
+          "case": "LTX-2.3 two-stage T2V",
+          "details": "768x512x121f · 30 steps · cfg 3",
+          "mode": "throughput",
+          "winner": "sglang",
+          "cells": {
+            "sglang": {
+              "status": "ok",
+              "qps": 0.087,
+              "p95_s": 23.063
+            },
+            "vllm-omni": {
+              "status": "no_profile",
+              "reason": "No compatible vLLM-Omni LTX2.3 serving profile is configured."
+            },
+            "lightx2v": {
+              "status": "failed",
+              "reason": "OOM on H100 80GB: LTX-2.3 22B two-stage 121-frame t2av peak exceeds 80GB even with every lossless lever (seq_p_size=2 activation sharding + block cpu_offload + Gemma/VAE offload + exact flash_attn3). Upstream profiles target H200 141GB. command_profiles below are the best-attempted lossless config, kept for provenance."
+            },
+            "trtllm-visual": {
+              "status": "not_run",
+              "reason": "Not yet classified. Confirm framework support and add a validated command profile, or mark unsupported."
+            }
+          }
+        },
+        {
+          "case_id": "cosmos3_nano_t2v_720p_189f",
+          "case": "Cosmos3-Nano T2V 720p",
+          "details": "1280x720x189f · 35 steps · cfg 6",
+          "mode": "throughput",
+          "winner": "sglang",
+          "cells": {
+            "sglang": {
+              "status": "ok",
+              "qps": 0.019,
+              "p95_s": 107.125
+            },
+            "vllm-omni": {
+              "status": "ok",
+              "qps": 0.016,
+              "p95_s": 127.276,
+              "ratio_to_sglang": 0.856
+            },
+            "lightx2v": {
+              "status": "unsupported",
+              "reason": "No tracked LightX2V Cosmos3 serving path in this benchmark."
+            },
+            "trtllm-visual": {
+              "status": "not_run",
+              "reason": "Not yet classified. Confirm framework support and add a validated command profile, or mark unsupported."
+            }
+          }
+        },
+        {
+          "case_id": "cosmos3_nano_i2v_720p_189f",
+          "case": "Cosmos3-Nano I2V 720p",
+          "details": "1280x720x189f · 35 steps · cfg 6",
+          "mode": "throughput",
+          "winner": "sglang",
+          "cells": {
+            "sglang": {
+              "status": "ok",
+              "qps": 0.019,
+              "p95_s": 107.12
+            },
+            "vllm-omni": {
+              "status": "ok",
+              "qps": 0.016,
+              "p95_s": 127.294,
+              "ratio_to_sglang": 0.85
+            },
+            "lightx2v": {
+              "status": "unsupported",
+              "reason": "No tracked LightX2V Cosmos3 serving path in this benchmark."
+            },
+            "trtllm-visual": {
+              "status": "not_run",
+              "reason": "Not yet classified. Confirm framework support and add a validated command profile, or mark unsupported."
+            }
+          }
+        }
+      ]
+    },
     {
       "id": "h100x4-fastest-20260703_single_e2e",
       "run": "h100x4-fastest-20260703",

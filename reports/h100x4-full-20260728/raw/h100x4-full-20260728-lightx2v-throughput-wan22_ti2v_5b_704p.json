@@ -1,0 +1,195 @@
+{
+  "timestamp": "2026-07-29T00:50:46.641768+00:00",
+  "commit_sha": "71f4c703bfcce202239646d44875a5773993a0d8",
+  "run_id": "h100x4-full-20260728-lightx2v-throughput-wan22_ti2v_5b_704p",
+  "hardware": {
+    "runner_labels": null,
+    "gpu_config": null,
+    "gpus": [
+      "NVIDIA H100 80GB HBM3, 81559 MiB, 580.126.20",
+      "NVIDIA H100 80GB HBM3, 81559 MiB, 580.126.20",
+      "NVIDIA H100 80GB HBM3, 81559 MiB, 580.126.20",
+      "NVIDIA H100 80GB HBM3, 81559 MiB, 580.126.20"
+    ],
+    "hardware_profile_override": "h100"
+  },
+  "sglang_runtime": {
+    "package_version": "0.0.0.dev15737+g50beeeb8c",
+    "module_path": "/persistent/sglang-ltx23-tp-sp-experiment/python/sglang/__init__.py",
+    "git_root": "/persistent/sglang-ltx23-tp-sp-experiment",
+    "git_commit": "161fffedfc99974a75f041e64589f6e1eb287fa9"
+  },
+  "framework_runtime": {
+    "venv_root": "/persistent/fw-venvs",
+    "install_specs": {
+      "vllm": "vllm",
+      "vllm_omni": "git+https://github.com/vllm-project/vllm-omni.git",
+      "lightx2v": "git+https://github.com/ModelTC/LightX2V.git",
+      "lightx2v_flash_attn": "flash-attn==2.8.3",
+      "lightx2v_flash_attn3": "",
+      "lightx2v_fa3_hf_repo": "varunneal/flash-attention-3",
+      "lightx2v_fa3_hf_revision": "de87b9b5af06dd9984df595bef90b2eba44b181a",
+      "lightx2v_fa3_hf_subdir": "build/torch28-cxx11-cu128-x86_64-linux/flash_attention_3",
+      "lightx2v_flashinfer": "flashinfer-python==0.6.11",
+      "trtllm": "tensorrt-llm==1.3.0rc18",
+      "torch_cuda_arch_list": "9.0"
+    },
+    "launchers": {
+      "vllm_omni_server_bin": "vllm",
+      "vllm_omni_required_help_args": "--omni",
+      "trtllm_visual_server_bin": "trtllm-serve"
+    },
+    "vllm-omni": {
+      "venv_path": "/persistent/fw-venvs/vllm-omni",
+      "packages": {
+        "vllm": {
+          "Name": "vllm",
+          "Version": "0.26.0",
+          "Home-page": "https://github.com/vllm-project/vllm",
+          "Location": "/persistent/fw-venvs/vllm-omni/lib/python3.12/site-packages"
+        },
+        "vllm-omni": {
+          "Name": "vllm-omni",
+          "Version": "0.26.0rc2.dev11+gc2b55de5b",
+          "Home-page": "https://github.com/vllm-project/vllm-omni",
+          "Location": "/persistent/fw-venvs/vllm-omni/lib/python3.12/site-packages"
+        }
+      },
+      "direct_urls": {
+        "vllm_omni-0.26.0rc2.dev11+gc2b55de5b.dist-info": {
+          "url": "https://github.com/vllm-project/vllm-omni.git",
+          "vcs_info": {
+            "commit_id": "c2b55de5b9ea618cd296665c31c1ffb82b366900",
+            "vcs": "git"
+          }
+        }
+      }
+    },
+    "lightx2v": {
+      "venv_path": "/persistent/fw-venvs/lightx2v",
+      "packages": {
+        "lightx2v": {
+          "Name": "lightx2v",
+          "Version": "0.1.0",
+          "Home-page": "https://github.com/ModelTC/LightX2V",
+          "Location": "/persistent/fw-venvs/lightx2v/lib/python3.12/site-packages"
+        },
+        "flash_attn": {
+          "Name": "flash_attn",
+          "Version": "2.8.3",
+          "Home-page": "https://github.com/Dao-AILab/flash-attention",
+          "Location": "/persistent/fw-venvs/lightx2v/lib/python3.12/site-packages"
+        },
+        "flashinfer-python": {
+          "Name": "flashinfer-python",
+          "Version": "0.6.11",
+          "Home-page": "https://github.com/flashinfer-ai/flashinfer",
+          "Location": "/persistent/fw-venvs/lightx2v/lib/python3.12/site-packages"
+        }
+      },
+      "direct_urls": {
+        "lightx2v-0.1.0.dist-info": {
+          "url": "https://github.com/ModelTC/LightX2V.git",
+          "vcs_info": {
+            "commit_id": "f57d1cdf05b2764668209455faeb3ca7a7278124",
+            "vcs": "git"
+          }
+        }
+      }
+    },
+    "trtllm-visual": {
+      "venv_path": "/persistent/fw-venvs/trtllm-visual"
+    }
+  },
+  "benchmark_env": {},
+  "benchmark_framework_args": {
+    "vllm-omni": [],
+    "lightx2v": {
+      "config": {
+        "compile": true
+      }
+    }
+  },
+  "torch_compile_disabled": false,
+  "benchmark_modes": [
+    "throughput"
+  ],
+  "requested_sglang_profile": "auto",
+  "results": [],
+  "throughput_results": [
+    {
+      "case_id": "wan22_ti2v_5b_704p",
+      "framework": "lightx2v",
+      "mode": "throughput",
+      "model": "Wan-AI/Wan2.2-TI2V-5B",
+      "task": "text-image-to-video",
+      "width": 1280,
+      "height": 704,
+      "num_frames": 81,
+      "fps": 24,
+      "num_inference_steps": 50,
+      "guidance_scale": 5.0,
+      "guidance_scale_2": null,
+      "true_cfg_scale": null,
+      "negative_prompt_set": false,
+      "num_gpus": 2,
+      "latency_s": 63.156,
+      "error": null,
+      "framework_metadata": {
+        "profile": "default",
+        "profile_request": "auto",
+        "profile_source": "default",
+        "framework_ref": "lightx2v-0.1.0-configs/wan22/wan_ti2v_i2v.json+cfg_parallel",
+        "hardware": null,
+        "hardware_candidates": [
+          "h100"
+        ],
+        "description": "Best known LightX2V command/config for aligned non-cache benchmark runs.",
+        "notes": "Uses explicit fast attention/offload settings; no cache, torch compile, or quantized model path.",
+        "install_specs": null,
+        "server_bin": null,
+        "use_omni_arg": null,
+        "required_help_args": null,
+        "serve_args": "",
+        "num_gpus": null,
+        "extra_env_keys": [],
+        "lightx2v_config_keys": [
+          "aspect_ratio",
+          "bucket_shape",
+          "cpu_offload",
+          "cross_attn_1_type",
+          "cross_attn_2_type",
+          "enable_cfg",
+          "num_channels_latents",
+          "offload_granularity",
+          "parallel",
+          "resolution",
+          "sample_shift",
+          "self_attn_1_type",
+          "t5_cpu_offload",
+          "use_image_encoder",
+          "vae_cpu_offload",
+          "vae_stride"
+        ]
+      },
+      "server_command": "torchrun --nproc_per_node=2 -m lightx2v.server --model_path /persistent/hf-cache/hub/models--Wan-AI--Wan2.2-TI2V-5B/snapshots/921dbaf3f1674a56f47e83fb80a34bac8a8f203e --model_cls wan2.2 --task i2v --config_json /tmp/lightx2v_config_wan22_ti2v_5b_704p.json --host 127.0.0.1 --port 31173",
+      "metrics": {
+        "duration_s": 127.324,
+        "num_requests": 4,
+        "completed_requests": 4,
+        "failed_requests": 0,
+        "max_concurrency": 2,
+        "throughput_rps": 0.0314,
+        "output_throughput_ops": 0.0314,
+        "latency_mean_s": 55.645,
+        "latency_p50_s": 63.156,
+        "latency_p90_s": 63.874,
+        "latency_p95_s": 64.026,
+        "latency_p99_s": 64.147,
+        "errors": [],
+        "server_startup_s": 24.03,
+        "warmup_s": 34.71
+      }
+    }
+  ]
+}
