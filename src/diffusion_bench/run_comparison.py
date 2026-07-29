@@ -321,10 +321,15 @@ def _merge_ltx2_single_file_metadata(cfg: dict) -> None:
         "num_layers",
         "out_channels",
         "qk_norm",
-        "rope_type",
         "timestep_scale_multiplier",
     ):
         _set_first_present(cfg, key, transformer, key)
+    # The checkpoint's own "rope_type" metadata describes the model's rope
+    # *layout* (e.g. "split"), a different axis from lightx2v's ROPE_REGISTER
+    # key (which computation backend to use, e.g. "torch_real_rope"). Passing
+    # the checkpoint value straight through raises KeyError: 'split' since no
+    # such backend is registered -- leave it unset so lightx2v picks its own
+    # default backend for the `layout=` it's given elsewhere.
 
     _set_first_present(cfg, "audio_pos_embed_max_pos", transformer, "audio_pos_embed_max_pos")
     if "audio_pos_embed_max_pos" not in cfg:

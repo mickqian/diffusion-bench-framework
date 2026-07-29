@@ -1057,7 +1057,6 @@
                         "parallel": {
                             "cfg_p_size": 2
                         },
-                        "rope_type": "torch",
                         "cpu_offload": false,
                         "t5_cpu_offload": false,
                         "vae_cpu_offload": false
@@ -1212,7 +1211,6 @@
                             "seq_p_size": 2,
                             "seq_p_attn_type": "ulysses"
                         },
-                        "rope_type": "torch",
                         "cpu_offload": false,
                         "t5_cpu_offload": false,
                         "vae_cpu_offload": false
@@ -1350,7 +1348,6 @@
                             "seq_p_size": 2,
                             "seq_p_attn_type": "ulysses"
                         },
-                        "rope_type": "torch",
                         "aspect_ratio": "16:9",
                         "boundary": 0.875,
                         "use_image_encoder": false,
@@ -1578,7 +1575,6 @@
                         "parallel": {
                             "cfg_p_size": 2
                         },
-                        "rope_type": "torch",
                         "aspect_ratio": "16:9",
                         "use_image_encoder": false,
                         "cpu_offload": false,
@@ -1941,7 +1937,6 @@
                             "seq_p_size": 2,
                             "seq_p_attn_type": "ulysses"
                         },
-                        "rope_type": "torch",
                         "cpu_offload": false,
                         "t5_cpu_offload": false,
                         "vae_cpu_offload": false
@@ -2081,7 +2076,6 @@
                             "seq_p_size": 2,
                             "seq_p_attn_type": "ulysses"
                         },
-                        "rope_type": "torch",
                         "aspect_ratio": "16:9",
                         "boundary": 0.9,
                         "use_image_encoder": false,

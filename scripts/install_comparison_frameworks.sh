@@ -134,6 +134,26 @@ case "${FRAMEWORK}" in
     python3 -m pip install --upgrade --upgrade-strategy only-if-needed "${LIGHTX2V_FLASHINFER_INSTALL_SPEC:-flashinfer-python==0.6.11}"
     python3 -m pip install --upgrade --upgrade-strategy only-if-needed "${LIGHTX2V_LIBROSA_INSTALL_SPEC:-librosa}"
     python3 -m pip install --upgrade --force-reinstall pyzmq
+    # flash-attn==2.8.3's cute submodule statically references
+    # cutlass.cute.core.ThrMma at import time; nvidia-cutlass-dsl (pulled
+    # transitively via flashinfer-python, unpinned >=4.5.0) removed that
+    # attribute in 4.6.0, and the last 4.5.x release predating the removal
+    # (4.5.3) is itself missing a module (`cutlass.utils.ampere_helpers`)
+    # flash-attn's cute code also needs -- no released cutlass-dsl version
+    # satisfies both. lightx2v's own attn modules already wrap this import in
+    # `except ImportError`, but the AttributeError from the incompatible
+    # cutlass-dsl slips past that guard. Drop the unused cute submodule so the
+    # import fails as a plain ModuleNotFoundError instead, which the existing
+    # fallback handles correctly.
+    python3 -c "
+import pathlib
+import flash_attn
+cute_dir = pathlib.Path(flash_attn.__file__).parent / 'cute'
+if cute_dir.exists():
+    import shutil
+    shutil.rmtree(cute_dir)
+    print(f'removed unusable {cute_dir}')
+"
     ;;
   trtllm-visual)
     # TensorRT-LLM VisualGen, served via `trtllm-serve`. Wheels live on the

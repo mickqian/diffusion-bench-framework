@@ -105,7 +105,6 @@
      "seq_p_size": 2,
      "seq_p_attn_type": "ulysses"
     },
-    "rope_type": "torch",
     "aspect_ratio": "16:9",
     "boundary": 0.9,
     "use_image_encoder": false,

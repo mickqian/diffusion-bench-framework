@@ -189,7 +189,6 @@
     "parallel": {
      "cfg_p_size": 2
     },
-    "rope_type": "torch",
     "aspect_ratio": "16:9",
     "use_image_encoder": false,
     "cpu_offload": false,

@@ -105,7 +105,6 @@
      "seq_p_size": 2,
      "seq_p_attn_type": "ulysses"
     },
-    "rope_type": "torch",
     "cpu_offload": false,
     "t5_cpu_offload": false,
     "vae_cpu_offload": false
