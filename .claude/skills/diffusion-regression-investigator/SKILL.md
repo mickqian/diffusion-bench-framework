@@ -29,6 +29,25 @@ Verify these before comparing latency:
 5. For surprising VAE or decode cost, check dtype, offload, tiling/chunking, output format, and CPU transfer.
 6. If SGLang is actually slower, propose a targeted code or config fix and state why it should affect the measured stage.
 
+## Timing Pitfalls (2026-07 qwen-vs-vLLM case)
+
+- Stage timers without a device sync steal time from each other: an async
+  denoise loop spills its GPU tail into the next stage, so "VAE 250ms" was
+  really VAE 67ms + denoise tail. Before optimizing any stage number, add a
+  `torch.cuda.synchronize()` bracket and reconcile the sum against client e2e.
+- "average time per step" is a CPU-side figure; treat it as a lower bound.
+- Baseline versions drift: the bench metadata's `install_specs` records the
+  *requested* pins, but `packages`/`direct_urls` record what was actually
+  installed (a source install can silently upgrade its deps — vllm-omni 0.18
+  spec actually ran vllm 0.24). Reproduce the denominator from
+  `packages`/`direct_urls`, never from install_specs, and re-measure it on the
+  same box before chasing a gap.
+- Before patching a "hot path", prove it executes (one-shot log in the
+  function): qwen's Ulysses A2A goes through USPAttention's tail-pad branch
+  (`_usp_input_all_to_all` x3 + `_usp_output_all_to_all`), not AllToAll4D and
+  not the varlen pair. Two "zero-effect optimizations" were just patches on
+  dead code.
+
 ## Reporting
 
 Lead with the verdict:
