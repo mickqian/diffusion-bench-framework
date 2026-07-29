@@ -23,7 +23,7 @@
      "description": "Best known SGLang command for the benchmark repo default profile.",
      "sglang_ref": "current-main",
      "serve_args": "--model-type diffusion --warmup --enable-cfg-parallel --ulysses-degree 2 --dit-cpu-offload false --pin-cpu-memory --dit-layerwise-offload false --performance-mode speed --enable-torch-compile",
-     "notes": "Keep this profile updated when the best command changes for a SGLang release or commit. Policy-aligned candidate (compile on, offload off) — NOT yet validated on H100; validate (incl. OOM risk) before publishing."
+     "notes": "Keep this profile updated when the best command changes for a SGLang release or commit. Policy-aligned candidate (compile on, offload off) \u2014 NOT yet validated on H100; validate (incl. OOM risk) before publishing."
     }
    }
   },

@@ -1,7 +1,7 @@
 {
-  "timestamp": "2026-07-29T09:07:21.327688+00:00",
+  "timestamp": "2026-07-29T07:08:38.054529+00:00",
   "commit_sha": "71f4c703bfcce202239646d44875a5773993a0d8",
-  "run_id": "h100x4-full-20260728-sglang-single_e2e-wan22_t2v_a14b_720p",
+  "run_id": "h100x4-full-20260728-lightx2v-single_e2e-flux2_dev_t2i_1024",
   "hardware": {
     "runner_labels": null,
     "gpu_config": null,
@@ -17,14 +17,14 @@
     "package_version": "0.0.0.dev15737+g50beeeb8c",
     "module_path": "/persistent/sglang-ltx23-tp-sp-experiment/python/sglang/__init__.py",
     "git_root": "/persistent/sglang-ltx23-tp-sp-experiment",
-    "git_commit": "c5c0fa00cf86c2c398ba89bdb6e23bef6283b73d"
+    "git_commit": "161fffedfc99974a75f041e64589f6e1eb287fa9"
   },
   "framework_runtime": {
     "venv_root": "/persistent/fw-venvs",
     "install_specs": {
       "vllm": "vllm==0.18.0",
       "vllm_omni": "vllm-omni==0.18.0",
-      "lightx2v": "git+https://github.com/ModelTC/LightX2V.git@7efd05f8e1425b83321fd4f1cef779ef6504076f",
+      "lightx2v": "git+https://github.com/ModelTC/LightX2V.git",
       "lightx2v_flash_attn": "flash-attn==2.8.3",
       "lightx2v_flash_attn3": "",
       "lightx2v_fa3_hf_repo": "varunneal/flash-attention-3",
@@ -131,56 +131,64 @@
   "requested_sglang_profile": "auto",
   "results": [
     {
-      "case_id": "wan22_t2v_a14b_720p",
-      "framework": "sglang",
+      "case_id": "flux2_dev_t2i_1024",
+      "framework": "lightx2v",
       "mode": "single_e2e",
-      "model": "Wan-AI/Wan2.2-T2V-A14B-Diffusers",
-      "task": "text-to-video",
-      "width": 1280,
-      "height": 720,
-      "num_frames": 81,
-      "fps": 16,
-      "num_inference_steps": 40,
+      "model": "black-forest-labs/FLUX.2-dev",
+      "task": "text-to-image",
+      "width": 1024,
+      "height": 1024,
+      "num_frames": null,
+      "fps": null,
+      "num_inference_steps": 50,
       "guidance_scale": 4.0,
-      "guidance_scale_2": 3.0,
+      "guidance_scale_2": null,
       "true_cfg_scale": null,
       "negative_prompt_set": false,
-      "num_gpus": 4,
-      "latency_s": 209.916,
+      "num_gpus": 2,
+      "latency_s": 65.153,
       "error": null,
       "framework_metadata": {
-        "profile": "default",
+        "profile": "h100-cpu-offload",
         "profile_request": "auto",
-        "profile_source": "default",
-        "framework_ref": null,
-        "hardware": null,
+        "profile_source": "hardware",
+        "framework_ref": "lightx2v-main-flux2_dev+h100-cpu-offload",
+        "hardware": [
+          "h100"
+        ],
         "hardware_candidates": [
           "h100"
         ],
-        "description": "Best known SGLang command for the benchmark repo default profile.",
-        "notes": "Keep this profile updated when the best command changes for a SGLang release or commit. Policy-aligned candidate (compile on, offload off) \u2014 NOT yet validated on H100; validate (incl. OOM risk) before publishing.",
+        "description": "H100 80GB LightX2V FLUX.2 profile: model-granularity CPU offload so the ~64GB bf16 weights fit. Lossless (identical numerics, weights just stream from CPU). Mirrors upstream configs/flux2/flux2_dev_offload.json.",
+        "notes": "Measured 2026-07-29 on H100 80GB: single-GPU resident load OOMs at ~78GB used during safetensors read, and the upstream TP path (parallel.tensor_p_size=2, configs/flux2/flux2_dev_tp.json) ALSO fails -- lightx2v loads the full model on rank 0 before sharding ('Single GPU - Load models cost 47.9s' then NCCL init hits cuda OOM), so TP does not reduce peak per-GPU load memory in current main. CPU offload is the only working lossless path on 80GB; expect higher latency than the H200 resident profile by design. rope_type must be the registry key 'flashinfer_rope' (bare 'flashinfer' raises KeyError in current main).",
         "install_specs": null,
         "server_bin": null,
         "use_omni_arg": null,
         "required_help_args": null,
-        "serve_args": "--model-type diffusion --warmup --enable-cfg-parallel --ulysses-degree 2 --dit-cpu-offload false --pin-cpu-memory --dit-layerwise-offload false --performance-mode speed --enable-torch-compile",
-        "num_gpus": null,
+        "serve_args": "",
+        "num_gpus": 2,
         "extra_env_keys": [],
-        "sglang_profile": "default",
-        "sglang_profile_request": "auto",
-        "sglang_profile_source": "default",
-        "sglang_ref": "current-main"
+        "lightx2v_config_keys": [
+          "cpu_offload",
+          "enable_cfg",
+          "feature_caching",
+          "offload_granularity",
+          "patch_size",
+          "rope_type",
+          "sample_guide_scale",
+          "text_encoder_out_layers",
+          "tokenizer_max_length",
+          "vae_scale_factor"
+        ]
       },
-      "server_command": "sglang serve --model-path Wan-AI/Wan2.2-T2V-A14B-Diffusers --port 31189 --host 127.0.0.1 --backend sglang --num-gpus 4 --model-type diffusion --warmup --enable-cfg-parallel --ulysses-degree 2 --dit-cpu-offload false --pin-cpu-memory --dit-layerwise-offload false --performance-mode speed --enable-torch-compile --warmup-steps 3",
+      "server_command": "torchrun --nproc_per_node=2 -m lightx2v.server --model_path /persistent/hf-cache/hub/models--black-forest-labs--FLUX.2-dev/snapshots/26afe3a78bb242c0a8bb181dcc8937bb16e5c66c --model_cls flux2_dev --task t2i --config_json /tmp/lightx2v_config_flux2_dev_t2i_1024.json --host 127.0.0.1 --port 31400",
       "metrics": {
-        "client_latency_s": 209.916,
-        "client_latency_min_s": 208.42,
-        "client_latency_max_s": 211.411,
-        "measured_repeats": 2,
-        "server_latency_s": 207.984,
-        "client_overhead_s": 1.931,
-        "server_startup_s": 175.33,
-        "warmup_s": 988.29
+        "client_latency_s": 65.153,
+        "client_latency_min_s": 65.146,
+        "client_latency_max_s": 89.197,
+        "measured_repeats": 5,
+        "server_startup_s": 50.08,
+        "warmup_s": 98.38
       }
     }
   ],

@@ -79,26 +79,32 @@ CASE_LABELS = {
 # "profile_issue" = our command profile needs work (framework itself likely
 # supports the case); not the framework's fault, but not a clean data point.
 KNOWN_ISSUES = {
-    ("ideogram4_t2i_1024_2gpu_tp", "sglang"): (
-        "broken",
-        "sglang bug: WeightOnlyFP8ColumnParallelLinear reports "
-        "'FP8 linear weight must be 2-D, got shape torch.Size([1])' under "
-        "2-GPU TP; root cause not yet located, tracked separately.",
-    ),
-    ("wan22_t2v_a14b_720p", "sglang"): (
-        "broken",
-        "sglang bug: Wan2.2-A14B (MoE) DiT's to_q linear reports "
-        "'b must be 2D' (weight shape collapses to [1]) under torch.compile "
-        "+ CFG-parallel + Ulysses; identical failure on both T2V and I2V "
-        "A14B variants, so it's a shared-code issue, not model-specific; "
-        "tracked separately.",
-    ),
+    # NOTE 2026-07-29: the original (1,)-placeholder crashes on ideogram4 and
+    # both Wan2.2-A14B variants were root-caused (offload_during_compile's
+    # residency strategy kept releasing restored weights on dual-DiT use-site
+    # switches) and fixed in sgl-project/sglang#32743; ideogram4 and
+    # wan22_t2v single_e2e now carry measured numbers. What remains below is
+    # what the fix exposed underneath: pure 80GB capacity limits.
     ("wan22_i2v_a14b_720p", "sglang"): (
-        "broken",
-        "sglang bug: identical to wan22_t2v_a14b_720p (same to_q linear "
-        "failure, byte-for-byte same error modulo device/request id) -- "
-        "confirms a shared root cause in the Wan2.2-A14B DiT code path, "
-        "tracked separately.",
+        "failed",
+        "Capacity: after the #32743 fix, I2V A14B still cannot load on "
+        "4x80GB -- sibling ranks place 20-35GB of loader staging on each "
+        "other's GPUs, and with both 14B experts plus the CLIP image "
+        "encoder the load-time peak exceeds 80GB (a layerwise-offload "
+        "profile fails the same way, so the limit is in the loading path, "
+        "not steady-state residency). T2V (one fewer resident encoder, "
+        "no image-cond channels) fits and wins at 209.9s. Tracked "
+        "separately as an sglang loader fix.",
+    ),
+    ("wan22_t2v_a14b_720p", "sglang", "throughput"): (
+        "failed",
+        "Capacity at concurrency 2: with both 14B experts resident (the "
+        "profile that makes single-request 209.9s the fastest of all "
+        "frameworks), one request's 720p x 81f VAE decode overlapping the "
+        "other's denoise deterministically exceeds 80GB (~73GB used, "
+        "346MiB short). Not flaky -- a retry hits the same wall. Needs an "
+        "upstream capacity lever (decode chunking under pressure or "
+        "partial residency) to lift.",
     ),
     ("cosmos3_nano_t2i_720p", "vllm-omni"): (
         "profile_issue",
@@ -128,22 +134,17 @@ KNOWN_ISSUES = {
         "CPU-offload or multi-GPU profile for this model, not attempted "
         "in this run.",
     ),
-    ("flux2_dev_t2i_1024", "lightx2v"): (
-        "not_run",
-        "Model download requires HF_TOKEN access to the gated FLUX.2 repo; "
-        "not available in this run. Every other case's model was already "
-        "cached locally so this is the only data point blocked purely by "
-        "credentials, not a framework or config issue.",
-    ),
 }
 
 FRAMEWORKS = {
     "sglang": {
         "label": "SGLang-Diffusion",
-        "commit": "161fffe",
+        "commit": "161fffe (+#32743 fix for re-measured cells)",
         "note": (
-            "origin/main HEAD; torch.compile + resident DiT; Ulysses/SP or "
-            "CFG-parallel per case per the tuned command_profiles"
+            "origin/main HEAD; compile or measured-eager per case per the "
+            "tuned command_profiles; Ulysses/SP or CFG-parallel per case. "
+            "Cells re-measured on 2026-07-29 additionally carry the "
+            "sgl-project/sglang#32743 dual-DiT residency fix."
         ),
     },
     "vllm-omni": {
@@ -185,23 +186,35 @@ POLICY = {
         "comparable to each other."
     ),
     "bimodal_latency_note": (
-        "Two single_e2e cells (sglang flux1_dev_t2i_1024, sglang "
-        "qwen_image_2512_t2i_1024 no-CFG) were found to have a bimodal "
-        "performance distribution across independent server restarts -- "
-        "the same command lands in either a consistently-slow (~9s / ~6.9s) "
-        "or consistently-fast (~5.7s / ~4.3s) state for the full life of "
-        "that server process (each state is internally consistent across "
-        "its own 5 measured repeats, so this is not per-request noise). "
-        "Root cause not identified (suspected torch.compile cache or NCCL "
-        "topology-selection non-determinism); tracked separately. The "
-        "numbers published here are the fast-mode results, which were "
-        "confirmed reproducible across 2 of 3 independent runs for the "
-        "qwen case and are the only independent sample for flux1 beyond "
-        "the original slow one -- see reports/h100x4-full-20260728/"
-        "bimodal-evidence-*.json for the raw before/after measurements. "
-        "Other sglang image cases (flux2, qwen true-CFG, qwen-edit, "
-        "zimage, cosmos3 T2I) were independently re-verified and found "
-        "stable (<2% delta), so this is not assumed to affect every cell."
+        "During this run, two compile-mode sglang cells (flux1, qwen "
+        "no-CFG) showed a bimodal latency distribution across independent "
+        "server restarts (each state internally consistent over its own 5 "
+        "repeats -- not per-request noise); raw evidence in "
+        "reports/h100x4-full-20260728/bimodal-evidence-*.json. The "
+        "published flux1 number is the reproduced fast-mode measurement. "
+        "The qwen no-CFG cell was subsequently re-measured under its final "
+        "eager profile (see the profile's policy_exception), where repeats "
+        "are tight (4.55-4.57s) and the bimodal observation no longer "
+        "applies. Other sglang image cells were independently re-verified "
+        "stable (<2% delta). Root cause of the compile-mode bimodality is "
+        "tracked separately."
+    ),
+    "post_run_fixes_note": (
+        "2026-07-29 follow-up: the initial pass surfaced two sglang bugs "
+        "and one measured mis-configuration; all three were fixed and the "
+        "affected cells re-measured on the same machine and sglang base "
+        "(161fffe) plus the fix commit. (1) ideogram4 and Wan2.2-A14B "
+        "crashed reading (1,)-placeholder weights -- root-caused to "
+        "offload_during_compile's residency interaction and fixed in "
+        "sgl-project/sglang#32743; ideogram4 now measures 4.00s and "
+        "wan22 T2V 209.9s (fastest of all frameworks). (2) qwen no-CFG "
+        "was published at 5.74s under torch.compile, which is a measured "
+        "net loss for this model (inductor GEMMs lose to cublas nvjet, "
+        "and the #31849 dynamo workaround additionally drops the fused "
+        "qk-norm-rope kernel when compiling); the profile now runs true "
+        "eager at 4.56s, near-parity with vLLM's 4.48s. The remaining "
+        "Wan2.2-A14B gaps are pure 80GB capacity limits, documented "
+        "per-cell."
     ),
 }
 
@@ -246,6 +259,10 @@ def _rows_by_mode(merged: dict, mode: str) -> dict:
 def _classify_cell(case_id, fw, ok_rows, failed_rows, config_cases, mode) -> dict | None:
     """Return a non-OK cell dict, or None if this is a normal OK/measured cell."""
     key = (case_id, fw)
+    mode_key = (case_id, fw, mode)
+    if mode_key in KNOWN_ISSUES:
+        status, reason = KNOWN_ISSUES[mode_key]
+        return {"status": status, "reason": reason}
     if key in KNOWN_ISSUES:
         status, reason = KNOWN_ISSUES[key]
         return {"status": status, "reason": reason}
@@ -410,13 +427,15 @@ def build_latest() -> dict:
             "other_wins": comparable - wins,
             "note": (
                 "Steady-state single-request latency on H100, best lossless "
-                "config per framework (torch.compile on everywhere), latest "
-                "main/HEAD for every framework. Full 18-case image+video "
-                "matrix. Two confirmed sglang bugs (ideogram4 FP8 shape, "
-                "Wan2.2-A14B to_q linear shape) and several competitor "
-                "profile gaps are called out per-cell rather than hidden; "
-                "see policy.bimodal_latency_note for a measurement caveat on "
-                "two cells. Throughput tables live in the report."
+                "config per framework (compile by default, measured-eager "
+                "where compile is a proven net loss), latest main/HEAD for "
+                "every framework. Full 18-case image+video matrix. The two "
+                "sglang bugs the initial pass surfaced were fixed "
+                "(sgl-project/sglang#32743) and the affected cells "
+                "re-measured -- see policy.post_run_fixes_note; remaining "
+                "gaps are documented per-cell (mostly 80GB capacity limits "
+                "and competitor profile issues). Throughput tables live in "
+                "the report."
             ),
         },
         "rows": single_rows,

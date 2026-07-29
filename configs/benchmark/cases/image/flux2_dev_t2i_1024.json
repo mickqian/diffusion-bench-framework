@@ -174,7 +174,7 @@
         "enable_cfg": false,
         "patch_size": 2,
         "tokenizer_max_length": 512,
-        "rope_type": "flashinfer",
+        "rope_type": "flashinfer_rope",
         "text_encoder_out_layers": [
           10,
           20,
@@ -187,6 +187,20 @@
           "framework_ref": "lightx2v-0.1.0-flux2_dev",
           "serve_args": "",
           "notes": "Uses explicit fast attention/offload settings; no cache, torch compile, or quantized model path."
+        },
+        "h100-cpu-offload": {
+          "description": "H100 80GB LightX2V FLUX.2 profile: model-granularity CPU offload so the ~64GB bf16 weights fit. Lossless (identical numerics, weights just stream from CPU). Mirrors upstream configs/flux2/flux2_dev_offload.json.",
+          "hardware": [
+            "h100"
+          ],
+          "framework_ref": "lightx2v-main-flux2_dev+h100-cpu-offload",
+          "num_gpus": 2,
+          "serve_args": "",
+          "notes": "Measured 2026-07-29 on H100 80GB: single-GPU resident load OOMs at ~78GB used during safetensors read, and the upstream TP path (parallel.tensor_p_size=2, configs/flux2/flux2_dev_tp.json) ALSO fails -- lightx2v loads the full model on rank 0 before sharding ('Single GPU - Load models cost 47.9s' then NCCL init hits cuda OOM), so TP does not reduce peak per-GPU load memory in current main. CPU offload is the only working lossless path on 80GB; expect higher latency than the H200 resident profile by design. rope_type must be the registry key 'flashinfer_rope' (bare 'flashinfer' raises KeyError in current main).",
+          "lightx2v_config": {
+            "cpu_offload": true,
+            "offload_granularity": "model"
+          }
         },
         "h200-fa3-flashinfer": {
           "description": "H200 fastest available LightX2V command/config for aligned non-cache benchmark runs.",

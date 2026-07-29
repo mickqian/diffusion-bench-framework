@@ -1,5 +1,5 @@
 {
-  "timestamp": "2026-07-28T17:36:14.963140+00:00",
+  "timestamp": "2026-07-29T12:44:33.178738+00:00",
   "commit_sha": "71f4c703bfcce202239646d44875a5773993a0d8",
   "run_id": "h100x4-full-20260728-sglang-single_e2e-wan22_i2v_a14b_720p",
   "hardware": {
@@ -17,14 +17,14 @@
     "package_version": "0.0.0.dev15737+g50beeeb8c",
     "module_path": "/persistent/sglang-ltx23-tp-sp-experiment/python/sglang/__init__.py",
     "git_root": "/persistent/sglang-ltx23-tp-sp-experiment",
-    "git_commit": "161fffedfc99974a75f041e64589f6e1eb287fa9"
+    "git_commit": "c5c0fa00cf86c2c398ba89bdb6e23bef6283b73d"
   },
   "framework_runtime": {
     "venv_root": "/persistent/fw-venvs",
     "install_specs": {
-      "vllm": "vllm",
-      "vllm_omni": "git+https://github.com/vllm-project/vllm-omni.git",
-      "lightx2v": "git+https://github.com/ModelTC/LightX2V.git",
+      "vllm": "vllm==0.18.0",
+      "vllm_omni": "vllm-omni==0.18.0",
+      "lightx2v": "git+https://github.com/ModelTC/LightX2V.git@7efd05f8e1425b83321fd4f1cef779ef6504076f",
       "lightx2v_flash_attn": "flash-attn==2.8.3",
       "lightx2v_flash_attn3": "",
       "lightx2v_fa3_hf_repo": "varunneal/flash-attention-3",
@@ -66,10 +66,53 @@
       }
     },
     "lightx2v": {
-      "venv_path": "/persistent/fw-venvs/lightx2v"
+      "venv_path": "/persistent/fw-venvs/lightx2v",
+      "packages": {
+        "lightx2v": {
+          "Name": "lightx2v",
+          "Version": "0.1.0",
+          "Home-page": "https://github.com/ModelTC/LightX2V",
+          "Location": "/persistent/fw-venvs/lightx2v/lib/python3.12/site-packages"
+        },
+        "flash_attn": {
+          "Name": "flash_attn",
+          "Version": "2.8.3",
+          "Home-page": "https://github.com/Dao-AILab/flash-attention",
+          "Location": "/persistent/fw-venvs/lightx2v/lib/python3.12/site-packages"
+        },
+        "flashinfer-python": {
+          "Name": "flashinfer-python",
+          "Version": "0.6.11",
+          "Home-page": "https://github.com/flashinfer-ai/flashinfer",
+          "Location": "/persistent/fw-venvs/lightx2v/lib/python3.12/site-packages"
+        }
+      },
+      "direct_urls": {
+        "lightx2v-0.1.0.dist-info": {
+          "url": "https://github.com/ModelTC/LightX2V.git",
+          "vcs_info": {
+            "commit_id": "f57d1cdf05b2764668209455faeb3ca7a7278124",
+            "vcs": "git"
+          }
+        }
+      }
     },
     "trtllm-visual": {
-      "venv_path": "/persistent/fw-venvs/trtllm-visual"
+      "venv_path": "/persistent/fw-venvs/trtllm-visual",
+      "packages": {
+        "tensorrt_llm": {
+          "Name": "tensorrt_llm",
+          "Version": "1.3.0rc18",
+          "Home-page": "https://github.com/NVIDIA/TensorRT-LLM",
+          "Location": "/persistent/fw-venvs/trtllm-visual/lib/python3.12/site-packages"
+        },
+        "tensorrt": {
+          "Name": "tensorrt",
+          "Version": "10.15.1.29",
+          "Home-page": "https://github.com/nvidia/tensorrt",
+          "Location": "/persistent/fw-venvs/trtllm-visual/lib/python3.12/site-packages"
+        }
+      }
     }
   },
   "benchmark_env": {},
@@ -104,35 +147,34 @@
       "negative_prompt_set": false,
       "num_gpus": 4,
       "latency_s": null,
-      "error": "Video generation failed: {'id': '59cc0812-20f5-48e9-9e21-93d6b4b42fbf', 'object': 'video', 'model': 'Wan-AI/Wan2.2-I2V-A14B-Diffusers', 'status': 'failed', 'progress': 0, 'created_at': 1785261390, 'size': '1280x720', 'seconds': '5', 'quality': 'standard', 'url': None, 'remixed_from_video_id': None, 'completed_at': None, 'expires_at': None, 'error': {'message': 'Model generation returned no output. Error from scheduler: Error executing request 59cc0812-20f5-48e9-9e21-93d6b4b42fbf: RuntimeError when making fake tensor call\\n  Explanation: Dynamo failed to run FX node with fake tensors: call_function <built-in function linear>(*(FakeTensor(..., device=\\'cuda:0\\', size=(1, s87, 5120), dtype=torch.bfloat16), Parameter(FakeTensor(..., device=\\'cuda:0\\', size=(1,), dtype=torch.bfloat16)), Parameter(FakeTensor(..., device=\\'cuda:0\\', size=(1,), dtype=torch.bfloat16))), **{}): got RuntimeError(\\'b must be 2D\\')\\n  Hint: Your code may result in an error when running in eager. Please double check that your code doesn\\'t contain a similar error when actually running eager/uncompiled. You can do this by removing the `torch.compile` call, or by using `torch.compiler.set_stance(\"force_eager\")`. \\n\\n  Developer debug context: \\n\\n For more details about this graph break, please visit: https://meta-pytorch.github.io/compile-graph-break-site/gb/gb4315.html\\n\\nfrom user code:\\n   File \"/persistent/sglang-ltx23-tp-sp-experiment/python/sglang/multimodal_gen/runtime/models/dits/wanvideo.py\", line 525, in forward\\n    query, _ = self.to_q(norm_hidden_states)\\n  File \"/persistent/sglang-ltx23-tp-sp-experiment/python/sglang/multimodal_gen/runtime/layers/linear.py\", line 426, in forward\\n    output_parallel = self.quant_method.apply(self, input_, bias)\\n  File \"/persistent/sglang-ltx23-tp-sp-experiment/python/sglang/multimodal_gen/runtime/layers/linear.py\", line 158, in apply\\n    F.linear(x, layer.weight, bias)\\n\\nSet TORCHDYNAMO_VERBOSE=1 for the internal stack trace (please do this especially if you\\'re reporting a bug to PyTorch). For even more developer context, set TORCH_LOGS=\"+dynamo\"\\n'}, 'file_path': '/persistent/diffusion-bench-framework/outputs/59cc0812-20f5-48e9-9e21-93d6b4b42fbf.mp4', 'file_paths': None, 'num_outputs': None, 'peak_memory_mb': None, 'inference_time_s': None, 'action': None}",
+      "error": "sglang server exited before health check passed (exit 1)",
       "framework_metadata": {
-        "profile": "default",
+        "profile": "h100-4gpu-cfg-uly-layerwise-offload",
         "profile_request": "auto",
-        "profile_source": "default",
+        "profile_source": "hardware",
         "framework_ref": null,
-        "hardware": null,
+        "hardware": [
+          "h100"
+        ],
         "hardware_candidates": [
           "h100"
         ],
-        "description": "Best known SGLang command for the benchmark repo default profile.",
-        "notes": "Keep this profile updated when the best command changes for a SGLang release or commit. Policy-aligned candidate (compile on, offload off) \u2014 NOT yet validated on H100; validate (incl. OOM risk) before publishing.",
+        "description": "H100 80GB profile for the dual-expert A14B I2V: layerwise-offloaded DiT so both 14B towers plus the CLIP image encoder and image-cond latents fit. Lossless (identical numerics, weights stream per layer).",
+        "notes": "T2V A14B keeps the resident profile (fits, fastest); only I2V needs the offload.",
         "install_specs": null,
         "server_bin": null,
         "use_omni_arg": null,
         "required_help_args": null,
-        "serve_args": "--model-type diffusion --warmup --enable-cfg-parallel --ulysses-degree 2 --dit-cpu-offload false --pin-cpu-memory --dit-layerwise-offload false --performance-mode speed --enable-torch-compile",
+        "serve_args": "--model-type diffusion --warmup --enable-cfg-parallel --ulysses-degree 2 --dit-cpu-offload false --pin-cpu-memory --dit-layerwise-offload true --performance-mode speed --enable-torch-compile",
         "num_gpus": null,
         "extra_env_keys": [],
-        "sglang_profile": "default",
+        "sglang_profile": "h100-4gpu-cfg-uly-layerwise-offload",
         "sglang_profile_request": "auto",
-        "sglang_profile_source": "default",
+        "sglang_profile_source": "hardware",
         "sglang_ref": "current-main"
       },
-      "server_command": "sglang serve --model-path Wan-AI/Wan2.2-I2V-A14B-Diffusers --port 30609 --host 127.0.0.1 --backend sglang --num-gpus 4 --model-type diffusion --warmup --enable-cfg-parallel --ulysses-degree 2 --dit-cpu-offload false --pin-cpu-memory --dit-layerwise-offload false --performance-mode speed --enable-torch-compile --warmup-steps 3",
-      "metrics": {
-        "server_startup_s": 329.95,
-        "warmup_s": 885.55
-      }
+      "server_command": "sglang serve --model-path Wan-AI/Wan2.2-I2V-A14B-Diffusers --port 31006 --host 127.0.0.1 --backend sglang --num-gpus 4 --model-type diffusion --warmup --enable-cfg-parallel --ulysses-degree 2 --dit-cpu-offload false --pin-cpu-memory --dit-layerwise-offload true --performance-mode speed --enable-torch-compile --warmup-steps 3",
+      "metrics": {}
     }
   ],
   "throughput_results": []

@@ -1,5 +1,5 @@
 {
-  "timestamp": "2026-07-29T03:54:58.372580+00:00",
+  "timestamp": "2026-07-29T12:51:02.338512+00:00",
   "commit_sha": "71f4c703bfcce202239646d44875a5773993a0d8",
   "run_id": "h100x4-full-20260728",
   "hardware": {
@@ -132,6 +132,12 @@
   "reproduce_script": "scripts/generate_h200_report_artifacts.sh",
   "source_results": [
     {
+      "path": "/persistent/bench_results/h100x4-full-20260728-lightx2v-single_e2e-flux2_dev_t2i_1024.json",
+      "run_id": "h100x4-full-20260728-lightx2v-single_e2e-flux2_dev_t2i_1024",
+      "commit_sha": "71f4c703bfcce202239646d44875a5773993a0d8",
+      "timestamp": "2026-07-29T07:08:38.054529+00:00"
+    },
+    {
       "path": "/persistent/bench_results/h100x4-full-20260728-lightx2v-single_e2e-ltx2_twostage_t2v.json",
       "run_id": "h100x4-full-20260728-lightx2v-single_e2e-ltx2_twostage_t2v",
       "commit_sha": "71f4c703bfcce202239646d44875a5773993a0d8",
@@ -178,6 +184,12 @@
       "run_id": "h100x4-full-20260728-lightx2v-single_e2e-zimage_turbo_t2i_1024",
       "commit_sha": "71f4c703bfcce202239646d44875a5773993a0d8",
       "timestamp": "2026-07-29T02:12:46.997851+00:00"
+    },
+    {
+      "path": "/persistent/bench_results/h100x4-full-20260728-lightx2v-throughput-flux2_dev_t2i_1024.json",
+      "run_id": "h100x4-full-20260728-lightx2v-throughput-flux2_dev_t2i_1024",
+      "commit_sha": "71f4c703bfcce202239646d44875a5773993a0d8",
+      "timestamp": "2026-07-29T07:17:42.345968+00:00"
     },
     {
       "path": "/persistent/bench_results/h100x4-full-20260728-lightx2v-throughput-ltx2_twostage_t2v.json",
@@ -261,7 +273,7 @@
       "path": "/persistent/bench_results/h100x4-full-20260728-sglang-single_e2e-ideogram4_t2i_1024_2gpu_tp.json",
       "run_id": "h100x4-full-20260728-sglang-single_e2e-ideogram4_t2i_1024_2gpu_tp",
       "commit_sha": "71f4c703bfcce202239646d44875a5773993a0d8",
-      "timestamp": "2026-07-28T16:04:05.461021+00:00"
+      "timestamp": "2026-07-29T07:52:01.529331+00:00"
     },
     {
       "path": "/persistent/bench_results/h100x4-full-20260728-sglang-single_e2e-ltx2.3_twostage_t2v_2gpus.json",
@@ -277,9 +289,9 @@
     },
     {
       "path": "/persistent/bench_results/h100x4-full-20260728-sglang-single_e2e-qwen_image_2512_t2i_1024.json",
-      "run_id": "h100x4-full-20260728",
+      "run_id": "h100x4-full-20260728-sglang-single_e2e-qwen_image_2512_t2i_1024",
       "commit_sha": "71f4c703bfcce202239646d44875a5773993a0d8",
-      "timestamp": "2026-07-29T03:34:51.857765+00:00"
+      "timestamp": "2026-07-29T08:00:05.753099+00:00"
     },
     {
       "path": "/persistent/bench_results/h100x4-full-20260728-sglang-single_e2e-qwen_image_2512_t2i_1024_truecfg.json",
@@ -315,13 +327,13 @@
       "path": "/persistent/bench_results/h100x4-full-20260728-sglang-single_e2e-wan22_i2v_a14b_720p.json",
       "run_id": "h100x4-full-20260728-sglang-single_e2e-wan22_i2v_a14b_720p",
       "commit_sha": "71f4c703bfcce202239646d44875a5773993a0d8",
-      "timestamp": "2026-07-28T17:36:14.963140+00:00"
+      "timestamp": "2026-07-29T12:44:33.178738+00:00"
     },
     {
       "path": "/persistent/bench_results/h100x4-full-20260728-sglang-single_e2e-wan22_t2v_a14b_720p.json",
       "run_id": "h100x4-full-20260728-sglang-single_e2e-wan22_t2v_a14b_720p",
       "commit_sha": "71f4c703bfcce202239646d44875a5773993a0d8",
-      "timestamp": "2026-07-28T16:35:01.436259+00:00"
+      "timestamp": "2026-07-29T09:07:21.327688+00:00"
     },
     {
       "path": "/persistent/bench_results/h100x4-full-20260728-sglang-single_e2e-wan22_ti2v_5b_704p.json",
@@ -369,7 +381,7 @@
       "path": "/persistent/bench_results/h100x4-full-20260728-sglang-throughput-ideogram4_t2i_1024_2gpu_tp.json",
       "run_id": "h100x4-full-20260728-sglang-throughput-ideogram4_t2i_1024_2gpu_tp",
       "commit_sha": "71f4c703bfcce202239646d44875a5773993a0d8",
-      "timestamp": "2026-07-28T16:19:19.308976+00:00"
+      "timestamp": "2026-07-29T07:53:38.511891+00:00"
     },
     {
       "path": "/persistent/bench_results/h100x4-full-20260728-sglang-throughput-ltx2.3_twostage_t2v_2gpus.json",
@@ -387,7 +399,7 @@
       "path": "/persistent/bench_results/h100x4-full-20260728-sglang-throughput-qwen_image_2512_t2i_1024.json",
       "run_id": "h100x4-full-20260728-sglang-throughput-qwen_image_2512_t2i_1024",
       "commit_sha": "71f4c703bfcce202239646d44875a5773993a0d8",
-      "timestamp": "2026-07-28T16:11:00.937787+00:00"
+      "timestamp": "2026-07-29T08:01:52.566963+00:00"
     },
     {
       "path": "/persistent/bench_results/h100x4-full-20260728-sglang-throughput-qwen_image_2512_t2i_1024_truecfg.json",
@@ -421,15 +433,15 @@
     },
     {
       "path": "/persistent/bench_results/h100x4-full-20260728-sglang-throughput-wan22_i2v_a14b_720p.json",
-      "run_id": "h100x4-full-20260728-sglang-throughput-wan22_i2v_a14b_720p",
+      "run_id": "h100x4-full-20260728-sglang-single_e2e-wan22_i2v_a14b_720p",
       "commit_sha": "71f4c703bfcce202239646d44875a5773993a0d8",
-      "timestamp": "2026-07-28T19:39:02.104492+00:00"
+      "timestamp": "2026-07-29T12:44:33.178738+00:00"
     },
     {
       "path": "/persistent/bench_results/h100x4-full-20260728-sglang-throughput-wan22_t2v_a14b_720p.json",
       "run_id": "h100x4-full-20260728-sglang-throughput-wan22_t2v_a14b_720p",
       "commit_sha": "71f4c703bfcce202239646d44875a5773993a0d8",
-      "timestamp": "2026-07-28T18:22:26.980836+00:00"
+      "timestamp": "2026-07-29T09:34:20.655764+00:00"
     },
     {
       "path": "/persistent/bench_results/h100x4-full-20260728-sglang-throughput-wan22_ti2v_5b_704p.json",
@@ -959,6 +971,68 @@
     },
     {
       "case_id": "flux2_dev_t2i_1024",
+      "framework": "lightx2v",
+      "mode": "single_e2e",
+      "model": "black-forest-labs/FLUX.2-dev",
+      "task": "text-to-image",
+      "width": 1024,
+      "height": 1024,
+      "num_frames": null,
+      "fps": null,
+      "num_inference_steps": 50,
+      "guidance_scale": 4.0,
+      "guidance_scale_2": null,
+      "true_cfg_scale": null,
+      "negative_prompt_set": false,
+      "num_gpus": 2,
+      "latency_s": 65.153,
+      "error": null,
+      "framework_metadata": {
+        "profile": "h100-cpu-offload",
+        "profile_request": "auto",
+        "profile_source": "hardware",
+        "framework_ref": "lightx2v-main-flux2_dev+h100-cpu-offload",
+        "hardware": [
+          "h100"
+        ],
+        "hardware_candidates": [
+          "h100"
+        ],
+        "description": "H100 80GB LightX2V FLUX.2 profile: model-granularity CPU offload so the ~64GB bf16 weights fit. Lossless (identical numerics, weights just stream from CPU). Mirrors upstream configs/flux2/flux2_dev_offload.json.",
+        "notes": "Measured 2026-07-29 on H100 80GB: single-GPU resident load OOMs at ~78GB used during safetensors read, and the upstream TP path (parallel.tensor_p_size=2, configs/flux2/flux2_dev_tp.json) ALSO fails -- lightx2v loads the full model on rank 0 before sharding ('Single GPU - Load models cost 47.9s' then NCCL init hits cuda OOM), so TP does not reduce peak per-GPU load memory in current main. CPU offload is the only working lossless path on 80GB; expect higher latency than the H200 resident profile by design. rope_type must be the registry key 'flashinfer_rope' (bare 'flashinfer' raises KeyError in current main).",
+        "install_specs": null,
+        "server_bin": null,
+        "use_omni_arg": null,
+        "required_help_args": null,
+        "serve_args": "",
+        "num_gpus": 2,
+        "extra_env_keys": [],
+        "lightx2v_config_keys": [
+          "cpu_offload",
+          "enable_cfg",
+          "feature_caching",
+          "offload_granularity",
+          "patch_size",
+          "rope_type",
+          "sample_guide_scale",
+          "text_encoder_out_layers",
+          "tokenizer_max_length",
+          "vae_scale_factor"
+        ]
+      },
+      "server_command": "torchrun --nproc_per_node=2 -m lightx2v.server --model_path /persistent/hf-cache/hub/models--black-forest-labs--FLUX.2-dev/snapshots/26afe3a78bb242c0a8bb181dcc8937bb16e5c66c --model_cls flux2_dev --task t2i --config_json /tmp/lightx2v_config_flux2_dev_t2i_1024.json --host 127.0.0.1 --port 31400",
+      "metrics": {
+        "client_latency_s": 65.153,
+        "client_latency_min_s": 65.146,
+        "client_latency_max_s": 89.197,
+        "measured_repeats": 5,
+        "server_startup_s": 50.08,
+        "warmup_s": 98.38
+      },
+      "source_result": "/persistent/bench_results/h100x4-full-20260728-lightx2v-single_e2e-flux2_dev_t2i_1024.json"
+    },
+    {
+      "case_id": "flux2_dev_t2i_1024",
       "framework": "trtllm-visual",
       "mode": "single_e2e",
       "model": "black-forest-labs/FLUX.2-dev",
@@ -1017,10 +1091,10 @@
       "true_cfg_scale": null,
       "negative_prompt_set": false,
       "num_gpus": 2,
-      "latency_s": 5.744,
+      "latency_s": 4.564,
       "error": null,
       "framework_metadata": {
-        "profile": "h100-2gpu-ulysses-speed-compile",
+        "profile": "h100-2gpu-ulysses-speed-eager",
         "profile_request": "auto",
         "profile_source": "hardware",
         "framework_ref": null,
@@ -1030,32 +1104,31 @@
         "hardware_candidates": [
           "h100"
         ],
-        "description": "Hopper 2-GPU Ulysses/SP (sequence-parallel), resident + torch.compile \u2014 measured fastest for qwen no-CFG.",
-        "notes": "Validated H100 only. --enable-cfg-parallel false required (no-CFG single branch; also prevents speed-mode auto-cfg from overriding sp_degree, PR #30016).",
+        "description": "Hopper 2-GPU Ulysses/SP (sequence-parallel), resident, true eager \u2014 measured fastest for qwen no-CFG. torch.compile is a measured NET LOSS on this model.",
+        "notes": "Validated H100 only. --enable-cfg-parallel false required (no-CFG single branch; also prevents speed-mode auto-cfg from overriding sp_degree, PR #30016). speed mode auto-enables compile since #30016, so the eager exception MUST say --enable-torch-compile false explicitly. Campaign follow-ups (fused-qknorm dynamo fix, full-step CUDA graph, IPC A2A \u2014 notes/multimodal_gen/qwen_image_vllm_30pct_20260720.md) measured 3.952s on this case; revisit this profile once those PRs merge.",
         "install_specs": null,
         "server_bin": null,
         "use_omni_arg": null,
         "required_help_args": null,
-        "serve_args": "--model-type diffusion --warmup --dit-layerwise-offload false --tp-size 1 --ulysses-degree 2 --enable-cfg-parallel false --performance-mode speed --enable-torch-compile",
+        "serve_args": "--model-type diffusion --warmup --dit-layerwise-offload false --tp-size 1 --ulysses-degree 2 --enable-cfg-parallel false --performance-mode speed --enable-torch-compile false",
         "num_gpus": null,
         "extra_env_keys": [],
-        "sglang_profile": "h100-2gpu-ulysses-speed-compile",
+        "sglang_profile": "h100-2gpu-ulysses-speed-eager",
         "sglang_profile_request": "auto",
         "sglang_profile_source": "hardware",
         "sglang_ref": "current-main"
       },
-      "server_command": "sglang serve --model-path Qwen/Qwen-Image-2512 --port 30778 --host 127.0.0.1 --backend sglang --num-gpus 2 --model-type diffusion --warmup --dit-layerwise-offload false --tp-size 1 --ulysses-degree 2 --enable-cfg-parallel false --performance-mode speed --enable-torch-compile --warmup-steps 3",
+      "server_command": "sglang serve --model-path Qwen/Qwen-Image-2512 --port 31320 --host 127.0.0.1 --backend sglang --num-gpus 2 --model-type diffusion --warmup --dit-layerwise-offload false --tp-size 1 --ulysses-degree 2 --enable-cfg-parallel false --performance-mode speed --enable-torch-compile false --warmup-steps 3",
       "metrics": {
-        "client_latency_s": 5.744,
-        "client_latency_min_s": 5.681,
-        "client_latency_max_s": 5.756,
+        "client_latency_s": 4.564,
+        "client_latency_min_s": 4.55,
+        "client_latency_max_s": 4.571,
         "measured_repeats": 5,
-        "server_latency_s": 5.662,
-        "client_overhead_s": 0.083,
-        "server_startup_s": 105.07,
-        "warmup_s": 7.17
+        "server_latency_s": 4.499,
+        "client_overhead_s": 0.065,
+        "server_startup_s": 51.22,
+        "warmup_s": 0.82
       },
-      "run_id": "h100x4-full-20260728",
       "source_result": "/persistent/bench_results/h100x4-full-20260728-sglang-single_e2e-qwen_image_2512_t2i_1024.json"
     },
     {
@@ -1547,8 +1620,8 @@
       "true_cfg_scale": null,
       "negative_prompt_set": false,
       "num_gpus": 2,
-      "latency_s": null,
-      "error": "500 Server Error: Internal Server Error for url: http://127.0.0.1:30948/v1/images/generations",
+      "latency_s": 4.002,
+      "error": null,
       "framework_metadata": {
         "profile": "h100-h200-2gpu-tp-speed",
         "profile_request": "auto",
@@ -1577,10 +1650,16 @@
         "sglang_profile_source": "hardware",
         "sglang_ref": "current-main"
       },
-      "server_command": "sglang serve --model-path ideogram-ai/ideogram-4-fp8 --port 30948 --host 127.0.0.1 --backend sglang --num-gpus 2 --model-type diffusion --warmup --dit-layerwise-offload false --tp-size 2 --performance-mode speed --enable-torch-compile --warmup-steps 3",
+      "server_command": "sglang serve --model-path ideogram-ai/ideogram-4-fp8 --port 31260 --host 127.0.0.1 --backend sglang --num-gpus 2 --model-type diffusion --warmup --dit-layerwise-offload false --tp-size 2 --performance-mode speed --enable-torch-compile --warmup-steps 3",
       "metrics": {
-        "server_startup_s": 52.52,
-        "warmup_s": 0.01
+        "client_latency_s": 4.002,
+        "client_latency_min_s": 3.978,
+        "client_latency_max_s": 4.062,
+        "measured_repeats": 5,
+        "server_latency_s": 3.986,
+        "client_overhead_s": 0.016,
+        "server_startup_s": 55.04,
+        "warmup_s": 0.02
       },
       "source_result": "/persistent/bench_results/h100x4-full-20260728-sglang-single_e2e-ideogram4_t2i_1024_2gpu_tp.json"
     },
@@ -1926,8 +2005,8 @@
       "true_cfg_scale": null,
       "negative_prompt_set": false,
       "num_gpus": 4,
-      "latency_s": null,
-      "error": "Video generation failed: {'id': '4528d847-dc71-47e6-ba04-79c096822174', 'object': 'video', 'model': 'Wan-AI/Wan2.2-T2V-A14B-Diffusers', 'status': 'failed', 'progress': 0, 'created_at': 1785257750, 'size': '1280x720', 'seconds': '5', 'quality': 'standard', 'url': None, 'remixed_from_video_id': None, 'completed_at': None, 'expires_at': None, 'error': {'message': 'Model generation returned no output. Error from scheduler: Error executing request 4528d847-dc71-47e6-ba04-79c096822174: RuntimeError when making fake tensor call\\n  Explanation: Dynamo failed to run FX node with fake tensors: call_function <built-in function linear>(*(FakeTensor(..., device=\\'cuda:0\\', size=(1, s87, 5120), dtype=torch.bfloat16), Parameter(FakeTensor(..., device=\\'cuda:0\\', size=(1,), dtype=torch.bfloat16)), Parameter(FakeTensor(..., device=\\'cuda:0\\', size=(1,), dtype=torch.bfloat16))), **{}): got RuntimeError(\\'b must be 2D\\')\\n  Hint: Your code may result in an error when running in eager. Please double check that your code doesn\\'t contain a similar error when actually running eager/uncompiled. You can do this by removing the `torch.compile` call, or by using `torch.compiler.set_stance(\"force_eager\")`. \\n\\n  Developer debug context: \\n\\n For more details about this graph break, please visit: https://meta-pytorch.github.io/compile-graph-break-site/gb/gb4315.html\\n\\nfrom user code:\\n   File \"/persistent/sglang-ltx23-tp-sp-experiment/python/sglang/multimodal_gen/runtime/models/dits/wanvideo.py\", line 525, in forward\\n    query, _ = self.to_q(norm_hidden_states)\\n  File \"/persistent/sglang-ltx23-tp-sp-experiment/python/sglang/multimodal_gen/runtime/layers/linear.py\", line 426, in forward\\n    output_parallel = self.quant_method.apply(self, input_, bias)\\n  File \"/persistent/sglang-ltx23-tp-sp-experiment/python/sglang/multimodal_gen/runtime/layers/linear.py\", line 158, in apply\\n    F.linear(x, layer.weight, bias)\\n\\nSet TORCHDYNAMO_VERBOSE=1 for the internal stack trace (please do this especially if you\\'re reporting a bug to PyTorch). For even more developer context, set TORCH_LOGS=\"+dynamo\"\\n'}, 'file_path': '/persistent/diffusion-bench-framework/outputs/4528d847-dc71-47e6-ba04-79c096822174.mp4', 'file_paths': None, 'num_outputs': None, 'peak_memory_mb': None, 'inference_time_s': None, 'action': None}",
+      "latency_s": 209.916,
+      "error": null,
       "framework_metadata": {
         "profile": "default",
         "profile_request": "auto",
@@ -1951,10 +2030,16 @@
         "sglang_profile_source": "default",
         "sglang_ref": "current-main"
       },
-      "server_command": "sglang serve --model-path Wan-AI/Wan2.2-T2V-A14B-Diffusers --port 31287 --host 127.0.0.1 --backend sglang --num-gpus 4 --model-type diffusion --warmup --enable-cfg-parallel --ulysses-degree 2 --dit-cpu-offload false --pin-cpu-memory --dit-layerwise-offload false --performance-mode speed --enable-torch-compile --warmup-steps 3",
+      "server_command": "sglang serve --model-path Wan-AI/Wan2.2-T2V-A14B-Diffusers --port 31189 --host 127.0.0.1 --backend sglang --num-gpus 4 --model-type diffusion --warmup --enable-cfg-parallel --ulysses-degree 2 --dit-cpu-offload false --pin-cpu-memory --dit-layerwise-offload false --performance-mode speed --enable-torch-compile --warmup-steps 3",
       "metrics": {
-        "server_startup_s": 195.58,
-        "warmup_s": 1053.37
+        "client_latency_s": 209.916,
+        "client_latency_min_s": 208.42,
+        "client_latency_max_s": 211.411,
+        "measured_repeats": 2,
+        "server_latency_s": 207.984,
+        "client_overhead_s": 1.931,
+        "server_startup_s": 175.33,
+        "warmup_s": 988.29
       },
       "source_result": "/persistent/bench_results/h100x4-full-20260728-sglang-single_e2e-wan22_t2v_a14b_720p.json"
     },
@@ -2647,35 +2732,34 @@
       "negative_prompt_set": false,
       "num_gpus": 4,
       "latency_s": null,
-      "error": "Video generation failed: {'id': '59cc0812-20f5-48e9-9e21-93d6b4b42fbf', 'object': 'video', 'model': 'Wan-AI/Wan2.2-I2V-A14B-Diffusers', 'status': 'failed', 'progress': 0, 'created_at': 1785261390, 'size': '1280x720', 'seconds': '5', 'quality': 'standard', 'url': None, 'remixed_from_video_id': None, 'completed_at': None, 'expires_at': None, 'error': {'message': 'Model generation returned no output. Error from scheduler: Error executing request 59cc0812-20f5-48e9-9e21-93d6b4b42fbf: RuntimeError when making fake tensor call\\n  Explanation: Dynamo failed to run FX node with fake tensors: call_function <built-in function linear>(*(FakeTensor(..., device=\\'cuda:0\\', size=(1, s87, 5120), dtype=torch.bfloat16), Parameter(FakeTensor(..., device=\\'cuda:0\\', size=(1,), dtype=torch.bfloat16)), Parameter(FakeTensor(..., device=\\'cuda:0\\', size=(1,), dtype=torch.bfloat16))), **{}): got RuntimeError(\\'b must be 2D\\')\\n  Hint: Your code may result in an error when running in eager. Please double check that your code doesn\\'t contain a similar error when actually running eager/uncompiled. You can do this by removing the `torch.compile` call, or by using `torch.compiler.set_stance(\"force_eager\")`. \\n\\n  Developer debug context: \\n\\n For more details about this graph break, please visit: https://meta-pytorch.github.io/compile-graph-break-site/gb/gb4315.html\\n\\nfrom user code:\\n   File \"/persistent/sglang-ltx23-tp-sp-experiment/python/sglang/multimodal_gen/runtime/models/dits/wanvideo.py\", line 525, in forward\\n    query, _ = self.to_q(norm_hidden_states)\\n  File \"/persistent/sglang-ltx23-tp-sp-experiment/python/sglang/multimodal_gen/runtime/layers/linear.py\", line 426, in forward\\n    output_parallel = self.quant_method.apply(self, input_, bias)\\n  File \"/persistent/sglang-ltx23-tp-sp-experiment/python/sglang/multimodal_gen/runtime/layers/linear.py\", line 158, in apply\\n    F.linear(x, layer.weight, bias)\\n\\nSet TORCHDYNAMO_VERBOSE=1 for the internal stack trace (please do this especially if you\\'re reporting a bug to PyTorch). For even more developer context, set TORCH_LOGS=\"+dynamo\"\\n'}, 'file_path': '/persistent/diffusion-bench-framework/outputs/59cc0812-20f5-48e9-9e21-93d6b4b42fbf.mp4', 'file_paths': None, 'num_outputs': None, 'peak_memory_mb': None, 'inference_time_s': None, 'action': None}",
+      "error": "sglang server exited before health check passed (exit 1)",
       "framework_metadata": {
-        "profile": "default",
+        "profile": "h100-4gpu-cfg-uly-layerwise-offload",
         "profile_request": "auto",
-        "profile_source": "default",
+        "profile_source": "hardware",
         "framework_ref": null,
-        "hardware": null,
+        "hardware": [
+          "h100"
+        ],
         "hardware_candidates": [
           "h100"
         ],
-        "description": "Best known SGLang command for the benchmark repo default profile.",
-        "notes": "Keep this profile updated when the best command changes for a SGLang release or commit. Policy-aligned candidate (compile on, offload off) \u2014 NOT yet validated on H100; validate (incl. OOM risk) before publishing.",
+        "description": "H100 80GB profile for the dual-expert A14B I2V: layerwise-offloaded DiT so both 14B towers plus the CLIP image encoder and image-cond latents fit. Lossless (identical numerics, weights stream per layer).",
+        "notes": "T2V A14B keeps the resident profile (fits, fastest); only I2V needs the offload.",
         "install_specs": null,
         "server_bin": null,
         "use_omni_arg": null,
         "required_help_args": null,
-        "serve_args": "--model-type diffusion --warmup --enable-cfg-parallel --ulysses-degree 2 --dit-cpu-offload false --pin-cpu-memory --dit-layerwise-offload false --performance-mode speed --enable-torch-compile",
+        "serve_args": "--model-type diffusion --warmup --enable-cfg-parallel --ulysses-degree 2 --dit-cpu-offload false --pin-cpu-memory --dit-layerwise-offload true --performance-mode speed --enable-torch-compile",
         "num_gpus": null,
         "extra_env_keys": [],
-        "sglang_profile": "default",
+        "sglang_profile": "h100-4gpu-cfg-uly-layerwise-offload",
         "sglang_profile_request": "auto",
-        "sglang_profile_source": "default",
+        "sglang_profile_source": "hardware",
         "sglang_ref": "current-main"
       },
-      "server_command": "sglang serve --model-path Wan-AI/Wan2.2-I2V-A14B-Diffusers --port 30609 --host 127.0.0.1 --backend sglang --num-gpus 4 --model-type diffusion --warmup --enable-cfg-parallel --ulysses-degree 2 --dit-cpu-offload false --pin-cpu-memory --dit-layerwise-offload false --performance-mode speed --enable-torch-compile --warmup-steps 3",
-      "metrics": {
-        "server_startup_s": 329.95,
-        "warmup_s": 885.55
-      },
+      "server_command": "sglang serve --model-path Wan-AI/Wan2.2-I2V-A14B-Diffusers --port 31006 --host 127.0.0.1 --backend sglang --num-gpus 4 --model-type diffusion --warmup --enable-cfg-parallel --ulysses-degree 2 --dit-cpu-offload false --pin-cpu-memory --dit-layerwise-offload true --performance-mode speed --enable-torch-compile --warmup-steps 3",
+      "metrics": {},
       "source_result": "/persistent/bench_results/h100x4-full-20260728-sglang-single_e2e-wan22_i2v_a14b_720p.json"
     },
     {
@@ -3500,6 +3584,77 @@
     },
     {
       "case_id": "flux2_dev_t2i_1024",
+      "framework": "lightx2v",
+      "mode": "throughput",
+      "model": "black-forest-labs/FLUX.2-dev",
+      "task": "text-to-image",
+      "width": 1024,
+      "height": 1024,
+      "num_frames": null,
+      "fps": null,
+      "num_inference_steps": 50,
+      "guidance_scale": 4.0,
+      "guidance_scale_2": null,
+      "true_cfg_scale": null,
+      "negative_prompt_set": false,
+      "num_gpus": 2,
+      "latency_s": 132.888,
+      "error": null,
+      "framework_metadata": {
+        "profile": "h100-cpu-offload",
+        "profile_request": "auto",
+        "profile_source": "hardware",
+        "framework_ref": "lightx2v-main-flux2_dev+h100-cpu-offload",
+        "hardware": [
+          "h100"
+        ],
+        "hardware_candidates": [
+          "h100"
+        ],
+        "description": "H100 80GB LightX2V FLUX.2 profile: model-granularity CPU offload so the ~64GB bf16 weights fit. Lossless (identical numerics, weights just stream from CPU). Mirrors upstream configs/flux2/flux2_dev_offload.json.",
+        "notes": "Measured 2026-07-29 on H100 80GB: single-GPU resident load OOMs at ~78GB used during safetensors read, and the upstream TP path (parallel.tensor_p_size=2, configs/flux2/flux2_dev_tp.json) ALSO fails -- lightx2v loads the full model on rank 0 before sharding ('Single GPU - Load models cost 47.9s' then NCCL init hits cuda OOM), so TP does not reduce peak per-GPU load memory in current main. CPU offload is the only working lossless path on 80GB; expect higher latency than the H200 resident profile by design. rope_type must be the registry key 'flashinfer_rope' (bare 'flashinfer' raises KeyError in current main).",
+        "install_specs": null,
+        "server_bin": null,
+        "use_omni_arg": null,
+        "required_help_args": null,
+        "serve_args": "",
+        "num_gpus": 2,
+        "extra_env_keys": [],
+        "lightx2v_config_keys": [
+          "cpu_offload",
+          "enable_cfg",
+          "feature_caching",
+          "offload_granularity",
+          "patch_size",
+          "rope_type",
+          "sample_guide_scale",
+          "text_encoder_out_layers",
+          "tokenizer_max_length",
+          "vae_scale_factor"
+        ]
+      },
+      "server_command": "torchrun --nproc_per_node=2 -m lightx2v.server --model_path /persistent/hf-cache/hub/models--black-forest-labs--FLUX.2-dev/snapshots/26afe3a78bb242c0a8bb181dcc8937bb16e5c66c --model_cls flux2_dev --task t2i --config_json /tmp/lightx2v_config_flux2_dev_t2i_1024.json --host 127.0.0.1 --port 31356",
+      "metrics": {
+        "duration_s": 265.777,
+        "num_requests": 4,
+        "completed_requests": 4,
+        "failed_requests": 0,
+        "max_concurrency": 2,
+        "throughput_rps": 0.0151,
+        "output_throughput_ops": 0.0151,
+        "latency_mean_s": 116.597,
+        "latency_p50_s": 132.888,
+        "latency_p90_s": 134.109,
+        "latency_p95_s": 134.257,
+        "latency_p99_s": 134.376,
+        "errors": [],
+        "server_startup_s": 50.07,
+        "warmup_s": 63.61
+      },
+      "source_result": "/persistent/bench_results/h100x4-full-20260728-lightx2v-throughput-flux2_dev_t2i_1024.json"
+    },
+    {
+      "case_id": "flux2_dev_t2i_1024",
       "framework": "trtllm-visual",
       "mode": "throughput",
       "model": "black-forest-labs/FLUX.2-dev",
@@ -3558,10 +3713,10 @@
       "true_cfg_scale": null,
       "negative_prompt_set": false,
       "num_gpus": 2,
-      "latency_s": 11.769,
+      "latency_s": 9.089,
       "error": null,
       "framework_metadata": {
-        "profile": "h100-2gpu-ulysses-speed-compile",
+        "profile": "h100-2gpu-ulysses-speed-eager",
         "profile_request": "auto",
         "profile_source": "hardware",
         "framework_ref": null,
@@ -3571,37 +3726,37 @@
         "hardware_candidates": [
           "h100"
         ],
-        "description": "Hopper 2-GPU Ulysses/SP (sequence-parallel), resident + torch.compile \u2014 measured fastest for qwen no-CFG.",
-        "notes": "Validated H100 only. --enable-cfg-parallel false required (no-CFG single branch; also prevents speed-mode auto-cfg from overriding sp_degree, PR #30016).",
+        "description": "Hopper 2-GPU Ulysses/SP (sequence-parallel), resident, true eager \u2014 measured fastest for qwen no-CFG. torch.compile is a measured NET LOSS on this model.",
+        "notes": "Validated H100 only. --enable-cfg-parallel false required (no-CFG single branch; also prevents speed-mode auto-cfg from overriding sp_degree, PR #30016). speed mode auto-enables compile since #30016, so the eager exception MUST say --enable-torch-compile false explicitly. Campaign follow-ups (fused-qknorm dynamo fix, full-step CUDA graph, IPC A2A \u2014 notes/multimodal_gen/qwen_image_vllm_30pct_20260720.md) measured 3.952s on this case; revisit this profile once those PRs merge.",
         "install_specs": null,
         "server_bin": null,
         "use_omni_arg": null,
         "required_help_args": null,
-        "serve_args": "--model-type diffusion --warmup --dit-layerwise-offload false --tp-size 1 --ulysses-degree 2 --enable-cfg-parallel false --performance-mode speed --enable-torch-compile",
+        "serve_args": "--model-type diffusion --warmup --dit-layerwise-offload false --tp-size 1 --ulysses-degree 2 --enable-cfg-parallel false --performance-mode speed --enable-torch-compile false",
         "num_gpus": null,
         "extra_env_keys": [],
-        "sglang_profile": "h100-2gpu-ulysses-speed-compile",
+        "sglang_profile": "h100-2gpu-ulysses-speed-eager",
         "sglang_profile_request": "auto",
         "sglang_profile_source": "hardware",
         "sglang_ref": "current-main"
       },
-      "server_command": "sglang serve --model-path Qwen/Qwen-Image-2512 --port 30826 --host 127.0.0.1 --backend sglang --num-gpus 2 --model-type diffusion --warmup --dit-layerwise-offload false --tp-size 1 --ulysses-degree 2 --enable-cfg-parallel false --performance-mode speed --enable-torch-compile --warmup-steps 3",
+      "server_command": "sglang serve --model-path Qwen/Qwen-Image-2512 --port 31040 --host 127.0.0.1 --backend sglang --num-gpus 2 --model-type diffusion --warmup --dit-layerwise-offload false --tp-size 1 --ulysses-degree 2 --enable-cfg-parallel false --performance-mode speed --enable-torch-compile false --warmup-steps 3",
       "metrics": {
-        "duration_s": 23.574,
+        "duration_s": 18.181,
         "num_requests": 4,
         "completed_requests": 4,
         "failed_requests": 0,
         "max_concurrency": 2,
-        "throughput_rps": 0.1697,
-        "output_throughput_ops": 0.1697,
-        "latency_mean_s": 10.315,
-        "latency_p50_s": 11.769,
-        "latency_p90_s": 11.793,
-        "latency_p95_s": 11.798,
-        "latency_p99_s": 11.802,
+        "throughput_rps": 0.22,
+        "output_throughput_ops": 0.22,
+        "latency_mean_s": 7.954,
+        "latency_p50_s": 9.089,
+        "latency_p90_s": 9.097,
+        "latency_p95_s": 9.098,
+        "latency_p99_s": 9.098,
         "errors": [],
-        "server_startup_s": 100.97,
-        "warmup_s": 7.08
+        "server_startup_s": 44.57,
+        "warmup_s": 0.81
       },
       "source_result": "/persistent/bench_results/h100x4-full-20260728-sglang-throughput-qwen_image_2512_t2i_1024.json"
     },
@@ -4171,8 +4326,8 @@
       "true_cfg_scale": null,
       "negative_prompt_set": false,
       "num_gpus": 2,
-      "latency_s": 0,
-      "error": "bench_serving partial failure (0/4 completed, 4 failed)",
+      "latency_s": 7.962,
+      "error": null,
       "framework_metadata": {
         "profile": "h100-h200-2gpu-tp-speed",
         "profile_request": "auto",
@@ -4201,43 +4356,22 @@
         "sglang_profile_source": "hardware",
         "sglang_ref": "current-main"
       },
-      "server_command": "sglang serve --model-path ideogram-ai/ideogram-4-fp8 --port 31023 --host 127.0.0.1 --backend sglang --num-gpus 2 --model-type diffusion --warmup --dit-layerwise-offload false --tp-size 2 --performance-mode speed --enable-torch-compile --warmup-steps 3",
+      "server_command": "sglang serve --model-path ideogram-ai/ideogram-4-fp8 --port 30937 --host 127.0.0.1 --backend sglang --num-gpus 2 --model-type diffusion --warmup --dit-layerwise-offload false --tp-size 2 --performance-mode speed --enable-torch-compile --warmup-steps 3",
       "metrics": {
-        "duration_s": 0.968,
+        "duration_s": 16.026,
         "num_requests": 4,
-        "completed_requests": 0,
-        "failed_requests": 4,
+        "completed_requests": 4,
+        "failed_requests": 0,
         "max_concurrency": 2,
-        "throughput_rps": 0.0,
-        "output_throughput_ops": 0.0,
-        "latency_mean_s": 0,
-        "latency_p50_s": 0,
-        "latency_p90_s": 0,
-        "latency_p95_s": 0,
-        "latency_p99_s": 0,
-        "errors": [
-          {
-            "request_id": "d1a70a19-cdce-48cb-bff6-b7ad5ad359df",
-            "latency_s": 0.476,
-            "error": "HTTP 500: Internal Server Error"
-          },
-          {
-            "request_id": "245c89e7-2dcb-4348-8735-b8eb10cd9e2f",
-            "latency_s": 0.642,
-            "error": "HTTP 500: Internal Server Error"
-          },
-          {
-            "request_id": "d61a5ac2-916b-4675-9946-e9729c7033ad",
-            "latency_s": 0.328,
-            "error": "HTTP 500: Internal Server Error"
-          },
-          {
-            "request_id": "bd2d8a1e-b306-4776-bea8-de71f4021e37",
-            "latency_s": 0.326,
-            "error": "HTTP 500: Internal Server Error"
-          }
-        ],
-        "server_startup_s": 51.9,
+        "throughput_rps": 0.2496,
+        "output_throughput_ops": 0.2496,
+        "latency_mean_s": 7.021,
+        "latency_p50_s": 7.962,
+        "latency_p90_s": 8.045,
+        "latency_p95_s": 8.06,
+        "latency_p99_s": 8.072,
+        "errors": [],
+        "server_startup_s": 55.04,
         "warmup_s": 0.02
       },
       "source_result": "/persistent/bench_results/h100x4-full-20260728-sglang-throughput-ideogram4_t2i_1024_2gpu_tp.json"
@@ -4636,8 +4770,8 @@
       "true_cfg_scale": null,
       "negative_prompt_set": false,
       "num_gpus": 4,
-      "latency_s": 0,
-      "error": "bench_serving partial failure (0/4 completed, 4 failed)",
+      "latency_s": null,
+      "error": "Command '['/usr/bin/python3', '-m', 'diffusion_bench.bench_serving', '--backend', 'sglang', '--base-url', 'http://127.0.0.1:31017', '--dataset', 'fixed', '--prompt', 'A cat and a dog baking a cake together in a kitchen.', '--model', 'Wan-AI/Wan2.2-T2V-A14B-Diffusers', '--task', 'text-to-video', '--num-prompts', '4', '--max-concurrency', '2', '--request-rate', 'inf', '--request-timeout', '2400', '--output-file', 'comparison-logs/bench_serving_wan22_t2v_a14b_720p_sglang.json', '--disable-tqdm', '--width', '1280', '--height', '720', '--num-frames', '81', '--fps', '16', '--num-inference-steps', '40', '--extra-body', '{\"guidance_scale\": 4.0, \"guidance_scale_2\": 3.0, \"seed\": 42}']' timed out after 4800 seconds",
       "framework_metadata": {
         "profile": "default",
         "profile_request": "auto",
@@ -4661,44 +4795,10 @@
         "sglang_profile_source": "default",
         "sglang_ref": "current-main"
       },
-      "server_command": "sglang serve --model-path Wan-AI/Wan2.2-T2V-A14B-Diffusers --port 31125 --host 127.0.0.1 --backend sglang --num-gpus 4 --model-type diffusion --warmup --enable-cfg-parallel --ulysses-degree 2 --dit-cpu-offload false --pin-cpu-memory --dit-layerwise-offload false --performance-mode speed --enable-torch-compile --warmup-steps 3",
+      "server_command": "sglang serve --model-path Wan-AI/Wan2.2-T2V-A14B-Diffusers --port 31017 --host 127.0.0.1 --backend sglang --num-gpus 4 --model-type diffusion --warmup --enable-cfg-parallel --ulysses-degree 2 --dit-cpu-offload false --pin-cpu-memory --dit-layerwise-offload false --performance-mode speed --enable-torch-compile --warmup-steps 3",
       "metrics": {
-        "duration_s": 2.015,
-        "num_requests": 4,
-        "completed_requests": 0,
-        "failed_requests": 4,
-        "max_concurrency": 2,
-        "throughput_rps": 0.0,
-        "output_throughput_ops": 0.0,
-        "latency_mean_s": 0,
-        "latency_p50_s": 0,
-        "latency_p90_s": 0,
-        "latency_p95_s": 0,
-        "latency_p99_s": 0,
-        "errors": [
-          {
-            "request_id": "fd14b2f2-44c3-4911-8970-dba29a44fa72",
-            "latency_s": 1.007,
-            "error": "Job failed: {'message': 'Model generation returned no output. Error from scheduler: Error executing request b1f202f7-e708-4bb0-8e8e-2821d802905d: RuntimeError when making fake tensor call\\n  Explanation: Dynamo failed to run FX node with fake tensors: call_function <built-in function linear>(*(FakeTensor(..., device=\\'cuda:0\\', size=(1, s87, 5120), dtype=torch.bfloat16), Parameter(FakeTensor(..., device=\\'cuda:0\\', size=(1,), dtype=torch.bfloat16)), Parameter(FakeTensor(..., device=\\'cuda:0\\', size=(1,), dtype=torch.bfloat16))), **{}): got RuntimeError(\\'b must be 2D\\')\\n  Hint: Your code may result in an error when running in eager. Please double check that your code doesn\\'t contain a similar error when actually running eager/uncompiled. You can do this by removing the `torch.compile` call, or by using `torch.compiler.set_stance(\"force_eager\")`. \\n\\n  Developer debug context: \\n\\n For more details about this graph break, please visit: https://meta-pytorch.github.io/compile-graph-break-site/gb/gb4315.html\\n\\nfrom user code:\\n   File \"/persistent/sglang-ltx23-tp-sp-experiment/python/sglang/multimodal_gen/runtime/models/dits/wanvideo.py\", line 525, in forward\\n    query, _ = self.to_q(norm_hidden_states)\\n  File \"/persistent/sglang-ltx23-tp-sp-experiment/python/sglang/multimodal_gen/runtime/layers/linear.py\", line 426, in forward\\n    output_parallel = self.quant_method.apply(self, input_, bias)\\n  File \"/persistent/sglang-ltx23-tp-sp-experiment/python/sglang/multimodal_gen/runtime/layers/linear.py\", line 158, in apply\\n    F.linear(x, layer.weight, bias)\\n\\nSet TORCHDYNAMO_VERBOSE=1 for the internal stack trace (please do this especially if you\\'re reporting a bug to PyTorch). For even more developer context, set TORCH_LOGS=\"+dynamo\"\\n'}"
-          },
-          {
-            "request_id": "750383c0-93b9-49fb-8737-72730c9b4110",
-            "latency_s": 1.007,
-            "error": "Job failed: {'message': 'Model generation returned no output. Error from scheduler: Error executing request feb2fff7-83d4-4c13-bec1-9d77472d2fff: RuntimeError when making fake tensor call\\n  Explanation: Dynamo failed to run FX node with fake tensors: call_function <built-in function linear>(*(FakeTensor(..., device=\\'cuda:0\\', size=(1, s87, 5120), dtype=torch.bfloat16), Parameter(FakeTensor(..., device=\\'cuda:0\\', size=(1,), dtype=torch.bfloat16)), Parameter(FakeTensor(..., device=\\'cuda:0\\', size=(1,), dtype=torch.bfloat16))), **{}): got RuntimeError(\\'b must be 2D\\')\\n  Hint: Your code may result in an error when running in eager. Please double check that your code doesn\\'t contain a similar error when actually running eager/uncompiled. You can do this by removing the `torch.compile` call, or by using `torch.compiler.set_stance(\"force_eager\")`. \\n\\n  Developer debug context: \\n\\n For more details about this graph break, please visit: https://meta-pytorch.github.io/compile-graph-break-site/gb/gb4315.html\\n\\nfrom user code:\\n   File \"/persistent/sglang-ltx23-tp-sp-experiment/python/sglang/multimodal_gen/runtime/models/dits/wanvideo.py\", line 525, in forward\\n    query, _ = self.to_q(norm_hidden_states)\\n  File \"/persistent/sglang-ltx23-tp-sp-experiment/python/sglang/multimodal_gen/runtime/layers/linear.py\", line 426, in forward\\n    output_parallel = self.quant_method.apply(self, input_, bias)\\n  File \"/persistent/sglang-ltx23-tp-sp-experiment/python/sglang/multimodal_gen/runtime/layers/linear.py\", line 158, in apply\\n    F.linear(x, layer.weight, bias)\\n\\nSet TORCHDYNAMO_VERBOSE=1 for the internal stack trace (please do this especially if you\\'re reporting a bug to PyTorch). For even more developer context, set TORCH_LOGS=\"+dynamo\"\\n'}"
-          },
-          {
-            "request_id": "7c452077-e7b5-4d33-ba34-4d11c016adaa",
-            "latency_s": 1.007,
-            "error": "Job failed: {'message': 'Model generation returned no output. Error from scheduler: Error executing request fc4aed62-5416-4160-a452-04ab42819e4e: RuntimeError when making fake tensor call\\n  Explanation: Dynamo failed to run FX node with fake tensors: call_function <built-in function linear>(*(FakeTensor(..., device=\\'cuda:0\\', size=(1, s87, 5120), dtype=torch.bfloat16), Parameter(FakeTensor(..., device=\\'cuda:0\\', size=(1,), dtype=torch.bfloat16)), Parameter(FakeTensor(..., device=\\'cuda:0\\', size=(1,), dtype=torch.bfloat16))), **{}): got RuntimeError(\\'b must be 2D\\')\\n  Hint: Your code may result in an error when running in eager. Please double check that your code doesn\\'t contain a similar error when actually running eager/uncompiled. You can do this by removing the `torch.compile` call, or by using `torch.compiler.set_stance(\"force_eager\")`. \\n\\n  Developer debug context: \\n\\n For more details about this graph break, please visit: https://meta-pytorch.github.io/compile-graph-break-site/gb/gb4315.html\\n\\nfrom user code:\\n   File \"/persistent/sglang-ltx23-tp-sp-experiment/python/sglang/multimodal_gen/runtime/models/dits/wanvideo.py\", line 525, in forward\\n    query, _ = self.to_q(norm_hidden_states)\\n  File \"/persistent/sglang-ltx23-tp-sp-experiment/python/sglang/multimodal_gen/runtime/layers/linear.py\", line 426, in forward\\n    output_parallel = self.quant_method.apply(self, input_, bias)\\n  File \"/persistent/sglang-ltx23-tp-sp-experiment/python/sglang/multimodal_gen/runtime/layers/linear.py\", line 158, in apply\\n    F.linear(x, layer.weight, bias)\\n\\nSet TORCHDYNAMO_VERBOSE=1 for the internal stack trace (please do this especially if you\\'re reporting a bug to PyTorch). For even more developer context, set TORCH_LOGS=\"+dynamo\"\\n'}"
-          },
-          {
-            "request_id": "96fbdaac-d673-4589-a8ac-4e562110c2c5",
-            "latency_s": 1.007,
-            "error": "Job failed: {'message': 'Model generation returned no output. Error from scheduler: Error executing request 4f0c9d76-7486-4c76-927f-3b911836b1c8: RuntimeError when making fake tensor call\\n  Explanation: Dynamo failed to run FX node with fake tensors: call_function <built-in function linear>(*(FakeTensor(..., device=\\'cuda:0\\', size=(1, s87, 5120), dtype=torch.bfloat16), Parameter(FakeTensor(..., device=\\'cuda:0\\', size=(1,), dtype=torch.bfloat16)), Parameter(FakeTensor(..., device=\\'cuda:0\\', size=(1,), dtype=torch.bfloat16))), **{}): got RuntimeError(\\'b must be 2D\\')\\n  Hint: Your code may result in an error when running in eager. Please double check that your code doesn\\'t contain a similar error when actually running eager/uncompiled. You can do this by removing the `torch.compile` call, or by using `torch.compiler.set_stance(\"force_eager\")`. \\n\\n  Developer debug context: \\n\\n For more details about this graph break, please visit: https://meta-pytorch.github.io/compile-graph-break-site/gb/gb4315.html\\n\\nfrom user code:\\n   File \"/persistent/sglang-ltx23-tp-sp-experiment/python/sglang/multimodal_gen/runtime/models/dits/wanvideo.py\", line 525, in forward\\n    query, _ = self.to_q(norm_hidden_states)\\n  File \"/persistent/sglang-ltx23-tp-sp-experiment/python/sglang/multimodal_gen/runtime/layers/linear.py\", line 426, in forward\\n    output_parallel = self.quant_method.apply(self, input_, bias)\\n  File \"/persistent/sglang-ltx23-tp-sp-experiment/python/sglang/multimodal_gen/runtime/layers/linear.py\", line 158, in apply\\n    F.linear(x, layer.weight, bias)\\n\\nSet TORCHDYNAMO_VERBOSE=1 for the internal stack trace (please do this especially if you\\'re reporting a bug to PyTorch). For even more developer context, set TORCH_LOGS=\"+dynamo\"\\n'}"
-          }
-        ],
-        "server_startup_s": 195.13,
-        "warmup_s": 943.13
+        "server_startup_s": 199.14,
+        "warmup_s": 1097.63
       },
       "source_result": "/persistent/bench_results/h100x4-full-20260728-sglang-throughput-wan22_t2v_a14b_720p.json"
     },
@@ -5519,70 +5619,35 @@
       "true_cfg_scale": null,
       "negative_prompt_set": false,
       "num_gpus": 4,
-      "latency_s": 0,
-      "error": "bench_serving partial failure (0/4 completed, 4 failed)",
+      "latency_s": null,
+      "error": "sglang server exited before health check passed (exit 1)",
       "framework_metadata": {
-        "profile": "default",
+        "profile": "h100-4gpu-cfg-uly-layerwise-offload",
         "profile_request": "auto",
-        "profile_source": "default",
+        "profile_source": "hardware",
         "framework_ref": null,
-        "hardware": null,
+        "hardware": [
+          "h100"
+        ],
         "hardware_candidates": [
           "h100"
         ],
-        "description": "Best known SGLang command for the benchmark repo default profile.",
-        "notes": "Keep this profile updated when the best command changes for a SGLang release or commit. Policy-aligned candidate (compile on, offload off) \u2014 NOT yet validated on H100; validate (incl. OOM risk) before publishing.",
+        "description": "H100 80GB profile for the dual-expert A14B I2V: layerwise-offloaded DiT so both 14B towers plus the CLIP image encoder and image-cond latents fit. Lossless (identical numerics, weights stream per layer).",
+        "notes": "T2V A14B keeps the resident profile (fits, fastest); only I2V needs the offload.",
         "install_specs": null,
         "server_bin": null,
         "use_omni_arg": null,
         "required_help_args": null,
-        "serve_args": "--model-type diffusion --warmup --enable-cfg-parallel --ulysses-degree 2 --dit-cpu-offload false --pin-cpu-memory --dit-layerwise-offload false --performance-mode speed --enable-torch-compile",
+        "serve_args": "--model-type diffusion --warmup --enable-cfg-parallel --ulysses-degree 2 --dit-cpu-offload false --pin-cpu-memory --dit-layerwise-offload true --performance-mode speed --enable-torch-compile",
         "num_gpus": null,
         "extra_env_keys": [],
-        "sglang_profile": "default",
+        "sglang_profile": "h100-4gpu-cfg-uly-layerwise-offload",
         "sglang_profile_request": "auto",
-        "sglang_profile_source": "default",
+        "sglang_profile_source": "hardware",
         "sglang_ref": "current-main"
       },
-      "server_command": "sglang serve --model-path Wan-AI/Wan2.2-I2V-A14B-Diffusers --port 30944 --host 127.0.0.1 --backend sglang --num-gpus 4 --model-type diffusion --warmup --enable-cfg-parallel --ulysses-degree 2 --dit-cpu-offload false --pin-cpu-memory --dit-layerwise-offload false --performance-mode speed --enable-torch-compile --warmup-steps 3",
-      "metrics": {
-        "duration_s": 15.052,
-        "num_requests": 4,
-        "completed_requests": 0,
-        "failed_requests": 4,
-        "max_concurrency": 2,
-        "throughput_rps": 0.0,
-        "output_throughput_ops": 0.0,
-        "latency_mean_s": 0,
-        "latency_p50_s": 0,
-        "latency_p90_s": 0,
-        "latency_p95_s": 0,
-        "latency_p99_s": 0,
-        "errors": [
-          {
-            "request_id": "f78643c6-6e3c-44b1-b9ed-ee8fcb91cf3e",
-            "latency_s": 4.022,
-            "error": "Job failed: {'message': 'Model generation returned no output. Error from scheduler: Error executing request 380dcfa7-172a-4689-8127-94918fc8a4f5: RuntimeError when making fake tensor call\\n  Explanation: Dynamo failed to run FX node with fake tensors: call_function <built-in function linear>(*(FakeTensor(..., device=\\'cuda:0\\', size=(1, s87, 5120), dtype=torch.bfloat16), Parameter(FakeTensor(..., device=\\'cuda:0\\', size=(1,), dtype=torch.bfloat16)), Parameter(FakeTensor(..., device=\\'cuda:0\\', size=(1,), dtype=torch.bfloat16))), **{}): got RuntimeError(\\'b must be 2D\\')\\n  Hint: Your code may result in an error when running in eager. Please double check that your code doesn\\'t contain a similar error when actually running eager/uncompiled. You can do this by removing the `torch.compile` call, or by using `torch.compiler.set_stance(\"force_eager\")`. \\n\\n  Developer debug context: \\n\\n For more details about this graph break, please visit: https://meta-pytorch.github.io/compile-graph-break-site/gb/gb4315.html\\n\\nfrom user code:\\n   File \"/persistent/sglang-ltx23-tp-sp-experiment/python/sglang/multimodal_gen/runtime/models/dits/wanvideo.py\", line 525, in forward\\n    query, _ = self.to_q(norm_hidden_states)\\n  File \"/persistent/sglang-ltx23-tp-sp-experiment/python/sglang/multimodal_gen/runtime/layers/linear.py\", line 426, in forward\\n    output_parallel = self.quant_method.apply(self, input_, bias)\\n  File \"/persistent/sglang-ltx23-tp-sp-experiment/python/sglang/multimodal_gen/runtime/layers/linear.py\", line 158, in apply\\n    F.linear(x, layer.weight, bias)\\n\\nSet TORCHDYNAMO_VERBOSE=1 for the internal stack trace (please do this especially if you\\'re reporting a bug to PyTorch). For even more developer context, set TORCH_LOGS=\"+dynamo\"\\n'}"
-          },
-          {
-            "request_id": "f4ff36f0-e6e7-449d-9cd6-73908bbcf60a",
-            "latency_s": 8.033,
-            "error": "Job failed: {'message': 'Model generation returned no output. Error from scheduler: Error executing request 72cbba7e-d477-49e4-b941-037dc2d4ab82: RuntimeError when making fake tensor call\\n  Explanation: Dynamo failed to run FX node with fake tensors: call_function <built-in function linear>(*(FakeTensor(..., device=\\'cuda:0\\', size=(1, s87, 5120), dtype=torch.bfloat16), Parameter(FakeTensor(..., device=\\'cuda:0\\', size=(1,), dtype=torch.bfloat16)), Parameter(FakeTensor(..., device=\\'cuda:0\\', size=(1,), dtype=torch.bfloat16))), **{}): got RuntimeError(\\'b must be 2D\\')\\n  Hint: Your code may result in an error when running in eager. Please double check that your code doesn\\'t contain a similar error when actually running eager/uncompiled. You can do this by removing the `torch.compile` call, or by using `torch.compiler.set_stance(\"force_eager\")`. \\n\\n  Developer debug context: \\n\\n For more details about this graph break, please visit: https://meta-pytorch.github.io/compile-graph-break-site/gb/gb4315.html\\n\\nfrom user code:\\n   File \"/persistent/sglang-ltx23-tp-sp-experiment/python/sglang/multimodal_gen/runtime/models/dits/wanvideo.py\", line 525, in forward\\n    query, _ = self.to_q(norm_hidden_states)\\n  File \"/persistent/sglang-ltx23-tp-sp-experiment/python/sglang/multimodal_gen/runtime/layers/linear.py\", line 426, in forward\\n    output_parallel = self.quant_method.apply(self, input_, bias)\\n  File \"/persistent/sglang-ltx23-tp-sp-experiment/python/sglang/multimodal_gen/runtime/layers/linear.py\", line 158, in apply\\n    F.linear(x, layer.weight, bias)\\n\\nSet TORCHDYNAMO_VERBOSE=1 for the internal stack trace (please do this especially if you\\'re reporting a bug to PyTorch). For even more developer context, set TORCH_LOGS=\"+dynamo\"\\n'}"
-          },
-          {
-            "request_id": "a007f455-e7a2-4b14-8ed1-2aa00d86e940",
-            "latency_s": 7.02,
-            "error": "Job failed: {'message': 'Model generation returned no output. Error from scheduler: Error executing request f4bc51cd-cb23-49d7-bec1-140502fe31b6: RuntimeError when making fake tensor call\\n  Explanation: Dynamo failed to run FX node with fake tensors: call_function <built-in function linear>(*(FakeTensor(..., device=\\'cuda:0\\', size=(1, s87, 5120), dtype=torch.bfloat16), Parameter(FakeTensor(..., device=\\'cuda:0\\', size=(1,), dtype=torch.bfloat16)), Parameter(FakeTensor(..., device=\\'cuda:0\\', size=(1,), dtype=torch.bfloat16))), **{}): got RuntimeError(\\'b must be 2D\\')\\n  Hint: Your code may result in an error when running in eager. Please double check that your code doesn\\'t contain a similar error when actually running eager/uncompiled. You can do this by removing the `torch.compile` call, or by using `torch.compiler.set_stance(\"force_eager\")`. \\n\\n  Developer debug context: \\n\\n For more details about this graph break, please visit: https://meta-pytorch.github.io/compile-graph-break-site/gb/gb4315.html\\n\\nfrom user code:\\n   File \"/persistent/sglang-ltx23-tp-sp-experiment/python/sglang/multimodal_gen/runtime/models/dits/wanvideo.py\", line 525, in forward\\n    query, _ = self.to_q(norm_hidden_states)\\n  File \"/persistent/sglang-ltx23-tp-sp-experiment/python/sglang/multimodal_gen/runtime/layers/linear.py\", line 426, in forward\\n    output_parallel = self.quant_method.apply(self, input_, bias)\\n  File \"/persistent/sglang-ltx23-tp-sp-experiment/python/sglang/multimodal_gen/runtime/layers/linear.py\", line 158, in apply\\n    F.linear(x, layer.weight, bias)\\n\\nSet TORCHDYNAMO_VERBOSE=1 for the internal stack trace (please do this especially if you\\'re reporting a bug to PyTorch). For even more developer context, set TORCH_LOGS=\"+dynamo\"\\n'}"
-          },
-          {
-            "request_id": "e774cb9e-ca45-43f1-8c4c-da41aa43fff3",
-            "latency_s": 7.019,
-            "error": "Job failed: {'message': 'Model generation returned no output. Error from scheduler: Error executing request 8969b311-9523-46bc-98e7-d4ee1d363f06: RuntimeError when making fake tensor call\\n  Explanation: Dynamo failed to run FX node with fake tensors: call_function <built-in function linear>(*(FakeTensor(..., device=\\'cuda:0\\', size=(1, s87, 5120), dtype=torch.bfloat16), Parameter(FakeTensor(..., device=\\'cuda:0\\', size=(1,), dtype=torch.bfloat16)), Parameter(FakeTensor(..., device=\\'cuda:0\\', size=(1,), dtype=torch.bfloat16))), **{}): got RuntimeError(\\'b must be 2D\\')\\n  Hint: Your code may result in an error when running in eager. Please double check that your code doesn\\'t contain a similar error when actually running eager/uncompiled. You can do this by removing the `torch.compile` call, or by using `torch.compiler.set_stance(\"force_eager\")`. \\n\\n  Developer debug context: \\n\\n For more details about this graph break, please visit: https://meta-pytorch.github.io/compile-graph-break-site/gb/gb4315.html\\n\\nfrom user code:\\n   File \"/persistent/sglang-ltx23-tp-sp-experiment/python/sglang/multimodal_gen/runtime/models/dits/wanvideo.py\", line 525, in forward\\n    query, _ = self.to_q(norm_hidden_states)\\n  File \"/persistent/sglang-ltx23-tp-sp-experiment/python/sglang/multimodal_gen/runtime/layers/linear.py\", line 426, in forward\\n    output_parallel = self.quant_method.apply(self, input_, bias)\\n  File \"/persistent/sglang-ltx23-tp-sp-experiment/python/sglang/multimodal_gen/runtime/layers/linear.py\", line 158, in apply\\n    F.linear(x, layer.weight, bias)\\n\\nSet TORCHDYNAMO_VERBOSE=1 for the internal stack trace (please do this especially if you\\'re reporting a bug to PyTorch). For even more developer context, set TORCH_LOGS=\"+dynamo\"\\n'}"
-          }
-        ],
-        "server_startup_s": 199.83,
-        "warmup_s": 1031.79
-      },
+      "server_command": "sglang serve --model-path Wan-AI/Wan2.2-I2V-A14B-Diffusers --port 31006 --host 127.0.0.1 --backend sglang --num-gpus 4 --model-type diffusion --warmup --enable-cfg-parallel --ulysses-degree 2 --dit-cpu-offload false --pin-cpu-memory --dit-layerwise-offload true --performance-mode speed --enable-torch-compile --warmup-steps 3",
+      "metrics": {},
       "source_result": "/persistent/bench_results/h100x4-full-20260728-sglang-throughput-wan22_i2v_a14b_720p.json"
     },
     {

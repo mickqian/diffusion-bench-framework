@@ -1,5 +1,5 @@
 {
-  "timestamp": "2026-07-28T18:22:26.980836+00:00",
+  "timestamp": "2026-07-29T09:34:20.655764+00:00",
   "commit_sha": "71f4c703bfcce202239646d44875a5773993a0d8",
   "run_id": "h100x4-full-20260728-sglang-throughput-wan22_t2v_a14b_720p",
   "hardware": {
@@ -17,14 +17,14 @@
     "package_version": "0.0.0.dev15737+g50beeeb8c",
     "module_path": "/persistent/sglang-ltx23-tp-sp-experiment/python/sglang/__init__.py",
     "git_root": "/persistent/sglang-ltx23-tp-sp-experiment",
-    "git_commit": "161fffedfc99974a75f041e64589f6e1eb287fa9"
+    "git_commit": "c5c0fa00cf86c2c398ba89bdb6e23bef6283b73d"
   },
   "framework_runtime": {
     "venv_root": "/persistent/fw-venvs",
     "install_specs": {
-      "vllm": "vllm",
-      "vllm_omni": "git+https://github.com/vllm-project/vllm-omni.git",
-      "lightx2v": "git+https://github.com/ModelTC/LightX2V.git",
+      "vllm": "vllm==0.18.0",
+      "vllm_omni": "vllm-omni==0.18.0",
+      "lightx2v": "git+https://github.com/ModelTC/LightX2V.git@7efd05f8e1425b83321fd4f1cef779ef6504076f",
       "lightx2v_flash_attn": "flash-attn==2.8.3",
       "lightx2v_flash_attn3": "",
       "lightx2v_fa3_hf_repo": "varunneal/flash-attention-3",
@@ -66,10 +66,53 @@
       }
     },
     "lightx2v": {
-      "venv_path": "/persistent/fw-venvs/lightx2v"
+      "venv_path": "/persistent/fw-venvs/lightx2v",
+      "packages": {
+        "lightx2v": {
+          "Name": "lightx2v",
+          "Version": "0.1.0",
+          "Home-page": "https://github.com/ModelTC/LightX2V",
+          "Location": "/persistent/fw-venvs/lightx2v/lib/python3.12/site-packages"
+        },
+        "flash_attn": {
+          "Name": "flash_attn",
+          "Version": "2.8.3",
+          "Home-page": "https://github.com/Dao-AILab/flash-attention",
+          "Location": "/persistent/fw-venvs/lightx2v/lib/python3.12/site-packages"
+        },
+        "flashinfer-python": {
+          "Name": "flashinfer-python",
+          "Version": "0.6.11",
+          "Home-page": "https://github.com/flashinfer-ai/flashinfer",
+          "Location": "/persistent/fw-venvs/lightx2v/lib/python3.12/site-packages"
+        }
+      },
+      "direct_urls": {
+        "lightx2v-0.1.0.dist-info": {
+          "url": "https://github.com/ModelTC/LightX2V.git",
+          "vcs_info": {
+            "commit_id": "f57d1cdf05b2764668209455faeb3ca7a7278124",
+            "vcs": "git"
+          }
+        }
+      }
     },
     "trtllm-visual": {
-      "venv_path": "/persistent/fw-venvs/trtllm-visual"
+      "venv_path": "/persistent/fw-venvs/trtllm-visual",
+      "packages": {
+        "tensorrt_llm": {
+          "Name": "tensorrt_llm",
+          "Version": "1.3.0rc18",
+          "Home-page": "https://github.com/NVIDIA/TensorRT-LLM",
+          "Location": "/persistent/fw-venvs/trtllm-visual/lib/python3.12/site-packages"
+        },
+        "tensorrt": {
+          "Name": "tensorrt",
+          "Version": "10.15.1.29",
+          "Home-page": "https://github.com/nvidia/tensorrt",
+          "Location": "/persistent/fw-venvs/trtllm-visual/lib/python3.12/site-packages"
+        }
+      }
     }
   },
   "benchmark_env": {},
@@ -104,8 +147,8 @@
       "true_cfg_scale": null,
       "negative_prompt_set": false,
       "num_gpus": 4,
-      "latency_s": 0,
-      "error": "bench_serving partial failure (0/4 completed, 4 failed)",
+      "latency_s": null,
+      "error": "Command '['/usr/bin/python3', '-m', 'diffusion_bench.bench_serving', '--backend', 'sglang', '--base-url', 'http://127.0.0.1:31017', '--dataset', 'fixed', '--prompt', 'A cat and a dog baking a cake together in a kitchen.', '--model', 'Wan-AI/Wan2.2-T2V-A14B-Diffusers', '--task', 'text-to-video', '--num-prompts', '4', '--max-concurrency', '2', '--request-rate', 'inf', '--request-timeout', '2400', '--output-file', 'comparison-logs/bench_serving_wan22_t2v_a14b_720p_sglang.json', '--disable-tqdm', '--width', '1280', '--height', '720', '--num-frames', '81', '--fps', '16', '--num-inference-steps', '40', '--extra-body', '{\"guidance_scale\": 4.0, \"guidance_scale_2\": 3.0, \"seed\": 42}']' timed out after 4800 seconds",
       "framework_metadata": {
         "profile": "default",
         "profile_request": "auto",
@@ -129,44 +172,10 @@
         "sglang_profile_source": "default",
         "sglang_ref": "current-main"
       },
-      "server_command": "sglang serve --model-path Wan-AI/Wan2.2-T2V-A14B-Diffusers --port 31125 --host 127.0.0.1 --backend sglang --num-gpus 4 --model-type diffusion --warmup --enable-cfg-parallel --ulysses-degree 2 --dit-cpu-offload false --pin-cpu-memory --dit-layerwise-offload false --performance-mode speed --enable-torch-compile --warmup-steps 3",
+      "server_command": "sglang serve --model-path Wan-AI/Wan2.2-T2V-A14B-Diffusers --port 31017 --host 127.0.0.1 --backend sglang --num-gpus 4 --model-type diffusion --warmup --enable-cfg-parallel --ulysses-degree 2 --dit-cpu-offload false --pin-cpu-memory --dit-layerwise-offload false --performance-mode speed --enable-torch-compile --warmup-steps 3",
       "metrics": {
-        "duration_s": 2.015,
-        "num_requests": 4,
-        "completed_requests": 0,
-        "failed_requests": 4,
-        "max_concurrency": 2,
-        "throughput_rps": 0.0,
-        "output_throughput_ops": 0.0,
-        "latency_mean_s": 0,
-        "latency_p50_s": 0,
-        "latency_p90_s": 0,
-        "latency_p95_s": 0,
-        "latency_p99_s": 0,
-        "errors": [
-          {
-            "request_id": "fd14b2f2-44c3-4911-8970-dba29a44fa72",
-            "latency_s": 1.007,
-            "error": "Job failed: {'message': 'Model generation returned no output. Error from scheduler: Error executing request b1f202f7-e708-4bb0-8e8e-2821d802905d: RuntimeError when making fake tensor call\\n  Explanation: Dynamo failed to run FX node with fake tensors: call_function <built-in function linear>(*(FakeTensor(..., device=\\'cuda:0\\', size=(1, s87, 5120), dtype=torch.bfloat16), Parameter(FakeTensor(..., device=\\'cuda:0\\', size=(1,), dtype=torch.bfloat16)), Parameter(FakeTensor(..., device=\\'cuda:0\\', size=(1,), dtype=torch.bfloat16))), **{}): got RuntimeError(\\'b must be 2D\\')\\n  Hint: Your code may result in an error when running in eager. Please double check that your code doesn\\'t contain a similar error when actually running eager/uncompiled. You can do this by removing the `torch.compile` call, or by using `torch.compiler.set_stance(\"force_eager\")`. \\n\\n  Developer debug context: \\n\\n For more details about this graph break, please visit: https://meta-pytorch.github.io/compile-graph-break-site/gb/gb4315.html\\n\\nfrom user code:\\n   File \"/persistent/sglang-ltx23-tp-sp-experiment/python/sglang/multimodal_gen/runtime/models/dits/wanvideo.py\", line 525, in forward\\n    query, _ = self.to_q(norm_hidden_states)\\n  File \"/persistent/sglang-ltx23-tp-sp-experiment/python/sglang/multimodal_gen/runtime/layers/linear.py\", line 426, in forward\\n    output_parallel = self.quant_method.apply(self, input_, bias)\\n  File \"/persistent/sglang-ltx23-tp-sp-experiment/python/sglang/multimodal_gen/runtime/layers/linear.py\", line 158, in apply\\n    F.linear(x, layer.weight, bias)\\n\\nSet TORCHDYNAMO_VERBOSE=1 for the internal stack trace (please do this especially if you\\'re reporting a bug to PyTorch). For even more developer context, set TORCH_LOGS=\"+dynamo\"\\n'}"
-          },
-          {
-            "request_id": "750383c0-93b9-49fb-8737-72730c9b4110",
-            "latency_s": 1.007,
-            "error": "Job failed: {'message': 'Model generation returned no output. Error from scheduler: Error executing request feb2fff7-83d4-4c13-bec1-9d77472d2fff: RuntimeError when making fake tensor call\\n  Explanation: Dynamo failed to run FX node with fake tensors: call_function <built-in function linear>(*(FakeTensor(..., device=\\'cuda:0\\', size=(1, s87, 5120), dtype=torch.bfloat16), Parameter(FakeTensor(..., device=\\'cuda:0\\', size=(1,), dtype=torch.bfloat16)), Parameter(FakeTensor(..., device=\\'cuda:0\\', size=(1,), dtype=torch.bfloat16))), **{}): got RuntimeError(\\'b must be 2D\\')\\n  Hint: Your code may result in an error when running in eager. Please double check that your code doesn\\'t contain a similar error when actually running eager/uncompiled. You can do this by removing the `torch.compile` call, or by using `torch.compiler.set_stance(\"force_eager\")`. \\n\\n  Developer debug context: \\n\\n For more details about this graph break, please visit: https://meta-pytorch.github.io/compile-graph-break-site/gb/gb4315.html\\n\\nfrom user code:\\n   File \"/persistent/sglang-ltx23-tp-sp-experiment/python/sglang/multimodal_gen/runtime/models/dits/wanvideo.py\", line 525, in forward\\n    query, _ = self.to_q(norm_hidden_states)\\n  File \"/persistent/sglang-ltx23-tp-sp-experiment/python/sglang/multimodal_gen/runtime/layers/linear.py\", line 426, in forward\\n    output_parallel = self.quant_method.apply(self, input_, bias)\\n  File \"/persistent/sglang-ltx23-tp-sp-experiment/python/sglang/multimodal_gen/runtime/layers/linear.py\", line 158, in apply\\n    F.linear(x, layer.weight, bias)\\n\\nSet TORCHDYNAMO_VERBOSE=1 for the internal stack trace (please do this especially if you\\'re reporting a bug to PyTorch). For even more developer context, set TORCH_LOGS=\"+dynamo\"\\n'}"
-          },
-          {
-            "request_id": "7c452077-e7b5-4d33-ba34-4d11c016adaa",
-            "latency_s": 1.007,
-            "error": "Job failed: {'message': 'Model generation returned no output. Error from scheduler: Error executing request fc4aed62-5416-4160-a452-04ab42819e4e: RuntimeError when making fake tensor call\\n  Explanation: Dynamo failed to run FX node with fake tensors: call_function <built-in function linear>(*(FakeTensor(..., device=\\'cuda:0\\', size=(1, s87, 5120), dtype=torch.bfloat16), Parameter(FakeTensor(..., device=\\'cuda:0\\', size=(1,), dtype=torch.bfloat16)), Parameter(FakeTensor(..., device=\\'cuda:0\\', size=(1,), dtype=torch.bfloat16))), **{}): got RuntimeError(\\'b must be 2D\\')\\n  Hint: Your code may result in an error when running in eager. Please double check that your code doesn\\'t contain a similar error when actually running eager/uncompiled. You can do this by removing the `torch.compile` call, or by using `torch.compiler.set_stance(\"force_eager\")`. \\n\\n  Developer debug context: \\n\\n For more details about this graph break, please visit: https://meta-pytorch.github.io/compile-graph-break-site/gb/gb4315.html\\n\\nfrom user code:\\n   File \"/persistent/sglang-ltx23-tp-sp-experiment/python/sglang/multimodal_gen/runtime/models/dits/wanvideo.py\", line 525, in forward\\n    query, _ = self.to_q(norm_hidden_states)\\n  File \"/persistent/sglang-ltx23-tp-sp-experiment/python/sglang/multimodal_gen/runtime/layers/linear.py\", line 426, in forward\\n    output_parallel = self.quant_method.apply(self, input_, bias)\\n  File \"/persistent/sglang-ltx23-tp-sp-experiment/python/sglang/multimodal_gen/runtime/layers/linear.py\", line 158, in apply\\n    F.linear(x, layer.weight, bias)\\n\\nSet TORCHDYNAMO_VERBOSE=1 for the internal stack trace (please do this especially if you\\'re reporting a bug to PyTorch). For even more developer context, set TORCH_LOGS=\"+dynamo\"\\n'}"
-          },
-          {
-            "request_id": "96fbdaac-d673-4589-a8ac-4e562110c2c5",
-            "latency_s": 1.007,
-            "error": "Job failed: {'message': 'Model generation returned no output. Error from scheduler: Error executing request 4f0c9d76-7486-4c76-927f-3b911836b1c8: RuntimeError when making fake tensor call\\n  Explanation: Dynamo failed to run FX node with fake tensors: call_function <built-in function linear>(*(FakeTensor(..., device=\\'cuda:0\\', size=(1, s87, 5120), dtype=torch.bfloat16), Parameter(FakeTensor(..., device=\\'cuda:0\\', size=(1,), dtype=torch.bfloat16)), Parameter(FakeTensor(..., device=\\'cuda:0\\', size=(1,), dtype=torch.bfloat16))), **{}): got RuntimeError(\\'b must be 2D\\')\\n  Hint: Your code may result in an error when running in eager. Please double check that your code doesn\\'t contain a similar error when actually running eager/uncompiled. You can do this by removing the `torch.compile` call, or by using `torch.compiler.set_stance(\"force_eager\")`. \\n\\n  Developer debug context: \\n\\n For more details about this graph break, please visit: https://meta-pytorch.github.io/compile-graph-break-site/gb/gb4315.html\\n\\nfrom user code:\\n   File \"/persistent/sglang-ltx23-tp-sp-experiment/python/sglang/multimodal_gen/runtime/models/dits/wanvideo.py\", line 525, in forward\\n    query, _ = self.to_q(norm_hidden_states)\\n  File \"/persistent/sglang-ltx23-tp-sp-experiment/python/sglang/multimodal_gen/runtime/layers/linear.py\", line 426, in forward\\n    output_parallel = self.quant_method.apply(self, input_, bias)\\n  File \"/persistent/sglang-ltx23-tp-sp-experiment/python/sglang/multimodal_gen/runtime/layers/linear.py\", line 158, in apply\\n    F.linear(x, layer.weight, bias)\\n\\nSet TORCHDYNAMO_VERBOSE=1 for the internal stack trace (please do this especially if you\\'re reporting a bug to PyTorch). For even more developer context, set TORCH_LOGS=\"+dynamo\"\\n'}"
-          }
-        ],
-        "server_startup_s": 195.13,
-        "warmup_s": 943.13
+        "server_startup_s": 199.14,
+        "warmup_s": 1097.63
       }
     }
   ]

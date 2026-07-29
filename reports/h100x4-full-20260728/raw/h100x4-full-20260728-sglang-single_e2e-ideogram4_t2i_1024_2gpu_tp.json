@@ -1,5 +1,5 @@
 {
-  "timestamp": "2026-07-28T16:04:05.461021+00:00",
+  "timestamp": "2026-07-29T07:52:01.529331+00:00",
   "commit_sha": "71f4c703bfcce202239646d44875a5773993a0d8",
   "run_id": "h100x4-full-20260728-sglang-single_e2e-ideogram4_t2i_1024_2gpu_tp",
   "hardware": {
@@ -17,14 +17,14 @@
     "package_version": "0.0.0.dev15737+g50beeeb8c",
     "module_path": "/persistent/sglang-ltx23-tp-sp-experiment/python/sglang/__init__.py",
     "git_root": "/persistent/sglang-ltx23-tp-sp-experiment",
-    "git_commit": "161fffedfc99974a75f041e64589f6e1eb287fa9"
+    "git_commit": "c5c0fa00cf86c2c398ba89bdb6e23bef6283b73d"
   },
   "framework_runtime": {
     "venv_root": "/persistent/fw-venvs",
     "install_specs": {
-      "vllm": "vllm",
-      "vllm_omni": "git+https://github.com/vllm-project/vllm-omni.git",
-      "lightx2v": "git+https://github.com/ModelTC/LightX2V.git",
+      "vllm": "vllm==0.18.0",
+      "vllm_omni": "vllm-omni==0.18.0",
+      "lightx2v": "git+https://github.com/ModelTC/LightX2V.git@7efd05f8e1425b83321fd4f1cef779ef6504076f",
       "lightx2v_flash_attn": "flash-attn==2.8.3",
       "lightx2v_flash_attn3": "",
       "lightx2v_fa3_hf_repo": "varunneal/flash-attention-3",
@@ -66,10 +66,53 @@
       }
     },
     "lightx2v": {
-      "venv_path": "/persistent/fw-venvs/lightx2v"
+      "venv_path": "/persistent/fw-venvs/lightx2v",
+      "packages": {
+        "lightx2v": {
+          "Name": "lightx2v",
+          "Version": "0.1.0",
+          "Home-page": "https://github.com/ModelTC/LightX2V",
+          "Location": "/persistent/fw-venvs/lightx2v/lib/python3.12/site-packages"
+        },
+        "flash_attn": {
+          "Name": "flash_attn",
+          "Version": "2.8.3",
+          "Home-page": "https://github.com/Dao-AILab/flash-attention",
+          "Location": "/persistent/fw-venvs/lightx2v/lib/python3.12/site-packages"
+        },
+        "flashinfer-python": {
+          "Name": "flashinfer-python",
+          "Version": "0.6.11",
+          "Home-page": "https://github.com/flashinfer-ai/flashinfer",
+          "Location": "/persistent/fw-venvs/lightx2v/lib/python3.12/site-packages"
+        }
+      },
+      "direct_urls": {
+        "lightx2v-0.1.0.dist-info": {
+          "url": "https://github.com/ModelTC/LightX2V.git",
+          "vcs_info": {
+            "commit_id": "f57d1cdf05b2764668209455faeb3ca7a7278124",
+            "vcs": "git"
+          }
+        }
+      }
     },
     "trtllm-visual": {
-      "venv_path": "/persistent/fw-venvs/trtllm-visual"
+      "venv_path": "/persistent/fw-venvs/trtllm-visual",
+      "packages": {
+        "tensorrt_llm": {
+          "Name": "tensorrt_llm",
+          "Version": "1.3.0rc18",
+          "Home-page": "https://github.com/NVIDIA/TensorRT-LLM",
+          "Location": "/persistent/fw-venvs/trtllm-visual/lib/python3.12/site-packages"
+        },
+        "tensorrt": {
+          "Name": "tensorrt",
+          "Version": "10.15.1.29",
+          "Home-page": "https://github.com/nvidia/tensorrt",
+          "Location": "/persistent/fw-venvs/trtllm-visual/lib/python3.12/site-packages"
+        }
+      }
     }
   },
   "benchmark_env": {},
@@ -103,8 +146,8 @@
       "true_cfg_scale": null,
       "negative_prompt_set": false,
       "num_gpus": 2,
-      "latency_s": null,
-      "error": "500 Server Error: Internal Server Error for url: http://127.0.0.1:30948/v1/images/generations",
+      "latency_s": 4.002,
+      "error": null,
       "framework_metadata": {
         "profile": "h100-h200-2gpu-tp-speed",
         "profile_request": "auto",
@@ -133,10 +176,16 @@
         "sglang_profile_source": "hardware",
         "sglang_ref": "current-main"
       },
-      "server_command": "sglang serve --model-path ideogram-ai/ideogram-4-fp8 --port 30948 --host 127.0.0.1 --backend sglang --num-gpus 2 --model-type diffusion --warmup --dit-layerwise-offload false --tp-size 2 --performance-mode speed --enable-torch-compile --warmup-steps 3",
+      "server_command": "sglang serve --model-path ideogram-ai/ideogram-4-fp8 --port 31260 --host 127.0.0.1 --backend sglang --num-gpus 2 --model-type diffusion --warmup --dit-layerwise-offload false --tp-size 2 --performance-mode speed --enable-torch-compile --warmup-steps 3",
       "metrics": {
-        "server_startup_s": 52.52,
-        "warmup_s": 0.01
+        "client_latency_s": 4.002,
+        "client_latency_min_s": 3.978,
+        "client_latency_max_s": 4.062,
+        "measured_repeats": 5,
+        "server_latency_s": 3.986,
+        "client_overhead_s": 0.016,
+        "server_startup_s": 55.04,
+        "warmup_s": 0.02
       }
     }
   ],

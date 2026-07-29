@@ -27,7 +27,7 @@
       "date": "2026-07-29",
       "gpu": "4x NVIDIA H100 80GB",
       "title": "H100 full 18-case matrix (best-lossless)",
-      "subtitle": "Steady-state single-request latency on H100, best lossless config per framework (torch.compile on everywhere), latest main/HEAD for every framework. Full 18-case image+video matrix. Two confirmed sglang bugs (ideogram4 FP8 shape, Wan2.2-A14B to_q linear shape) and several competitor profile gaps are called out per-cell rather than hidden; see policy.bimodal_latency_note for a measurement caveat on two cells. Throughput tables live in the report.",
+      "subtitle": "Steady-state single-request latency on H100, best lossless config per framework (compile by default, measured-eager where compile is a proven net loss), latest main/HEAD for every framework. Full 18-case image+video matrix. The two sglang bugs the initial pass surfaced were fixed (sgl-project/sglang#32743) and the affected cells re-measured -- see policy.post_run_fixes_note; remaining gaps are documented per-cell (mostly 80GB capacity limits and competitor profile issues). Throughput tables live in the report.",
       "mode": "single_e2e",
       "source_manifest": "reports/h100x4-full-20260728/",
       "reproduce": "configs/benchmark/ (explicit matrix) + scripts/build_benchmark_config.py",
@@ -40,8 +40,8 @@
       "summary": {
         "rows": 18,
         "comparable_rows": 15,
-        "sglang_diffusion_wins": 12,
-        "other_wins": 3
+        "sglang_diffusion_wins": 13,
+        "other_wins": 2
       },
       "rows": [
         {
@@ -100,8 +100,11 @@
               "ratio_to_sglang": 1.305
             },
             "lightx2v": {
-              "status": "not_run",
-              "reason": "Model download requires HF_TOKEN access to the gated FLUX.2 repo; not available in this run. Every other case's model was already cached locally so this is the only data point blocked purely by credentials, not a framework or config issue."
+              "gpus": 2,
+              "profile": "h100-cpu-offload",
+              "status": "ok",
+              "latency_s": 65.153,
+              "ratio_to_sglang": 5.103
             },
             "trtllm-visual": {
               "status": "profile_issue",
@@ -118,9 +121,9 @@
           "cells": {
             "sglang": {
               "gpus": 2,
-              "profile": "h100-2gpu-ulysses-speed-compile",
+              "profile": "h100-2gpu-ulysses-speed-eager",
               "status": "ok",
-              "latency_s": 5.744,
+              "latency_s": 4.564,
               "ratio_to_sglang": 1.0
             },
             "vllm-omni": {
@@ -128,7 +131,7 @@
               "profile": "default",
               "status": "ok",
               "latency_s": 4.483,
-              "ratio_to_sglang": 0.78
+              "ratio_to_sglang": 0.982
             },
             "lightx2v": {
               "status": "unsupported",
@@ -139,7 +142,7 @@
               "profile": "h100-h200-2gpu-tp-speed",
               "status": "ok",
               "latency_s": 7.604,
-              "ratio_to_sglang": 1.324
+              "ratio_to_sglang": 1.666
             }
           }
         },
@@ -244,11 +247,14 @@
           "case": "Ideogram-4 (FP8) T2I",
           "details": "1024x1024 · 20 steps · cfg ?",
           "mode": "single_e2e",
-          "winner": "n/a",
+          "winner": "sglang",
           "cells": {
             "sglang": {
-              "status": "broken",
-              "reason": "sglang bug: WeightOnlyFP8ColumnParallelLinear reports 'FP8 linear weight must be 2-D, got shape torch.Size([1])' under 2-GPU TP; root cause not yet located, tracked separately."
+              "gpus": 2,
+              "profile": "h100-h200-2gpu-tp-speed",
+              "status": "ok",
+              "latency_s": 4.002,
+              "ratio_to_sglang": 1.0
             },
             "vllm-omni": {
               "status": "unsupported",
@@ -399,23 +405,28 @@
           "case": "Wan2.2 T2V A14B 720p",
           "details": "1280x720x81f · 40 steps · cfg 4",
           "mode": "single_e2e",
-          "winner": "lightx2v",
+          "winner": "sglang",
           "cells": {
             "sglang": {
-              "status": "broken",
-              "reason": "sglang bug: Wan2.2-A14B (MoE) DiT's to_q linear reports 'b must be 2D' (weight shape collapses to [1]) under torch.compile + CFG-parallel + Ulysses; identical failure on both T2V and I2V A14B variants, so it's a shared-code issue, not model-specific; tracked separately."
+              "gpus": 4,
+              "profile": "default",
+              "status": "ok",
+              "latency_s": 209.916,
+              "ratio_to_sglang": 1.0
             },
             "vllm-omni": {
               "gpus": 4,
               "profile": "default",
               "status": "ok",
-              "latency_s": 247.638
+              "latency_s": 247.638,
+              "ratio_to_sglang": 1.18
             },
             "lightx2v": {
               "gpus": 4,
               "profile": "default",
               "status": "ok",
-              "latency_s": 214.4
+              "latency_s": 214.4,
+              "ratio_to_sglang": 1.021
             },
             "trtllm-visual": {
               "status": "not_run",
@@ -431,8 +442,8 @@
           "winner": "lightx2v",
           "cells": {
             "sglang": {
-              "status": "broken",
-              "reason": "sglang bug: identical to wan22_t2v_a14b_720p (same to_q linear failure, byte-for-byte same error modulo device/request id) -- confirms a shared root cause in the Wan2.2-A14B DiT code path, tracked separately."
+              "status": "failed",
+              "reason": "Capacity: after the #32743 fix, I2V A14B still cannot load on 4x80GB -- sibling ranks place 20-35GB of loader staging on each other's GPUs, and with both 14B experts plus the CLIP image encoder the load-time peak exceeds 80GB (a layerwise-offload profile fails the same way, so the limit is in the loading path, not steady-state residency). T2V (one fewer resident encoder, no image-cond channels) fits and wins at 209.9s. Tracked separately as an sglang loader fix."
             },
             "vllm-omni": {
               "gpus": 4,
@@ -682,8 +693,10 @@
               "ratio_to_sglang": 0.764
             },
             "lightx2v": {
-              "status": "not_run",
-              "reason": "Model download requires HF_TOKEN access to the gated FLUX.2 repo; not available in this run. Every other case's model was already cached locally so this is the only data point blocked purely by credentials, not a framework or config issue."
+              "status": "ok",
+              "qps": 0.015,
+              "p95_s": 134.257,
+              "ratio_to_sglang": 0.192
             },
             "trtllm-visual": {
               "status": "profile_issue",
@@ -700,14 +713,14 @@
           "cells": {
             "sglang": {
               "status": "ok",
-              "qps": 0.17,
-              "p95_s": 11.798
+              "qps": 0.22,
+              "p95_s": 9.098
             },
             "vllm-omni": {
               "status": "ok",
               "qps": 0.227,
               "p95_s": 8.825,
-              "ratio_to_sglang": 1.338
+              "ratio_to_sglang": 1.032
             },
             "lightx2v": {
               "status": "unsupported",
@@ -717,7 +730,7 @@
               "status": "ok",
               "qps": 0.131,
               "p95_s": 15.241,
-              "ratio_to_sglang": 0.774
+              "ratio_to_sglang": 0.597
             }
           }
         },
@@ -812,11 +825,12 @@
           "case": "Ideogram-4 (FP8) T2I",
           "details": "1024x1024 · 20 steps · cfg ?",
           "mode": "throughput",
-          "winner": "n/a",
+          "winner": "sglang",
           "cells": {
             "sglang": {
-              "status": "broken",
-              "reason": "sglang bug: WeightOnlyFP8ColumnParallelLinear reports 'FP8 linear weight must be 2-D, got shape torch.Size([1])' under 2-GPU TP; root cause not yet located, tracked separately."
+              "status": "ok",
+              "qps": 0.25,
+              "p95_s": 8.06
             },
             "vllm-omni": {
               "status": "unsupported",
@@ -956,8 +970,8 @@
           "winner": "lightx2v",
           "cells": {
             "sglang": {
-              "status": "broken",
-              "reason": "sglang bug: Wan2.2-A14B (MoE) DiT's to_q linear reports 'b must be 2D' (weight shape collapses to [1]) under torch.compile + CFG-parallel + Ulysses; identical failure on both T2V and I2V A14B variants, so it's a shared-code issue, not model-specific; tracked separately."
+              "status": "failed",
+              "reason": "Capacity at concurrency 2: with both 14B experts resident (the profile that makes single-request 209.9s the fastest of all frameworks), one request's 720p x 81f VAE decode overlapping the other's denoise deterministically exceeds 80GB (~73GB used, 346MiB short). Not flaky -- a retry hits the same wall. Needs an upstream capacity lever (decode chunking under pressure or partial residency) to lift."
             },
             "vllm-omni": {
               "status": "ok",
@@ -985,8 +999,8 @@
           "winner": "lightx2v",
           "cells": {
             "sglang": {
-              "status": "broken",
-              "reason": "sglang bug: identical to wan22_t2v_a14b_720p (same to_q linear failure, byte-for-byte same error modulo device/request id) -- confirms a shared root cause in the Wan2.2-A14B DiT code path, tracked separately."
+              "status": "failed",
+              "reason": "Capacity: after the #32743 fix, I2V A14B still cannot load on 4x80GB -- sibling ranks place 20-35GB of loader staging on each other's GPUs, and with both 14B experts plus the CLIP image encoder the load-time peak exceeds 80GB (a layerwise-offload profile fails the same way, so the limit is in the loading path, not steady-state residency). T2V (one fewer resident encoder, no image-cond channels) fits and wins at 209.9s. Tracked separately as an sglang loader fix."
             },
             "vllm-omni": {
               "status": "ok",
