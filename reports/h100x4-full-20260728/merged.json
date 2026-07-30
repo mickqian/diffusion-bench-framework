@@ -1,6 +1,6 @@
 {
-  "timestamp": "2026-07-29T12:51:02.338512+00:00",
-  "commit_sha": "71f4c703bfcce202239646d44875a5773993a0d8",
+  "timestamp": "2026-07-30T00:32:38.858095+00:00",
+  "commit_sha": "4d820cbabad8905520a1cfd9fe9889741c2acad9",
   "run_id": "h100x4-full-20260728",
   "hardware": {
     "runner_labels": null,
@@ -15,16 +15,16 @@
   },
   "sglang_runtime": {
     "package_version": "0.0.0.dev15737+g50beeeb8c",
-    "module_path": "/persistent/sglang-ltx23-tp-sp-experiment/python/sglang/__init__.py",
-    "git_root": "/persistent/sglang-ltx23-tp-sp-experiment",
+    "module_path": "/persistent/sglang-i2v-debug/python/sglang/__init__.py",
+    "git_root": "/persistent/sglang-i2v-debug",
     "git_commit": "161fffedfc99974a75f041e64589f6e1eb287fa9"
   },
   "framework_runtime": {
     "venv_root": "/persistent/fw-venvs",
     "install_specs": {
-      "vllm": "vllm",
-      "vllm_omni": "git+https://github.com/vllm-project/vllm-omni.git",
-      "lightx2v": "git+https://github.com/ModelTC/LightX2V.git",
+      "vllm": "vllm==0.18.0",
+      "vllm_omni": "vllm-omni==0.18.0",
+      "lightx2v": "git+https://github.com/ModelTC/LightX2V.git@7efd05f8e1425b83321fd4f1cef779ef6504076f",
       "lightx2v_flash_attn": "flash-attn==2.8.3",
       "lightx2v_flash_attn3": "",
       "lightx2v_fa3_hf_repo": "varunneal/flash-attention-3",
@@ -32,7 +32,7 @@
       "lightx2v_fa3_hf_subdir": "build/torch28-cxx11-cu128-x86_64-linux/flash_attention_3",
       "lightx2v_flashinfer": "flashinfer-python==0.6.11",
       "trtllm": "tensorrt-llm==1.3.0rc18",
-      "torch_cuda_arch_list": "9.0"
+      "torch_cuda_arch_list": ""
     },
     "launchers": {
       "vllm_omni_server_bin": "vllm",
@@ -132,568 +132,604 @@
   "reproduce_script": "scripts/generate_h200_report_artifacts.sh",
   "source_results": [
     {
-      "path": "/persistent/bench_results/h100x4-full-20260728-lightx2v-single_e2e-flux2_dev_t2i_1024.json",
+      "path": "reports/h100x4-full-20260728/raw/h100x4-full-20260728-lightx2v-single_e2e-flux2_dev_t2i_1024.json",
       "run_id": "h100x4-full-20260728-lightx2v-single_e2e-flux2_dev_t2i_1024",
       "commit_sha": "71f4c703bfcce202239646d44875a5773993a0d8",
       "timestamp": "2026-07-29T07:08:38.054529+00:00"
     },
     {
-      "path": "/persistent/bench_results/h100x4-full-20260728-lightx2v-single_e2e-ltx2_twostage_t2v.json",
+      "path": "reports/h100x4-full-20260728/raw/h100x4-full-20260728-lightx2v-single_e2e-ltx2_twostage_t2v.json",
       "run_id": "h100x4-full-20260728-lightx2v-single_e2e-ltx2_twostage_t2v",
       "commit_sha": "71f4c703bfcce202239646d44875a5773993a0d8",
       "timestamp": "2026-07-29T02:13:50.083885+00:00"
     },
     {
-      "path": "/persistent/bench_results/h100x4-full-20260728-lightx2v-single_e2e-wan21_i2v_14b_480p.json",
+      "path": "reports/h100x4-full-20260728/raw/h100x4-full-20260728-lightx2v-single_e2e-wan21_i2v_14b_480p.json",
       "run_id": "h100x4-full-20260728-lightx2v-single_e2e-wan21_i2v_14b_480p",
       "commit_sha": "71f4c703bfcce202239646d44875a5773993a0d8",
       "timestamp": "2026-07-29T02:19:42.982934+00:00"
     },
     {
-      "path": "/persistent/bench_results/h100x4-full-20260728-lightx2v-single_e2e-wan21_i2v_14b_720p.json",
+      "path": "reports/h100x4-full-20260728/raw/h100x4-full-20260728-lightx2v-single_e2e-wan21_i2v_14b_720p.json",
       "run_id": "h100x4-full-20260728-lightx2v-single_e2e-wan21_i2v_14b_720p",
       "commit_sha": "71f4c703bfcce202239646d44875a5773993a0d8",
       "timestamp": "2026-07-28T23:48:53.191260+00:00"
     },
     {
-      "path": "/persistent/bench_results/h100x4-full-20260728-lightx2v-single_e2e-wan21_t2v_1_3b_480p.json",
+      "path": "reports/h100x4-full-20260728/raw/h100x4-full-20260728-lightx2v-single_e2e-wan21_t2v_1_3b_480p.json",
       "run_id": "h100x4-full-20260728-lightx2v-single_e2e-wan21_t2v_1_3b_480p",
       "commit_sha": "71f4c703bfcce202239646d44875a5773993a0d8",
       "timestamp": "2026-07-29T02:23:59.874398+00:00"
     },
     {
-      "path": "/persistent/bench_results/h100x4-full-20260728-lightx2v-single_e2e-wan22_i2v_a14b_720p.json",
+      "path": "reports/h100x4-full-20260728/raw/h100x4-full-20260728-lightx2v-single_e2e-wan22_i2v_a14b_720p.json",
       "run_id": "h100x4-full-20260728-lightx2v-single_e2e-wan22_i2v_a14b_720p",
       "commit_sha": "71f4c703bfcce202239646d44875a5773993a0d8",
       "timestamp": "2026-07-29T00:02:52.138297+00:00"
     },
     {
-      "path": "/persistent/bench_results/h100x4-full-20260728-lightx2v-single_e2e-wan22_t2v_a14b_720p.json",
+      "path": "reports/h100x4-full-20260728/raw/h100x4-full-20260728-lightx2v-single_e2e-wan22_t2v_a14b_720p.json",
       "run_id": "h100x4-full-20260728-lightx2v-single_e2e-wan22_t2v_a14b_720p",
       "commit_sha": "71f4c703bfcce202239646d44875a5773993a0d8",
       "timestamp": "2026-07-29T02:26:13.059137+00:00"
     },
     {
-      "path": "/persistent/bench_results/h100x4-full-20260728-lightx2v-single_e2e-wan22_ti2v_5b_704p.json",
+      "path": "reports/h100x4-full-20260728/raw/h100x4-full-20260728-lightx2v-single_e2e-wan22_ti2v_5b_704p.json",
       "run_id": "h100x4-full-20260728-lightx2v-single_e2e-wan22_ti2v_5b_704p",
       "commit_sha": "71f4c703bfcce202239646d44875a5773993a0d8",
       "timestamp": "2026-07-29T02:38:10.078913+00:00"
     },
     {
-      "path": "/persistent/bench_results/h100x4-full-20260728-lightx2v-single_e2e-zimage_turbo_t2i_1024.json",
+      "path": "reports/h100x4-full-20260728/raw/h100x4-full-20260728-lightx2v-single_e2e-zimage_turbo_t2i_1024.json",
       "run_id": "h100x4-full-20260728-lightx2v-single_e2e-zimage_turbo_t2i_1024",
       "commit_sha": "71f4c703bfcce202239646d44875a5773993a0d8",
       "timestamp": "2026-07-29T02:12:46.997851+00:00"
     },
     {
-      "path": "/persistent/bench_results/h100x4-full-20260728-lightx2v-throughput-flux2_dev_t2i_1024.json",
+      "path": "reports/h100x4-full-20260728/raw/h100x4-full-20260728-lightx2v-throughput-flux2_dev_t2i_1024.json",
       "run_id": "h100x4-full-20260728-lightx2v-throughput-flux2_dev_t2i_1024",
       "commit_sha": "71f4c703bfcce202239646d44875a5773993a0d8",
       "timestamp": "2026-07-29T07:17:42.345968+00:00"
     },
     {
-      "path": "/persistent/bench_results/h100x4-full-20260728-lightx2v-throughput-ltx2_twostage_t2v.json",
+      "path": "reports/h100x4-full-20260728/raw/h100x4-full-20260728-lightx2v-throughput-ltx2_twostage_t2v.json",
       "run_id": "h100x4-full-20260728-lightx2v-throughput-ltx2_twostage_t2v",
       "commit_sha": "71f4c703bfcce202239646d44875a5773993a0d8",
       "timestamp": "2026-07-29T00:54:56.358557+00:00"
     },
     {
-      "path": "/persistent/bench_results/h100x4-full-20260728-lightx2v-throughput-wan21_i2v_14b_480p.json",
+      "path": "reports/h100x4-full-20260728/raw/h100x4-full-20260728-lightx2v-throughput-wan21_i2v_14b_480p.json",
       "run_id": "h100x4-full-20260728-lightx2v-throughput-wan21_i2v_14b_480p",
       "commit_sha": "71f4c703bfcce202239646d44875a5773993a0d8",
       "timestamp": "2026-07-29T00:20:30.396825+00:00"
     },
     {
-      "path": "/persistent/bench_results/h100x4-full-20260728-lightx2v-throughput-wan21_i2v_14b_720p.json",
+      "path": "reports/h100x4-full-20260728/raw/h100x4-full-20260728-lightx2v-throughput-wan21_i2v_14b_720p.json",
       "run_id": "h100x4-full-20260728-lightx2v-throughput-wan21_i2v_14b_720p",
       "commit_sha": "71f4c703bfcce202239646d44875a5773993a0d8",
       "timestamp": "2026-07-29T01:04:33.400804+00:00"
     },
     {
-      "path": "/persistent/bench_results/h100x4-full-20260728-lightx2v-throughput-wan21_t2v_1_3b_480p.json",
+      "path": "reports/h100x4-full-20260728/raw/h100x4-full-20260728-lightx2v-throughput-wan21_t2v_1_3b_480p.json",
       "run_id": "h100x4-full-20260728-lightx2v-throughput-wan21_t2v_1_3b_480p",
       "commit_sha": "71f4c703bfcce202239646d44875a5773993a0d8",
       "timestamp": "2026-07-29T00:16:57.431523+00:00"
     },
     {
-      "path": "/persistent/bench_results/h100x4-full-20260728-lightx2v-throughput-wan22_i2v_a14b_720p.json",
+      "path": "reports/h100x4-full-20260728/raw/h100x4-full-20260728-lightx2v-throughput-wan22_i2v_a14b_720p.json",
       "run_id": "h100x4-full-20260728-lightx2v-throughput-wan22_i2v_a14b_720p",
       "commit_sha": "71f4c703bfcce202239646d44875a5773993a0d8",
       "timestamp": "2026-07-29T01:27:21.982738+00:00"
     },
     {
-      "path": "/persistent/bench_results/h100x4-full-20260728-lightx2v-throughput-wan22_t2v_a14b_720p.json",
+      "path": "reports/h100x4-full-20260728/raw/h100x4-full-20260728-lightx2v-throughput-wan22_t2v_a14b_720p.json",
       "run_id": "h100x4-full-20260728-lightx2v-throughput-wan22_t2v_a14b_720p",
       "commit_sha": "71f4c703bfcce202239646d44875a5773993a0d8",
       "timestamp": "2026-07-29T00:27:53.688564+00:00"
     },
     {
-      "path": "/persistent/bench_results/h100x4-full-20260728-lightx2v-throughput-wan22_ti2v_5b_704p.json",
+      "path": "reports/h100x4-full-20260728/raw/h100x4-full-20260728-lightx2v-throughput-wan22_ti2v_5b_704p.json",
       "run_id": "h100x4-full-20260728-lightx2v-throughput-wan22_ti2v_5b_704p",
       "commit_sha": "71f4c703bfcce202239646d44875a5773993a0d8",
       "timestamp": "2026-07-29T00:50:46.641768+00:00"
     },
     {
-      "path": "/persistent/bench_results/h100x4-full-20260728-lightx2v-throughput-zimage_turbo_t2i_1024.json",
+      "path": "reports/h100x4-full-20260728/raw/h100x4-full-20260728-lightx2v-throughput-zimage_turbo_t2i_1024.json",
       "run_id": "h100x4-full-20260728-lightx2v-throughput-zimage_turbo_t2i_1024",
       "commit_sha": "71f4c703bfcce202239646d44875a5773993a0d8",
       "timestamp": "2026-07-28T23:29:50.861500+00:00"
     },
     {
-      "path": "/persistent/bench_results/h100x4-full-20260728-sglang-single_e2e-cosmos3_nano_i2v_720p_189f.json",
+      "path": "reports/h100x4-full-20260728/raw/h100x4-full-20260728-sglang-single_e2e-cosmos3_nano_i2v_720p_189f.json",
       "run_id": "h100x4-full-20260728-sglang-single_e2e-cosmos3_nano_i2v_720p_189f",
       "commit_sha": "71f4c703bfcce202239646d44875a5773993a0d8",
       "timestamp": "2026-07-28T18:00:41.721978+00:00"
     },
     {
-      "path": "/persistent/bench_results/h100x4-full-20260728-sglang-single_e2e-cosmos3_nano_t2i_720p.json",
+      "path": "reports/h100x4-full-20260728/raw/h100x4-full-20260728-sglang-single_e2e-cosmos3_nano_t2i_720p.json",
       "run_id": "h100x4-full-20260728-sglang-single-img",
       "commit_sha": "71f4c703bfcce202239646d44875a5773993a0d8",
       "timestamp": "2026-07-28T12:26:34.402424+00:00"
     },
     {
-      "path": "/persistent/bench_results/h100x4-full-20260728-sglang-single_e2e-cosmos3_nano_t2v_720p_189f.json",
+      "path": "reports/h100x4-full-20260728/raw/h100x4-full-20260728-sglang-single_e2e-cosmos3_nano_t2v_720p_189f.json",
       "run_id": "h100x4-full-20260728-sglang-single_e2e-cosmos3_nano_t2v_720p_189f",
       "commit_sha": "71f4c703bfcce202239646d44875a5773993a0d8",
       "timestamp": "2026-07-28T17:57:00.046317+00:00"
     },
     {
-      "path": "/persistent/bench_results/h100x4-full-20260728-sglang-single_e2e-flux1_dev_t2i_1024.json",
+      "path": "reports/h100x4-full-20260728/raw/h100x4-full-20260728-sglang-single_e2e-flux1_dev_t2i_1024.json",
       "run_id": "h100x4-full-20260728",
       "commit_sha": "71f4c703bfcce202239646d44875a5773993a0d8",
       "timestamp": "2026-07-29T03:38:19.140555+00:00"
     },
     {
-      "path": "/persistent/bench_results/h100x4-full-20260728-sglang-single_e2e-flux2_dev_t2i_1024.json",
+      "path": "reports/h100x4-full-20260728/raw/h100x4-full-20260728-sglang-single_e2e-flux2_dev_t2i_1024.json",
       "run_id": "h100x4-full-20260728-sglang-single-img",
       "commit_sha": "71f4c703bfcce202239646d44875a5773993a0d8",
       "timestamp": "2026-07-28T12:26:34.402424+00:00"
     },
     {
-      "path": "/persistent/bench_results/h100x4-full-20260728-sglang-single_e2e-ideogram4_t2i_1024_2gpu_tp.json",
+      "path": "reports/h100x4-full-20260728/raw/h100x4-full-20260728-sglang-single_e2e-ideogram4_t2i_1024_2gpu_tp.json",
       "run_id": "h100x4-full-20260728-sglang-single_e2e-ideogram4_t2i_1024_2gpu_tp",
       "commit_sha": "71f4c703bfcce202239646d44875a5773993a0d8",
       "timestamp": "2026-07-29T07:52:01.529331+00:00"
     },
     {
-      "path": "/persistent/bench_results/h100x4-full-20260728-sglang-single_e2e-ltx2.3_twostage_t2v_2gpus.json",
+      "path": "reports/h100x4-full-20260728/raw/h100x4-full-20260728-sglang-single_e2e-ltx2.3_twostage_t2v_2gpus.json",
       "run_id": "h100x4-full-20260728-sglang-single_e2e-ltx2.3_twostage_t2v_2gpus",
       "commit_sha": "71f4c703bfcce202239646d44875a5773993a0d8",
       "timestamp": "2026-07-28T17:07:03.001970+00:00"
     },
     {
-      "path": "/persistent/bench_results/h100x4-full-20260728-sglang-single_e2e-ltx2_twostage_t2v.json",
+      "path": "reports/h100x4-full-20260728/raw/h100x4-full-20260728-sglang-single_e2e-ltx2_twostage_t2v.json",
       "run_id": "h100x4-full-20260728-sglang-single_e2e-ltx2_twostage_t2v",
       "commit_sha": "71f4c703bfcce202239646d44875a5773993a0d8",
       "timestamp": "2026-07-28T17:00:37.098094+00:00"
     },
     {
-      "path": "/persistent/bench_results/h100x4-full-20260728-sglang-single_e2e-qwen_image_2512_t2i_1024.json",
+      "path": "reports/h100x4-full-20260728/raw/h100x4-full-20260728-sglang-single_e2e-qwen_image_2512_t2i_1024.json",
       "run_id": "h100x4-full-20260728-sglang-single_e2e-qwen_image_2512_t2i_1024",
       "commit_sha": "71f4c703bfcce202239646d44875a5773993a0d8",
       "timestamp": "2026-07-29T08:00:05.753099+00:00"
     },
     {
-      "path": "/persistent/bench_results/h100x4-full-20260728-sglang-single_e2e-qwen_image_2512_t2i_1024_truecfg.json",
+      "path": "reports/h100x4-full-20260728/raw/h100x4-full-20260728-sglang-single_e2e-qwen_image_2512_t2i_1024_truecfg.json",
       "run_id": "h100x4-full-20260728-sglang-single-img",
       "commit_sha": "71f4c703bfcce202239646d44875a5773993a0d8",
       "timestamp": "2026-07-28T12:26:34.402424+00:00"
     },
     {
-      "path": "/persistent/bench_results/h100x4-full-20260728-sglang-single_e2e-qwen_image_edit_2511.json",
+      "path": "reports/h100x4-full-20260728/raw/h100x4-full-20260728-sglang-single_e2e-qwen_image_edit_2511.json",
       "run_id": "h100x4-full-20260728-sglang-single-img",
       "commit_sha": "71f4c703bfcce202239646d44875a5773993a0d8",
       "timestamp": "2026-07-28T12:26:34.402424+00:00"
     },
     {
-      "path": "/persistent/bench_results/h100x4-full-20260728-sglang-single_e2e-wan21_i2v_14b_480p.json",
+      "path": "reports/h100x4-full-20260728/raw/h100x4-full-20260728-sglang-single_e2e-wan21_i2v_14b_480p.json",
       "run_id": "h100x4-full-20260728-sglang-single_e2e-wan21_i2v_14b_480p",
       "commit_sha": "71f4c703bfcce202239646d44875a5773993a0d8",
       "timestamp": "2026-07-28T16:24:50.364928+00:00"
     },
     {
-      "path": "/persistent/bench_results/h100x4-full-20260728-sglang-single_e2e-wan21_i2v_14b_720p.json",
+      "path": "reports/h100x4-full-20260728/raw/h100x4-full-20260728-sglang-single_e2e-wan21_i2v_14b_720p.json",
       "run_id": "h100x4-full-20260728-sglang-single_e2e-wan21_i2v_14b_720p",
       "commit_sha": "71f4c703bfcce202239646d44875a5773993a0d8",
       "timestamp": "2026-07-28T17:09:31.663399+00:00"
     },
     {
-      "path": "/persistent/bench_results/h100x4-full-20260728-sglang-single_e2e-wan21_t2v_1_3b_480p.json",
+      "path": "reports/h100x4-full-20260728/raw/h100x4-full-20260728-sglang-single_e2e-wan21_t2v_1_3b_480p.json",
       "run_id": "h100x4-full-20260728-sglang-single_e2e-wan21_t2v_1_3b_480p",
       "commit_sha": "71f4c703bfcce202239646d44875a5773993a0d8",
       "timestamp": "2026-07-28T16:21:51.020168+00:00"
     },
     {
-      "path": "/persistent/bench_results/h100x4-full-20260728-sglang-single_e2e-wan22_i2v_a14b_720p.json",
+      "path": "reports/h100x4-full-20260728/raw/h100x4-full-20260728-sglang-single_e2e-wan22_i2v_a14b_720p.json",
       "run_id": "h100x4-full-20260728-sglang-single_e2e-wan22_i2v_a14b_720p",
       "commit_sha": "71f4c703bfcce202239646d44875a5773993a0d8",
       "timestamp": "2026-07-29T12:44:33.178738+00:00"
     },
     {
-      "path": "/persistent/bench_results/h100x4-full-20260728-sglang-single_e2e-wan22_t2v_a14b_720p.json",
+      "path": "reports/h100x4-full-20260728/raw/h100x4-full-20260728-sglang-single_e2e-wan22_t2v_a14b_720p.json",
       "run_id": "h100x4-full-20260728-sglang-single_e2e-wan22_t2v_a14b_720p",
       "commit_sha": "71f4c703bfcce202239646d44875a5773993a0d8",
       "timestamp": "2026-07-29T09:07:21.327688+00:00"
     },
     {
-      "path": "/persistent/bench_results/h100x4-full-20260728-sglang-single_e2e-wan22_ti2v_5b_704p.json",
+      "path": "reports/h100x4-full-20260728/raw/h100x4-full-20260728-sglang-single_e2e-wan22_ti2v_5b_704p.json",
       "run_id": "h100x4-full-20260728-sglang-single_e2e-wan22_ti2v_5b_704p",
       "commit_sha": "71f4c703bfcce202239646d44875a5773993a0d8",
       "timestamp": "2026-07-28T16:56:16.036961+00:00"
     },
     {
-      "path": "/persistent/bench_results/h100x4-full-20260728-sglang-single_e2e-zimage_turbo_t2i_1024.json",
+      "path": "reports/h100x4-full-20260728/raw/h100x4-full-20260728-sglang-single_e2e-zimage_turbo_t2i_1024.json",
       "run_id": "h100x4-full-20260728-sglang-single-img",
       "commit_sha": "71f4c703bfcce202239646d44875a5773993a0d8",
       "timestamp": "2026-07-28T12:26:34.402424+00:00"
     },
     {
-      "path": "/persistent/bench_results/h100x4-full-20260728-sglang-throughput-cosmos3_nano_i2v_720p_189f.json",
+      "path": "reports/h100x4-full-20260728/raw/h100x4-full-20260728-sglang-throughput-cosmos3_nano_i2v_720p_189f.json",
       "run_id": "h100x4-full-20260728-sglang-throughput-cosmos3_nano_i2v_720p_189f",
       "commit_sha": "71f4c703bfcce202239646d44875a5773993a0d8",
       "timestamp": "2026-07-28T20:05:47.095201+00:00"
     },
     {
-      "path": "/persistent/bench_results/h100x4-full-20260728-sglang-throughput-cosmos3_nano_t2i_720p.json",
+      "path": "reports/h100x4-full-20260728/raw/h100x4-full-20260728-sglang-throughput-cosmos3_nano_t2i_720p.json",
       "run_id": "h100x4-full-20260728-sglang-throughput-cosmos3_nano_t2i_720p",
       "commit_sha": "71f4c703bfcce202239646d44875a5773993a0d8",
       "timestamp": "2026-07-28T16:20:34.730296+00:00"
     },
     {
-      "path": "/persistent/bench_results/h100x4-full-20260728-sglang-throughput-cosmos3_nano_t2v_720p_189f.json",
+      "path": "reports/h100x4-full-20260728/raw/h100x4-full-20260728-sglang-throughput-cosmos3_nano_t2v_720p_189f.json",
       "run_id": "h100x4-full-20260728-sglang-throughput-cosmos3_nano_t2v_720p_189f",
       "commit_sha": "71f4c703bfcce202239646d44875a5773993a0d8",
       "timestamp": "2026-07-28T20:00:16.745067+00:00"
     },
     {
-      "path": "/persistent/bench_results/h100x4-full-20260728-sglang-throughput-flux1_dev_t2i_1024.json",
+      "path": "reports/h100x4-full-20260728/raw/h100x4-full-20260728-sglang-throughput-flux1_dev_t2i_1024.json",
       "run_id": "h100x4-full-20260728-sglang-throughput-flux1_dev_t2i_1024",
       "commit_sha": "71f4c703bfcce202239646d44875a5773993a0d8",
       "timestamp": "2026-07-28T16:05:20.813403+00:00"
     },
     {
-      "path": "/persistent/bench_results/h100x4-full-20260728-sglang-throughput-flux2_dev_t2i_1024.json",
+      "path": "reports/h100x4-full-20260728/raw/h100x4-full-20260728-sglang-throughput-flux2_dev_t2i_1024.json",
       "run_id": "h100x4-full-20260728-sglang-throughput-flux2_dev_t2i_1024",
       "commit_sha": "71f4c703bfcce202239646d44875a5773993a0d8",
       "timestamp": "2026-07-28T16:07:19.939374+00:00"
     },
     {
-      "path": "/persistent/bench_results/h100x4-full-20260728-sglang-throughput-ideogram4_t2i_1024_2gpu_tp.json",
+      "path": "reports/h100x4-full-20260728/raw/h100x4-full-20260728-sglang-throughput-ideogram4_t2i_1024_2gpu_tp.json",
       "run_id": "h100x4-full-20260728-sglang-throughput-ideogram4_t2i_1024_2gpu_tp",
       "commit_sha": "71f4c703bfcce202239646d44875a5773993a0d8",
       "timestamp": "2026-07-29T07:53:38.511891+00:00"
     },
     {
-      "path": "/persistent/bench_results/h100x4-full-20260728-sglang-throughput-ltx2.3_twostage_t2v_2gpus.json",
+      "path": "reports/h100x4-full-20260728/raw/h100x4-full-20260728-sglang-throughput-ltx2.3_twostage_t2v_2gpus.json",
       "run_id": "h100x4-full-20260728-sglang-throughput-ltx2.3_twostage_t2v_2gpus",
       "commit_sha": "71f4c703bfcce202239646d44875a5773993a0d8",
       "timestamp": "2026-07-28T18:55:49.753793+00:00"
     },
     {
-      "path": "/persistent/bench_results/h100x4-full-20260728-sglang-throughput-ltx2_twostage_t2v.json",
+      "path": "reports/h100x4-full-20260728/raw/h100x4-full-20260728-sglang-throughput-ltx2_twostage_t2v.json",
       "run_id": "h100x4-full-20260728-sglang-throughput-ltx2_twostage_t2v",
       "commit_sha": "71f4c703bfcce202239646d44875a5773993a0d8",
       "timestamp": "2026-07-28T18:47:20.211227+00:00"
     },
     {
-      "path": "/persistent/bench_results/h100x4-full-20260728-sglang-throughput-qwen_image_2512_t2i_1024.json",
+      "path": "reports/h100x4-full-20260728/raw/h100x4-full-20260728-sglang-throughput-qwen_image_2512_t2i_1024.json",
       "run_id": "h100x4-full-20260728-sglang-throughput-qwen_image_2512_t2i_1024",
       "commit_sha": "71f4c703bfcce202239646d44875a5773993a0d8",
       "timestamp": "2026-07-29T08:01:52.566963+00:00"
     },
     {
-      "path": "/persistent/bench_results/h100x4-full-20260728-sglang-throughput-qwen_image_2512_t2i_1024_truecfg.json",
+      "path": "reports/h100x4-full-20260728/raw/h100x4-full-20260728-sglang-throughput-qwen_image_2512_t2i_1024_truecfg.json",
       "run_id": "h100x4-full-20260728-sglang-throughput-qwen_image_2512_t2i_1024_truecfg",
       "commit_sha": "71f4c703bfcce202239646d44875a5773993a0d8",
       "timestamp": "2026-07-28T16:13:35.664508+00:00"
     },
     {
-      "path": "/persistent/bench_results/h100x4-full-20260728-sglang-throughput-qwen_image_edit_2511.json",
+      "path": "reports/h100x4-full-20260728/raw/h100x4-full-20260728-sglang-throughput-qwen_image_edit_2511.json",
       "run_id": "h100x4-full-20260728-sglang-throughput-qwen_image_edit_2511",
       "commit_sha": "71f4c703bfcce202239646d44875a5773993a0d8",
       "timestamp": "2026-07-28T16:15:52.321042+00:00"
     },
     {
-      "path": "/persistent/bench_results/h100x4-full-20260728-sglang-throughput-wan21_i2v_14b_480p.json",
+      "path": "reports/h100x4-full-20260728/raw/h100x4-full-20260728-sglang-throughput-wan21_i2v_14b_480p.json",
       "run_id": "h100x4-full-20260728-sglang-throughput-wan21_i2v_14b_480p",
       "commit_sha": "71f4c703bfcce202239646d44875a5773993a0d8",
       "timestamp": "2026-07-28T18:08:39.154155+00:00"
     },
     {
-      "path": "/persistent/bench_results/h100x4-full-20260728-sglang-throughput-wan21_i2v_14b_720p.json",
+      "path": "reports/h100x4-full-20260728/raw/h100x4-full-20260728-sglang-throughput-wan21_i2v_14b_720p.json",
       "run_id": "h100x4-full-20260728-sglang-throughput-wan21_i2v_14b_720p",
       "commit_sha": "71f4c703bfcce202239646d44875a5773993a0d8",
       "timestamp": "2026-07-29T02:40:43.172108+00:00"
     },
     {
-      "path": "/persistent/bench_results/h100x4-full-20260728-sglang-throughput-wan21_t2v_1_3b_480p.json",
+      "path": "reports/h100x4-full-20260728/raw/h100x4-full-20260728-sglang-throughput-wan21_t2v_1_3b_480p.json",
       "run_id": "h100x4-full-20260728-sglang-throughput-wan21_t2v_1_3b_480p",
       "commit_sha": "71f4c703bfcce202239646d44875a5773993a0d8",
       "timestamp": "2026-07-28T18:04:41.937264+00:00"
     },
     {
-      "path": "/persistent/bench_results/h100x4-full-20260728-sglang-throughput-wan22_i2v_a14b_720p.json",
+      "path": "reports/h100x4-full-20260728/raw/h100x4-full-20260728-sglang-throughput-wan22_i2v_a14b_720p.json",
       "run_id": "h100x4-full-20260728-sglang-single_e2e-wan22_i2v_a14b_720p",
       "commit_sha": "71f4c703bfcce202239646d44875a5773993a0d8",
       "timestamp": "2026-07-29T12:44:33.178738+00:00"
     },
     {
-      "path": "/persistent/bench_results/h100x4-full-20260728-sglang-throughput-wan22_t2v_a14b_720p.json",
+      "path": "reports/h100x4-full-20260728/raw/h100x4-full-20260728-sglang-throughput-wan22_t2v_a14b_720p.json",
       "run_id": "h100x4-full-20260728-sglang-throughput-wan22_t2v_a14b_720p",
       "commit_sha": "71f4c703bfcce202239646d44875a5773993a0d8",
       "timestamp": "2026-07-29T09:34:20.655764+00:00"
     },
     {
-      "path": "/persistent/bench_results/h100x4-full-20260728-sglang-throughput-wan22_ti2v_5b_704p.json",
+      "path": "reports/h100x4-full-20260728/raw/h100x4-full-20260728-sglang-throughput-wan22_ti2v_5b_704p.json",
       "run_id": "h100x4-full-20260728-sglang-throughput-wan22_ti2v_5b_704p",
       "commit_sha": "71f4c703bfcce202239646d44875a5773993a0d8",
       "timestamp": "2026-07-28T18:41:53.487601+00:00"
     },
     {
-      "path": "/persistent/bench_results/h100x4-full-20260728-sglang-throughput-zimage_turbo_t2i_1024.json",
+      "path": "reports/h100x4-full-20260728/raw/h100x4-full-20260728-sglang-throughput-zimage_turbo_t2i_1024.json",
       "run_id": "h100x4-full-20260728-sglang-throughput-zimage_turbo_t2i_1024",
       "commit_sha": "71f4c703bfcce202239646d44875a5773993a0d8",
       "timestamp": "2026-07-28T16:18:15.641712+00:00"
     },
     {
-      "path": "/persistent/bench_results/h100x4-full-20260728-trtllm-visual-single_e2e-cosmos3_nano_t2i_720p.json",
+      "path": "reports/h100x4-full-20260728/raw/h100x4-full-20260728-trtllm-visual-single_e2e-cosmos3_nano_t2i_720p.json",
       "run_id": "h100x4-full-20260728-trtllm-visual-single_e2e-cosmos3_nano_t2i_720p",
       "commit_sha": "71f4c703bfcce202239646d44875a5773993a0d8",
       "timestamp": "2026-07-29T01:58:49.811042+00:00"
     },
     {
-      "path": "/persistent/bench_results/h100x4-full-20260728-trtllm-visual-single_e2e-flux1_dev_t2i_1024.json",
+      "path": "reports/h100x4-full-20260728/raw/h100x4-full-20260728-trtllm-visual-single_e2e-flux1_dev_t2i_1024.json",
       "run_id": "h100x4-full-20260728-trtllm-visual-single_e2e-flux1_dev_t2i_1024",
       "commit_sha": "71f4c703bfcce202239646d44875a5773993a0d8",
       "timestamp": "2026-07-29T01:50:06.178577+00:00"
     },
     {
-      "path": "/persistent/bench_results/h100x4-full-20260728-trtllm-visual-single_e2e-flux2_dev_t2i_1024.json",
+      "path": "reports/h100x4-full-20260728/raw/h100x4-full-20260728-trtllm-visual-single_e2e-flux2_dev_t2i_1024.json",
       "run_id": "h100x4-full-20260728-trtllm-visual-single_e2e-flux2_dev_t2i_1024",
       "commit_sha": "71f4c703bfcce202239646d44875a5773993a0d8",
       "timestamp": "2026-07-29T01:55:34.873148+00:00"
     },
     {
-      "path": "/persistent/bench_results/h100x4-full-20260728-trtllm-visual-single_e2e-qwen_image_2512_t2i_1024.json",
+      "path": "reports/h100x4-full-20260728/raw/h100x4-full-20260728-trtllm-visual-single_e2e-qwen_image_2512_t2i_1024.json",
       "run_id": "h100x4-full-20260728-trtllm-visual-single_e2e-qwen_image_2512_t2i_1024",
       "commit_sha": "71f4c703bfcce202239646d44875a5773993a0d8",
       "timestamp": "2026-07-29T01:56:50.672992+00:00"
     },
     {
-      "path": "/persistent/bench_results/h100x4-full-20260728-trtllm-visual-throughput-cosmos3_nano_t2i_720p.json",
+      "path": "reports/h100x4-full-20260728/raw/h100x4-full-20260728-trtllm-visual-throughput-cosmos3_nano_t2i_720p.json",
       "run_id": "h100x4-full-20260728-trtllm-visual-throughput-cosmos3_nano_t2i_720p",
       "commit_sha": "71f4c703bfcce202239646d44875a5773993a0d8",
       "timestamp": "2026-07-29T02:04:47.824619+00:00"
     },
     {
-      "path": "/persistent/bench_results/h100x4-full-20260728-trtllm-visual-throughput-flux1_dev_t2i_1024.json",
+      "path": "reports/h100x4-full-20260728/raw/h100x4-full-20260728-trtllm-visual-throughput-flux1_dev_t2i_1024.json",
       "run_id": "h100x4-full-20260728-trtllm-visual-throughput-flux1_dev_t2i_1024",
       "commit_sha": "71f4c703bfcce202239646d44875a5773993a0d8",
       "timestamp": "2026-07-29T02:00:15.859091+00:00"
     },
     {
-      "path": "/persistent/bench_results/h100x4-full-20260728-trtllm-visual-throughput-flux2_dev_t2i_1024.json",
+      "path": "reports/h100x4-full-20260728/raw/h100x4-full-20260728-trtllm-visual-throughput-flux2_dev_t2i_1024.json",
       "run_id": "h100x4-full-20260728-trtllm-visual-throughput-flux2_dev_t2i_1024",
       "commit_sha": "71f4c703bfcce202239646d44875a5773993a0d8",
       "timestamp": "2026-07-29T02:01:49.842014+00:00"
     },
     {
-      "path": "/persistent/bench_results/h100x4-full-20260728-trtllm-visual-throughput-qwen_image_2512_t2i_1024.json",
+      "path": "reports/h100x4-full-20260728/raw/h100x4-full-20260728-trtllm-visual-throughput-qwen_image_2512_t2i_1024.json",
       "run_id": "h100x4-full-20260728-trtllm-visual-throughput-qwen_image_2512_t2i_1024",
       "commit_sha": "71f4c703bfcce202239646d44875a5773993a0d8",
       "timestamp": "2026-07-29T02:03:01.682019+00:00"
     },
     {
-      "path": "/persistent/bench_results/h100x4-full-20260728-vllm-omni-single_e2e-cosmos3_nano_i2v_720p_189f.json",
+      "path": "reports/h100x4-full-20260728/raw/h100x4-full-20260728-vllm-omni-single_e2e-cosmos3_nano_i2v_720p_189f.json",
       "run_id": "h100x4-full-20260728-vllm-omni-single_e2e-cosmos3_nano_i2v_720p_189f",
       "commit_sha": "71f4c703bfcce202239646d44875a5773993a0d8",
       "timestamp": "2026-07-28T21:30:03.534406+00:00"
     },
     {
-      "path": "/persistent/bench_results/h100x4-full-20260728-vllm-omni-single_e2e-cosmos3_nano_t2i_720p.json",
+      "path": "reports/h100x4-full-20260728/raw/h100x4-full-20260728-vllm-omni-single_e2e-cosmos3_nano_t2i_720p.json",
       "run_id": "h100x4-full-20260728-vllm-omni-single_e2e-cosmos3_nano_t2i_720p",
       "commit_sha": "71f4c703bfcce202239646d44875a5773993a0d8",
       "timestamp": "2026-07-28T20:24:39.065729+00:00"
     },
     {
-      "path": "/persistent/bench_results/h100x4-full-20260728-vllm-omni-single_e2e-cosmos3_nano_t2v_720p_189f.json",
+      "path": "reports/h100x4-full-20260728/raw/h100x4-full-20260728-vllm-omni-single_e2e-cosmos3_nano_t2v_720p_189f.json",
       "run_id": "h100x4-full-20260728-vllm-omni-single_e2e-cosmos3_nano_t2v_720p_189f",
       "commit_sha": "71f4c703bfcce202239646d44875a5773993a0d8",
       "timestamp": "2026-07-28T21:25:03.940254+00:00"
     },
     {
-      "path": "/persistent/bench_results/h100x4-full-20260728-vllm-omni-single_e2e-flux1_dev_t2i_1024.json",
+      "path": "reports/h100x4-full-20260728/raw/h100x4-full-20260728-vllm-omni-single_e2e-flux1_dev_t2i_1024.json",
       "run_id": "h100x4-full-20260728-vllm-omni-single_e2e-flux1_dev_t2i_1024",
       "commit_sha": "71f4c703bfcce202239646d44875a5773993a0d8",
       "timestamp": "2026-07-28T20:12:06.367593+00:00"
     },
     {
-      "path": "/persistent/bench_results/h100x4-full-20260728-vllm-omni-single_e2e-flux2_dev_t2i_1024.json",
+      "path": "reports/h100x4-full-20260728/raw/h100x4-full-20260728-vllm-omni-single_e2e-flux2_dev_t2i_1024.json",
       "run_id": "h100x4-full-20260728-vllm-omni-single_e2e-flux2_dev_t2i_1024",
       "commit_sha": "71f4c703bfcce202239646d44875a5773993a0d8",
       "timestamp": "2026-07-28T20:14:02.740199+00:00"
     },
     {
-      "path": "/persistent/bench_results/h100x4-full-20260728-vllm-omni-single_e2e-ltx2_twostage_t2v.json",
+      "path": "reports/h100x4-full-20260728/raw/h100x4-full-20260728-vllm-omni-single_e2e-ltx2_twostage_t2v.json",
       "run_id": "h100x4-full-20260728-vllm-omni-single_e2e-ltx2_twostage_t2v",
       "commit_sha": "71f4c703bfcce202239646d44875a5773993a0d8",
       "timestamp": "2026-07-28T20:59:49.305179+00:00"
     },
     {
-      "path": "/persistent/bench_results/h100x4-full-20260728-vllm-omni-single_e2e-qwen_image_2512_t2i_1024.json",
+      "path": "reports/h100x4-full-20260728/raw/h100x4-full-20260728-vllm-omni-single_e2e-qwen_image_2512_t2i_1024.json",
       "run_id": "h100x4-full-20260728-vllm-omni-single_e2e-qwen_image_2512_t2i_1024",
       "commit_sha": "71f4c703bfcce202239646d44875a5773993a0d8",
       "timestamp": "2026-07-28T20:17:26.175166+00:00"
     },
     {
-      "path": "/persistent/bench_results/h100x4-full-20260728-vllm-omni-single_e2e-qwen_image_2512_t2i_1024_truecfg.json",
+      "path": "reports/h100x4-full-20260728/raw/h100x4-full-20260728-vllm-omni-single_e2e-qwen_image_2512_t2i_1024_truecfg.json",
       "run_id": "h100x4-full-20260728-vllm-omni-single_e2e-qwen_image_2512_t2i_1024_truecfg",
       "commit_sha": "71f4c703bfcce202239646d44875a5773993a0d8",
       "timestamp": "2026-07-28T20:19:13.288375+00:00"
     },
     {
-      "path": "/persistent/bench_results/h100x4-full-20260728-vllm-omni-single_e2e-qwen_image_edit_2511.json",
+      "path": "reports/h100x4-full-20260728/raw/h100x4-full-20260728-vllm-omni-single_e2e-qwen_image_edit_2511.json",
       "run_id": "h100x4-full-20260728-vllm-omni-single_e2e-qwen_image_edit_2511",
       "commit_sha": "71f4c703bfcce202239646d44875a5773993a0d8",
       "timestamp": "2026-07-28T20:21:16.235486+00:00"
     },
     {
-      "path": "/persistent/bench_results/h100x4-full-20260728-vllm-omni-single_e2e-wan21_i2v_14b_480p.json",
+      "path": "reports/h100x4-full-20260728/raw/h100x4-full-20260728-vllm-omni-single_e2e-wan21_i2v_14b_480p.json",
       "run_id": "h100x4-full-20260728-vllm-omni-single_e2e-wan21_i2v_14b_480p",
       "commit_sha": "71f4c703bfcce202239646d44875a5773993a0d8",
       "timestamp": "2026-07-28T20:41:00.401946+00:00"
     },
     {
-      "path": "/persistent/bench_results/h100x4-full-20260728-vllm-omni-single_e2e-wan21_i2v_14b_720p.json",
+      "path": "reports/h100x4-full-20260728/raw/h100x4-full-20260728-vllm-omni-single_e2e-wan21_i2v_14b_720p.json",
       "run_id": "h100x4-full-20260728-vllm-omni-single_e2e-wan21_i2v_14b_720p",
       "commit_sha": "71f4c703bfcce202239646d44875a5773993a0d8",
       "timestamp": "2026-07-28T21:02:26.676453+00:00"
     },
     {
-      "path": "/persistent/bench_results/h100x4-full-20260728-vllm-omni-single_e2e-wan21_t2v_1_3b_480p.json",
+      "path": "reports/h100x4-full-20260728/raw/h100x4-full-20260728-vllm-omni-single_e2e-wan21_t2v_1_3b_480p.json",
       "run_id": "h100x4-full-20260728-vllm-omni-single_e2e-wan21_t2v_1_3b_480p",
       "commit_sha": "71f4c703bfcce202239646d44875a5773993a0d8",
       "timestamp": "2026-07-28T20:38:24.961341+00:00"
     },
     {
-      "path": "/persistent/bench_results/h100x4-full-20260728-vllm-omni-single_e2e-wan22_i2v_a14b_720p.json",
+      "path": "reports/h100x4-full-20260728/raw/h100x4-full-20260728-vllm-omni-single_e2e-wan22_i2v_a14b_720p.json",
       "run_id": "h100x4-full-20260728-vllm-omni-single_e2e-wan22_i2v_a14b_720p",
       "commit_sha": "71f4c703bfcce202239646d44875a5773993a0d8",
       "timestamp": "2026-07-28T21:13:45.503838+00:00"
     },
     {
-      "path": "/persistent/bench_results/h100x4-full-20260728-vllm-omni-single_e2e-wan22_t2v_a14b_720p.json",
+      "path": "reports/h100x4-full-20260728/raw/h100x4-full-20260728-vllm-omni-single_e2e-wan22_t2v_a14b_720p.json",
       "run_id": "h100x4-full-20260728-vllm-omni-single_e2e-wan22_t2v_a14b_720p",
       "commit_sha": "71f4c703bfcce202239646d44875a5773993a0d8",
       "timestamp": "2026-07-28T20:45:31.694902+00:00"
     },
     {
-      "path": "/persistent/bench_results/h100x4-full-20260728-vllm-omni-single_e2e-wan22_ti2v_5b_704p.json",
+      "path": "reports/h100x4-full-20260728/raw/h100x4-full-20260728-vllm-omni-single_e2e-wan22_ti2v_5b_704p.json",
       "run_id": "h100x4-full-20260728-vllm-omni-single_e2e-wan22_ti2v_5b_704p",
       "commit_sha": "71f4c703bfcce202239646d44875a5773993a0d8",
       "timestamp": "2026-07-28T20:56:37.944597+00:00"
     },
     {
-      "path": "/persistent/bench_results/h100x4-full-20260728-vllm-omni-single_e2e-zimage_turbo_t2i_1024.json",
+      "path": "reports/h100x4-full-20260728/raw/h100x4-full-20260728-vllm-omni-single_e2e-zimage_turbo_t2i_1024.json",
       "run_id": "h100x4-full-20260728-vllm-omni-single_e2e-zimage_turbo_t2i_1024",
       "commit_sha": "71f4c703bfcce202239646d44875a5773993a0d8",
       "timestamp": "2026-07-28T20:23:18.597543+00:00"
     },
     {
-      "path": "/persistent/bench_results/h100x4-full-20260728-vllm-omni-throughput-cosmos3_nano_i2v_720p_189f.json",
+      "path": "reports/h100x4-full-20260728/raw/h100x4-full-20260728-vllm-omni-throughput-cosmos3_nano_i2v_720p_189f.json",
       "run_id": "h100x4-full-20260728-vllm-omni-throughput-cosmos3_nano_i2v_720p_189f",
       "commit_sha": "71f4c703bfcce202239646d44875a5773993a0d8",
       "timestamp": "2026-07-28T22:58:28.294000+00:00"
     },
     {
-      "path": "/persistent/bench_results/h100x4-full-20260728-vllm-omni-throughput-cosmos3_nano_t2i_720p.json",
+      "path": "reports/h100x4-full-20260728/raw/h100x4-full-20260728-vllm-omni-throughput-cosmos3_nano_t2i_720p.json",
       "run_id": "h100x4-full-20260728-vllm-omni-throughput-cosmos3_nano_t2i_720p",
       "commit_sha": "71f4c703bfcce202239646d44875a5773993a0d8",
       "timestamp": "2026-07-28T20:37:27.993568+00:00"
     },
     {
-      "path": "/persistent/bench_results/h100x4-full-20260728-vllm-omni-throughput-cosmos3_nano_t2v_720p_189f.json",
+      "path": "reports/h100x4-full-20260728/raw/h100x4-full-20260728-vllm-omni-throughput-cosmos3_nano_t2v_720p_189f.json",
       "run_id": "h100x4-full-20260728-vllm-omni-throughput-cosmos3_nano_t2v_720p_189f",
       "commit_sha": "71f4c703bfcce202239646d44875a5773993a0d8",
       "timestamp": "2026-07-28T22:51:21.385809+00:00"
     },
     {
-      "path": "/persistent/bench_results/h100x4-full-20260728-vllm-omni-throughput-flux1_dev_t2i_1024.json",
+      "path": "reports/h100x4-full-20260728/raw/h100x4-full-20260728-vllm-omni-throughput-flux1_dev_t2i_1024.json",
       "run_id": "h100x4-full-20260728-vllm-omni-throughput-flux1_dev_t2i_1024",
       "commit_sha": "71f4c703bfcce202239646d44875a5773993a0d8",
       "timestamp": "2026-07-28T20:25:35.999268+00:00"
     },
     {
-      "path": "/persistent/bench_results/h100x4-full-20260728-vllm-omni-throughput-flux2_dev_t2i_1024.json",
+      "path": "reports/h100x4-full-20260728/raw/h100x4-full-20260728-vllm-omni-throughput-flux2_dev_t2i_1024.json",
       "run_id": "h100x4-full-20260728-vllm-omni-throughput-flux2_dev_t2i_1024",
       "commit_sha": "71f4c703bfcce202239646d44875a5773993a0d8",
       "timestamp": "2026-07-28T20:27:24.796807+00:00"
     },
     {
-      "path": "/persistent/bench_results/h100x4-full-20260728-vllm-omni-throughput-ltx2_twostage_t2v.json",
+      "path": "reports/h100x4-full-20260728/raw/h100x4-full-20260728-vllm-omni-throughput-ltx2_twostage_t2v.json",
       "run_id": "h100x4-full-20260728-vllm-omni-throughput-ltx2_twostage_t2v",
       "commit_sha": "71f4c703bfcce202239646d44875a5773993a0d8",
       "timestamp": "2026-07-28T22:09:39.583732+00:00"
     },
     {
-      "path": "/persistent/bench_results/h100x4-full-20260728-vllm-omni-throughput-qwen_image_2512_t2i_1024.json",
+      "path": "reports/h100x4-full-20260728/raw/h100x4-full-20260728-vllm-omni-throughput-qwen_image_2512_t2i_1024.json",
       "run_id": "h100x4-full-20260728-vllm-omni-throughput-qwen_image_2512_t2i_1024",
       "commit_sha": "71f4c703bfcce202239646d44875a5773993a0d8",
       "timestamp": "2026-07-28T20:30:27.130222+00:00"
     },
     {
-      "path": "/persistent/bench_results/h100x4-full-20260728-vllm-omni-throughput-qwen_image_2512_t2i_1024_truecfg.json",
+      "path": "reports/h100x4-full-20260728/raw/h100x4-full-20260728-vllm-omni-throughput-qwen_image_2512_t2i_1024_truecfg.json",
       "run_id": "h100x4-full-20260728-vllm-omni-throughput-qwen_image_2512_t2i_1024_truecfg",
       "commit_sha": "71f4c703bfcce202239646d44875a5773993a0d8",
       "timestamp": "2026-07-28T20:32:04.289664+00:00"
     },
     {
-      "path": "/persistent/bench_results/h100x4-full-20260728-vllm-omni-throughput-qwen_image_edit_2511.json",
+      "path": "reports/h100x4-full-20260728/raw/h100x4-full-20260728-vllm-omni-throughput-qwen_image_edit_2511.json",
       "run_id": "h100x4-full-20260728-vllm-omni-throughput-qwen_image_edit_2511",
       "commit_sha": "71f4c703bfcce202239646d44875a5773993a0d8",
       "timestamp": "2026-07-28T20:33:59.373043+00:00"
     },
     {
-      "path": "/persistent/bench_results/h100x4-full-20260728-vllm-omni-throughput-wan21_i2v_14b_480p.json",
+      "path": "reports/h100x4-full-20260728/raw/h100x4-full-20260728-vllm-omni-throughput-wan21_i2v_14b_480p.json",
       "run_id": "h100x4-full-20260728-vllm-omni-throughput-wan21_i2v_14b_480p",
       "commit_sha": "71f4c703bfcce202239646d44875a5773993a0d8",
       "timestamp": "2026-07-28T21:38:34.485856+00:00"
     },
     {
-      "path": "/persistent/bench_results/h100x4-full-20260728-vllm-omni-throughput-wan21_i2v_14b_720p.json",
+      "path": "reports/h100x4-full-20260728/raw/h100x4-full-20260728-vllm-omni-throughput-wan21_i2v_14b_720p.json",
       "run_id": "h100x4-full-20260728-vllm-omni-throughput-wan21_i2v_14b_720p",
       "commit_sha": "71f4c703bfcce202239646d44875a5773993a0d8",
       "timestamp": "2026-07-28T22:11:15.034093+00:00"
     },
     {
-      "path": "/persistent/bench_results/h100x4-full-20260728-vllm-omni-throughput-wan21_t2v_1_3b_480p.json",
+      "path": "reports/h100x4-full-20260728/raw/h100x4-full-20260728-vllm-omni-throughput-wan21_t2v_1_3b_480p.json",
       "run_id": "h100x4-full-20260728-vllm-omni-throughput-wan21_t2v_1_3b_480p",
       "commit_sha": "71f4c703bfcce202239646d44875a5773993a0d8",
       "timestamp": "2026-07-28T21:34:53.057564+00:00"
     },
     {
-      "path": "/persistent/bench_results/h100x4-full-20260728-vllm-omni-throughput-wan22_i2v_a14b_720p.json",
+      "path": "reports/h100x4-full-20260728/raw/h100x4-full-20260728-vllm-omni-throughput-wan22_i2v_a14b_720p.json",
       "run_id": "h100x4-full-20260728-vllm-omni-throughput-wan22_i2v_a14b_720p",
       "commit_sha": "71f4c703bfcce202239646d44875a5773993a0d8",
       "timestamp": "2026-07-28T22:31:18.969619+00:00"
     },
     {
-      "path": "/persistent/bench_results/h100x4-full-20260728-vllm-omni-throughput-wan22_t2v_a14b_720p.json",
+      "path": "reports/h100x4-full-20260728/raw/h100x4-full-20260728-vllm-omni-throughput-wan22_t2v_a14b_720p.json",
       "run_id": "h100x4-full-20260728-vllm-omni-throughput-wan22_t2v_a14b_720p",
       "commit_sha": "71f4c703bfcce202239646d44875a5773993a0d8",
       "timestamp": "2026-07-28T21:45:43.974614+00:00"
     },
     {
-      "path": "/persistent/bench_results/h100x4-full-20260728-vllm-omni-throughput-wan22_ti2v_5b_704p.json",
+      "path": "reports/h100x4-full-20260728/raw/h100x4-full-20260728-vllm-omni-throughput-wan22_ti2v_5b_704p.json",
       "run_id": "h100x4-full-20260728-vllm-omni-throughput-wan22_ti2v_5b_704p",
       "commit_sha": "71f4c703bfcce202239646d44875a5773993a0d8",
       "timestamp": "2026-07-28T22:05:17.808646+00:00"
     },
     {
-      "path": "/persistent/bench_results/h100x4-full-20260728-vllm-omni-throughput-zimage_turbo_t2i_1024.json",
+      "path": "reports/h100x4-full-20260728/raw/h100x4-full-20260728-vllm-omni-throughput-zimage_turbo_t2i_1024.json",
       "run_id": "h100x4-full-20260728-vllm-omni-throughput-zimage_turbo_t2i_1024",
       "commit_sha": "71f4c703bfcce202239646d44875a5773993a0d8",
       "timestamp": "2026-07-28T20:36:10.705551+00:00"
+    },
+    {
+      "path": "reports/h100x4-full-20260728/raw-rerun-20260729/run_abab_lightx2v_wan21_i2v_14b_480p.json",
+      "run_id": "local",
+      "commit_sha": "71f4c703bfcce202239646d44875a5773993a0d8",
+      "timestamp": "2026-07-29T17:57:35.014980+00:00"
+    },
+    {
+      "path": "reports/h100x4-full-20260728/raw-rerun-20260729/run_abab_lightx2v_wan21_i2v_14b_720p.json",
+      "run_id": "local",
+      "commit_sha": "71f4c703bfcce202239646d44875a5773993a0d8",
+      "timestamp": "2026-07-29T18:46:38.138873+00:00"
+    },
+    {
+      "path": "reports/h100x4-full-20260728/raw-rerun-20260729/run_abab_sglang_wan21_i2v_14b_480p.json",
+      "run_id": "local",
+      "commit_sha": "71f4c703bfcce202239646d44875a5773993a0d8",
+      "timestamp": "2026-07-29T17:43:35.099727+00:00"
+    },
+    {
+      "path": "reports/h100x4-full-20260728/raw-rerun-20260729/run_abab_sglang_wan21_i2v_14b_720p.json",
+      "run_id": "local",
+      "commit_sha": "71f4c703bfcce202239646d44875a5773993a0d8",
+      "timestamp": "2026-07-29T18:05:50.520836+00:00"
+    },
+    {
+      "path": "reports/h100x4-full-20260728/raw-rerun-20260729/run_i2vfix_wan22_i2v_a14b_720p.json",
+      "run_id": "local",
+      "commit_sha": "71f4c703bfcce202239646d44875a5773993a0d8",
+      "timestamp": "2026-07-29T14:30:36.806483+00:00"
+    },
+    {
+      "path": "reports/h100x4-full-20260728/raw-rerun-20260729/run_t2vfix_wan22_t2v_a14b_720p.json",
+      "run_id": "local",
+      "commit_sha": "71f4c703bfcce202239646d44875a5773993a0d8",
+      "timestamp": "2026-07-29T17:06:57.303497+00:00"
     }
   ],
   "results": [
@@ -753,7 +789,7 @@
         "warmup_s": 8.58
       },
       "run_id": "h100x4-full-20260728",
-      "source_result": "/persistent/bench_results/h100x4-full-20260728-sglang-single_e2e-flux1_dev_t2i_1024.json"
+      "source_result": "reports/h100x4-full-20260728/raw/h100x4-full-20260728-sglang-single_e2e-flux1_dev_t2i_1024.json"
     },
     {
       "case_id": "flux1_dev_t2i_1024",
@@ -806,7 +842,7 @@
         "server_startup_s": 36.02,
         "warmup_s": 11.24
       },
-      "source_result": "/persistent/bench_results/h100x4-full-20260728-vllm-omni-single_e2e-flux1_dev_t2i_1024.json"
+      "source_result": "reports/h100x4-full-20260728/raw/h100x4-full-20260728-vllm-omni-single_e2e-flux1_dev_t2i_1024.json"
     },
     {
       "case_id": "flux1_dev_t2i_1024",
@@ -857,7 +893,7 @@
         "server_startup_s": 42.02,
         "warmup_s": 1.42
       },
-      "source_result": "/persistent/bench_results/h100x4-full-20260728-trtllm-visual-single_e2e-flux1_dev_t2i_1024.json"
+      "source_result": "reports/h100x4-full-20260728/raw/h100x4-full-20260728-trtllm-visual-single_e2e-flux1_dev_t2i_1024.json"
     },
     {
       "case_id": "flux2_dev_t2i_1024",
@@ -914,7 +950,7 @@
         "server_startup_s": 494.58,
         "warmup_s": 67.93
       },
-      "source_result": "/persistent/bench_results/h100x4-full-20260728-sglang-single_e2e-flux2_dev_t2i_1024.json"
+      "source_result": "reports/h100x4-full-20260728/raw/h100x4-full-20260728-sglang-single_e2e-flux2_dev_t2i_1024.json"
     },
     {
       "case_id": "flux2_dev_t2i_1024",
@@ -967,7 +1003,7 @@
         "server_startup_s": 46.03,
         "warmup_s": 33.15
       },
-      "source_result": "/persistent/bench_results/h100x4-full-20260728-vllm-omni-single_e2e-flux2_dev_t2i_1024.json"
+      "source_result": "reports/h100x4-full-20260728/raw/h100x4-full-20260728-vllm-omni-single_e2e-flux2_dev_t2i_1024.json"
     },
     {
       "case_id": "flux2_dev_t2i_1024",
@@ -1029,7 +1065,7 @@
         "server_startup_s": 50.08,
         "warmup_s": 98.38
       },
-      "source_result": "/persistent/bench_results/h100x4-full-20260728-lightx2v-single_e2e-flux2_dev_t2i_1024.json"
+      "source_result": "reports/h100x4-full-20260728/raw/h100x4-full-20260728-lightx2v-single_e2e-flux2_dev_t2i_1024.json"
     },
     {
       "case_id": "flux2_dev_t2i_1024",
@@ -1073,7 +1109,7 @@
       },
       "server_command": "trtllm-serve serve black-forest-labs/FLUX.2-dev --host 127.0.0.1 --port 30989 --tp_size 2 --backend pytorch",
       "metrics": {},
-      "source_result": "/persistent/bench_results/h100x4-full-20260728-trtllm-visual-single_e2e-flux2_dev_t2i_1024.json"
+      "source_result": "reports/h100x4-full-20260728/raw/h100x4-full-20260728-trtllm-visual-single_e2e-flux2_dev_t2i_1024.json"
     },
     {
       "case_id": "qwen_image_2512_t2i_1024",
@@ -1129,7 +1165,7 @@
         "server_startup_s": 51.22,
         "warmup_s": 0.82
       },
-      "source_result": "/persistent/bench_results/h100x4-full-20260728-sglang-single_e2e-qwen_image_2512_t2i_1024.json"
+      "source_result": "reports/h100x4-full-20260728/raw/h100x4-full-20260728-sglang-single_e2e-qwen_image_2512_t2i_1024.json"
     },
     {
       "case_id": "qwen_image_2512_t2i_1024",
@@ -1179,7 +1215,7 @@
         "server_startup_s": 42.02,
         "warmup_s": 1.71
       },
-      "source_result": "/persistent/bench_results/h100x4-full-20260728-vllm-omni-single_e2e-qwen_image_2512_t2i_1024.json"
+      "source_result": "reports/h100x4-full-20260728/raw/h100x4-full-20260728-vllm-omni-single_e2e-qwen_image_2512_t2i_1024.json"
     },
     {
       "case_id": "qwen_image_2512_t2i_1024",
@@ -1230,7 +1266,7 @@
         "server_startup_s": 48.03,
         "warmup_s": 4.84
       },
-      "source_result": "/persistent/bench_results/h100x4-full-20260728-trtllm-visual-single_e2e-qwen_image_2512_t2i_1024.json"
+      "source_result": "reports/h100x4-full-20260728/raw/h100x4-full-20260728-trtllm-visual-single_e2e-qwen_image_2512_t2i_1024.json"
     },
     {
       "case_id": "qwen_image_2512_t2i_1024_truecfg",
@@ -1287,7 +1323,7 @@
         "server_startup_s": 131.22,
         "warmup_s": 15.68
       },
-      "source_result": "/persistent/bench_results/h100x4-full-20260728-sglang-single_e2e-qwen_image_2512_t2i_1024_truecfg.json"
+      "source_result": "reports/h100x4-full-20260728/raw/h100x4-full-20260728-sglang-single_e2e-qwen_image_2512_t2i_1024_truecfg.json"
     },
     {
       "case_id": "qwen_image_2512_t2i_1024_truecfg",
@@ -1337,7 +1373,7 @@
         "server_startup_s": 36.02,
         "warmup_s": 2.22
       },
-      "source_result": "/persistent/bench_results/h100x4-full-20260728-vllm-omni-single_e2e-qwen_image_2512_t2i_1024_truecfg.json"
+      "source_result": "reports/h100x4-full-20260728/raw/h100x4-full-20260728-vllm-omni-single_e2e-qwen_image_2512_t2i_1024_truecfg.json"
     },
     {
       "case_id": "qwen_image_edit_2511",
@@ -1389,7 +1425,7 @@
         "server_startup_s": 226.09,
         "warmup_s": 13.03
       },
-      "source_result": "/persistent/bench_results/h100x4-full-20260728-sglang-single_e2e-qwen_image_edit_2511.json"
+      "source_result": "reports/h100x4-full-20260728/raw/h100x4-full-20260728-sglang-single_e2e-qwen_image_edit_2511.json"
     },
     {
       "case_id": "qwen_image_edit_2511",
@@ -1439,7 +1475,7 @@
         "server_startup_s": 40.02,
         "warmup_s": 2.38
       },
-      "source_result": "/persistent/bench_results/h100x4-full-20260728-vllm-omni-single_e2e-qwen_image_edit_2511.json"
+      "source_result": "reports/h100x4-full-20260728/raw/h100x4-full-20260728-vllm-omni-single_e2e-qwen_image_edit_2511.json"
     },
     {
       "case_id": "zimage_turbo_t2i_1024",
@@ -1496,7 +1532,7 @@
         "server_startup_s": 36.29,
         "warmup_s": 0.69
       },
-      "source_result": "/persistent/bench_results/h100x4-full-20260728-sglang-single_e2e-zimage_turbo_t2i_1024.json"
+      "source_result": "reports/h100x4-full-20260728/raw/h100x4-full-20260728-sglang-single_e2e-zimage_turbo_t2i_1024.json"
     },
     {
       "case_id": "zimage_turbo_t2i_1024",
@@ -1546,7 +1582,7 @@
         "server_startup_s": 32.02,
         "warmup_s": 1.17
       },
-      "source_result": "/persistent/bench_results/h100x4-full-20260728-vllm-omni-single_e2e-zimage_turbo_t2i_1024.json"
+      "source_result": "reports/h100x4-full-20260728/raw/h100x4-full-20260728-vllm-omni-single_e2e-zimage_turbo_t2i_1024.json"
     },
     {
       "case_id": "zimage_turbo_t2i_1024",
@@ -1602,7 +1638,7 @@
         "server_startup_s": 16.03,
         "warmup_s": 4.02
       },
-      "source_result": "/persistent/bench_results/h100x4-full-20260728-lightx2v-single_e2e-zimage_turbo_t2i_1024.json"
+      "source_result": "reports/h100x4-full-20260728/raw/h100x4-full-20260728-lightx2v-single_e2e-zimage_turbo_t2i_1024.json"
     },
     {
       "case_id": "ideogram4_t2i_1024_2gpu_tp",
@@ -1661,7 +1697,7 @@
         "server_startup_s": 55.04,
         "warmup_s": 0.02
       },
-      "source_result": "/persistent/bench_results/h100x4-full-20260728-sglang-single_e2e-ideogram4_t2i_1024_2gpu_tp.json"
+      "source_result": "reports/h100x4-full-20260728/raw/h100x4-full-20260728-sglang-single_e2e-ideogram4_t2i_1024_2gpu_tp.json"
     },
     {
       "case_id": "wan21_t2v_1_3b_480p",
@@ -1717,7 +1753,7 @@
         "server_startup_s": 88.97,
         "warmup_s": 18.07
       },
-      "source_result": "/persistent/bench_results/h100x4-full-20260728-sglang-single_e2e-wan21_t2v_1_3b_480p.json"
+      "source_result": "reports/h100x4-full-20260728/raw/h100x4-full-20260728-sglang-single_e2e-wan21_t2v_1_3b_480p.json"
     },
     {
       "case_id": "wan21_t2v_1_3b_480p",
@@ -1767,7 +1803,7 @@
         "server_startup_s": 32.02,
         "warmup_s": 18.64
       },
-      "source_result": "/persistent/bench_results/h100x4-full-20260728-vllm-omni-single_e2e-wan21_t2v_1_3b_480p.json"
+      "source_result": "reports/h100x4-full-20260728/raw/h100x4-full-20260728-vllm-omni-single_e2e-wan21_t2v_1_3b_480p.json"
     },
     {
       "case_id": "wan21_t2v_1_3b_480p",
@@ -1826,7 +1862,7 @@
         "server_startup_s": 18.03,
         "warmup_s": 28.06
       },
-      "source_result": "/persistent/bench_results/h100x4-full-20260728-lightx2v-single_e2e-wan21_t2v_1_3b_480p.json"
+      "source_result": "reports/h100x4-full-20260728/raw/h100x4-full-20260728-lightx2v-single_e2e-wan21_t2v_1_3b_480p.json"
     },
     {
       "case_id": "wan21_i2v_14b_480p",
@@ -1878,7 +1914,7 @@
         "server_startup_s": 149.33,
         "warmup_s": 305.28
       },
-      "source_result": "/persistent/bench_results/h100x4-full-20260728-sglang-single_e2e-wan21_i2v_14b_480p.json"
+      "source_result": "reports/h100x4-full-20260728/raw/h100x4-full-20260728-sglang-single_e2e-wan21_i2v_14b_480p.json"
     },
     {
       "case_id": "wan21_i2v_14b_480p",
@@ -1928,7 +1964,7 @@
         "server_startup_s": 42.02,
         "warmup_s": 34.98
       },
-      "source_result": "/persistent/bench_results/h100x4-full-20260728-vllm-omni-single_e2e-wan21_i2v_14b_480p.json"
+      "source_result": "reports/h100x4-full-20260728/raw/h100x4-full-20260728-vllm-omni-single_e2e-wan21_i2v_14b_480p.json"
     },
     {
       "case_id": "wan21_i2v_14b_480p",
@@ -1987,7 +2023,7 @@
         "server_startup_s": 32.04,
         "warmup_s": 64.67
       },
-      "source_result": "/persistent/bench_results/h100x4-full-20260728-lightx2v-single_e2e-wan21_i2v_14b_480p.json"
+      "source_result": "reports/h100x4-full-20260728/raw/h100x4-full-20260728-lightx2v-single_e2e-wan21_i2v_14b_480p.json"
     },
     {
       "case_id": "wan22_t2v_a14b_720p",
@@ -2041,7 +2077,7 @@
         "server_startup_s": 175.33,
         "warmup_s": 988.29
       },
-      "source_result": "/persistent/bench_results/h100x4-full-20260728-sglang-single_e2e-wan22_t2v_a14b_720p.json"
+      "source_result": "reports/h100x4-full-20260728/raw/h100x4-full-20260728-sglang-single_e2e-wan22_t2v_a14b_720p.json"
     },
     {
       "case_id": "wan22_t2v_a14b_720p",
@@ -2091,7 +2127,7 @@
         "server_startup_s": 48.03,
         "warmup_s": 81.32
       },
-      "source_result": "/persistent/bench_results/h100x4-full-20260728-vllm-omni-single_e2e-wan22_t2v_a14b_720p.json"
+      "source_result": "reports/h100x4-full-20260728/raw/h100x4-full-20260728-vllm-omni-single_e2e-wan22_t2v_a14b_720p.json"
     },
     {
       "case_id": "wan22_t2v_a14b_720p",
@@ -2154,7 +2190,7 @@
         "server_startup_s": 36.04,
         "warmup_s": 216.42
       },
-      "source_result": "/persistent/bench_results/h100x4-full-20260728-lightx2v-single_e2e-wan22_t2v_a14b_720p.json"
+      "source_result": "reports/h100x4-full-20260728/raw/h100x4-full-20260728-lightx2v-single_e2e-wan22_t2v_a14b_720p.json"
     },
     {
       "case_id": "wan22_ti2v_5b_704p",
@@ -2209,7 +2245,7 @@
         "server_startup_s": 112.08,
         "warmup_s": 45.67
       },
-      "source_result": "/persistent/bench_results/h100x4-full-20260728-sglang-single_e2e-wan22_ti2v_5b_704p.json"
+      "source_result": "reports/h100x4-full-20260728/raw/h100x4-full-20260728-sglang-single_e2e-wan22_ti2v_5b_704p.json"
     },
     {
       "case_id": "wan22_ti2v_5b_704p",
@@ -2259,7 +2295,7 @@
         "server_startup_s": 36.02,
         "warmup_s": 37.02
       },
-      "source_result": "/persistent/bench_results/h100x4-full-20260728-vllm-omni-single_e2e-wan22_ti2v_5b_704p.json"
+      "source_result": "reports/h100x4-full-20260728/raw/h100x4-full-20260728-vllm-omni-single_e2e-wan22_ti2v_5b_704p.json"
     },
     {
       "case_id": "wan22_ti2v_5b_704p",
@@ -2325,7 +2361,7 @@
         "server_startup_s": 22.04,
         "warmup_s": 33.57
       },
-      "source_result": "/persistent/bench_results/h100x4-full-20260728-lightx2v-single_e2e-wan22_ti2v_5b_704p.json"
+      "source_result": "reports/h100x4-full-20260728/raw/h100x4-full-20260728-lightx2v-single_e2e-wan22_ti2v_5b_704p.json"
     },
     {
       "case_id": "ltx2_twostage_t2v",
@@ -2379,7 +2415,7 @@
         "server_startup_s": 178.27,
         "warmup_s": 87.25
       },
-      "source_result": "/persistent/bench_results/h100x4-full-20260728-sglang-single_e2e-ltx2_twostage_t2v.json"
+      "source_result": "reports/h100x4-full-20260728/raw/h100x4-full-20260728-sglang-single_e2e-ltx2_twostage_t2v.json"
     },
     {
       "case_id": "ltx2_twostage_t2v",
@@ -2425,7 +2461,7 @@
         "server_startup_s": 112.05,
         "warmup_s": 3.01
       },
-      "source_result": "/persistent/bench_results/h100x4-full-20260728-vllm-omni-single_e2e-ltx2_twostage_t2v.json"
+      "source_result": "reports/h100x4-full-20260728/raw/h100x4-full-20260728-vllm-omni-single_e2e-ltx2_twostage_t2v.json"
     },
     {
       "case_id": "ltx2_twostage_t2v",
@@ -2495,7 +2531,7 @@
         "server_startup_s": 48.04,
         "warmup_s": 90.28
       },
-      "source_result": "/persistent/bench_results/h100x4-full-20260728-lightx2v-single_e2e-ltx2_twostage_t2v.json"
+      "source_result": "reports/h100x4-full-20260728/raw/h100x4-full-20260728-lightx2v-single_e2e-ltx2_twostage_t2v.json"
     },
     {
       "case_id": "ltx2.3_twostage_t2v_2gpus",
@@ -2551,7 +2587,7 @@
         "server_startup_s": 84.03,
         "warmup_s": 18.06
       },
-      "source_result": "/persistent/bench_results/h100x4-full-20260728-sglang-single_e2e-ltx2.3_twostage_t2v_2gpus.json"
+      "source_result": "reports/h100x4-full-20260728/raw/h100x4-full-20260728-sglang-single_e2e-ltx2.3_twostage_t2v_2gpus.json"
     },
     {
       "case_id": "wan21_i2v_14b_720p",
@@ -2603,7 +2639,7 @@
         "server_startup_s": 149.41,
         "warmup_s": 1004.79
       },
-      "source_result": "/persistent/bench_results/h100x4-full-20260728-sglang-single_e2e-wan21_i2v_14b_720p.json"
+      "source_result": "reports/h100x4-full-20260728/raw/h100x4-full-20260728-sglang-single_e2e-wan21_i2v_14b_720p.json"
     },
     {
       "case_id": "wan21_i2v_14b_720p",
@@ -2653,7 +2689,7 @@
         "server_startup_s": 42.02,
         "warmup_s": 92.06
       },
-      "source_result": "/persistent/bench_results/h100x4-full-20260728-vllm-omni-single_e2e-wan21_i2v_14b_720p.json"
+      "source_result": "reports/h100x4-full-20260728/raw/h100x4-full-20260728-vllm-omni-single_e2e-wan21_i2v_14b_720p.json"
     },
     {
       "case_id": "wan21_i2v_14b_720p",
@@ -2713,7 +2749,7 @@
         "server_startup_s": 36.06,
         "warmup_s": 223.01
       },
-      "source_result": "/persistent/bench_results/h100x4-full-20260728-lightx2v-single_e2e-wan21_i2v_14b_720p.json"
+      "source_result": "reports/h100x4-full-20260728/raw/h100x4-full-20260728-lightx2v-single_e2e-wan21_i2v_14b_720p.json"
     },
     {
       "case_id": "wan22_i2v_a14b_720p",
@@ -2731,36 +2767,41 @@
       "true_cfg_scale": null,
       "negative_prompt_set": false,
       "num_gpus": 4,
-      "latency_s": null,
-      "error": "sglang server exited before health check passed (exit 1)",
+      "latency_s": 203.911,
+      "error": null,
       "framework_metadata": {
-        "profile": "h100-4gpu-cfg-uly-layerwise-offload",
+        "profile": "default",
         "profile_request": "auto",
-        "profile_source": "hardware",
+        "profile_source": "default",
         "framework_ref": null,
-        "hardware": [
-          "h100"
-        ],
+        "hardware": null,
         "hardware_candidates": [
           "h100"
         ],
-        "description": "H100 80GB profile for the dual-expert A14B I2V: layerwise-offloaded DiT so both 14B towers plus the CLIP image encoder and image-cond latents fit. Lossless (identical numerics, weights stream per layer).",
-        "notes": "T2V A14B keeps the resident profile (fits, fastest); only I2V needs the offload.",
+        "description": "Best known SGLang command for the benchmark repo default profile.",
+        "notes": "Keep this profile updated when the best command changes for a SGLang release or commit. Policy-aligned candidate (compile on, offload off) \u2014 NOT yet validated on H100; validate (incl. OOM risk) before publishing.",
         "install_specs": null,
         "server_bin": null,
         "use_omni_arg": null,
         "required_help_args": null,
-        "serve_args": "--model-type diffusion --warmup --enable-cfg-parallel --ulysses-degree 2 --dit-cpu-offload false --pin-cpu-memory --dit-layerwise-offload true --performance-mode speed --enable-torch-compile",
+        "serve_args": "--model-type diffusion --warmup --enable-cfg-parallel --ulysses-degree 2 --dit-cpu-offload false --pin-cpu-memory --dit-layerwise-offload false --performance-mode speed --enable-torch-compile",
         "num_gpus": null,
         "extra_env_keys": [],
-        "sglang_profile": "h100-4gpu-cfg-uly-layerwise-offload",
+        "sglang_profile": "default",
         "sglang_profile_request": "auto",
-        "sglang_profile_source": "hardware",
+        "sglang_profile_source": "default",
         "sglang_ref": "current-main"
       },
-      "server_command": "sglang serve --model-path Wan-AI/Wan2.2-I2V-A14B-Diffusers --port 31006 --host 127.0.0.1 --backend sglang --num-gpus 4 --model-type diffusion --warmup --enable-cfg-parallel --ulysses-degree 2 --dit-cpu-offload false --pin-cpu-memory --dit-layerwise-offload true --performance-mode speed --enable-torch-compile --warmup-steps 3",
-      "metrics": {},
-      "source_result": "/persistent/bench_results/h100x4-full-20260728-sglang-single_e2e-wan22_i2v_a14b_720p.json"
+      "server_command": "sglang serve --model-path Wan-AI/Wan2.2-I2V-A14B-Diffusers --port 37101 --host 127.0.0.1 --backend sglang --num-gpus 4 --model-type diffusion --warmup --enable-cfg-parallel --ulysses-degree 2 --dit-cpu-offload false --pin-cpu-memory --dit-layerwise-offload false --performance-mode speed --enable-torch-compile --warmup-steps 3",
+      "metrics": {
+        "client_latency_s": 203.911,
+        "client_latency_min_s": 203.394,
+        "client_latency_max_s": 204.427,
+        "measured_repeats": 2,
+        "server_startup_s": 194.63,
+        "warmup_s": 1047.88
+      },
+      "source_result": "reports/h100x4-full-20260728/raw-rerun-20260729/run_i2vfix_wan22_i2v_a14b_720p.json"
     },
     {
       "case_id": "wan22_i2v_a14b_720p",
@@ -2810,7 +2851,7 @@
         "server_startup_s": 44.03,
         "warmup_s": 92.31
       },
-      "source_result": "/persistent/bench_results/h100x4-full-20260728-vllm-omni-single_e2e-wan22_i2v_a14b_720p.json"
+      "source_result": "reports/h100x4-full-20260728/raw/h100x4-full-20260728-vllm-omni-single_e2e-wan22_i2v_a14b_720p.json"
     },
     {
       "case_id": "wan22_i2v_a14b_720p",
@@ -2874,7 +2915,7 @@
         "server_startup_s": 42.07,
         "warmup_s": 216.93
       },
-      "source_result": "/persistent/bench_results/h100x4-full-20260728-lightx2v-single_e2e-wan22_i2v_a14b_720p.json"
+      "source_result": "reports/h100x4-full-20260728/raw/h100x4-full-20260728-lightx2v-single_e2e-wan22_i2v_a14b_720p.json"
     },
     {
       "case_id": "cosmos3_nano_t2i_720p",
@@ -2930,7 +2971,7 @@
         "server_startup_s": 81.46,
         "warmup_s": 3.24
       },
-      "source_result": "/persistent/bench_results/h100x4-full-20260728-sglang-single_e2e-cosmos3_nano_t2i_720p.json"
+      "source_result": "reports/h100x4-full-20260728/raw/h100x4-full-20260728-sglang-single_e2e-cosmos3_nano_t2i_720p.json"
     },
     {
       "case_id": "cosmos3_nano_t2i_720p",
@@ -2985,7 +3026,7 @@
       },
       "server_command": "vllm serve nvidia/Cosmos3-Nano --port 31012 --host 127.0.0.1 --omni --stage-configs-path configs/vllm_omni_cosmos3_h200_2gpu_cfg_guardrails_off.yaml --stage-init-timeout 900 --init-timeout 1800 --tensor-parallel-size 2",
       "metrics": {},
-      "source_result": "/persistent/bench_results/h100x4-full-20260728-vllm-omni-single_e2e-cosmos3_nano_t2i_720p.json"
+      "source_result": "reports/h100x4-full-20260728/raw/h100x4-full-20260728-vllm-omni-single_e2e-cosmos3_nano_t2i_720p.json"
     },
     {
       "case_id": "cosmos3_nano_t2i_720p",
@@ -3034,7 +3075,7 @@
         "server_startup_s": 58.03,
         "warmup_s": 0.0
       },
-      "source_result": "/persistent/bench_results/h100x4-full-20260728-trtllm-visual-single_e2e-cosmos3_nano_t2i_720p.json"
+      "source_result": "reports/h100x4-full-20260728/raw/h100x4-full-20260728-trtllm-visual-single_e2e-cosmos3_nano_t2i_720p.json"
     },
     {
       "case_id": "cosmos3_nano_t2v_720p_189f",
@@ -3092,7 +3133,7 @@
         "server_startup_s": 59.03,
         "warmup_s": 32.09
       },
-      "source_result": "/persistent/bench_results/h100x4-full-20260728-sglang-single_e2e-cosmos3_nano_t2v_720p_189f.json"
+      "source_result": "reports/h100x4-full-20260728/raw/h100x4-full-20260728-sglang-single_e2e-cosmos3_nano_t2v_720p_189f.json"
     },
     {
       "case_id": "cosmos3_nano_t2v_720p_189f",
@@ -3152,7 +3193,7 @@
         "server_startup_s": 42.03,
         "warmup_s": 72.73
       },
-      "source_result": "/persistent/bench_results/h100x4-full-20260728-vllm-omni-single_e2e-cosmos3_nano_t2v_720p_189f.json"
+      "source_result": "reports/h100x4-full-20260728/raw/h100x4-full-20260728-vllm-omni-single_e2e-cosmos3_nano_t2v_720p_189f.json"
     },
     {
       "case_id": "cosmos3_nano_i2v_720p_189f",
@@ -3206,7 +3247,7 @@
         "server_startup_s": 59.16,
         "warmup_s": 30.58
       },
-      "source_result": "/persistent/bench_results/h100x4-full-20260728-sglang-single_e2e-cosmos3_nano_i2v_720p_189f.json"
+      "source_result": "reports/h100x4-full-20260728/raw/h100x4-full-20260728-sglang-single_e2e-cosmos3_nano_i2v_720p_189f.json"
     },
     {
       "case_id": "cosmos3_nano_i2v_720p_189f",
@@ -3266,7 +3307,7 @@
         "server_startup_s": 38.03,
         "warmup_s": 67.41
       },
-      "source_result": "/persistent/bench_results/h100x4-full-20260728-vllm-omni-single_e2e-cosmos3_nano_i2v_720p_189f.json"
+      "source_result": "reports/h100x4-full-20260728/raw/h100x4-full-20260728-vllm-omni-single_e2e-cosmos3_nano_i2v_720p_189f.json"
     }
   ],
   "throughput_results": [
@@ -3332,7 +3373,7 @@
         "server_startup_s": 70.05,
         "warmup_s": 8.56
       },
-      "source_result": "/persistent/bench_results/h100x4-full-20260728-sglang-throughput-flux1_dev_t2i_1024.json"
+      "source_result": "reports/h100x4-full-20260728/raw/h100x4-full-20260728-sglang-throughput-flux1_dev_t2i_1024.json"
     },
     {
       "case_id": "flux1_dev_t2i_1024",
@@ -3394,7 +3435,7 @@
         "server_startup_s": 34.02,
         "warmup_s": 11.2
       },
-      "source_result": "/persistent/bench_results/h100x4-full-20260728-vllm-omni-throughput-flux1_dev_t2i_1024.json"
+      "source_result": "reports/h100x4-full-20260728/raw/h100x4-full-20260728-vllm-omni-throughput-flux1_dev_t2i_1024.json"
     },
     {
       "case_id": "flux1_dev_t2i_1024",
@@ -3454,7 +3495,7 @@
         "server_startup_s": 34.02,
         "warmup_s": 1.46
       },
-      "source_result": "/persistent/bench_results/h100x4-full-20260728-trtllm-visual-throughput-flux1_dev_t2i_1024.json"
+      "source_result": "reports/h100x4-full-20260728/raw/h100x4-full-20260728-trtllm-visual-throughput-flux1_dev_t2i_1024.json"
     },
     {
       "case_id": "flux2_dev_t2i_1024",
@@ -3518,7 +3559,7 @@
         "server_startup_s": 117.14,
         "warmup_s": 28.96
       },
-      "source_result": "/persistent/bench_results/h100x4-full-20260728-sglang-throughput-flux2_dev_t2i_1024.json"
+      "source_result": "reports/h100x4-full-20260728/raw/h100x4-full-20260728-sglang-throughput-flux2_dev_t2i_1024.json"
     },
     {
       "case_id": "flux2_dev_t2i_1024",
@@ -3580,7 +3621,7 @@
         "server_startup_s": 40.02,
         "warmup_s": 33.23
       },
-      "source_result": "/persistent/bench_results/h100x4-full-20260728-vllm-omni-throughput-flux2_dev_t2i_1024.json"
+      "source_result": "reports/h100x4-full-20260728/raw/h100x4-full-20260728-vllm-omni-throughput-flux2_dev_t2i_1024.json"
     },
     {
       "case_id": "flux2_dev_t2i_1024",
@@ -3651,7 +3692,7 @@
         "server_startup_s": 50.07,
         "warmup_s": 63.61
       },
-      "source_result": "/persistent/bench_results/h100x4-full-20260728-lightx2v-throughput-flux2_dev_t2i_1024.json"
+      "source_result": "reports/h100x4-full-20260728/raw/h100x4-full-20260728-lightx2v-throughput-flux2_dev_t2i_1024.json"
     },
     {
       "case_id": "flux2_dev_t2i_1024",
@@ -3695,7 +3736,7 @@
       },
       "server_command": "trtllm-serve serve black-forest-labs/FLUX.2-dev --host 127.0.0.1 --port 31312 --tp_size 2 --backend pytorch",
       "metrics": {},
-      "source_result": "/persistent/bench_results/h100x4-full-20260728-trtllm-visual-throughput-flux2_dev_t2i_1024.json"
+      "source_result": "reports/h100x4-full-20260728/raw/h100x4-full-20260728-trtllm-visual-throughput-flux2_dev_t2i_1024.json"
     },
     {
       "case_id": "qwen_image_2512_t2i_1024",
@@ -3758,7 +3799,7 @@
         "server_startup_s": 44.57,
         "warmup_s": 0.81
       },
-      "source_result": "/persistent/bench_results/h100x4-full-20260728-sglang-throughput-qwen_image_2512_t2i_1024.json"
+      "source_result": "reports/h100x4-full-20260728/raw/h100x4-full-20260728-sglang-throughput-qwen_image_2512_t2i_1024.json"
     },
     {
       "case_id": "qwen_image_2512_t2i_1024",
@@ -3817,7 +3858,7 @@
         "server_startup_s": 36.02,
         "warmup_s": 1.71
       },
-      "source_result": "/persistent/bench_results/h100x4-full-20260728-vllm-omni-throughput-qwen_image_2512_t2i_1024.json"
+      "source_result": "reports/h100x4-full-20260728/raw/h100x4-full-20260728-vllm-omni-throughput-qwen_image_2512_t2i_1024.json"
     },
     {
       "case_id": "qwen_image_2512_t2i_1024",
@@ -3877,7 +3918,7 @@
         "server_startup_s": 44.02,
         "warmup_s": 2.54
       },
-      "source_result": "/persistent/bench_results/h100x4-full-20260728-trtllm-visual-throughput-qwen_image_2512_t2i_1024.json"
+      "source_result": "reports/h100x4-full-20260728/raw/h100x4-full-20260728-trtllm-visual-throughput-qwen_image_2512_t2i_1024.json"
     },
     {
       "case_id": "qwen_image_2512_t2i_1024_truecfg",
@@ -3941,7 +3982,7 @@
         "server_startup_s": 81.38,
         "warmup_s": 5.81
       },
-      "source_result": "/persistent/bench_results/h100x4-full-20260728-sglang-throughput-qwen_image_2512_t2i_1024_truecfg.json"
+      "source_result": "reports/h100x4-full-20260728/raw/h100x4-full-20260728-sglang-throughput-qwen_image_2512_t2i_1024_truecfg.json"
     },
     {
       "case_id": "qwen_image_2512_t2i_1024_truecfg",
@@ -4000,7 +4041,7 @@
         "server_startup_s": 36.02,
         "warmup_s": 2.25
       },
-      "source_result": "/persistent/bench_results/h100x4-full-20260728-vllm-omni-throughput-qwen_image_2512_t2i_1024_truecfg.json"
+      "source_result": "reports/h100x4-full-20260728/raw/h100x4-full-20260728-vllm-omni-throughput-qwen_image_2512_t2i_1024_truecfg.json"
     },
     {
       "case_id": "qwen_image_edit_2511",
@@ -4061,7 +4102,7 @@
         "server_startup_s": 78.06,
         "warmup_s": 4.32
       },
-      "source_result": "/persistent/bench_results/h100x4-full-20260728-sglang-throughput-qwen_image_edit_2511.json"
+      "source_result": "reports/h100x4-full-20260728/raw/h100x4-full-20260728-sglang-throughput-qwen_image_edit_2511.json"
     },
     {
       "case_id": "qwen_image_edit_2511",
@@ -4120,7 +4161,7 @@
         "server_startup_s": 40.02,
         "warmup_s": 2.37
       },
-      "source_result": "/persistent/bench_results/h100x4-full-20260728-vllm-omni-throughput-qwen_image_edit_2511.json"
+      "source_result": "reports/h100x4-full-20260728/raw/h100x4-full-20260728-vllm-omni-throughput-qwen_image_edit_2511.json"
     },
     {
       "case_id": "zimage_turbo_t2i_1024",
@@ -4184,7 +4225,7 @@
         "server_startup_s": 37.09,
         "warmup_s": 0.74
       },
-      "source_result": "/persistent/bench_results/h100x4-full-20260728-sglang-throughput-zimage_turbo_t2i_1024.json"
+      "source_result": "reports/h100x4-full-20260728/raw/h100x4-full-20260728-sglang-throughput-zimage_turbo_t2i_1024.json"
     },
     {
       "case_id": "zimage_turbo_t2i_1024",
@@ -4243,7 +4284,7 @@
         "server_startup_s": 30.02,
         "warmup_s": 1.17
       },
-      "source_result": "/persistent/bench_results/h100x4-full-20260728-vllm-omni-throughput-zimage_turbo_t2i_1024.json"
+      "source_result": "reports/h100x4-full-20260728/raw/h100x4-full-20260728-vllm-omni-throughput-zimage_turbo_t2i_1024.json"
     },
     {
       "case_id": "zimage_turbo_t2i_1024",
@@ -4308,7 +4349,7 @@
         "server_startup_s": 14.05,
         "warmup_s": 25.47
       },
-      "source_result": "/persistent/bench_results/h100x4-full-20260728-lightx2v-throughput-zimage_turbo_t2i_1024.json"
+      "source_result": "reports/h100x4-full-20260728/raw/h100x4-full-20260728-lightx2v-throughput-zimage_turbo_t2i_1024.json"
     },
     {
       "case_id": "ideogram4_t2i_1024_2gpu_tp",
@@ -4374,7 +4415,7 @@
         "server_startup_s": 55.04,
         "warmup_s": 0.02
       },
-      "source_result": "/persistent/bench_results/h100x4-full-20260728-sglang-throughput-ideogram4_t2i_1024_2gpu_tp.json"
+      "source_result": "reports/h100x4-full-20260728/raw/h100x4-full-20260728-sglang-throughput-ideogram4_t2i_1024_2gpu_tp.json"
     },
     {
       "case_id": "wan21_t2v_1_3b_480p",
@@ -4437,7 +4478,7 @@
         "server_startup_s": 91.98,
         "warmup_s": 18.06
       },
-      "source_result": "/persistent/bench_results/h100x4-full-20260728-sglang-throughput-wan21_t2v_1_3b_480p.json"
+      "source_result": "reports/h100x4-full-20260728/raw/h100x4-full-20260728-sglang-throughput-wan21_t2v_1_3b_480p.json"
     },
     {
       "case_id": "wan21_t2v_1_3b_480p",
@@ -4496,7 +4537,7 @@
         "server_startup_s": 32.02,
         "warmup_s": 18.54
       },
-      "source_result": "/persistent/bench_results/h100x4-full-20260728-vllm-omni-throughput-wan21_t2v_1_3b_480p.json"
+      "source_result": "reports/h100x4-full-20260728/raw/h100x4-full-20260728-vllm-omni-throughput-wan21_t2v_1_3b_480p.json"
     },
     {
       "case_id": "wan21_t2v_1_3b_480p",
@@ -4564,7 +4605,7 @@
         "server_startup_s": 20.03,
         "warmup_s": 28.07
       },
-      "source_result": "/persistent/bench_results/h100x4-full-20260728-lightx2v-throughput-wan21_t2v_1_3b_480p.json"
+      "source_result": "reports/h100x4-full-20260728/raw/h100x4-full-20260728-lightx2v-throughput-wan21_t2v_1_3b_480p.json"
     },
     {
       "case_id": "wan21_i2v_14b_480p",
@@ -4582,7 +4623,7 @@
       "true_cfg_scale": null,
       "negative_prompt_set": false,
       "num_gpus": 4,
-      "latency_s": 139.845,
+      "latency_s": 140.369,
       "error": null,
       "framework_metadata": {
         "profile": "default",
@@ -4607,25 +4648,25 @@
         "sglang_profile_source": "default",
         "sglang_ref": "current-main"
       },
-      "server_command": "sglang serve --model-path Wan-AI/Wan2.1-I2V-14B-480P-Diffusers --port 31138 --host 127.0.0.1 --backend sglang --num-gpus 4 --model-type diffusion --warmup --enable-cfg-parallel --ulysses-degree 2 --dit-cpu-offload false --pin-cpu-memory --dit-layerwise-offload false --performance-mode speed --enable-torch-compile --warmup-steps 3",
+      "server_command": "sglang serve --model-path Wan-AI/Wan2.1-I2V-14B-480P-Diffusers --port 37401 --host 127.0.0.1 --backend sglang --num-gpus 4 --model-type diffusion --warmup --enable-cfg-parallel --ulysses-degree 2 --dit-cpu-offload false --pin-cpu-memory --dit-layerwise-offload false --performance-mode speed --enable-torch-compile --warmup-steps 3",
       "metrics": {
-        "duration_s": 279.707,
+        "duration_s": 280.75,
         "num_requests": 4,
         "completed_requests": 4,
         "failed_requests": 0,
         "max_concurrency": 2,
-        "throughput_rps": 0.0143,
-        "output_throughput_ops": 0.0143,
-        "latency_mean_s": 122.566,
-        "latency_p50_s": 139.845,
-        "latency_p90_s": 140.376,
-        "latency_p95_s": 140.378,
-        "latency_p99_s": 140.38,
+        "throughput_rps": 0.0142,
+        "output_throughput_ops": 0.0142,
+        "latency_mean_s": 122.833,
+        "latency_p50_s": 140.369,
+        "latency_p90_s": 140.383,
+        "latency_p95_s": 140.385,
+        "latency_p99_s": 140.387,
         "errors": [],
-        "server_startup_s": 149.93,
-        "warmup_s": 305.29
+        "server_startup_s": 153.11,
+        "warmup_s": 304.24
       },
-      "source_result": "/persistent/bench_results/h100x4-full-20260728-sglang-throughput-wan21_i2v_14b_480p.json"
+      "source_result": "reports/h100x4-full-20260728/raw-rerun-20260729/run_abab_sglang_wan21_i2v_14b_480p.json"
     },
     {
       "case_id": "wan21_i2v_14b_480p",
@@ -4684,7 +4725,7 @@
         "server_startup_s": 40.02,
         "warmup_s": 34.89
       },
-      "source_result": "/persistent/bench_results/h100x4-full-20260728-vllm-omni-throughput-wan21_i2v_14b_480p.json"
+      "source_result": "reports/h100x4-full-20260728/raw/h100x4-full-20260728-vllm-omni-throughput-wan21_i2v_14b_480p.json"
     },
     {
       "case_id": "wan21_i2v_14b_480p",
@@ -4702,7 +4743,7 @@
       "true_cfg_scale": null,
       "negative_prompt_set": false,
       "num_gpus": 4,
-      "latency_s": 124.315,
+      "latency_s": 124.326,
       "error": null,
       "framework_metadata": {
         "profile": "default",
@@ -4734,25 +4775,25 @@
           "vae_cpu_offload"
         ]
       },
-      "server_command": "torchrun --nproc_per_node=4 -m lightx2v.server --model_path /persistent/hf-cache/hub/models--Wan-AI--Wan2.1-I2V-14B-480P/snapshots/6b73f84e66371cdfe870c72acd6826e1d61cf279 --model_cls wan2.1 --task i2v --config_json /tmp/lightx2v_config_wan21_i2v_14b_480p.json --host 127.0.0.1 --port 30861",
+      "server_command": "torchrun --nproc_per_node=4 -m lightx2v.server --model_path /persistent/.cache/huggingface/hub/models--Wan-AI--Wan2.1-I2V-14B-480P/snapshots/6b73f84e66371cdfe870c72acd6826e1d61cf279 --model_cls wan2.1 --task i2v --config_json /tmp/lightx2v_config_wan21_i2v_14b_480p.json --host 127.0.0.1 --port 37402",
       "metrics": {
-        "duration_s": 248.647,
+        "duration_s": 248.659,
         "num_requests": 4,
         "completed_requests": 4,
         "failed_requests": 0,
         "max_concurrency": 2,
         "throughput_rps": 0.0161,
         "output_throughput_ops": 0.0161,
-        "latency_mean_s": 108.789,
-        "latency_p50_s": 124.315,
-        "latency_p90_s": 124.34,
-        "latency_p95_s": 124.342,
-        "latency_p99_s": 124.344,
+        "latency_mean_s": 108.794,
+        "latency_p50_s": 124.326,
+        "latency_p90_s": 124.346,
+        "latency_p95_s": 124.347,
+        "latency_p99_s": 124.347,
         "errors": [],
-        "server_startup_s": 34.04,
-        "warmup_s": 64.63
+        "server_startup_s": 32.05,
+        "warmup_s": 67.7
       },
-      "source_result": "/persistent/bench_results/h100x4-full-20260728-lightx2v-throughput-wan21_i2v_14b_480p.json"
+      "source_result": "reports/h100x4-full-20260728/raw-rerun-20260729/run_abab_lightx2v_wan21_i2v_14b_480p.json"
     },
     {
       "case_id": "wan22_t2v_a14b_720p",
@@ -4770,8 +4811,8 @@
       "true_cfg_scale": null,
       "negative_prompt_set": false,
       "num_gpus": 4,
-      "latency_s": null,
-      "error": "Command '['/usr/bin/python3', '-m', 'diffusion_bench.bench_serving', '--backend', 'sglang', '--base-url', 'http://127.0.0.1:31017', '--dataset', 'fixed', '--prompt', 'A cat and a dog baking a cake together in a kitchen.', '--model', 'Wan-AI/Wan2.2-T2V-A14B-Diffusers', '--task', 'text-to-video', '--num-prompts', '4', '--max-concurrency', '2', '--request-rate', 'inf', '--request-timeout', '2400', '--output-file', 'comparison-logs/bench_serving_wan22_t2v_a14b_720p_sglang.json', '--disable-tqdm', '--width', '1280', '--height', '720', '--num-frames', '81', '--fps', '16', '--num-inference-steps', '40', '--extra-body', '{\"guidance_scale\": 4.0, \"guidance_scale_2\": 3.0, \"seed\": 42}']' timed out after 4800 seconds",
+      "latency_s": 416.089,
+      "error": null,
       "framework_metadata": {
         "profile": "default",
         "profile_request": "auto",
@@ -4795,12 +4836,25 @@
         "sglang_profile_source": "default",
         "sglang_ref": "current-main"
       },
-      "server_command": "sglang serve --model-path Wan-AI/Wan2.2-T2V-A14B-Diffusers --port 31017 --host 127.0.0.1 --backend sglang --num-gpus 4 --model-type diffusion --warmup --enable-cfg-parallel --ulysses-degree 2 --dit-cpu-offload false --pin-cpu-memory --dit-layerwise-offload false --performance-mode speed --enable-torch-compile --warmup-steps 3",
+      "server_command": "sglang serve --model-path Wan-AI/Wan2.2-T2V-A14B-Diffusers --port 37201 --host 127.0.0.1 --backend sglang --num-gpus 4 --model-type diffusion --warmup --enable-cfg-parallel --ulysses-degree 2 --dit-cpu-offload false --pin-cpu-memory --dit-layerwise-offload false --performance-mode speed --enable-torch-compile --warmup-steps 3",
       "metrics": {
-        "server_startup_s": 199.14,
-        "warmup_s": 1097.63
+        "duration_s": 832.189,
+        "num_requests": 4,
+        "completed_requests": 4,
+        "failed_requests": 0,
+        "max_concurrency": 2,
+        "throughput_rps": 0.0048,
+        "output_throughput_ops": 0.0048,
+        "latency_mean_s": 364.224,
+        "latency_p50_s": 416.089,
+        "latency_p90_s": 416.141,
+        "latency_p95_s": 416.142,
+        "latency_p99_s": 416.143,
+        "errors": [],
+        "server_startup_s": 195.44,
+        "warmup_s": 1006.29
       },
-      "source_result": "/persistent/bench_results/h100x4-full-20260728-sglang-throughput-wan22_t2v_a14b_720p.json"
+      "source_result": "reports/h100x4-full-20260728/raw-rerun-20260729/run_t2vfix_wan22_t2v_a14b_720p.json"
     },
     {
       "case_id": "wan22_t2v_a14b_720p",
@@ -4859,7 +4913,7 @@
         "server_startup_s": 42.02,
         "warmup_s": 81.05
       },
-      "source_result": "/persistent/bench_results/h100x4-full-20260728-vllm-omni-throughput-wan22_t2v_a14b_720p.json"
+      "source_result": "reports/h100x4-full-20260728/raw/h100x4-full-20260728-vllm-omni-throughput-wan22_t2v_a14b_720p.json"
     },
     {
       "case_id": "wan22_t2v_a14b_720p",
@@ -4931,7 +4985,7 @@
         "server_startup_s": 50.06,
         "warmup_s": 216.65
       },
-      "source_result": "/persistent/bench_results/h100x4-full-20260728-lightx2v-throughput-wan22_t2v_a14b_720p.json"
+      "source_result": "reports/h100x4-full-20260728/raw/h100x4-full-20260728-lightx2v-throughput-wan22_t2v_a14b_720p.json"
     },
     {
       "case_id": "wan22_ti2v_5b_704p",
@@ -4995,7 +5049,7 @@
         "server_startup_s": 108.08,
         "warmup_s": 44.6
       },
-      "source_result": "/persistent/bench_results/h100x4-full-20260728-sglang-throughput-wan22_ti2v_5b_704p.json"
+      "source_result": "reports/h100x4-full-20260728/raw/h100x4-full-20260728-sglang-throughput-wan22_ti2v_5b_704p.json"
     },
     {
       "case_id": "wan22_ti2v_5b_704p",
@@ -5054,7 +5108,7 @@
         "server_startup_s": 32.02,
         "warmup_s": 32.88
       },
-      "source_result": "/persistent/bench_results/h100x4-full-20260728-vllm-omni-throughput-wan22_ti2v_5b_704p.json"
+      "source_result": "reports/h100x4-full-20260728/raw/h100x4-full-20260728-vllm-omni-throughput-wan22_ti2v_5b_704p.json"
     },
     {
       "case_id": "wan22_ti2v_5b_704p",
@@ -5129,7 +5183,7 @@
         "server_startup_s": 24.03,
         "warmup_s": 34.71
       },
-      "source_result": "/persistent/bench_results/h100x4-full-20260728-lightx2v-throughput-wan22_ti2v_5b_704p.json"
+      "source_result": "reports/h100x4-full-20260728/raw/h100x4-full-20260728-lightx2v-throughput-wan22_ti2v_5b_704p.json"
     },
     {
       "case_id": "ltx2_twostage_t2v",
@@ -5190,7 +5244,7 @@
         "server_startup_s": 181.14,
         "warmup_s": 89.23
       },
-      "source_result": "/persistent/bench_results/h100x4-full-20260728-sglang-throughput-ltx2_twostage_t2v.json"
+      "source_result": "reports/h100x4-full-20260728/raw/h100x4-full-20260728-sglang-throughput-ltx2_twostage_t2v.json"
     },
     {
       "case_id": "ltx2_twostage_t2v",
@@ -5270,7 +5324,7 @@
         "server_startup_s": 48.03,
         "warmup_s": 3.01
       },
-      "source_result": "/persistent/bench_results/h100x4-full-20260728-vllm-omni-throughput-ltx2_twostage_t2v.json"
+      "source_result": "reports/h100x4-full-20260728/raw/h100x4-full-20260728-vllm-omni-throughput-ltx2_twostage_t2v.json"
     },
     {
       "case_id": "ltx2_twostage_t2v",
@@ -5349,7 +5403,7 @@
         "server_startup_s": 66.08,
         "warmup_s": 82.38
       },
-      "source_result": "/persistent/bench_results/h100x4-full-20260728-lightx2v-throughput-ltx2_twostage_t2v.json"
+      "source_result": "reports/h100x4-full-20260728/raw/h100x4-full-20260728-lightx2v-throughput-ltx2_twostage_t2v.json"
     },
     {
       "case_id": "ltx2.3_twostage_t2v_2gpus",
@@ -5412,7 +5466,7 @@
         "server_startup_s": 88.5,
         "warmup_s": 18.07
       },
-      "source_result": "/persistent/bench_results/h100x4-full-20260728-sglang-throughput-ltx2.3_twostage_t2v_2gpus.json"
+      "source_result": "reports/h100x4-full-20260728/raw/h100x4-full-20260728-sglang-throughput-ltx2.3_twostage_t2v_2gpus.json"
     },
     {
       "case_id": "wan21_i2v_14b_720p",
@@ -5430,7 +5484,7 @@
       "true_cfg_scale": null,
       "negative_prompt_set": false,
       "num_gpus": 4,
-      "latency_s": 504.862,
+      "latency_s": 504.339,
       "error": null,
       "framework_metadata": {
         "profile": "default",
@@ -5455,25 +5509,25 @@
         "sglang_profile_source": "default",
         "sglang_ref": "current-main"
       },
-      "server_command": "sglang serve --model-path Wan-AI/Wan2.1-I2V-14B-720P-Diffusers --port 30882 --host 127.0.0.1 --backend sglang --num-gpus 4 --model-type diffusion --warmup --enable-cfg-parallel --ulysses-degree 2 --dit-cpu-offload false --pin-cpu-memory --dit-layerwise-offload false --performance-mode speed --enable-torch-compile --warmup-steps 3",
+      "server_command": "sglang serve --model-path Wan-AI/Wan2.1-I2V-14B-720P-Diffusers --port 37403 --host 127.0.0.1 --backend sglang --num-gpus 4 --model-type diffusion --warmup --enable-cfg-parallel --ulysses-degree 2 --dit-cpu-offload false --pin-cpu-memory --dit-layerwise-offload false --performance-mode speed --enable-torch-compile --warmup-steps 3",
       "metrics": {
-        "duration_s": 1009.739,
+        "duration_s": 1009.579,
         "num_requests": 4,
         "completed_requests": 4,
         "failed_requests": 0,
         "max_concurrency": 2,
         "throughput_rps": 0.004,
         "output_throughput_ops": 0.004,
-        "latency_mean_s": 441.967,
-        "latency_p50_s": 504.862,
-        "latency_p90_s": 505.422,
-        "latency_p95_s": 505.425,
-        "latency_p99_s": 505.426,
+        "latency_mean_s": 441.649,
+        "latency_p50_s": 504.339,
+        "latency_p90_s": 504.957,
+        "latency_p95_s": 505.083,
+        "latency_p99_s": 505.184,
         "errors": [],
-        "server_startup_s": 253.63,
-        "warmup_s": 1051.1
+        "server_startup_s": 176.13,
+        "warmup_s": 977.8
       },
-      "source_result": "/persistent/bench_results/h100x4-full-20260728-sglang-throughput-wan21_i2v_14b_720p.json"
+      "source_result": "reports/h100x4-full-20260728/raw-rerun-20260729/run_abab_sglang_wan21_i2v_14b_720p.json"
     },
     {
       "case_id": "wan21_i2v_14b_720p",
@@ -5532,7 +5586,7 @@
         "server_startup_s": 40.02,
         "warmup_s": 92.29
       },
-      "source_result": "/persistent/bench_results/h100x4-full-20260728-vllm-omni-throughput-wan21_i2v_14b_720p.json"
+      "source_result": "reports/h100x4-full-20260728/raw/h100x4-full-20260728-vllm-omni-throughput-wan21_i2v_14b_720p.json"
     },
     {
       "case_id": "wan21_i2v_14b_720p",
@@ -5550,7 +5604,7 @@
       "true_cfg_scale": null,
       "negative_prompt_set": false,
       "num_gpus": 4,
-      "latency_s": 432.034,
+      "latency_s": 432.098,
       "error": null,
       "framework_metadata": {
         "profile": "default",
@@ -5583,25 +5637,25 @@
           "vae_cpu_offload"
         ]
       },
-      "server_command": "torchrun --nproc_per_node=4 -m lightx2v.server --model_path /persistent/hf-cache/hub/models--Wan-AI--Wan2.1-I2V-14B-720P/snapshots/8823af45fcc58a8aa999a54b04be9abc7d2aac98 --model_cls wan2.1 --task i2v --config_json /tmp/lightx2v_config_wan21_i2v_14b_720p.json --host 127.0.0.1 --port 30628",
+      "server_command": "torchrun --nproc_per_node=4 -m lightx2v.server --model_path /persistent/.cache/huggingface/hub/models--Wan-AI--Wan2.1-I2V-14B-720P/snapshots/8823af45fcc58a8aa999a54b04be9abc7d2aac98 --model_cls wan2.1 --task i2v --config_json /tmp/lightx2v_config_wan21_i2v_14b_720p.json --host 127.0.0.1 --port 37404",
       "metrics": {
-        "duration_s": 864.99,
+        "duration_s": 865.154,
         "num_requests": 4,
         "completed_requests": 4,
         "failed_requests": 0,
         "max_concurrency": 2,
         "throughput_rps": 0.0046,
         "output_throughput_ops": 0.0046,
-        "latency_mean_s": 378.385,
-        "latency_p50_s": 432.034,
-        "latency_p90_s": 432.678,
-        "latency_p95_s": 432.815,
-        "latency_p99_s": 432.924,
+        "latency_mean_s": 378.453,
+        "latency_p50_s": 432.098,
+        "latency_p90_s": 432.8,
+        "latency_p95_s": 432.944,
+        "latency_p99_s": 433.059,
         "errors": [],
-        "server_startup_s": 32.04,
-        "warmup_s": 220.91
+        "server_startup_s": 30.06,
+        "warmup_s": 224.09
       },
-      "source_result": "/persistent/bench_results/h100x4-full-20260728-lightx2v-throughput-wan21_i2v_14b_720p.json"
+      "source_result": "reports/h100x4-full-20260728/raw-rerun-20260729/run_abab_lightx2v_wan21_i2v_14b_720p.json"
     },
     {
       "case_id": "wan22_i2v_a14b_720p",
@@ -5619,36 +5673,50 @@
       "true_cfg_scale": null,
       "negative_prompt_set": false,
       "num_gpus": 4,
-      "latency_s": null,
-      "error": "sglang server exited before health check passed (exit 1)",
+      "latency_s": 406.044,
+      "error": null,
       "framework_metadata": {
-        "profile": "h100-4gpu-cfg-uly-layerwise-offload",
+        "profile": "default",
         "profile_request": "auto",
-        "profile_source": "hardware",
+        "profile_source": "default",
         "framework_ref": null,
-        "hardware": [
-          "h100"
-        ],
+        "hardware": null,
         "hardware_candidates": [
           "h100"
         ],
-        "description": "H100 80GB profile for the dual-expert A14B I2V: layerwise-offloaded DiT so both 14B towers plus the CLIP image encoder and image-cond latents fit. Lossless (identical numerics, weights stream per layer).",
-        "notes": "T2V A14B keeps the resident profile (fits, fastest); only I2V needs the offload.",
+        "description": "Best known SGLang command for the benchmark repo default profile.",
+        "notes": "Keep this profile updated when the best command changes for a SGLang release or commit. Policy-aligned candidate (compile on, offload off) \u2014 NOT yet validated on H100; validate (incl. OOM risk) before publishing.",
         "install_specs": null,
         "server_bin": null,
         "use_omni_arg": null,
         "required_help_args": null,
-        "serve_args": "--model-type diffusion --warmup --enable-cfg-parallel --ulysses-degree 2 --dit-cpu-offload false --pin-cpu-memory --dit-layerwise-offload true --performance-mode speed --enable-torch-compile",
+        "serve_args": "--model-type diffusion --warmup --enable-cfg-parallel --ulysses-degree 2 --dit-cpu-offload false --pin-cpu-memory --dit-layerwise-offload false --performance-mode speed --enable-torch-compile",
         "num_gpus": null,
         "extra_env_keys": [],
-        "sglang_profile": "h100-4gpu-cfg-uly-layerwise-offload",
+        "sglang_profile": "default",
         "sglang_profile_request": "auto",
-        "sglang_profile_source": "hardware",
+        "sglang_profile_source": "default",
         "sglang_ref": "current-main"
       },
-      "server_command": "sglang serve --model-path Wan-AI/Wan2.2-I2V-A14B-Diffusers --port 31006 --host 127.0.0.1 --backend sglang --num-gpus 4 --model-type diffusion --warmup --enable-cfg-parallel --ulysses-degree 2 --dit-cpu-offload false --pin-cpu-memory --dit-layerwise-offload true --performance-mode speed --enable-torch-compile --warmup-steps 3",
-      "metrics": {},
-      "source_result": "/persistent/bench_results/h100x4-full-20260728-sglang-throughput-wan22_i2v_a14b_720p.json"
+      "server_command": "sglang serve --model-path Wan-AI/Wan2.2-I2V-A14B-Diffusers --port 37101 --host 127.0.0.1 --backend sglang --num-gpus 4 --model-type diffusion --warmup --enable-cfg-parallel --ulysses-degree 2 --dit-cpu-offload false --pin-cpu-memory --dit-layerwise-offload false --performance-mode speed --enable-torch-compile --warmup-steps 3",
+      "metrics": {
+        "duration_s": 812.117,
+        "num_requests": 4,
+        "completed_requests": 4,
+        "failed_requests": 0,
+        "max_concurrency": 2,
+        "throughput_rps": 0.0049,
+        "output_throughput_ops": 0.0049,
+        "latency_mean_s": 355.442,
+        "latency_p50_s": 406.044,
+        "latency_p90_s": 406.102,
+        "latency_p95_s": 406.106,
+        "latency_p99_s": 406.109,
+        "errors": [],
+        "server_startup_s": 194.63,
+        "warmup_s": 1047.88
+      },
+      "source_result": "reports/h100x4-full-20260728/raw-rerun-20260729/run_i2vfix_wan22_i2v_a14b_720p.json"
     },
     {
       "case_id": "wan22_i2v_a14b_720p",
@@ -5707,7 +5775,7 @@
         "server_startup_s": 44.03,
         "warmup_s": 91.79
       },
-      "source_result": "/persistent/bench_results/h100x4-full-20260728-vllm-omni-throughput-wan22_i2v_a14b_720p.json"
+      "source_result": "reports/h100x4-full-20260728/raw/h100x4-full-20260728-vllm-omni-throughput-wan22_i2v_a14b_720p.json"
     },
     {
       "case_id": "wan22_i2v_a14b_720p",
@@ -5780,7 +5848,7 @@
         "server_startup_s": 40.05,
         "warmup_s": 218.01
       },
-      "source_result": "/persistent/bench_results/h100x4-full-20260728-lightx2v-throughput-wan22_i2v_a14b_720p.json"
+      "source_result": "reports/h100x4-full-20260728/raw/h100x4-full-20260728-lightx2v-throughput-wan22_i2v_a14b_720p.json"
     },
     {
       "case_id": "cosmos3_nano_t2i_720p",
@@ -5843,7 +5911,7 @@
         "server_startup_s": 47.03,
         "warmup_s": 1.53
       },
-      "source_result": "/persistent/bench_results/h100x4-full-20260728-sglang-throughput-cosmos3_nano_t2i_720p.json"
+      "source_result": "reports/h100x4-full-20260728/raw/h100x4-full-20260728-sglang-throughput-cosmos3_nano_t2i_720p.json"
     },
     {
       "case_id": "cosmos3_nano_t2i_720p",
@@ -5898,7 +5966,7 @@
       },
       "server_command": "vllm serve nvidia/Cosmos3-Nano --port 31321 --host 127.0.0.1 --omni --stage-configs-path configs/vllm_omni_cosmos3_h200_2gpu_cfg_guardrails_off.yaml --stage-init-timeout 900 --init-timeout 1800 --tensor-parallel-size 2",
       "metrics": {},
-      "source_result": "/persistent/bench_results/h100x4-full-20260728-vllm-omni-throughput-cosmos3_nano_t2i_720p.json"
+      "source_result": "reports/h100x4-full-20260728/raw/h100x4-full-20260728-vllm-omni-throughput-cosmos3_nano_t2i_720p.json"
     },
     {
       "case_id": "cosmos3_nano_t2i_720p",
@@ -5981,7 +6049,7 @@
         "server_startup_s": 52.03,
         "warmup_s": 0.0
       },
-      "source_result": "/persistent/bench_results/h100x4-full-20260728-trtllm-visual-throughput-cosmos3_nano_t2i_720p.json"
+      "source_result": "reports/h100x4-full-20260728/raw/h100x4-full-20260728-trtllm-visual-throughput-cosmos3_nano_t2i_720p.json"
     },
     {
       "case_id": "cosmos3_nano_t2v_720p_189f",
@@ -6046,7 +6114,7 @@
         "server_startup_s": 57.04,
         "warmup_s": 29.09
       },
-      "source_result": "/persistent/bench_results/h100x4-full-20260728-sglang-throughput-cosmos3_nano_t2v_720p_189f.json"
+      "source_result": "reports/h100x4-full-20260728/raw/h100x4-full-20260728-sglang-throughput-cosmos3_nano_t2v_720p_189f.json"
     },
     {
       "case_id": "cosmos3_nano_t2v_720p_189f",
@@ -6115,7 +6183,7 @@
         "server_startup_s": 36.02,
         "warmup_s": 66.02
       },
-      "source_result": "/persistent/bench_results/h100x4-full-20260728-vllm-omni-throughput-cosmos3_nano_t2v_720p_189f.json"
+      "source_result": "reports/h100x4-full-20260728/raw/h100x4-full-20260728-vllm-omni-throughput-cosmos3_nano_t2v_720p_189f.json"
     },
     {
       "case_id": "cosmos3_nano_i2v_720p_189f",
@@ -6178,7 +6246,7 @@
         "server_startup_s": 59.35,
         "warmup_s": 30.58
       },
-      "source_result": "/persistent/bench_results/h100x4-full-20260728-sglang-throughput-cosmos3_nano_i2v_720p_189f.json"
+      "source_result": "reports/h100x4-full-20260728/raw/h100x4-full-20260728-sglang-throughput-cosmos3_nano_i2v_720p_189f.json"
     },
     {
       "case_id": "cosmos3_nano_i2v_720p_189f",
@@ -6247,7 +6315,7 @@
         "server_startup_s": 36.02,
         "warmup_s": 66.93
       },
-      "source_result": "/persistent/bench_results/h100x4-full-20260728-vllm-omni-throughput-cosmos3_nano_i2v_720p_189f.json"
+      "source_result": "reports/h100x4-full-20260728/raw/h100x4-full-20260728-vllm-omni-throughput-cosmos3_nano_i2v_720p_189f.json"
     }
   ]
 }

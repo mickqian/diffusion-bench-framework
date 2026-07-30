@@ -1,6 +1,6 @@
 {
   "id": "historical-cross-framework-20260610",
-  "updated_at": "2026-07-29",
+  "updated_at": "2026-07-30",
   "frameworks": {
     "sglang": "SGLang-Diffusion",
     "vllm-omni": "vLLM-Omni",
@@ -27,7 +27,7 @@
       "date": "2026-07-29",
       "gpu": "4x NVIDIA H100 80GB",
       "title": "H100 full 18-case matrix (best-lossless)",
-      "subtitle": "Steady-state single-request latency on H100, best lossless config per framework (compile by default, measured-eager where compile is a proven net loss), latest main/HEAD for every framework. Full 18-case image+video matrix. The two sglang bugs the initial pass surfaced were fixed (sgl-project/sglang#32743) and the affected cells re-measured -- see policy.post_run_fixes_note; remaining gaps are documented per-cell (mostly 80GB capacity limits and competitor profile issues). Throughput tables live in the report.",
+      "subtitle": "Steady-state single-request latency on H100, best lossless config per framework (compile by default, measured-eager where compile is a proven net loss), latest main/HEAD for every framework. Full 18-case image+video matrix. The two sglang bugs the initial pass surfaced were fixed (sgl-project/sglang#32743) and the affected cells re-measured -- see policy.post_run_fixes_note; the two 'capacity' cells were later proven to be shared-machine contamination and now carry clean winning numbers. The one known remaining loss (wan21_i2v throughput) is a root-caused sglang concurrency slowdown, documented in policy.concurrency_slowdown_note. Throughput tables live in the report.",
       "mode": "single_e2e",
       "source_manifest": "reports/h100x4-full-20260728/",
       "reproduce": "configs/benchmark/ (explicit matrix) + scripts/build_benchmark_config.py",
@@ -40,8 +40,8 @@
       "summary": {
         "rows": 18,
         "comparable_rows": 15,
-        "sglang_diffusion_wins": 13,
-        "other_wins": 2
+        "sglang_diffusion_wins": 14,
+        "other_wins": 1
       },
       "rows": [
         {
@@ -439,23 +439,28 @@
           "case": "Wan2.2 I2V A14B 720p",
           "details": "1280x720x81f · 40 steps · cfg 3.5",
           "mode": "single_e2e",
-          "winner": "lightx2v",
+          "winner": "sglang",
           "cells": {
             "sglang": {
-              "status": "failed",
-              "reason": "Capacity: after the #32743 fix, I2V A14B still cannot load on 4x80GB -- sibling ranks place 20-35GB of loader staging on each other's GPUs, and with both 14B experts plus the CLIP image encoder the load-time peak exceeds 80GB (a layerwise-offload profile fails the same way, so the limit is in the loading path, not steady-state residency). T2V (one fewer resident encoder, no image-cond channels) fits and wins at 209.9s. Tracked separately as an sglang loader fix."
+              "gpus": 4,
+              "profile": "default",
+              "status": "ok",
+              "latency_s": 203.911,
+              "ratio_to_sglang": 1.0
             },
             "vllm-omni": {
               "gpus": 4,
               "profile": "default",
               "status": "ok",
-              "latency_s": 250.355
+              "latency_s": 250.355,
+              "ratio_to_sglang": 1.228
             },
             "lightx2v": {
               "gpus": 4,
               "profile": "default",
               "status": "ok",
-              "latency_s": 214.414
+              "latency_s": 214.414,
+              "ratio_to_sglang": 1.052
             },
             "trtllm-visual": {
               "status": "not_run",
@@ -640,8 +645,8 @@
       "summary": {
         "rows": 18,
         "comparable_rows": 15,
-        "sglang_diffusion_wins": 10,
-        "other_wins": 5
+        "sglang_diffusion_wins": 12,
+        "other_wins": 3
       },
       "rows": [
         {
@@ -912,19 +917,19 @@
             "sglang": {
               "status": "ok",
               "qps": 0.014,
-              "p95_s": 140.378
+              "p95_s": 140.385
             },
             "vllm-omni": {
               "status": "ok",
               "qps": 0.013,
               "p95_s": 151.1,
-              "ratio_to_sglang": 0.93
+              "ratio_to_sglang": 0.937
             },
             "lightx2v": {
               "status": "ok",
               "qps": 0.016,
-              "p95_s": 124.342,
-              "ratio_to_sglang": 1.126
+              "p95_s": 124.347,
+              "ratio_to_sglang": 1.134
             },
             "trtllm-visual": {
               "status": "not_run",
@@ -942,7 +947,7 @@
             "sglang": {
               "status": "ok",
               "qps": 0.004,
-              "p95_s": 505.425
+              "p95_s": 505.083
             },
             "vllm-omni": {
               "status": "ok",
@@ -953,7 +958,7 @@
             "lightx2v": {
               "status": "ok",
               "qps": 0.005,
-              "p95_s": 432.815,
+              "p95_s": 432.944,
               "ratio_to_sglang": 1.15
             },
             "trtllm-visual": {
@@ -967,23 +972,24 @@
           "case": "Wan2.2 T2V A14B 720p",
           "details": "1280x720x81f · 40 steps · cfg 4",
           "mode": "throughput",
-          "winner": "lightx2v",
+          "winner": "sglang",
           "cells": {
             "sglang": {
-              "status": "failed",
-              "reason": "Capacity at concurrency 2: with both 14B experts resident (the profile that makes single-request 209.9s the fastest of all frameworks), one request's 720p x 81f VAE decode overlapping the other's denoise deterministically exceeds 80GB (~73GB used, 346MiB short). Not flaky -- a retry hits the same wall. Needs an upstream capacity lever (decode chunking under pressure or partial residency) to lift."
+              "status": "ok",
+              "qps": 0.005,
+              "p95_s": 416.142
             },
             "vllm-omni": {
               "status": "ok",
               "qps": 0.004,
               "p95_s": 491.948,
-              "ratio_to_sglang": null
+              "ratio_to_sglang": 0.854
             },
             "lightx2v": {
               "status": "ok",
               "qps": 0.005,
               "p95_s": 429.016,
-              "ratio_to_sglang": null
+              "ratio_to_sglang": 0.979
             },
             "trtllm-visual": {
               "status": "not_run",
@@ -996,23 +1002,24 @@
           "case": "Wan2.2 I2V A14B 720p",
           "details": "1280x720x81f · 40 steps · cfg 3.5",
           "mode": "throughput",
-          "winner": "lightx2v",
+          "winner": "sglang",
           "cells": {
             "sglang": {
-              "status": "failed",
-              "reason": "Capacity: after the #32743 fix, I2V A14B still cannot load on 4x80GB -- sibling ranks place 20-35GB of loader staging on each other's GPUs, and with both 14B experts plus the CLIP image encoder the load-time peak exceeds 80GB (a layerwise-offload profile fails the same way, so the limit is in the loading path, not steady-state residency). T2V (one fewer resident encoder, no image-cond channels) fits and wins at 209.9s. Tracked separately as an sglang loader fix."
+              "status": "ok",
+              "qps": 0.005,
+              "p95_s": 406.106
             },
             "vllm-omni": {
               "status": "ok",
               "qps": 0.004,
               "p95_s": 498.335,
-              "ratio_to_sglang": null
+              "ratio_to_sglang": 0.816
             },
             "lightx2v": {
               "status": "ok",
               "qps": 0.005,
               "p95_s": 429.106,
-              "ratio_to_sglang": null
+              "ratio_to_sglang": 0.959
             },
             "trtllm-visual": {
               "status": "not_run",

@@ -1,6 +1,6 @@
 # Diffusion Cross-Framework Performance Dashboard
 
-*Generated: Jul 29 | Commit: `71f4c70`*
+*Generated: Jul 30 | Commit: `4d820cb`*
 
 ## Cross-Framework Performance Comparison
 
@@ -20,7 +20,7 @@
 | LTX-2 | 🟢 | **49.11** | N/A | N/A | 89.73 | N/A | N/A | 1.83x |
 | LTX-2.3 | ✅ | **12.03** | N/A | N/A | N/A | N/A | N/A | N/A |
 | Wan2.1-I2V-14B-720P-Diffusers | 🟡 | **203.38** | 251.79 | N/A | 224.00 | 1.24x | N/A | 1.10x |
-| Wan2.2-I2V-A14B-Diffusers | ❌ | N/A | 250.35 | N/A | **214.41** | N/A | N/A | N/A |
+| Wan2.2-I2V-A14B-Diffusers | 🟡 | **203.91** | 250.35 | N/A | 214.41 | 1.23x | N/A | 1.05x |
 | Cosmos3-Nano | ✅ | **1.22** | N/A | N/A | N/A | N/A | N/A | N/A |
 | Cosmos3-Nano | 🟡 | **54.11** | 66.31 | N/A | N/A | 1.23x | N/A | N/A |
 | Cosmos3-Nano | 🟡 | **54.11** | 66.30 | N/A | N/A | 1.23x | N/A | N/A |
@@ -37,13 +37,13 @@
 | Z-Image-Turbo | 1.45 | 1.39 | 0.84 | 2.40 | N/A | N/A | 0.66 | 3.86 |
 | ideogram-4-fp8 | 0.25 | 8.06 | N/A | N/A | N/A | N/A | N/A | N/A |
 | Wan2.1-T2V-1.3B-Diffusers | 0.04 | 50.13 | 0.03 | 62.24 | N/A | N/A | 0.04 | 53.15 |
-| Wan2.1-I2V-14B-480P-Diffusers | 0.01 | 140.38 | 0.01 | 151.10 | N/A | N/A | 0.02 | 124.34 |
-| Wan2.2-T2V-A14B-Diffusers | N/A | N/A | 0.00 | 491.95 | N/A | N/A | 0.00 | 429.02 |
+| Wan2.1-I2V-14B-480P-Diffusers | 0.01 | 140.38 | 0.01 | 151.10 | N/A | N/A | 0.02 | 124.35 |
+| Wan2.2-T2V-A14B-Diffusers | 0.00 | 416.14 | 0.00 | 491.95 | N/A | N/A | 0.00 | 429.02 |
 | Wan2.2-TI2V-5B-Diffusers | 0.03 | 61.02 | 0.03 | 73.69 | N/A | N/A | 0.03 | 64.03 |
 | LTX-2 | 0.02 | 96.28 | 0.00 | 0.00 | N/A | N/A | 0.01 | 158.45 |
 | LTX-2.3 | 0.09 | 23.06 | N/A | N/A | N/A | N/A | N/A | N/A |
-| Wan2.1-I2V-14B-720P-Diffusers | 0.00 | 505.43 | 0.00 | 500.47 | N/A | N/A | 0.00 | 432.81 |
-| Wan2.2-I2V-A14B-Diffusers | N/A | N/A | 0.00 | 498.33 | N/A | N/A | 0.00 | 429.11 |
+| Wan2.1-I2V-14B-720P-Diffusers | 0.00 | 505.08 | 0.00 | 500.47 | N/A | N/A | 0.00 | 432.94 |
+| Wan2.2-I2V-A14B-Diffusers | 0.00 | 406.11 | 0.00 | 498.33 | N/A | N/A | 0.00 | 429.11 |
 | Cosmos3-Nano | 0.82 | 2.44 | N/A | N/A | 0.00 | 0.00 | N/A | N/A |
 | Cosmos3-Nano | 0.02 | 107.12 | 0.02 | 127.28 | N/A | N/A | N/A | N/A |
 | Cosmos3-Nano | 0.02 | 107.12 | 0.02 | 127.29 | N/A | N/A | N/A | N/A |
@@ -53,7 +53,6 @@
 >
 > The following cases need attention:
 > - qwen_image_2512_t2i_1024: SGLang slower than vllm-omni (4.56s vs 4.48s)
-> - wan22_i2v_a14b_720p: SGLang latency is N/A (broken)
 
 
 ---

@@ -1,7 +1,7 @@
 {
   "id": "h100x4-full-20260728",
   "title": "H100 SGLang-Diffusion vs vLLM-Omni vs LightX2V vs TensorRT-LLM VisualGen (full 18-case matrix, best lossless, compile on)",
-  "updated_at": "2026-07-29",
+  "updated_at": "2026-07-30",
   "source_report": "reports/h100x4-full-20260728/",
   "source_script": "configs/benchmark/ (explicit matrix) + scripts/build_benchmark_config.py",
   "hardware": {
@@ -17,8 +17,9 @@
     "attention": "each framework runs its fastest exact-precision attention (FA/FlashInfer/SDPA); no quantized/approximate substitution",
     "version_policy": "latest-vs-latest: sglang runs origin/main HEAD, every competitor runs its newest main/release line (no pinned snapshots)",
     "qwen_note": "Qwen-Image is reported under both semantics: no-CFG (guidance 1.0, one forward/step) and true-CFG (true_cfg_scale 4 + negative prompt, two forwards/step, served with CFG-parallel). The two rows are not comparable to each other.",
-    "bimodal_latency_note": "During this run, two compile-mode sglang cells (flux1, qwen no-CFG) showed a bimodal latency distribution across independent server restarts (each state internally consistent over its own 5 repeats -- not per-request noise); raw evidence in reports/h100x4-full-20260728/bimodal-evidence-*.json. The published flux1 number is the reproduced fast-mode measurement. The qwen no-CFG cell was subsequently re-measured under its final eager profile (see the profile's policy_exception), where repeats are tight (4.55-4.57s) and the bimodal observation no longer applies. Other sglang image cells were independently re-verified stable (<2% delta). Root cause of the compile-mode bimodality is tracked separately.",
-    "post_run_fixes_note": "2026-07-29 follow-up: the initial pass surfaced two sglang bugs and one measured mis-configuration; all three were fixed and the affected cells re-measured on the same machine and sglang base (161fffe) plus the fix commit. (1) ideogram4 and Wan2.2-A14B crashed reading (1,)-placeholder weights -- root-caused to offload_during_compile's residency interaction and fixed in sgl-project/sglang#32743; ideogram4 now measures 4.00s and wan22 T2V 209.9s (fastest of all frameworks). (2) qwen no-CFG was published at 5.74s under torch.compile, which is a measured net loss for this model (inductor GEMMs lose to cublas nvjet, and the #31849 dynamo workaround additionally drops the fused qk-norm-rope kernel when compiling); the profile now runs true eager at 4.56s, near-parity with vLLM's 4.48s. The remaining Wan2.2-A14B gaps are pure 80GB capacity limits, documented per-cell."
+    "bimodal_latency_note": "During this run, two compile-mode sglang cells (flux1, qwen no-CFG) showed a bimodal latency distribution across independent server restarts (each state internally consistent over its own 5 repeats -- not per-request noise); raw evidence in reports/h100x4-full-20260728/bimodal-evidence-*.json. The published flux1 number is the reproduced fast-mode measurement. The qwen no-CFG cell was subsequently re-measured under its final eager profile (see the profile's policy_exception), where repeats are tight (4.55-4.57s) and the bimodal observation no longer applies. Other sglang image cells were independently re-verified stable (<2% delta). Root cause of the compile-mode bimodality is tracked separately. A video-case fast/slow pattern initially attributed to the same effect turned out NOT to be bimodal: it is the deterministic concurrency slowdown documented in concurrency_slowdown_note. Method note: sustained full load on this machine always settles at ~1455MHz under the 700W power cap (both frameworks, all windows, 94-98% of samples) -- clock state is a constant background here, not a per-cell variable; clock traces for the reruns are archived alongside the raw JSONs.",
+    "post_run_fixes_note": "2026-07-29 follow-up: the initial pass surfaced two sglang bugs and one measured mis-configuration; all three were fixed and the affected cells re-measured on the same machine and sglang base (161fffe) plus the fix commit. (1) ideogram4 and Wan2.2-A14B crashed reading (1,)-placeholder weights -- root-caused to offload_during_compile's residency interaction and fixed in sgl-project/sglang#32743; ideogram4 now measures 4.00s and wan22 T2V 209.9s (fastest of all frameworks). (2) qwen no-CFG was published at 5.74s under torch.compile, which is a measured net loss for this model (inductor GEMMs lose to cublas nvjet, and the #31849 dynamo workaround additionally drops the fused qk-norm-rope kernel when compiling); the profile now runs true eager at 4.56s, near-parity with vLLM's 4.48s. (3) The two Wan2.2-A14B cells previously published as 80GB capacity failures (I2V load, T2V throughput decode OOM) were re-audited from the OOM messages themselves and turned out to be shared-machine contamination (concurrent experiments / an orphan worker from the previous case holding 5.93GiB); clean reruns on the same base+fix pass and beat LightX2V on all four A14B cells (raw-rerun-20260729/).",
+    "concurrency_slowdown_note": "wan21_i2v throughput (480p and 720p) is published as measured and currently loses to LightX2V. Root cause is isolated but not yet fixed: with a second request pending in the server, sglang's per-step denoise time rises ~26% (480p 52.6s->66.1s, 720p 194s->243s per 50-step request; deterministic across 5+ server restarts over three days, and reproduced in a same-window ABAB against LightX2V, which is unaffected). GPU frequency was ruled out by sampling clocks during both modes (~1455-1485MHz power-cap steady state in ALL sustained loads on this machine, both frameworks alike). The slowdown scales with sequence-parallel all-to-all volume; fix is tracked as an sglang concurrency scheduling bug."
   },
   "framework_order": [
     "sglang",
@@ -49,9 +50,9 @@
   "summary": {
     "cases": 18,
     "comparable_rows": 15,
-    "sglang_diffusion_wins": 13,
-    "other_wins": 2,
-    "note": "Steady-state single-request latency on H100, best lossless config per framework (compile by default, measured-eager where compile is a proven net loss), latest main/HEAD for every framework. Full 18-case image+video matrix. The two sglang bugs the initial pass surfaced were fixed (sgl-project/sglang#32743) and the affected cells re-measured -- see policy.post_run_fixes_note; remaining gaps are documented per-cell (mostly 80GB capacity limits and competitor profile issues). Throughput tables live in the report."
+    "sglang_diffusion_wins": 14,
+    "other_wins": 1,
+    "note": "Steady-state single-request latency on H100, best lossless config per framework (compile by default, measured-eager where compile is a proven net loss), latest main/HEAD for every framework. Full 18-case image+video matrix. The two sglang bugs the initial pass surfaced were fixed (sgl-project/sglang#32743) and the affected cells re-measured -- see policy.post_run_fixes_note; the two 'capacity' cells were later proven to be shared-machine contamination and now carry clean winning numbers. The one known remaining loss (wan21_i2v throughput) is a root-caused sglang concurrency slowdown, documented in policy.concurrency_slowdown_note. Throughput tables live in the report."
   },
   "rows": [
     {
@@ -369,11 +370,11 @@
       "case": "Wan2.2 I2V A14B 720p",
       "details": "1280x720x81f · 40 steps · cfg 3.5",
       "gpus": "4 GPU",
-      "winner": "lightx2v",
+      "winner": "sglang",
       "cells": {
         "sglang": {
-          "status": "failed",
-          "reason": "Capacity: after the #32743 fix, I2V A14B still cannot load on 4x80GB -- sibling ranks place 20-35GB of loader staging on each other's GPUs, and with both 14B experts plus the CLIP image encoder the load-time peak exceeds 80GB (a layerwise-offload profile fails the same way, so the limit is in the loading path, not steady-state residency). T2V (one fewer resident encoder, no image-cond channels) fits and wins at 209.9s. Tracked separately as an sglang loader fix."
+          "client_latency_s": 203.911,
+          "profile": "default"
         },
         "vllm-omni": {
           "client_latency_s": 250.355,
@@ -387,7 +388,8 @@
           "status": "not_run",
           "reason": "Not yet classified. Confirm framework support and add a validated command profile, or mark unsupported."
         }
-      }
+      },
+      "winner_speedup": "1.05x"
     },
     {
       "case_id": "wan22_ti2v_5b_704p",

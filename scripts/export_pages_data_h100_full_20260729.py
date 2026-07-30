@@ -79,33 +79,15 @@ CASE_LABELS = {
 # "profile_issue" = our command profile needs work (framework itself likely
 # supports the case); not the framework's fault, but not a clean data point.
 KNOWN_ISSUES = {
-    # NOTE 2026-07-29: the original (1,)-placeholder crashes on ideogram4 and
-    # both Wan2.2-A14B variants were root-caused (offload_during_compile's
+    # NOTE 2026-07-29/30: the original (1,)-placeholder crashes on ideogram4
+    # and both Wan2.2-A14B variants were root-caused (offload_during_compile's
     # residency strategy kept releasing restored weights on dual-DiT use-site
-    # switches) and fixed in sgl-project/sglang#32743; ideogram4 and
-    # wan22_t2v single_e2e now carry measured numbers. What remains below is
-    # what the fix exposed underneath: pure 80GB capacity limits.
-    ("wan22_i2v_a14b_720p", "sglang"): (
-        "failed",
-        "Capacity: after the #32743 fix, I2V A14B still cannot load on "
-        "4x80GB -- sibling ranks place 20-35GB of loader staging on each "
-        "other's GPUs, and with both 14B experts plus the CLIP image "
-        "encoder the load-time peak exceeds 80GB (a layerwise-offload "
-        "profile fails the same way, so the limit is in the loading path, "
-        "not steady-state residency). T2V (one fewer resident encoder, "
-        "no image-cond channels) fits and wins at 209.9s. Tracked "
-        "separately as an sglang loader fix.",
-    ),
-    ("wan22_t2v_a14b_720p", "sglang", "throughput"): (
-        "failed",
-        "Capacity at concurrency 2: with both 14B experts resident (the "
-        "profile that makes single-request 209.9s the fastest of all "
-        "frameworks), one request's 720p x 81f VAE decode overlapping the "
-        "other's denoise deterministically exceeds 80GB (~73GB used, "
-        "346MiB short). Not flaky -- a retry hits the same wall. Needs an "
-        "upstream capacity lever (decode chunking under pressure or "
-        "partial residency) to lift.",
-    ),
+    # switches) and fixed in sgl-project/sglang#32743. The two "capacity"
+    # entries that used to live here (wan22_i2v load, wan22_t2v throughput
+    # decode OOM) were subsequently proven to be shared-devbox contamination
+    # (concurrent sessions / an orphan worker holding 5.93GiB), not real
+    # walls: clean-environment reruns on the same base+fix pass and win both
+    # cells (raw-rerun-20260729/).
     ("cosmos3_nano_t2i_720p", "vllm-omni"): (
         "profile_issue",
         "vllm-omni stage config is missing a now-required "
@@ -197,7 +179,14 @@ POLICY = {
         "are tight (4.55-4.57s) and the bimodal observation no longer "
         "applies. Other sglang image cells were independently re-verified "
         "stable (<2% delta). Root cause of the compile-mode bimodality is "
-        "tracked separately."
+        "tracked separately. A video-case fast/slow pattern initially "
+        "attributed to the same effect turned out NOT to be bimodal: it is "
+        "the deterministic concurrency slowdown documented in "
+        "concurrency_slowdown_note. Method note: sustained full load on "
+        "this machine always settles at ~1455MHz under the 700W power cap "
+        "(both frameworks, all windows, 94-98% of samples) -- clock state "
+        "is a constant background here, not a per-cell variable; clock "
+        "traces for the reruns are archived alongside the raw JSONs."
     ),
     "post_run_fixes_note": (
         "2026-07-29 follow-up: the initial pass surfaced two sglang bugs "
@@ -212,9 +201,28 @@ POLICY = {
         "net loss for this model (inductor GEMMs lose to cublas nvjet, "
         "and the #31849 dynamo workaround additionally drops the fused "
         "qk-norm-rope kernel when compiling); the profile now runs true "
-        "eager at 4.56s, near-parity with vLLM's 4.48s. The remaining "
-        "Wan2.2-A14B gaps are pure 80GB capacity limits, documented "
-        "per-cell."
+        "eager at 4.56s, near-parity with vLLM's 4.48s. (3) The two "
+        "Wan2.2-A14B cells previously published as 80GB capacity failures "
+        "(I2V load, T2V throughput decode OOM) were re-audited from the OOM "
+        "messages themselves and turned out to be shared-machine "
+        "contamination (concurrent experiments / an orphan worker from the "
+        "previous case holding 5.93GiB); clean reruns on the same base+fix "
+        "pass and beat LightX2V on all four A14B cells "
+        "(raw-rerun-20260729/)."
+    ),
+    "concurrency_slowdown_note": (
+        "wan21_i2v throughput (480p and 720p) is published as measured and "
+        "currently loses to LightX2V. Root cause is isolated but not yet "
+        "fixed: with a second request pending in the server, sglang's "
+        "per-step denoise time rises ~26% (480p 52.6s->66.1s, 720p "
+        "194s->243s per 50-step request; deterministic across 5+ server "
+        "restarts over three days, and reproduced in a same-window ABAB "
+        "against LightX2V, which is unaffected). GPU frequency was ruled "
+        "out by sampling clocks during both modes (~1455-1485MHz power-cap "
+        "steady state in ALL sustained loads on this machine, both "
+        "frameworks alike). The slowdown scales with sequence-parallel "
+        "all-to-all volume; fix is tracked as an sglang concurrency "
+        "scheduling bug."
     ),
 }
 
@@ -413,7 +421,7 @@ def build_latest() -> dict:
             "H100 SGLang-Diffusion vs vLLM-Omni vs LightX2V vs TensorRT-LLM "
             "VisualGen (full 18-case matrix, best lossless, compile on)"
         ),
-        "updated_at": "2026-07-29",
+        "updated_at": "2026-07-30",
         "source_report": "reports/h100x4-full-20260728/",
         "source_script": "configs/benchmark/ (explicit matrix) + scripts/build_benchmark_config.py",
         "hardware": {"label": "4x NVIDIA H100 80GB", "gpu_name": "NVIDIA H100 80GB HBM3", "gpus": 4},
@@ -432,10 +440,13 @@ def build_latest() -> dict:
                 "every framework. Full 18-case image+video matrix. The two "
                 "sglang bugs the initial pass surfaced were fixed "
                 "(sgl-project/sglang#32743) and the affected cells "
-                "re-measured -- see policy.post_run_fixes_note; remaining "
-                "gaps are documented per-cell (mostly 80GB capacity limits "
-                "and competitor profile issues). Throughput tables live in "
-                "the report."
+                "re-measured -- see policy.post_run_fixes_note; the two "
+                "'capacity' cells were later proven to be shared-machine "
+                "contamination and now carry clean winning numbers. The one "
+                "known remaining loss (wan21_i2v throughput) is a "
+                "root-caused sglang concurrency slowdown, documented in "
+                "policy.concurrency_slowdown_note. Throughput tables live "
+                "in the report."
             ),
         },
         "rows": single_rows,
@@ -620,7 +631,7 @@ def main() -> int:
         h100_single_e2e_section(latest),
         h100_throughput_section(latest, throughput_stats),
     ]
-    historical["updated_at"] = "2026-07-29"
+    historical["updated_at"] = "2026-07-30"
     historical.setdefault("summary", {})["sections"] = len(historical["sections"])
     dump(HISTORICAL, historical)
     print(f"replaced H100 sections in {HISTORICAL.name}")
