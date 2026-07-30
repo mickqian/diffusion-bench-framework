@@ -182,6 +182,8 @@ async def async_request_image_sglang(
 
         if input.width and input.height:
             data.add_field("size", f"{input.width}x{input.height}")
+        if input.num_inference_steps:
+            data.add_field("num_inference_steps", str(input.num_inference_steps))
 
         # Merge extra parameters
         for key, value in input.extra_body.items():

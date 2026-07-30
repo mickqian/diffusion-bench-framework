@@ -1,6 +1,6 @@
 {
-  "timestamp": "2026-07-30T00:32:38.858095+00:00",
-  "commit_sha": "4d820cbabad8905520a1cfd9fe9889741c2acad9",
+  "timestamp": "2026-07-30T04:26:40.060318+00:00",
+  "commit_sha": "de4ce496ff2dfaf726197ececa7221716e1be5f1",
   "run_id": "h100x4-full-20260728",
   "hardware": {
     "runner_labels": null,
@@ -708,22 +708,22 @@
       "timestamp": "2026-07-29T18:46:38.138873+00:00"
     },
     {
-      "path": "reports/h100x4-full-20260728/raw-rerun-20260729/run_abab_sglang_wan21_i2v_14b_480p.json",
-      "run_id": "local",
-      "commit_sha": "71f4c703bfcce202239646d44875a5773993a0d8",
-      "timestamp": "2026-07-29T17:43:35.099727+00:00"
-    },
-    {
-      "path": "reports/h100x4-full-20260728/raw-rerun-20260729/run_abab_sglang_wan21_i2v_14b_720p.json",
-      "run_id": "local",
-      "commit_sha": "71f4c703bfcce202239646d44875a5773993a0d8",
-      "timestamp": "2026-07-29T18:05:50.520836+00:00"
-    },
-    {
       "path": "reports/h100x4-full-20260728/raw-rerun-20260729/run_i2vfix_wan22_i2v_a14b_720p.json",
       "run_id": "local",
       "commit_sha": "71f4c703bfcce202239646d44875a5773993a0d8",
       "timestamp": "2026-07-29T14:30:36.806483+00:00"
+    },
+    {
+      "path": "reports/h100x4-full-20260728/raw-rerun-20260729/run_stepfix_wan21_i2v_14b_480p.json",
+      "run_id": "local",
+      "commit_sha": "71f4c703bfcce202239646d44875a5773993a0d8",
+      "timestamp": "2026-07-30T03:24:48.394254+00:00"
+    },
+    {
+      "path": "reports/h100x4-full-20260728/raw-rerun-20260729/run_stepfix_wan21_i2v_14b_720p.json",
+      "run_id": "local",
+      "commit_sha": "71f4c703bfcce202239646d44875a5773993a0d8",
+      "timestamp": "2026-07-30T03:38:57.660203+00:00"
     },
     {
       "path": "reports/h100x4-full-20260728/raw-rerun-20260729/run_t2vfix_wan22_t2v_a14b_720p.json",
@@ -4623,7 +4623,7 @@
       "true_cfg_scale": null,
       "negative_prompt_set": false,
       "num_gpus": 4,
-      "latency_s": 140.369,
+      "latency_s": 113.295,
       "error": null,
       "framework_metadata": {
         "profile": "default",
@@ -4648,25 +4648,25 @@
         "sglang_profile_source": "default",
         "sglang_ref": "current-main"
       },
-      "server_command": "sglang serve --model-path Wan-AI/Wan2.1-I2V-14B-480P-Diffusers --port 37401 --host 127.0.0.1 --backend sglang --num-gpus 4 --model-type diffusion --warmup --enable-cfg-parallel --ulysses-degree 2 --dit-cpu-offload false --pin-cpu-memory --dit-layerwise-offload false --performance-mode speed --enable-torch-compile --warmup-steps 3",
+      "server_command": "sglang serve --model-path Wan-AI/Wan2.1-I2V-14B-480P-Diffusers --port 37601 --host 127.0.0.1 --backend sglang --num-gpus 4 --model-type diffusion --warmup --enable-cfg-parallel --ulysses-degree 2 --dit-cpu-offload false --pin-cpu-memory --dit-layerwise-offload false --performance-mode speed --enable-torch-compile --warmup-steps 3",
       "metrics": {
-        "duration_s": 280.75,
+        "duration_s": 227.607,
         "num_requests": 4,
         "completed_requests": 4,
         "failed_requests": 0,
         "max_concurrency": 2,
-        "throughput_rps": 0.0142,
-        "output_throughput_ops": 0.0142,
-        "latency_mean_s": 122.833,
-        "latency_p50_s": 140.369,
-        "latency_p90_s": 140.383,
-        "latency_p95_s": 140.385,
-        "latency_p99_s": 140.387,
+        "throughput_rps": 0.0176,
+        "output_throughput_ops": 0.0176,
+        "latency_mean_s": 99.521,
+        "latency_p50_s": 113.295,
+        "latency_p90_s": 114.021,
+        "latency_p95_s": 114.174,
+        "latency_p99_s": 114.295,
         "errors": [],
-        "server_startup_s": 153.11,
-        "warmup_s": 304.24
+        "server_startup_s": 168.19,
+        "warmup_s": 421.43
       },
-      "source_result": "reports/h100x4-full-20260728/raw-rerun-20260729/run_abab_sglang_wan21_i2v_14b_480p.json"
+      "source_result": "reports/h100x4-full-20260728/raw-rerun-20260729/run_stepfix_wan21_i2v_14b_480p.json"
     },
     {
       "case_id": "wan21_i2v_14b_480p",
@@ -5484,7 +5484,7 @@
       "true_cfg_scale": null,
       "negative_prompt_set": false,
       "num_gpus": 4,
-      "latency_s": 504.339,
+      "latency_s": 405.522,
       "error": null,
       "framework_metadata": {
         "profile": "default",
@@ -5509,25 +5509,25 @@
         "sglang_profile_source": "default",
         "sglang_ref": "current-main"
       },
-      "server_command": "sglang serve --model-path Wan-AI/Wan2.1-I2V-14B-720P-Diffusers --port 37403 --host 127.0.0.1 --backend sglang --num-gpus 4 --model-type diffusion --warmup --enable-cfg-parallel --ulysses-degree 2 --dit-cpu-offload false --pin-cpu-memory --dit-layerwise-offload false --performance-mode speed --enable-torch-compile --warmup-steps 3",
+      "server_command": "sglang serve --model-path Wan-AI/Wan2.1-I2V-14B-720P-Diffusers --port 37601 --host 127.0.0.1 --backend sglang --num-gpus 4 --model-type diffusion --warmup --enable-cfg-parallel --ulysses-degree 2 --dit-cpu-offload false --pin-cpu-memory --dit-layerwise-offload false --performance-mode speed --enable-torch-compile --warmup-steps 3",
       "metrics": {
-        "duration_s": 1009.579,
+        "duration_s": 812.064,
         "num_requests": 4,
         "completed_requests": 4,
         "failed_requests": 0,
         "max_concurrency": 2,
-        "throughput_rps": 0.004,
-        "output_throughput_ops": 0.004,
-        "latency_mean_s": 441.649,
-        "latency_p50_s": 504.339,
-        "latency_p90_s": 504.957,
-        "latency_p95_s": 505.083,
-        "latency_p99_s": 505.184,
+        "throughput_rps": 0.0049,
+        "output_throughput_ops": 0.0049,
+        "latency_mean_s": 355.16,
+        "latency_p50_s": 405.522,
+        "latency_p90_s": 406.041,
+        "latency_p95_s": 406.047,
+        "latency_p99_s": 406.053,
         "errors": [],
-        "server_startup_s": 176.13,
-        "warmup_s": 977.8
+        "server_startup_s": 176.12,
+        "warmup_s": 1171.01
       },
-      "source_result": "reports/h100x4-full-20260728/raw-rerun-20260729/run_abab_sglang_wan21_i2v_14b_720p.json"
+      "source_result": "reports/h100x4-full-20260728/raw-rerun-20260729/run_stepfix_wan21_i2v_14b_720p.json"
     },
     {
       "case_id": "wan21_i2v_14b_720p",

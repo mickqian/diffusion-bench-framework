@@ -24,10 +24,10 @@
       "id": "h100x4-full-20260728_single_e2e",
       "run": "h100x4-full-20260728",
       "run_label": "H100 full 18-case matrix (best-lossless)",
-      "date": "2026-07-29",
+      "date": "2026-07-30",
       "gpu": "4x NVIDIA H100 80GB",
       "title": "H100 full 18-case matrix (best-lossless)",
-      "subtitle": "Steady-state single-request latency on H100, best lossless config per framework (compile by default, measured-eager where compile is a proven net loss), latest main/HEAD for every framework. Full 18-case image+video matrix. The two sglang bugs the initial pass surfaced were fixed (sgl-project/sglang#32743) and the affected cells re-measured -- see policy.post_run_fixes_note; the two 'capacity' cells were later proven to be shared-machine contamination and now carry clean winning numbers. The one known remaining loss (wan21_i2v throughput) is a root-caused sglang concurrency slowdown, documented in policy.concurrency_slowdown_note. Throughput tables live in the report.",
+      "subtitle": "Steady-state single-request latency on H100, best lossless config per framework (compile by default, measured-eager where compile is a proven net loss), latest main/HEAD for every framework. Full 18-case image+video matrix. The two sglang bugs the initial pass surfaced were fixed (sgl-project/sglang#32743) and the affected cells re-measured -- see policy.post_run_fixes_note; the two 'capacity' cells were later proven to be shared-machine contamination and now carry clean winning numbers, and the wan21_i2v throughput cells were re-measured after fixing a dropped request parameter in this harness (policy.harness_step_fix_note). Throughput tables live in the report.",
       "mode": "single_e2e",
       "source_manifest": "reports/h100x4-full-20260728/",
       "reproduce": "configs/benchmark/ (explicit matrix) + scripts/build_benchmark_config.py",
@@ -629,7 +629,7 @@
       "id": "h100x4-full-20260728_throughput",
       "run": "h100x4-full-20260728",
       "run_label": "H100 full 18-case matrix (best-lossless)",
-      "date": "2026-07-29",
+      "date": "2026-07-30",
       "gpu": "4x NVIDIA H100 80GB",
       "title": "H100 high-pressure throughput",
       "subtitle": "4 requests at concurrency 2 (image and video); qps and p95 from client-observed completions.",
@@ -645,8 +645,8 @@
       "summary": {
         "rows": 18,
         "comparable_rows": 15,
-        "sglang_diffusion_wins": 12,
-        "other_wins": 3
+        "sglang_diffusion_wins": 14,
+        "other_wins": 1
       },
       "rows": [
         {
@@ -658,12 +658,14 @@
           "cells": {
             "sglang": {
               "status": "ok",
-              "qps": 0.233,
+              "qps": 0.2333,
+              "p50_s": 8.574,
               "p95_s": 8.59
             },
             "vllm-omni": {
               "status": "ok",
-              "qps": 0.18,
+              "qps": 0.1805,
+              "p50_s": 11.027,
               "p95_s": 11.128,
               "ratio_to_sglang": 0.774
             },
@@ -673,7 +675,8 @@
             },
             "trtllm-visual": {
               "status": "ok",
-              "qps": 0.136,
+              "qps": 0.1364,
+              "p50_s": 14.657,
               "p95_s": 14.703,
               "ratio_to_sglang": 0.585
             }
@@ -688,18 +691,21 @@
           "cells": {
             "sglang": {
               "status": "ok",
-              "qps": 0.079,
+              "qps": 0.0787,
+              "p50_s": 25.409,
               "p95_s": 25.42
             },
             "vllm-omni": {
               "status": "ok",
-              "qps": 0.06,
+              "qps": 0.0601,
+              "p50_s": 33.201,
               "p95_s": 33.283,
               "ratio_to_sglang": 0.764
             },
             "lightx2v": {
               "status": "ok",
-              "qps": 0.015,
+              "qps": 0.0151,
+              "p50_s": 132.888,
               "p95_s": 134.257,
               "ratio_to_sglang": 0.192
             },
@@ -719,11 +725,13 @@
             "sglang": {
               "status": "ok",
               "qps": 0.22,
+              "p50_s": 9.089,
               "p95_s": 9.098
             },
             "vllm-omni": {
               "status": "ok",
               "qps": 0.227,
+              "p50_s": 8.779,
               "p95_s": 8.825,
               "ratio_to_sglang": 1.032
             },
@@ -733,7 +741,8 @@
             },
             "trtllm-visual": {
               "status": "ok",
-              "qps": 0.131,
+              "qps": 0.1314,
+              "p50_s": 15.224,
               "p95_s": 15.241,
               "ratio_to_sglang": 0.597
             }
@@ -748,12 +757,14 @@
           "cells": {
             "sglang": {
               "status": "ok",
-              "qps": 0.153,
+              "qps": 0.1527,
+              "p50_s": 13.098,
               "p95_s": 13.113
             },
             "vllm-omni": {
               "status": "ok",
-              "qps": 0.115,
+              "qps": 0.1147,
+              "p50_s": 17.398,
               "p95_s": 17.469,
               "ratio_to_sglang": 0.751
             },
@@ -776,12 +787,14 @@
           "cells": {
             "sglang": {
               "status": "ok",
-              "qps": 0.131,
+              "qps": 0.1305,
+              "p50_s": 15.296,
               "p95_s": 15.35
             },
             "vllm-omni": {
               "status": "ok",
-              "qps": 0.104,
+              "qps": 0.1044,
+              "p50_s": 19.065,
               "p95_s": 19.209,
               "ratio_to_sglang": 0.8
             },
@@ -805,17 +818,20 @@
             "sglang": {
               "status": "ok",
               "qps": 1.446,
+              "p50_s": 1.38,
               "p95_s": 1.385
             },
             "vllm-omni": {
               "status": "ok",
-              "qps": 0.844,
+              "qps": 0.8437,
+              "p50_s": 2.337,
               "p95_s": 2.402,
               "ratio_to_sglang": 0.584
             },
             "lightx2v": {
               "status": "ok",
-              "qps": 0.664,
+              "qps": 0.6644,
+              "p50_s": 2.509,
               "p95_s": 3.864,
               "ratio_to_sglang": 0.46
             },
@@ -834,7 +850,8 @@
           "cells": {
             "sglang": {
               "status": "ok",
-              "qps": 0.25,
+              "qps": 0.2496,
+              "p50_s": 7.962,
               "p95_s": 8.06
             },
             "vllm-omni": {
@@ -861,6 +878,7 @@
             "sglang": {
               "status": "ok",
               "qps": 0.821,
+              "p50_s": 2.425,
               "p95_s": 2.438
             },
             "vllm-omni": {
@@ -886,18 +904,21 @@
           "cells": {
             "sglang": {
               "status": "ok",
-              "qps": 0.04,
+              "qps": 0.0399,
+              "p50_s": 50.126,
               "p95_s": 50.134
             },
             "vllm-omni": {
               "status": "ok",
-              "qps": 0.032,
+              "qps": 0.0324,
+              "p50_s": 60.848,
               "p95_s": 62.236,
               "ratio_to_sglang": 0.812
             },
             "lightx2v": {
               "status": "ok",
-              "qps": 0.038,
+              "qps": 0.0376,
+              "p50_s": 53.139,
               "p95_s": 53.149,
               "ratio_to_sglang": 0.942
             },
@@ -912,24 +933,27 @@
           "case": "Wan2.1 I2V 14B 480p",
           "details": "832x480x81f · 40 steps · cfg 5",
           "mode": "throughput",
-          "winner": "lightx2v",
+          "winner": "sglang",
           "cells": {
             "sglang": {
               "status": "ok",
-              "qps": 0.014,
-              "p95_s": 140.385
+              "qps": 0.0176,
+              "p50_s": 113.295,
+              "p95_s": 114.174
             },
             "vllm-omni": {
               "status": "ok",
-              "qps": 0.013,
+              "qps": 0.0133,
+              "p50_s": 149.409,
               "p95_s": 151.1,
-              "ratio_to_sglang": 0.937
+              "ratio_to_sglang": 0.756
             },
             "lightx2v": {
               "status": "ok",
-              "qps": 0.016,
+              "qps": 0.0161,
+              "p50_s": 124.326,
               "p95_s": 124.347,
-              "ratio_to_sglang": 1.134
+              "ratio_to_sglang": 0.915
             },
             "trtllm-visual": {
               "status": "not_run",
@@ -942,24 +966,27 @@
           "case": "Wan2.1 I2V 14B 720p",
           "details": "1280x720x81f · 40 steps · cfg 5",
           "mode": "throughput",
-          "winner": "lightx2v",
+          "winner": "sglang",
           "cells": {
             "sglang": {
               "status": "ok",
-              "qps": 0.004,
-              "p95_s": 505.083
+              "qps": 0.0049,
+              "p50_s": 405.522,
+              "p95_s": 406.047
             },
             "vllm-omni": {
               "status": "ok",
               "qps": 0.004,
+              "p50_s": 498.295,
               "p95_s": 500.473,
-              "ratio_to_sglang": 1.0
+              "ratio_to_sglang": 0.816
             },
             "lightx2v": {
               "status": "ok",
-              "qps": 0.005,
+              "qps": 0.0046,
+              "p50_s": 432.098,
               "p95_s": 432.944,
-              "ratio_to_sglang": 1.15
+              "ratio_to_sglang": 0.939
             },
             "trtllm-visual": {
               "status": "not_run",
@@ -976,18 +1003,21 @@
           "cells": {
             "sglang": {
               "status": "ok",
-              "qps": 0.005,
+              "qps": 0.0048,
+              "p50_s": 416.089,
               "p95_s": 416.142
             },
             "vllm-omni": {
               "status": "ok",
-              "qps": 0.004,
+              "qps": 0.0041,
+              "p50_s": 489.73,
               "p95_s": 491.948,
               "ratio_to_sglang": 0.854
             },
             "lightx2v": {
               "status": "ok",
-              "qps": 0.005,
+              "qps": 0.0047,
+              "p50_s": 428.12,
               "p95_s": 429.016,
               "ratio_to_sglang": 0.979
             },
@@ -1006,18 +1036,21 @@
           "cells": {
             "sglang": {
               "status": "ok",
-              "qps": 0.005,
+              "qps": 0.0049,
+              "p50_s": 406.044,
               "p95_s": 406.106
             },
             "vllm-omni": {
               "status": "ok",
               "qps": 0.004,
+              "p50_s": 495.788,
               "p95_s": 498.335,
               "ratio_to_sglang": 0.816
             },
             "lightx2v": {
               "status": "ok",
-              "qps": 0.005,
+              "qps": 0.0047,
+              "p50_s": 429.053,
               "p95_s": 429.106,
               "ratio_to_sglang": 0.959
             },
@@ -1037,17 +1070,20 @@
             "sglang": {
               "status": "ok",
               "qps": 0.033,
+              "p50_s": 60.148,
               "p95_s": 61.015
             },
             "vllm-omni": {
               "status": "ok",
-              "qps": 0.028,
+              "qps": 0.0275,
+              "p50_s": 71.46,
               "p95_s": 73.692,
               "ratio_to_sglang": 0.833
             },
             "lightx2v": {
               "status": "ok",
-              "qps": 0.031,
+              "qps": 0.0314,
+              "p50_s": 63.156,
               "p95_s": 64.026,
               "ratio_to_sglang": 0.952
             },
@@ -1066,7 +1102,8 @@
           "cells": {
             "sglang": {
               "status": "ok",
-              "qps": 0.021,
+              "qps": 0.0208,
+              "p50_s": 96.251,
               "p95_s": 96.276
             },
             "vllm-omni": {
@@ -1075,7 +1112,8 @@
             },
             "lightx2v": {
               "status": "ok",
-              "qps": 0.013,
+              "qps": 0.0127,
+              "p50_s": 157.93,
               "p95_s": 158.449,
               "ratio_to_sglang": 0.611
             },
@@ -1094,7 +1132,8 @@
           "cells": {
             "sglang": {
               "status": "ok",
-              "qps": 0.087,
+              "qps": 0.0867,
+              "p50_s": 23.059,
               "p95_s": 23.063
             },
             "vllm-omni": {
@@ -1120,12 +1159,14 @@
           "cells": {
             "sglang": {
               "status": "ok",
-              "qps": 0.019,
+              "qps": 0.0187,
+              "p50_s": 106.259,
               "p95_s": 107.125
             },
             "vllm-omni": {
               "status": "ok",
               "qps": 0.016,
+              "p50_s": 123.067,
               "p95_s": 127.276,
               "ratio_to_sglang": 0.856
             },
@@ -1148,12 +1189,14 @@
           "cells": {
             "sglang": {
               "status": "ok",
-              "qps": 0.019,
+              "qps": 0.0187,
+              "p50_s": 106.259,
               "p95_s": 107.12
             },
             "vllm-omni": {
               "status": "ok",
-              "qps": 0.016,
+              "qps": 0.0159,
+              "p50_s": 123.146,
               "p95_s": 127.294,
               "ratio_to_sglang": 0.85
             },

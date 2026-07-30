@@ -210,19 +210,23 @@ POLICY = {
         "pass and beat LightX2V on all four A14B cells "
         "(raw-rerun-20260729/)."
     ),
-    "concurrency_slowdown_note": (
-        "wan21_i2v throughput (480p and 720p) is published as measured and "
-        "currently loses to LightX2V. Root cause is isolated but not yet "
-        "fixed: with a second request pending in the server, sglang's "
-        "per-step denoise time rises ~26% (480p 52.6s->66.1s, 720p "
-        "194s->243s per 50-step request; deterministic across 5+ server "
-        "restarts over three days, and reproduced in a same-window ABAB "
-        "against LightX2V, which is unaffected). GPU frequency was ruled "
-        "out by sampling clocks during both modes (~1455-1485MHz power-cap "
-        "steady state in ALL sustained loads on this machine, both "
-        "frameworks alike). The slowdown scales with sequence-parallel "
-        "all-to-all volume; fix is tracked as an sglang concurrency "
-        "scheduling bug."
+    "harness_step_fix_note": (
+        "The wan21_i2v throughput cells published on 2026-07-29 were wrong "
+        "because of a bug in THIS benchmark harness, not in any framework: "
+        "bench_serving's multipart video-submit branch dropped "
+        "num_inference_steps, so the sglang throughput requests ran the "
+        "model default 50 steps against a 40-step case definition (the "
+        "single_e2e path sent it correctly). Per-step time was identical in "
+        "both modes -- 66.1s/50 steps == 52.8s/40 steps == 1.32s/step -- so "
+        "it read as a 26% 'concurrency slowdown' and cost three days of "
+        "investigation before the runlog step counters (40/40 vs 50/50) "
+        "settled it. Fixed, both cells re-measured at 40 steps, and the "
+        "same omission in the image-edit multipart branch fixed too (that "
+        "one happened to be harmless because the model default equalled the "
+        "case). Competitor paths were audited and send steps correctly, so "
+        "no competitor number was inflated. A controlled same-server "
+        "serial->conc2->serial A-B-A confirmed sglang has no per-step "
+        "concurrency penalty at all."
     ),
 }
 
@@ -373,7 +377,15 @@ def build_throughput_rows(merged: dict, config_cases: dict, latest_rows: dict) -
             qps = metrics.get("throughput_rps")
             p95 = metrics.get("latency_p95_s")
             qps_by_fw[fw] = qps
-            cells[fw] = {"status": "ok", "qps": round(qps, 3) if qps is not None else None}
+            # 3 decimals collapses every video cell to 0.005; keep 4 significant
+            # digits so the ranking the winner field already uses stays visible.
+            cells[fw] = {
+                "status": "ok",
+                "qps": float(f"{qps:.4g}") if qps is not None else None,
+            }
+            p50 = metrics.get("latency_p50_s")
+            if p50 is not None:
+                cells[fw]["p50_s"] = round(p50, 3)
             if p95 is not None:
                 cells[fw]["p95_s"] = round(p95, 3)
         if not qps_by_fw:
@@ -442,11 +454,11 @@ def build_latest() -> dict:
                 "(sgl-project/sglang#32743) and the affected cells "
                 "re-measured -- see policy.post_run_fixes_note; the two "
                 "'capacity' cells were later proven to be shared-machine "
-                "contamination and now carry clean winning numbers. The one "
-                "known remaining loss (wan21_i2v throughput) is a "
-                "root-caused sglang concurrency slowdown, documented in "
-                "policy.concurrency_slowdown_note. Throughput tables live "
-                "in the report."
+                "contamination and now carry clean winning numbers, and the "
+                "wan21_i2v throughput cells were re-measured after fixing a "
+                "dropped request parameter in this harness "
+                "(policy.harness_step_fix_note). Throughput tables live in "
+                "the report."
             ),
         },
         "rows": single_rows,
@@ -499,7 +511,7 @@ def h100_single_e2e_section(latest: dict) -> dict:
         "id": "h100x4-full-20260728_single_e2e",
         "run": "h100x4-full-20260728",
         "run_label": "H100 full 18-case matrix (best-lossless)",
-        "date": "2026-07-29",
+        "date": "2026-07-30",
         "gpu": "4x NVIDIA H100 80GB",
         "title": "H100 full 18-case matrix (best-lossless)",
         "subtitle": latest["summary"]["note"],
@@ -523,7 +535,7 @@ def h100_throughput_section(latest: dict, throughput_stats: tuple) -> dict:
         "id": "h100x4-full-20260728_throughput",
         "run": "h100x4-full-20260728",
         "run_label": "H100 full 18-case matrix (best-lossless)",
-        "date": "2026-07-29",
+        "date": "2026-07-30",
         "gpu": "4x NVIDIA H100 80GB",
         "title": "H100 high-pressure throughput",
         "subtitle": "4 requests at concurrency 2 (image and video); qps and p95 from client-observed completions.",

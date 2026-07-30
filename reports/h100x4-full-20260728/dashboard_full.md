@@ -1,6 +1,6 @@
 # Diffusion Cross-Framework Performance Dashboard
 
-*Generated: Jul 30 | Commit: `4d820cb`*
+*Generated: Jul 30 | Commit: `de4ce49`*
 
 ## Cross-Framework Performance Comparison
 
@@ -37,12 +37,12 @@
 | Z-Image-Turbo | 1.45 | 1.39 | 0.84 | 2.40 | N/A | N/A | 0.66 | 3.86 |
 | ideogram-4-fp8 | 0.25 | 8.06 | N/A | N/A | N/A | N/A | N/A | N/A |
 | Wan2.1-T2V-1.3B-Diffusers | 0.04 | 50.13 | 0.03 | 62.24 | N/A | N/A | 0.04 | 53.15 |
-| Wan2.1-I2V-14B-480P-Diffusers | 0.01 | 140.38 | 0.01 | 151.10 | N/A | N/A | 0.02 | 124.35 |
+| Wan2.1-I2V-14B-480P-Diffusers | 0.02 | 114.17 | 0.01 | 151.10 | N/A | N/A | 0.02 | 124.35 |
 | Wan2.2-T2V-A14B-Diffusers | 0.00 | 416.14 | 0.00 | 491.95 | N/A | N/A | 0.00 | 429.02 |
 | Wan2.2-TI2V-5B-Diffusers | 0.03 | 61.02 | 0.03 | 73.69 | N/A | N/A | 0.03 | 64.03 |
 | LTX-2 | 0.02 | 96.28 | 0.00 | 0.00 | N/A | N/A | 0.01 | 158.45 |
 | LTX-2.3 | 0.09 | 23.06 | N/A | N/A | N/A | N/A | N/A | N/A |
-| Wan2.1-I2V-14B-720P-Diffusers | 0.00 | 505.08 | 0.00 | 500.47 | N/A | N/A | 0.00 | 432.94 |
+| Wan2.1-I2V-14B-720P-Diffusers | 0.00 | 406.05 | 0.00 | 500.47 | N/A | N/A | 0.00 | 432.94 |
 | Wan2.2-I2V-A14B-Diffusers | 0.00 | 406.11 | 0.00 | 498.33 | N/A | N/A | 0.00 | 429.11 |
 | Cosmos3-Nano | 0.82 | 2.44 | N/A | N/A | 0.00 | 0.00 | N/A | N/A |
 | Cosmos3-Nano | 0.02 | 107.12 | 0.02 | 127.28 | N/A | N/A | N/A | N/A |

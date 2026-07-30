@@ -1,5 +1,5 @@
 {
-  "timestamp": "2026-07-29T18:05:50.520836+00:00",
+  "timestamp": "2026-07-30T03:24:48.394254+00:00",
   "commit_sha": "71f4c703bfcce202239646d44875a5773993a0d8",
   "run_id": "local",
   "hardware": {
@@ -132,13 +132,13 @@
   "results": [],
   "throughput_results": [
     {
-      "case_id": "wan21_i2v_14b_720p",
+      "case_id": "wan21_i2v_14b_480p",
       "framework": "sglang",
       "mode": "throughput",
-      "model": "Wan-AI/Wan2.1-I2V-14B-720P-Diffusers",
+      "model": "Wan-AI/Wan2.1-I2V-14B-480P-Diffusers",
       "task": "image-to-video",
-      "width": 1280,
-      "height": 720,
+      "width": 832,
+      "height": 480,
       "num_frames": 81,
       "fps": 16,
       "num_inference_steps": 40,
@@ -147,7 +147,7 @@
       "true_cfg_scale": null,
       "negative_prompt_set": false,
       "num_gpus": 4,
-      "latency_s": 504.339,
+      "latency_s": 113.295,
       "error": null,
       "framework_metadata": {
         "profile": "default",
@@ -159,7 +159,7 @@
           "h100"
         ],
         "description": "Best known SGLang command for the benchmark repo default profile.",
-        "notes": "Tracks Wan2.1 720P I2V SGLang coverage; add other frameworks only after confirming compatible model support. Policy-aligned candidate (compile on, offload off) \u2014 NOT yet validated on H100; validate (incl. OOM risk) before publishing.",
+        "notes": "Keep this profile updated when the best command changes for a SGLang release or commit. Policy-aligned candidate (compile on, offload off) \u2014 NOT yet validated on H100; validate (incl. OOM risk) before publishing.",
         "install_specs": null,
         "server_bin": null,
         "use_omni_arg": null,
@@ -172,23 +172,23 @@
         "sglang_profile_source": "default",
         "sglang_ref": "current-main"
       },
-      "server_command": "sglang serve --model-path Wan-AI/Wan2.1-I2V-14B-720P-Diffusers --port 37403 --host 127.0.0.1 --backend sglang --num-gpus 4 --model-type diffusion --warmup --enable-cfg-parallel --ulysses-degree 2 --dit-cpu-offload false --pin-cpu-memory --dit-layerwise-offload false --performance-mode speed --enable-torch-compile --warmup-steps 3",
+      "server_command": "sglang serve --model-path Wan-AI/Wan2.1-I2V-14B-480P-Diffusers --port 37601 --host 127.0.0.1 --backend sglang --num-gpus 4 --model-type diffusion --warmup --enable-cfg-parallel --ulysses-degree 2 --dit-cpu-offload false --pin-cpu-memory --dit-layerwise-offload false --performance-mode speed --enable-torch-compile --warmup-steps 3",
       "metrics": {
-        "duration_s": 1009.579,
+        "duration_s": 227.607,
         "num_requests": 4,
         "completed_requests": 4,
         "failed_requests": 0,
         "max_concurrency": 2,
-        "throughput_rps": 0.004,
-        "output_throughput_ops": 0.004,
-        "latency_mean_s": 441.649,
-        "latency_p50_s": 504.339,
-        "latency_p90_s": 504.957,
-        "latency_p95_s": 505.083,
-        "latency_p99_s": 505.184,
+        "throughput_rps": 0.0176,
+        "output_throughput_ops": 0.0176,
+        "latency_mean_s": 99.521,
+        "latency_p50_s": 113.295,
+        "latency_p90_s": 114.021,
+        "latency_p95_s": 114.174,
+        "latency_p99_s": 114.295,
         "errors": [],
-        "server_startup_s": 176.13,
-        "warmup_s": 977.8
+        "server_startup_s": 168.19,
+        "warmup_s": 421.43
       }
     }
   ]
