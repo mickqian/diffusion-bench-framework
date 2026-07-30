@@ -286,11 +286,13 @@ async def async_request_video_sglang(
         for key, value in input.extra_body.items():
             data.add_field(key, _form_value(value))
 
-        # Explicitly add fps/num_frames if they are not in extra_body (bench_serving logic overrides)
+        # Explicitly add fps/num_frames/steps if they are not in extra_body (bench_serving logic overrides)
         if input.num_frames:
             data.add_field("num_frames", str(input.num_frames))
         if input.fps:
             data.add_field("fps", str(input.fps))
+        if input.num_inference_steps:
+            data.add_field("num_inference_steps", str(input.num_inference_steps))
 
         # Add image file
         # Currently only support single image upload as 'input_reference' per API spec
