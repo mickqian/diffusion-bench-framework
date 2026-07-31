@@ -48,6 +48,34 @@ Verify these before comparing latency:
   not the varlen pair. Two "zero-effect optimizations" were just patches on
   dead code.
 
+## Prove The Path Executed Before Judging It (2026-07-31, three misfires in one day)
+
+A comparison whose two arms never diverged in the code under test passes while
+proving nothing, and it reads exactly like a clean result. This burned three
+separate conclusions in one session:
+
+- **"dp is byte-identical"** — the request used `guidance_scale 1.0`, so the
+  encode batch was 1 and the dp gate refused in *both* arms. The identical
+  bytes were two runs of the same replicated path.
+- **"spatial split is a 32% pessimisation on small activations"** — image VAEs
+  return `False` from `auto_parallel_decode_prefers_spatial_shard()`, so
+  toggling `--vae-config.use-parallel-decode` changed nothing; the "difference"
+  was 3-sample noise (arms overlapped: 0.091/0.061/0.106 vs 0.093/0.061/0.062).
+- **"AllToAll4D parity holds"** — the arm never reached the IPC branch. Caught
+  only because the staged-buffer count stayed at 6, which new shapes could not
+  have done.
+
+Make the evidence part of the assertion, not an afterthought:
+
+- Require a **side effect that only the path under test produces** — a cache/
+  staging key count that must grow, a one-shot log line, a counter. Assert it.
+- For a flag A/B, first confirm the flag reaches a decision: log the resolved
+  policy, or check the gate's own predicate for your inputs.
+- Prefer a **crash/shape test over a numeric-equivalence test** when the change
+  is structural; a wrong layout cannot hide behind a tolerance.
+- Two or three samples cannot support a percentage claim. If the arms' ranges
+  overlap, there is no effect to report yet.
+
 ## Reporting
 
 Lead with the verdict:
