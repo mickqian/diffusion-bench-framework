@@ -51,6 +51,32 @@ Absolute medians, for reference:
 
 **At R=4 the direct-IPC exchange is 25-45% slower than NCCL, at every size.**
 
+### Blackwell (B200, sm100, NVLink5)
+
+Re-run on 2/4x B200 to check the gate is not Hopper-specific:
+
+| ranks | 1 MB | 4 MB | 16 MB |
+|---|---|---|---|
+| R=2 | 0.91x | 1.08x | **1.15x** |
+| R=4 | 0.70x | 0.85x | 0.94x |
+
+Same shape as H100: R=2 breaks even and pulls ahead with size, R=4 loses at
+every size. The R=4 deficit is smaller than on H100 (0.94x vs 0.78x at 16MB),
+consistent with NVLink5's higher bandwidth making each per-peer write relatively
+cheaper — but it still does not turn positive. So `world_size == 2` is the right
+gate on both architectures and needs no per-architecture branch.
+
+The parity test (`test_ipc_a2a_2_gpu.py`) also passes bitwise on B200.
+
+**A portability bug this surfaced**: the spin's timeout was converted from
+milliseconds using `cudaDevAttrClockRate`, which reports 1980 MHz on H100 (its
+peak) but **120 MHz on B200**. A 200 ms budget therefore became ~13 ms of real
+time there, so a legitimately slow peer would trip the watchdog, return
+incomplete data and disable the transport. Fixed by timing the spin with PTX
+`%globaltimer`, a nanosecond wall clock that needs no conversion. Worth
+remembering for any GPU-side deadline: **do not derive time from a clock-rate
+attribute.**
+
 ## Why
 
 The IPC scheme's cost is linear in rank count on two axes that NCCL amortises:
