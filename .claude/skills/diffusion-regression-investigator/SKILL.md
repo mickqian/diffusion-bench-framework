@@ -61,9 +61,9 @@ separate conclusions in one session:
   return `False` from `auto_parallel_decode_prefers_spatial_shard()`, so
   toggling `--vae-config.use-parallel-decode` changed nothing; the "difference"
   was 3-sample noise (arms overlapped: 0.091/0.061/0.106 vs 0.093/0.061/0.062).
-- **"AllToAll4D parity holds"** — the arm never reached the IPC branch. Caught
-  only because the staged-buffer count stayed at 6, which new shapes could not
-  have done.
+- **"AllToAll4D parity holds"** — suspected the arm never reached the IPC branch,
+  because the staged-buffer count stayed at 6 where new shapes should have added
+  keys. See the next section: that evidence was itself invalid.
 
 Make the evidence part of the assertion, not an afterthought:
 
@@ -75,6 +75,33 @@ Make the evidence part of the assertion, not an afterthought:
   is structural; a wrong layout cannot hide behind a tolerance.
 - Two or three samples cannot support a percentage claim. If the arms' ranges
   overlap, there is no effect to report yet.
+
+## Then Prove The Evidence Itself (same day, the fix that misfired)
+
+The "prove the path ran" guard above immediately produced its own false alarm, so
+it needs a second rule. The evidence chosen for the AllToAll4D arm was *a new
+staging key must appear*. It never appeared, and the reported verdict was
+"AllToAll4D never took the IPC path". A probe that called only that entry point
+disproved it in one line — the hook ran, the transport was ready, it returned a
+tensor, staging went 0→1:
+
+```
+PROBE ipc_fn_calls=1 ready=True returned=tensor staging 0->1
+```
+
+The staging key is `(n_local, n_peer, dtype)` with **no call-site component**, so
+the second entry point reuses the buffers the first one allocated. The premise —
+"a new call site with these shapes must allocate" — was false, and it accused
+working code. Two rules:
+
+- **Count the event, not a resource derived from it.** A monotone per-call
+  counter (`IPC_A2A.calls`) cannot collide; a cache key deliberately can, since
+  reuse is the cache's whole purpose. Before asserting on a container's size, ask
+  what its key is and whether two different call sites can hash to the same one.
+- **When an evidence assertion fires, probe the narrow path before believing it.**
+  Isolating one entry point costs a few minutes and distinguishes "the code is
+  broken" from "my assertion is wrong" — a distinction that reasoning about the
+  gate conditions did not settle in either direction.
 
 ## Reporting
 
