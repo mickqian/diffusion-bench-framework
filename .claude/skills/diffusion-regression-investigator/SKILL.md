@@ -103,6 +103,35 @@ working code. Two rules:
   broken" from "my assertion is wrong" — a distinction that reasoning about the
   gate conditions did not settle in either direction.
 
+## A NCCL Watchdog Timeout Means One Rank Took A Different Path
+
+`Watchdog caught collective operation timeout` is almost never a NCCL bug and
+almost never a slow network. It means one rank posted a collective the others did
+not, so read it as **"find the branch that is per-rank"**.
+
+The instance that taught this (sgl-project/sglang#31854, `wan2_2_t2v_a14b_2gpu`):
+a custom IPC transport bounded its GPU-side spin, and on expiry the rank that
+timed out disabled the transport **for itself** and fell back to NCCL. Its peer
+never timed out, stayed on IPC, and posted nothing. Ten minutes later the
+watchdog took the process down. Both ends were in the CI log — the transport's
+own "timed out waiting for the peer" line, then the abort with the transport's
+file in the stack — so the chain was evidence, not inference.
+
+- Any **fallback, capability gate, or feature flag that a single rank can resolve
+  differently must be decided collectively**, or the collective it guards will
+  eventually be posted by a subset of ranks. Per-rank device state (a flag a
+  kernel sets locally) is exactly this hazard.
+- Prefer telling the peer over adding a collective to ask it. A rank that already
+  maps the peer's memory can write the decision there; an extra all-reduce at a
+  boundary introduces a *second* way for ranks to disagree (one rank skipping the
+  all-reduce because its own init failed leaves the other hanging in it).
+- A bound that "gives up and degrades" is only safe if giving up is **symmetric**
+  and the incomplete result is **not consumed**. Otherwise it converts a hang into
+  a corrupted output plus a later, misattributed crash.
+- Sanity-check the bound against the model, not the kernel: layerwise offload and
+  wan2.2's expert-tower swap stall a rank for **seconds**. A 200 ms "generous"
+  budget was simply wrong; a deadlock backstop belongs in the seconds.
+
 ## Reporting
 
 Lead with the verdict:
