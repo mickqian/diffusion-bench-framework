@@ -102,6 +102,14 @@ working code. Two rules:
   Isolating one entry point costs a few minutes and distinguishes "the code is
   broken" from "my assertion is wrong" — a distinction that reasoning about the
   gate conditions did not settle in either direction.
+- **An evidence assertion must also separate "did not run" from "cannot run
+  here."** The same guard that proves a CUDA-IPC path executed failed the test on
+  MI300, where the transport correctly refuses and both arms fall back — a true
+  report of "never engaged" on a platform that can never engage. Device count is
+  not the discriminator (`torch.cuda.device_count()` is 2 under HIP); the platform
+  is (`current_platform.is_cuda()`). Any test whose evidence is "the accelerated
+  path ran" needs a platform skip next to it, or it becomes a false failure on
+  every other backend in the matrix.
 
 ## A NCCL Watchdog Timeout Means One Rank Took A Different Path
 
