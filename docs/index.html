@@ -2397,7 +2397,7 @@
           <h2 class="section-title">Nightly performance track</h2>
           <p>
             Automated nightly latency for SGLang-Diffusion across the cross-framework CI cases — fetched live from
-            <a class="ulink" href="https://github.com/sgl-project/ci-data/tree/main/diffusion-comparisons" target="_blank" rel="noreferrer">sgl-project/ci-data</a>
+            <a class="ulink" href="https://github.com/sgl-project/ci-data-diffusion/tree/main/diffusion-comparisons" target="_blank" rel="noreferrer">sgl-project/ci-data-diffusion</a>
             each time you open this section, so it always reflects the latest run.
           </p>
         </div>
@@ -4048,10 +4048,10 @@
 
       /* ---------- nightly performance track ---------- */
       const NIGHTLY = {
-        listApi: "https://api.github.com/repos/sgl-project/ci-data/contents/diffusion-comparisons",
-        repoUrl: "https://github.com/sgl-project/ci-data/tree/main/diffusion-comparisons",
+        listApi: "https://api.github.com/repos/sgl-project/ci-data-diffusion/contents/diffusion-comparisons",
+        repoUrl: "https://github.com/sgl-project/ci-data-diffusion/tree/main/diffusion-comparisons",
         maxRuns: 30,
-        cacheKey: "sgld-nightly-v1",
+        cacheKey: "sgld-nightly-v2",
         // stale-while-revalidate: cache is always used for the instant paint; revalidateAfter
         // is how old the cache must be before loadNightly hits the network again on open.
         revalidateAfter: 15 * 60 * 1000,
@@ -4217,7 +4217,7 @@
 
         metaEl.hidden = false;
         metaEl.innerHTML =
-          `<span>Source <b>sgl-project/ci-data</b></span>` +
+          `<span>Source <b>sgl-project/ci-data-diffusion</b></span>` +
           `<span>Updated <b>${nightlyDate(meta.latestMs)}, ${new Date(meta.latestMs).getUTCFullYear()}</b></span>` +
           `<span>Commit <b class="mono">${escapeHtml((meta.commit || "").slice(0, 7))}</b></span>` +
           `<span><b>${meta.runs}</b> nightly runs</span>` +
