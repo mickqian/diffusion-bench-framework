@@ -140,6 +140,24 @@ file in the stack — so the chain was evidence, not inference.
   wan2.2's expert-tower swap stall a rank for **seconds**. A 200 ms "generous"
   budget was simply wrong; a deadlock backstop belongs in the seconds.
 
+## CI Blame Needs The Checkout Time, Not The Log Time (2026-08-06)
+
+A flux 2-GPU perf regression was pinned on the only attention commit in the
+window, "seven minutes before the failure" — but the seven minutes were measured
+against the mid-job failure **log** timestamp. The job's `started_at` (which is
+when the merge ref is checked out) was 31 minutes **before** the commit landed:
+the failing code could not contain it. Two public comments had to be retracted.
+
+- Blame windows are bounded by **`started_at` of the runs' checkouts**, never by
+  log timestamps inside the job, and a rerun (`run_attempt > 1`) reuses the
+  run's ORIGINAL merge commit — a green attempt-2 executed later still tests the
+  old code.
+- An independent A/B of the accused commit (ABAB on the case it allegedly broke)
+  is cheap insurance before accusing publicly; here it showed both arms
+  identical, which is what forced the timeline recheck.
+- Library-version bumps (sgl-kernel) belong in every perf-blame window: kernels
+  ship from there, and a dispatch change matches a constant per-step factor.
+
 ## Reporting
 
 Lead with the verdict:
