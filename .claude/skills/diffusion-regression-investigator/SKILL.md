@@ -157,6 +157,10 @@ the failing code could not contain it. Two public comments had to be retracted.
   identical, which is what forced the timeline recheck.
 - Library-version bumps (sgl-kernel) belong in every perf-blame window: kernels
   ship from there, and a dispatch change matches a constant per-step factor.
+- Resolution of this case: the same-commit rerun (attempt 2) passed — there was
+  **no code regression at all**, only runner state. The cheapest discriminator
+  for any CI perf blame is a rerun at the same merge commit; run it before any
+  bisect, and treat a runner with same-day OOM/cache incidents as suspect #1.
 
 ## Reporting
 
