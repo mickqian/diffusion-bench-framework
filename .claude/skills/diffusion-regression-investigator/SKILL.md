@@ -162,6 +162,33 @@ the failing code could not contain it. Two public comments had to be retracted.
   for any CI perf blame is a rerun at the same merge commit; run it before any
   bisect, and treat a runner with same-day OOM/cache incidents as suspect #1.
 
+## A 2-GPU Run Can Silently Be Diffusers (2026-08-06 kv-gather case)
+
+If the sglang custom DiT class throws **anything** at construction, the loader
+logs `Error while loading customized transformer, falling back to native
+version` and runs the **diffusers** transformer instead — the run proceeds,
+and a perf/correctness comparison silently measures the wrong implementation.
+Before trusting any run, check the loaded-transformer line:
+`grep "Loaded transformer" server.log` must say `(sgl-diffusion version)`,
+not `(native version)`.
+
+The chain that produced it is worth knowing because every link was silent:
+
+- `python3 -m sglang.cli.main generate ...` is a **silent no-op** (exit 0, no
+  output, even for `--help`): `cli/main.py` has no `__main__` guard. Use the
+  `sglang` console script; PYTHONPATH still selects the code root.
+- `git checkout FETCH_HEAD -- <paths>` **stages** the fetched content, and a
+  trailing `git checkout .` restores the worktree *from the index* — it does
+  not undo it. The tree keeps foreign versions of those paths (here: branch
+  layer.py + upstream-main server_args.py → `AttributeError` at DiT init →
+  the silent diffusers fallback above). `git status --short` first-column `M`
+  means staged foreign content; recover with `git checkout HEAD -- <paths>`.
+
+Related property, useful for consistency tests: at SP2, K/V-gather and Ulysses
+attention outputs are **byte-identical** (per (row, head) pair the KV scan
+order is the same), so a cross-mode check can assert md5 equality instead of a
+tolerance — and an md5 match is expected, not suspicious.
+
 ## Reporting
 
 Lead with the verdict:
