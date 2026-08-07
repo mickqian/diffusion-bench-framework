@@ -4048,6 +4048,10 @@
 
       /* ---------- nightly performance track ---------- */
       const NIGHTLY = {
+        // same-origin snapshot refreshed by .github/workflows/mirror-nightly.yml;
+        // no GitHub API quota involved (the anonymous 60/hour limit is shared per
+        // egress IP, so proxy/NAT users saw permanent 403s on the live listing)
+        bundleUrl: "nightly-data.json",
         listApi: "https://api.github.com/repos/sgl-project/ci-data-diffusion/contents/diffusion-comparisons",
         repoUrl: "https://github.com/sgl-project/ci-data-diffusion/tree/main/diffusion-comparisons",
         maxRuns: 30,
@@ -4130,30 +4134,40 @@
           status.textContent = "Loading nightly data…";
         }
         try {
-          const listResp = await fetch(NIGHTLY.listApi, { headers: { Accept: "application/vnd.github+json" } });
-          if (!listResp.ok) throw new Error("listing " + listResp.status);
-          const list = await listResp.json();
-          const files = list
-            .filter((f) => /^\d{4}-\d{2}-\d{2}_.*\.json$/.test(f.name))
-            .sort((a, b) => (a.name < b.name ? -1 : 1));
-          const recent = files.slice(-NIGHTLY.maxRuns);
-          if (!recent.length) throw new Error("no runs found");
-          status.textContent = `Fetching ${recent.length} nightly runs…`;
-
-          const runs = (
-            await Promise.all(
-              recent.map(async (f) => {
-                try {
-                  const r = await fetch(f.download_url, { cache: "no-store" });
-                  return r.ok ? await r.json() : null;
-                } catch {
-                  return null;
-                }
-              })
-            )
-          )
-            .filter(Boolean)
-            .sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp));
+          let runs = null;
+          // 1) same-origin snapshot: one request, no API quota
+          try {
+            const b = await fetch(`${NIGHTLY.bundleUrl}?h=${Math.floor(Date.now() / 36e5)}`);
+            if (b.ok) {
+              const bundle = await b.json();
+              if (Array.isArray(bundle.runs) && bundle.runs.length) runs = bundle.runs;
+            }
+          } catch {}
+          // 2) live GitHub listing (anonymous, per-IP rate limited) as fallback
+          if (!runs) {
+            const listResp = await fetch(NIGHTLY.listApi, { headers: { Accept: "application/vnd.github+json" } });
+            if (!listResp.ok) throw new Error("listing " + listResp.status);
+            const list = await listResp.json();
+            const files = list
+              .filter((f) => /^\d{4}-\d{2}-\d{2}_.*\.json$/.test(f.name))
+              .sort((a, b) => (a.name < b.name ? -1 : 1));
+            const recent = files.slice(-NIGHTLY.maxRuns);
+            if (!recent.length) throw new Error("no runs found");
+            status.textContent = `Fetching ${recent.length} nightly runs…`;
+            runs = (
+              await Promise.all(
+                recent.map(async (f) => {
+                  try {
+                    const r = await fetch(f.download_url, { cache: "no-store" });
+                    return r.ok ? await r.json() : null;
+                  } catch {
+                    return null;
+                  }
+                })
+              )
+            ).filter(Boolean);
+          }
+          runs.sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp));
           if (!runs.length) throw new Error("could not read any run");
 
           const cases = new Map();

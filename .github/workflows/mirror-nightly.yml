@@ -1,0 +1,34 @@
+name: Mirror nightly data into Pages
+
+on:
+  schedule:
+    - cron: "20 */6 * * *"
+  workflow_dispatch:
+
+concurrency:
+  group: mirror-nightly
+  cancel-in-progress: true
+
+permissions:
+  contents: write
+
+jobs:
+  mirror:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Aggregate recent nightly runs
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: python3 scripts/mirror_nightly_data.py
+      - name: Commit snapshot when it changed
+        run: |
+          if git diff --quiet docs/nightly-data.json; then
+            echo "snapshot unchanged"
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add docs/nightly-data.json
+          git commit -m "chore: refresh nightly data snapshot [skip ci]"
+          git push
