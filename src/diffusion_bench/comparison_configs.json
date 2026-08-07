@@ -2746,6 +2746,80 @@
                 "lightx2v": "No tracked LightX2V Cosmos3 serving path in this benchmark.",
                 "trtllm-visual": "Not yet classified. Confirm framework support and add a validated command profile, or mark unsupported."
             }
+        },
+        {
+            "id": "minimax_h3_t2va_5s",
+            "model": "MiniMaxAI/MiniMax-H3",
+            "task": "text-to-video",
+            "prompt": "At night, while their owner sleeps in a bedroom, three cats march in loudly playing tiny brass instruments, then abruptly file out.",
+            "width": 1344,
+            "height": 768,
+            "num_frames": 124,
+            "seed": 1101,
+            "num_gpus": 2,
+            "fps": 24,
+            "num_inference_steps": 50,
+            "framework_request_extra": {
+                "sglang": {
+                    "task": "t2va",
+                    "conditions": [],
+                    "target": {
+                        "short_edge": 768,
+                        "aspect_ratio": "16:9",
+                        "duration_seconds": 5.0
+                    },
+                    "flow_shift": 12.0,
+                    "audio_flow_shift": 3.0,
+                    "num_frames": null,
+                    "fps": null
+                },
+                "vllm-omni": {
+                    "extra_params": {
+                        "task": "t2va",
+                        "duration": 5.0,
+                        "audio_flow_shift": 3.0,
+                        "aspect_ratio": "16:9"
+                    },
+                    "flow_shift": 12.0
+                }
+            },
+            "frameworks": {
+                "sglang": {
+                    "serve_args": "--model-type diffusion --warmup-mode server --model-variant fl2va --enable-torch-compile false",
+                    "command_profiles": {
+                        "default": {
+                            "description": "Model-default topology; validate before publishing on hardware without a dedicated profile below.",
+                            "sglang_ref": "current-main",
+                            "serve_args": "--model-type diffusion --warmup-mode server --model-variant fl2va --ulysses-degree 2 --performance-mode speed --enable-torch-compile false",
+                            "notes": "Mirrors the cookbook's 4x-class Ulysses4 resident recipe scaled to num_gpus; NOT validated at num_gpus=2 -- validate (incl. OOM risk) before publishing.",
+                            "policy_exception": "Correctness exception, not a speed tradeoff: MiniMax-H3's torch.compile path changes numerical output per the sglang cookbook (docs/cookbook/diffusion/MiniMax/MiniMax-H3.mdx, checked 2026-08-07) -- compile is not enabled by any recommended lossless preset for this model and must not be used to generate consistency ground truth. --enable-torch-compile stays false in every profile for this case until upstream fixes the numerics."
+                        },
+                        "rtx5090-2gpu": {
+                            "description": "2x RTX 5090 (32 GB) layerwise-offload recipe -- the lightweight, broadly-runnable topology for this case.",
+                            "hardware": [
+                                "rtx5090"
+                            ],
+                            "sglang_ref": "7f069277c4 (2026-08-04 checkout)",
+                            "num_gpus": 2,
+                            "serve_args": "--model-type diffusion --warmup-mode server --model-variant fl2va --tp-size 2 --ulysses-degree 1 --performance-mode memory --layerwise-offload-components dit,text_encoder,vae --dit-offload-prefetch-size 1 --dit-layerwise-resident-layers 20 --enable-torch-compile false",
+                            "notes": "Matches docs/cookbook/diffusion/MiniMax/MiniMax-H3.mdx's verified 2xRTX5090/32GB/377GiB-host recipe as-is. The recorded numbers below (612.65s/556.79s/23366MB) were captured 2026-08-07 on minimax-h3-5090-2gpu-v4 from a run that used --dit-offload-prefetch-size 0 instead of 1, chosen at the time because prefetch-size 1 had intermittently deadlocked at 'Loading MiniMaxH3DiTModel ... Run:ai Model Streamer' on a minority of launches. That deadlock's real cause turned out to be unrelated to prefetch-size -- LayerwiseOffloadManager.__init__ clamps prefetch_size to min(max(1, prefetch_size), num_layers), so 0 and 1 are runtime-identical, and the 0-vs-1 correlation was coincidence (page-cache warmth carried over across attempts). The actual root cause: runai_model_streamer issues an unconditional torch.distributed collective (new_group + all_gather_object) inside find_local_ranks() on the first stream_files() call per component per rank, regardless of the is_distributed argument sglang passes (always False here); any per-rank divergence in layerwise-offload load order or timing can call that ad-hoc group out of lockstep and hang. Fixed at the sglang layer in sgl-project/sglang#33969 (monkeypatches find_local_ranks to skip the collective) -- serve_args here now uses the cookbook's prefetch-size 1 since 0 was never actually load-bearing; re-validate this cell once that PR lands to confirm the hang no longer reproduces even under adversarial per-rank timing. Client wall 612.65s, server-reported inference_time_s 556.79, peak_memory_mb 23366 (well under the 32 GB budget). --performance-mode speed excluded: H3's compile path changes numerics, and speed mode's residency assumption does not fit 32 GB without the layerwise knobs above. Single-GPU (num_gpus=1, tp_size=1) at this exact shape (1344x768, 124 frames) OOMs even at resident-layers=20 -- TP2's per-rank activation footprint (measured ~13 GB/rank at 100% util during a real denoise) roughly doubles unsharded on 1 GPU, on top of a 32 GB card already near its edge per the cookbook's own 2-GPU peak (~31.7 GiB/rank); the case is 2-GPU-only until that's independently reworked.",
+                            "policy_exception": "Same correctness exception as the default profile (checked 2026-08-07): MiniMax-H3's torch.compile path changes numerical output per the sglang cookbook, so it is excluded regardless of hardware."
+                        }
+                    }
+                }
+            },
+            "report_framework_statuses": {
+                "vllm-omni": "failed",
+                "lightx2v": "unsupported",
+                "trtllm-visual": "unsupported",
+                "diffusers": "unsupported"
+            },
+            "report_framework_reasons": {
+                "vllm-omni": "Empirically validated 2026-08-07 on minimax-h3-5090-2gpu-v4 (2x RTX 5090): the default profile boots, passes health, and accepts a corrected request (needs explicit aspect_ratio -- see command_profiles.default.notes), then hard-crashes 1 step into denoising with a native segfault whose Python trace runs through torch Dynamo's custom_eval_frame, despite the recipe's own claim that torch.compile is 'not enabled by default on consumer paths.' Adding --enforce-eager to rule out compile does not fix it -- the server instead fails at startup with a different error (a diffusion worker process dies before completing its init handshake, surfaced to the parent as EOFError on the worker's pipe). Both failures reproduce cleanly and neither is a request- or config-shape issue on this side; this reads as a vLLM-Omni MiniMax-H3 stability bug on this GPU class, not something fixable from the benchmark harness.",
+                "lightx2v": "No MiniMax-H3 pipeline in LightX2V as of 2026-08; a turbo LoRA effort for H3 was blocked by the model license's territory clause (excludes EU/UK/South Korea/US), not by missing engineering support.",
+                "trtllm-visual": "trtllm-visual's tracked scope in this harness is image cases; H3 is a video+audio model.",
+                "diffusers": "MiniMax-H3 is integrated as Modular Diffusers blocks only (no DiffusionPipeline), and only via an unmerged PR (huggingface/diffusers#14355 -- pip install git+.../diffusers.git@refs/pull/14355/head). Not a servable baseline path today."
+            }
         }
     ]
 }

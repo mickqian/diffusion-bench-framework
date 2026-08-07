@@ -13,6 +13,7 @@ what `--hardware-profile <hw>` will actually run; edit THAT profile.
 | ideogram4_t2i_1024_2gpu_tp | h100 | `h100-h200-2gpu-tp-speed` |  |  | `--model-type diffusion --warmup --dit-layerwise-offload false --tp-size 2 --performance-mode speed --enable-torch-compile` |
 | ltx2.3_twostage_t2v_2gpus | h100 | `h100-80gb-2gpu` | yes |  | `--model-type diffusion --warmup --enable-cfg-parallel --pipeline-class-name LTX2TwoStagePipeline --ltx2-two-stage-device-mode snapshot` |
 | ltx2_twostage_t2v | h100 | `default` |  |  | `--model-type diffusion --warmup --enable-cfg-parallel --pipeline-class-name LTX2TwoStagePipeline --dit-layerwise-offload false --performance-mode speed --enable-torch-compile` |
+| minimax_h3_t2va_5s | h100 | `default` | yes |  | `--model-type diffusion --warmup-mode server --model-variant fl2va --ulysses-degree 2 --performance-mode speed --enable-torch-compile false` |
 | qwen_image_2512_t2i_1024 | h100 | `h100-2gpu-ulysses-speed-eager` | yes |  | `--model-type diffusion --warmup --dit-layerwise-offload false --tp-size 1 --ulysses-degree 2 --enable-cfg-parallel false --performance-mode speed --enable-torch-compile false` |
 | qwen_image_2512_t2i_1024_truecfg | h100 | `h100-h200-2gpu-tp-speed-compile` |  |  | `--model-type diffusion --warmup --enable-cfg-parallel --performance-mode speed --enable-torch-compile` |
 | qwen_image_edit_2511 | h100 | `default` |  |  | `--model-type diffusion --warmup --tp-size 2 --dit-layerwise-offload false --performance-mode speed --enable-torch-compile` |

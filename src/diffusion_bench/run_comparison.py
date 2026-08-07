@@ -587,6 +587,7 @@ def _hardware_profile_candidates(hardware_metadata: dict | None) -> list[str]:
         "a100",
         "l40",
         "l4",
+        "rtx5090",
         "rtx4090",
         "rtx3090",
     ):

@@ -23,3 +23,4 @@ Scope matrix (has a command profile), NOT run-results. `profile`=configured to r
 | cosmos3_nano_t2i_720p | text-to-image | profile | profile | n/a | profile |
 | cosmos3_nano_t2v_720p_189f | text-to-video | profile | profile | n/a | TODO |
 | cosmos3_nano_i2v_720p_189f | image-to-video | profile | profile | n/a | TODO |
+| minimax_h3_t2va_5s | text-to-video | profile | FAIL | n/a | n/a |
