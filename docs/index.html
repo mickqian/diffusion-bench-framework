@@ -180,6 +180,13 @@
         text-rendering: optimizeLegibility;
       }
 
+      /* the page ships a --mono stack but had no rule using it; default
+         monospace runs wide next to Ubuntu, so scale it back to match */
+      code {
+        font-family: var(--mono);
+        font-size: 0.9em;
+      }
+
       ::selection {
         background: var(--accent-tint);
         color: var(--accent-strong);
@@ -296,6 +303,24 @@
         font-size: 20px;
         font-weight: 500;
         letter-spacing: -0.01em;
+      }
+
+      .brand-group {
+        display: flex;
+        align-items: baseline;
+        gap: 10px;
+      }
+
+      /* Derived from the page's own Last-Modified, so it cannot go stale. */
+      .site-updated {
+        font-size: 11px;
+        color: var(--muted);
+        letter-spacing: 0.02em;
+        white-space: nowrap;
+      }
+
+      .site-updated:empty {
+        display: none;
       }
 
       .nav-links {
@@ -2205,7 +2230,10 @@
   <body>
     <header class="topbar" aria-label="SGLang-Diffusion navigation">
       <div class="shell topbar-inner">
-        <a class="brand" href="#top">SGLang-Diffusion</a>
+        <span class="brand-group">
+          <a class="brand" href="#top">SGLang-Diffusion</a>
+          <span class="site-updated" id="siteUpdated"></span>
+        </span>
         <nav class="nav-links">
           <a href="#gallery">Gallery</a>
           <a href="#performance">Performance gains</a>
@@ -2250,7 +2278,7 @@
             </div>
             <div class="system-line">
               <b>Quality</b>
-              <span>Use cache, quantization, and progressive resolution only with visible quality-drift evaluation.</span>
+              <span>Every request is bit-exact under the default <code>quality</code>; cache, quantization, and sparsity are opted into with visible quality drift.</span>
             </div>
           </div>
         </aside>
@@ -2310,10 +2338,10 @@
               <li><b>Dynamic batching</b> &mdash; keep the GPU busy</li>
               <li><b>Full-stack layerwise offload</b> &mdash; fit larger models</li>
               <li><b>VAE parallel decode</b> &mdash; split across GPUs</li>
-              <li><b>Model-aware parallelism</b> &mdash; TP / SP / CFG</li>
+              <li><b>Model-aware parallelism</b> &mdash; TP / SP / CFG / DP</li>
               <li><b>Disaggregation</b> &mdash; Mooncake, split stages</li>
               <li><b>Shared CUDA kernel stack</b> &mdash; reuse tuned kernels</li>
-              <li><b>Breakable CUDA graph</b> &mdash; runtime kernel selection</li>
+              <li><b>Breakable CUDA graph</b> &mdash; capture the DiT, break at attention</li>
             </ul>
           </article>
           <article class="summary-card">
@@ -2366,7 +2394,7 @@
           </article>
           <article class="lesson">
             <b>Broad model coverage</b>
-            <p>20+ image and video families — Wan, FLUX, HunyuanVideo, LTX, Qwen-Image, Cosmos and more — plus 3D generation and high-speed inference for real-time world models, all served on one stack.</p>
+            <p>20+ image and video families — Wan, FLUX, HunyuanVideo, LTX, Qwen-Image, Cosmos and more — plus 3D generation, high-speed inference for real-time world models, and vision-language-action policies that emit robot action chunks rather than pixels, all served on one stack.</p>
           </article>
         </div>
       </section>
@@ -2452,6 +2480,18 @@
         }).observe(sentinel);
       }
 
+      /* ---------- last updated: read from the page's own Last-Modified, so it
+         tracks the deploy instead of a hand-edited string that silently rots ---------- */
+      {
+        const el = document.getElementById("siteUpdated");
+        const stamp = Date.parse(document.lastModified);
+        if (el && Number.isFinite(stamp) && stamp > 0) {
+          const d = new Date(stamp);
+          const pad = (n) => String(n).padStart(2, "0");
+          el.textContent = `updated ${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+        }
+      }
+
       /* ---------- theme ---------- */
       const themeToggle = document.getElementById("themeToggle");
 
@@ -2534,12 +2574,12 @@
             title: "Rich, model-aware parallelism",
             status: "shipped",
             summary:
-              "A full parallelism toolbox — tensor, sequence (Ulysses + ring), and CFG parallelism, plus parallel VAE decoding — applied as model-dependent levers rather than afterthoughts.",
+              "A full parallelism toolbox — tensor, sequence (Ulysses + ring, or a K/V all-gather instead), and CFG parallelism, plus parallel text/image encoding, parallel VAE decoding, and whole-engine replicas when concurrent requests are the load — applied as model-dependent levers rather than afterthoughts.",
             optimizes: "Long latent sequences, video attention cost, VAE/decode cost, and multi-GPU utilization.",
             matters:
               "For video and high-resolution generation, decode and communication can be as visible as the denoising kernels — so the VAE decoder is now parallelized too, not just the DiT.",
             helps:
-              "Wan, Cosmos, LTX-style video paths, high-resolution image models, and requests with large latent token counts.",
+              "Wan, Cosmos, LTX-style video paths, high-resolution image models, and requests with latent token counts too large for one GPU or one node.",
             links: [["Sequence parallelism", "https://docs.sglang.io/docs/sglang-diffusion/ring_sp_performance"]]
           },
           {
@@ -2547,7 +2587,7 @@
             title: "Off the CPU critical path",
             status: "shipped",
             summary:
-              "Drive the hundreds of per-step launches off the CPU — CUDA graphs capture the DiT loop, host/kwargs copies are elided, and fused kernels collapse many launches into few — so the GPU never waits on Python.",
+              "Drive the hundreds of per-step launches off the CPU — CUDA graphs replay the DiT forward, host/kwargs copies are elided, and fused kernels collapse many launches into few — so the GPU never waits on Python.",
             optimizes: "Per-step host overhead and kernel-launch count, which dominate wall-clock once each denoising step is short.",
             matters:
               "On fast models a step can finish before the CPU has queued the next one; removing CPU overhead is then worth more than a faster kernel.",
@@ -2560,32 +2600,29 @@
             title: "Shared CUDA kernel stack",
             status: "shipped",
             summary:
-              "Reuse SGLang's sgl-kernel for general ops — fused RMSNorm, SiLU-and-mul, FP4 quant GEMM, FlashAttention — plus a diffusion-specific jit_kernel set (fused norm-scale-shift, group-norm-SiLU, QK-norm RoPE) on the DiT hot loop.",
+              "Reuse SGLang's shared kernel library for general ops — fused RMSNorm, SiLU-and-mul, FP4 quant GEMM, FlashAttention — plus a diffusion-specific kernel set (fused norm-scale-shift, group-norm-SiLU, QK-norm RoPE) on the DiT hot loop.",
             optimizes: "Per-step denoising latency and kernel-launch overhead by replacing eager PyTorch with fused CUDA/Triton kernels on the repeated DiT work.",
             matters:
-              "A DiT runs the same block hundreds of times per request; the same battle-tested kernels behind SGLang's LLM runtime carry over, plus diffusion-specific fusions.",
+              "Fusion can come from a compiler or from a kernel. Written kernels now match or beat torch.compile on most diffusion models, so the fast path is the default one — no compile wait, no recompile when a shape changes, no second numeric path to validate.",
             helps:
               "Every DiT-based image/video model, especially long video sampling where the denoiser dominates wall-clock time.",
             links: [
-              ["sgl-kernel", "https://github.com/sgl-project/sglang/tree/main/sgl-kernel"],
-              ["jit_kernel", "https://github.com/sgl-project/sglang/tree/main/python/sglang/jit_kernel/diffusion"]
+              ["Kernel stack", "https://github.com/sgl-project/sglang/tree/main/python/sglang/kernels"],
+              ["Diffusion kernels", "https://github.com/sgl-project/sglang/tree/main/python/sglang/kernels/ops/diffusion"]
             ]
           },
           {
-            label: "Kernel path",
-            title: "Breakable CUDA graph and kernel selection",
-            status: "WIP",
+            label: "Host path",
+            title: "Breakable CUDA graph",
+            status: "shipped",
             summary:
-              "Roadmap work to keep graph benefits through diffusion control flow and choose between fused and compiled kernels by shape and hardware.",
-            optimizes: "Launch overhead, stable hot loops, and kernel-path selection without forcing one backend everywhere.",
+              "Capture the DiT forward as CUDA graph segments split at attention — SP all-to-all and dynamic attention stay eager while everything between them replays — with one capture per declared resolution and prompt-length bucket, all taken at warmup.",
+            optimizes: "Per-kernel launch overhead on fixed-resolution serving paths, without giving up the eager regions the pipeline still needs.",
             matters:
-              "Diffusion has repeated work but also control flow. The goal is graph and kernel efficiency without losing pipeline flexibility.",
+              "Diffusion has repeated work but also control flow. An all-or-nothing graph forces a choice between launch overhead and flexibility; a breakable one does not.",
             helps:
-              "Stable-shape serving paths and deployments where fused kernels or compiled kernels win under different model/hardware regimes.",
-            links: [
-              ["BCG PR", "https://github.com/sgl-project/sglang/pull/27436"],
-              ["Kernel selection PR", "https://github.com/sgl-project/sglang/pull/27250/changes"]
-            ]
+              "Launch-bound image and video paths where every served resolution is known ahead of time and can be declared up front.",
+            links: [["Breakable CUDA graph", "https://github.com/sgl-project/sglang/pull/27436"]]
           }
         ],
         lossy: [
@@ -2638,7 +2675,7 @@
             title: "Attention backends",
             status: "quality tradeoff",
             summary:
-              "Swap the attention backend per model and hardware, including sparse and quantized paths — sliding-tile, block/video-sparse, and SageAttention-style quantized attention — that trade a little fidelity for speed.",
+              "Swap the attention backend per model and hardware, including sparse and quantized paths — sliding-tile, block/video-sparse, SageAttention-style quantized attention, and fine-tuned sparse-linear hybrids pairing a sparse branch with a learned linear one — that trade a little fidelity for speed.",
             optimizes: "Attention cost, which dominates long-frame video and high-resolution latents, by taking a cheaper attention path where the quality envelope allows.",
             matters:
               "Exact backends (FlashAttention, SDPA) stay lossless; the sparse and quantized ones are a real speed lever for long sequences but must be reported with quality drift.",
