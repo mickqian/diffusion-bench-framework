@@ -48,15 +48,6 @@
     },
     {
       "type": "image",
-      "src": "gallery/desert_ruins.png",
-      "model": "Ideogram-4",
-      "prompt": "A lone traveler crossing red sandstone badlands at golden hour — vast emptiness under low, raking light.",
-      "params": "1280×768 · text-to-image · 2-GPU TP",
-      "time": "5s",
-      "aspect": "1280 / 768"
-    },
-    {
-      "type": "image",
       "src": "gallery/aurora_coast.png",
       "model": "Ideogram-4",
       "prompt": "A black volcanic coastline beneath a sweeping green aurora — the night sky ablaze over dark, breaking waves.",
@@ -80,16 +71,6 @@
       "poster": "gallery/fjord_v.png",
       "model": "LTX-2.3 HQ",
       "prompt": "Image-to-video from the fjord still — mist drifts between the granite cliffs and ripples spread across the still water.",
-      "params": "1920×1088 · image-to-video · two-stage HQ",
-      "time": "85s",
-      "aspect": "1920 / 1088"
-    },
-    {
-      "type": "video",
-      "src": "gallery/desert_ruins_v.mp4",
-      "poster": "gallery/desert_ruins_v.png",
-      "model": "LTX-2.3 HQ",
-      "prompt": "Image-to-video from the desert still — a lone traveler walks on as heat haze shimmers and fine sand drifts in the wind.",
       "params": "1920×1088 · image-to-video · two-stage HQ",
       "time": "85s",
       "aspect": "1920 / 1088"
@@ -169,13 +150,12 @@
     },
     {
       "type": "video",
-      "src": "gallery/ltx23.mp4",
-      "poster": "gallery/ltx23.png",
-      "model": "LTX-2.3",
-      "prompt": "A paper boat drifting down a rain-slick gutter through fallen ginkgo leaves, shallow depth of field.",
-      "params": "768×512 · 121 frames",
-      "time": "16s",
-      "aspect": "768 / 512"
+      "src": "gallery/h3_ref2va_street.mp4",
+      "poster": "gallery/h3_ref2va_street.png",
+      "model": "MiniMax-H3",
+      "prompt": "Ref2VA: a real street-chase film clip supplied as the video reference; H3 composites an animated character into the scene and generates synchronized audio, while the reference footage itself is untouched, unsynthesized source material.",
+      "params": "1344×768 · ref2va · video reference + audio",
+      "aspect": "1344 / 768"
     }
   ]
 }
