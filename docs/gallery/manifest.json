@@ -12,33 +12,6 @@
     },
     {
       "type": "image",
-      "src": "gallery/fjord.png",
-      "model": "Ideogram-4",
-      "prompt": "A misty Norwegian fjord at first light — sheer cliffs falling to still water, a lone kayak gliding far below.",
-      "params": "1280×768 · text-to-image · 2-GPU TP",
-      "time": "5s",
-      "aspect": "1280 / 768"
-    },
-    {
-      "type": "image",
-      "src": "gallery/cathedral.png",
-      "model": "Ideogram-4",
-      "prompt": "The vast nave of a Gothic cathedral in raking light — a lone figure dwarfed by stone columns, stark black and white.",
-      "params": "768×1280 · text-to-image · 2-GPU TP",
-      "time": "5s",
-      "aspect": "768 / 1280"
-    },
-    {
-      "type": "image",
-      "src": "gallery/glacier.png",
-      "model": "Ideogram-4",
-      "prompt": "An aerial sweep over a vast blue glacier — deep crevasses fracturing the ice, a tiny figure giving the scale.",
-      "params": "1280×768 · text-to-image · 2-GPU TP",
-      "time": "5s",
-      "aspect": "1280 / 768"
-    },
-    {
-      "type": "image",
       "src": "gallery/redwoods.png",
       "model": "Ideogram-4",
       "prompt": "A towering redwood grove in morning fog — immense trunks above a quiet forest path, sun filtering through the canopy.",
@@ -70,7 +43,7 @@
       "src": "gallery/fjord_v.mp4",
       "poster": "gallery/fjord_v.png",
       "model": "LTX-2.3 HQ",
-      "prompt": "Image-to-video from the fjord still — mist drifts between the granite cliffs and ripples spread across the still water.",
+      "prompt": "Image-to-video from a still of a misty Norwegian fjord — mist drifts between the granite cliffs and ripples spread across the still water.",
       "params": "1920×1088 · image-to-video · two-stage HQ",
       "time": "85s",
       "aspect": "1920 / 1088"
