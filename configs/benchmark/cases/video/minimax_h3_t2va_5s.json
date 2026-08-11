@@ -56,34 +56,57 @@
           "serve_args": "--model-type diffusion --warmup-mode server --model-variant fl2va --tp-size 2 --ulysses-degree 1 --performance-mode memory --layerwise-offload-components dit,text_encoder,vae --dit-offload-prefetch-size 1 --dit-layerwise-resident-layers 20 --enable-torch-compile false",
           "notes": "Matches docs/cookbook/diffusion/MiniMax/MiniMax-H3.mdx's verified 2xRTX5090/32GB/377GiB-host recipe as-is. The recorded numbers below (612.65s/556.79s/23366MB) were captured 2026-08-07 on minimax-h3-5090-2gpu-v4 from a run that used --dit-offload-prefetch-size 0 instead of 1, chosen at the time because prefetch-size 1 had intermittently deadlocked at 'Loading MiniMaxH3DiTModel ... Run:ai Model Streamer' on a minority of launches. That deadlock's real cause turned out to be unrelated to prefetch-size -- LayerwiseOffloadManager.__init__ clamps prefetch_size to min(max(1, prefetch_size), num_layers), so 0 and 1 are runtime-identical, and the 0-vs-1 correlation was coincidence (page-cache warmth carried over across attempts). The actual root cause: runai_model_streamer issues an unconditional torch.distributed collective (new_group + all_gather_object) inside find_local_ranks() on the first stream_files() call per component per rank, regardless of the is_distributed argument sglang passes (always False here); any per-rank divergence in layerwise-offload load order or timing can call that ad-hoc group out of lockstep and hang. Fixed at the sglang layer in sgl-project/sglang#33969 (monkeypatches find_local_ranks to skip the collective) -- serve_args here now uses the cookbook's prefetch-size 1 since 0 was never actually load-bearing; re-validate this cell once that PR lands to confirm the hang no longer reproduces even under adversarial per-rank timing. Client wall 612.65s, server-reported inference_time_s 556.79, peak_memory_mb 23366 (well under the 32 GB budget). --performance-mode speed excluded: H3's compile path changes numerics, and speed mode's residency assumption does not fit 32 GB without the layerwise knobs above. Single-GPU (num_gpus=1, tp_size=1) at this exact shape (1344x768, 124 frames) OOMs even at resident-layers=20 -- TP2's per-rank activation footprint (measured ~13 GB/rank at 100% util during a real denoise) roughly doubles unsharded on 1 GPU, on top of a 32 GB card already near its edge per the cookbook's own 2-GPU peak (~31.7 GiB/rank); the case is 2-GPU-only until that's independently reworked.",
           "policy_exception": "Same correctness exception as the default profile (checked 2026-08-07): MiniMax-H3's torch.compile path changes numerical output per the sglang cookbook, so it is excluded regardless of hardware."
+        },
+        "b200-2gpu": {
+          "description": "2x B200 (183 GB), fully resident -- no layerwise offload needed at this memory class.",
+          "hardware": [
+            "b200",
+            "b300"
+          ],
+          "sglang_ref": "8d0c77081 (2026-08-07 checkout, includes sgl-project/sglang#33969)",
+          "num_gpus": 2,
+          "serve_args": "--model-type diffusion --warmup-mode server --model-variant fl2va --ulysses-degree 2 --performance-mode speed --enable-torch-compile false",
+          "notes": "Validated 2026-08-07 on 2 independent fresh 2xB200 devboxes (h3-b200-2gpu-v2 and its predecessor), same request as the rtx5090-2gpu profile. Two back-to-back runs agreed to 2 decimal places: client wall 80.64s/80.63s, server-reported inference_time_s 75.42/75.42, peak_memory_mb 108328/108358 (well under the 183 GB budget -- room to spare, unlike the 32 GB RTX5090 profile which needs the layerwise-offload knobs). ~7.6x faster wall-clock than the rtx5090-2gpu profile on the identical request; expected given B200's raw compute plus the total absence of the 5090 recipe's CPU<->GPU layerwise-transfer tax. See the vllm-omni entry's b200-2gpu profile for the cross-framework comparison on the same hardware.",
+          "policy_exception": "Same correctness exception as the default profile (checked 2026-08-07): MiniMax-H3's torch.compile path changes numerical output per the sglang cookbook, so it is excluded regardless of hardware."
         }
       }
     },
     "vllm-omni": {
-      "status": "failed",
+      "status": "supported",
       "num_gpus": 2,
-      "serve_args": "--trust-remote-code --tensor-parallel-size 2 --enable-distributed-layerwise-offload --dlo-no-use-allgather --dlo-resident-layers 20 --diffusion-attention-backend CUDNN_ATTN",
+      "serve_args": "--trust-remote-code --tensor-parallel-size 2 --enforce-eager --enable-distributed-layerwise-offload --dlo-no-use-allgather --dlo-resident-layers 20 --diffusion-attention-backend CUDNN_ATTN",
       "extra_env": {
         "VLLM_WORKER_MULTIPROC_METHOD": "spawn",
         "VLLM_OMNI_VIDEO_SYNC_TIMEOUT": "1800"
       },
       "command_profiles": {
         "default": {
-          "description": "vLLM-Omni's own 2-GPU MiniMax-H3 recipe (TP2, distributed layerwise offload). Reaches health and accepts a request, then crashes during generation -- kept for provenance, not a working profile.",
-          "framework_ref": "vllm-omni recipes/MiniMaxAI/MiniMax-H3.md (2-GPU section); installed from git main (0.26.1.dev45+g24ede9e22) + vllm==0.26.0, not the repo's default pinned vllm-omni==0.18.0",
+          "description": "vLLM-Omni's own 2-GPU MiniMax-H3 recipe (TP2, distributed layerwise offload, compile path). Reaches health and accepts a request, then crashes during generation -- kept for provenance, not a working profile on any GPU class tested so far.",
+          "framework_ref": "vllm-omni recipes/MiniMaxAI/MiniMax-H3.md (2-GPU section); installed from git main (0.26.1.dev45+g24ede9e22 on RTX 5090, 0.26.1.dev50+gcfa6d66ed on B200) + vllm==0.26.0, not the repo's default pinned vllm-omni==0.18.0",
           "num_gpus": 2,
           "serve_args": "--trust-remote-code --tensor-parallel-size 2 --enable-distributed-layerwise-offload --dlo-no-use-allgather --dlo-resident-layers 20 --diffusion-attention-backend CUDNN_ATTN",
-          "notes": "Requires ffmpeg/ffprobe on PATH for MP4 muxing. The request also needs `aspect_ratio` inside extra_params (the recipe's own T2VA example omits it and 422s with 'RuntimeError: t2va requires an explicit aspect_ratio' as written)."
+          "notes": "Requires ffmpeg/ffprobe on PATH for MP4 muxing. The request also needs `aspect_ratio` inside extra_params (the recipe's own T2VA example omits it and 422s with 'RuntimeError: t2va requires an explicit aspect_ratio' as written). CONFIRMED HARDWARE-INDEPENDENT 2026-08-07: re-ran this exact profile on 2xB200 (sm100, datacenter Blackwell) -- it segfaults with the identical signature as on RTX 5090 (native segfault, Python trace through torch Dynamo's custom_eval_frame), 1 step into denoising. Same bug on two unrelated GPU architectures rules out a consumer-GPU/SM120 quirk; this is a real vLLM-Omni MiniMax-H3 stability bug in the compiled path, not something fixable from the benchmark harness. Use the enforce-eager / b200-2gpu profile instead."
         },
         "enforce-eager": {
-          "description": "Same recipe with --enforce-eager, tried after the default profile segfaulted -- also fails, differently. Kept for provenance only.",
+          "description": "Same recipe with --enforce-eager, tried after the default profile segfaulted. Fails differently (and earlier) on RTX 5090, but is the profile that actually works on B200 -- see command_profiles.b200-2gpu.",
           "framework_ref": "vllm-omni recipes/MiniMaxAI/MiniMax-H3.md (2-GPU section) + --enforce-eager",
           "num_gpus": 2,
           "serve_args": "--trust-remote-code --tensor-parallel-size 2 --enforce-eager --enable-distributed-layerwise-offload --dlo-no-use-allgather --dlo-resident-layers 20 --diffusion-attention-backend CUDNN_ATTN",
-          "notes": "Crashes during server startup (EOFError: a diffusion worker process dies before completing its init handshake) rather than during generation."
+          "notes": "On RTX 5090 this crashes during server startup (EOFError: a diffusion worker process dies before completing its init handshake) rather than during generation, and never reaches a request. UPDATE 2026-08-07: the identical flags reach health and complete a real generation on 2xB200 -- see command_profiles.b200-2gpu for the hardware-scoped, validated version of this same command."
+        },
+        "b200-2gpu": {
+          "description": "2x B200, same recipe as enforce-eager -- the profile that actually completes a generation for this case.",
+          "hardware": [
+            "b200",
+            "b300"
+          ],
+          "framework_ref": "vllm-omni recipes/MiniMaxAI/MiniMax-H3.md (2-GPU section) + --enforce-eager; git main 0.26.1.dev50+gcfa6d66ed + vllm==0.26.0",
+          "num_gpus": 2,
+          "serve_args": "--trust-remote-code --tensor-parallel-size 2 --enforce-eager --enable-distributed-layerwise-offload --dlo-no-use-allgather --dlo-resident-layers 20 --diffusion-attention-backend CUDNN_ATTN",
+          "notes": "Validated 2026-08-07 on 2xB200 (h3-b200-2gpu-v2): completes the case's T2VA request end to end -- client wall 105.76s, server-reported inference_time_s 103.06, peak_memory_mb 24546. Output verified with ffprobe directly on the returned MP4: 124 frames @ 24 fps = 5.166667s, exactly matching the requested 5s/124-frame shape (the API's own JSON `seconds` field reported a stale '4' on both the submit and completed response -- a cosmetic metadata default unrelated to the real generation params, not a real duration shortfall; confirmed by decoding the actual file). Still uses the recipe's memory-constrained --dlo-resident-layers 20 offload even though B200's 183 GB has no need for it -- vllm-omni ships only one documented 2-GPU H3 recipe, so this is that recipe as-is, not a B200-tuned command; a fully-resident vllm-omni command may be faster but is not a documented starting point. Same request, same 2xB200 hardware, sglang's b200-2gpu profile: 80.64s/80.63s client wall, 75.42s inference_time_s -- sglang is ~1.31x faster than vLLM-Omni here."
         }
       },
-      "reason": "Empirically validated 2026-08-07 on minimax-h3-5090-2gpu-v4 (2x RTX 5090): the default profile boots, passes health, and accepts a corrected request (needs explicit aspect_ratio -- see command_profiles.default.notes), then hard-crashes 1 step into denoising with a native segfault whose Python trace runs through torch Dynamo's custom_eval_frame, despite the recipe's own claim that torch.compile is 'not enabled by default on consumer paths.' Adding --enforce-eager to rule out compile does not fix it -- the server instead fails at startup with a different error (a diffusion worker process dies before completing its init handshake, surfaced to the parent as EOFError on the worker's pipe). Both failures reproduce cleanly and neither is a request- or config-shape issue on this side; this reads as a vLLM-Omni MiniMax-H3 stability bug on this GPU class, not something fixable from the benchmark harness."
+      "reason": "Empirically validated 2026-08-07, first on minimax-h3-5090-2gpu-v4 (2x RTX 5090) then on 2xB200: the default (compiled) profile segfaults identically on both GPU classes 1 step into denoising (see command_profiles.default.notes) -- a confirmed hardware-independent vLLM-Omni bug, despite the recipe's own claim that torch.compile is 'not enabled by default on consumer paths.' --enforce-eager avoids that segfault, but on RTX 5090 it fails differently at startup (a diffusion worker process dies before completing its init handshake, surfaced as EOFError) and never completes a request on that GPU class. On 2xB200 the identical --enforce-eager command works cleanly and completes a correct generation -- see command_profiles.b200-2gpu for the validated numbers and the sglang comparison on the same hardware. Net: vLLM-Omni H3 support is real but fragile below the B200 class tested here; RTX 5090 has no working profile for this case in either variant."
     },
     "lightx2v": {
       "status": "unsupported",

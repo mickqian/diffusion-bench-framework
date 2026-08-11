@@ -27,7 +27,7 @@
  "frameworks": {
   "sglang": {
    "status": "supported",
-   "serve_args": "--model-type diffusion --warmup --attention-backend fa --tp-size 2",
+   "serve_args": "--model-type diffusion --warmup-mode server --attention-backend fa --tp-size 2",
    "extra_env": {
     "SGLANG_DISABLE_COSMOS3_GUARDRAILS": "1"
    },
@@ -35,7 +35,7 @@
     "default": {
      "description": "Cosmos3 Nano T2I profile for SGLang-Diffusion main 3d540563.",
      "sglang_ref": "sgl-project/sglang@3d540563916394115f9612f30601ae3fa97ada7c",
-     "serve_args": "--model-type diffusion --warmup --attention-backend fa --tp-size 2 --dit-layerwise-offload false --performance-mode speed --enable-torch-compile",
+     "serve_args": "--model-type diffusion --warmup-mode server --attention-backend fa --tp-size 2 --dit-layerwise-offload false --performance-mode speed --enable-torch-compile",
      "notes": "Guardrails disabled for framework-only serving performance; no cache or torch compile path. Policy-aligned candidate (compile on, offload off) — NOT yet validated on H100; validate (incl. OOM risk) before publishing.",
      "extra_env": {
       "SGLANG_DISABLE_COSMOS3_GUARDRAILS": "1"
@@ -48,7 +48,7 @@
      ],
      "num_gpus": 2,
      "sglang_ref": "current-main",
-     "serve_args": "--model-type diffusion --warmup --attention-backend fa --tp-size 2",
+     "serve_args": "--model-type diffusion --warmup-mode server --attention-backend fa --tp-size 2",
      "notes": "Tensor-parallel across 2 GPUs; no cache, no torch compile."
     },
     "h200-2gpu-tp-fa-speed": {
@@ -58,7 +58,7 @@
      ],
      "num_gpus": 2,
      "sglang_ref": "current-main",
-     "serve_args": "--model-type diffusion --warmup --attention-backend fa --tp-size 2 --performance-mode speed",
+     "serve_args": "--model-type diffusion --warmup-mode server --attention-backend fa --tp-size 2 --performance-mode speed",
      "notes": "Tensor-parallel across 2 GPUs with performance-mode speed; no cache, no torch compile."
     },
     "h200-2gpu-tp-fa-batch4": {
@@ -68,7 +68,7 @@
      ],
      "num_gpus": 2,
      "sglang_ref": "current-main",
-     "serve_args": "--model-type diffusion --warmup --attention-backend fa --tp-size 2 --batching-max-size 4 --enable-batching-metrics",
+     "serve_args": "--model-type diffusion --warmup-mode server --attention-backend fa --tp-size 2 --batching-max-size 4 --enable-batching-metrics",
      "notes": "Tensor-parallel across 2 GPUs plus batch-4 serving pressure; no cache, no torch compile."
     }
    }

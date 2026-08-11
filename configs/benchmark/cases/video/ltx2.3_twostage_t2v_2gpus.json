@@ -14,13 +14,13 @@
  "frameworks": {
   "sglang": {
    "status": "supported",
-   "serve_args": "--model-type diffusion --warmup --enable-cfg-parallel --pipeline-class-name LTX2TwoStagePipeline",
+   "serve_args": "--model-type diffusion --warmup-mode server --enable-cfg-parallel --pipeline-class-name LTX2TwoStagePipeline",
    "extra_env": {},
    "command_profiles": {
     "default": {
      "description": "Fallback SGLang command when no hardware-specific profile matches.",
      "sglang_ref": "current-main",
-     "serve_args": "--model-type diffusion --warmup --enable-cfg-parallel --pipeline-class-name LTX2TwoStagePipeline",
+     "serve_args": "--model-type diffusion --warmup-mode server --enable-cfg-parallel --pipeline-class-name LTX2TwoStagePipeline",
      "notes": "Use hardware-specific profiles for formal H100/H200 runs."
     },
     "h100-80gb-2gpu": {
@@ -30,7 +30,7 @@
      ],
      "sglang_ref": "current-main",
      "num_gpus": 2,
-     "serve_args": "--model-type diffusion --warmup --enable-cfg-parallel --pipeline-class-name LTX2TwoStagePipeline --ltx2-two-stage-device-mode snapshot",
+     "serve_args": "--model-type diffusion --warmup-mode server --enable-cfg-parallel --pipeline-class-name LTX2TwoStagePipeline --ltx2-two-stage-device-mode snapshot",
      "notes": "Snapshot mode avoids H100 resident VRAM pressure.",
      "policy_exception": "Measured H100 A/B 2026-07-03 (steady-state single_e2e): speed+compile OOMs on 2x80GB (79.1/79.2 GiB used, 30MiB alloc failure during request) — two-stage residency + compile workspace does not fit. Snapshot device mode is the fastest configuration that fits (12.03s)."
     },
@@ -41,14 +41,14 @@
      ],
      "sglang_ref": "current-main",
      "num_gpus": 2,
-     "serve_args": "--model-type diffusion --warmup --enable-cfg-parallel --pipeline-class-name LTX2TwoStagePipeline --ltx2-two-stage-device-mode resident",
+     "serve_args": "--model-type diffusion --warmup-mode server --enable-cfg-parallel --pipeline-class-name LTX2TwoStagePipeline --ltx2-two-stage-device-mode resident",
      "notes": "Resident mode is the fastest LTX2.3 two-stage path when both DiTs fit in VRAM."
     },
     "official-original-2gpu": {
      "description": "Official stage-switching semantics profile for LTX2.3 two-stage comparisons.",
      "sglang_ref": "current-main",
      "num_gpus": 2,
-     "serve_args": "--model-type diffusion --warmup --enable-cfg-parallel --pipeline-class-name LTX2TwoStagePipeline --ltx2-two-stage-device-mode original",
+     "serve_args": "--model-type diffusion --warmup-mode server --enable-cfg-parallel --pipeline-class-name LTX2TwoStagePipeline --ltx2-two-stage-device-mode original",
      "notes": "Use this only when official switching semantics are more important than latency."
     }
    }

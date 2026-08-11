@@ -12,13 +12,13 @@
   "frameworks": {
     "sglang": {
       "status": "supported",
-      "serve_args": "--model-type diffusion --warmup --dit-layerwise-offload false --tp-size 2",
+      "serve_args": "--model-type diffusion --warmup-mode server --dit-layerwise-offload false --tp-size 2",
       "extra_env": {},
       "command_profiles": {
         "default": {
           "description": "Best known SGLang command for the benchmark repo default profile.",
           "sglang_ref": "current-main",
-          "serve_args": "--model-type diffusion --warmup --dit-layerwise-offload false --tp-size 2",
+          "serve_args": "--model-type diffusion --warmup-mode server --dit-layerwise-offload false --tp-size 2",
           "notes": "Keep this profile updated when the best command changes for a SGLang release or commit."
         },
         "h100-h200-2gpu-tp-compile": {
@@ -29,7 +29,7 @@
           ],
           "num_gpus": 2,
           "sglang_ref": "legacy-compatible",
-          "serve_args": "--model-type diffusion --warmup --dit-layerwise-offload false --tp-size 2 --enable-torch-compile",
+          "serve_args": "--model-type diffusion --warmup-mode server --dit-layerwise-offload false --tp-size 2 --enable-torch-compile",
           "benchmark": {
             "warmup": {
               "num_requests": 2,
@@ -48,7 +48,7 @@
           ],
           "num_gpus": 2,
           "sglang_ref": "legacy-compatible",
-          "serve_args": "--model-type diffusion --warmup --dit-layerwise-offload false --tp-size 2 --enable-torch-compile",
+          "serve_args": "--model-type diffusion --warmup-mode server --dit-layerwise-offload false --tp-size 2 --enable-torch-compile",
           "benchmark": {
             "warmup": {
               "num_requests": 2,
@@ -65,7 +65,7 @@
           ],
           "num_gpus": 2,
           "sglang_ref": "current-main",
-          "serve_args": "--model-type diffusion --warmup --dit-layerwise-offload false --tp-size 2 --performance-mode speed --enable-torch-compile",
+          "serve_args": "--model-type diffusion --warmup-mode server --dit-layerwise-offload false --tp-size 2 --performance-mode speed --enable-torch-compile",
           "benchmark": {
             "warmup": {
               "num_requests": 2,
@@ -87,7 +87,7 @@
           ],
           "num_gpus": 2,
           "sglang_ref": "current-main",
-          "serve_args": "--model-type diffusion --warmup --dit-layerwise-offload false --tp-size 2 --performance-mode speed --enable-torch-compile",
+          "serve_args": "--model-type diffusion --warmup-mode server --dit-layerwise-offload false --tp-size 2 --performance-mode speed --enable-torch-compile",
           "benchmark": {
             "warmup": {
               "num_requests": 2,

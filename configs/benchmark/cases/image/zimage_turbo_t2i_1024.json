@@ -12,13 +12,13 @@
  "frameworks": {
   "sglang": {
    "status": "supported",
-   "serve_args": "--model-type diffusion --warmup --tp-size 2",
+   "serve_args": "--model-type diffusion --warmup-mode server --tp-size 2",
    "extra_env": {},
    "command_profiles": {
     "default": {
      "description": "Best known SGLang command for the benchmark repo default profile.",
      "sglang_ref": "current-main",
-     "serve_args": "--model-type diffusion --warmup --tp-size 2",
+     "serve_args": "--model-type diffusion --warmup-mode server --tp-size 2",
      "notes": "Keep this profile updated when the best command changes for a SGLang release or commit. Best-lossless = eager: validated compile (0.975s) is slower than eager (0.79s) for this 9-step turbo model, so no compile profile."
     },
     "h100-h200-2gpu-tp-resident-eager": {
@@ -28,7 +28,7 @@
       "h200"
      ],
      "sglang_ref": "current-main",
-     "serve_args": "--model-type diffusion --warmup --tp-size 2 --dit-layerwise-offload false --performance-mode speed --enable-torch-compile false",
+     "serve_args": "--model-type diffusion --warmup-mode server --tp-size 2 --dit-layerwise-offload false --performance-mode speed --enable-torch-compile false",
      "policy_exception": "Measured H100 A/B 2026-07-03 (steady-state single_e2e): speed+compile 0.987/0.997s vs speed-eager 0.701/0.699s vs auto-offload default 0.793/0.799s — compile loses on this 9-step turbo model. Explicit --enable-torch-compile false also future-proofs against speed-mode auto-compile (sglang PR #30016).",
      "notes": "Validated on H100; hardware list includes h200 for selection parity — re-validate there before publishing h200 numbers."
     }

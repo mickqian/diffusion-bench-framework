@@ -12,13 +12,13 @@
  "frameworks": {
   "sglang": {
    "status": "supported",
-   "serve_args": "--model-type diffusion --warmup --dit-layerwise-offload false --tp-size 2",
+   "serve_args": "--model-type diffusion --warmup-mode server --dit-layerwise-offload false --tp-size 2",
    "extra_env": {},
    "command_profiles": {
     "default": {
      "description": "Best known SGLang command for Ideogram-4 T2I at 2-GPU TP.",
      "sglang_ref": "current-main",
-     "serve_args": "--model-type diffusion --warmup --dit-layerwise-offload false --tp-size 2",
+     "serve_args": "--model-type diffusion --warmup-mode server --dit-layerwise-offload false --tp-size 2",
      "notes": "Tensor-parallel across 2 GPUs; no cache, no torch compile. Keep updated as the best command changes."
     },
     "h100-h200-2gpu-tp-speed": {
@@ -29,7 +29,7 @@
      ],
      "num_gpus": 2,
      "sglang_ref": "current-main",
-     "serve_args": "--model-type diffusion --warmup --dit-layerwise-offload false --tp-size 2 --performance-mode speed --enable-torch-compile",
+     "serve_args": "--model-type diffusion --warmup-mode server --dit-layerwise-offload false --tp-size 2 --performance-mode speed --enable-torch-compile",
      "extra_env": {
       "FLASHINFER_USE_CUDA_NORM": "1"
      },

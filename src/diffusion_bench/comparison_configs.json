@@ -31,13 +31,13 @@
             "guidance_scale": 3.5,
             "frameworks": {
                 "sglang": {
-                    "serve_args": "--model-type diffusion --warmup --dit-layerwise-offload false --tp-size 2",
+                    "serve_args": "--model-type diffusion --warmup-mode server --dit-layerwise-offload false --tp-size 2",
                     "extra_env": {},
                     "command_profiles": {
                         "default": {
                             "description": "Best known SGLang command for the benchmark repo default profile.",
                             "sglang_ref": "current-main",
-                            "serve_args": "--model-type diffusion --warmup --dit-layerwise-offload false --tp-size 2",
+                            "serve_args": "--model-type diffusion --warmup-mode server --dit-layerwise-offload false --tp-size 2",
                             "notes": "Keep this profile updated when the best command changes for a SGLang release or commit."
                         },
                         "h100-h200-2gpu-tp-compile": {
@@ -48,7 +48,7 @@
                             ],
                             "num_gpus": 2,
                             "sglang_ref": "legacy-compatible",
-                            "serve_args": "--model-type diffusion --warmup --dit-layerwise-offload false --tp-size 2 --enable-torch-compile",
+                            "serve_args": "--model-type diffusion --warmup-mode server --dit-layerwise-offload false --tp-size 2 --enable-torch-compile",
                             "benchmark": {
                                 "warmup": {
                                     "num_requests": 2,
@@ -67,7 +67,7 @@
                             ],
                             "num_gpus": 2,
                             "sglang_ref": "legacy-compatible",
-                            "serve_args": "--model-type diffusion --warmup --dit-layerwise-offload false --tp-size 2 --enable-torch-compile",
+                            "serve_args": "--model-type diffusion --warmup-mode server --dit-layerwise-offload false --tp-size 2 --enable-torch-compile",
                             "benchmark": {
                                 "warmup": {
                                     "num_requests": 2,
@@ -84,7 +84,7 @@
                             ],
                             "num_gpus": 2,
                             "sglang_ref": "current-main",
-                            "serve_args": "--model-type diffusion --warmup --dit-layerwise-offload false --tp-size 2 --performance-mode speed --enable-torch-compile",
+                            "serve_args": "--model-type diffusion --warmup-mode server --dit-layerwise-offload false --tp-size 2 --performance-mode speed --enable-torch-compile",
                             "benchmark": {
                                 "warmup": {
                                     "num_requests": 2,
@@ -106,7 +106,7 @@
                             ],
                             "num_gpus": 2,
                             "sglang_ref": "current-main",
-                            "serve_args": "--model-type diffusion --warmup --dit-layerwise-offload false --tp-size 2 --performance-mode speed --enable-torch-compile",
+                            "serve_args": "--model-type diffusion --warmup-mode server --dit-layerwise-offload false --tp-size 2 --performance-mode speed --enable-torch-compile",
                             "benchmark": {
                                 "warmup": {
                                     "num_requests": 2,
@@ -240,13 +240,13 @@
             "guidance_scale": 4.0,
             "frameworks": {
                 "sglang": {
-                    "serve_args": "--model-type diffusion --warmup --dit-layerwise-offload false --tp-size 2",
+                    "serve_args": "--model-type diffusion --warmup-mode server --dit-layerwise-offload false --tp-size 2",
                     "extra_env": {},
                     "command_profiles": {
                         "default": {
                             "description": "Best known SGLang command for the benchmark repo default profile.",
                             "sglang_ref": "current-main",
-                            "serve_args": "--model-type diffusion --warmup --dit-layerwise-offload false --tp-size 2",
+                            "serve_args": "--model-type diffusion --warmup-mode server --dit-layerwise-offload false --tp-size 2",
                             "notes": "Keep this profile updated when the best command changes for a SGLang release or commit."
                         },
                         "h100-h200-2gpu-tp-compile": {
@@ -257,7 +257,7 @@
                             ],
                             "num_gpus": 2,
                             "sglang_ref": "legacy-compatible",
-                            "serve_args": "--model-type diffusion --warmup --dit-layerwise-offload false --tp-size 2 --enable-torch-compile",
+                            "serve_args": "--model-type diffusion --warmup-mode server --dit-layerwise-offload false --tp-size 2 --enable-torch-compile",
                             "benchmark": {
                                 "warmup": {
                                     "num_requests": 2,
@@ -276,7 +276,7 @@
                             ],
                             "num_gpus": 2,
                             "sglang_ref": "legacy-compatible",
-                            "serve_args": "--model-type diffusion --warmup --dit-layerwise-offload false --tp-size 2 --enable-torch-compile",
+                            "serve_args": "--model-type diffusion --warmup-mode server --dit-layerwise-offload false --tp-size 2 --enable-torch-compile",
                             "benchmark": {
                                 "warmup": {
                                     "num_requests": 2,
@@ -293,7 +293,7 @@
                             ],
                             "num_gpus": 2,
                             "sglang_ref": "current-main",
-                            "serve_args": "--model-type diffusion --warmup --dit-layerwise-offload false --tp-size 2 --performance-mode speed --enable-torch-compile",
+                            "serve_args": "--model-type diffusion --warmup-mode server --dit-layerwise-offload false --tp-size 2 --performance-mode speed --enable-torch-compile",
                             "benchmark": {
                                 "warmup": {
                                     "num_requests": 2,
@@ -315,7 +315,7 @@
                             ],
                             "num_gpus": 2,
                             "sglang_ref": "current-main",
-                            "serve_args": "--model-type diffusion --warmup --dit-layerwise-offload false --tp-size 2 --performance-mode speed --enable-torch-compile",
+                            "serve_args": "--model-type diffusion --warmup-mode server --dit-layerwise-offload false --tp-size 2 --performance-mode speed --enable-torch-compile",
                             "benchmark": {
                                 "warmup": {
                                     "num_requests": 2,
@@ -514,13 +514,13 @@
             "guidance_scale": 1.0,
             "frameworks": {
                 "sglang": {
-                    "serve_args": "--model-type diffusion --warmup --tp-size 2",
+                    "serve_args": "--model-type diffusion --warmup-mode server --tp-size 2",
                     "extra_env": {},
                     "command_profiles": {
                         "default": {
                             "description": "Best known SGLang command for the benchmark repo default profile.",
                             "sglang_ref": "current-main",
-                            "serve_args": "--model-type diffusion --warmup --tp-size 2",
+                            "serve_args": "--model-type diffusion --warmup-mode server --tp-size 2",
                             "notes": "Keep this profile updated when the best command changes for a SGLang release or commit."
                         },
                         "h100-2gpu-ulysses-speed-eager": {
@@ -529,7 +529,7 @@
                                 "h100"
                             ],
                             "sglang_ref": "current-main",
-                            "serve_args": "--model-type diffusion --warmup --dit-layerwise-offload false --tp-size 1 --ulysses-degree 2 --enable-cfg-parallel false --performance-mode speed --enable-torch-compile false",
+                            "serve_args": "--model-type diffusion --warmup-mode server --dit-layerwise-offload false --tp-size 1 --ulysses-degree 2 --enable-cfg-parallel false --performance-mode speed --enable-torch-compile false",
                             "policy_exception": "compile OFF by measurement, twice over. (1) 2026-07-20 same-machine sweep (2xH100, 50 steps, ms/step): true eager 88.3 (4.54s e2e) vs 07-03-era compile 96.5 (4.97s) vs current-main compile 114.5 (5.83s) — qwen+compile never won (07-03 gain was ~1.5% at best) because inductor's triton GEMMs lose to cublas nvjet on this shape mix. (2) The 07-28 full-matrix run measured 5.74s under compile, matching the 114.5ms/step row: sglang PR #31849 (needed to stop a dynamo crash: can_use_fused_inplace_qknorm_rope receives SymInt under tracing) additionally drops the fused qk-norm-rope kernel when compiling, so compile now also pays the unfused qknorm path x60 blocks. Until the fused kernel is made trace-safe upstream, eager is strictly faster AND numerically identical. Parallelism choice unchanged from 2026-07-03 ABAB x3: Ulysses 4.892 vs best-TP 5.135 (-4.7%, 3/3 pairs); TP-vs-Ulysses MAE 0.74/255 converging with steps = FP-reorder, not a bug.",
                             "notes": "Validated H100 only. --enable-cfg-parallel false required (no-CFG single branch; also prevents speed-mode auto-cfg from overriding sp_degree, PR #30016). speed mode auto-enables compile since #30016, so the eager exception MUST say --enable-torch-compile false explicitly. Campaign follow-ups (fused-qknorm dynamo fix, full-step CUDA graph, IPC A2A — notes/multimodal_gen/qwen_image_vllm_30pct_20260720.md) measured 3.952s on this case; revisit this profile once those PRs merge."
                         },
@@ -539,7 +539,7 @@
                                 "h200"
                             ],
                             "sglang_ref": "origin/main + PR #29774 (QwenImage TP shard) + selective txt_mlp ReplicatedLinear (proposed #29774 follow-up)",
-                            "serve_args": "--model-type diffusion --warmup --dit-layerwise-offload false --tp-size 2 --performance-mode speed --enable-torch-compile",
+                            "serve_args": "--model-type diffusion --warmup-mode server --dit-layerwise-offload false --tp-size 2 --performance-mode speed --enable-torch-compile",
                             "notes": "no-CFG single-branch: TP shard (#29774) but keep text-branch txt_mlp ReplicatedLinear to skip its per-block all-reduce. Measured H100: full-shard 5.65s -> txt_mlp-replicated 5.076s, beats vLLM 5.17s. (true-CFG uses CFG-parallel instead — see the truecfg case.) offload-during-compile is in main. Selective-shard qwen_image.py kept at reports/h100x4-final-20260702/qwen_image_selective_shard.py. H100 superseded by Ulysses profile (measured faster); TP retained for H200 until Ulysses is validated there."
                         }
                     }
@@ -643,13 +643,13 @@
             "_note": "Qwen-Image quality path = official diffusers true-CFG (true_cfg_scale=4.0 + negative_prompt), two transformer forwards per step. Sibling of the no-CFG qwen_image_2512_t2i_1024 (single forward). Both sglang and vLLM-Omni receive identical true_cfg_scale+negative_prompt via the shared payload, so the two-pass comparison is apples-to-apples. Provenance: sglang notes qwen_image_perf_issue_20260508.md.",
             "frameworks": {
                 "sglang": {
-                    "serve_args": "--model-type diffusion --warmup --tp-size 2",
+                    "serve_args": "--model-type diffusion --warmup-mode server --tp-size 2",
                     "extra_env": {},
                     "command_profiles": {
                         "default": {
                             "description": "Best known SGLang command for the benchmark repo default profile.",
                             "sglang_ref": "current-main",
-                            "serve_args": "--model-type diffusion --warmup --tp-size 2",
+                            "serve_args": "--model-type diffusion --warmup-mode server --tp-size 2",
                             "notes": "Keep this profile updated when the best command changes for a SGLang release or commit."
                         },
                         "h100-h200-2gpu-tp-speed-compile": {
@@ -659,7 +659,7 @@
                                 "h200"
                             ],
                             "sglang_ref": "origin/main + PR #29774 (Shard QwenImage DiT across TP ranks; open, not yet merged)",
-                            "serve_args": "--model-type diffusion --warmup --enable-cfg-parallel --performance-mode speed --enable-torch-compile",
+                            "serve_args": "--model-type diffusion --warmup-mode server --enable-cfg-parallel --performance-mode speed --enable-torch-compile",
                             "notes": "CFG parallelism is the cookbook-recommended Qwen multi-GPU path. Measured: 6.49s vs TP #29774 11.07s vs vLLM 10.14s (CFG-parallel 1.56x faster than vLLM). TP shards the DiT but RowParallel all-reduce dominates (~70% kernel time) for the 2-branch case; CFG-parallel avoids it. No #29774 needed here (DiT replicated, one branch per GPU)."
                         }
                     }
@@ -721,13 +721,13 @@
             "guidance_scale": 1.0,
             "frameworks": {
                 "sglang": {
-                    "serve_args": "--model-type diffusion --warmup --tp-size 2",
+                    "serve_args": "--model-type diffusion --warmup-mode server --tp-size 2",
                     "extra_env": {},
                     "command_profiles": {
                         "default": {
                             "description": "Best known SGLang command for the benchmark repo default profile.",
                             "sglang_ref": "current-main",
-                            "serve_args": "--model-type diffusion --warmup --tp-size 2 --dit-layerwise-offload false --performance-mode speed --enable-torch-compile",
+                            "serve_args": "--model-type diffusion --warmup-mode server --tp-size 2 --dit-layerwise-offload false --performance-mode speed --enable-torch-compile",
                             "notes": "Keep this profile updated when the best command changes for a SGLang release or commit. Policy-aligned candidate (compile on, offload off) — NOT yet validated on H100; validate (incl. OOM risk) before publishing."
                         }
                     }
@@ -773,13 +773,13 @@
             "guidance_scale": 0.0,
             "frameworks": {
                 "sglang": {
-                    "serve_args": "--model-type diffusion --warmup --tp-size 2",
+                    "serve_args": "--model-type diffusion --warmup-mode server --tp-size 2",
                     "extra_env": {},
                     "command_profiles": {
                         "default": {
                             "description": "Best known SGLang command for the benchmark repo default profile.",
                             "sglang_ref": "current-main",
-                            "serve_args": "--model-type diffusion --warmup --tp-size 2",
+                            "serve_args": "--model-type diffusion --warmup-mode server --tp-size 2",
                             "notes": "Keep this profile updated when the best command changes for a SGLang release or commit. Best-lossless = eager: validated compile (0.975s) is slower than eager (0.79s) for this 9-step turbo model, so no compile profile."
                         },
                         "h100-h200-2gpu-tp-resident-eager": {
@@ -789,7 +789,7 @@
                                 "h200"
                             ],
                             "sglang_ref": "current-main",
-                            "serve_args": "--model-type diffusion --warmup --tp-size 2 --dit-layerwise-offload false --performance-mode speed --enable-torch-compile false",
+                            "serve_args": "--model-type diffusion --warmup-mode server --tp-size 2 --dit-layerwise-offload false --performance-mode speed --enable-torch-compile false",
                             "policy_exception": "Measured H100 A/B 2026-07-03 (steady-state single_e2e): speed+compile 0.987/0.997s vs speed-eager 0.701/0.699s vs auto-offload default 0.793/0.799s — compile loses on this 9-step turbo model. Explicit --enable-torch-compile false also future-proofs against speed-mode auto-compile (sglang PR #30016).",
                             "notes": "Validated on H100; hardware list includes h200 for selection parity — re-validate there before publishing h200 numbers."
                         }
@@ -900,13 +900,13 @@
             "_note": "Ideogram-4 derives steps and guidance from its sampling preset (V4_DEFAULT_20: 20 steps, final guidance 7); guidance_scale is intentionally omitted because the model rejects an explicit value.",
             "frameworks": {
                 "sglang": {
-                    "serve_args": "--model-type diffusion --warmup --dit-layerwise-offload false --tp-size 2",
+                    "serve_args": "--model-type diffusion --warmup-mode server --dit-layerwise-offload false --tp-size 2",
                     "extra_env": {},
                     "command_profiles": {
                         "default": {
                             "description": "Best known SGLang command for Ideogram-4 T2I at 2-GPU TP.",
                             "sglang_ref": "current-main",
-                            "serve_args": "--model-type diffusion --warmup --dit-layerwise-offload false --tp-size 2",
+                            "serve_args": "--model-type diffusion --warmup-mode server --dit-layerwise-offload false --tp-size 2",
                             "notes": "Tensor-parallel across 2 GPUs; no cache, no torch compile. Keep updated as the best command changes."
                         },
                         "h100-h200-2gpu-tp-speed": {
@@ -917,7 +917,7 @@
                             ],
                             "num_gpus": 2,
                             "sglang_ref": "current-main",
-                            "serve_args": "--model-type diffusion --warmup --dit-layerwise-offload false --tp-size 2 --performance-mode speed --enable-torch-compile",
+                            "serve_args": "--model-type diffusion --warmup-mode server --dit-layerwise-offload false --tp-size 2 --performance-mode speed --enable-torch-compile",
                             "extra_env": {
                                 "FLASHINFER_USE_CUDA_NORM": "1"
                             },
@@ -952,13 +952,13 @@
             "guidance_scale": 6.0,
             "frameworks": {
                 "sglang": {
-                    "serve_args": "--model-type diffusion --warmup --enable-cfg-parallel",
+                    "serve_args": "--model-type diffusion --warmup-mode server --enable-cfg-parallel",
                     "extra_env": {},
                     "command_profiles": {
                         "default": {
                             "description": "Best known SGLang command for the benchmark repo default profile.",
                             "sglang_ref": "current-main",
-                            "serve_args": "--model-type diffusion --warmup --enable-cfg-parallel",
+                            "serve_args": "--model-type diffusion --warmup-mode server --enable-cfg-parallel",
                             "notes": "Keep this profile updated when the best command changes for a SGLang release or commit."
                         },
                         "h200-2gpu-cfg-bf16-vae-resident": {
@@ -968,7 +968,7 @@
                             ],
                             "sglang_ref": "current-main",
                             "num_gpus": 2,
-                            "serve_args": "--model-type diffusion --warmup --enable-cfg-parallel --dit-cpu-offload false --vae-precision bf16 --text-encoder-cpu-offload false --image-encoder-cpu-offload false --vae-cpu-offload false",
+                            "serve_args": "--model-type diffusion --warmup-mode server --enable-cfg-parallel --dit-cpu-offload false --vae-precision bf16 --text-encoder-cpu-offload false --image-encoder-cpu-offload false --vae-cpu-offload false",
                             "notes": "Keeps DiT, text/image encoders, and VAE resident on high-memory H200; BF16 VAE aligns with LightX2V best-performance Wan serving path. No cache or torch compile path."
                         },
                         "h100-2gpu-cfg-speed-compile": {
@@ -977,7 +977,7 @@
                                 "h100"
                             ],
                             "sglang_ref": "current-main",
-                            "serve_args": "--model-type diffusion --warmup --enable-cfg-parallel --dit-layerwise-offload false --performance-mode speed --enable-torch-compile",
+                            "serve_args": "--model-type diffusion --warmup-mode server --enable-cfg-parallel --dit-layerwise-offload false --performance-mode speed --enable-torch-compile",
                             "notes": "Measured H100 A/B 2026-07-03 (steady-state single_e2e): 26.556s (auto default) -> 25.046s (-5.7%)."
                         }
                     }
@@ -1139,13 +1139,13 @@
             "guidance_scale": 5.0,
             "frameworks": {
                 "sglang": {
-                    "serve_args": "--model-type diffusion --warmup --enable-cfg-parallel --ulysses-degree 2 --dit-cpu-offload false --text-encoder-cpu-offload --pin-cpu-memory",
+                    "serve_args": "--model-type diffusion --warmup-mode server --enable-cfg-parallel --ulysses-degree 2 --dit-cpu-offload false --text-encoder-cpu-offload --pin-cpu-memory",
                     "extra_env": {},
                     "command_profiles": {
                         "default": {
                             "description": "Best known SGLang command for the benchmark repo default profile.",
                             "sglang_ref": "current-main",
-                            "serve_args": "--model-type diffusion --warmup --enable-cfg-parallel --ulysses-degree 2 --dit-cpu-offload false --pin-cpu-memory --dit-layerwise-offload false --performance-mode speed --enable-torch-compile",
+                            "serve_args": "--model-type diffusion --warmup-mode server --enable-cfg-parallel --ulysses-degree 2 --dit-cpu-offload false --pin-cpu-memory --dit-layerwise-offload false --performance-mode speed --enable-torch-compile",
                             "notes": "Keep this profile updated when the best command changes for a SGLang release or commit. Policy-aligned candidate (compile on, offload off) — NOT yet validated on H100; validate (incl. OOM risk) before publishing."
                         }
                     }
@@ -1276,13 +1276,13 @@
             "guidance_scale_2": 3.0,
             "frameworks": {
                 "sglang": {
-                    "serve_args": "--model-type diffusion --warmup --enable-cfg-parallel --ulysses-degree 2 --dit-cpu-offload false --text-encoder-cpu-offload --pin-cpu-memory",
+                    "serve_args": "--model-type diffusion --warmup-mode server --enable-cfg-parallel --ulysses-degree 2 --dit-cpu-offload false --text-encoder-cpu-offload --pin-cpu-memory",
                     "extra_env": {},
                     "command_profiles": {
                         "default": {
                             "description": "Best known SGLang command for the benchmark repo default profile.",
                             "sglang_ref": "current-main",
-                            "serve_args": "--model-type diffusion --warmup --enable-cfg-parallel --ulysses-degree 2 --dit-cpu-offload false --pin-cpu-memory --dit-layerwise-offload false --performance-mode speed --enable-torch-compile",
+                            "serve_args": "--model-type diffusion --warmup-mode server --enable-cfg-parallel --ulysses-degree 2 --dit-cpu-offload false --pin-cpu-memory --dit-layerwise-offload false --performance-mode speed --enable-torch-compile",
                             "notes": "Keep this profile updated when the best command changes for a SGLang release or commit. Policy-aligned candidate (compile on, offload off) — NOT yet validated on H100; validate (incl. OOM risk) before publishing."
                         }
                     }
@@ -1417,13 +1417,13 @@
             "guidance_scale": 5.0,
             "frameworks": {
                 "sglang": {
-                    "serve_args": "--model-type diffusion --warmup --enable-cfg-parallel",
+                    "serve_args": "--model-type diffusion --warmup-mode server --enable-cfg-parallel",
                     "extra_env": {},
                     "command_profiles": {
                         "default": {
                             "description": "Best known SGLang command for the benchmark repo default profile.",
                             "sglang_ref": "current-main",
-                            "serve_args": "--model-type diffusion --warmup --enable-cfg-parallel",
+                            "serve_args": "--model-type diffusion --warmup-mode server --enable-cfg-parallel",
                             "notes": "Keep this profile updated when the best command changes for a SGLang release or commit."
                         },
                         "h200-2gpu-cfg-bf16-vae-resident": {
@@ -1433,7 +1433,7 @@
                             ],
                             "sglang_ref": "current-main",
                             "num_gpus": 2,
-                            "serve_args": "--model-type diffusion --warmup --enable-cfg-parallel --dit-cpu-offload false --vae-precision bf16 --text-encoder-cpu-offload false --image-encoder-cpu-offload false --vae-cpu-offload false",
+                            "serve_args": "--model-type diffusion --warmup-mode server --enable-cfg-parallel --dit-cpu-offload false --vae-precision bf16 --text-encoder-cpu-offload false --image-encoder-cpu-offload false --vae-cpu-offload false",
                             "notes": "Keeps DiT, text/image encoders, and VAE resident on high-memory H200; BF16 VAE aligns with LightX2V best-performance Wan serving path. No cache or torch compile path."
                         },
                         "h100-h200-2gpu": {
@@ -1444,7 +1444,7 @@
                             ],
                             "sglang_ref": "current-main",
                             "num_gpus": 2,
-                            "serve_args": "--model-type diffusion --warmup --enable-cfg-parallel --dit-cpu-offload false --pin-cpu-memory --dit-layerwise-offload false --performance-mode speed --enable-torch-compile",
+                            "serve_args": "--model-type diffusion --warmup-mode server --enable-cfg-parallel --dit-cpu-offload false --pin-cpu-memory --dit-layerwise-offload false --performance-mode speed --enable-torch-compile",
                             "notes": "Measured H100 A/B 2026-07-03 (steady-state single_e2e): 35.07s (textenc-offload default) -> 31.068s (-11.4%). Measured on H100; re-validate before publishing new h200 numbers."
                         }
                     }
@@ -1659,13 +1659,13 @@
             "guidance_scale": 4.0,
             "frameworks": {
                 "sglang": {
-                    "serve_args": "--model-type diffusion --warmup --enable-cfg-parallel --pipeline-class-name LTX2TwoStagePipeline",
+                    "serve_args": "--model-type diffusion --warmup-mode server --enable-cfg-parallel --pipeline-class-name LTX2TwoStagePipeline",
                     "extra_env": {},
                     "command_profiles": {
                         "default": {
                             "description": "Best known SGLang command for the benchmark repo default profile.",
                             "sglang_ref": "current-main",
-                            "serve_args": "--model-type diffusion --warmup --enable-cfg-parallel --pipeline-class-name LTX2TwoStagePipeline --dit-layerwise-offload false --performance-mode speed --enable-torch-compile",
+                            "serve_args": "--model-type diffusion --warmup-mode server --enable-cfg-parallel --pipeline-class-name LTX2TwoStagePipeline --dit-layerwise-offload false --performance-mode speed --enable-torch-compile",
                             "notes": "Keep this profile updated when the best command changes for a SGLang release or commit. Policy-aligned candidate (compile on, offload off) — NOT yet validated on H100; validate (incl. OOM risk) before publishing."
                         },
                         "h200-2gpu": {
@@ -1675,7 +1675,7 @@
                             ],
                             "sglang_ref": "current-main",
                             "num_gpus": 2,
-                            "serve_args": "--model-type diffusion --warmup --enable-cfg-parallel --pipeline-class-name LTX2TwoStagePipeline --ltx2-two-stage-device-mode resident",
+                            "serve_args": "--model-type diffusion --warmup-mode server --enable-cfg-parallel --pipeline-class-name LTX2TwoStagePipeline --ltx2-two-stage-device-mode resident",
                             "notes": "Resident mode keeps both stages in VRAM on H200-class GPUs."
                         }
                     }
@@ -1796,13 +1796,13 @@
             "guidance_scale": 3.0,
             "frameworks": {
                 "sglang": {
-                    "serve_args": "--model-type diffusion --warmup --enable-cfg-parallel --pipeline-class-name LTX2TwoStagePipeline",
+                    "serve_args": "--model-type diffusion --warmup-mode server --enable-cfg-parallel --pipeline-class-name LTX2TwoStagePipeline",
                     "extra_env": {},
                     "command_profiles": {
                         "default": {
                             "description": "Fallback SGLang command when no hardware-specific profile matches.",
                             "sglang_ref": "current-main",
-                            "serve_args": "--model-type diffusion --warmup --enable-cfg-parallel --pipeline-class-name LTX2TwoStagePipeline",
+                            "serve_args": "--model-type diffusion --warmup-mode server --enable-cfg-parallel --pipeline-class-name LTX2TwoStagePipeline",
                             "notes": "Use hardware-specific profiles for formal H100/H200 runs."
                         },
                         "h100-80gb-2gpu": {
@@ -1812,7 +1812,7 @@
                             ],
                             "sglang_ref": "current-main",
                             "num_gpus": 2,
-                            "serve_args": "--model-type diffusion --warmup --enable-cfg-parallel --pipeline-class-name LTX2TwoStagePipeline --ltx2-two-stage-device-mode snapshot",
+                            "serve_args": "--model-type diffusion --warmup-mode server --enable-cfg-parallel --pipeline-class-name LTX2TwoStagePipeline --ltx2-two-stage-device-mode snapshot",
                             "notes": "Snapshot mode avoids H100 resident VRAM pressure.",
                             "policy_exception": "Measured H100 A/B 2026-07-03 (steady-state single_e2e): speed+compile OOMs on 2x80GB (79.1/79.2 GiB used, 30MiB alloc failure during request) — two-stage residency + compile workspace does not fit. Snapshot device mode is the fastest configuration that fits (12.03s)."
                         },
@@ -1823,14 +1823,14 @@
                             ],
                             "sglang_ref": "current-main",
                             "num_gpus": 2,
-                            "serve_args": "--model-type diffusion --warmup --enable-cfg-parallel --pipeline-class-name LTX2TwoStagePipeline --ltx2-two-stage-device-mode resident",
+                            "serve_args": "--model-type diffusion --warmup-mode server --enable-cfg-parallel --pipeline-class-name LTX2TwoStagePipeline --ltx2-two-stage-device-mode resident",
                             "notes": "Resident mode is the fastest LTX2.3 two-stage path when both DiTs fit in VRAM."
                         },
                         "official-original-2gpu": {
                             "description": "Official stage-switching semantics profile for LTX2.3 two-stage comparisons.",
                             "sglang_ref": "current-main",
                             "num_gpus": 2,
-                            "serve_args": "--model-type diffusion --warmup --enable-cfg-parallel --pipeline-class-name LTX2TwoStagePipeline --ltx2-two-stage-device-mode original",
+                            "serve_args": "--model-type diffusion --warmup-mode server --enable-cfg-parallel --pipeline-class-name LTX2TwoStagePipeline --ltx2-two-stage-device-mode original",
                             "notes": "Use this only when official switching semantics are more important than latency."
                         }
                     }
@@ -1863,13 +1863,13 @@
             "guidance_scale": 5.0,
             "frameworks": {
                 "sglang": {
-                    "serve_args": "--model-type diffusion --warmup --enable-cfg-parallel --ulysses-degree 2 --dit-cpu-offload false --text-encoder-cpu-offload --pin-cpu-memory",
+                    "serve_args": "--model-type diffusion --warmup-mode server --enable-cfg-parallel --ulysses-degree 2 --dit-cpu-offload false --text-encoder-cpu-offload --pin-cpu-memory",
                     "extra_env": {},
                     "command_profiles": {
                         "default": {
                             "description": "Best known SGLang command for the benchmark repo default profile.",
                             "sglang_ref": "current-main",
-                            "serve_args": "--model-type diffusion --warmup --enable-cfg-parallel --ulysses-degree 2 --dit-cpu-offload false --pin-cpu-memory --dit-layerwise-offload false --performance-mode speed --enable-torch-compile",
+                            "serve_args": "--model-type diffusion --warmup-mode server --enable-cfg-parallel --ulysses-degree 2 --dit-cpu-offload false --pin-cpu-memory --dit-layerwise-offload false --performance-mode speed --enable-torch-compile",
                             "notes": "Tracks Wan2.1 720P I2V SGLang coverage; add other frameworks only after confirming compatible model support. Policy-aligned candidate (compile on, offload off) — NOT yet validated on H100; validate (incl. OOM risk) before publishing."
                         }
                     }
@@ -2003,13 +2003,13 @@
             "guidance_scale_2": 3.5,
             "frameworks": {
                 "sglang": {
-                    "serve_args": "--model-type diffusion --warmup --enable-cfg-parallel --ulysses-degree 2 --dit-cpu-offload false --text-encoder-cpu-offload --pin-cpu-memory",
+                    "serve_args": "--model-type diffusion --warmup-mode server --enable-cfg-parallel --ulysses-degree 2 --dit-cpu-offload false --text-encoder-cpu-offload --pin-cpu-memory",
                     "extra_env": {},
                     "command_profiles": {
                         "default": {
                             "description": "Best known SGLang command for the benchmark repo default profile.",
                             "sglang_ref": "current-main",
-                            "serve_args": "--model-type diffusion --warmup --enable-cfg-parallel --ulysses-degree 2 --dit-cpu-offload false --pin-cpu-memory --dit-layerwise-offload false --performance-mode speed --enable-torch-compile",
+                            "serve_args": "--model-type diffusion --warmup-mode server --enable-cfg-parallel --ulysses-degree 2 --dit-cpu-offload false --pin-cpu-memory --dit-layerwise-offload false --performance-mode speed --enable-torch-compile",
                             "notes": "Keep this profile updated when the best command changes for a SGLang release or commit. Policy-aligned candidate (compile on, offload off) — NOT yet validated on H100; validate (incl. OOM risk) before publishing."
                         }
                     }
@@ -2157,7 +2157,7 @@
             },
             "frameworks": {
                 "sglang": {
-                    "serve_args": "--model-type diffusion --warmup --attention-backend fa --tp-size 2",
+                    "serve_args": "--model-type diffusion --warmup-mode server --attention-backend fa --tp-size 2",
                     "extra_env": {
                         "SGLANG_DISABLE_COSMOS3_GUARDRAILS": "1"
                     },
@@ -2165,7 +2165,7 @@
                         "default": {
                             "description": "Cosmos3 Nano T2I profile for SGLang-Diffusion main 3d540563.",
                             "sglang_ref": "sgl-project/sglang@3d540563916394115f9612f30601ae3fa97ada7c",
-                            "serve_args": "--model-type diffusion --warmup --attention-backend fa --tp-size 2 --dit-layerwise-offload false --performance-mode speed --enable-torch-compile",
+                            "serve_args": "--model-type diffusion --warmup-mode server --attention-backend fa --tp-size 2 --dit-layerwise-offload false --performance-mode speed --enable-torch-compile",
                             "notes": "Guardrails disabled for framework-only serving performance; no cache or torch compile path. Policy-aligned candidate (compile on, offload off) — NOT yet validated on H100; validate (incl. OOM risk) before publishing.",
                             "extra_env": {
                                 "SGLANG_DISABLE_COSMOS3_GUARDRAILS": "1"
@@ -2178,7 +2178,7 @@
                             ],
                             "num_gpus": 2,
                             "sglang_ref": "current-main",
-                            "serve_args": "--model-type diffusion --warmup --attention-backend fa --tp-size 2",
+                            "serve_args": "--model-type diffusion --warmup-mode server --attention-backend fa --tp-size 2",
                             "notes": "Tensor-parallel across 2 GPUs; no cache, no torch compile."
                         },
                         "h200-2gpu-tp-fa-speed": {
@@ -2188,7 +2188,7 @@
                             ],
                             "num_gpus": 2,
                             "sglang_ref": "current-main",
-                            "serve_args": "--model-type diffusion --warmup --attention-backend fa --tp-size 2 --performance-mode speed",
+                            "serve_args": "--model-type diffusion --warmup-mode server --attention-backend fa --tp-size 2 --performance-mode speed",
                             "notes": "Tensor-parallel across 2 GPUs with performance-mode speed; no cache, no torch compile."
                         },
                         "h200-2gpu-tp-fa-batch4": {
@@ -2198,7 +2198,7 @@
                             ],
                             "num_gpus": 2,
                             "sglang_ref": "current-main",
-                            "serve_args": "--model-type diffusion --warmup --attention-backend fa --tp-size 2 --batching-max-size 4 --enable-batching-metrics",
+                            "serve_args": "--model-type diffusion --warmup-mode server --attention-backend fa --tp-size 2 --batching-max-size 4 --enable-batching-metrics",
                             "notes": "Tensor-parallel across 2 GPUs plus batch-4 serving pressure; no cache, no torch compile."
                         }
                     }
@@ -2324,7 +2324,7 @@
             "frameworks": {
                 "sglang": {
                     "num_gpus": 4,
-                    "serve_args": "--model-type diffusion --warmup --attention-backend fa --cfg-parallel-size 2 --ulysses-degree 2",
+                    "serve_args": "--model-type diffusion --warmup-mode server --attention-backend fa --cfg-parallel-size 2 --ulysses-degree 2",
                     "extra_env": {
                         "SGLANG_DISABLE_COSMOS3_GUARDRAILS": "1"
                     },
@@ -2333,7 +2333,7 @@
                             "description": "Cosmos3 Nano T2V profile for SGLang-Diffusion main 3d540563.",
                             "sglang_ref": "sgl-project/sglang@3d540563916394115f9612f30601ae3fa97ada7c",
                             "num_gpus": 4,
-                            "serve_args": "--model-type diffusion --warmup --attention-backend fa --cfg-parallel-size 2 --ulysses-degree 2",
+                            "serve_args": "--model-type diffusion --warmup-mode server --attention-backend fa --cfg-parallel-size 2 --ulysses-degree 2",
                             "notes": "4-GPU CFG parallel plus Ulysses SP for long-video H200 serving; guardrails disabled, no cache."
                         },
                         "h200-4gpu-cfg-ulysses": {
@@ -2343,7 +2343,7 @@
                             ],
                             "sglang_ref": "sgl-project/sglang@3d540563916394115f9612f30601ae3fa97ada7c",
                             "num_gpus": 4,
-                            "serve_args": "--model-type diffusion --warmup --attention-backend fa --cfg-parallel-size 2 --ulysses-degree 2",
+                            "serve_args": "--model-type diffusion --warmup-mode server --attention-backend fa --cfg-parallel-size 2 --ulysses-degree 2",
                             "notes": "Same 4-GPU budget as vLLM-Omni; combines CFG parallel and sequence parallel for the 189-frame 720p case.",
                             "extra_env": {
                                 "SGLANG_DISABLE_COSMOS3_GUARDRAILS": "1"
@@ -2356,7 +2356,7 @@
                             ],
                             "sglang_ref": "sgl-project/sglang@3d540563916394115f9612f30601ae3fa97ada7c",
                             "num_gpus": 4,
-                            "serve_args": "--model-type diffusion --warmup --attention-backend fa --cfg-parallel-size 2 --ulysses-degree 2 --performance-mode speed",
+                            "serve_args": "--model-type diffusion --warmup-mode server --attention-backend fa --cfg-parallel-size 2 --ulysses-degree 2 --performance-mode speed",
                             "notes": "Same as the formal 4-GPU CFG+Ulysses profile plus explicit speed mode; guardrails disabled, no cache, torch compile disabled by harness.",
                             "extra_env": {
                                 "SGLANG_DISABLE_COSMOS3_GUARDRAILS": "1"
@@ -2369,7 +2369,7 @@
                             ],
                             "sglang_ref": "sgl-project/sglang@3d540563916394115f9612f30601ae3fa97ada7c",
                             "num_gpus": 2,
-                            "serve_args": "--model-type diffusion --warmup --attention-backend fa --cfg-parallel-size 2 --sp-degree 1",
+                            "serve_args": "--model-type diffusion --warmup-mode server --attention-backend fa --cfg-parallel-size 2 --sp-degree 1",
                             "notes": "Uses the two GPUs for CFG parallelism only; sp_degree is pinned to 1 to avoid automatic sequence-parallel inference.",
                             "extra_env": {
                                 "SGLANG_DISABLE_COSMOS3_GUARDRAILS": "1"
@@ -2382,7 +2382,7 @@
                             ],
                             "sglang_ref": "sgl-project/sglang@main",
                             "num_gpus": 2,
-                            "serve_args": "--model-type diffusion --warmup --attention-backend fa --cfg-parallel-size 2 --sp-degree 1 --performance-mode speed",
+                            "serve_args": "--model-type diffusion --warmup-mode server --attention-backend fa --cfg-parallel-size 2 --sp-degree 1 --performance-mode speed",
                             "notes": "same two-GPU CFG-only profile plus explicit speed mode; sp_degree is pinned to 1 to avoid automatic sequence-parallel inference",
                             "extra_env": {
                                 "FLASHINFER_USE_CUDA_NORM": "1",
@@ -2395,7 +2395,7 @@
                                 "h100"
                             ],
                             "sglang_ref": "current-main",
-                            "serve_args": "--model-type diffusion --warmup --attention-backend fa --cfg-parallel-size 2 --ulysses-degree 2 --dit-layerwise-offload false --performance-mode speed --enable-torch-compile",
+                            "serve_args": "--model-type diffusion --warmup-mode server --attention-backend fa --cfg-parallel-size 2 --ulysses-degree 2 --dit-layerwise-offload false --performance-mode speed --enable-torch-compile",
                             "notes": "Measured H100 A/B 2026-07-03 (steady-state single_e2e): 55.115s (auto default) -> 53.614s (-2.7%)."
                         }
                     }
@@ -2561,7 +2561,7 @@
             "frameworks": {
                 "sglang": {
                     "num_gpus": 4,
-                    "serve_args": "--model-type diffusion --warmup --attention-backend fa --cfg-parallel-size 2 --ulysses-degree 2",
+                    "serve_args": "--model-type diffusion --warmup-mode server --attention-backend fa --cfg-parallel-size 2 --ulysses-degree 2",
                     "extra_env": {
                         "SGLANG_DISABLE_COSMOS3_GUARDRAILS": "1"
                     },
@@ -2570,7 +2570,7 @@
                             "description": "Cosmos3 Nano I2V profile for SGLang-Diffusion main 3d540563.",
                             "sglang_ref": "sgl-project/sglang@3d540563916394115f9612f30601ae3fa97ada7c",
                             "num_gpus": 4,
-                            "serve_args": "--model-type diffusion --warmup --attention-backend fa --cfg-parallel-size 2 --ulysses-degree 2 --dit-layerwise-offload false --performance-mode speed --enable-torch-compile",
+                            "serve_args": "--model-type diffusion --warmup-mode server --attention-backend fa --cfg-parallel-size 2 --ulysses-degree 2 --dit-layerwise-offload false --performance-mode speed --enable-torch-compile",
                             "notes": "4-GPU CFG parallel plus Ulysses SP for long-video H200 serving; guardrails disabled, no cache. Policy-aligned candidate (compile on, offload off) — NOT yet validated on H100; validate (incl. OOM risk) before publishing."
                         },
                         "h200-4gpu-cfg-ulysses": {
@@ -2580,7 +2580,7 @@
                             ],
                             "sglang_ref": "sgl-project/sglang@3d540563916394115f9612f30601ae3fa97ada7c",
                             "num_gpus": 4,
-                            "serve_args": "--model-type diffusion --warmup --attention-backend fa --cfg-parallel-size 2 --ulysses-degree 2",
+                            "serve_args": "--model-type diffusion --warmup-mode server --attention-backend fa --cfg-parallel-size 2 --ulysses-degree 2",
                             "notes": "Same 4-GPU budget as vLLM-Omni; combines CFG parallel and sequence parallel for the 189-frame 720p I2V case.",
                             "extra_env": {
                                 "SGLANG_DISABLE_COSMOS3_GUARDRAILS": "1"
@@ -2593,7 +2593,7 @@
                             ],
                             "sglang_ref": "sgl-project/sglang@3d540563916394115f9612f30601ae3fa97ada7c",
                             "num_gpus": 4,
-                            "serve_args": "--model-type diffusion --warmup --attention-backend fa --cfg-parallel-size 2 --ulysses-degree 2 --performance-mode speed",
+                            "serve_args": "--model-type diffusion --warmup-mode server --attention-backend fa --cfg-parallel-size 2 --ulysses-degree 2 --performance-mode speed",
                             "notes": "Same as the formal 4-GPU CFG+Ulysses profile plus explicit speed mode; guardrails disabled, no cache, torch compile disabled by harness.",
                             "extra_env": {
                                 "SGLANG_DISABLE_COSMOS3_GUARDRAILS": "1"
@@ -2606,7 +2606,7 @@
                             ],
                             "sglang_ref": "sgl-project/sglang@3d540563916394115f9612f30601ae3fa97ada7c",
                             "num_gpus": 2,
-                            "serve_args": "--model-type diffusion --warmup --attention-backend fa --cfg-parallel-size 2 --sp-degree 1",
+                            "serve_args": "--model-type diffusion --warmup-mode server --attention-backend fa --cfg-parallel-size 2 --sp-degree 1",
                             "notes": "Uses the two GPUs for CFG parallelism only; sp_degree is pinned to 1 to avoid automatic sequence-parallel inference.",
                             "extra_env": {
                                 "SGLANG_DISABLE_COSMOS3_GUARDRAILS": "1"
@@ -2619,7 +2619,7 @@
                             ],
                             "sglang_ref": "sgl-project/sglang@main",
                             "num_gpus": 2,
-                            "serve_args": "--model-type diffusion --warmup --attention-backend fa --cfg-parallel-size 2 --sp-degree 1 --performance-mode speed",
+                            "serve_args": "--model-type diffusion --warmup-mode server --attention-backend fa --cfg-parallel-size 2 --sp-degree 1 --performance-mode speed",
                             "notes": "same two-GPU CFG-only profile plus explicit speed mode; sp_degree is pinned to 1 to avoid automatic sequence-parallel inference",
                             "extra_env": {
                                 "SGLANG_DISABLE_COSMOS3_GUARDRAILS": "1"
@@ -2804,18 +2804,64 @@
                             "serve_args": "--model-type diffusion --warmup-mode server --model-variant fl2va --tp-size 2 --ulysses-degree 1 --performance-mode memory --layerwise-offload-components dit,text_encoder,vae --dit-offload-prefetch-size 1 --dit-layerwise-resident-layers 20 --enable-torch-compile false",
                             "notes": "Matches docs/cookbook/diffusion/MiniMax/MiniMax-H3.mdx's verified 2xRTX5090/32GB/377GiB-host recipe as-is. The recorded numbers below (612.65s/556.79s/23366MB) were captured 2026-08-07 on minimax-h3-5090-2gpu-v4 from a run that used --dit-offload-prefetch-size 0 instead of 1, chosen at the time because prefetch-size 1 had intermittently deadlocked at 'Loading MiniMaxH3DiTModel ... Run:ai Model Streamer' on a minority of launches. That deadlock's real cause turned out to be unrelated to prefetch-size -- LayerwiseOffloadManager.__init__ clamps prefetch_size to min(max(1, prefetch_size), num_layers), so 0 and 1 are runtime-identical, and the 0-vs-1 correlation was coincidence (page-cache warmth carried over across attempts). The actual root cause: runai_model_streamer issues an unconditional torch.distributed collective (new_group + all_gather_object) inside find_local_ranks() on the first stream_files() call per component per rank, regardless of the is_distributed argument sglang passes (always False here); any per-rank divergence in layerwise-offload load order or timing can call that ad-hoc group out of lockstep and hang. Fixed at the sglang layer in sgl-project/sglang#33969 (monkeypatches find_local_ranks to skip the collective) -- serve_args here now uses the cookbook's prefetch-size 1 since 0 was never actually load-bearing; re-validate this cell once that PR lands to confirm the hang no longer reproduces even under adversarial per-rank timing. Client wall 612.65s, server-reported inference_time_s 556.79, peak_memory_mb 23366 (well under the 32 GB budget). --performance-mode speed excluded: H3's compile path changes numerics, and speed mode's residency assumption does not fit 32 GB without the layerwise knobs above. Single-GPU (num_gpus=1, tp_size=1) at this exact shape (1344x768, 124 frames) OOMs even at resident-layers=20 -- TP2's per-rank activation footprint (measured ~13 GB/rank at 100% util during a real denoise) roughly doubles unsharded on 1 GPU, on top of a 32 GB card already near its edge per the cookbook's own 2-GPU peak (~31.7 GiB/rank); the case is 2-GPU-only until that's independently reworked.",
                             "policy_exception": "Same correctness exception as the default profile (checked 2026-08-07): MiniMax-H3's torch.compile path changes numerical output per the sglang cookbook, so it is excluded regardless of hardware."
+                        },
+                        "b200-2gpu": {
+                            "description": "2x B200 (183 GB), fully resident -- no layerwise offload needed at this memory class.",
+                            "hardware": [
+                                "b200",
+                                "b300"
+                            ],
+                            "sglang_ref": "8d0c77081 (2026-08-07 checkout, includes sgl-project/sglang#33969)",
+                            "num_gpus": 2,
+                            "serve_args": "--model-type diffusion --warmup-mode server --model-variant fl2va --ulysses-degree 2 --performance-mode speed --enable-torch-compile false",
+                            "notes": "Validated 2026-08-07 on 2 independent fresh 2xB200 devboxes (h3-b200-2gpu-v2 and its predecessor), same request as the rtx5090-2gpu profile. Two back-to-back runs agreed to 2 decimal places: client wall 80.64s/80.63s, server-reported inference_time_s 75.42/75.42, peak_memory_mb 108328/108358 (well under the 183 GB budget -- room to spare, unlike the 32 GB RTX5090 profile which needs the layerwise-offload knobs). ~7.6x faster wall-clock than the rtx5090-2gpu profile on the identical request; expected given B200's raw compute plus the total absence of the 5090 recipe's CPU<->GPU layerwise-transfer tax. See the vllm-omni entry's b200-2gpu profile for the cross-framework comparison on the same hardware.",
+                            "policy_exception": "Same correctness exception as the default profile (checked 2026-08-07): MiniMax-H3's torch.compile path changes numerical output per the sglang cookbook, so it is excluded regardless of hardware."
                         }
                     }
+                },
+                "vllm-omni": {
+                    "num_gpus": 2,
+                    "serve_args": "--trust-remote-code --tensor-parallel-size 2 --enforce-eager --enable-distributed-layerwise-offload --dlo-no-use-allgather --dlo-resident-layers 20 --diffusion-attention-backend CUDNN_ATTN",
+                    "extra_env": {
+                        "VLLM_WORKER_MULTIPROC_METHOD": "spawn",
+                        "VLLM_OMNI_VIDEO_SYNC_TIMEOUT": "1800"
+                    },
+                    "command_profiles": {
+                        "default": {
+                            "description": "vLLM-Omni's own 2-GPU MiniMax-H3 recipe (TP2, distributed layerwise offload, compile path). Reaches health and accepts a request, then crashes during generation -- kept for provenance, not a working profile on any GPU class tested so far.",
+                            "framework_ref": "vllm-omni recipes/MiniMaxAI/MiniMax-H3.md (2-GPU section); installed from git main (0.26.1.dev45+g24ede9e22 on RTX 5090, 0.26.1.dev50+gcfa6d66ed on B200) + vllm==0.26.0, not the repo's default pinned vllm-omni==0.18.0",
+                            "num_gpus": 2,
+                            "serve_args": "--trust-remote-code --tensor-parallel-size 2 --enable-distributed-layerwise-offload --dlo-no-use-allgather --dlo-resident-layers 20 --diffusion-attention-backend CUDNN_ATTN",
+                            "notes": "Requires ffmpeg/ffprobe on PATH for MP4 muxing. The request also needs `aspect_ratio` inside extra_params (the recipe's own T2VA example omits it and 422s with 'RuntimeError: t2va requires an explicit aspect_ratio' as written). CONFIRMED HARDWARE-INDEPENDENT 2026-08-07: re-ran this exact profile on 2xB200 (sm100, datacenter Blackwell) -- it segfaults with the identical signature as on RTX 5090 (native segfault, Python trace through torch Dynamo's custom_eval_frame), 1 step into denoising. Same bug on two unrelated GPU architectures rules out a consumer-GPU/SM120 quirk; this is a real vLLM-Omni MiniMax-H3 stability bug in the compiled path, not something fixable from the benchmark harness. Use the enforce-eager / b200-2gpu profile instead."
+                        },
+                        "enforce-eager": {
+                            "description": "Same recipe with --enforce-eager, tried after the default profile segfaulted. Fails differently (and earlier) on RTX 5090, but is the profile that actually works on B200 -- see command_profiles.b200-2gpu.",
+                            "framework_ref": "vllm-omni recipes/MiniMaxAI/MiniMax-H3.md (2-GPU section) + --enforce-eager",
+                            "num_gpus": 2,
+                            "serve_args": "--trust-remote-code --tensor-parallel-size 2 --enforce-eager --enable-distributed-layerwise-offload --dlo-no-use-allgather --dlo-resident-layers 20 --diffusion-attention-backend CUDNN_ATTN",
+                            "notes": "On RTX 5090 this crashes during server startup (EOFError: a diffusion worker process dies before completing its init handshake) rather than during generation, and never reaches a request. UPDATE 2026-08-07: the identical flags reach health and complete a real generation on 2xB200 -- see command_profiles.b200-2gpu for the hardware-scoped, validated version of this same command."
+                        },
+                        "b200-2gpu": {
+                            "description": "2x B200, same recipe as enforce-eager -- the profile that actually completes a generation for this case.",
+                            "hardware": [
+                                "b200",
+                                "b300"
+                            ],
+                            "framework_ref": "vllm-omni recipes/MiniMaxAI/MiniMax-H3.md (2-GPU section) + --enforce-eager; git main 0.26.1.dev50+gcfa6d66ed + vllm==0.26.0",
+                            "num_gpus": 2,
+                            "serve_args": "--trust-remote-code --tensor-parallel-size 2 --enforce-eager --enable-distributed-layerwise-offload --dlo-no-use-allgather --dlo-resident-layers 20 --diffusion-attention-backend CUDNN_ATTN",
+                            "notes": "Validated 2026-08-07 on 2xB200 (h3-b200-2gpu-v2): completes the case's T2VA request end to end -- client wall 105.76s, server-reported inference_time_s 103.06, peak_memory_mb 24546. Output verified with ffprobe directly on the returned MP4: 124 frames @ 24 fps = 5.166667s, exactly matching the requested 5s/124-frame shape (the API's own JSON `seconds` field reported a stale '4' on both the submit and completed response -- a cosmetic metadata default unrelated to the real generation params, not a real duration shortfall; confirmed by decoding the actual file). Still uses the recipe's memory-constrained --dlo-resident-layers 20 offload even though B200's 183 GB has no need for it -- vllm-omni ships only one documented 2-GPU H3 recipe, so this is that recipe as-is, not a B200-tuned command; a fully-resident vllm-omni command may be faster but is not a documented starting point. Same request, same 2xB200 hardware, sglang's b200-2gpu profile: 80.64s/80.63s client wall, 75.42s inference_time_s -- sglang is ~1.31x faster than vLLM-Omni here."
+                        }
+                    },
+                    "reason": "Empirically validated 2026-08-07, first on minimax-h3-5090-2gpu-v4 (2x RTX 5090) then on 2xB200: the default (compiled) profile segfaults identically on both GPU classes 1 step into denoising (see command_profiles.default.notes) -- a confirmed hardware-independent vLLM-Omni bug, despite the recipe's own claim that torch.compile is 'not enabled by default on consumer paths.' --enforce-eager avoids that segfault, but on RTX 5090 it fails differently at startup (a diffusion worker process dies before completing its init handshake, surfaced as EOFError) and never completes a request on that GPU class. On 2xB200 the identical --enforce-eager command works cleanly and completes a correct generation -- see command_profiles.b200-2gpu for the validated numbers and the sglang comparison on the same hardware. Net: vLLM-Omni H3 support is real but fragile below the B200 class tested here; RTX 5090 has no working profile for this case in either variant."
                 }
             },
             "report_framework_statuses": {
-                "vllm-omni": "failed",
                 "lightx2v": "unsupported",
                 "trtllm-visual": "unsupported",
                 "diffusers": "unsupported"
             },
             "report_framework_reasons": {
-                "vllm-omni": "Empirically validated 2026-08-07 on minimax-h3-5090-2gpu-v4 (2x RTX 5090): the default profile boots, passes health, and accepts a corrected request (needs explicit aspect_ratio -- see command_profiles.default.notes), then hard-crashes 1 step into denoising with a native segfault whose Python trace runs through torch Dynamo's custom_eval_frame, despite the recipe's own claim that torch.compile is 'not enabled by default on consumer paths.' Adding --enforce-eager to rule out compile does not fix it -- the server instead fails at startup with a different error (a diffusion worker process dies before completing its init handshake, surfaced to the parent as EOFError on the worker's pipe). Both failures reproduce cleanly and neither is a request- or config-shape issue on this side; this reads as a vLLM-Omni MiniMax-H3 stability bug on this GPU class, not something fixable from the benchmark harness.",
                 "lightx2v": "No MiniMax-H3 pipeline in LightX2V as of 2026-08; a turbo LoRA effort for H3 was blocked by the model license's territory clause (excludes EU/UK/South Korea/US), not by missing engineering support.",
                 "trtllm-visual": "trtllm-visual's tracked scope in this harness is image cases; H3 is a video+audio model.",
                 "diffusers": "MiniMax-H3 is integrated as Modular Diffusers blocks only (no DiffusionPipeline), and only via an unmerged PR (huggingface/diffusers#14355 -- pip install git+.../diffusers.git@refs/pull/14355/head). Not a servable baseline path today."

@@ -12,13 +12,13 @@
  "frameworks": {
   "sglang": {
    "status": "supported",
-   "serve_args": "--model-type diffusion --warmup --tp-size 2",
+   "serve_args": "--model-type diffusion --warmup-mode server --tp-size 2",
    "extra_env": {},
    "command_profiles": {
     "default": {
      "description": "Best known SGLang command for the benchmark repo default profile.",
      "sglang_ref": "current-main",
-     "serve_args": "--model-type diffusion --warmup --tp-size 2",
+     "serve_args": "--model-type diffusion --warmup-mode server --tp-size 2",
      "notes": "Keep this profile updated when the best command changes for a SGLang release or commit."
     },
     "h100-2gpu-ulysses-speed-eager": {
@@ -27,7 +27,7 @@
       "h100"
      ],
      "sglang_ref": "current-main",
-     "serve_args": "--model-type diffusion --warmup --dit-layerwise-offload false --tp-size 1 --ulysses-degree 2 --enable-cfg-parallel false --performance-mode speed --enable-torch-compile false",
+     "serve_args": "--model-type diffusion --warmup-mode server --dit-layerwise-offload false --tp-size 1 --ulysses-degree 2 --enable-cfg-parallel false --performance-mode speed --enable-torch-compile false",
      "policy_exception": "compile OFF by measurement, twice over. (1) 2026-07-20 same-machine sweep (2xH100, 50 steps, ms/step): true eager 88.3 (4.54s e2e) vs 07-03-era compile 96.5 (4.97s) vs current-main compile 114.5 (5.83s) — qwen+compile never won (07-03 gain was ~1.5% at best) because inductor's triton GEMMs lose to cublas nvjet on this shape mix. (2) The 07-28 full-matrix run measured 5.74s under compile, matching the 114.5ms/step row: sglang PR #31849 (needed to stop a dynamo crash: can_use_fused_inplace_qknorm_rope receives SymInt under tracing) additionally drops the fused qk-norm-rope kernel when compiling, so compile now also pays the unfused qknorm path x60 blocks. Until the fused kernel is made trace-safe upstream, eager is strictly faster AND numerically identical. Parallelism choice unchanged from 2026-07-03 ABAB x3: Ulysses 4.892 vs best-TP 5.135 (-4.7%, 3/3 pairs); TP-vs-Ulysses MAE 0.74/255 converging with steps = FP-reorder, not a bug.",
      "notes": "Validated H100 only. --enable-cfg-parallel false required (no-CFG single branch; also prevents speed-mode auto-cfg from overriding sp_degree, PR #30016). speed mode auto-enables compile since #30016, so the eager exception MUST say --enable-torch-compile false explicitly. Campaign follow-ups (fused-qknorm dynamo fix, full-step CUDA graph, IPC A2A — notes/multimodal_gen/qwen_image_vllm_30pct_20260720.md) measured 3.952s on this case; revisit this profile once those PRs merge."
     },
@@ -37,7 +37,7 @@
       "h200"
      ],
      "sglang_ref": "origin/main + PR #29774 (QwenImage TP shard) + selective txt_mlp ReplicatedLinear (proposed #29774 follow-up)",
-     "serve_args": "--model-type diffusion --warmup --dit-layerwise-offload false --tp-size 2 --performance-mode speed --enable-torch-compile",
+     "serve_args": "--model-type diffusion --warmup-mode server --dit-layerwise-offload false --tp-size 2 --performance-mode speed --enable-torch-compile",
      "notes": "no-CFG single-branch: TP shard (#29774) but keep text-branch txt_mlp ReplicatedLinear to skip its per-block all-reduce. Measured H100: full-shard 5.65s -> txt_mlp-replicated 5.076s, beats vLLM 5.17s. (true-CFG uses CFG-parallel instead — see the truecfg case.) offload-during-compile is in main. Selective-shard qwen_image.py kept at reports/h100x4-final-20260702/qwen_image_selective_shard.py. H100 superseded by Ulysses profile (measured faster); TP retained for H200 until Ulysses is validated there."
     }
    }

@@ -15,13 +15,13 @@
   "frameworks": {
     "sglang": {
       "status": "supported",
-      "serve_args": "--model-type diffusion --warmup --tp-size 2",
+      "serve_args": "--model-type diffusion --warmup-mode server --tp-size 2",
       "extra_env": {},
       "command_profiles": {
         "default": {
           "description": "Best known SGLang command for the benchmark repo default profile.",
           "sglang_ref": "current-main",
-          "serve_args": "--model-type diffusion --warmup --tp-size 2",
+          "serve_args": "--model-type diffusion --warmup-mode server --tp-size 2",
           "notes": "Keep this profile updated when the best command changes for a SGLang release or commit."
         },
         "h100-h200-2gpu-tp-speed-compile": {
@@ -31,7 +31,7 @@
             "h200"
           ],
           "sglang_ref": "origin/main + PR #29774 (Shard QwenImage DiT across TP ranks; open, not yet merged)",
-          "serve_args": "--model-type diffusion --warmup --enable-cfg-parallel --performance-mode speed --enable-torch-compile",
+          "serve_args": "--model-type diffusion --warmup-mode server --enable-cfg-parallel --performance-mode speed --enable-torch-compile",
           "notes": "CFG parallelism is the cookbook-recommended Qwen multi-GPU path. Measured: 6.49s vs TP #29774 11.07s vs vLLM 10.14s (CFG-parallel 1.56x faster than vLLM). TP shards the DiT but RowParallel all-reduce dominates (~70% kernel time) for the 2-branch case; CFG-parallel avoids it. No #29774 needed here (DiT replicated, one branch per GPU)."
         }
       }

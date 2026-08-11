@@ -27,7 +27,7 @@
   "sglang": {
    "status": "supported",
    "num_gpus": 4,
-   "serve_args": "--model-type diffusion --warmup --attention-backend fa --cfg-parallel-size 2 --ulysses-degree 2",
+   "serve_args": "--model-type diffusion --warmup-mode server --attention-backend fa --cfg-parallel-size 2 --ulysses-degree 2",
    "extra_env": {
     "SGLANG_DISABLE_COSMOS3_GUARDRAILS": "1"
    },
@@ -36,7 +36,7 @@
      "description": "Cosmos3 Nano I2V profile for SGLang-Diffusion main 3d540563.",
      "sglang_ref": "sgl-project/sglang@3d540563916394115f9612f30601ae3fa97ada7c",
      "num_gpus": 4,
-     "serve_args": "--model-type diffusion --warmup --attention-backend fa --cfg-parallel-size 2 --ulysses-degree 2 --dit-layerwise-offload false --performance-mode speed --enable-torch-compile",
+     "serve_args": "--model-type diffusion --warmup-mode server --attention-backend fa --cfg-parallel-size 2 --ulysses-degree 2 --dit-layerwise-offload false --performance-mode speed --enable-torch-compile",
      "notes": "4-GPU CFG parallel plus Ulysses SP for long-video H200 serving; guardrails disabled, no cache. Policy-aligned candidate (compile on, offload off) — NOT yet validated on H100; validate (incl. OOM risk) before publishing."
     },
     "h200-4gpu-cfg-ulysses": {
@@ -46,7 +46,7 @@
      ],
      "sglang_ref": "sgl-project/sglang@3d540563916394115f9612f30601ae3fa97ada7c",
      "num_gpus": 4,
-     "serve_args": "--model-type diffusion --warmup --attention-backend fa --cfg-parallel-size 2 --ulysses-degree 2",
+     "serve_args": "--model-type diffusion --warmup-mode server --attention-backend fa --cfg-parallel-size 2 --ulysses-degree 2",
      "notes": "Same 4-GPU budget as vLLM-Omni; combines CFG parallel and sequence parallel for the 189-frame 720p I2V case.",
      "extra_env": {
       "SGLANG_DISABLE_COSMOS3_GUARDRAILS": "1"
@@ -59,7 +59,7 @@
      ],
      "sglang_ref": "sgl-project/sglang@3d540563916394115f9612f30601ae3fa97ada7c",
      "num_gpus": 4,
-     "serve_args": "--model-type diffusion --warmup --attention-backend fa --cfg-parallel-size 2 --ulysses-degree 2 --performance-mode speed",
+     "serve_args": "--model-type diffusion --warmup-mode server --attention-backend fa --cfg-parallel-size 2 --ulysses-degree 2 --performance-mode speed",
      "notes": "Same as the formal 4-GPU CFG+Ulysses profile plus explicit speed mode; guardrails disabled, no cache, torch compile disabled by harness.",
      "extra_env": {
       "SGLANG_DISABLE_COSMOS3_GUARDRAILS": "1"
@@ -72,7 +72,7 @@
      ],
      "sglang_ref": "sgl-project/sglang@3d540563916394115f9612f30601ae3fa97ada7c",
      "num_gpus": 2,
-     "serve_args": "--model-type diffusion --warmup --attention-backend fa --cfg-parallel-size 2 --sp-degree 1",
+     "serve_args": "--model-type diffusion --warmup-mode server --attention-backend fa --cfg-parallel-size 2 --sp-degree 1",
      "notes": "Uses the two GPUs for CFG parallelism only; sp_degree is pinned to 1 to avoid automatic sequence-parallel inference.",
      "extra_env": {
       "SGLANG_DISABLE_COSMOS3_GUARDRAILS": "1"
@@ -85,7 +85,7 @@
      ],
      "sglang_ref": "sgl-project/sglang@main",
      "num_gpus": 2,
-     "serve_args": "--model-type diffusion --warmup --attention-backend fa --cfg-parallel-size 2 --sp-degree 1 --performance-mode speed",
+     "serve_args": "--model-type diffusion --warmup-mode server --attention-backend fa --cfg-parallel-size 2 --sp-degree 1 --performance-mode speed",
      "notes": "same two-GPU CFG-only profile plus explicit speed mode; sp_degree is pinned to 1 to avoid automatic sequence-parallel inference",
      "extra_env": {
       "SGLANG_DISABLE_COSMOS3_GUARDRAILS": "1"
