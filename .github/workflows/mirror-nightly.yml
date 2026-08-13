@@ -39,9 +39,12 @@ jobs:
 
       # [skip ci] keeps the commit from re-running the test workflows, but it
       # also suppresses the Pages deploy, so the refreshed snapshot would sit in
-      # the repo and never reach the site. Trigger the deploy explicitly.
+      # the repo and never reach the site. Trigger the deploy explicitly, and
+      # pin the SHA: dispatching seconds after the push can still resolve
+      # `main` to the pre-push commit and deploy a tree without the snapshot
+      # (observed 2026-08-13: commit 03:03:52, dispatch 03:03:55 → old SHA).
       - name: Deploy the refreshed snapshot
         if: steps.commit.outputs.changed == 'true'
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: gh workflow run pages.yml --ref main
+        run: gh workflow run pages.yml --ref main -f sha="$(git rev-parse HEAD)"

@@ -5,6 +5,13 @@ on:
     branches:
       - main
   workflow_dispatch:
+    inputs:
+      sha:
+        description: >-
+          Exact commit to deploy. The mirror job passes this because a dispatch
+          right after its push can resolve `main` to the pre-push commit.
+        required: false
+        type: string
 
 permissions:
   contents: read
@@ -24,6 +31,9 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          # empty for push runs, which already pin the pushed commit
+          ref: ${{ inputs.sha }}
 
       - name: Configure Pages
         uses: actions/configure-pages@v5
