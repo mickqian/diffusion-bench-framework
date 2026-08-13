@@ -11,6 +11,7 @@ concurrency:
 
 permissions:
   contents: write
+  actions: write
 
 jobs:
   mirror:
@@ -22,9 +23,11 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: python3 scripts/mirror_nightly_data.py
       - name: Commit snapshot when it changed
+        id: commit
         run: |
           if git diff --quiet docs/nightly-data.json; then
             echo "snapshot unchanged"
+            echo "changed=false" >> "$GITHUB_OUTPUT"
             exit 0
           fi
           git config user.name "github-actions[bot]"
@@ -32,3 +35,13 @@ jobs:
           git add docs/nightly-data.json
           git commit -m "chore: refresh nightly data snapshot [skip ci]"
           git push
+          echo "changed=true" >> "$GITHUB_OUTPUT"
+
+      # [skip ci] keeps the commit from re-running the test workflows, but it
+      # also suppresses the Pages deploy, so the refreshed snapshot would sit in
+      # the repo and never reach the site. Trigger the deploy explicitly.
+      - name: Deploy the refreshed snapshot
+        if: steps.commit.outputs.changed == 'true'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: gh workflow run pages.yml --ref main
