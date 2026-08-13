@@ -167,6 +167,9 @@
 
       html {
         scroll-behavior: smooth;
+        /* the topbar is sticky, so a bare hash jump parks the target underneath
+           it; keep every anchor landing clear of the bar */
+        scroll-padding-top: 86px;
       }
 
       body {
@@ -487,10 +490,36 @@
 
       h2.section-title {
         margin: 0;
-        font-size: 13px;
+        font-size: clamp(15px, 1.25vw, 18px);
         font-weight: 600;
-        letter-spacing: 0.16em;
+        /* tracking scales down as the type grows, or the label reads as gappy */
+        letter-spacing: 0.13em;
         text-transform: uppercase;
+        color: var(--accent-strong);
+      }
+
+      /* every section heading carries a link you can click to jump and copy.
+         kept faintly visible rather than hover-only so it is discoverable, and
+         separate from the heading text so selecting the text still works. */
+      .anchor-link {
+        margin-left: 0.5em;
+        font-size: 0.85em;
+        font-weight: 500;
+        letter-spacing: 0;
+        text-decoration: none;
+        color: var(--muted);
+        opacity: 0.35;
+        transition: opacity 140ms ease, color 140ms ease;
+      }
+
+      .anchor-link:hover,
+      .anchor-link:focus-visible {
+        opacity: 1;
+        color: var(--accent-strong);
+      }
+
+      .anchor-link.copied {
+        opacity: 1;
         color: var(--accent-strong);
       }
 
@@ -2490,6 +2519,63 @@
           const pad = (n) => String(n).padStart(2, "0");
           el.textContent = `updated ${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
         }
+      }
+
+      /* ---------- section anchors: jump, and copy the link to share it ---------- */
+      {
+        const LABEL = "Copy link to this section";
+        // navigator.clipboard needs a secure context, so fall back to the
+        // selection-based copy for http:// and file:// viewers.
+        async function copyText(text) {
+          try {
+            await navigator.clipboard.writeText(text);
+            return true;
+          } catch {}
+          try {
+            const ta = document.createElement("textarea");
+            ta.value = text;
+            ta.setAttribute("readonly", "");
+            ta.style.cssText = "position:fixed;top:-1000px;opacity:0;";
+            document.body.appendChild(ta);
+            ta.select();
+            const ok = document.execCommand("copy");
+            ta.remove();
+            return ok;
+          } catch {
+            return false;
+          }
+        }
+        document.querySelectorAll("section[id]").forEach((sec) => {
+          const heading = sec.querySelector(".section-title, .summary-title");
+          if (!heading || heading.querySelector(".anchor-link")) return;
+          const a = document.createElement("a");
+          a.className = "anchor-link";
+          a.href = `#${sec.id}`;
+          a.title = LABEL;
+          a.setAttribute("aria-label", LABEL);
+          a.textContent = "#";
+          let revert = 0;
+          a.addEventListener("click", async (e) => {
+            e.preventDefault();
+            history.replaceState(null, "", `#${sec.id}`);
+            sec.scrollIntoView({ behavior: "smooth", block: "start" });
+            const url = `${location.origin}${location.pathname}#${sec.id}`;
+            if (await copyText(url)) {
+              a.classList.add("copied");
+              a.textContent = "copied";
+              // a second click restarts the window instead of inheriting the
+              // first one's deadline, which would clear the label early
+              clearTimeout(revert);
+              revert = setTimeout(() => {
+                a.classList.remove("copied");
+                a.textContent = "#";
+              }, 1400);
+            }
+            // if the copy failed we stay silent rather than claim success —
+            // the jump still happened and the URL now carries the hash
+          });
+          heading.appendChild(a);
+        });
       }
 
       /* ---------- theme ---------- */
