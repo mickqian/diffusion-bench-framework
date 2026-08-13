@@ -498,27 +498,28 @@
         color: var(--accent-strong);
       }
 
-      /* every section heading carries a link you can click to jump and copy.
-         kept faintly visible rather than hover-only so it is discoverable, and
-         separate from the heading text so selecting the text still works. */
-      .anchor-link {
-        margin-left: 0.5em;
-        font-size: 0.85em;
+      /* the whole section heading is the jump-and-copy target, so the hit area
+         is the title itself rather than a small glyph beside it. */
+      .section-anchor {
+        color: inherit;
+        text-decoration: none;
+        cursor: pointer;
+      }
+
+      /* the trailing mark is the affordance: kept faintly visible rather than
+         hover-only so the headings read as clickable before you reach them. */
+      .anchor-mark {
+        margin-left: 0.45em;
         font-weight: 500;
         letter-spacing: 0;
-        text-decoration: none;
         color: var(--muted);
-        opacity: 0.35;
+        opacity: 0.4;
         transition: opacity 140ms ease, color 140ms ease;
       }
 
-      .anchor-link:hover,
-      .anchor-link:focus-visible {
-        opacity: 1;
-        color: var(--accent-strong);
-      }
-
-      .anchor-link.copied {
+      .section-anchor:hover .anchor-mark,
+      .section-anchor:focus-visible .anchor-mark,
+      .anchor-mark.copied {
         opacity: 1;
         color: var(--accent-strong);
       }
@@ -2547,28 +2548,35 @@
         }
         document.querySelectorAll("section[id]").forEach((sec) => {
           const heading = sec.querySelector(".section-title, .summary-title");
-          if (!heading || heading.querySelector(".anchor-link")) return;
+          if (!heading || heading.querySelector(".section-anchor")) return;
           const a = document.createElement("a");
-          a.className = "anchor-link";
+          a.className = "section-anchor";
           a.href = `#${sec.id}`;
           a.title = LABEL;
-          a.setAttribute("aria-label", LABEL);
-          a.textContent = "#";
+          // the heading text moves inside the link, so the whole title is
+          // clickable; the mark trails it as the visible affordance
+          while (heading.firstChild) a.appendChild(heading.firstChild);
+          const mark = document.createElement("span");
+          mark.className = "anchor-mark";
+          mark.textContent = "#";
+          // decoration only: the link's accessible name is the heading text
+          mark.setAttribute("aria-hidden", "true");
+          a.appendChild(mark);
           let revert = 0;
-          a.addEventListener("click", async (e) => {
-            e.preventDefault();
-            history.replaceState(null, "", `#${sec.id}`);
-            sec.scrollIntoView({ behavior: "smooth", block: "start" });
+          // the jump is left to the browser's own hash navigation -- it honours
+          // scroll-behavior and scroll-padding-top from CSS, and keeps working
+          // if scripting is restricted. The handler only adds the copy.
+          a.addEventListener("click", async () => {
             const url = `${location.origin}${location.pathname}#${sec.id}`;
             if (await copyText(url)) {
-              a.classList.add("copied");
-              a.textContent = "copied";
+              mark.classList.add("copied");
+              mark.textContent = "copied";
               // a second click restarts the window instead of inheriting the
               // first one's deadline, which would clear the label early
               clearTimeout(revert);
               revert = setTimeout(() => {
-                a.classList.remove("copied");
-                a.textContent = "#";
+                mark.classList.remove("copied");
+                mark.textContent = "#";
               }, 1400);
             }
             // if the copy failed we stay silent rather than claim success —
