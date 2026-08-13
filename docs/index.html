@@ -329,7 +329,9 @@
       .nav-links {
         display: flex;
         align-items: center;
-        gap: 28px;
+        /* 28px separates items on one line; once the bar wraps, 28px rows make
+           the sticky header eat the viewport, so wrapped rows sit tighter */
+        gap: 12px 28px;
         flex-wrap: wrap;
       }
 
@@ -490,6 +492,10 @@
 
       h2.section-title {
         margin: 0;
+        /* the label owns its row: confined to the first grid column it wraps
+           once the type outgrows 0.62fr, and nothing else sits beside it */
+        grid-column: 1 / -1;
+        white-space: nowrap;
         font-size: clamp(15px, 1.25vw, 18px);
         font-weight: 600;
         /* tracking scales down as the type grows, or the label reads as gappy */
@@ -584,7 +590,8 @@
         font-weight: 500;
         letter-spacing: 0.04em;
         color: var(--muted);
-        padding: 7px 18px;
+        /* segmented controls share one size: keep in step with .bench-view-toggle */
+        padding: 7px 16px;
         border-radius: 999px;
         transition: color 160ms ease, background 160ms ease, box-shadow 160ms ease;
       }
@@ -818,27 +825,6 @@
       }
 
       /* ---- benchmarks ---- */
-      .benchmark-head {
-        padding-bottom: 24px;
-      }
-
-      .summary-title {
-        display: block;
-        font-family: var(--serif);
-        font-size: clamp(24px, 3vw, 36px);
-        font-weight: 500;
-        letter-spacing: -0.02em;
-        line-height: 1.1;
-      }
-
-      .summary-copy {
-        display: block;
-        margin-top: 12px;
-        color: var(--body);
-        font-size: 16px;
-        line-height: 1.55;
-      }
-
       .marker {
         flex: none;
         display: inline-flex;
@@ -939,7 +925,8 @@
       }
 
       .chip {
-        font-size: 13.5px;
+        /* outlined filter pills share one size: keep in step with .history-tabs */
+        font-size: 13px;
         font-weight: 500;
         color: var(--muted);
         padding: 7px 15px;
@@ -1272,7 +1259,8 @@
         font-size: 13px;
         font-weight: 500;
         color: var(--muted);
-        padding: 6px 16px;
+        /* segmented controls share one size: keep in step with .mode-toggle */
+        padding: 7px 16px;
         border-radius: 999px;
         transition: color 160ms ease, background 160ms ease, box-shadow 160ms ease;
       }
@@ -1593,7 +1581,8 @@
         font-size: 13px;
         font-weight: 500;
         color: var(--muted);
-        padding: 7px 14px;
+        /* outlined filter pills share one size: keep in step with .chip */
+        padding: 7px 15px;
         border-radius: 999px;
         border: 1px solid var(--hair-strong);
         transition: color 160ms ease, border-color 160ms ease, background 160ms ease;
@@ -2217,6 +2206,13 @@
           justify-content: flex-start;
         }
 
+        /* the labels stay one line (nowrap), so at phone widths the longest
+           one must fit by shrinking, not by pushing the page sideways */
+        h2.section-title {
+          font-size: 14px;
+          letter-spacing: 0.1em;
+        }
+
         .footer-inner {
           flex-direction: column;
         }
@@ -2431,11 +2427,11 @@
 
       <section class="shell section" id="benchmarks">
         <div class="benchmark-shell">
-          <div class="benchmark-head">
-            <span class="summary-title">Cross-framework benchmark data</span>
-            <span class="summary-copy">
+          <div class="section-head">
+            <h2 class="section-title">Cross-framework benchmark data</h2>
+            <p>
               Cache-free, one representative case per model across all four frameworks on the same GPU count. Pick a tab for single-request latency or high-pressure throughput; each tab shows its GPU, benchmark date, and per-framework versions. Unsupported, anomalous, or unbenched combinations are marked with the reason.
-            </span>
+            </p>
           </div>
           <section class="history-panel" aria-label="Cross-framework benchmark coverage">
             <div class="history-head">
@@ -2547,7 +2543,7 @@
           }
         }
         document.querySelectorAll("section[id]").forEach((sec) => {
-          const heading = sec.querySelector(".section-title, .summary-title");
+          const heading = sec.querySelector(".section-title");
           if (!heading || heading.querySelector(".section-anchor")) return;
           const a = document.createElement("a");
           a.className = "section-anchor";
