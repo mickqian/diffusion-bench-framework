@@ -114,11 +114,11 @@
     },
     {
       "type": "video",
-      "src": "gallery/lingbot.mp4",
-      "poster": "gallery/lingbot.png",
-      "model": "LingBot-world-fast",
-      "prompt": "A rover crossing the dust-red Martian surface, mountains on the horizon — a real-time world-model scene.",
-      "params": "480p · 40 fps · real-time world model",
+      "src": "gallery/lingbot_v2_mars.mp4",
+      "poster": "gallery/lingbot_v2_mars.png",
+      "model": "LingBot-World-v2 (14B)",
+      "prompt": "A Martian rover crossing cracked basalt toward a volcanic mountain — a real-time interactive world model, camera driven live by keyboard: forward runs, two sweeping turns, a look up at the volcano.",
+      "params": "480p · 25 fps · real-time world/action model · keyboard-driven",
       "aspect": "832 / 480"
     },
     {
