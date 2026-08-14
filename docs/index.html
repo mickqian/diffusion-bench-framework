@@ -4385,10 +4385,10 @@
         const note = document.getElementById("nightlyNote");
         nightlyPlot = {};
 
-        // drop near-empty cases — a 1-2 point chart is not a trend (e.g. transient LTX-2.3 runs)
-        const order = [...cases.keys()]
-          .filter((k) => (cases.get(k).pts || []).length >= 3)
-          .sort();
+        // every case renders — hiding sparse ones made each freshly-added case
+        // invisible for its first days. Cases with under 3 points draw as dots
+        // and say how many runs exist instead of pretending to be a trend.
+        const order = [...cases.keys()].sort();
 
         metaEl.hidden = false;
         metaEl.innerHTML =
@@ -4412,7 +4412,10 @@
         const pts = c.pts;
         const last = pts[pts.length - 1].v;
         let delta = "";
-        if (pts.length > 1) {
+        if (pts.length < 3) {
+          // too few points for a trend: say so rather than show a delta
+          delta = `<span class="trend-delta flat">${pts.length} run${pts.length > 1 ? "s" : ""} so far</span>`;
+        } else {
           const prev = pts[pts.length - 2].v;
           if (prev > 0) {
             const pct = ((last - prev) / prev) * 100;
@@ -4442,26 +4445,37 @@
         const padY = (mx - mn) * 0.18;
         mn -= padY; mx += padY;
         const tmn = Math.min(...ts), tmx = Math.max(...ts);
-        const x = (t) => L + (tmx === tmn ? 0 : (t - tmn) / (tmx - tmn)) * (W - L - R);
+        // a lone run centers its dot rather than hugging the left edge
+        const x = (t) => (tmx === tmn ? L + (W - L - R) / 2 : L + ((t - tmn) / (tmx - tmn)) * (W - L - R));
         const y = (v) => T + (1 - (v - mn) / (mx - mn)) * (H - T - B);
         const plotted = pts.map((p) => ({ px: x(p.t), py: y(p.v), v: p.v, t: p.t, c: p.c }));
         const last = pts[pts.length - 1];
         const fixed = last.v < 10 ? 3 : last.v < 100 ? 2 : 1;
         nightlyPlot[caseId] = { plotted, W, H, fixed };
+        const sparse = pts.length < 3;
         const line = plotted.map((p, i) => `${i ? "L" : "M"}${p.px.toFixed(1)},${p.py.toFixed(1)}`).join(" ");
         const area = `${line} L${x(tmx).toFixed(1)},${(H - B).toFixed(1)} L${x(tmn).toFixed(1)},${(H - B).toFixed(1)} Z`;
-        const lp = plotted[plotted.length - 1];
+        // under 3 points there is no trend to draw: dots only, no line/area
+        const series = sparse
+          ? plotted
+              .map((p) => `<circle cx="${p.px.toFixed(1)}" cy="${p.py.toFixed(1)}" r="3.2" fill="var(--accent)" />`)
+              .join("")
+          : `<path d="${area}" fill="var(--accent)" fill-opacity="0.09" />
+            <path d="${line}" fill="none" stroke="var(--accent)" stroke-width="2" stroke-linejoin="round" stroke-linecap="round" vector-effect="non-scaling-stroke" />
+            <circle cx="${plotted[plotted.length - 1].px.toFixed(1)}" cy="${plotted[plotted.length - 1].py.toFixed(1)}" r="3.2" fill="var(--accent)" />`;
         const yMax = mx.toFixed(mx < 10 ? 2 : mx < 100 ? 1 : 0);
+        const dates =
+          tmn === tmx
+            ? `<text x="${(W / 2).toFixed(1)}" y="${H - 6}" text-anchor="middle" fill="var(--faint)" font-size="10">${nightlyDate(tmn)}</text>`
+            : `<text x="${L}" y="${H - 6}" fill="var(--faint)" font-size="10">${nightlyDate(tmn)}</text>
+            <text x="${W - R}" y="${H - 6}" text-anchor="end" fill="var(--faint)" font-size="10">${nightlyDate(tmx)}</text>`;
         return `
           <svg class="trend-svg" viewBox="0 0 ${W} ${H}" role="img" aria-label="latency trend over time">
-            <path d="${area}" fill="var(--accent)" fill-opacity="0.09" />
-            <path d="${line}" fill="none" stroke="var(--accent)" stroke-width="2" stroke-linejoin="round" stroke-linecap="round" vector-effect="non-scaling-stroke" />
+            ${series}
             <line class="trend-guide" x1="0" y1="${T}" x2="0" y2="${H - B}" />
-            <circle cx="${lp.px.toFixed(1)}" cy="${lp.py.toFixed(1)}" r="3.2" fill="var(--accent)" />
             <circle class="trend-cursor" cx="0" cy="0" r="3.8" />
             <text x="${L}" y="10" fill="var(--faint)" font-size="10">${yMax}s</text>
-            <text x="${L}" y="${H - 6}" fill="var(--faint)" font-size="10">${nightlyDate(tmn)}</text>
-            <text x="${W - R}" y="${H - 6}" text-anchor="end" fill="var(--faint)" font-size="10">${nightlyDate(tmx)}</text>
+            ${dates}
             <rect class="trend-hit" x="0" y="0" width="${W}" height="${H}" />
           </svg>`;
       }
