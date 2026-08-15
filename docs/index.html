@@ -1107,7 +1107,8 @@
         border-radius: 999px;
         transform: scaleX(0);
         transform-origin: left center;
-        transition: transform 0.9s var(--spring),
+        /* linear + per-bar --grow: fill time replays the measured ratio */
+        transition: transform var(--grow, 0.9s) linear,
           filter 200ms ease;
       }
 
@@ -1686,7 +1687,10 @@
       .bnx-track i {
         position: absolute; inset: 0 auto 0 0; border-radius: 99px;
         transform: scaleX(0); transform-origin: left center;
-        transition: transform 1.05s cubic-bezier(0.22, 1, 0.36, 1);
+        /* the fill is a replay of the measurement: each bar carries its own
+           --grow proportional to its measured value, so linear pacing (not an
+           ease) is what makes the speed differences readable */
+        transition: transform var(--grow, 1.05s) linear;
       }
       .bnx-row.seen .bnx-track i { transform: scaleX(1); }
       .bnx-val { text-align: right; font-size: 15px; color: var(--body); white-space: nowrap; font-variant-numeric: tabular-nums; }
@@ -3479,10 +3483,14 @@
             ? Math.min(100, ratioValue * 50)
             : Math.min(100, (1 / ratioValue) * 50)
           : 0;
+        // fill time replays the measurement relative to sglang: faster than
+        // the reference finishes sooner, slower drags in real proportion
+        const growRel = hasRatio ? (mode === "throughput" ? 1 / ratioValue : ratioValue) : 1;
+        const grow = Math.min(3.5, Math.max(0.25, 0.7 * growRel));
         const ratio = hasRatio
           ? `
             <span class="ratio">${ratioValue.toFixed(3)}x ${mode === "throughput" ? "qps" : "latency"}</span>
-            <span class="bar-track bar-${kind}"><i style="width:${barWidth.toFixed(1)}%"></i></span>
+            <span class="bar-track bar-${kind}"><i style="width:${barWidth.toFixed(1)}%;--grow:${grow.toFixed(2)}s"></i></span>
           `
           : "";
 
@@ -3938,8 +3946,13 @@
             // bar length ∝ value/rowMax: latency -> longest is slowest; throughput -> longest is fastest
             const w = Math.max(5, (V / rowMax) * 100);
             const win = k === best;
+            // fill time replays the race: the row's best takes the base time,
+            // everyone else takes base x their measured ratio to it
+            const bestV = best ? bnxVal(cells[best], isTput) : V;
+            const rel = isTput ? bestV / V : V / bestV;
+            const grow = Math.min(3.5, 0.7 * rel);
             return `<div class="bnx-brow${win ? " win" : ""}"><span class="bnx-fw">${BNX_SHORT[k]}</span>`
-              + `<span class="bnx-track"><i style="width:${w.toFixed(1)}%;background:${BNX_COLOR[k]}"></i></span>`
+              + `<span class="bnx-track"><i style="width:${w.toFixed(1)}%;background:${BNX_COLOR[k]};--grow:${grow.toFixed(2)}s"></i></span>`
               + `<span class="bnx-val">${fmt(V)}<span class="u">${unit}</span></span></div>`;
           }).join("");
           const sample = row.sample || (row.cells && row.cells.sglang && row.cells.sglang.sample);
@@ -3975,8 +3988,8 @@
             + `<div class="bnx-m"><div class="bnx-mv">${wins}</div><div class="bnx-ml">${isTput ? "top QPS" : "fastest"}</div></div></div>`;
         }).join("");
         const metricNote = isTput
-          ? "Bar length ∝ QPS — longer is faster; highest QPS wins."
-          : "Bar length ∝ latency — shorter is faster; lowest latency wins.";
+          ? "Bar length ∝ QPS — longer is faster; highest QPS wins. Bars fill in measured proportion: the fastest lands first."
+          : "Bar length ∝ latency — shorter is faster; lowest latency wins. Bars fill in measured proportion: the fastest lands first.";
         return `<div class="bnx-metricnote">${metricNote}</div>`
           + `<div class="bnx-ledger">${rowsHtml}</div>`
           + `<div class="bnx-standlabel">Standings · across the cases each framework could serve</div>`
