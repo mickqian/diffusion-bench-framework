@@ -2,6 +2,7 @@
  "id": "qwen_image_edit_2511",
  "model": "Qwen/Qwen-Image-Edit-2511",
  "task": "image-edit",
+ "label": "Qwen-Image-Edit-2511",
  "prompt": "Make the cat wear a red hat",
  "reference_image": true,
  "width": 1024,
@@ -19,7 +20,7 @@
     "default": {
      "description": "Best known SGLang command for the benchmark repo default profile.",
      "sglang_ref": "current-main",
-     "serve_args": "--model-type diffusion --warmup-mode server --tp-size 2 --dit-layerwise-offload false --performance-mode speed --enable-torch-compile",
+     "serve_args": "--model-type diffusion --warmup-mode server --tp-size 2 --dit-layerwise-offload false --performance-mode speed --enable-torch-compile false",
      "notes": "Keep this profile updated when the best command changes for a SGLang release or commit. Policy-aligned candidate (compile on, offload off) — NOT yet validated on H100; validate (incl. OOM risk) before publishing."
     }
    }

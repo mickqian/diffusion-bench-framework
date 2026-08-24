@@ -2,6 +2,7 @@
  "id": "wan22_t2v_a14b_720p",
  "model": "Wan-AI/Wan2.2-T2V-A14B-Diffusers",
  "task": "text-to-video",
+ "label": "Wan2.2 T2V A14B 720p",
  "prompt": "A cat and a dog baking a cake together in a kitchen.",
  "width": 1280,
  "height": 720,
@@ -21,7 +22,7 @@
     "default": {
      "description": "Best known SGLang command for the benchmark repo default profile.",
      "sglang_ref": "current-main",
-     "serve_args": "--model-type diffusion --warmup-mode server --enable-cfg-parallel --ulysses-degree 2 --dit-cpu-offload false --pin-cpu-memory --dit-layerwise-offload false --performance-mode speed --enable-torch-compile",
+     "serve_args": "--model-type diffusion --warmup-mode server --enable-cfg-parallel --ulysses-degree 2 --dit-cpu-offload false --pin-cpu-memory --dit-layerwise-offload false --performance-mode speed --enable-torch-compile false",
      "notes": "Keep this profile updated when the best command changes for a SGLang release or commit. Policy-aligned candidate (compile on, offload off) — NOT yet validated on H100; validate (incl. OOM risk) before publishing."
     }
    }

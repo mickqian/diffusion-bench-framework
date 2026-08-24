@@ -2,6 +2,7 @@
  "id": "cosmos3_nano_i2v_720p_189f",
  "model": "nvidia/Cosmos3-Nano",
  "task": "image-to-video",
+ "label": "Cosmos3-Nano I2V 720p",
  "prompt": "A dashcam car drives along a coastal mountain road and brakes as rocks fall ahead.",
  "negative_prompt": "blurry, distorted, low quality",
  "reference_image": true,
@@ -36,7 +37,7 @@
      "description": "Cosmos3 Nano I2V profile for SGLang-Diffusion main 3d540563.",
      "sglang_ref": "sgl-project/sglang@3d540563916394115f9612f30601ae3fa97ada7c",
      "num_gpus": 4,
-     "serve_args": "--model-type diffusion --warmup-mode server --attention-backend fa --cfg-parallel-size 2 --ulysses-degree 2 --dit-layerwise-offload false --performance-mode speed --enable-torch-compile",
+     "serve_args": "--model-type diffusion --warmup-mode server --attention-backend fa --cfg-parallel-size 2 --ulysses-degree 2 --dit-layerwise-offload false --performance-mode speed --enable-torch-compile false",
      "notes": "4-GPU CFG parallel plus Ulysses SP for long-video H200 serving; guardrails disabled, no cache. Policy-aligned candidate (compile on, offload off) — NOT yet validated on H100; validate (incl. OOM risk) before publishing."
     },
     "h200-4gpu-cfg-ulysses": {

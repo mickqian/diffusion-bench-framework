@@ -2,6 +2,7 @@
   "id": "flux2_dev_t2i_1024",
   "model": "black-forest-labs/FLUX.2-dev",
   "task": "text-to-image",
+  "label": "FLUX.2-dev T2I",
   "prompt": "A futuristic cyberpunk city at night, neon lights reflecting on wet streets",
   "width": 1024,
   "height": 1024,
@@ -21,7 +22,7 @@
           "serve_args": "--model-type diffusion --warmup-mode server --dit-layerwise-offload false --tp-size 2",
           "notes": "Keep this profile updated when the best command changes for a SGLang release or commit."
         },
-        "h100-h200-2gpu-tp-compile": {
+        "h100-h200-2gpu-tp-eager": {
           "description": "Hopper 2-GPU TP legacy-compatible FLUX.2 compile profile.",
           "hardware": [
             "h100",
@@ -29,7 +30,7 @@
           ],
           "num_gpus": 2,
           "sglang_ref": "legacy-compatible",
-          "serve_args": "--model-type diffusion --warmup-mode server --dit-layerwise-offload false --tp-size 2 --enable-torch-compile",
+          "serve_args": "--model-type diffusion --warmup-mode server --dit-layerwise-offload false --tp-size 2 --enable-torch-compile false false",
           "benchmark": {
             "warmup": {
               "num_requests": 2,
@@ -38,7 +39,7 @@
           },
           "notes": "Use for SGLang commits before --performance-mode speed existed; TP remains explicit."
         },
-        "blackwell-2gpu-tp-compile": {
+        "blackwell-2gpu-tp-eager": {
           "description": "Blackwell 2-GPU TP legacy-compatible FLUX.2 compile profile.",
           "hardware": [
             "b200",
@@ -48,7 +49,7 @@
           ],
           "num_gpus": 2,
           "sglang_ref": "legacy-compatible",
-          "serve_args": "--model-type diffusion --warmup-mode server --dit-layerwise-offload false --tp-size 2 --enable-torch-compile",
+          "serve_args": "--model-type diffusion --warmup-mode server --dit-layerwise-offload false --tp-size 2 --enable-torch-compile false false",
           "benchmark": {
             "warmup": {
               "num_requests": 2,
@@ -57,7 +58,7 @@
           },
           "notes": "Use for SGLang commits before --performance-mode speed existed; TP remains explicit."
         },
-        "h100-h200-2gpu-tp-speed-compile": {
+        "h100-h200-2gpu-tp-speed-eager": {
           "description": "Hopper 2-GPU TP fastest FLUX.2 profile probe.",
           "hardware": [
             "h100",
@@ -65,7 +66,7 @@
           ],
           "num_gpus": 2,
           "sglang_ref": "current-main",
-          "serve_args": "--model-type diffusion --warmup-mode server --dit-layerwise-offload false --tp-size 2 --performance-mode speed --enable-torch-compile",
+          "serve_args": "--model-type diffusion --warmup-mode server --dit-layerwise-offload false --tp-size 2 --performance-mode speed --enable-torch-compile false false",
           "benchmark": {
             "warmup": {
               "num_requests": 2,
@@ -77,7 +78,7 @@
           },
           "notes": "Steady-state fastest profile candidate; TP is explicit and CUDA norm avoids FlashInfer CUTE norm JIT on Hopper."
         },
-        "blackwell-2gpu-tp-speed-compile": {
+        "blackwell-2gpu-tp-speed-eager": {
           "description": "Blackwell 2-GPU TP fastest FLUX.2 profile probe.",
           "hardware": [
             "b200",
@@ -87,7 +88,7 @@
           ],
           "num_gpus": 2,
           "sglang_ref": "current-main",
-          "serve_args": "--model-type diffusion --warmup-mode server --dit-layerwise-offload false --tp-size 2 --performance-mode speed --enable-torch-compile",
+          "serve_args": "--model-type diffusion --warmup-mode server --dit-layerwise-offload false --tp-size 2 --performance-mode speed --enable-torch-compile false false",
           "benchmark": {
             "warmup": {
               "num_requests": 2,
@@ -115,7 +116,7 @@
             "DIFFUSION_ATTENTION_BACKEND": "FLASH_ATTN"
           }
         },
-        "h100-h200-2gpu-tp-compile": {
+        "h100-h200-2gpu-tp-eager": {
           "description": "Hopper 2-GPU TP fastest vLLM-Omni FLUX.2 profile probe.",
           "hardware": [
             "h100",
@@ -135,7 +136,7 @@
             "DIFFUSION_ATTENTION_BACKEND": "FLASH_ATTN"
           }
         },
-        "blackwell-2gpu-tp-compile": {
+        "blackwell-2gpu-tp-eager": {
           "description": "Blackwell 2-GPU TP fastest vLLM-Omni FLUX.2 profile probe.",
           "hardware": [
             "b200",

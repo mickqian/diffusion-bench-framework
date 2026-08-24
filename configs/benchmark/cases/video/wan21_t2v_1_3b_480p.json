@@ -2,6 +2,7 @@
  "id": "wan21_t2v_1_3b_480p",
  "model": "Wan-AI/Wan2.1-T2V-1.3B-Diffusers",
  "task": "text-to-video",
+ "label": "Wan2.1 T2V 1.3B 480p",
  "prompt": "A cat and a dog baking a cake together in a kitchen.",
  "width": 832,
  "height": 480,
@@ -33,13 +34,13 @@
      "serve_args": "--model-type diffusion --warmup-mode server --enable-cfg-parallel --dit-cpu-offload false --vae-precision bf16 --text-encoder-cpu-offload false --image-encoder-cpu-offload false --vae-cpu-offload false",
      "notes": "Keeps DiT, text/image encoders, and VAE resident on high-memory H200; BF16 VAE aligns with LightX2V best-performance Wan serving path. No cache or torch compile path."
     },
-    "h100-2gpu-cfg-speed-compile": {
+    "h100-2gpu-cfg-speed-eager": {
      "description": "Hopper 2-GPU CFG-parallel + resident + torch.compile — measured fastest.",
      "hardware": [
       "h100"
      ],
      "sglang_ref": "current-main",
-     "serve_args": "--model-type diffusion --warmup-mode server --enable-cfg-parallel --dit-layerwise-offload false --performance-mode speed --enable-torch-compile",
+     "serve_args": "--model-type diffusion --warmup-mode server --enable-cfg-parallel --dit-layerwise-offload false --performance-mode speed --enable-torch-compile false",
      "notes": "Measured H100 A/B 2026-07-03 (steady-state single_e2e): 26.556s (auto default) -> 25.046s (-5.7%)."
     }
    }

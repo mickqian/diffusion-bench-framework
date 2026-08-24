@@ -22,6 +22,7 @@
             "id": "flux1_dev_t2i_1024",
             "model": "black-forest-labs/FLUX.1-dev",
             "task": "text-to-image",
+            "label": "FLUX.1-dev T2I",
             "throughput": true,
             "prompt": "A futuristic cyberpunk city at night, neon lights reflecting on wet streets",
             "width": 1024,
@@ -41,7 +42,7 @@
                             "serve_args": "--model-type diffusion --warmup-mode server --dit-layerwise-offload false --tp-size 2",
                             "notes": "Keep this profile updated when the best command changes for a SGLang release or commit."
                         },
-                        "h100-h200-2gpu-tp-compile": {
+                        "h100-h200-2gpu-tp-eager": {
                             "description": "Hopper 2-GPU TP legacy-compatible FLUX compile profile.",
                             "hardware": [
                                 "h100",
@@ -49,7 +50,7 @@
                             ],
                             "num_gpus": 2,
                             "sglang_ref": "legacy-compatible",
-                            "serve_args": "--model-type diffusion --warmup-mode server --dit-layerwise-offload false --tp-size 2 --enable-torch-compile",
+                            "serve_args": "--model-type diffusion --warmup-mode server --dit-layerwise-offload false --tp-size 2 --enable-torch-compile false false",
                             "benchmark": {
                                 "warmup": {
                                     "num_requests": 2,
@@ -58,7 +59,7 @@
                             },
                             "notes": "Use for SGLang commits before --performance-mode speed existed; TP remains explicit."
                         },
-                        "blackwell-2gpu-tp-compile": {
+                        "blackwell-2gpu-tp-eager": {
                             "description": "Blackwell 2-GPU TP legacy-compatible FLUX compile profile.",
                             "hardware": [
                                 "b200",
@@ -68,7 +69,7 @@
                             ],
                             "num_gpus": 2,
                             "sglang_ref": "legacy-compatible",
-                            "serve_args": "--model-type diffusion --warmup-mode server --dit-layerwise-offload false --tp-size 2 --enable-torch-compile",
+                            "serve_args": "--model-type diffusion --warmup-mode server --dit-layerwise-offload false --tp-size 2 --enable-torch-compile false false",
                             "benchmark": {
                                 "warmup": {
                                     "num_requests": 2,
@@ -77,7 +78,7 @@
                             },
                             "notes": "Use for SGLang commits before --performance-mode speed existed; TP remains explicit."
                         },
-                        "h100-h200-2gpu-tp-speed-compile": {
+                        "h100-h200-2gpu-tp-speed-eager": {
                             "description": "Hopper 2-GPU TP fastest FLUX profile probe.",
                             "hardware": [
                                 "h100",
@@ -85,7 +86,7 @@
                             ],
                             "num_gpus": 2,
                             "sglang_ref": "current-main",
-                            "serve_args": "--model-type diffusion --warmup-mode server --dit-layerwise-offload false --tp-size 2 --performance-mode speed --enable-torch-compile",
+                            "serve_args": "--model-type diffusion --warmup-mode server --dit-layerwise-offload false --tp-size 2 --performance-mode speed --enable-torch-compile false false",
                             "benchmark": {
                                 "warmup": {
                                     "num_requests": 2,
@@ -97,7 +98,7 @@
                             },
                             "notes": "Steady-state fastest profile candidate; TP is explicit and CUDA norm avoids FlashInfer CUTE norm JIT on Hopper."
                         },
-                        "blackwell-2gpu-tp-speed-compile": {
+                        "blackwell-2gpu-tp-speed-eager": {
                             "description": "Blackwell 2-GPU TP fastest FLUX profile probe.",
                             "hardware": [
                                 "b200",
@@ -107,7 +108,7 @@
                             ],
                             "num_gpus": 2,
                             "sglang_ref": "current-main",
-                            "serve_args": "--model-type diffusion --warmup-mode server --dit-layerwise-offload false --tp-size 2 --performance-mode speed --enable-torch-compile",
+                            "serve_args": "--model-type diffusion --warmup-mode server --dit-layerwise-offload false --tp-size 2 --performance-mode speed --enable-torch-compile false false",
                             "benchmark": {
                                 "warmup": {
                                     "num_requests": 2,
@@ -134,7 +135,7 @@
                                 "DIFFUSION_ATTENTION_BACKEND": "FLASH_ATTN"
                             }
                         },
-                        "h100-h200-2gpu-tp-compile": {
+                        "h100-h200-2gpu-tp-eager": {
                             "description": "Hopper 2-GPU TP fastest vLLM-Omni FLUX profile probe.",
                             "hardware": [
                                 "h100",
@@ -154,7 +155,7 @@
                                 "DIFFUSION_ATTENTION_BACKEND": "FLASH_ATTN"
                             }
                         },
-                        "blackwell-2gpu-tp-compile": {
+                        "blackwell-2gpu-tp-eager": {
                             "description": "Blackwell 2-GPU TP fastest vLLM-Omni FLUX profile probe.",
                             "hardware": [
                                 "b200",
@@ -232,6 +233,7 @@
             "id": "flux2_dev_t2i_1024",
             "model": "black-forest-labs/FLUX.2-dev",
             "task": "text-to-image",
+            "label": "FLUX.2-dev T2I",
             "prompt": "A futuristic cyberpunk city at night, neon lights reflecting on wet streets",
             "width": 1024,
             "height": 1024,
@@ -250,7 +252,7 @@
                             "serve_args": "--model-type diffusion --warmup-mode server --dit-layerwise-offload false --tp-size 2",
                             "notes": "Keep this profile updated when the best command changes for a SGLang release or commit."
                         },
-                        "h100-h200-2gpu-tp-compile": {
+                        "h100-h200-2gpu-tp-eager": {
                             "description": "Hopper 2-GPU TP legacy-compatible FLUX.2 compile profile.",
                             "hardware": [
                                 "h100",
@@ -258,7 +260,7 @@
                             ],
                             "num_gpus": 2,
                             "sglang_ref": "legacy-compatible",
-                            "serve_args": "--model-type diffusion --warmup-mode server --dit-layerwise-offload false --tp-size 2 --enable-torch-compile",
+                            "serve_args": "--model-type diffusion --warmup-mode server --dit-layerwise-offload false --tp-size 2 --enable-torch-compile false false",
                             "benchmark": {
                                 "warmup": {
                                     "num_requests": 2,
@@ -267,7 +269,7 @@
                             },
                             "notes": "Use for SGLang commits before --performance-mode speed existed; TP remains explicit."
                         },
-                        "blackwell-2gpu-tp-compile": {
+                        "blackwell-2gpu-tp-eager": {
                             "description": "Blackwell 2-GPU TP legacy-compatible FLUX.2 compile profile.",
                             "hardware": [
                                 "b200",
@@ -277,7 +279,7 @@
                             ],
                             "num_gpus": 2,
                             "sglang_ref": "legacy-compatible",
-                            "serve_args": "--model-type diffusion --warmup-mode server --dit-layerwise-offload false --tp-size 2 --enable-torch-compile",
+                            "serve_args": "--model-type diffusion --warmup-mode server --dit-layerwise-offload false --tp-size 2 --enable-torch-compile false false",
                             "benchmark": {
                                 "warmup": {
                                     "num_requests": 2,
@@ -286,7 +288,7 @@
                             },
                             "notes": "Use for SGLang commits before --performance-mode speed existed; TP remains explicit."
                         },
-                        "h100-h200-2gpu-tp-speed-compile": {
+                        "h100-h200-2gpu-tp-speed-eager": {
                             "description": "Hopper 2-GPU TP fastest FLUX.2 profile probe.",
                             "hardware": [
                                 "h100",
@@ -294,7 +296,7 @@
                             ],
                             "num_gpus": 2,
                             "sglang_ref": "current-main",
-                            "serve_args": "--model-type diffusion --warmup-mode server --dit-layerwise-offload false --tp-size 2 --performance-mode speed --enable-torch-compile",
+                            "serve_args": "--model-type diffusion --warmup-mode server --dit-layerwise-offload false --tp-size 2 --performance-mode speed --enable-torch-compile false false",
                             "benchmark": {
                                 "warmup": {
                                     "num_requests": 2,
@@ -306,7 +308,7 @@
                             },
                             "notes": "Steady-state fastest profile candidate; TP is explicit and CUDA norm avoids FlashInfer CUTE norm JIT on Hopper."
                         },
-                        "blackwell-2gpu-tp-speed-compile": {
+                        "blackwell-2gpu-tp-speed-eager": {
                             "description": "Blackwell 2-GPU TP fastest FLUX.2 profile probe.",
                             "hardware": [
                                 "b200",
@@ -316,7 +318,7 @@
                             ],
                             "num_gpus": 2,
                             "sglang_ref": "current-main",
-                            "serve_args": "--model-type diffusion --warmup-mode server --dit-layerwise-offload false --tp-size 2 --performance-mode speed --enable-torch-compile",
+                            "serve_args": "--model-type diffusion --warmup-mode server --dit-layerwise-offload false --tp-size 2 --performance-mode speed --enable-torch-compile false false",
                             "benchmark": {
                                 "warmup": {
                                     "num_requests": 2,
@@ -343,7 +345,7 @@
                                 "DIFFUSION_ATTENTION_BACKEND": "FLASH_ATTN"
                             }
                         },
-                        "h100-h200-2gpu-tp-compile": {
+                        "h100-h200-2gpu-tp-eager": {
                             "description": "Hopper 2-GPU TP fastest vLLM-Omni FLUX.2 profile probe.",
                             "hardware": [
                                 "h100",
@@ -363,7 +365,7 @@
                                 "DIFFUSION_ATTENTION_BACKEND": "FLASH_ATTN"
                             }
                         },
-                        "blackwell-2gpu-tp-compile": {
+                        "blackwell-2gpu-tp-eager": {
                             "description": "Blackwell 2-GPU TP fastest vLLM-Omni FLUX.2 profile probe.",
                             "hardware": [
                                 "b200",
@@ -506,6 +508,7 @@
             "id": "qwen_image_2512_t2i_1024",
             "model": "Qwen/Qwen-Image-2512",
             "task": "text-to-image",
+            "label": "Qwen-Image-2512 T2I (no-CFG)",
             "prompt": "A futuristic cyberpunk city at night, neon lights reflecting on wet streets",
             "width": 1024,
             "height": 1024,
@@ -534,13 +537,13 @@
                             "policy_exception": "compile OFF by measurement, twice over. (1) 2026-07-20 same-machine sweep (2xH100, 50 steps, ms/step): true eager 88.3 (4.54s e2e) vs 07-03-era compile 96.5 (4.97s) vs current-main compile 114.5 (5.83s) — qwen+compile never won (07-03 gain was ~1.5% at best) because inductor's triton GEMMs lose to cublas nvjet on this shape mix. (2) The 07-28 full-matrix run measured 5.74s under compile, matching the 114.5ms/step row: sglang PR #31849 (needed to stop a dynamo crash: can_use_fused_inplace_qknorm_rope receives SymInt under tracing) additionally drops the fused qk-norm-rope kernel when compiling, so compile now also pays the unfused qknorm path x60 blocks. Until the fused kernel is made trace-safe upstream, eager is strictly faster AND numerically identical. Parallelism choice unchanged from 2026-07-03 ABAB x3: Ulysses 4.892 vs best-TP 5.135 (-4.7%, 3/3 pairs); TP-vs-Ulysses MAE 0.74/255 converging with steps = FP-reorder, not a bug.",
                             "notes": "Validated H100 only. --enable-cfg-parallel false required (no-CFG single branch; also prevents speed-mode auto-cfg from overriding sp_degree, PR #30016). speed mode auto-enables compile since #30016, so the eager exception MUST say --enable-torch-compile false explicitly. Campaign follow-ups (fused-qknorm dynamo fix, full-step CUDA graph, IPC A2A — notes/multimodal_gen/qwen_image_vllm_30pct_20260720.md) measured 3.952s on this case; revisit this profile once those PRs merge."
                         },
-                        "h200-2gpu-tp-speed-compile": {
+                        "h200-2gpu-tp-speed-eager": {
                             "description": "Hopper 2-GPU TP SGLang qwen_image_2512_t2i_1024: resident DiT + torch.compile (best-lossless). Same validated command as flux1/flux2 speed-compile.",
                             "hardware": [
                                 "h200"
                             ],
                             "sglang_ref": "origin/main + PR #29774 (QwenImage TP shard) + selective txt_mlp ReplicatedLinear (proposed #29774 follow-up)",
-                            "serve_args": "--model-type diffusion --warmup-mode server --dit-layerwise-offload false --tp-size 2 --performance-mode speed --enable-torch-compile",
+                            "serve_args": "--model-type diffusion --warmup-mode server --dit-layerwise-offload false --tp-size 2 --performance-mode speed --enable-torch-compile false",
                             "notes": "no-CFG single-branch: TP shard (#29774) but keep text-branch txt_mlp ReplicatedLinear to skip its per-block all-reduce. Measured H100: full-shard 5.65s -> txt_mlp-replicated 5.076s, beats vLLM 5.17s. (true-CFG uses CFG-parallel instead — see the truecfg case.) offload-during-compile is in main. Selective-shard qwen_image.py kept at reports/h100x4-final-20260702/qwen_image_selective_shard.py. H100 superseded by Ulysses profile (measured faster); TP retained for H200 until Ulysses is validated there."
                         }
                     }
@@ -632,6 +635,7 @@
             "id": "qwen_image_2512_t2i_1024_truecfg",
             "model": "Qwen/Qwen-Image-2512",
             "task": "text-to-image",
+            "label": "Qwen-Image-2512 T2I (true-CFG)",
             "prompt": "A futuristic cyberpunk city at night, neon lights reflecting on wet streets",
             "width": 1024,
             "height": 1024,
@@ -653,14 +657,14 @@
                             "serve_args": "--model-type diffusion --warmup-mode server --tp-size 2",
                             "notes": "Keep this profile updated when the best command changes for a SGLang release or commit."
                         },
-                        "h100-h200-2gpu-tp-speed-compile": {
+                        "h100-h200-2gpu-tp-speed-eager": {
                             "description": "H100 2-GPU SGLang Qwen-Image true-CFG: CFG parallelism (each GPU runs one CFG branch, no per-layer all-reduce) + resident + compile. Fastest for the 2-branch quality path.",
                             "hardware": [
                                 "h100",
                                 "h200"
                             ],
                             "sglang_ref": "origin/main + PR #29774 (Shard QwenImage DiT across TP ranks; open, not yet merged)",
-                            "serve_args": "--model-type diffusion --warmup-mode server --enable-cfg-parallel --performance-mode speed --enable-torch-compile",
+                            "serve_args": "--model-type diffusion --warmup-mode server --enable-cfg-parallel --performance-mode speed --enable-torch-compile false",
                             "notes": "CFG parallelism is the cookbook-recommended Qwen multi-GPU path. Measured: 6.49s vs TP #29774 11.07s vs vLLM 10.14s (CFG-parallel 1.56x faster than vLLM). TP shards the DiT but RowParallel all-reduce dominates (~70% kernel time) for the 2-branch case; CFG-parallel avoids it. No #29774 needed here (DiT replicated, one branch per GPU)."
                         }
                     }
@@ -712,6 +716,7 @@
             "id": "qwen_image_edit_2511",
             "model": "Qwen/Qwen-Image-Edit-2511",
             "task": "image-edit",
+            "label": "Qwen-Image-Edit-2511",
             "prompt": "Make the cat wear a red hat",
             "reference_image": true,
             "width": 1024,
@@ -728,7 +733,7 @@
                         "default": {
                             "description": "Best known SGLang command for the benchmark repo default profile.",
                             "sglang_ref": "current-main",
-                            "serve_args": "--model-type diffusion --warmup-mode server --tp-size 2 --dit-layerwise-offload false --performance-mode speed --enable-torch-compile",
+                            "serve_args": "--model-type diffusion --warmup-mode server --tp-size 2 --dit-layerwise-offload false --performance-mode speed --enable-torch-compile false",
                             "notes": "Keep this profile updated when the best command changes for a SGLang release or commit. Policy-aligned candidate (compile on, offload off) — NOT yet validated on H100; validate (incl. OOM risk) before publishing."
                         }
                     }
@@ -765,6 +770,7 @@
             "id": "zimage_turbo_t2i_1024",
             "model": "Tongyi-MAI/Z-Image-Turbo",
             "task": "text-to-image",
+            "label": "Z-Image-Turbo T2I",
             "prompt": "A futuristic cyberpunk city at night, neon lights reflecting on wet streets",
             "width": 1024,
             "height": 1024,
@@ -892,6 +898,7 @@
             "id": "ideogram4_t2i_1024_2gpu_tp",
             "model": "ideogram-ai/ideogram-4-fp8",
             "task": "text-to-image",
+            "label": "Ideogram-4 (FP8) T2I",
             "prompt": "A futuristic cyberpunk city at night, neon lights reflecting on wet streets",
             "width": 1024,
             "height": 1024,
@@ -918,7 +925,7 @@
                             ],
                             "num_gpus": 2,
                             "sglang_ref": "current-main",
-                            "serve_args": "--model-type diffusion --warmup-mode server --dit-layerwise-offload false --tp-size 2 --performance-mode speed --enable-torch-compile",
+                            "serve_args": "--model-type diffusion --warmup-mode server --dit-layerwise-offload false --tp-size 2 --performance-mode speed --enable-torch-compile false",
                             "extra_env": {
                                 "FLASHINFER_USE_CUDA_NORM": "1"
                             },
@@ -942,6 +949,7 @@
             "id": "wan21_t2v_1_3b_480p",
             "model": "Wan-AI/Wan2.1-T2V-1.3B-Diffusers",
             "task": "text-to-video",
+            "label": "Wan2.1 T2V 1.3B 480p",
             "prompt": "A cat and a dog baking a cake together in a kitchen.",
             "width": 832,
             "height": 480,
@@ -972,13 +980,13 @@
                             "serve_args": "--model-type diffusion --warmup-mode server --enable-cfg-parallel --dit-cpu-offload false --vae-precision bf16 --text-encoder-cpu-offload false --image-encoder-cpu-offload false --vae-cpu-offload false",
                             "notes": "Keeps DiT, text/image encoders, and VAE resident on high-memory H200; BF16 VAE aligns with LightX2V best-performance Wan serving path. No cache or torch compile path."
                         },
-                        "h100-2gpu-cfg-speed-compile": {
+                        "h100-2gpu-cfg-speed-eager": {
                             "description": "Hopper 2-GPU CFG-parallel + resident + torch.compile — measured fastest.",
                             "hardware": [
                                 "h100"
                             ],
                             "sglang_ref": "current-main",
-                            "serve_args": "--model-type diffusion --warmup-mode server --enable-cfg-parallel --dit-layerwise-offload false --performance-mode speed --enable-torch-compile",
+                            "serve_args": "--model-type diffusion --warmup-mode server --enable-cfg-parallel --dit-layerwise-offload false --performance-mode speed --enable-torch-compile false",
                             "notes": "Measured H100 A/B 2026-07-03 (steady-state single_e2e): 26.556s (auto default) -> 25.046s (-5.7%)."
                         }
                     }
@@ -1128,6 +1136,7 @@
             "id": "wan21_i2v_14b_480p",
             "model": "Wan-AI/Wan2.1-I2V-14B-480P-Diffusers",
             "task": "image-to-video",
+            "label": "Wan2.1 I2V 14B 480p",
             "prompt": "The cat starts walking slowly towards the camera.",
             "reference_image": true,
             "width": 832,
@@ -1146,7 +1155,7 @@
                         "default": {
                             "description": "Best known SGLang command for the benchmark repo default profile.",
                             "sglang_ref": "current-main",
-                            "serve_args": "--model-type diffusion --warmup-mode server --enable-cfg-parallel --ulysses-degree 2 --dit-cpu-offload false --pin-cpu-memory --dit-layerwise-offload false --performance-mode speed --enable-torch-compile",
+                            "serve_args": "--model-type diffusion --warmup-mode server --enable-cfg-parallel --ulysses-degree 2 --dit-cpu-offload false --pin-cpu-memory --dit-layerwise-offload false --performance-mode speed --enable-torch-compile false",
                             "notes": "Keep this profile updated when the best command changes for a SGLang release or commit. Policy-aligned candidate (compile on, offload off) — NOT yet validated on H100; validate (incl. OOM risk) before publishing."
                         }
                     }
@@ -1265,6 +1274,7 @@
             "id": "wan22_t2v_a14b_720p",
             "model": "Wan-AI/Wan2.2-T2V-A14B-Diffusers",
             "task": "text-to-video",
+            "label": "Wan2.2 T2V A14B 720p",
             "prompt": "A cat and a dog baking a cake together in a kitchen.",
             "width": 1280,
             "height": 720,
@@ -1283,7 +1293,7 @@
                         "default": {
                             "description": "Best known SGLang command for the benchmark repo default profile.",
                             "sglang_ref": "current-main",
-                            "serve_args": "--model-type diffusion --warmup-mode server --enable-cfg-parallel --ulysses-degree 2 --dit-cpu-offload false --pin-cpu-memory --dit-layerwise-offload false --performance-mode speed --enable-torch-compile",
+                            "serve_args": "--model-type diffusion --warmup-mode server --enable-cfg-parallel --ulysses-degree 2 --dit-cpu-offload false --pin-cpu-memory --dit-layerwise-offload false --performance-mode speed --enable-torch-compile false",
                             "notes": "Keep this profile updated when the best command changes for a SGLang release or commit. Policy-aligned candidate (compile on, offload off) — NOT yet validated on H100; validate (incl. OOM risk) before publishing."
                         }
                     }
@@ -1406,6 +1416,7 @@
             "id": "wan22_ti2v_5b_704p",
             "model": "Wan-AI/Wan2.2-TI2V-5B-Diffusers",
             "task": "text-image-to-video",
+            "label": "Wan2.2 TI2V 5B 704p",
             "prompt": "The cat starts walking slowly towards the camera.",
             "reference_image": true,
             "width": 1280,
@@ -1445,7 +1456,7 @@
                             ],
                             "sglang_ref": "current-main",
                             "num_gpus": 2,
-                            "serve_args": "--model-type diffusion --warmup-mode server --enable-cfg-parallel --dit-cpu-offload false --pin-cpu-memory --dit-layerwise-offload false --performance-mode speed --enable-torch-compile",
+                            "serve_args": "--model-type diffusion --warmup-mode server --enable-cfg-parallel --dit-cpu-offload false --pin-cpu-memory --dit-layerwise-offload false --performance-mode speed --enable-torch-compile false",
                             "notes": "Measured H100 A/B 2026-07-03 (steady-state single_e2e): 35.07s (textenc-offload default) -> 31.068s (-11.4%). Measured on H100; re-validate before publishing new h200 numbers."
                         }
                     }
@@ -1649,6 +1660,7 @@
             "id": "ltx2_twostage_t2v",
             "model": "Lightricks/LTX-2",
             "task": "text-to-video",
+            "label": "LTX-2 two-stage T2V",
             "prompt": "A cat and a dog baking a cake together in a kitchen.",
             "width": 768,
             "height": 512,
@@ -1666,7 +1678,7 @@
                         "default": {
                             "description": "Best known SGLang command for the benchmark repo default profile.",
                             "sglang_ref": "current-main",
-                            "serve_args": "--model-type diffusion --warmup-mode server --enable-cfg-parallel --pipeline-class-name LTX2TwoStagePipeline --dit-layerwise-offload false --performance-mode speed --enable-torch-compile",
+                            "serve_args": "--model-type diffusion --warmup-mode server --enable-cfg-parallel --pipeline-class-name LTX2TwoStagePipeline --dit-layerwise-offload false --performance-mode speed --enable-torch-compile false",
                             "notes": "Keep this profile updated when the best command changes for a SGLang release or commit. Policy-aligned candidate (compile on, offload off) — NOT yet validated on H100; validate (incl. OOM risk) before publishing."
                         },
                         "h200-2gpu": {
@@ -1786,6 +1798,7 @@
             "id": "ltx2.3_twostage_t2v_2gpus",
             "model": "Lightricks/LTX-2.3",
             "task": "text-to-video",
+            "label": "LTX-2.3 two-stage T2V",
             "prompt": "A cat and a dog baking a cake together in a kitchen.",
             "width": 768,
             "height": 512,
@@ -1852,6 +1865,7 @@
             "id": "wan21_i2v_14b_720p",
             "model": "Wan-AI/Wan2.1-I2V-14B-720P-Diffusers",
             "task": "image-to-video",
+            "label": "Wan2.1 I2V 14B 720p",
             "prompt": "The cat starts walking slowly towards the camera.",
             "reference_image": true,
             "width": 1280,
@@ -1870,7 +1884,7 @@
                         "default": {
                             "description": "Best known SGLang command for the benchmark repo default profile.",
                             "sglang_ref": "current-main",
-                            "serve_args": "--model-type diffusion --warmup-mode server --enable-cfg-parallel --ulysses-degree 2 --dit-cpu-offload false --pin-cpu-memory --dit-layerwise-offload false --performance-mode speed --enable-torch-compile",
+                            "serve_args": "--model-type diffusion --warmup-mode server --enable-cfg-parallel --ulysses-degree 2 --dit-cpu-offload false --pin-cpu-memory --dit-layerwise-offload false --performance-mode speed --enable-torch-compile false",
                             "notes": "Tracks Wan2.1 720P I2V SGLang coverage; add other frameworks only after confirming compatible model support. Policy-aligned candidate (compile on, offload off) — NOT yet validated on H100; validate (incl. OOM risk) before publishing."
                         }
                     }
@@ -1991,6 +2005,7 @@
             "id": "wan22_i2v_a14b_720p",
             "model": "Wan-AI/Wan2.2-I2V-A14B-Diffusers",
             "task": "image-to-video",
+            "label": "Wan2.2 I2V A14B 720p",
             "prompt": "The cat starts walking slowly towards the camera.",
             "reference_image": true,
             "width": 1280,
@@ -2010,7 +2025,7 @@
                         "default": {
                             "description": "Best known SGLang command for the benchmark repo default profile.",
                             "sglang_ref": "current-main",
-                            "serve_args": "--model-type diffusion --warmup-mode server --enable-cfg-parallel --ulysses-degree 2 --dit-cpu-offload false --pin-cpu-memory --dit-layerwise-offload false --performance-mode speed --enable-torch-compile",
+                            "serve_args": "--model-type diffusion --warmup-mode server --enable-cfg-parallel --ulysses-degree 2 --dit-cpu-offload false --pin-cpu-memory --dit-layerwise-offload false --performance-mode speed --enable-torch-compile false",
                             "notes": "Keep this profile updated when the best command changes for a SGLang release or commit. Policy-aligned candidate (compile on, offload off) — NOT yet validated on H100; validate (incl. OOM risk) before publishing."
                         }
                     }
@@ -2134,6 +2149,7 @@
             "id": "cosmos3_nano_t2i_720p",
             "model": "nvidia/Cosmos3-Nano",
             "task": "text-to-image",
+            "label": "Cosmos3-Nano T2I 720p",
             "prompt": "A warehouse robot folds a blue cloth on a clean workbench.",
             "width": 1280,
             "height": 720,
@@ -2166,7 +2182,7 @@
                         "default": {
                             "description": "Cosmos3 Nano T2I profile for SGLang-Diffusion main 3d540563.",
                             "sglang_ref": "sgl-project/sglang@3d540563916394115f9612f30601ae3fa97ada7c",
-                            "serve_args": "--model-type diffusion --warmup-mode server --attention-backend fa --tp-size 2 --dit-layerwise-offload false --performance-mode speed --enable-torch-compile",
+                            "serve_args": "--model-type diffusion --warmup-mode server --attention-backend fa --tp-size 2 --dit-layerwise-offload false --performance-mode speed --enable-torch-compile false",
                             "notes": "Guardrails disabled for framework-only serving performance; no cache or torch compile path. Policy-aligned candidate (compile on, offload off) — NOT yet validated on H100; validate (incl. OOM risk) before publishing.",
                             "extra_env": {
                                 "SGLANG_DISABLE_COSMOS3_GUARDRAILS": "1"
@@ -2303,6 +2319,7 @@
             "id": "cosmos3_nano_t2v_720p_189f",
             "model": "nvidia/Cosmos3-Nano",
             "task": "text-to-video",
+            "label": "Cosmos3-Nano T2V 720p",
             "prompt": "A small warehouse robot moves a blue box across a clean floor.",
             "negative_prompt": "blurry, distorted, low quality",
             "width": 1280,
@@ -2390,13 +2407,13 @@
                                 "SGLANG_DISABLE_COSMOS3_GUARDRAILS": "1"
                             }
                         },
-                        "h100-4gpu-cfg-ulysses-speed-compile": {
+                        "h100-4gpu-cfg-ulysses-speed-eager": {
                             "description": "Hopper 4-GPU CFG+Ulysses, resident + torch.compile — measured fastest.",
                             "hardware": [
                                 "h100"
                             ],
                             "sglang_ref": "current-main",
-                            "serve_args": "--model-type diffusion --warmup-mode server --attention-backend fa --cfg-parallel-size 2 --ulysses-degree 2 --dit-layerwise-offload false --performance-mode speed --enable-torch-compile",
+                            "serve_args": "--model-type diffusion --warmup-mode server --attention-backend fa --cfg-parallel-size 2 --ulysses-degree 2 --dit-layerwise-offload false --performance-mode speed --enable-torch-compile false",
                             "notes": "Measured H100 A/B 2026-07-03 (steady-state single_e2e): 55.115s (auto default) -> 53.614s (-2.7%)."
                         }
                     }
@@ -2538,6 +2555,7 @@
             "id": "cosmos3_nano_i2v_720p_189f",
             "model": "nvidia/Cosmos3-Nano",
             "task": "image-to-video",
+            "label": "Cosmos3-Nano I2V 720p",
             "prompt": "A dashcam car drives along a coastal mountain road and brakes as rocks fall ahead.",
             "negative_prompt": "blurry, distorted, low quality",
             "reference_image": true,
@@ -2571,7 +2589,7 @@
                             "description": "Cosmos3 Nano I2V profile for SGLang-Diffusion main 3d540563.",
                             "sglang_ref": "sgl-project/sglang@3d540563916394115f9612f30601ae3fa97ada7c",
                             "num_gpus": 4,
-                            "serve_args": "--model-type diffusion --warmup-mode server --attention-backend fa --cfg-parallel-size 2 --ulysses-degree 2 --dit-layerwise-offload false --performance-mode speed --enable-torch-compile",
+                            "serve_args": "--model-type diffusion --warmup-mode server --attention-backend fa --cfg-parallel-size 2 --ulysses-degree 2 --dit-layerwise-offload false --performance-mode speed --enable-torch-compile false",
                             "notes": "4-GPU CFG parallel plus Ulysses SP for long-video H200 serving; guardrails disabled, no cache. Policy-aligned candidate (compile on, offload off) — NOT yet validated on H100; validate (incl. OOM risk) before publishing."
                         },
                         "h200-4gpu-cfg-ulysses": {
@@ -2752,6 +2770,7 @@
             "id": "minimax_h3_t2va_5s",
             "model": "MiniMaxAI/MiniMax-H3",
             "task": "text-to-video",
+            "label": "MiniMax-H3 T2V+A",
             "throughput": true,
             "prompt": "At night, while their owner sleeps in a bedroom, three cats march in loudly playing tiny brass instruments, then abruptly file out.",
             "width": 1344,

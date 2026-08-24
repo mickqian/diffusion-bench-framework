@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<!--
+  Fortnightly cross-framework benchmark. Install with:
+
+    cp scripts/launchd/com.mick.diffusion-bench-biweekly.plist ~/Library/LaunchAgents/
+    launchctl load  ~/Library/LaunchAgents/com.mick.diffusion-bench-biweekly.plist
+    launchctl start com.mick.diffusion-bench-biweekly     # run once now
+
+  Uninstall: launchctl unload ~/Library/LaunchAgents/com.mick.diffusion-bench-biweekly.plist
+
+  launchd has no "every 14 days", so this fires on the 1st and the 15th. If the
+  Mac is asleep at the fire time, launchd runs the job once on wake rather than
+  skipping the cycle.
+-->
+<plist version="1.0">
+<dict>
+    <key>Label</key>
+    <string>com.mick.diffusion-bench-biweekly</string>
+
+    <key>ProgramArguments</key>
+    <array>
+        <string>/bin/bash</string>
+        <string>/Users/mick/repos/diffusion-bench-framework/scripts/biweekly_fair_bench.sh</string>
+    </array>
+
+    <key>WorkingDirectory</key>
+    <string>/Users/mick/repos/diffusion-bench-framework</string>
+
+    <key>StartCalendarInterval</key>
+    <array>
+        <dict>
+            <key>Day</key><integer>1</integer>
+            <key>Hour</key><integer>9</integer>
+            <key>Minute</key><integer>47</integer>
+        </dict>
+        <dict>
+            <key>Day</key><integer>15</integer>
+            <key>Hour</key><integer>9</integer>
+            <key>Minute</key><integer>47</integer>
+        </dict>
+    </array>
+
+    <key>EnvironmentVariables</key>
+    <dict>
+        <key>PATH</key>
+        <string>/usr/local/bin:/opt/homebrew/bin:/usr/bin:/bin:/usr/sbin:/sbin</string>
+        <key>HOME</key>
+        <string>/Users/mick</string>
+    </dict>
+
+    <!-- The job outlives a screen lock but not a shutdown; a missed cycle is
+         picked up on the next fire date. -->
+    <key>RunAtLoad</key>
+    <false/>
+
+    <key>StandardOutPath</key>
+    <string>/Users/mick/repos/diffusion-bench-framework/tmp/biweekly/launchd.out.log</string>
+    <key>StandardErrorPath</key>
+    <string>/Users/mick/repos/diffusion-bench-framework/tmp/biweekly/launchd.err.log</string>
+
+    <key>ProcessType</key>
+    <string>Background</string>
+</dict>
+</plist>

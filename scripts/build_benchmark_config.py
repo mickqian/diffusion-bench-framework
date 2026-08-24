@@ -35,9 +35,11 @@ VALID_STATUS = {"supported", "unsupported", "no_profile", "failed", "not_run", "
 # harness would actually SELECT there (first hardware match, else `default`)
 # — patching an unselected profile is a recurring footgun.
 POLICY_HARDWARE = ("h100",)
-# "Best lossless" policy: the selected sglang profile must run compiled and
-# resident. A profile may opt out ONLY with a `policy_exception` string
-# carrying measured evidence (e.g. zimage: compile measured slower).
+# "Best lossless" policy: the selected sglang profile must run resident, and
+# must NOT enable torch.compile — sglang's explicitly-fused kernels now match or
+# beat compiler fusion on most diffusion models, so compile-on is the slower
+# path as well as a long autotune before every measurement. A profile may opt
+# out ONLY with a `policy_exception` string carrying measured evidence.
 _OFFLOAD_ENABLE_RE = re.compile(
     r"--(?:text-encoder|image-encoder|vae|dit)-cpu-offload(?!\s+false)"
     r"|--dit-layerwise-offload(?!\s+false)"
@@ -69,10 +71,10 @@ def _lint_sglang_policy(cid: str, body: dict) -> list[str]:
                 )
             continue
         args = prof.get("serve_args", "")
-        if not re.search(r"--enable-torch-compile(?!\s+false)", args):
+        if re.search(r"--enable-torch-compile(?!\s+false)", args):
             errs.append(
-                f"{cid}/sglang[{name}] (selected on {hw}): missing "
-                f"--enable-torch-compile and no policy_exception"
+                f"{cid}/sglang[{name}] (selected on {hw}): enables "
+                f"torch.compile and no policy_exception"
             )
         m = _OFFLOAD_ENABLE_RE.search(args)
         if m:

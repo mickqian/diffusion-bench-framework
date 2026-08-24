@@ -2,6 +2,7 @@
  "id": "ltx2.3_twostage_t2v_2gpus",
  "model": "Lightricks/LTX-2.3",
  "task": "text-to-video",
+ "label": "LTX-2.3 two-stage T2V",
  "prompt": "A cat and a dog baking a cake together in a kitchen.",
  "width": 768,
  "height": 512,

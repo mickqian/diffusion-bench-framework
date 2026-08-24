@@ -2,6 +2,7 @@
  "id": "wan21_i2v_14b_720p",
  "model": "Wan-AI/Wan2.1-I2V-14B-720P-Diffusers",
  "task": "image-to-video",
+ "label": "Wan2.1 I2V 14B 720p",
  "prompt": "The cat starts walking slowly towards the camera.",
  "reference_image": true,
  "width": 1280,
@@ -21,7 +22,7 @@
     "default": {
      "description": "Best known SGLang command for the benchmark repo default profile.",
      "sglang_ref": "current-main",
-     "serve_args": "--model-type diffusion --warmup-mode server --enable-cfg-parallel --ulysses-degree 2 --dit-cpu-offload false --pin-cpu-memory --dit-layerwise-offload false --performance-mode speed --enable-torch-compile",
+     "serve_args": "--model-type diffusion --warmup-mode server --enable-cfg-parallel --ulysses-degree 2 --dit-cpu-offload false --pin-cpu-memory --dit-layerwise-offload false --performance-mode speed --enable-torch-compile false",
      "notes": "Tracks Wan2.1 720P I2V SGLang coverage; add other frameworks only after confirming compatible model support. Policy-aligned candidate (compile on, offload off) — NOT yet validated on H100; validate (incl. OOM risk) before publishing."
     }
    }

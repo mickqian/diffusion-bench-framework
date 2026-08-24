@@ -2,6 +2,7 @@
  "id": "cosmos3_nano_t2i_720p",
  "model": "nvidia/Cosmos3-Nano",
  "task": "text-to-image",
+ "label": "Cosmos3-Nano T2I 720p",
  "prompt": "A warehouse robot folds a blue cloth on a clean workbench.",
  "width": 1280,
  "height": 720,
@@ -35,7 +36,7 @@
     "default": {
      "description": "Cosmos3 Nano T2I profile for SGLang-Diffusion main 3d540563.",
      "sglang_ref": "sgl-project/sglang@3d540563916394115f9612f30601ae3fa97ada7c",
-     "serve_args": "--model-type diffusion --warmup-mode server --attention-backend fa --tp-size 2 --dit-layerwise-offload false --performance-mode speed --enable-torch-compile",
+     "serve_args": "--model-type diffusion --warmup-mode server --attention-backend fa --tp-size 2 --dit-layerwise-offload false --performance-mode speed --enable-torch-compile false",
      "notes": "Guardrails disabled for framework-only serving performance; no cache or torch compile path. Policy-aligned candidate (compile on, offload off) — NOT yet validated on H100; validate (incl. OOM risk) before publishing.",
      "extra_env": {
       "SGLANG_DISABLE_COSMOS3_GUARDRAILS": "1"

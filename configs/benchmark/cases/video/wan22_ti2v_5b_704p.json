@@ -2,6 +2,7 @@
  "id": "wan22_ti2v_5b_704p",
  "model": "Wan-AI/Wan2.2-TI2V-5B-Diffusers",
  "task": "text-image-to-video",
+ "label": "Wan2.2 TI2V 5B 704p",
  "prompt": "The cat starts walking slowly towards the camera.",
  "reference_image": true,
  "width": 1280,
@@ -42,7 +43,7 @@
      ],
      "sglang_ref": "current-main",
      "num_gpus": 2,
-     "serve_args": "--model-type diffusion --warmup-mode server --enable-cfg-parallel --dit-cpu-offload false --pin-cpu-memory --dit-layerwise-offload false --performance-mode speed --enable-torch-compile",
+     "serve_args": "--model-type diffusion --warmup-mode server --enable-cfg-parallel --dit-cpu-offload false --pin-cpu-memory --dit-layerwise-offload false --performance-mode speed --enable-torch-compile false",
      "notes": "Measured H100 A/B 2026-07-03 (steady-state single_e2e): 35.07s (textenc-offload default) -> 31.068s (-11.4%). Measured on H100; re-validate before publishing new h200 numbers."
     }
    }

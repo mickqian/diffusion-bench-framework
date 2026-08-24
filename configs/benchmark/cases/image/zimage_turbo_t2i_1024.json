@@ -2,6 +2,7 @@
  "id": "zimage_turbo_t2i_1024",
  "model": "Tongyi-MAI/Z-Image-Turbo",
  "task": "text-to-image",
+ "label": "Z-Image-Turbo T2I",
  "prompt": "A futuristic cyberpunk city at night, neon lights reflecting on wet streets",
  "width": 1024,
  "height": 1024,

@@ -2,6 +2,7 @@
   "id": "qwen_image_2512_t2i_1024_truecfg",
   "model": "Qwen/Qwen-Image-2512",
   "task": "text-to-image",
+  "label": "Qwen-Image-2512 T2I (true-CFG)",
   "prompt": "A futuristic cyberpunk city at night, neon lights reflecting on wet streets",
   "width": 1024,
   "height": 1024,
@@ -24,14 +25,14 @@
           "serve_args": "--model-type diffusion --warmup-mode server --tp-size 2",
           "notes": "Keep this profile updated when the best command changes for a SGLang release or commit."
         },
-        "h100-h200-2gpu-tp-speed-compile": {
+        "h100-h200-2gpu-tp-speed-eager": {
           "description": "H100 2-GPU SGLang Qwen-Image true-CFG: CFG parallelism (each GPU runs one CFG branch, no per-layer all-reduce) + resident + compile. Fastest for the 2-branch quality path.",
           "hardware": [
             "h100",
             "h200"
           ],
           "sglang_ref": "origin/main + PR #29774 (Shard QwenImage DiT across TP ranks; open, not yet merged)",
-          "serve_args": "--model-type diffusion --warmup-mode server --enable-cfg-parallel --performance-mode speed --enable-torch-compile",
+          "serve_args": "--model-type diffusion --warmup-mode server --enable-cfg-parallel --performance-mode speed --enable-torch-compile false",
           "notes": "CFG parallelism is the cookbook-recommended Qwen multi-GPU path. Measured: 6.49s vs TP #29774 11.07s vs vLLM 10.14s (CFG-parallel 1.56x faster than vLLM). TP shards the DiT but RowParallel all-reduce dominates (~70% kernel time) for the 2-branch case; CFG-parallel avoids it. No #29774 needed here (DiT replicated, one branch per GPU)."
         }
       }
