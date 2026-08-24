@@ -2,6 +2,7 @@
   "id": "flux1_dev_t2i_1024",
   "model": "black-forest-labs/FLUX.1-dev",
   "task": "text-to-image",
+  "throughput": true,
   "prompt": "A futuristic cyberpunk city at night, neon lights reflecting on wet streets",
   "width": 1024,
   "height": 1024,

@@ -7,7 +7,7 @@
       "video_repeats": 2
     },
     "throughput": {
-      "description": "Multi-request server throughput under real concurrency. Records num_requests, concurrency, p50, p95, p99, QPS.",
+      "description": "Multi-request server throughput under real concurrency. Records num_requests, concurrency, p50, p95, p99, QPS. OPT-IN PER CASE: a full-matrix throughput sweep costs hours and repeats the same finding, so only cases carrying \"throughput\": true run it — currently flux1_dev_t2i_1024 (most-used open image model) and minimax_h3_t2va_5s (video/audio). Cases without the flag are single_e2e-only even when --modes includes throughput.",
       "max_concurrency": 2,
       "num_requests": 4,
       "request_rate": "inf"

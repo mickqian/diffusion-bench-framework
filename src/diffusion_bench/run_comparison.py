@@ -55,6 +55,18 @@ REQUEST_TIMEOUT = 1200  # seconds
 GPU_CLEAR_WAIT = 15  # seconds between framework runs
 MODE_SINGLE_E2E = "single_e2e"
 MODE_THROUGHPUT = "throughput"
+
+
+def _modes_for_case(case: dict, modes: list[str]) -> list[str]:
+    """Throughput is opt-in per case.
+
+    A full-matrix throughput sweep costs hours and repeats the same finding;
+    a representative pair (one video, one popular image model) carries it. Cases
+    opt in with `"throughput": true` — see configs/benchmark/workloads.json.
+    """
+    if MODE_THROUGHPUT in modes and not case.get("throughput"):
+        return [m for m in modes if m != MODE_THROUGHPUT]
+    return modes
 DEFAULT_BENCHMARK = {
     # video_num_requests: extra warmups for expensive video cases so a single
     # measured request lands in steady state instead of catching a cold path.
@@ -2229,6 +2241,19 @@ def run_comparison(
     if invalid_modes:
         raise ValueError(f"Unknown benchmark mode(s): {invalid_modes}")
 
+    if MODE_THROUGHPUT in modes:
+        opted_in = [c["id"] for c in config["cases"] if c.get("throughput")]
+        skipped = [
+            c["id"]
+            for c in config["cases"]
+            if not c.get("throughput") and (not case_ids or c["id"] in case_ids)
+        ]
+        if skipped:
+            print(
+                f"Throughput is opt-in per case; running it for {opted_in} "
+                f"and skipping {len(skipped)} other case(s)."
+            )
+
     fw_cases: dict[str, list[tuple[dict, dict]]] = {fw: [] for fw in FRAMEWORK_ORDER}
 
     for case in config["cases"]:
@@ -2259,11 +2284,12 @@ def run_comparison(
                 # Skip all cases for this framework
                 for case, pair_fw_cfg in pairs:
                     case_for_fw = _case_for_framework(case, pair_fw_cfg)
-                    if MODE_SINGLE_E2E in modes:
+                    case_modes = _modes_for_case(case, modes)
+                    if MODE_SINGLE_E2E in case_modes:
                         result = _base_result(case_for_fw, fw_name, MODE_SINGLE_E2E)
                         result["error"] = f"{fw_name} installation failed"
                         results.append(result)
-                    if MODE_THROUGHPUT in modes:
+                    if MODE_THROUGHPUT in case_modes:
                         result = _base_result(case_for_fw, fw_name, MODE_THROUGHPUT)
                         result["error"] = f"{fw_name} installation failed"
                         throughput_results.append(result)
@@ -2284,18 +2310,19 @@ def run_comparison(
                 print(f"  [DRY-RUN] Would run: {shlex.join(cmd)}")
                 if fw_name in INSTALLABLE_FRAMEWORKS:
                     print(f"  [DRY-RUN] venv: {_framework_venv_path(fw_name)}")
-                if MODE_SINGLE_E2E in modes:
+                case_modes = _modes_for_case(case, modes)
+                if MODE_SINGLE_E2E in case_modes:
                     result = _base_result(case_for_fw, fw_name, MODE_SINGLE_E2E)
                     result["error"] = "dry-run"
                     results.append(result)
-                if MODE_THROUGHPUT in modes:
+                if MODE_THROUGHPUT in case_modes:
                     result = _base_result(case_for_fw, fw_name, MODE_THROUGHPUT)
                     result["error"] = "dry-run"
                     throughput_results.append(result)
                 continue
 
             single_result, throughput_result = run_case_framework(
-                case, fw_name, fw_cfg, modes, port, log_dir, config
+                case, fw_name, fw_cfg, _modes_for_case(case, modes), port, log_dir, config
             )
             if single_result is not None:
                 results.append(single_result)

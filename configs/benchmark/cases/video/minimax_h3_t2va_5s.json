@@ -2,6 +2,7 @@
   "id": "minimax_h3_t2va_5s",
   "model": "MiniMaxAI/MiniMax-H3",
   "task": "text-to-video",
+  "throughput": true,
   "prompt": "At night, while their owner sleeps in a bedroom, three cats march in loudly playing tiny brass instruments, then abruptly file out.",
   "width": 1344,
   "height": 768,
