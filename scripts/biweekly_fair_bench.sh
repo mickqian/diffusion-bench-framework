@@ -15,11 +15,16 @@ set -uo pipefail
 
 REPO="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 STAMP="$(date +%Y%m%d-%H%M)"
-RUN_ID="h200x2-fair-$(date +%Y%m%d)"
+RUN_ID="h200x${BENCH_GPU_COUNT:-4}-fair-$(date +%Y%m%d)"
 BOX="diffbench-auto-${STAMP}"
 LOG_DIR="${REPO}/tmp/biweekly"
 LOG="${LOG_DIR}/${STAMP}.log"
 REMOTE_REPO="/scratch/diffusion-bench-framework"
+# Sized from the case matrix, not from habit: 6 of the 19 cases declare
+# num_gpus 4 (wan21/wan22 i2v+t2v, both cosmos3 videos), and on a smaller box
+# they die with "CUDA error: invalid device ordinal" -- which reads in the
+# results as a broken framework rather than a box that was too small.
+GPU_COUNT="${BENCH_GPU_COUNT:-4}"
 mkdir -p "${LOG_DIR}"
 
 # rx's exec transport goes through the local proxy; without it every remote
@@ -98,12 +103,12 @@ TRT_LATEST="$(curl -sL https://pypi.nvidia.com/tensorrt-llm/ 2>/dev/null \
 log "vllm=${VLLM_LATEST} lightx2v=${LX2V_LATEST} trtllm=${TRT_LATEST}"
 
 # --- acquire ----------------------------------------------------------------
-log "acquiring 2x H200 as ${BOX}"
+log "acquiring ${GPU_COUNT}x H200 as ${BOX}"
 # --image skips the interactive image menu; the piped y answers the "you already
 # have devboxes, acquire another?" prompt that only appears when some exist.
 # TTL is generous on purpose: a box expiring mid-run takes /scratch with it, and
 # the whole run is lost (happened 2026-08-25 on a 12h TTL).
-printf 'y\n' | rx devbox acquire --gpu h200 --count 2 --image lmsysorg/sglang:latest \
+printf 'y\n' | rx devbox acquire --gpu h200 --count "${GPU_COUNT}" --image lmsysorg/sglang:latest \
   --name "${BOX}" --ttl 48h >>"${LOG}" 2>&1 || { log "FATAL: acquire failed"; exit 1; }
 BOX_ACQUIRED=1
 
@@ -181,7 +186,7 @@ LAUNCH_OUT="$(rxrun "${ENVSPEC}
     echo GUARD_HIT
   else
     touch /scratch/results/${RUN_ID}.started
-    setsid bash -c 'diffusion-bench-compare --modes single_e2e throughput --hardware-profile h200 --output /scratch/results/${RUN_ID}.json > /scratch/results/${RUN_ID}.log 2>&1; echo \$? > /scratch/results/${RUN_ID}.done' </dev/null &
+    setsid bash -c 'diffusion-bench-compare --modes single_e2e throughput --hardware-profile h200 --output /scratch/results/${RUN_ID}.json > /scratch/results/${RUN_ID}.log 2>&1; echo \$? > /scratch/results/${RUN_ID}.done' </dev/null >/dev/null 2>&1 &
     echo LAUNCHED
   fi
   sleep 10
@@ -237,7 +242,7 @@ MERGED="${REPO}/tmp/report/${RUN_ID}-merged.json"
 
 "${PY}" scripts/publish_bench_run.py --merged "${MERGED}" --run-id "${RUN_ID}" \
   --label "H200 cross-framework (latest-vs-latest)" \
-  --gpu "2x NVIDIA H200 143GB" >>"${LOG}" 2>&1 \
+  --gpu "${GPU_COUNT}x NVIDIA H200 143GB" >>"${LOG}" 2>&1 \
   || { log "FATAL: publish failed"; exit 1; }
 
 git add docs/data docs/index.html
