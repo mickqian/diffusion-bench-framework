@@ -38,6 +38,19 @@ rxrun() { rx devbox run "${BOX}" -- bash -c "$1"; }
 
 cleanup() {
   local rc=$?
+  # Salvage before releasing: /scratch dies with the box, and two runs' worth of
+  # GPU hours have already evaporated that way. Best-effort and non-fatal.
+  if [[ -n "${BOX_ACQUIRED:-}" && $rc -ne 0 ]]; then
+    mkdir -p "${REPO}/tmp/report"
+    if rxrun "test -s /scratch/results/${RUN_ID}.json && echo YES" 2>/dev/null | grep -q YES; then
+      log "salvaging partial results before release"
+      rxrun "base64 -w0 /scratch/results/${RUN_ID}.json" 2>/dev/null \
+        | tr -d '\n\r' | base64 -d > "${REPO}/tmp/report/${RUN_ID}-partial.json" 2>/dev/null \
+        && log "partial results at tmp/report/${RUN_ID}-partial.json"
+    fi
+    rxrun "tail -100 /scratch/results/${RUN_ID}.log" > "${LOG_DIR}/${STAMP}-runner.log" 2>/dev/null \
+      && log "runner log tail at ${LOG_DIR}/${STAMP}-runner.log"
+  fi
   if [[ -n "${BOX_ACQUIRED:-}" ]]; then
     log "releasing ${BOX}"
     rx devbox release "${BOX}" >>"${LOG}" 2>&1 || log "WARN: release failed — check 'rx devbox list'"
@@ -51,9 +64,15 @@ log "=== biweekly fair bench ${STAMP} ==="
 # --- resolve every competitor's latest, so the run is latest-vs-latest -------
 VLLM_LATEST="$(curl -s https://pypi.org/pypi/vllm/json | "${PY}" -c 'import json,sys;print(json.load(sys.stdin)["info"]["version"])' 2>/dev/null)"
 LX2V_LATEST="$(git ls-remote https://github.com/ModelTC/LightX2V.git refs/heads/main 2>/dev/null | cut -c1-12)"
+# TRT-LLM release candidates live only on NVIDIA's index; PyPI carries stable
+# only. Sort numerically -- rc9 sorts above rc24 as a string.
+TRT_LATEST="$(curl -s https://pypi.nvidia.com/tensorrt-llm/ 2>/dev/null \
+  | grep -oE 'tensorrt_llm-[0-9.]+rc[0-9]+' | sed 's/tensorrt_llm-//' \
+  | sort -t c -k2 -V | tail -1)"
 [[ -n "${VLLM_LATEST}" ]] || { log "FATAL: could not resolve latest vllm"; exit 1; }
 [[ -n "${LX2V_LATEST}" ]] || { log "FATAL: could not resolve LightX2V main"; exit 1; }
-log "vllm=${VLLM_LATEST} lightx2v=${LX2V_LATEST}"
+[[ -n "${TRT_LATEST}" ]] || { log "FATAL: could not resolve latest tensorrt-llm rc"; exit 1; }
+log "vllm=${VLLM_LATEST} lightx2v=${LX2V_LATEST} trtllm=${TRT_LATEST}"
 
 # --- acquire ----------------------------------------------------------------
 log "acquiring 2x H200 as ${BOX}"
@@ -111,6 +130,7 @@ export VLLM_INSTALL_SPEC="vllm==${VLLM_LATEST}"
 export VLLM_OMNI_INSTALL_SPEC="git+https://github.com/vllm-project/vllm-omni.git@main"
 export LIGHTX2V_INSTALL_SPEC="git+https://github.com/ModelTC/LightX2V.git@${LX2V_LATEST}"
 export LIGHTX2V_FA3_HF_SUBDIR="build/torch211-cxx11-cu130-x86_64-linux/flash_attention_3"
+export TRTLLM_INSTALL_SPEC="tensorrt-llm==${TRT_LATEST}"
 EOS
 
 for fw in vllm-omni lightx2v trtllm-visual; do
@@ -136,10 +156,25 @@ rxrun "${ENVSPEC}
     > /scratch/results/${RUN_ID}.log 2>&1; echo \$? > /scratch/results/${RUN_ID}.done' </dev/null &
   sleep 5" >>"${LOG}" 2>&1
 
+# A single rx call can die on a transport blip ("websocket: close 1006"), and
+# treating that as "the process is gone" killed a healthy multi-hour run on
+# 2026-08-25. So the probe reports its own verdict as text: empty output means
+# the CALL failed and says nothing about the run, and only repeated DEAD
+# verdicts -- never one -- end the run.
+DEAD_STREAK=0
 while true; do
-  if rxrun "test -f /scratch/results/${RUN_ID}.done" 2>/dev/null; then break; fi
-  if ! rxrun 'pgrep -f "diffusion-bench-compar[e]" >/dev/null' 2>/dev/null; then
-    log "FATAL: runner vanished without finishing"; rxrun "tail -30 /scratch/results/${RUN_ID}.log" | tee -a "${LOG}"; exit 1
+  if [[ "$(rxrun "test -f /scratch/results/${RUN_ID}.done && echo DONE" 2>/dev/null)" == *DONE* ]]; then break; fi
+  VERDICT="$(rxrun 'pgrep -f "diffusion-bench-compar[e]" >/dev/null && echo ALIVE || echo DEAD' 2>/dev/null)"
+  case "${VERDICT}" in
+    *ALIVE*) DEAD_STREAK=0 ;;
+    *DEAD*)  DEAD_STREAK=$((DEAD_STREAK + 1))
+             log "runner not seen (${DEAD_STREAK}/3)" ;;
+    *)       log "liveness probe unreachable — assuming the run is fine" ;;
+  esac
+  if (( DEAD_STREAK >= 3 )); then
+    log "FATAL: runner gone on 3 consecutive checks"
+    rxrun "tail -30 /scratch/results/${RUN_ID}.log" 2>/dev/null | tee -a "${LOG}"
+    exit 1
   fi
   sleep 300
 done
