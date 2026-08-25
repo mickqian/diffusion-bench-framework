@@ -62,11 +62,11 @@ trap cleanup EXIT
 log "=== biweekly fair bench ${STAMP} ==="
 
 # --- resolve every competitor's latest, so the run is latest-vs-latest -------
-VLLM_LATEST="$(curl -s https://pypi.org/pypi/vllm/json | "${PY}" -c 'import json,sys;print(json.load(sys.stdin)["info"]["version"])' 2>/dev/null)"
+VLLM_LATEST="$(curl -sL https://pypi.org/pypi/vllm/json | "${PY}" -c 'import json,sys;print(json.load(sys.stdin)["info"]["version"])' 2>/dev/null)"
 LX2V_LATEST="$(git ls-remote https://github.com/ModelTC/LightX2V.git refs/heads/main 2>/dev/null | cut -c1-12)"
 # TRT-LLM release candidates live only on NVIDIA's index; PyPI carries stable
 # only. Sort numerically -- rc9 sorts above rc24 as a string.
-TRT_LATEST="$(curl -s https://pypi.nvidia.com/tensorrt-llm/ 2>/dev/null \
+TRT_LATEST="$(curl -sL https://pypi.nvidia.com/tensorrt-llm/ 2>/dev/null \
   | grep -oE 'tensorrt_llm-[0-9.]+rc[0-9]+' | sed 's/tensorrt_llm-//' \
   | sort -t c -k2 -V | tail -1)"
 [[ -n "${VLLM_LATEST}" ]] || { log "FATAL: could not resolve latest vllm"; exit 1; }
