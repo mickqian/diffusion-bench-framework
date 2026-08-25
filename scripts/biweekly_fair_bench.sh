@@ -20,6 +20,15 @@ BOX="diffbench-auto-${STAMP}"
 LOG_DIR="${REPO}/tmp/biweekly"
 LOG="${LOG_DIR}/${STAMP}.log"
 REMOTE_REPO="/scratch/diffusion-bench-framework"
+# /scratch is per-devbox and wiped on release; /personal survives across boxes
+# on the same cluster. Results, per-case logs and the framework venvs all live
+# there now: two runs' results died with their box, and every one of six
+# attempts rebuilt the same three venvs (~40 min each) because they sat on the
+# ephemeral overlay. SKILL.md L188 documents the reuse switch.
+PERSIST="${BENCH_PERSIST_ROOT:-/personal/diffusion-bench}"
+VENV_ROOT="${PERSIST}/fw-venvs"
+RESULT_DIR="${PERSIST}/results"
+WORK_DIR="${PERSIST}/work"
 # Sized from the case matrix, not from habit: 6 of the 19 cases declare
 # num_gpus 4 (wan21/wan22 i2v+t2v, both cosmos3 videos), and on a smaller box
 # they die with "CUDA error: invalid device ordinal" -- which reads in the
@@ -70,13 +79,13 @@ cleanup() {
   # GPU hours have already evaporated that way. Best-effort and non-fatal.
   if [[ -n "${BOX_ACQUIRED:-}" && $rc -ne 0 ]]; then
     mkdir -p "${REPO}/tmp/report"
-    if rxrun "test -s /scratch/results/${RUN_ID}.json && echo YES" 2>/dev/null | grep -q YES; then
+    if rxrun "test -s ${RESULT_DIR}/${RUN_ID}.json && echo YES" 2>/dev/null | grep -q YES; then
       log "salvaging partial results before release"
-      rxrun "base64 -w0 /scratch/results/${RUN_ID}.json" 2>/dev/null \
+      rxrun "base64 -w0 ${RESULT_DIR}/${RUN_ID}.json" 2>/dev/null \
         | tr -d '\n\r' | base64 -d > "${REPO}/tmp/report/${RUN_ID}-partial.json" 2>/dev/null \
         && log "partial results at tmp/report/${RUN_ID}-partial.json"
     fi
-    rxrun "tail -100 /scratch/results/${RUN_ID}.log" > "${LOG_DIR}/${STAMP}-runner.log" 2>/dev/null \
+    rxrun "tail -100 ${RESULT_DIR}/${RUN_ID}.log" > "${LOG_DIR}/${STAMP}-runner.log" 2>/dev/null \
       && log "runner log tail at ${LOG_DIR}/${STAMP}-runner.log"
   fi
   if [[ -n "${BOX_ACQUIRED:-}" ]]; then
@@ -142,6 +151,17 @@ rxrun 'cd /sgl-workspace/sglang \
 SGL_COMMIT="$(rxrun 'cd /sgl-workspace/sglang && git rev-parse --short=9 HEAD' 2>/dev/null | tr -d "\r\n ")"
 log "sglang @ ${SGL_COMMIT}"
 
+# /personal was 95% full when this was written. Falling back to the ephemeral
+# overlay costs a reinstall; silently failing to write results costs the run.
+AVAIL="$(rxrun "df -P ${PERSIST%/*} 2>/dev/null | awk 'NR==2{print \$4}'" 2>/dev/null | tr -dc '0-9')"
+if [[ -n "${AVAIL}" ]] && (( AVAIL < 60000000 )); then
+  log "WARN: ${PERSIST%/*} has only $((AVAIL/1024/1024))G free; falling back to ephemeral paths"
+  PERSIST="/scratch/diffusion-bench"
+  VENV_ROOT="${PERSIST}/fw-venvs"; RESULT_DIR="${PERSIST}/results"; WORK_DIR="${PERSIST}/work"
+fi
+rxrun "mkdir -p ${VENV_ROOT} ${RESULT_DIR} ${WORK_DIR}" >>"${LOG}" 2>&1
+log "state under ${PERSIST}"
+
 # --- harness ----------------------------------------------------------------
 log "installing harness"
 rxrun "rm -rf ${REMOTE_REPO} \
@@ -158,6 +178,7 @@ export VLLM_INSTALL_SPEC="vllm==${VLLM_LATEST}"
 export VLLM_OMNI_INSTALL_SPEC="git+https://github.com/vllm-project/vllm-omni.git@main"
 export LIGHTX2V_INSTALL_SPEC="git+https://github.com/ModelTC/LightX2V.git@${LX2V_LATEST}"
 export LIGHTX2V_FA3_HF_SUBDIR="build/torch211-cxx11-cu130-x86_64-linux/flash_attention_3"
+export SGLANG_DIFFUSION_FRAMEWORK_VENV_ROOT=${VENV_ROOT}
 export TRTLLM_INSTALL_SPEC="tensorrt-llm==${TRT_LATEST}"
 EOS
 
@@ -165,7 +186,7 @@ for fw in vllm-omni lightx2v trtllm-visual; do
   log "installing ${fw}"
   rxrun "${ENVSPEC}
     cd ${REMOTE_REPO} && bash scripts/install_comparison_frameworks.sh ${fw}" >>"${LOG}" 2>&1
-  if rxrun "test -f /tmp/sglang-diffusion-framework-venvs/${fw}/.diffusion-bench-install-stamp" 2>/dev/null; then
+  if rxrun "test -f ${VENV_ROOT}/${fw}/.diffusion-bench-install-stamp" 2>/dev/null; then
     log "  ${fw} OK"
   else
     # A framework that fails to install is reported as a failed cell by the
@@ -180,17 +201,18 @@ log "running the matrix (this takes hours)"
 # Twice now it silently did nothing and was only noticed 15 minutes later by the
 # liveness loop, with an empty runner log and no way to tell why.
 LAUNCH_OUT="$(rxrun "${ENVSPEC}
+  export SGLANG_DIFFUSION_SKIP_FRAMEWORK_INSTALL=1
   cd ${REMOTE_REPO}
   mkdir -p /scratch/results
-  if [ -e /scratch/results/${RUN_ID}.started ]; then
+  if [ -e ${RESULT_DIR}/${RUN_ID}.started ]; then
     echo GUARD_HIT
   else
-    touch /scratch/results/${RUN_ID}.started
-    setsid bash -c 'diffusion-bench-compare --modes single_e2e throughput --hardware-profile h200 --output /scratch/results/${RUN_ID}.json > /scratch/results/${RUN_ID}.log 2>&1; echo \$? > /scratch/results/${RUN_ID}.done' </dev/null >/dev/null 2>&1 &
+    touch ${RESULT_DIR}/${RUN_ID}.started
+    setsid bash -c 'diffusion-bench-compare --modes single_e2e throughput --hardware-profile h200 --output ${RESULT_DIR}/${RUN_ID}.json > ${RESULT_DIR}/${RUN_ID}.log 2>&1; echo \$? > ${RESULT_DIR}/${RUN_ID}.done' </dev/null >/dev/null 2>&1 &
     echo LAUNCHED
   fi
   sleep 10
-  if pgrep -f 'diffusion-bench-compar[e]' >/dev/null; then echo RUNNER_UP; else echo RUNNER_DOWN; ls -la /scratch/results/ 2>&1; fi" 2>&1)"
+  if pgrep -f 'diffusion-bench-compar[e]' >/dev/null; then echo RUNNER_UP; else echo RUNNER_DOWN; ls -la ${RESULT_DIR}/ 2>&1; fi" 2>&1)"
 log "launch: $(printf '%s' "${LAUNCH_OUT}" | tr '\n' ' ' | cut -c1-300)"
 if ! grep -q RUNNER_UP <<<"${LAUNCH_OUT}"; then
   log "FATAL: runner did not come up at launch"
@@ -199,7 +221,7 @@ fi
 
 DEAD_STREAK=0
 while true; do
-  if [[ "$(rxrun "test -f /scratch/results/${RUN_ID}.done && echo DONE" 2>/dev/null)" == *DONE* ]]; then break; fi
+  if [[ "$(rxrun "test -f ${RESULT_DIR}/${RUN_ID}.done && echo DONE" 2>/dev/null)" == *DONE* ]]; then break; fi
   VERDICT="$(rxrun 'pgrep -f "diffusion-bench-compar[e]" >/dev/null && echo ALIVE || echo DEAD' 2>/dev/null)"
   case "${VERDICT}" in
     *ALIVE*) DEAD_STREAK=0 ;;
@@ -209,23 +231,23 @@ while true; do
   esac
   if (( DEAD_STREAK >= 3 )); then
     log "FATAL: runner gone on 3 consecutive checks"
-    rxrun "tail -30 /scratch/results/${RUN_ID}.log" 2>/dev/null | tee -a "${LOG}"
+    rxrun "tail -30 ${RESULT_DIR}/${RUN_ID}.log" 2>/dev/null | tee -a "${LOG}"
     exit 1
   fi
   sleep 300
 done
-log "run finished rc=$(rxrun "cat /scratch/results/${RUN_ID}.done" 2>/dev/null | tr -d '\r\n ')"
+log "run finished rc=$(rxrun "cat ${RESULT_DIR}/${RUN_ID}.done" 2>/dev/null | tr -d '\r\n ')"
 
 # --- pull results (chunked: a single base64 of a big file truncates) ---------
 log "pulling results"
 mkdir -p "${REPO}/tmp/report"
 RAW="${REPO}/tmp/report/${RUN_ID}-raw.json"
-rxrun "split -b 400k -d /scratch/results/${RUN_ID}.json /scratch/results/part_" >>"${LOG}" 2>&1
+rxrun "split -b 400k -d ${RESULT_DIR}/${RUN_ID}.json ${RESULT_DIR}/part_" >>"${LOG}" 2>&1
 : > "${RAW}"
-for i in $(rxrun "ls /scratch/results/part_* | sed 's#.*/part_##'" 2>/dev/null | tr -d '\r'); do
-  rxrun "base64 -w0 /scratch/results/part_${i}" 2>/dev/null | tr -d '\n\r' | base64 -d >> "${RAW}"
+for i in $(rxrun "ls ${RESULT_DIR}/part_* | sed 's#.*/part_##'" 2>/dev/null | tr -d '\r'); do
+  rxrun "base64 -w0 ${RESULT_DIR}/part_${i}" 2>/dev/null | tr -d '\n\r' | base64 -d >> "${RAW}"
 done
-REMOTE_MD5="$(rxrun "md5sum /scratch/results/${RUN_ID}.json | cut -d' ' -f1" 2>/dev/null | tr -d '\r\n ')"
+REMOTE_MD5="$(rxrun "md5sum ${RESULT_DIR}/${RUN_ID}.json | cut -d' ' -f1" 2>/dev/null | tr -d '\r\n ')"
 LOCAL_MD5="$(md5 -q "${RAW}" 2>/dev/null || md5sum "${RAW}" | cut -d' ' -f1)"
 [[ "${REMOTE_MD5}" == "${LOCAL_MD5}" ]] || { log "FATAL: result transfer corrupted (${LOCAL_MD5} != ${REMOTE_MD5})"; exit 1; }
 log "results verified (${LOCAL_MD5})"
