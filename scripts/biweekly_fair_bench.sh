@@ -171,25 +171,27 @@ done
 
 # --- run --------------------------------------------------------------------
 log "running the matrix (this takes hours)"
-rxrun "${ENVSPEC}
+# The launch reports which branch it took and whether the runner is actually up.
+# Twice now it silently did nothing and was only noticed 15 minutes later by the
+# liveness loop, with an empty runner log and no way to tell why.
+LAUNCH_OUT="$(rxrun "${ENVSPEC}
   cd ${REMOTE_REPO}
   mkdir -p /scratch/results
-  # Idempotence guard for rxrun retries. It must NOT be a pgrep: the launch
-  # command line below literally contains the runner's name, so any pgrep
-  # pattern matching the runner also matches this very shell, the guard reads
-  # "already running", and nothing ever starts. A marker file has no such
-  # self-match hazard.
-  [ -e /scratch/results/${RUN_ID}.started ] || { touch /scratch/results/${RUN_ID}.started; \
-  setsid bash -c 'diffusion-bench-compare --modes single_e2e throughput \
-    --hardware-profile h200 --output /scratch/results/${RUN_ID}.json \
-    > /scratch/results/${RUN_ID}.log 2>&1; echo \$? > /scratch/results/${RUN_ID}.done' </dev/null & }
-  sleep 5" >>"${LOG}" 2>&1
+  if [ -e /scratch/results/${RUN_ID}.started ]; then
+    echo GUARD_HIT
+  else
+    touch /scratch/results/${RUN_ID}.started
+    setsid bash -c 'diffusion-bench-compare --modes single_e2e throughput --hardware-profile h200 --output /scratch/results/${RUN_ID}.json > /scratch/results/${RUN_ID}.log 2>&1; echo \$? > /scratch/results/${RUN_ID}.done' </dev/null &
+    echo LAUNCHED
+  fi
+  sleep 10
+  if pgrep -f 'diffusion-bench-compar[e]' >/dev/null; then echo RUNNER_UP; else echo RUNNER_DOWN; ls -la /scratch/results/ 2>&1; fi" 2>&1)"
+log "launch: $(printf '%s' "${LAUNCH_OUT}" | tr '\n' ' ' | cut -c1-300)"
+if ! grep -q RUNNER_UP <<<"${LAUNCH_OUT}"; then
+  log "FATAL: runner did not come up at launch"
+  exit 1
+fi
 
-# A single rx call can die on a transport blip ("websocket: close 1006"), and
-# treating that as "the process is gone" killed a healthy multi-hour run on
-# 2026-08-25. So the probe reports its own verdict as text: empty output means
-# the CALL failed and says nothing about the run, and only repeated DEAD
-# verdicts -- never one -- end the run.
 DEAD_STREAK=0
 while true; do
   if [[ "$(rxrun "test -f /scratch/results/${RUN_ID}.done && echo DONE" 2>/dev/null)" == *DONE* ]]; then break; fi
