@@ -174,11 +174,15 @@ log "running the matrix (this takes hours)"
 rxrun "${ENVSPEC}
   cd ${REMOTE_REPO}
   mkdir -p /scratch/results
-  # guard makes this launch idempotent, so an rxrun retry cannot start a second runner
-  pgrep -f 'diffusion-bench-compar[e]' >/dev/null || \
+  # Idempotence guard for rxrun retries. It must NOT be a pgrep: the launch
+  # command line below literally contains the runner's name, so any pgrep
+  # pattern matching the runner also matches this very shell, the guard reads
+  # "already running", and nothing ever starts. A marker file has no such
+  # self-match hazard.
+  [ -e /scratch/results/${RUN_ID}.started ] || { touch /scratch/results/${RUN_ID}.started; \
   setsid bash -c 'diffusion-bench-compare --modes single_e2e throughput \
     --hardware-profile h200 --output /scratch/results/${RUN_ID}.json \
-    > /scratch/results/${RUN_ID}.log 2>&1; echo \$? > /scratch/results/${RUN_ID}.done' </dev/null &
+    > /scratch/results/${RUN_ID}.log 2>&1; echo \$? > /scratch/results/${RUN_ID}.done' </dev/null & }
   sleep 5" >>"${LOG}" 2>&1
 
 # A single rx call can die on a transport blip ("websocket: close 1006"), and
