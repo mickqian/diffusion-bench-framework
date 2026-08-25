@@ -65,11 +65,21 @@ printf 'y\n' | rx devbox acquire --gpu h200 --count 2 --image lmsysorg/sglang:la
   --name "${BOX}" --ttl 48h >>"${LOG}" 2>&1 || { log "FATAL: acquire failed"; exit 1; }
 BOX_ACQUIRED=1
 
-for _ in $(seq 1 60); do
-  rx devbox status "${BOX}" 2>/dev/null | grep -q running && break
+# Probe the capability we actually need -- can we execute on it? -- instead of
+# grepping the human-readable status line. `rx devbox run` returns 409 with
+# "devbox not running (status=provisioning)" until the box is ready, so a
+# successful `true` is the real readiness signal. Parsing status text failed a
+# run on 2026-08-25 and left no record of what the status actually said.
+READY=""
+for _ in $(seq 1 120); do
+  if rxrun 'true' >/dev/null 2>&1; then READY=1; break; fi
   sleep 20
 done
-rx devbox status "${BOX}" 2>/dev/null | grep -q running || { log "FATAL: devbox never reached running"; exit 1; }
+if [[ -z "${READY}" ]]; then
+  log "FATAL: devbox never became executable after 40m. Last status:"
+  rx devbox status "${BOX}" 2>&1 | head -5 | tee -a "${LOG}"
+  exit 1
+fi
 log "devbox running"
 
 # --- sglang origin/main -----------------------------------------------------
