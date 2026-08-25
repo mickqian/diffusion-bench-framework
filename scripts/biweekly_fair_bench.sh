@@ -34,7 +34,30 @@ PY="${BENCH_PYTHON:-/opt/homebrew/Caskroom/miniconda/base/bin/python3}"
 export PYTHONPATH="${REPO}/src${PYTHONPATH:+:${PYTHONPATH}}"
 
 log() { echo "[$(date +%H:%M:%S)] $*" | tee -a "${LOG}"; }
-rxrun() { rx devbox run "${BOX}" -- bash -c "$1"; }
+# The rx control plane and its exec transport both fail transiently -- three
+# distinct flavours in one afternoon ("websocket: close 1006", "error listing
+# devboxes: ... EOF", i/o timeouts). Those say nothing about the remote command,
+# so retry them here, at the one chokepoint, instead of letting each call site
+# mistake a dropped connection for a failed command (which killed two runs).
+# stdout still streams; stderr is captured only to classify the failure.
+rxrun() {
+  local attempt=0 rc err
+  err="$(mktemp)"
+  while :; do
+    rx devbox run "${BOX}" -- bash -c "$1" 2>"${err}"
+    rc=$?
+    if (( rc == 0 )); then break; fi
+    if (( attempt < 4 )) && grep -qiE 'EOF|websocket|i/o timeout|connection (refused|reset)|error listing devboxes|50[234]|deadline exceeded' "${err}"; then
+      attempt=$((attempt + 1))
+      sleep $(( attempt * 15 ))
+      continue
+    fi
+    break
+  done
+  cat "${err}" >&2
+  rm -f "${err}"
+  return "${rc}"
+}
 
 cleanup() {
   local rc=$?
@@ -151,6 +174,8 @@ log "running the matrix (this takes hours)"
 rxrun "${ENVSPEC}
   cd ${REMOTE_REPO}
   mkdir -p /scratch/results
+  # guard makes this launch idempotent, so an rxrun retry cannot start a second runner
+  pgrep -f 'diffusion-bench-compar[e]' >/dev/null || \
   setsid bash -c 'diffusion-bench-compare --modes single_e2e throughput \
     --hardware-profile h200 --output /scratch/results/${RUN_ID}.json \
     > /scratch/results/${RUN_ID}.log 2>&1; echo \$? > /scratch/results/${RUN_ID}.done' </dev/null &
