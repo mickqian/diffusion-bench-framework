@@ -2031,7 +2031,6 @@ def run_case_framework(
         # This framework cannot run in eager mode; let it keep torch.compile.
         env.pop("TORCH_COMPILE_DISABLE", None)
     env = _framework_env(framework, env)
-    _preflight_framework_command(framework, fw_cfg, env)
 
     log_file = log_dir / f"{case['id']}_{framework}.log"
     log_fh = open(log_file, "w", encoding="utf-8", buffering=1)
@@ -2042,6 +2041,10 @@ def run_case_framework(
     server_startup_s: float | None = None
     warmup_s: float | None = None
     try:
+        # Inside the guarded region on purpose: a framework whose CLI has
+        # drifted (upstream renamed a flag) must fail its own cells, not
+        # abort the whole matrix and discard every framework already run.
+        _preflight_framework_command(framework, fw_cfg, env)
         proc = subprocess.Popen(
             cmd,
             stdout=subprocess.PIPE,
