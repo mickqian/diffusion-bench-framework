@@ -977,10 +977,10 @@ def _read_perf_dump(perf_dump_path: str, timeout: float = 10.0) -> float | None:
 
 
 def send_image_request_sglang(
-    base_url: str, case: dict, perf_dump_path: str | None = None
+    base_url: str, case: dict, config: dict | None = None, perf_dump_path: str | None = None
 ) -> LatencyBreakdown:
     """Send a single T2I request via SGLang's /v1/images/generations."""
-    payload = _build_sglang_payload(case)
+    payload = _build_sglang_payload(case, config)
     if perf_dump_path:
         payload["perf_dump_path"] = perf_dump_path
 
@@ -1009,10 +1009,10 @@ def send_image_request_sglang(
 
 
 def send_video_request_sglang(
-    base_url: str, case: dict, perf_dump_path: str | None = None
+    base_url: str, case: dict, config: dict | None = None, perf_dump_path: str | None = None
 ) -> LatencyBreakdown:
     """Send a single T2V request via SGLang's /v1/videos (async)."""
-    payload = _build_sglang_payload(case)
+    payload = _build_sglang_payload(case, config)
     if perf_dump_path:
         payload["perf_dump_path"] = perf_dump_path
 
@@ -1219,8 +1219,8 @@ def send_request_vllm_omni(base_url: str, case: dict, config: dict) -> float:
         return latency
 
     if task == "text-to-image":
-        payload = _build_sglang_payload(case)
-        payload.update(_request_extra(case, "vllm-omni"))
+        payload = _build_sglang_payload(case, config)
+        payload.update(_request_extra(case, "vllm-omni", config))
         start = time.time()
         resp = requests.post(
             f"{base_url}/v1/images/generations",
@@ -1488,8 +1488,8 @@ def send_request_generic_http(
 
     if task == "text-to-image":
         endpoint = spec.get("endpoint", "/v1/images/generations")
-        payload = _build_sglang_payload(case)
-        payload.update(_request_extra(case, framework))
+        payload = _build_sglang_payload(case, config)
+        payload.update(_request_extra(case, framework, config))
         start = time.time()
         resp = requests.post(
             f"{base_url}{endpoint}", json=payload, timeout=REQUEST_TIMEOUT
@@ -1568,9 +1568,9 @@ def send_request(
             base_url, case, config, perf_dump_path
         )
     elif task == "text-to-image":
-        return send_image_request_sglang(base_url, case, perf_dump_path)
+        return send_image_request_sglang(base_url, case, config, perf_dump_path)
     elif task == "text-to-video":
-        return send_video_request_sglang(base_url, case, perf_dump_path)
+        return send_video_request_sglang(base_url, case, config, perf_dump_path)
     else:
         raise ValueError(f"Unknown task type: {task}")
 
