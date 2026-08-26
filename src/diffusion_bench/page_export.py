@@ -87,14 +87,24 @@ def build_single_e2e_rows(merged: dict, config_cases: dict, case_order) -> tuple
                 cells[fw] = override
                 continue
             row = ok_rows[(case_id, fw)]
+            # `status: "ok"` is load-bearing, not decoration: the live renderer
+            # (bnxVal in docs/index.html) treats any cell without it as missing,
+            # so omitting it publishes a whole run as "n/a".
             cells[fw] = {
-                "client_latency_s": round(row["latency_s"], 3),
+                "gpus": row.get("num_gpus", cfg["num_gpus"]),
                 "profile": _profile_of(row),
-                "gpus": f"{row.get('num_gpus', cfg['num_gpus'])} GPU",
+                "status": "ok",
+                "latency_s": round(row["latency_s"], 3),
             }
             if fw != "sglang":
                 competitor_lat[fw] = row["latency_s"]
         sgl = ok_rows.get((case_id, "sglang"))
+        # latency ratios are competitor/sglang, so >1 means slower than sglang.
+        # (Throughput uses the opposite orientation -- see build_throughput_rows.)
+        if sgl:
+            for fw, cell in cells.items():
+                if cell.get("status") == "ok":
+                    cell["ratio_to_sglang"] = round(cell["latency_s"] / sgl["latency_s"], 3)
         entry = {
             "case_id": case_id,
             "case": case_label(cfg),
@@ -110,7 +120,9 @@ def build_single_e2e_rows(merged: dict, config_cases: dict, case_order) -> tuple
             if competitor_lat:
                 comparable += 1
         else:
-            entry["winner"] = "sglang"
+            # "winner" only means something against a competitor that ran; with
+            # none, saying sglang won is a win over an empty field.
+            entry["winner"] = "sglang" if competitor_lat else "n/a"
             if competitor_lat:
                 comparable += 1
                 best = min(competitor_lat.values())
@@ -144,7 +156,11 @@ def build_throughput_rows(merged: dict, config_cases: dict, case_order) -> tuple
                 continue
             row = ok_rows[(case_id, fw)]
             metrics = row.get("metrics") or {}
-            cell = {"profile": _profile_of(row), "gpus": f"{row.get('num_gpus', cfg['num_gpus'])} GPU"}
+            cell = {
+                "gpus": row.get("num_gpus", cfg["num_gpus"]),
+                "profile": _profile_of(row),
+                "status": "ok",
+            }
             for src, dst in (
                 ("throughput_rps", "qps"),
                 ("p50_s", "p50_s"),
@@ -160,6 +176,12 @@ def build_throughput_rows(merged: dict, config_cases: dict, case_order) -> tuple
                 competitor_qps[fw] = metrics["throughput_rps"]
         sgl = ok_rows.get((case_id, "sglang"))
         sgl_qps = ((sgl or {}).get("metrics") or {}).get("throughput_rps")
+        # throughput ratios are sglang/competitor, so <1 again means slower than
+        # sglang -- the same reading as the latency ratio despite the flip.
+        if isinstance(sgl_qps, (int, float)) and sgl_qps:
+            for cell in cells.values():
+                if cell.get("status") == "ok" and isinstance(cell.get("qps"), (int, float)):
+                    cell["ratio_to_sglang"] = round(cell["qps"] / sgl_qps, 3)
         entry = {
             "case_id": case_id,
             "case": case_label(cfg),
@@ -175,7 +197,7 @@ def build_throughput_rows(merged: dict, config_cases: dict, case_order) -> tuple
             if competitor_qps:
                 comparable += 1
         else:
-            entry["winner"] = "sglang"
+            entry["winner"] = "sglang" if competitor_qps else "n/a"
             if competitor_qps:
                 comparable += 1
                 best = max(competitor_qps.values())
@@ -190,24 +212,40 @@ def build_throughput_rows(merged: dict, config_cases: dict, case_order) -> tuple
 
 
 def framework_versions(merged: dict) -> dict:
-    """Resolved versions per framework, as recorded by the runner."""
+    """Resolved versions per framework, from what was ACTUALLY installed.
+
+    `framework_runtime.install_specs` records the versions that were *asked*
+    for; a source install can silently upgrade its deps, so the published
+    denominator has to come from each framework's `packages` block instead.
+    The top level of framework_runtime also holds non-framework keys
+    (venv_root, install_specs, launchers) -- iterating it blindly once
+    published "venv_root" as a framework.
+    """
+    # the package whose version identifies each framework, in display order
+    IDENTITY = {
+        "vllm-omni": ("vllm-omni", "vllm"),
+        "lightx2v": ("lightx2v",),
+        "trtllm-visual": ("tensorrt_llm", "tensorrt-llm"),
+    }
     out: dict[str, str] = {}
-    runtime = merged.get("framework_runtime") or {}
-    for fw, info in runtime.items():
-        if isinstance(info, dict):
-            ver = info.get("version") or info.get("resolved") or info.get("commit")
-            if ver:
-                out[fw] = str(ver)
-        elif info:
-            out[fw] = str(info)
+
     sgl = merged.get("sglang_runtime") or {}
-    if sgl.get("version") or merged.get("commit_sha"):
-        out.setdefault(
-            "sglang",
-            str(sgl.get("version") or "")
-            + (f" @ {merged['commit_sha'][:9]}" if merged.get("commit_sha") else ""),
-        )
-    return {k: v for k, v in out.items() if v}
+    ver, commit = sgl.get("package_version"), sgl.get("git_commit")
+    if ver or commit:
+        # commit_sha at the top level is the BENCH repo's HEAD, not sglang's
+        out["sglang"] = " @ ".join(x for x in (ver, (commit or "")[:9]) if x)
+
+    runtime = merged.get("framework_runtime") or {}
+    for fw, names in IDENTITY.items():
+        pkgs = ((runtime.get(fw) or {}).get("packages")) or {}
+        parts = []
+        for n in names:
+            entry = pkgs.get(n)
+            if isinstance(entry, dict) and entry.get("Version"):
+                parts.append(f"{n} {entry['Version']}")
+        if parts:
+            out[fw] = " + ".join(parts)
+    return out
 
 
 def build_sections(

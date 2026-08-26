@@ -1,13 +1,11 @@
 {
-  "id": "h100x4-full-20260728",
-  "title": "H100 SGLang-Diffusion vs vLLM-Omni vs LightX2V vs TensorRT-LLM VisualGen (full 18-case matrix, best lossless, compile on)",
+  "id": "h200x4-fair-20260825",
+  "title": "H200 cross-framework (latest-vs-latest)",
   "updated_at": "2026-08-26",
   "source_report": "reports/h100x4-full-20260728/",
   "source_script": "configs/benchmark/ (explicit matrix) + scripts/build_benchmark_config.py",
   "hardware": {
-    "label": "4x NVIDIA H100 80GB",
-    "gpu_name": "NVIDIA H100 80GB HBM3",
-    "gpus": 4
+    "label": "4x NVIDIA H200 143GB"
   },
   "policy": {
     "latency_source": "client-side wall clock, steady-state median of back-to-back measured requests after warmup; server-side timers kept only as sglang diagnostics",
@@ -28,24 +26,10 @@
     "trtllm-visual"
   ],
   "frameworks": {
-    "sglang": {
-      "label": "SGLang-Diffusion",
-      "commit": "161fffe (+#32743 fix for re-measured cells)",
-      "note": "origin/main HEAD; compile or measured-eager per case per the tuned command_profiles; Ulysses/SP or CFG-parallel per case. Cells re-measured on 2026-07-29 additionally carry the sgl-project/sglang#32743 dual-DiT residency fix."
-    },
-    "vllm-omni": {
-      "label": "vLLM-Omni",
-      "note": "main HEAD (git+https://github.com/vllm-project/vllm-omni.git); compile on"
-    },
-    "lightx2v": {
-      "label": "LightX2V",
-      "note": "main HEAD (git+https://github.com/ModelTC/LightX2V.git); FA2/FA3 exact; compile on"
-    },
-    "trtllm-visual": {
-      "label": "TensorRT-LLM VisualGen",
-      "tensorrt_llm": "1.3.0rc18",
-      "note": "_torch backend; VANILLA(SDPA) exact attention (fastest on Hopper); cache-free"
-    }
+    "sglang": "SGLang-Diffusion",
+    "vllm-omni": "vLLM-Omni",
+    "lightx2v": "LightX2V",
+    "trtllm-visual": "TensorRT-LLM VisualGen"
   },
   "summary": {
     "cases": 18,
@@ -532,8 +516,10 @@
       "subtitle": "Steady-state single-request latency, best lossless config per framework (compile on, no caches, no quantization). SGLang-Diffusion fastest in 13/14 comparable cases.",
       "mode": "single_e2e",
       "framework_versions": {
-        "venv_root": "/tmp/sglang-diffusion-framework-venvs",
-        "sglang": " @ 598a9b23a"
+        "sglang": "0.5.18 @ a1f9508dd",
+        "vllm-omni": "vllm-omni 0.27.0rc2.dev180+gd6b66faba + vllm 0.27.1",
+        "lightx2v": "lightx2v 0.1.0",
+        "trtllm-visual": "tensorrt_llm 1.3.0rc24"
       },
       "summary": {
         "sglang_wins": 13,
@@ -548,9 +534,11 @@
           "mode": "single_e2e",
           "cells": {
             "sglang": {
-              "client_latency_s": 4.263,
+              "gpus": 2,
               "profile": "h100-h200-2gpu-tp-eager",
-              "gpus": "2 GPU"
+              "status": "ok",
+              "latency_s": 4.263,
+              "ratio_to_sglang": 1.0
             },
             "vllm-omni": {
               "status": "failed",
@@ -561,9 +549,11 @@
               "reason": "Tracked LightX2V version has no FLUX.1 serving path; FLUX coverage starts at FLUX.2."
             },
             "trtllm-visual": {
-              "client_latency_s": 7.029,
+              "gpus": 2,
               "profile": "h100-h200-2gpu-tp-speed",
-              "gpus": "2 GPU"
+              "status": "ok",
+              "latency_s": 7.029,
+              "ratio_to_sglang": 1.649
             }
           },
           "winner": "sglang",
@@ -577,9 +567,11 @@
           "mode": "single_e2e",
           "cells": {
             "sglang": {
-              "client_latency_s": 12.884,
+              "gpus": 2,
               "profile": "h100-h200-2gpu-tp-eager",
-              "gpus": "2 GPU"
+              "status": "ok",
+              "latency_s": 12.884,
+              "ratio_to_sglang": 1.0
             },
             "vllm-omni": {
               "status": "failed",
@@ -594,7 +586,7 @@
               "reason": "trtllm-visual server exited before health check passed (exit 1)"
             }
           },
-          "winner": "sglang"
+          "winner": "n/a"
         },
         {
           "case_id": "qwen_image_2512_t2i_1024",
@@ -604,23 +596,29 @@
           "mode": "single_e2e",
           "cells": {
             "sglang": {
-              "client_latency_s": 4.975,
+              "gpus": 2,
               "profile": "h200-2gpu-tp-speed-eager",
-              "gpus": "2 GPU"
+              "status": "ok",
+              "latency_s": 4.975,
+              "ratio_to_sglang": 1.0
             },
             "vllm-omni": {
-              "client_latency_s": 4.362,
+              "gpus": 2,
               "profile": "default",
-              "gpus": "2 GPU"
+              "status": "ok",
+              "latency_s": 4.362,
+              "ratio_to_sglang": 0.877
             },
             "lightx2v": {
               "status": "unsupported",
               "reason": "Tracked LightX2V version has no Qwen-Image text-to-image serving path."
             },
             "trtllm-visual": {
-              "client_latency_s": 6.718,
+              "gpus": 2,
               "profile": "h100-h200-2gpu-tp-speed",
-              "gpus": "2 GPU"
+              "status": "ok",
+              "latency_s": 6.718,
+              "ratio_to_sglang": 1.35
             }
           },
           "winner": "vllm-omni",
@@ -634,14 +632,18 @@
           "mode": "single_e2e",
           "cells": {
             "sglang": {
-              "client_latency_s": 6.433,
+              "gpus": 2,
               "profile": "h100-h200-2gpu-tp-speed-eager",
-              "gpus": "2 GPU"
+              "status": "ok",
+              "latency_s": 6.433,
+              "ratio_to_sglang": 1.0
             },
             "vllm-omni": {
-              "client_latency_s": 8.564,
+              "gpus": 2,
               "profile": "default",
-              "gpus": "2 GPU"
+              "status": "ok",
+              "latency_s": 8.564,
+              "ratio_to_sglang": 1.331
             },
             "lightx2v": {
               "status": "unsupported",
@@ -663,14 +665,18 @@
           "mode": "single_e2e",
           "cells": {
             "sglang": {
-              "client_latency_s": 7.408,
+              "gpus": 2,
               "profile": "default",
-              "gpus": "2 GPU"
+              "status": "ok",
+              "latency_s": 7.408,
+              "ratio_to_sglang": 1.0
             },
             "vllm-omni": {
-              "client_latency_s": 7.727,
+              "gpus": 2,
               "profile": "default",
-              "gpus": "2 GPU"
+              "status": "ok",
+              "latency_s": 7.727,
+              "ratio_to_sglang": 1.043
             },
             "lightx2v": {
               "status": "unsupported",
@@ -692,19 +698,25 @@
           "mode": "single_e2e",
           "cells": {
             "sglang": {
-              "client_latency_s": 0.647,
+              "gpus": 2,
               "profile": "h100-h200-2gpu-tp-resident-eager",
-              "gpus": "2 GPU"
+              "status": "ok",
+              "latency_s": 0.647,
+              "ratio_to_sglang": 1.0
             },
             "vllm-omni": {
-              "client_latency_s": 0.743,
+              "gpus": 2,
               "profile": "default",
-              "gpus": "2 GPU"
+              "status": "ok",
+              "latency_s": 0.743,
+              "ratio_to_sglang": 1.148
             },
             "lightx2v": {
-              "client_latency_s": 2.008,
+              "gpus": 2,
               "profile": "h200-fa3-flashinfer",
-              "gpus": "2 GPU"
+              "status": "ok",
+              "latency_s": 2.008,
+              "ratio_to_sglang": 3.104
             },
             "trtllm-visual": {
               "status": "not_run",
@@ -722,9 +734,11 @@
           "mode": "single_e2e",
           "cells": {
             "sglang": {
-              "client_latency_s": 3.764,
+              "gpus": 2,
               "profile": "h100-h200-2gpu-tp-speed",
-              "gpus": "2 GPU"
+              "status": "ok",
+              "latency_s": 3.764,
+              "ratio_to_sglang": 1.0
             },
             "vllm-omni": {
               "status": "unsupported",
@@ -739,7 +753,7 @@
               "reason": "Latest TensorRT-LLM VisualGen has no Ideogram-4 serving path (coverage is FLUX/Wan/LTX-2/Qwen-Image/Cosmos3)."
             }
           },
-          "winner": "sglang"
+          "winner": "n/a"
         },
         {
           "case_id": "wan21_t2v_1_3b_480p",
@@ -749,19 +763,25 @@
           "mode": "single_e2e",
           "cells": {
             "sglang": {
-              "client_latency_s": 24.55,
+              "gpus": 2,
               "profile": "h200-2gpu-cfg-bf16-vae-resident",
-              "gpus": "2 GPU"
+              "status": "ok",
+              "latency_s": 24.55,
+              "ratio_to_sglang": 1.0
             },
             "vllm-omni": {
-              "client_latency_s": 33.053,
+              "gpus": 2,
               "profile": "h200-2gpu-tp",
-              "gpus": "2 GPU"
+              "status": "ok",
+              "latency_s": 33.053,
+              "ratio_to_sglang": 1.346
             },
             "lightx2v": {
-              "client_latency_s": 26.057,
+              "gpus": 2,
               "profile": "h200-fa3",
-              "gpus": "2 GPU"
+              "status": "ok",
+              "latency_s": 26.057,
+              "ratio_to_sglang": 1.061
             },
             "trtllm-visual": {
               "status": "not_run",
@@ -779,19 +799,25 @@
           "mode": "single_e2e",
           "cells": {
             "sglang": {
-              "client_latency_s": 56.612,
+              "gpus": 4,
               "profile": "default",
-              "gpus": "4 GPU"
+              "status": "ok",
+              "latency_s": 56.612,
+              "ratio_to_sglang": 1.0
             },
             "vllm-omni": {
-              "client_latency_s": 75.151,
+              "gpus": 4,
               "profile": "h200-4gpu-tp",
-              "gpus": "4 GPU"
+              "status": "ok",
+              "latency_s": 75.151,
+              "ratio_to_sglang": 1.327
             },
             "lightx2v": {
-              "client_latency_s": 63.124,
+              "gpus": 4,
               "profile": "h200-fa3",
-              "gpus": "4 GPU"
+              "status": "ok",
+              "latency_s": 63.124,
+              "ratio_to_sglang": 1.115
             },
             "trtllm-visual": {
               "status": "not_run",
@@ -809,19 +835,25 @@
           "mode": "single_e2e",
           "cells": {
             "sglang": {
-              "client_latency_s": 210.866,
+              "gpus": 4,
               "profile": "default",
-              "gpus": "4 GPU"
+              "status": "ok",
+              "latency_s": 210.866,
+              "ratio_to_sglang": 1.0
             },
             "vllm-omni": {
-              "client_latency_s": 250.575,
+              "gpus": 4,
               "profile": "h200-4gpu-tp",
-              "gpus": "4 GPU"
+              "status": "ok",
+              "latency_s": 250.575,
+              "ratio_to_sglang": 1.188
             },
             "lightx2v": {
-              "client_latency_s": 216.9,
+              "gpus": 4,
               "profile": "h200-fa3",
-              "gpus": "4 GPU"
+              "status": "ok",
+              "latency_s": 216.9,
+              "ratio_to_sglang": 1.029
             },
             "trtllm-visual": {
               "status": "not_run",
@@ -839,19 +871,25 @@
           "mode": "single_e2e",
           "cells": {
             "sglang": {
-              "client_latency_s": 28.559,
+              "gpus": 2,
               "profile": "h200-2gpu-cfg-bf16-vae-resident",
-              "gpus": "2 GPU"
+              "status": "ok",
+              "latency_s": 28.559,
+              "ratio_to_sglang": 1.0
             },
             "vllm-omni": {
-              "client_latency_s": 38.237,
+              "gpus": 2,
               "profile": "h200-2gpu-tp",
-              "gpus": "2 GPU"
+              "status": "ok",
+              "latency_s": 38.237,
+              "ratio_to_sglang": 1.339
             },
             "lightx2v": {
-              "client_latency_s": 31.061,
+              "gpus": 2,
               "profile": "h200-fa3",
-              "gpus": "2 GPU"
+              "status": "ok",
+              "latency_s": 31.061,
+              "ratio_to_sglang": 1.088
             },
             "trtllm-visual": {
               "status": "not_run",
@@ -869,9 +907,11 @@
           "mode": "single_e2e",
           "cells": {
             "sglang": {
-              "client_latency_s": 11.022,
+              "gpus": 2,
               "profile": "h200-2gpu",
-              "gpus": "2 GPU"
+              "status": "ok",
+              "latency_s": 11.022,
+              "ratio_to_sglang": 1.0
             },
             "vllm-omni": {
               "status": "failed",
@@ -886,7 +926,7 @@
               "reason": "Not yet classified. Confirm framework support and add a validated command profile, or mark unsupported."
             }
           },
-          "winner": "sglang"
+          "winner": "n/a"
         },
         {
           "case_id": "ltx2.3_twostage_t2v_2gpus",
@@ -896,9 +936,11 @@
           "mode": "single_e2e",
           "cells": {
             "sglang": {
-              "client_latency_s": 11.025,
+              "gpus": 2,
               "profile": "h200-2gpu",
-              "gpus": "2 GPU"
+              "status": "ok",
+              "latency_s": 11.025,
+              "ratio_to_sglang": 1.0
             },
             "vllm-omni": {
               "status": "no_profile",
@@ -913,7 +955,7 @@
               "reason": "Not yet classified. Confirm framework support and add a validated command profile, or mark unsupported."
             }
           },
-          "winner": "sglang"
+          "winner": "n/a"
         },
         {
           "case_id": "wan21_i2v_14b_720p",
@@ -923,19 +965,25 @@
           "mode": "single_e2e",
           "cells": {
             "sglang": {
-              "client_latency_s": 206.861,
+              "gpus": 4,
               "profile": "default",
-              "gpus": "4 GPU"
+              "status": "ok",
+              "latency_s": 206.861,
+              "ratio_to_sglang": 1.0
             },
             "vllm-omni": {
-              "client_latency_s": 254.584,
+              "gpus": 4,
               "profile": "h200-4gpu-tp",
-              "gpus": "4 GPU"
+              "status": "ok",
+              "latency_s": 254.584,
+              "ratio_to_sglang": 1.231
             },
             "lightx2v": {
-              "client_latency_s": 218.389,
+              "gpus": 4,
               "profile": "h200-fa3",
-              "gpus": "4 GPU"
+              "status": "ok",
+              "latency_s": 218.389,
+              "ratio_to_sglang": 1.056
             },
             "trtllm-visual": {
               "status": "not_run",
@@ -953,19 +1001,25 @@
           "mode": "single_e2e",
           "cells": {
             "sglang": {
-              "client_latency_s": 205.839,
+              "gpus": 4,
               "profile": "default",
-              "gpus": "4 GPU"
+              "status": "ok",
+              "latency_s": 205.839,
+              "ratio_to_sglang": 1.0
             },
             "vllm-omni": {
-              "client_latency_s": 252.736,
+              "gpus": 4,
               "profile": "h200-4gpu-tp",
-              "gpus": "4 GPU"
+              "status": "ok",
+              "latency_s": 252.736,
+              "ratio_to_sglang": 1.228
             },
             "lightx2v": {
-              "client_latency_s": 217.385,
+              "gpus": 4,
               "profile": "h200-fa3",
-              "gpus": "4 GPU"
+              "status": "ok",
+              "latency_s": 217.385,
+              "ratio_to_sglang": 1.056
             },
             "trtllm-visual": {
               "status": "not_run",
@@ -983,9 +1037,11 @@
           "mode": "single_e2e",
           "cells": {
             "sglang": {
-              "client_latency_s": 1.526,
+              "gpus": 2,
               "profile": "h200-2gpu-tp-fa",
-              "gpus": "2 GPU"
+              "status": "ok",
+              "latency_s": 1.526,
+              "ratio_to_sglang": 1.0
             },
             "vllm-omni": {
               "status": "failed",
@@ -1000,7 +1056,7 @@
               "reason": "trtllm-visual server exited before health check passed (exit 1)"
             }
           },
-          "winner": "sglang"
+          "winner": "n/a"
         },
         {
           "case_id": "cosmos3_nano_t2v_720p_189f",
@@ -1010,14 +1066,18 @@
           "mode": "single_e2e",
           "cells": {
             "sglang": {
-              "client_latency_s": 53.091,
+              "gpus": 4,
               "profile": "h200-4gpu-cfg-ulysses",
-              "gpus": "4 GPU"
+              "status": "ok",
+              "latency_s": 53.091,
+              "ratio_to_sglang": 1.0
             },
             "vllm-omni": {
-              "client_latency_s": 68.054,
+              "gpus": 4,
               "profile": "h200-4gpu-cfg-ulysses",
-              "gpus": "4 GPU"
+              "status": "ok",
+              "latency_s": 68.054,
+              "ratio_to_sglang": 1.282
             },
             "lightx2v": {
               "status": "unsupported",
@@ -1039,14 +1099,18 @@
           "mode": "single_e2e",
           "cells": {
             "sglang": {
-              "client_latency_s": 53.592,
+              "gpus": 4,
               "profile": "h200-4gpu-cfg-ulysses",
-              "gpus": "4 GPU"
+              "status": "ok",
+              "latency_s": 53.592,
+              "ratio_to_sglang": 1.0
             },
             "vllm-omni": {
-              "client_latency_s": 68.632,
+              "gpus": 4,
               "profile": "h200-4gpu-cfg-ulysses",
-              "gpus": "4 GPU"
+              "status": "ok",
+              "latency_s": 68.632,
+              "ratio_to_sglang": 1.281
             },
             "lightx2v": {
               "status": "unsupported",
@@ -1068,14 +1132,18 @@
           "mode": "single_e2e",
           "cells": {
             "sglang": {
-              "client_latency_s": 146.734,
+              "gpus": 2,
               "profile": "default",
-              "gpus": "2 GPU"
+              "status": "ok",
+              "latency_s": 146.734,
+              "ratio_to_sglang": 1.0
             },
             "vllm-omni": {
-              "client_latency_s": 176.777,
+              "gpus": 2,
               "profile": "default",
-              "gpus": "2 GPU"
+              "status": "ok",
+              "latency_s": 176.777,
+              "ratio_to_sglang": 1.205
             },
             "lightx2v": {
               "status": "unsupported",
@@ -1102,8 +1170,10 @@
       "subtitle": "High-pressure throughput on a representative pair (one popular image model, one video+audio case) — the matrix is deliberately not swept, see configs/benchmark/workloads.json. SGLang-Diffusion highest QPS in 2/2 comparable cases.",
       "mode": "throughput",
       "framework_versions": {
-        "venv_root": "/tmp/sglang-diffusion-framework-venvs",
-        "sglang": " @ 598a9b23a"
+        "sglang": "0.5.18 @ a1f9508dd",
+        "vllm-omni": "vllm-omni 0.27.0rc2.dev180+gd6b66faba + vllm 0.27.1",
+        "lightx2v": "lightx2v 0.1.0",
+        "trtllm-visual": "tensorrt_llm 1.3.0rc24"
       },
       "summary": {
         "sglang_wins": 2,
@@ -1118,11 +1188,13 @@
           "mode": "throughput",
           "cells": {
             "sglang": {
+              "gpus": 2,
               "profile": "h100-h200-2gpu-tp-eager",
-              "gpus": "2 GPU",
+              "status": "ok",
               "qps": 0.2356,
               "num_requests": 4,
-              "concurrency": 2
+              "concurrency": 2,
+              "ratio_to_sglang": 1.0
             },
             "vllm-omni": {
               "status": "failed",
@@ -1133,11 +1205,13 @@
               "reason": "Tracked LightX2V version has no FLUX.1 serving path; FLUX coverage starts at FLUX.2."
             },
             "trtllm-visual": {
+              "gpus": 2,
               "profile": "h100-h200-2gpu-tp-speed",
-              "gpus": "2 GPU",
+              "status": "ok",
               "qps": 0.1422,
               "num_requests": 4,
-              "concurrency": 2
+              "concurrency": 2,
+              "ratio_to_sglang": 0.604
             }
           },
           "winner": "sglang",
@@ -1151,18 +1225,22 @@
           "mode": "throughput",
           "cells": {
             "sglang": {
+              "gpus": 2,
               "profile": "default",
-              "gpus": "2 GPU",
+              "status": "ok",
               "qps": 0.0068,
               "num_requests": 4,
-              "concurrency": 2
+              "concurrency": 2,
+              "ratio_to_sglang": 1.0
             },
             "vllm-omni": {
+              "gpus": 2,
               "profile": "default",
-              "gpus": "2 GPU",
+              "status": "ok",
               "qps": 0.0058,
               "num_requests": 4,
-              "concurrency": 2
+              "concurrency": 2,
+              "ratio_to_sglang": 0.853
             },
             "lightx2v": {
               "status": "unsupported",
