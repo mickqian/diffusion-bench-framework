@@ -879,10 +879,38 @@ def _deep_merge(base: dict, override: dict) -> dict:
     return merged
 
 
-def _request_extra(case: dict, framework: str) -> dict:
+REF_IMAGE_TOKEN = "__TEST_IMAGE_URL__"
+
+
+def _substitute_ref_image(node, url: str):
+    """Replace REF_IMAGE_TOKEN anywhere inside a request-extra tree.
+
+    Some models take their reference image in a model-specific shape rather
+    than the harness's common image field -- MiniMax-H3 Ref2VA wants it as a
+    conditions[] entry with role=reference -- so the case declares the shape
+    and marks where the shared test image belongs.
+    """
+    if isinstance(node, dict):
+        return {k: _substitute_ref_image(v, url) for k, v in node.items()}
+    if isinstance(node, list):
+        return [_substitute_ref_image(v, url) for v in node]
+    if node == REF_IMAGE_TOKEN:
+        return url
+    return node
+
+
+def _request_extra(case: dict, framework: str, config: dict | None = None) -> dict:
     extras = copy.deepcopy(case.get("request_extra", {}))
     framework_extras = (case.get("framework_request_extra") or {}).get(framework, {})
-    return _deep_merge(extras, framework_extras)
+    merged = _deep_merge(extras, framework_extras)
+    if REF_IMAGE_TOKEN in json.dumps(merged):
+        url = _reference_image_url(config or {}, case)
+        if not url:
+            raise RuntimeError(
+                f"{case['id']}: request extras use {REF_IMAGE_TOKEN} but no test_image_url is configured"
+            )
+        merged = _substitute_ref_image(merged, url)
+    return merged
 
 
 def _form_value(value: object) -> str:
@@ -903,7 +931,7 @@ def _update_form_data(data: dict, values: dict) -> None:
 # ---------------------------------------------------------------------------
 
 
-def _build_sglang_payload(case: dict) -> dict:
+def _build_sglang_payload(case: dict, config: dict | None = None) -> dict:
     """Build common SGLang request payload."""
     payload = {
         "model": case["model"],
@@ -924,7 +952,7 @@ def _build_sglang_payload(case: dict) -> dict:
     ):
         if key in case:
             payload[key] = case[key]
-    payload.update(_request_extra(case, "sglang"))
+    payload.update(_request_extra(case, "sglang", config))
     return payload
 
 

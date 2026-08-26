@@ -7,17 +7,13 @@
     "qwen_image_edit_2511",
     "zimage_turbo_t2i_1024",
     "ideogram4_t2i_1024_2gpu_tp",
-    "wan21_t2v_1_3b_480p",
-    "wan21_i2v_14b_480p",
     "wan22_t2v_a14b_720p",
-    "wan22_ti2v_5b_704p",
     "ltx2_twostage_t2v",
     "ltx2.3_twostage_t2v_2gpus",
-    "wan21_i2v_14b_720p",
-    "wan22_i2v_a14b_720p",
     "cosmos3_nano_t2i_720p",
     "cosmos3_nano_t2v_720p_189f",
     "cosmos3_nano_i2v_720p_189f",
-    "minimax_h3_t2va_5s"
+    "minimax_h3_t2va_5s",
+    "minimax_h3_ref2va_5s"
   ]
 }
