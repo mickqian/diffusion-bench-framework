@@ -128,5 +128,5 @@
    "reason": "MiniMax-H3 is integrated as Modular Diffusers blocks only (no DiffusionPipeline), and only via an unmerged PR (huggingface/diffusers#14355 -- pip install git+.../diffusers.git@refs/pull/14355/head). Not a servable baseline path today."
   }
  },
- "_note": "Ref2VA is selected by the conditions[] entry with role=reference, not by the harness's reference_image multipart path; __TEST_IMAGE_URL__ is substituted with meta.test_image_url at request time."
+ "_note": "Ref2VA is selected by the conditions[] entry with role=reference, not by the harness's reference_image multipart path; __TEST_IMAGE_URL__ is substituted with meta.test_image_url at request time. Validated on 2x H200 2026-08-26: 222.4s single_e2e (t2va on the same box is 146.7s -- reference conditioning costs ~1.5x)."
 }

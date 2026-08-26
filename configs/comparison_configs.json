@@ -2078,7 +2078,7 @@
                     "flow_shift": 12.0
                 }
             },
-            "_note": "Ref2VA is selected by the conditions[] entry with role=reference, not by the harness's reference_image multipart path; __TEST_IMAGE_URL__ is substituted with meta.test_image_url at request time.",
+            "_note": "Ref2VA is selected by the conditions[] entry with role=reference, not by the harness's reference_image multipart path; __TEST_IMAGE_URL__ is substituted with meta.test_image_url at request time. Validated on 2x H200 2026-08-26: 222.4s single_e2e (t2va on the same box is 146.7s -- reference conditioning costs ~1.5x).",
             "frameworks": {
                 "sglang": {
                     "serve_args": "--model-type diffusion --warmup-mode server --model-variant fl2va --enable-torch-compile false",
