@@ -50,7 +50,7 @@
                             ],
                             "num_gpus": 2,
                             "sglang_ref": "legacy-compatible",
-                            "serve_args": "--model-type diffusion --warmup-mode server --dit-layerwise-offload false --tp-size 2 --enable-torch-compile false false",
+                            "serve_args": "--model-type diffusion --warmup-mode server --dit-layerwise-offload false --tp-size 2 --enable-torch-compile false",
                             "benchmark": {
                                 "warmup": {
                                     "num_requests": 2,
@@ -69,7 +69,7 @@
                             ],
                             "num_gpus": 2,
                             "sglang_ref": "legacy-compatible",
-                            "serve_args": "--model-type diffusion --warmup-mode server --dit-layerwise-offload false --tp-size 2 --enable-torch-compile false false",
+                            "serve_args": "--model-type diffusion --warmup-mode server --dit-layerwise-offload false --tp-size 2 --enable-torch-compile false",
                             "benchmark": {
                                 "warmup": {
                                     "num_requests": 2,
@@ -86,7 +86,7 @@
                             ],
                             "num_gpus": 2,
                             "sglang_ref": "current-main",
-                            "serve_args": "--model-type diffusion --warmup-mode server --dit-layerwise-offload false --tp-size 2 --performance-mode speed --enable-torch-compile false false",
+                            "serve_args": "--model-type diffusion --warmup-mode server --dit-layerwise-offload false --tp-size 2 --performance-mode speed --enable-torch-compile false",
                             "benchmark": {
                                 "warmup": {
                                     "num_requests": 2,
@@ -108,7 +108,7 @@
                             ],
                             "num_gpus": 2,
                             "sglang_ref": "current-main",
-                            "serve_args": "--model-type diffusion --warmup-mode server --dit-layerwise-offload false --tp-size 2 --performance-mode speed --enable-torch-compile false false",
+                            "serve_args": "--model-type diffusion --warmup-mode server --dit-layerwise-offload false --tp-size 2 --performance-mode speed --enable-torch-compile false",
                             "benchmark": {
                                 "warmup": {
                                     "num_requests": 2,
@@ -260,7 +260,7 @@
                             ],
                             "num_gpus": 2,
                             "sglang_ref": "legacy-compatible",
-                            "serve_args": "--model-type diffusion --warmup-mode server --dit-layerwise-offload false --tp-size 2 --enable-torch-compile false false",
+                            "serve_args": "--model-type diffusion --warmup-mode server --dit-layerwise-offload false --tp-size 2 --enable-torch-compile false",
                             "benchmark": {
                                 "warmup": {
                                     "num_requests": 2,
@@ -279,7 +279,7 @@
                             ],
                             "num_gpus": 2,
                             "sglang_ref": "legacy-compatible",
-                            "serve_args": "--model-type diffusion --warmup-mode server --dit-layerwise-offload false --tp-size 2 --enable-torch-compile false false",
+                            "serve_args": "--model-type diffusion --warmup-mode server --dit-layerwise-offload false --tp-size 2 --enable-torch-compile false",
                             "benchmark": {
                                 "warmup": {
                                     "num_requests": 2,
@@ -296,7 +296,7 @@
                             ],
                             "num_gpus": 2,
                             "sglang_ref": "current-main",
-                            "serve_args": "--model-type diffusion --warmup-mode server --dit-layerwise-offload false --tp-size 2 --performance-mode speed --enable-torch-compile false false",
+                            "serve_args": "--model-type diffusion --warmup-mode server --dit-layerwise-offload false --tp-size 2 --performance-mode speed --enable-torch-compile false",
                             "benchmark": {
                                 "warmup": {
                                     "num_requests": 2,
@@ -318,7 +318,7 @@
                             ],
                             "num_gpus": 2,
                             "sglang_ref": "current-main",
-                            "serve_args": "--model-type diffusion --warmup-mode server --dit-layerwise-offload false --tp-size 2 --performance-mode speed --enable-torch-compile false false",
+                            "serve_args": "--model-type diffusion --warmup-mode server --dit-layerwise-offload false --tp-size 2 --performance-mode speed --enable-torch-compile false",
                             "benchmark": {
                                 "warmup": {
                                     "num_requests": 2,

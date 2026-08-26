@@ -49,6 +49,24 @@ _OFFLOAD_ENABLE_RE = re.compile(
 SELECTED_ROWS = []  # (case, hw, profile, args, exception?, ambiguous-matches)
 
 
+def _lint_serve_args_shape(cid: str, fw: str, name: str, args: str) -> list[str]:
+    """Catch malformed serve_args before a run does.
+
+    A bulk edit once produced `--enable-torch-compile false false`; the config
+    built fine, the lint passed, and the breakage only surfaced hours later as
+    "unrecognized arguments: false" on the flagship FLUX cases in a full matrix.
+    """
+    errs = []
+    toks = args.split()
+    for i in range(len(toks) - 2):
+        if toks[i].startswith("--") and toks[i + 1] == toks[i + 2] and not toks[i + 1].startswith("--"):
+            errs.append(
+                f"{cid}/{fw}[{name}]: repeated value for {toks[i]} "
+                f"({toks[i + 1]!r} twice) — malformed serve_args"
+            )
+    return errs
+
+
 def _lint_sglang_policy(cid: str, body: dict) -> list[str]:
     errs = []
     profiles = body.get("command_profiles") or {}
@@ -135,6 +153,10 @@ def build():
                 body = {k: v for k, v in entry.items() if k != "status"}
                 if not (body.get("command_profiles") or body.get("serve_args") is not None):
                     errors.append(f"{cid}/{fw}: status=supported but no command_profiles/serve_args")
+                for _pn, _pf in (body.get("command_profiles") or {"": body}).items():
+                    errors.extend(
+                        _lint_serve_args_shape(cid, fw, _pn or "inline", _pf.get("serve_args") or "")
+                    )
                 if fw == "sglang":
                     policy_errors.extend(_lint_sglang_policy(cid, body))
                 frameworks[fw] = body
