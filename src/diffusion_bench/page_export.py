@@ -11,6 +11,8 @@ from __future__ import annotations
 
 from typing import Any
 
+REPO_URL = "https://github.com/mickqian/diffusion-bench-framework"
+
 FRAMEWORK_ORDER = ("sglang", "vllm-omni", "lightx2v", "trtllm-visual")
 FRAMEWORK_LABELS = {
     "sglang": "SGLang-Diffusion",
@@ -18,6 +20,21 @@ FRAMEWORK_LABELS = {
     "lightx2v": "LightX2V",
     "trtllm-visual": "TensorRT-LLM VisualGen",
 }
+
+
+def reproduce_link(path: str, commit: str | None) -> dict:
+    """A run's script, pinned to the commit that ran it.
+
+    Linking to main would drift: the script keeps changing, so a reader
+    following the link months later would not see what produced these numbers.
+    Falls back to main only when the run recorded no commit.
+    """
+    ref = commit if commit and commit != "unknown" else "main"
+    return {
+        "path": path,
+        "ref": ref[:9] if ref != "main" else "main",
+        "url": f"{REPO_URL}/blob/{ref}/{path}",
+    }
 
 
 def case_details(case: dict) -> str:
@@ -286,6 +303,9 @@ def build_sections(
         )
         if reproduce:
             sections[-1]["reproduce"] = reproduce
+            sections[-1]["reproduce_link"] = reproduce_link(
+                reproduce, merged.get("commit_sha")
+            )
 
     tput_rows, t_wins, t_cmp = build_throughput_rows(merged, config_cases, case_order)
     if tput_rows:
@@ -311,4 +331,7 @@ def build_sections(
         )
         if reproduce:
             sections[-1]["reproduce"] = reproduce
+            sections[-1]["reproduce_link"] = reproduce_link(
+                reproduce, merged.get("commit_sha")
+            )
     return sections

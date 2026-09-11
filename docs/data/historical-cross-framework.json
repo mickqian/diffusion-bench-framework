@@ -1,6 +1,6 @@
 {
   "id": "historical-cross-framework-20260610",
-  "updated_at": "2026-08-26",
+  "updated_at": "2026-09-11",
   "frameworks": {
     "sglang": "SGLang-Diffusion",
     "vllm-omni": "vLLM-Omni",
@@ -28,7 +28,7 @@
       "date": "2026-08-26",
       "gpu": "4x NVIDIA H200 143GB",
       "title": "H200 cross-framework (latest-vs-latest)",
-      "subtitle": "Steady-state single-request latency, best lossless config per framework (compile on, no caches, no quantization). SGLang-Diffusion fastest in 13/14 comparable cases.",
+      "subtitle": "Steady-state single-request latency, best lossless config per framework (compile on, no caches, no quantization). SGLang-Diffusion fastest in 8/9 comparable cases.",
       "mode": "single_e2e",
       "framework_versions": {
         "sglang": "0.5.18 @ a1f9508dd",
@@ -37,8 +37,8 @@
         "trtllm-visual": "tensorrt_llm 1.3.0rc24"
       },
       "summary": {
-        "sglang_wins": 13,
-        "comparable": 14
+        "sglang_wins": 8,
+        "comparable": 9
       },
       "rows": [
         {
@@ -271,78 +271,6 @@
           "winner": "n/a"
         },
         {
-          "case_id": "wan21_t2v_1_3b_480p",
-          "case": "Wan2.1 T2V 1.3B 480p",
-          "details": "832x480x81f · 50 steps · cfg 6",
-          "gpus": "2 GPU",
-          "mode": "single_e2e",
-          "cells": {
-            "sglang": {
-              "gpus": 2,
-              "profile": "h200-2gpu-cfg-bf16-vae-resident",
-              "status": "ok",
-              "latency_s": 24.55,
-              "ratio_to_sglang": 1.0
-            },
-            "vllm-omni": {
-              "gpus": 2,
-              "profile": "h200-2gpu-tp",
-              "status": "ok",
-              "latency_s": 33.053,
-              "ratio_to_sglang": 1.346
-            },
-            "lightx2v": {
-              "gpus": 2,
-              "profile": "h200-fa3",
-              "status": "ok",
-              "latency_s": 26.057,
-              "ratio_to_sglang": 1.061
-            },
-            "trtllm-visual": {
-              "status": "not_run",
-              "reason": "Not yet classified. Confirm framework support and add a validated command profile, or mark unsupported."
-            }
-          },
-          "winner": "sglang",
-          "winner_speedup": "1.06x"
-        },
-        {
-          "case_id": "wan21_i2v_14b_480p",
-          "case": "Wan2.1 I2V 14B 480p",
-          "details": "832x480x81f · 40 steps · cfg 5",
-          "gpus": "4 GPU",
-          "mode": "single_e2e",
-          "cells": {
-            "sglang": {
-              "gpus": 4,
-              "profile": "default",
-              "status": "ok",
-              "latency_s": 56.612,
-              "ratio_to_sglang": 1.0
-            },
-            "vllm-omni": {
-              "gpus": 4,
-              "profile": "h200-4gpu-tp",
-              "status": "ok",
-              "latency_s": 75.151,
-              "ratio_to_sglang": 1.327
-            },
-            "lightx2v": {
-              "gpus": 4,
-              "profile": "h200-fa3",
-              "status": "ok",
-              "latency_s": 63.124,
-              "ratio_to_sglang": 1.115
-            },
-            "trtllm-visual": {
-              "status": "not_run",
-              "reason": "Not yet classified. Confirm framework support and add a validated command profile, or mark unsupported."
-            }
-          },
-          "winner": "sglang",
-          "winner_speedup": "1.12x"
-        },
-        {
           "case_id": "wan22_t2v_a14b_720p",
           "case": "Wan2.2 T2V A14B 720p",
           "details": "1280x720x81f · 40 steps · cfg 4",
@@ -377,42 +305,6 @@
           },
           "winner": "sglang",
           "winner_speedup": "1.03x"
-        },
-        {
-          "case_id": "wan22_ti2v_5b_704p",
-          "case": "Wan2.2 TI2V 5B 704p",
-          "details": "1280x704x81f · 50 steps · cfg 5",
-          "gpus": "2 GPU",
-          "mode": "single_e2e",
-          "cells": {
-            "sglang": {
-              "gpus": 2,
-              "profile": "h200-2gpu-cfg-bf16-vae-resident",
-              "status": "ok",
-              "latency_s": 28.559,
-              "ratio_to_sglang": 1.0
-            },
-            "vllm-omni": {
-              "gpus": 2,
-              "profile": "h200-2gpu-tp",
-              "status": "ok",
-              "latency_s": 38.237,
-              "ratio_to_sglang": 1.339
-            },
-            "lightx2v": {
-              "gpus": 2,
-              "profile": "h200-fa3",
-              "status": "ok",
-              "latency_s": 31.061,
-              "ratio_to_sglang": 1.088
-            },
-            "trtllm-visual": {
-              "status": "not_run",
-              "reason": "Not yet classified. Confirm framework support and add a validated command profile, or mark unsupported."
-            }
-          },
-          "winner": "sglang",
-          "winner_speedup": "1.09x"
         },
         {
           "case_id": "ltx2_twostage_t2v",
@@ -471,78 +363,6 @@
             }
           },
           "winner": "n/a"
-        },
-        {
-          "case_id": "wan21_i2v_14b_720p",
-          "case": "Wan2.1 I2V 14B 720p",
-          "details": "1280x720x81f · 40 steps · cfg 5",
-          "gpus": "4 GPU",
-          "mode": "single_e2e",
-          "cells": {
-            "sglang": {
-              "gpus": 4,
-              "profile": "default",
-              "status": "ok",
-              "latency_s": 206.861,
-              "ratio_to_sglang": 1.0
-            },
-            "vllm-omni": {
-              "gpus": 4,
-              "profile": "h200-4gpu-tp",
-              "status": "ok",
-              "latency_s": 254.584,
-              "ratio_to_sglang": 1.231
-            },
-            "lightx2v": {
-              "gpus": 4,
-              "profile": "h200-fa3",
-              "status": "ok",
-              "latency_s": 218.389,
-              "ratio_to_sglang": 1.056
-            },
-            "trtllm-visual": {
-              "status": "not_run",
-              "reason": "Not yet classified. Confirm framework support and add a validated command profile, or mark unsupported."
-            }
-          },
-          "winner": "sglang",
-          "winner_speedup": "1.06x"
-        },
-        {
-          "case_id": "wan22_i2v_a14b_720p",
-          "case": "Wan2.2 I2V A14B 720p",
-          "details": "1280x720x81f · 40 steps · cfg 3.5",
-          "gpus": "4 GPU",
-          "mode": "single_e2e",
-          "cells": {
-            "sglang": {
-              "gpus": 4,
-              "profile": "default",
-              "status": "ok",
-              "latency_s": 205.839,
-              "ratio_to_sglang": 1.0
-            },
-            "vllm-omni": {
-              "gpus": 4,
-              "profile": "h200-4gpu-tp",
-              "status": "ok",
-              "latency_s": 252.736,
-              "ratio_to_sglang": 1.228
-            },
-            "lightx2v": {
-              "gpus": 4,
-              "profile": "h200-fa3",
-              "status": "ok",
-              "latency_s": 217.385,
-              "ratio_to_sglang": 1.056
-            },
-            "trtllm-visual": {
-              "status": "not_run",
-              "reason": "Not yet classified. Confirm framework support and add a validated command profile, or mark unsupported."
-            }
-          },
-          "winner": "sglang",
-          "winner_speedup": "1.06x"
         },
         {
           "case_id": "cosmos3_nano_t2i_720p",
@@ -671,9 +491,38 @@
           },
           "winner": "sglang",
           "winner_speedup": "1.20x"
+        },
+        {
+          "case_id": "minimax_h3_ref2va_5s",
+          "case": "MiniMax-H3 Ref2V+A",
+          "details": "1344x768x124f · 50 steps · cfg ?",
+          "gpus": "2 GPU",
+          "mode": "single_e2e",
+          "cells": {
+            "sglang": {
+              "status": "not_run"
+            },
+            "vllm-omni": {
+              "status": "not_run"
+            },
+            "lightx2v": {
+              "status": "unsupported",
+              "reason": "No MiniMax-H3 pipeline in LightX2V as of 2026-08; a turbo LoRA effort for H3 was blocked by the model license's territory clause (excludes EU/UK/South Korea/US), not by missing engineering support."
+            },
+            "trtllm-visual": {
+              "status": "unsupported",
+              "reason": "trtllm-visual's tracked scope in this harness is image cases; H3 is a video+audio model."
+            }
+          },
+          "winner": "n/a"
         }
       ],
-      "reproduce": "scripts/biweekly_fair_bench.sh"
+      "reproduce": "scripts/biweekly_fair_bench.sh",
+      "reproduce_link": {
+        "path": "scripts/biweekly_fair_bench.sh",
+        "ref": "598a9b23a",
+        "url": "https://github.com/mickqian/diffusion-bench-framework/blob/598a9b23a6ea831f5abafa44e0ec8bbcd8e23fcb/scripts/biweekly_fair_bench.sh"
+      }
     },
     {
       "id": "h200x4-fair-20260825_throughput",
@@ -770,7 +619,12 @@
           "winner_speedup": "1.17x"
         }
       ],
-      "reproduce": "scripts/biweekly_fair_bench.sh"
+      "reproduce": "scripts/biweekly_fair_bench.sh",
+      "reproduce_link": {
+        "path": "scripts/biweekly_fair_bench.sh",
+        "ref": "598a9b23a",
+        "url": "https://github.com/mickqian/diffusion-bench-framework/blob/598a9b23a6ea831f5abafa44e0ec8bbcd8e23fcb/scripts/biweekly_fair_bench.sh"
+      }
     },
     {
       "id": "h100x4-full-20260728_single_e2e",
@@ -1375,7 +1229,12 @@
             }
           }
         }
-      ]
+      ],
+      "reproduce_link": {
+        "path": "configs/benchmark/",
+        "ref": "main",
+        "url": "https://github.com/mickqian/diffusion-bench-framework/blob/main/configs/benchmark/"
+      }
     },
     {
       "id": "h100x4-full-20260728_throughput",
@@ -1962,7 +1821,12 @@
             }
           }
         }
-      ]
+      ],
+      "reproduce_link": {
+        "path": "configs/benchmark/",
+        "ref": "main",
+        "url": "https://github.com/mickqian/diffusion-bench-framework/blob/main/configs/benchmark/"
+      }
     },
     {
       "id": "h100x4-fastest-20260703_single_e2e",
@@ -2274,7 +2138,12 @@
             }
           }
         }
-      ]
+      ],
+      "reproduce_link": {
+        "path": "configs/benchmark/",
+        "ref": "main",
+        "url": "https://github.com/mickqian/diffusion-bench-framework/blob/main/configs/benchmark/"
+      }
     },
     {
       "id": "h100x4-fastest-20260703_throughput",
@@ -2565,7 +2434,12 @@
             }
           }
         }
-      ]
+      ],
+      "reproduce_link": {
+        "path": "configs/benchmark/",
+        "ref": "main",
+        "url": "https://github.com/mickqian/diffusion-bench-framework/blob/main/configs/benchmark/"
+      }
     },
     {
       "id": "b200-cross-framework-20260701_single_e2e",
@@ -2835,7 +2709,12 @@
             }
           }
         }
-      ]
+      ],
+      "reproduce_link": {
+        "path": "scripts/run_b200_cross_framework_20260701.sh",
+        "ref": "main",
+        "url": "https://github.com/mickqian/diffusion-bench-framework/blob/main/scripts/run_b200_cross_framework_20260701.sh"
+      }
     },
     {
       "id": "manifests_20260510-h200-single-e2e.json + manifests_20260514-h200-wan-vllm-omni.json + reports_h200-video-parallelism-refresh-20260611_single_e2e",
@@ -3229,7 +3108,12 @@
             }
           }
         }
-      ]
+      ],
+      "reproduce_link": {
+        "path": "scripts/generate_h200_report_artifacts.sh",
+        "ref": "main",
+        "url": "https://github.com/mickqian/diffusion-bench-framework/blob/main/scripts/generate_h200_report_artifacts.sh"
+      }
     },
     {
       "id": "manifests_20260511-h200-throughput-fast.json + manifests_20260514-h200-wan-vllm-omni_throughput",
@@ -3438,7 +3322,12 @@
             }
           }
         }
-      ]
+      ],
+      "reproduce_link": {
+        "path": "scripts/generate_h200_report_artifacts.sh",
+        "ref": "main",
+        "url": "https://github.com/mickqian/diffusion-bench-framework/blob/main/scripts/generate_h200_report_artifacts.sh"
+      }
     },
     {
       "id": "manifests_20260601-h200-cosmos3_single_e2e",
@@ -3538,7 +3427,12 @@
             }
           }
         }
-      ]
+      ],
+      "reproduce_link": {
+        "path": "scripts/run_h200_cosmos3_20260601.sh",
+        "ref": "main",
+        "url": "https://github.com/mickqian/diffusion-bench-framework/blob/main/scripts/run_h200_cosmos3_20260601.sh"
+      }
     },
     {
       "id": "flux_fastest_20260610",
@@ -3717,7 +3611,12 @@
             }
           }
         }
-      ]
+      ],
+      "reproduce_link": {
+        "path": "scripts/run_flux_fastest_20260610.sh",
+        "ref": "main",
+        "url": "https://github.com/mickqian/diffusion-bench-framework/blob/main/scripts/run_flux_fastest_20260610.sh"
+      }
     }
   ]
 }
