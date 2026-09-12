@@ -15,7 +15,7 @@ Scope matrix (has a command profile), NOT run-results. `profile`=configured to r
 | wan22_t2v_a14b_720p | text-to-video | profile | profile | profile | TODO |
 | ltx2_twostage_t2v | text-to-video | profile | profile | profile | TODO |
 | ltx2.3_twostage_t2v_2gpus | text-to-video | profile | no-cmd | FAIL | TODO |
-| cosmos3_nano_t2i_720p | text-to-image | profile | profile | n/a | profile |
+| cosmos3_nano_t2i_720p | text-to-image | profile | profile | n/a | FAIL |
 | cosmos3_nano_t2v_720p_189f | text-to-video | profile | profile | n/a | TODO |
 | cosmos3_nano_i2v_720p_189f | image-to-video | profile | profile | n/a | TODO |
 | minimax_h3_t2va_5s | text-to-video | profile | profile | n/a | n/a |
