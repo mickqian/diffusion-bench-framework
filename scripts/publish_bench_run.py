@@ -73,13 +73,24 @@ def main() -> int:
         return 1
 
     for sec in sections:
+        # Must use the same predicate as the status guard below. It counted
+        # `client_latency_s`, a key build_sections does not emit, so it printed
+        # "0 measured cells" for a perfectly good run -- a progress line that
+        # reads zero whether the run is empty or fine tells you nothing, and a
+        # run did once get published entirely as "n/a" without anyone noticing.
         measured = sum(
             1
             for r in sec["rows"]
             for c in r["cells"].values()
-            if "client_latency_s" in c or "qps" in c
+            if "latency_s" in c or "qps" in c
         )
         print(f"{sec['id']}: {len(sec['rows'])} rows, {measured} measured cells")
+        if not measured:
+            print(
+                f"  warning: {sec['id']} has no measured cells — it would "
+                f"publish as all n/a",
+                file=sys.stderr,
+            )
 
     if args.dry_run:
         print("dry-run: nothing written")
