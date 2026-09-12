@@ -76,7 +76,7 @@
                                     "num_inference_steps": 50
                                 }
                             },
-                            "notes": "Use for SGLang commits before --performance-mode speed existed; TP remains explicit."
+                            "notes": "Use for SGLang commits before --performance-mode speed existed; TP remains explicit. Measured on 2xB200 (sglang 0.5.19, ABAB interleaved x4, 2026-09-12): this profile and blackwell-2gpu-tp-speed-eager are indistinguishable -- paired diffs +1.6/+7.6/+1.2/-5.8%, mean +1.15% with mixed signs, against within-arm spreads of 6.6% and 7.9%. So the 'legacy' label is about which flags existed, NOT about speed: --performance-mode speed buys nothing measurable here, and the two profiles are left in this order deliberately. Do not re-run this comparison without a reason; two pairs alone look like a +4.6% win and are noise."
                         },
                         "h100-h200-2gpu-tp-speed-eager": {
                             "description": "Hopper 2-GPU TP fastest FLUX profile probe.",
@@ -286,7 +286,7 @@
                                     "num_inference_steps": 50
                                 }
                             },
-                            "notes": "Use for SGLang commits before --performance-mode speed existed; TP remains explicit."
+                            "notes": "Use for SGLang commits before --performance-mode speed existed; TP remains explicit. Measured on 2xB200 (sglang 0.5.19, ABAB interleaved x4, 2026-09-12): this profile and blackwell-2gpu-tp-speed-eager are indistinguishable -- paired diffs +1.6/+7.6/+1.2/-5.8%, mean +1.15% with mixed signs, against within-arm spreads of 6.6% and 7.9%. So the 'legacy' label is about which flags existed, NOT about speed: --performance-mode speed buys nothing measurable here, and the two profiles are left in this order deliberately. Do not re-run this comparison without a reason; two pairs alone look like a +4.6% win and are noise."
                         },
                         "h100-h200-2gpu-tp-speed-eager": {
                             "description": "Hopper 2-GPU TP fastest FLUX.2 profile probe.",
@@ -1057,6 +1057,23 @@
                         "offload_granularity": "model"
                     },
                     "command_profiles": {
+                        "blackwell-fa2": {
+                            "description": "Blackwell LightX2V Wan2.2 profile: same config as default with all three attention slots on FlashAttention 2.",
+                            "hardware": [
+                                "b200",
+                                "gb200",
+                                "b300",
+                                "gb300"
+                            ],
+                            "framework_ref": "lightx2v-9bf4d39a-wan22+blackwell-fa2",
+                            "serve_args": "",
+                            "notes": "LightX2V's default FlashAttention-3 path is a Hopper-only precompiled kernel: on B200 it loads and then dies mid-generation with 'no kernel image is available for execution on the device' (flash-attention/hopper/flash_fwd_launch_template.h), taking the server with it. FA2 is built from source for sm_100 in this venv and is the same precision class (exact softmax), matching how SGLang and vLLM-Omni are run here. Deliberately NOT SageAttention: int8 QK quantisation is a different numeric class and not a fair substitute.",
+                            "lightx2v_config": {
+                                "self_attn_1_type": "flash_attn2",
+                                "cross_attn_1_type": "flash_attn2",
+                                "cross_attn_2_type": "flash_attn2"
+                            }
+                        },
                         "default": {
                             "description": "Best known LightX2V command/config for aligned non-cache benchmark runs.",
                             "framework_ref": "lightx2v-0.1.0-configs/wan22/wan_moe_t2v.json+cfg_parallel",
@@ -1172,6 +1189,21 @@
                         "dit_original_ckpt": "Lightricks/LTX-2/ltx-2-19b-dev.safetensors"
                     },
                     "command_profiles": {
+                        "blackwell-fa2": {
+                            "description": "Blackwell LightX2V LTX-2 t2av profile: same config as default with FlashAttention 2 instead of FA3.",
+                            "hardware": [
+                                "b200",
+                                "gb200",
+                                "b300",
+                                "gb300"
+                            ],
+                            "framework_ref": "lightx2v-9bf4d39a-ltx2+blackwell-fa2",
+                            "serve_args": "",
+                            "notes": "LightX2V's default FlashAttention-3 path is a Hopper-only precompiled kernel: on B200 it loads and then dies mid-generation with 'no kernel image is available for execution on the device' (flash-attention/hopper/flash_fwd_launch_template.h), taking the server with it. FA2 is built from source for sm_100 in this venv and is the same precision class (exact softmax), matching how SGLang and vLLM-Omni are run here. Deliberately NOT SageAttention: int8 QK quantisation is a different numeric class and not a fair substitute.",
+                            "lightx2v_config": {
+                                "attn_type": "flash_attn2"
+                            }
+                        },
                         "default": {
                             "description": "LightX2V upstream LTX-2 t2av path for the LTX-2 121-frame case.",
                             "framework_ref": "lightx2v-7efd05f8-ltx2+t2av+cfg_parallel",
@@ -2116,6 +2148,7 @@
                     }
                 },
                 "vllm-omni": {
+                    "reference_image": true,
                     "num_gpus": 2,
                     "serve_args": "--trust-remote-code --tensor-parallel-size 2 --enforce-eager --enable-distributed-layerwise-offload --dlo-no-use-allgather --dlo-resident-layers 20 --diffusion-attention-backend CUDNN_ATTN",
                     "extra_env": {

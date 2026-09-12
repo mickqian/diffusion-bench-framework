@@ -11,14 +11,19 @@
 # Transport is ssh (via `rx devbox ssh-config`), not `rx devbox run` -- a
 # binary-ish stream through the run channel is what kept truncating.
 #
-#   scripts/rxpull.sh <box> <remote-path> <local-dest-dir>
+#   scripts/rxpull.sh <box> <remote-path> <local-dest-dir> [name-glob]
+#
+# The optional glob restricts the pull (e.g. '*.json' to skip multi-MB server
+# runlogs); without it everything under <remote-path> comes back.
 #
 # Exit: 0 = every file verified; 1 = mismatch/empty; 2 = usage; 75 = transport.
 set -uo pipefail
 
-BOX="${1:?usage: rxpull.sh <box> <remote-path> <local-dest-dir>}"
+BOX="${1:?usage: rxpull.sh <box> <remote-path> <local-dest-dir> [name-glob]}"
 REMOTE="${2:?remote path}"
 DEST="${3:?local destination directory}"
+GLOB="${4:-}"
+TRIES="${RXPULL_TRIES:-4}"
 
 SSH_CFG="$(mktemp)"
 trap 'rm -f "$SSH_CFG"' EXIT
@@ -45,22 +50,39 @@ if ! "${SSH[@]}" "mkdir -p '$snap' && cp -a '$REMOTE' '$snap/'" 2>/dev/null; the
     exit 1
 fi
 
+find_expr="find '$name' -type f"
+[[ -n "$GLOB" ]] && find_expr="$find_expr -name '$GLOB'"
+
 manifest="$(mktemp)"
 trap 'rm -f "$SSH_CFG" "$manifest"; cleanup_remote' EXIT
-if ! "${SSH[@]}" "cd '$snap' && find '$name' -type f -print0 | xargs -0 -r md5sum" > "$manifest" 2>/dev/null; then
+if ! "${SSH[@]}" "cd '$snap' && $find_expr -print0 | xargs -0 -r md5sum" > "$manifest" 2>/dev/null; then
     echo "rxpull: cannot list $REMOTE on $BOX" >&2
     exit 75
 fi
 want="$(wc -l < "$manifest" | tr -d ' ')"
 if [[ "$want" -eq 0 ]]; then
-    echo "rxpull: $REMOTE has no files on $BOX -- refusing to report success" >&2
+    echo "rxpull: $REMOTE has no matching files on $BOX -- refusing to report success" >&2
     exit 1
 fi
-echo "rxpull: $want file(s) to fetch from $BOX:$REMOTE"
+echo "rxpull: $want file(s) to fetch from $BOX:$REMOTE${GLOB:+ (glob $GLOB)}"
 
 mkdir -p "$DEST"
-if ! "${SSH[@]}" "cd '$snap' && tar -cf - '$name'" | tar -xf - -C "$DEST"; then
-    echo "rxpull: transfer failed" >&2
+# The rx-proxied ssh channel drops on large transfers ("rx: read: unexpected
+# EOF" + a broken pipe), and a dropped connection says nothing about the files,
+# so compress (these are highly compressible logs) and retry the stream. Extract
+# without owner/permission restore: the box runs as root and this end does not.
+ok=""
+for ((attempt = 1; attempt <= TRIES; attempt++)); do
+    if "${SSH[@]}" "cd '$snap' && $find_expr -print0 | tar --null -T - -czf -" \
+        | tar -xzf - -C "$DEST" --no-same-owner --no-same-permissions 2>/dev/null; then
+        ok=1
+        break
+    fi
+    echo "rxpull: transfer attempt $attempt/$TRIES failed, retrying" >&2
+    sleep $((attempt * 5))
+done
+if [[ -z "$ok" ]]; then
+    echo "rxpull: transfer failed after $TRIES attempts" >&2
     exit 75
 fi
 
