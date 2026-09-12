@@ -2316,6 +2316,39 @@ def _preflight_framework_command(
         )
 
 
+
+def _collect_model_revisions(results: list[dict], throughput_results: list[dict]) -> dict:
+    """Resolve each benchmarked model to the HF commit actually served.
+
+    A run records framework versions but recorded only the model *id*, and an
+    id is not a version: `nvidia/Cosmos3-Nano` was re-uploaded on 2026-08-26,
+    so the same case measured 29s in July and 223s now. Without the revision
+    that reads as a 7.7x regression instead of a different checkpoint, and
+    every cross-run comparison is a guess.
+
+    Best-effort: a model served from a local path, or an unreachable hub,
+    records why rather than failing the run.
+    """
+    models = {
+        str(entry.get("model"))
+        for entry in list(results) + list(throughput_results)
+        if entry.get("model")
+    }
+    revisions: dict[str, str] = {}
+    for model in sorted(models):
+        if os.path.isdir(model) or model.startswith("/"):
+            revisions[model] = "local-path"
+            continue
+        try:
+            from huggingface_hub import HfApi
+
+            info = HfApi().model_info(model)
+            revisions[model] = info.sha or "unknown"
+        except Exception as exc:  # noqa: BLE001 - never fail a finished run
+            revisions[model] = f"unresolved: {type(exc).__name__}"
+    return revisions
+
+
 def run_comparison(
     config: dict,
     case_ids: list[str] | None = None,
@@ -2457,6 +2490,9 @@ def run_comparison(
         "hardware": hardware_metadata,
         "sglang_runtime": _collect_sglang_runtime_metadata(),
         "framework_runtime": _collect_framework_runtime_metadata(),
+        # The model id alone does not identify what was served; see
+        # _collect_model_revisions.
+        "model_revisions": _collect_model_revisions(results, throughput_results),
         "benchmark_env": benchmark_env,
         "benchmark_framework_args": {
             "vllm-omni": _vllm_torch_compile_args(),

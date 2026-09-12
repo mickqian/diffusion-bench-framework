@@ -89,6 +89,10 @@ def merge_results(paths: list[Path], output_json: Path, config_path: Path, run_i
         "hardware": {},
         "sglang_runtime": {},
         "framework_runtime": {},
+        # Which checkpoint each model id actually resolved to. Carried through
+        # because a re-uploaded model turns a run-to-run comparison into
+        # nonsense, and the id alone does not say.
+        "model_revisions": {},
         "benchmark_env": {},
         "benchmark_framework_args": {},
         "benchmark_modes": [],
@@ -150,6 +154,7 @@ def merge_results(paths: list[Path], output_json: Path, config_path: Path, run_i
         if data.get("sglang_runtime"):
             merged["sglang_runtime"] = copy.deepcopy(data["sglang_runtime"])
         _merge_dict(merged["framework_runtime"], data.get("framework_runtime"))
+        _merge_dict(merged["model_revisions"], data.get("model_revisions"))
         _merge_dict(merged["benchmark_env"], data.get("benchmark_env"))
         _merge_dict(merged["benchmark_framework_args"], data.get("benchmark_framework_args"))
         if data.get("torch_compile_disabled") is not None:
