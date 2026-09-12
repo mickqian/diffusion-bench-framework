@@ -5,7 +5,8 @@
         --merged tmp/report/merged.json \
         --run-id h200x2-fair-20260819 \
         --label "H200 cross-framework (latest-vs-latest)" \
-        --gpu "2x NVIDIA H200 143GB"
+        --gpu "2x NVIDIA H200 143GB" \
+        --reproduce scripts/biweekly_fair_bench.sh
 
 Appends the run's sections to docs/data/historical-cross-framework.json, points
 docs/data/latest-cross-framework.json at it, and refreshes the inline snapshots
@@ -51,9 +52,24 @@ def main() -> int:
         default=None,
         help="run date; defaults to the run's own timestamp, not today",
     )
-    ap.add_argument("--reproduce", default="scripts/biweekly_fair_bench.sh")
+    # No default: the link is the promise that this file produced these
+    # numbers, and defaulting it silently attributed every hand-driven run to
+    # the biweekly script, which had not run in weeks.
+    ap.add_argument(
+        "--reproduce",
+        required=True,
+        help="repo-relative path of the script that actually produced this run",
+    )
     ap.add_argument("--dry-run", action="store_true")
     args = ap.parse_args()
+
+    if not (ROOT / args.reproduce).exists():
+        print(
+            f"error: --reproduce {args.reproduce} does not exist in the repo; "
+            f"the published link would 404",
+            file=sys.stderr,
+        )
+        return 1
 
     merged = _load(args.merged)
     config = _load(args.config)

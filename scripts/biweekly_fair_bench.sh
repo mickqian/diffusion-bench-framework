@@ -264,6 +264,7 @@ MERGED="${REPO}/tmp/report/${RUN_ID}-merged.json"
 
 "${PY}" scripts/publish_bench_run.py --merged "${MERGED}" --run-id "${RUN_ID}" \
   --label "H200 cross-framework (latest-vs-latest)" \
+  --reproduce "scripts/biweekly_fair_bench.sh" \
   --gpu "${GPU_COUNT}x NVIDIA H200 143GB" >>"${LOG}" 2>&1 \
   || { log "FATAL: publish failed"; exit 1; }
 
