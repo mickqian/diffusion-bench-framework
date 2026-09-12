@@ -35,6 +35,22 @@
         "DIFFUSION_ATTENTION_BACKEND": "FLASH_ATTN"
       },
       "command_profiles": {
+        "blackwell-cudnn": {
+          "description": "Blackwell vLLM-Omni profile for wan22_t2v_a14b_720p using cuDNN attention.",
+          "hardware": [
+            "b200",
+            "gb200",
+            "b300",
+            "gb300"
+          ],
+          "framework_ref": "vllm-omni-0.29.0rc2+blackwell-cudnn",
+          "num_gpus": 4,
+          "serve_args": "--tensor-parallel-size 4",
+          "notes": "Blackwell attention choice, measured on this box 2026-09-12. FLASH_ATTN is a Hopper-only precompiled kernel -- vLLM-Omni refuses it on sm_100 with 'FLASH_ATTN was explicitly selected but is unsupported'. FLASHINFER_ATTN starts but dies under torch.compile on dynamic shapes (`AsPythonConstantNotImplementedError: SymNodeVariable() is not a constant` in the FlashInfer backend's _ensure_plan), observed on qwen-image and cosmos3 t2v; it is fine for the static image cases (zimage, flux), which are deliberately left on it. CUDNN_ATTN is exact softmax, the same precision class as the kernels the other frameworks run here, measured at 2.741s on qwen-image (vs TRTLLM_ATTN 3.274s) and already the backend minimax-h3 serves with on this box.",
+          "extra_env": {
+            "DIFFUSION_ATTENTION_BACKEND": "CUDNN_ATTN"
+          }
+        },
         "default": {
           "description": "Best known vLLM-Omni Wan command for aligned non-cache benchmark runs.",
           "framework_ref": "vllm-omni-0.18.0-wan+tp4",

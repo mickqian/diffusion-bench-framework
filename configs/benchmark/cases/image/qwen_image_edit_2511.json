@@ -1,56 +1,72 @@
 {
- "id": "qwen_image_edit_2511",
- "model": "Qwen/Qwen-Image-Edit-2511",
- "task": "image-edit",
- "label": "Qwen-Image-Edit-2511",
- "prompt": "Make the cat wear a red hat",
- "reference_image": true,
- "width": 1024,
- "height": 1024,
- "seed": 42,
- "num_gpus": 2,
- "num_inference_steps": 40,
- "guidance_scale": 1.0,
- "frameworks": {
-  "sglang": {
-   "status": "supported",
-   "serve_args": "--model-type diffusion --warmup-mode server --tp-size 2",
-   "extra_env": {},
-   "command_profiles": {
-    "default": {
-     "description": "Best known SGLang command for the benchmark repo default profile.",
-     "sglang_ref": "current-main",
-     "serve_args": "--model-type diffusion --warmup-mode server --tp-size 2 --dit-layerwise-offload false --performance-mode speed --enable-torch-compile false",
-     "notes": "Keep this profile updated when the best command changes for a SGLang release or commit. Policy-aligned candidate (compile on, offload off) — NOT yet validated on H100; validate (incl. OOM risk) before publishing."
+  "id": "qwen_image_edit_2511",
+  "model": "Qwen/Qwen-Image-Edit-2511",
+  "task": "image-edit",
+  "label": "Qwen-Image-Edit-2511",
+  "prompt": "Make the cat wear a red hat",
+  "reference_image": true,
+  "width": 1024,
+  "height": 1024,
+  "seed": 42,
+  "num_gpus": 2,
+  "num_inference_steps": 40,
+  "guidance_scale": 1.0,
+  "frameworks": {
+    "sglang": {
+      "status": "supported",
+      "serve_args": "--model-type diffusion --warmup-mode server --tp-size 2",
+      "extra_env": {},
+      "command_profiles": {
+        "default": {
+          "description": "Best known SGLang command for the benchmark repo default profile.",
+          "sglang_ref": "current-main",
+          "serve_args": "--model-type diffusion --warmup-mode server --tp-size 2 --dit-layerwise-offload false --performance-mode speed --enable-torch-compile false",
+          "notes": "Keep this profile updated when the best command changes for a SGLang release or commit. Policy-aligned candidate (compile on, offload off) — NOT yet validated on H100; validate (incl. OOM risk) before publishing."
+        }
+      }
+    },
+    "vllm-omni": {
+      "status": "supported",
+      "num_gpus": 2,
+      "serve_args": "",
+      "extra_env": {
+        "DIFFUSION_ATTENTION_BACKEND": "FLASH_ATTN"
+      },
+      "command_profiles": {
+        "blackwell-cudnn": {
+          "description": "Blackwell vLLM-Omni profile for qwen_image_edit_2511 using cuDNN attention.",
+          "hardware": [
+            "b200",
+            "gb200",
+            "b300",
+            "gb300"
+          ],
+          "framework_ref": "vllm-omni-0.29.0rc2+blackwell-cudnn",
+          "num_gpus": 2,
+          "serve_args": "",
+          "notes": "Blackwell attention choice, measured on this box 2026-09-12. FLASH_ATTN is a Hopper-only precompiled kernel -- vLLM-Omni refuses it on sm_100 with 'FLASH_ATTN was explicitly selected but is unsupported'. FLASHINFER_ATTN starts but dies under torch.compile on dynamic shapes (`AsPythonConstantNotImplementedError: SymNodeVariable() is not a constant` in the FlashInfer backend's _ensure_plan), observed on qwen-image and cosmos3 t2v; it is fine for the static image cases (zimage, flux), which are deliberately left on it. CUDNN_ATTN is exact softmax, the same precision class as the kernels the other frameworks run here, measured at 2.741s on qwen-image (vs TRTLLM_ATTN 3.274s) and already the backend minimax-h3 serves with on this box.",
+          "extra_env": {
+            "DIFFUSION_ATTENTION_BACKEND": "CUDNN_ATTN"
+          }
+        },
+        "default": {
+          "description": "Best known vLLM-Omni command for aligned non-cache benchmark runs.",
+          "framework_ref": "vllm-omni-0.18.0-cli-env",
+          "serve_args": "",
+          "notes": "Uses env-selected FlashAttention; torch compile is disabled by the benchmark harness.",
+          "extra_env": {
+            "DIFFUSION_ATTENTION_BACKEND": "FLASH_ATTN"
+          }
+        }
+      }
+    },
+    "lightx2v": {
+      "status": "unsupported",
+      "reason": "Tracked LightX2V version has no Qwen-Image-Edit serving path."
+    },
+    "trtllm-visual": {
+      "status": "not_run",
+      "reason": "Not yet classified. Confirm framework support and add a validated command profile, or mark unsupported."
     }
-   }
-  },
-  "vllm-omni": {
-   "status": "supported",
-   "num_gpus": 2,
-   "serve_args": "",
-   "extra_env": {
-    "DIFFUSION_ATTENTION_BACKEND": "FLASH_ATTN"
-   },
-   "command_profiles": {
-    "default": {
-     "description": "Best known vLLM-Omni command for aligned non-cache benchmark runs.",
-     "framework_ref": "vllm-omni-0.18.0-cli-env",
-     "serve_args": "",
-     "notes": "Uses env-selected FlashAttention; torch compile is disabled by the benchmark harness.",
-     "extra_env": {
-      "DIFFUSION_ATTENTION_BACKEND": "FLASH_ATTN"
-     }
-    }
-   }
-  },
-  "lightx2v": {
-   "status": "unsupported",
-   "reason": "Tracked LightX2V version has no Qwen-Image-Edit serving path."
-  },
-  "trtllm-visual": {
-   "status": "not_run",
-   "reason": "Not yet classified. Confirm framework support and add a validated command profile, or mark unsupported."
   }
- }
 }
