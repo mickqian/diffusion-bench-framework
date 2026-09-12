@@ -9,7 +9,7 @@ import subprocess
 from datetime import datetime, timezone
 from pathlib import Path
 
-from diffusion_bench.config_guard import verify_merged_commands
+from diffusion_bench.config_guard import hardware_candidates, verify_merged_commands
 from diffusion_bench.generate_dashboard import (
     build_issue_report_comment,
     generate_dashboard,
@@ -114,6 +114,9 @@ def merge_results(paths: list[Path], output_json: Path, config_path: Path, run_i
     # was compared with the profile h100 selects and reported as drift —
     # warnings on correct rows, and a hard refusal under
     # DIFFUSION_BENCH_STRICT_COMMANDS=1.
+    # Derive candidates from the RUNS, not from `merged`: merged["hardware"] is
+    # still empty here (it is filled in the loop below), so deriving from it
+    # yields nothing and every row is checked against the wrong profile.
     run_hardware = [
         hw
         for _, data in runs
@@ -125,8 +128,18 @@ def merge_results(paths: list[Path], output_json: Path, config_path: Path, run_i
             f"({sorted(set(run_hardware))}); checking commands against "
             f"{run_hardware[0]!r}"
         )
+    candidates: list[str] = []
+    for _, data in runs:
+        for token in hardware_candidates(
+            data.get("hardware"),
+            override=(data.get("hardware") or {}).get("hardware_profile_override"),
+        ):
+            if token not in candidates:
+                candidates.append(token)
     drift = verify_merged_commands(
-        merged, config_data, hardware=run_hardware[0] if run_hardware else "h100"
+        merged,
+        config_data,
+        hardware=candidates or [run_hardware[0] if run_hardware else "h100"],
     )
     if drift:
         merged["command_drift_warnings"] = drift

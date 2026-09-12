@@ -36,7 +36,12 @@ VALID_STATUS = {"supported", "unsupported", "no_profile", "failed", "not_run", "
 # — patching an unselected profile is a recurring footgun. Every class we
 # publish belongs here: the policy was linted on h100 only while a B200 run was
 # being prepared, so a blackwell profile could have enabled compile unnoticed.
-POLICY_HARDWARE = ("h100", "blackwell")
+# Use the tokens the RUNTIME derives, not the string passed to
+# --hardware-profile: it scans the GPU names for known tokens, so a B200 box
+# selects by "b200". Linting "blackwell" only checked profiles named
+# blackwell-*, and silently skipped cases whose Blackwell profile is named
+# b200-* (minimax-h3), leaving them outside the compile policy.
+POLICY_HARDWARE = ("h100", "b200")
 # "Best lossless" policy: the selected sglang profile must run resident, and
 # must NOT enable torch.compile — sglang's explicitly-fused kernels now match or
 # beat compiler fusion on most diffusion models, so compile-on is the slower

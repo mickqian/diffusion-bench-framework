@@ -18,6 +18,43 @@ from __future__ import annotations
 DEFAULT_PROFILE = "default"
 
 
+
+# MIRRORS ``run_comparison._hardware_profile_candidates``. The runtime does not
+# match a profile against the --hardware-profile string directly: it joins the
+# override, the env var, gpu_config, runner_labels and the GPU names into one
+# blob and looks for known hardware tokens in it. So `--hardware-profile
+# blackwell` on a box of B200s yields the candidate ``b200`` -- "blackwell" is
+# not a token and contributes nothing by itself.
+#
+# Keeping only the override string here (as this module used to) made the drift
+# check compare against a different profile than the one that ran: a case whose
+# Blackwell profile is named `b200-2gpu` matched at runtime and not in the
+# mirror, so every correct row was reported as drift. If you change the runtime
+# list, change this one in the same commit.
+HARDWARE_TOKENS = (
+    "gb300", "gb200", "b300", "b200", "h200", "h100", "a100",
+    "l40", "l4", "rtx5090", "rtx4090", "rtx3090",
+)
+
+
+def hardware_candidates(hardware_metadata: dict | None, override: str | None = None) -> list[str]:
+    """Hardware tokens the runtime would derive, in the runtime's own order."""
+    metadata = hardware_metadata or {}
+    values = [
+        override,
+        metadata.get("hardware_profile_override"),
+        metadata.get("gpu_config"),
+        metadata.get("runner_labels"),
+        *(metadata.get("gpus") or []),
+    ]
+    text = " ".join(str(value).lower() for value in values if value)
+    return [
+        token
+        for token in HARDWARE_TOKENS
+        if token in text or token.replace("rtx", "rtx ") in text
+    ]
+
+
 def profile_hardware_values(profile_cfg: dict) -> list[str]:
     hardware = (
         profile_cfg.get("hardware")
@@ -36,18 +73,22 @@ def profile_matches_hardware(name: str, profile_cfg: dict, candidate: str) -> bo
     return any(candidate in value for value in values)
 
 
-def select_profile(profiles: dict, hardware: str) -> tuple[str | None, dict | None, list[str]]:
+def select_profile(
+    profiles: dict, hardware: str | list[str]
+) -> tuple[str | None, dict | None, list[str]]:
     """Return (selected_name, selected_cfg, all_hardware_matches).
 
     ``all_hardware_matches`` lists every non-default profile that matched —
     more than one means first-match order is deciding, which is exactly the
     footgun where someone edits a matching-but-unselected profile.
     """
-    candidate = hardware.lower()
+    candidates = [hardware] if isinstance(hardware, str) else list(hardware)
+    candidates = [c.lower() for c in candidates if c]
     matches = [
         name
         for name, cfg in profiles.items()
-        if name != DEFAULT_PROFILE and profile_matches_hardware(name, cfg, candidate)
+        if name != DEFAULT_PROFILE
+        and any(profile_matches_hardware(name, cfg, c) for c in candidates)
     ]
     if matches:
         return matches[0], profiles[matches[0]], matches
@@ -63,7 +104,10 @@ def serve_args_missing_tokens(config_serve_args: str, server_command: str) -> li
 
 
 def verify_merged_commands(
-    merged: dict, config: dict, hardware: str = "h100", framework: str = "sglang"
+    merged: dict,
+    config: dict,
+    hardware: str | list[str] | None = None,
+    framework: str = "sglang",
 ) -> list[str]:
     """Cross-check every published row against the CURRENT config selection.
 
@@ -72,6 +116,15 @@ def verify_merged_commands(
     tokens of the selected serve_args — i.e. the published number no longer
     describes what the config would run.
     """
+    # Derive the same candidates the runtime did, from the run's own recorded
+    # hardware, so the check compares against the profile that actually ran.
+    if isinstance(hardware, str) or hardware is None:
+        candidates = hardware_candidates(merged.get("hardware"), override=hardware)
+        if not candidates:
+            candidates = [hardware or "h100"]
+    else:
+        candidates = list(hardware)
+
     cases = {c.get("id"): c for c in config.get("cases", [])}
     warnings: list[str] = []
     seen: set[tuple[str, str]] = set()
@@ -87,7 +140,7 @@ def verify_merged_commands(
             profiles = fw_cfg.get("command_profiles") or {}
             if not profiles:
                 continue
-            selected_name, selected_cfg, _ = select_profile(profiles, hardware)
+            selected_name, selected_cfg, _ = select_profile(profiles, candidates)
             if selected_cfg is None:
                 continue
             row_profile = (row.get("framework_metadata") or {}).get("profile")
@@ -99,7 +152,7 @@ def verify_merged_commands(
                 warnings.append(
                     f"{case_id}/{framework}: published row ran profile "
                     f"{row_profile!r} but the config now selects "
-                    f"{selected_name!r} on {hardware} — re-run before publishing"
+                    f"{selected_name!r} on {'/'.join(candidates)} — re-run before publishing"
                 )
                 continue
             missing = serve_args_missing_tokens(
