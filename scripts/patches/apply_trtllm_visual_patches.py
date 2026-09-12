@@ -15,8 +15,14 @@ cache-free policy sets). We cast weight/bias to the (fp32) input dtype, matching
 the upcast intent and working in both eager and compiled paths.
 
 This lets `trtllm-visual` be benchmarked compile-OFF for a same-policy
-comparison against the other frameworks. Kept local (not upstreamed); re-apply
-after every (re)install. Verified against tensorrt-llm 1.3.0rc18.
+comparison against the other frameworks. Re-apply after every (re)install.
+
+RESOLVED UPSTREAM in 1.3.0rc24. Checking the published tags, rc18-rc23 still
+pass `weight=self.weight`; rc24, rc25 and rc26 cast both to fp32 with the same
+rationale we used ("Eager torch.layer_norm needs weight/bias in the fp32
+compute dtype"). So on any version we would run today this patch is a no-op and
+reports itself as one; it stays only for reproducing a report pinned to
+rc18-rc23. Delete it once no published run pins one of those.
 """
 from __future__ import annotations
 
@@ -38,15 +44,15 @@ def patch_layer_norm_eager_dtype() -> None:
         print("[patch] layer_norm.py already patched")
         return
     if "weight=self.weight.to(" in src or "self.weight.to(" in src:
-        print("[patch] layer_norm.py already casts weight upstream; patch no longer needed")
+        print("[patch] layer_norm.py casts weight upstream (1.3.0rc24+); nothing to do")
         return
     if "weight=self.weight," not in src or "bias=self.bias," not in src:
         # Loud on purpose. This printed quietly for three consecutive runs while
         # the patch did nothing: it only matters compile-off, and the benchmark
         # runs competitors compile-on, so nothing failed and nobody looked.
         print(
-            "[patch] WARNING: layer_norm.py no longer matches the patch target "
-            "(verified against 1.3.0rc18; installed version has moved). The "
+            "[patch] WARNING: layer_norm.py matches neither the rc18-rc23 patch "
+            "target nor the rc24+ upstream fix -- it has moved again. The "
             "eager-mode dtype fix is NOT applied -- trtllm-visual will crash if "
             "run with TORCH_COMPILE_DISABLE=1. Re-target or retire this patch: "
             f"{target}"
