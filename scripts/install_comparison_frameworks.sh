@@ -47,7 +47,7 @@ write_desired_stamp() {
         echo "lightx2v_flash_attn3_install_spec=${LIGHTX2V_FLASH_ATTN3_INSTALL_SPEC:-}"
         echo "lightx2v_fa3_hf_repo=${LIGHTX2V_FA3_HF_REPO:-varunneal/flash-attention-3}"
         echo "lightx2v_fa3_hf_revision=${LIGHTX2V_FA3_HF_REVISION:-de87b9b5af06dd9984df595bef90b2eba44b181a}"
-        echo "lightx2v_fa3_hf_subdir=${LIGHTX2V_FA3_HF_SUBDIR:-build/torch28-cxx11-cu128-x86_64-linux/flash_attention_3}"
+        echo "lightx2v_fa3_hf_subdir=${LIGHTX2V_FA3_HF_SUBDIR:-auto}"
         echo "lightx2v_sageattention_install_spec=${LIGHTX2V_SAGEATTENTION_INSTALL_SPEC:-sageattention==1.0.6}"
         echo "lightx2v_flashinfer_install_spec=${LIGHTX2V_FLASHINFER_INSTALL_SPEC:-flashinfer-python==0.6.11}"
         echo "lightx2v_hf_xet_install_spec=${LIGHTX2V_HF_XET_INSTALL_SPEC:-hf-xet}"
@@ -150,7 +150,20 @@ case "${FRAMEWORK}" in
     python3 -m pip install --upgrade --force-reinstall "${LIGHTX2V_TRANSFORMERS_INSTALL_SPEC:-transformers<5}"
     python3 -m pip install --upgrade --pre --upgrade-strategy only-if-needed "${LIGHTX2V_SAFETENSORS_INSTALL_SPEC:-safetensors>=0.8.0rc0}"
     python3 -m pip install --upgrade ninja packaging matplotlib
-    export MAX_JOBS="${MAX_JOBS:-8}"
+    # flash-attn is a source build here (~70 translation units x 4 GPU archs --
+    # its setup.py picks archs from the CUDA version and ignores
+    # TORCH_CUDA_ARCH_LIST). A flat MAX_JOBS=8 cost 25 minutes on a 240-core
+    # box; each nvcc peaks around 4GB, so scale with whichever of cores/RAM
+    # runs out first and keep a ceiling so a huge host does not thrash.
+    if [[ -z "${MAX_JOBS:-}" ]]; then
+      _cores="$(nproc 2>/dev/null || echo 8)"
+      _mem_gb="$(awk '/MemAvailable/ {print int($2/1024/1024)}' /proc/meminfo 2>/dev/null || echo 16)"
+      MAX_JOBS=$(( _cores / 2 )); [[ $(( _mem_gb / 4 )) -lt ${MAX_JOBS} ]] && MAX_JOBS=$(( _mem_gb / 4 ))
+      [[ ${MAX_JOBS} -gt 48 ]] && MAX_JOBS=48
+      [[ ${MAX_JOBS} -lt 1 ]] && MAX_JOBS=1
+      echo "flash-attn build: MAX_JOBS=${MAX_JOBS} (${_cores} cores, ${_mem_gb}GB avail)"
+    fi
+    export MAX_JOBS
     export TORCH_CUDA_ARCH_LIST="${TORCH_CUDA_ARCH_LIST:-9.0}"
     python3 -m pip install --upgrade --no-cache-dir --no-build-isolation --no-deps --no-binary flash-attn "${LIGHTX2V_FLASH_ATTN_INSTALL_SPEC:-flash-attn==2.8.3}"
     if [[ -n "${LIGHTX2V_FLASH_ATTN3_INSTALL_SPEC:-}" ]]; then
