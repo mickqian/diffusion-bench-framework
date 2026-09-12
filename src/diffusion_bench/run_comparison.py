@@ -64,6 +64,35 @@ REQUEST_TIMEOUT = 1200  # seconds
 #
 # This is a fairness fix, not a tuning one: the overhead scales with response
 # size, so it penalised whichever framework returned the biggest payload.
+
+def _poll_get(url: str, deadline: float, timeout: int = 30):
+    """GET a job-status URL, tolerating transient failures.
+
+    Long video generations poll for minutes, and the harness used to abort the
+    whole measurement on a single slow or refused poll: a wan22 run that had
+    already produced a 690s video died on `Read timed out (read timeout=30)`
+    during its second request, discarding an eleven-minute measurement because
+    one status check was late while the server was busy generating.
+
+    A transient failure is not a result. Keep polling until the caller's overall
+    deadline, and only then give up -- a server that is really gone will fail
+    every attempt and still hit that deadline.
+    """
+    last: Exception | None = None
+    while time.time() < deadline:
+        try:
+            resp = requests.get(url, timeout=timeout)
+            resp.raise_for_status()
+            return resp
+        except (requests.Timeout, requests.ConnectionError) as exc:
+            last = exc
+            time.sleep(2)
+    raise TimeoutError(
+        f"status polling for {url} did not succeed before the deadline"
+        + (f" (last error: {type(last).__name__}: {str(last)[:120]})" if last else "")
+    )
+
+
 HTTP_READ_CHUNK = 1 << 18  # 256 KiB
 
 
@@ -1062,7 +1091,7 @@ def send_video_request_sglang(
     poll_url = f"{base_url}/v1/videos/{job_id}"
     while True:
         time.sleep(1)
-        poll_resp = requests.get(poll_url, timeout=30)
+        poll_resp = _poll_get(poll_url, start + REQUEST_TIMEOUT)
         poll_resp.raise_for_status()
         poll_data = poll_resp.json()
         status = poll_data.get("status")
@@ -1149,7 +1178,7 @@ def send_image_conditioned_request_sglang(
         poll_url = f"{base_url}/v1/videos/{job_id}"
         while True:
             time.sleep(1)
-            poll_resp = requests.get(poll_url, timeout=30)
+            poll_resp = _poll_get(poll_url, start + REQUEST_TIMEOUT)
             poll_resp.raise_for_status()
             poll_data = poll_resp.json()
             status = poll_data.get("status")
@@ -1236,7 +1265,7 @@ def send_request_vllm_omni(base_url: str, case: dict, config: dict) -> float:
         poll_url = f"{base_url}/v1/videos/{job_id}"
         while True:
             time.sleep(1)
-            poll_resp = requests.get(poll_url, timeout=30)
+            poll_resp = _poll_get(poll_url, start + REQUEST_TIMEOUT)
             poll_resp.raise_for_status()
             poll_data = poll_resp.json()
             status = str(poll_data.get("status") or "").lower()
@@ -1430,7 +1459,7 @@ def send_request_lightx2v(base_url: str, case: dict, config: dict) -> float:
     poll_url = f"{base_url}/v1/tasks/{task_id}/status"
     while True:
         time.sleep(LIGHTX2V_POLL_INTERVAL_S)
-        poll_resp = requests.get(poll_url, timeout=30)
+        poll_resp = _poll_get(poll_url, start + REQUEST_TIMEOUT)
         poll_resp.raise_for_status()
         poll_data = poll_resp.json()
         status = (
@@ -1529,7 +1558,7 @@ def send_request_generic_http(
         poll_url = f"{base_url}{endpoint.rstrip('/')}/{job_id}"
         while True:
             time.sleep(1)
-            poll_resp = requests.get(poll_url, timeout=30)
+            poll_resp = _poll_get(poll_url, start + REQUEST_TIMEOUT)
             poll_resp.raise_for_status()
             poll_data = poll_resp.json()
             status = str(poll_data.get("status") or "").lower()
