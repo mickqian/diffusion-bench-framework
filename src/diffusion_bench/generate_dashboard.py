@@ -1077,11 +1077,27 @@ def build_issue_report_comment(results: dict) -> str:
             key=_framework_sort_key,
         )
         case_cfg = case_configs.get(case_id)
+        # The case's descriptive row (model/task/dims/steps). `frameworks`
+        # includes every framework in scope, not only those with results, so
+        # keying the fallback on frameworks[0] returns None whenever the
+        # first-sorted framework did not run this case -- a partial run, or any
+        # case sglang does not cover -- and the report crashed on None.get().
+        # Take the first framework that actually produced an entry, then the
+        # config, which describes the case whether or not anything ran.
         case_entry = (
             single_fws.get("sglang")
             or throughput_fws.get("sglang")
-            or single_fws.get(frameworks[0])
-            or throughput_fws.get(frameworks[0])
+            or next(
+                (
+                    entry
+                    for fw in frameworks
+                    for entry in (single_fws.get(fw), throughput_fws.get(fw))
+                    if entry
+                ),
+                None,
+            )
+            or case_cfg
+            or {}
         )
         sglang_single = single_fws.get("sglang")
         sglang_single_latency = _successful_metric(sglang_single, "latency_s")

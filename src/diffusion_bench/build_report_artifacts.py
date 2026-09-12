@@ -105,7 +105,25 @@ def merge_results(paths: list[Path], output_json: Path, config_path: Path, run_i
     import os as _os
 
     config_data = _load(config_path)
-    drift = verify_merged_commands(merged, config_data)
+    # Check against the hardware the run actually used. The verifier defaults to
+    # h100, and nothing passed anything else, so every row of a Blackwell run
+    # was compared with the profile h100 selects and reported as drift —
+    # warnings on correct rows, and a hard refusal under
+    # DIFFUSION_BENCH_STRICT_COMMANDS=1.
+    run_hardware = [
+        hw
+        for _, data in runs
+        if (hw := (data.get("hardware") or {}).get("hardware_profile_override"))
+    ]
+    if len(set(run_hardware)) > 1:
+        print(
+            "WARNING: results were produced on mixed hardware profiles "
+            f"({sorted(set(run_hardware))}); checking commands against "
+            f"{run_hardware[0]!r}"
+        )
+    drift = verify_merged_commands(
+        merged, config_data, hardware=run_hardware[0] if run_hardware else "h100"
+    )
     if drift:
         merged["command_drift_warnings"] = drift
         print("COMMAND DRIFT — published rows vs current config:")
