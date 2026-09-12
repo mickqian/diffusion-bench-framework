@@ -254,15 +254,44 @@ def framework_versions(merged: dict) -> dict:
 
     runtime = merged.get("framework_runtime") or {}
     for fw, names in IDENTITY.items():
-        pkgs = ((runtime.get(fw) or {}).get("packages")) or {}
+        block = runtime.get(fw) or {}
+        pkgs = block.get("packages") or {}
         parts = []
         for n in names:
             entry = pkgs.get(n)
             if isinstance(entry, dict) and entry.get("Version"):
-                parts.append(f"{n} {entry['Version']}")
+                commit = _vcs_commit(block, n)
+                version = entry["Version"]
+                parts.append(
+                    f"{n} {version} @ {commit[:9]}" if commit else f"{n} {version}"
+                )
         if parts:
             out[fw] = " + ".join(parts)
     return out
+
+
+def _vcs_commit(framework_block: dict, package: str) -> str | None:
+    """The commit a package was installed from, if it came from git.
+
+    A version alone does not identify a source install: LightX2V publishes
+    0.5.0 for every main-HEAD build, so "lightx2v 0.5.0" says nothing about
+    which HEAD, and a latest-vs-latest claim is unverifiable without it.
+    pip records the truth in the distribution's direct_url.json, which the
+    harness already collects -- unlike `install_specs`, which stores what was
+    *asked* for and reads as the stale default whenever the run process did not
+    carry the *_INSTALL_SPEC env vars (it usually does not: the installer has
+    them, the runner does not).
+    """
+    normalised = package.replace("_", "-").lower()
+    for dist_name, info in (framework_block.get("direct_urls") or {}).items():
+        # dist-info directory names look like `lightx2v-0.5.0.dist-info`
+        stem = dist_name.split(".dist-info")[0].rsplit("-", 1)[0]
+        if stem.replace("_", "-").lower() != normalised:
+            continue
+        commit = ((info or {}).get("vcs_info") or {}).get("commit_id")
+        if commit:
+            return str(commit)
+    return None
 
 
 def build_sections(
