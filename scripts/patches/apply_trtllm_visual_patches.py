@@ -65,5 +65,49 @@ def patch_layer_norm_eager_dtype() -> None:
     print(f"[patch] applied eager-dtype fix to {target}")
 
 
+def patch_image_generation_missing_import() -> None:
+    """`/v1/images/generations` 500s on a missing import (1.3.0rc26).
+
+    `serve/openai_server.py::openai_image_generation` finishes the generation,
+    then builds its timing headers with
+    `get_steady_clock_now_in_seconds() - request_received` -- a name the module
+    never imports. So the image is produced and thrown away, every request
+    returns 500, and the whole trtllm-visual column of a matrix is lost to a
+    metrics line. Upstream oversight, not a config problem; the import is the
+    entire fix and changes nothing about generation.
+    """
+    spec = importlib.util.find_spec("tensorrt_llm")
+    if spec is None or not spec.origin:
+        print("[patch] tensorrt_llm not importable; skipping")
+        return
+    target = pathlib.Path(spec.origin).parent / "serve" / "openai_server.py"
+    if not target.exists():
+        print(f"[patch] {target} not found; skipping (version drift?)")
+        return
+    src = target.read_text()
+    name = "get_steady_clock_now_in_seconds"
+    if f"import {name}" in src or f"{name},\n" in src:
+        print("[patch] openai_server.py already imports the clock helper")
+        return
+    if f"{name}(" not in src:
+        print(f"[patch] openai_server.py no longer calls {name}; nothing to do")
+        return
+    anchor = "from tensorrt_llm._torch.async_llm import AsyncLLM"
+    if anchor not in src:
+        print(
+            "[patch] WARNING: openai_server.py calls "
+            f"{name} without importing it, but the expected import anchor is "
+            f"gone -- /v1/images/generations will 500 on every request. "
+            f"Re-target this patch: {target}"
+        )
+        return
+    src = src.replace(
+        anchor, f"from tensorrt_llm._utils import {name}\n{anchor}", 1
+    )
+    target.write_text(src)
+    print(f"[patch] added the missing {name} import to {target}")
+
+
 if __name__ == "__main__":
     patch_layer_norm_eager_dtype()
+    patch_image_generation_missing_import()
