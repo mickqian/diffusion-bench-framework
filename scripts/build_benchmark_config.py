@@ -33,8 +33,10 @@ VALID_STATUS = {"supported", "unsupported", "no_profile", "failed", "not_run", "
 
 # The benchmark's published hardware. The lint checks the profile that the
 # harness would actually SELECT there (first hardware match, else `default`)
-# — patching an unselected profile is a recurring footgun.
-POLICY_HARDWARE = ("h100",)
+# — patching an unselected profile is a recurring footgun. Every class we
+# publish belongs here: the policy was linted on h100 only while a B200 run was
+# being prepared, so a blackwell profile could have enabled compile unnoticed.
+POLICY_HARDWARE = ("h100", "blackwell")
 # "Best lossless" policy: the selected sglang profile must run resident, and
 # must NOT enable torch.compile — sglang's explicitly-fused kernels now match or
 # beat compiler fusion on most diffusion models, so compile-on is the slower
