@@ -52,6 +52,34 @@ HEALTH_TIMEOUT = (
     2400  # seconds (40 min — large checkpoints can need long download/load time)
 )
 REQUEST_TIMEOUT = 1200  # seconds
+
+# requests' non-streaming path reads a response body in 10 KiB pieces
+# (`CONTENT_CHUNK_SIZE`). Against vLLM-Omni's image responses each of those
+# reads costs ~134ms, so a 4.2MB reply took 55s of pure client overhead on top
+# of a 3.2s generation -- and the harness recorded that 58s as the framework's
+# latency. Measured on the same request and server: curl 3.28s, stdlib
+# http.client 3.28s, requests default 58.20s, and by read size
+# iter_content(10240) 54.93s vs 32 KiB 0.20s vs 256 KiB 0.00s. So drain every
+# measured response ourselves with a read size far above the cliff.
+#
+# This is a fairness fix, not a tuning one: the overhead scales with response
+# size, so it penalised whichever framework returned the biggest payload.
+HTTP_READ_CHUNK = 1 << 18  # 256 KiB
+
+
+def _post_drained(url: str, **kwargs):
+    """POST and read the whole body in large reads.
+
+    Returns a normal Response -- `.content`, `.text` and `.json()` work -- with
+    the body already materialised, so the caller's timing stops when the last
+    byte arrives, as it would with curl.
+    """
+    resp = requests.post(url, stream=True, **kwargs)
+    # What Response.content would do, minus the 10 KiB read size.
+    resp._content = b"".join(resp.iter_content(HTTP_READ_CHUNK))
+    resp._content_consumed = True
+    return resp
+
 GPU_CLEAR_WAIT = 15  # seconds between framework runs
 MODE_SINGLE_E2E = "single_e2e"
 MODE_THROUGHPUT = "throughput"
@@ -985,7 +1013,7 @@ def send_image_request_sglang(
         payload["perf_dump_path"] = perf_dump_path
 
     start = time.time()
-    resp = requests.post(
+    resp = _post_drained(
         f"{base_url}/v1/images/generations",
         json=payload,
         timeout=REQUEST_TIMEOUT,
@@ -1019,7 +1047,7 @@ def send_video_request_sglang(
     start = time.time()
 
     # Submit job
-    resp = requests.post(
+    resp = _post_drained(
         f"{base_url}/v1/videos",
         json=payload,
         timeout=REQUEST_TIMEOUT,
@@ -1104,7 +1132,7 @@ def send_image_conditioned_request_sglang(
         endpoint = "/v1/images/generations"
 
     start = time.time()
-    resp = requests.post(
+    resp = _post_drained(
         f"{base_url}{endpoint}",
         files=files,
         data=data,
@@ -1186,7 +1214,7 @@ def send_request_vllm_omni(base_url: str, case: dict, config: dict) -> float:
             }
 
         start = time.time()
-        resp = requests.post(
+        resp = _post_drained(
             f"{base_url}/v1/videos",
             data=data,
             files=files,
@@ -1222,7 +1250,7 @@ def send_request_vllm_omni(base_url: str, case: dict, config: dict) -> float:
         payload = _build_sglang_payload(case, config)
         payload.update(_request_extra(case, "vllm-omni", config))
         start = time.time()
-        resp = requests.post(
+        resp = _post_drained(
             f"{base_url}/v1/images/generations",
             json=payload,
             timeout=REQUEST_TIMEOUT,
@@ -1252,7 +1280,7 @@ def send_request_vllm_omni(base_url: str, case: dict, config: dict) -> float:
                 data[key] = str(case[key])
         _update_form_data(data, _request_extra(case, "vllm-omni"))
         start = time.time()
-        resp = requests.post(
+        resp = _post_drained(
             f"{base_url}/v1/images/edits",
             files=files,
             data=data,
@@ -1299,7 +1327,7 @@ def send_request_vllm_omni(base_url: str, case: dict, config: dict) -> float:
     }
 
     start = time.time()
-    resp = requests.post(
+    resp = _post_drained(
         f"{base_url}/v1/chat/completions",
         json=payload,
         timeout=REQUEST_TIMEOUT,
@@ -1319,47 +1347,69 @@ def send_request_vllm_omni(base_url: str, case: dict, config: dict) -> float:
 # ---------------------------------------------------------------------------
 
 
-def send_request_lightx2v(base_url: str, case: dict, config: dict) -> float:
-    """Send request via LightX2V's async task API."""
-    endpoint = "/v1/tasks/"
-    suffix = (
-        ".png"
-        if case["task"] in ("text-to-image", "image-edit", "image-to-image")
-        else ".mp4"
-    )
+# LightX2V's task API rejects unknown fields (`BaseTaskRequest` is
+# `extra="forbid"`), so a request carrying a field it has since dropped fails
+# whole with a 422 and no usable detail — which is how every lightx2v cell went
+# red on the first B200 matrix. Sizing/steps/fps/guidance now live ONLY in the
+# launch config (see `_write_lightx2v_config`); the request carries prompt,
+# seed, size and the reference image.
+LIGHTX2V_IMAGE_TASKS = ("text-to-image", "image-edit", "image-to-image")
+# Video polls the async task API. 1s (the old value) is a floor on the measured
+# latency and quantises it: on an image case that generates in ~0.4s it more
+# than doubled the number we would have published.
+LIGHTX2V_POLL_INTERVAL_S = 0.2
 
+
+def _lightx2v_payload(case: dict, config: dict, is_image: bool) -> dict:
     payload = {
         "prompt": case["prompt"],
         "seed": case.get("seed", 42),
-        "infer_steps": case.get("num_inference_steps", 50),
-        "save_result_path": os.path.join(
-            tempfile.gettempdir(),
-            f"lightx2v_{case['id']}_{int(time.time() * 1000)}{suffix}",
-        ),
     }
-    # LightX2V uses target_video_length for frames, height/width directly
-    if "num_frames" in case:
-        payload["target_video_length"] = case["num_frames"]
-    if "height" in case:
-        payload["height"] = case["height"]
-    if "width" in case:
-        payload["width"] = case["width"]
     if "height" in case and "width" in case:
-        payload["target_shape"] = [case["height"], case["width"]]
-    if "guidance_scale" in case:
-        payload["guidance_scale"] = case["guidance_scale"]
-    if "fps" in case:
-        payload["fps"] = case["fps"]
+        payload["size"] = [case["height"], case["width"]]
+    if not is_image and "num_frames" in case:
+        payload["num_frames"] = case["num_frames"]
     if "negative_prompt" in case:
         payload["negative_prompt"] = case["negative_prompt"]
     if case.get("reference_image"):
         payload["image_path"] = _get_ref_image_path(config, case)
+    return payload
 
+
+def send_request_lightx2v(base_url: str, case: dict, config: dict) -> float:
+    """Send request via LightX2V's task API.
+
+    Images go to the synchronous endpoint: one blocking call returning the PNG,
+    which is both what the other frameworks are measured on and free of the
+    poll interval. Video stays on submit + poll.
+    """
+    is_image = case["task"] in LIGHTX2V_IMAGE_TASKS
+    payload = _lightx2v_payload(case, config, is_image)
+
+    if is_image:
+        # No save_result_path: the sync endpoint returns the PNG in the
+        # response, so we measure generation rather than a disk write the
+        # other frameworks do not do.
+        start = time.time()
+        resp = _post_drained(
+            f"{base_url}/v1/tasks/image/sync",
+            json=payload,
+            timeout=REQUEST_TIMEOUT,
+        )
+        resp.raise_for_status()
+        latency = time.time() - start
+        if not resp.content:
+            raise RuntimeError("LightX2V sync image request returned no content")
+        print(f"  Generated in {latency:.2f}s (lightx2v)")
+        return latency
+
+    payload["save_result_path"] = os.path.join(
+        tempfile.gettempdir(),
+        f"lightx2v_{case['id']}_{int(time.time() * 1000)}.mp4",
+    )
     start = time.time()
-
-    # Submit task
-    resp = requests.post(
-        f"{base_url}{endpoint}",
+    resp = _post_drained(
+        f"{base_url}/v1/tasks/video/",
         json=payload,
         timeout=REQUEST_TIMEOUT,
     )
@@ -1369,10 +1419,9 @@ def send_request_lightx2v(base_url: str, case: dict, config: dict) -> float:
     if not task_id:
         raise RuntimeError(f"LightX2V submit returned no task_id: {task_data}")
 
-    # Poll for completion
     poll_url = f"{base_url}/v1/tasks/{task_id}/status"
     while True:
-        time.sleep(1)
+        time.sleep(LIGHTX2V_POLL_INTERVAL_S)
         poll_resp = requests.get(poll_url, timeout=30)
         poll_resp.raise_for_status()
         poll_data = poll_resp.json()
@@ -1458,7 +1507,7 @@ def send_request_generic_http(
                 )
             }
         start = time.time()
-        resp = requests.post(
+        resp = _post_drained(
             f"{base_url}{endpoint}", data=data, files=files, timeout=REQUEST_TIMEOUT
         )
         resp.raise_for_status()
@@ -1491,7 +1540,7 @@ def send_request_generic_http(
         payload = _build_sglang_payload(case, config)
         payload.update(_request_extra(case, framework, config))
         start = time.time()
-        resp = requests.post(
+        resp = _post_drained(
             f"{base_url}{endpoint}", json=payload, timeout=REQUEST_TIMEOUT
         )
         latency = time.time() - start
@@ -1522,7 +1571,7 @@ def send_request_generic_http(
                 data[key] = str(case[key])
         _update_form_data(data, _request_extra(case, framework))
         start = time.time()
-        resp = requests.post(
+        resp = _post_drained(
             f"{base_url}{endpoint}", files=files, data=data, timeout=REQUEST_TIMEOUT
         )
         latency = time.time() - start
