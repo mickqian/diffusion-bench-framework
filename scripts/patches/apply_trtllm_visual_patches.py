@@ -37,8 +37,20 @@ def patch_layer_norm_eager_dtype() -> None:
     if "self.weight.to(hidden_states.dtype)" in src:
         print("[patch] layer_norm.py already patched")
         return
+    if "weight=self.weight.to(" in src or "self.weight.to(" in src:
+        print("[patch] layer_norm.py already casts weight upstream; patch no longer needed")
+        return
     if "weight=self.weight," not in src or "bias=self.bias," not in src:
-        print("[patch] layer_norm.py: expected pattern not found; skipping (version drift?)")
+        # Loud on purpose. This printed quietly for three consecutive runs while
+        # the patch did nothing: it only matters compile-off, and the benchmark
+        # runs competitors compile-on, so nothing failed and nobody looked.
+        print(
+            "[patch] WARNING: layer_norm.py no longer matches the patch target "
+            "(verified against 1.3.0rc18; installed version has moved). The "
+            "eager-mode dtype fix is NOT applied -- trtllm-visual will crash if "
+            "run with TORCH_COMPILE_DISABLE=1. Re-target or retire this patch: "
+            f"{target}"
+        )
         return
     src = src.replace(
         "weight=self.weight,", "weight=self.weight.to(hidden_states.dtype),"

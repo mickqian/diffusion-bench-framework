@@ -109,12 +109,41 @@ python3 -m pip install --upgrade pip wheel setuptools
 
 case "${FRAMEWORK}" in
   vllm-omni)
+    # Upstream's documented flow (vllm-omni docs/getting_started/installation/
+    # gpu/cuda.inc.md): install the matching vLLM minor, then install omni
+    # editable from a clone with uv. Omni's dev line tracks vLLM's -- "the 0.29
+    # development line uses vLLM 0.29.x" -- so a spec that pins them to
+    # different lines cannot resolve.
+    #
+    # The previous recipe pinned pip-freeze constraints from the vLLM install
+    # onto omni's. That froze `tokenizers` at whatever vLLM chose (0.23.2 for
+    # vLLM 0.29.0), while omni's transformers 5.x caps it at <=0.23.0, so pip
+    # reported ResolutionImpossible and the nightly went red. Left to resolve,
+    # uv picks tokenizers 0.22.2 and both are satisfied.
     python3 -m pip install --upgrade --force-reinstall "${VLLM_INSTALL_SPEC:-vllm==0.18.0}"
-    constraints="${VENV_PATH}/vllm_omni_constraints.txt"
-    python3 -m pip freeze \
-      | grep -E '^(llvmlite|numba|numpy|setuptools|tokenizers|torch|torchaudio|torchvision|triton)==' \
-      > "${constraints}"
-    python3 -m pip install --upgrade --force-reinstall -c "${constraints}" "${VLLM_OMNI_INSTALL_SPEC:-vllm-omni==0.18.0}"
+    omni_spec="${VLLM_OMNI_INSTALL_SPEC:-vllm-omni==0.18.0}"
+    if [[ "${omni_spec}" == git+* ]]; then
+      omni_src="${VENV_PATH}/src/vllm-omni"
+      omni_url="${omni_spec#git+}"
+      omni_ref="main"
+      if [[ "${omni_url}" == *"@"* ]]; then
+        omni_ref="${omni_url##*@}"
+        omni_url="${omni_url%@*}"
+      fi
+      rm -rf "${omni_src}"
+      mkdir -p "$(dirname "${omni_src}")"
+      git clone -q --depth 1 --branch "${omni_ref}" "${omni_url}" "${omni_src}" \
+        || git clone -q "${omni_url}" "${omni_src}"
+      ( cd "${omni_src}" && git checkout -q "${omni_ref}" 2>/dev/null || true )
+      echo "vllm-omni source at $(cd "${omni_src}" && git rev-parse --short=12 HEAD)"
+      if command -v uv >/dev/null 2>&1; then
+        VIRTUAL_ENV="${VENV_PATH}" uv pip install -e "${omni_src}"
+      else
+        python3 -m pip install -e "${omni_src}"
+      fi
+    else
+      python3 -m pip install --upgrade --force-reinstall "${omni_spec}"
+    fi
     ;;
   lightx2v)
     python3 -m pip install --upgrade --force-reinstall "${LIGHTX2V_INSTALL_SPEC:-git+https://github.com/ModelTC/LightX2V.git@7efd05f8e1425b83321fd4f1cef779ef6504076f}"
