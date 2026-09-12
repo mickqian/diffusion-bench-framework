@@ -1203,8 +1203,16 @@ def send_request_vllm_omni(base_url: str, case: dict, config: dict) -> float:
             if key in case:
                 data[key] = str(case[key])
         _update_form_data(data, _request_extra(case, "vllm-omni"))
+        # A case may condition on a reference image without setting the
+        # top-level `reference_image`: for sglang, ref2va is selected by a
+        # `conditions[]` entry, and setting `reference_image` would reroute
+        # sglang to its image-conditioned path entirely. So the framework entry
+        # opts in separately -- otherwise vLLM-Omni receives no reference and
+        # answers `ref2va requires at least one image or video reference`,
+        # which reads like an unsupported case rather than a missing argument.
+        fw_entry = (case.get("frameworks") or {}).get("vllm-omni") or {}
         files = None
-        if case.get("reference_image"):
+        if case.get("reference_image") or fw_entry.get("reference_image"):
             files = {
                 "input_reference": (
                     "ref.png",

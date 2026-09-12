@@ -2116,6 +2116,7 @@
                     }
                 },
                 "vllm-omni": {
+                    "reference_image": true,
                     "num_gpus": 2,
                     "serve_args": "--trust-remote-code --tensor-parallel-size 2 --enforce-eager --enable-distributed-layerwise-offload --dlo-no-use-allgather --dlo-resident-layers 20 --diffusion-attention-backend CUDNN_ATTN",
                     "extra_env": {
