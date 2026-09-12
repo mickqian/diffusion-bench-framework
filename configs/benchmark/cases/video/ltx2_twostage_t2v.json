@@ -38,7 +38,7 @@
     },
     "vllm-omni": {
       "status": "supported",
-      "model": "rootonchair/LTX-2-19b-distilled",
+      "model": "Lightricks/LTX-2",
       "num_gpus": 2,
       "serve_args": "--num-gpus 2 --cfg-parallel-size 2",
       "extra_env": {
@@ -71,7 +71,8 @@
             "DIFFUSION_ATTENTION_BACKEND": "FLASH_ATTN"
           }
         }
-      }
+      },
+      "model_override_reason": "Same weights as the case (Lightricks/LTX-2). Previously pointed at rootonchair/LTX-2-19b-distilled, carried over from the pre-JSON config with no rationale: a distilled checkpoint is explicitly lossy, needs far fewer steps, and would have made this cell unfairly fast against sglang and LightX2V on the full model. vLLM-Omni itself refuses it -- 'LTX2Pipeline requires a regular non-distilled LTX checkpoint' -- which is how it surfaced."
     },
     "lightx2v": {
       "status": "supported",

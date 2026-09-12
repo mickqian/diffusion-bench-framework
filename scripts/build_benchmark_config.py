@@ -74,6 +74,31 @@ def _lint_serve_args_shape(cid: str, fw: str, name: str, args: str) -> list[str]
     return errs
 
 
+def _lint_model_override(cid: str, case_model, fw: str, body: dict) -> list[str]:
+    """A framework running different weights needs a stated reason.
+
+    ltx2 handed vLLM-Omni `rootonchair/LTX-2-19b-distilled` while sglang and
+    LightX2V ran the full `Lightricks/LTX-2` -- a distilled checkpoint is
+    explicitly lossy and would have made that cell unfairly fast. It came in
+    with a bulk config migration and no rationale, and survived because nothing
+    checked. Legitimate overrides exist (LightX2V reads Wan's original layout
+    where the others read the Diffusers conversion), so the rule is a stated
+    reason, not a ban.
+    """
+    errs = []
+    seen = {body.get("model")} | {
+        (prof or {}).get("model") for prof in (body.get("command_profiles") or {}).values()
+    }
+    for model in sorted(m for m in seen if m and m != case_model):
+        if not str(body.get("model_override_reason") or "").strip():
+            errs.append(
+                f"{cid}/{fw}: runs {model!r} instead of the case's {case_model!r} "
+                f"with no `model_override_reason` — state why the weights are "
+                f"equivalent, or use the case's model"
+            )
+    return errs
+
+
 def _lint_sglang_policy(cid: str, body: dict) -> list[str]:
     errs = []
     profiles = body.get("command_profiles") or {}
@@ -164,6 +189,7 @@ def build():
                     errors.extend(
                         _lint_serve_args_shape(cid, fw, _pn or "inline", _pf.get("serve_args") or "")
                     )
+                errors.extend(_lint_model_override(cid, c.get("model"), fw, body))
                 if fw == "sglang":
                     policy_errors.extend(_lint_sglang_policy(cid, body))
                 frameworks[fw] = body

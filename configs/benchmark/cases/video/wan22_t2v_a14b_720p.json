@@ -166,7 +166,8 @@
             "cross_attn_2_type": "flash_attn3"
           }
         }
-      }
+      },
+      "model_override_reason": "Same weights, different packaging: LightX2V reads Wan's original checkpoint layout, while sglang and vLLM-Omni read the Diffusers conversion (Wan2.2-T2V-A14B-Diffusers). Equivalent model path, not a different model."
     },
     "trtllm-visual": {
       "status": "not_run",
