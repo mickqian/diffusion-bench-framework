@@ -209,6 +209,16 @@ def build():
 
     _write_matrix(ordered, in_scope)
     print(f"\nOK: {len(ordered)} cases x {len(in_scope)} frameworks fully classified.")
+    # Both copies are rewritten above, so the working tree is always consistent
+    # and `git add configs/` looks complete while silently leaving the packaged
+    # copy -- what an install of the package reads -- behind. That happened ten
+    # times before it was noticed, so say the command here, at the moment of the
+    # mistake. scripts/tests/test_config_copies_in_sync.py is the backstop.
+    print(
+        "\nstage BOTH copies:\n"
+        f"  git add {os.path.relpath(OUT_EDITABLE, REPO)} "
+        f"{os.path.relpath(OUT_PACKAGED, REPO)}"
+    )
 
     _write_selected()
 
