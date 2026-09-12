@@ -14,20 +14,43 @@
 #   nohup bash scripts/devbox_run_cases.sh rebench 0,1 37001 "single_e2e throughput" \
 #       zimage_turbo_t2i_1024 wan21_t2v_1_3b_480p >/dev/null 2>&1 &
 #   tail -f /persistent/logs/run_<tag>.log
+#
+# Layout and run scope are env-overridable, because they were hardcoded to one
+# devbox's paths, to sglang-only and to h100 — so the first box that mounted
+# its state elsewhere (or ran a cross-framework matrix, or was Blackwell) had
+# no way to use this script, which is how hand-rolled per-run bash keeps coming
+# back. Defaults are the original values, so existing invocations are unchanged:
+#   DBF_STATE_DIR=/persistent      DBF_REPO_DIR=$STATE/diffusion-bench-framework
+#   DBF_LOG_DIR=$STATE/logs        DBF_VENV_ROOT=$STATE/fw-venvs
+#   DBF_HF_HOME=$STATE/hf-cache    DBF_HF_TOKEN_FILE=$STATE/.hftoken
+#   DBF_FRAMEWORKS=sglang          DBF_HARDWARE_PROFILE=h100
+#   DBF_CASE_TIMEOUT=3000
 set -u
 
 TAG="${1:?tag}"; GPU_IDS="${2:?gpu ids, e.g. 0,1}"; readonly BASE_PORT="${3:?base port}"
 MODES="${4:?modes, e.g. 'single_e2e throughput'}"; shift 4
 CASES=("$@"); [ "${#CASES[@]}" -gt 0 ] || { echo "no cases" >&2; exit 2; }
 
-LOG="/persistent/logs/run_${TAG}.log"
+STATE_DIR="${DBF_STATE_DIR:-/persistent}"
+REPO_DIR="${DBF_REPO_DIR:-${STATE_DIR}/diffusion-bench-framework}"
+LOG_DIR="${DBF_LOG_DIR:-${STATE_DIR}/logs}"
+HW_PROFILE="${DBF_HARDWARE_PROFILE:-h100}"
+FRAMEWORKS="${DBF_FRAMEWORKS:-sglang}"
+CASE_TIMEOUT="${DBF_CASE_TIMEOUT:-3000}"
+TOKEN_FILE="${DBF_HF_TOKEN_FILE:-${STATE_DIR}/.hftoken}"
+
+mkdir -p "$LOG_DIR"
+LOG="${LOG_DIR}/run_${TAG}.log"
 exec > "$LOG" 2>&1
 
-cd /persistent/diffusion-bench-framework
-export HF_TOKEN="$(cat /persistent/.hftoken)"
-export HF_HOME=/persistent/hf-cache
+cd "$REPO_DIR"
+# Only override the ambient token when a token file exists: `HF_TOKEN=$(cat
+# missing-file)` exports an EMPTY token, which silently replaces a working
+# login with an anonymous one and turns gated models into 401s.
+[ -r "$TOKEN_FILE" ] && export HF_TOKEN="$(cat "$TOKEN_FILE")"
+export HF_HOME="${DBF_HF_HOME:-${STATE_DIR}/hf-cache}"
 export SGLANG_DIFFUSION_SKIP_FRAMEWORK_INSTALL=1
-export SGLANG_DIFFUSION_FRAMEWORK_VENV_ROOT=/persistent/fw-venvs
+export SGLANG_DIFFUSION_FRAMEWORK_VENV_ROOT="${DBF_VENV_ROOT:-${STATE_DIR}/fw-venvs}"
 export DIFFUSION_BENCH_DISABLE_TORCH_COMPILE=0
 export PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True
 
@@ -43,19 +66,20 @@ kill_own_gpus() {
 }
 
 echo "=== RUN $TAG START $(date -u) cases=[${CASES[*]}] modes=[$MODES] gpus=$GPU_IDS ==="
+echo "=== repo=$REPO_DIR hw=$HW_PROFILE frameworks=$FRAMEWORKS venvs=$SGLANG_DIFFUSION_FRAMEWORK_VENV_ROOT hf=$HF_HOME ==="
 port="$BASE_PORT"
 for case_id in "${CASES[@]}"; do
     kill_own_gpus
-    CUDA_VISIBLE_DEVICES="$GPU_IDS" PYTHONPATH=src timeout 3000 \
+    CUDA_VISIBLE_DEVICES="$GPU_IDS" PYTHONPATH=src timeout "$CASE_TIMEOUT" \
         python3 -m diffusion_bench.run_comparison \
         --config configs/comparison_configs.json \
-        --frameworks sglang --case-ids "$case_id" --modes $MODES \
-        --hardware-profile h100 --port "$port" \
-        --output "/persistent/logs/run_${TAG}_${case_id}.json" \
-        > "/persistent/logs/run_${TAG}_${case_id}.runlog" 2>&1
+        --frameworks $FRAMEWORKS --case-ids "$case_id" --modes $MODES \
+        --hardware-profile "$HW_PROFILE" --port "$port" \
+        --output "${LOG_DIR}/run_${TAG}_${case_id}.json" \
+        > "${LOG_DIR}/run_${TAG}_${case_id}.runlog" 2>&1
     rc=$?
     kill_own_gpus
-    summary=$(grep -hE 'req/s|single_e2e' "/persistent/logs/run_${TAG}_${case_id}.runlog" 2>/dev/null | tail -2 | tr '\n' ' ')
+    summary=$(grep -hE 'req/s|single_e2e' "${LOG_DIR}/run_${TAG}_${case_id}.runlog" 2>/dev/null | tail -2 | tr '\n' ' ')
     echo "RESULT $case_id rc=$rc $summary"
     port=$((port + 1))
 done
