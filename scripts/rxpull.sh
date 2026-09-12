@@ -33,9 +33,21 @@ name="$(basename "$REMOTE")"
 
 # Manifest first: if the remote path is missing or empty, fail before transfer
 # rather than "succeeding" with nothing.
+# Snapshot on the box first. Pulling a directory a run is still writing to
+# makes tar fail ("Truncated tar archive" -- the file grew mid-read) and would
+# make the md5 manifest disagree with the bytes that arrived even when nothing
+# is wrong. Copy once, then read the manifest AND the tar from that copy, so
+# the two always describe the same bytes.
+snap="/tmp/.rxpull-$$-$(date +%s)"
+cleanup_remote() { "${SSH[@]}" "rm -rf '$snap'" >/dev/null 2>&1 || true; }
+if ! "${SSH[@]}" "mkdir -p '$snap' && cp -a '$REMOTE' '$snap/'" 2>/dev/null; then
+    echo "rxpull: cannot snapshot $REMOTE on $BOX (missing path?)" >&2
+    exit 1
+fi
+
 manifest="$(mktemp)"
-trap 'rm -f "$SSH_CFG" "$manifest"' EXIT
-if ! "${SSH[@]}" "cd '$parent' && find '$name' -type f -print0 | xargs -0 -r md5sum" > "$manifest" 2>/dev/null; then
+trap 'rm -f "$SSH_CFG" "$manifest"; cleanup_remote' EXIT
+if ! "${SSH[@]}" "cd '$snap' && find '$name' -type f -print0 | xargs -0 -r md5sum" > "$manifest" 2>/dev/null; then
     echo "rxpull: cannot list $REMOTE on $BOX" >&2
     exit 75
 fi
@@ -47,7 +59,7 @@ fi
 echo "rxpull: $want file(s) to fetch from $BOX:$REMOTE"
 
 mkdir -p "$DEST"
-if ! "${SSH[@]}" "cd '$parent' && tar -cf - '$name'" | tar -xf - -C "$DEST"; then
+if ! "${SSH[@]}" "cd '$snap' && tar -cf - '$name'" | tar -xf - -C "$DEST"; then
     echo "rxpull: transfer failed" >&2
     exit 75
 fi
