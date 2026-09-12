@@ -40,6 +40,50 @@ def _dump(path: Path, data: dict) -> None:
     path.write_text(json.dumps(data, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
 
 
+
+def _policy_block(merged: dict, args) -> dict:
+    """What this run actually did, rebuilt per publication.
+
+    Only the invariants are hardcoded; anything run-specific is derived or
+    passed in with --note, so a caveat cannot outlive the run it describes.
+    """
+    compile_off = bool(merged.get("torch_compile_disabled"))
+    policy = {
+        "latency_source": (
+            "client-side wall clock, steady-state median of back-to-back "
+            "measured requests after warmup; server-side timers kept only as "
+            "per-framework diagnostics"
+        ),
+        "selection": (
+            "best lossless profile per case for the hardware this ran on "
+            "(see each row's profile; configs/benchmark/SELECTED.md lists what "
+            "the harness selects)"
+        ),
+        "cache": "no response cache, no Cache-DiT, no quantized checkpoints",
+        "torch_compile": (
+            "OFF for every framework"
+            if compile_off
+            else "ON for the competitors; sglang runs compile-off by policy "
+            "(its fused kernels match or beat compiler fusion, measured)"
+        ),
+        "attention": (
+            "each framework runs its fastest exact-precision attention; no "
+            "quantized or approximate substitution"
+        ),
+        "version_policy": (
+            "latest-vs-latest: sglang runs origin/main HEAD, every competitor "
+            "runs its newest main/release line (no pinned snapshots)"
+        ),
+    }
+    revisions = merged.get("model_revisions") or {}
+    if revisions:
+        policy["model_revisions"] = {k: str(v)[:9] for k, v in sorted(revisions.items())}
+    for note in args.note:  # validated in main()
+        key, _, text = note.partition("=")
+        policy[key.strip()] = text.strip()
+    return policy
+
+
 def main() -> int:
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--merged", required=True, type=Path, help="merged artifact from build_report_artifacts")
@@ -60,8 +104,23 @@ def main() -> int:
         required=True,
         help="repo-relative path of the script that actually produced this run",
     )
+    ap.add_argument(
+        "--note",
+        action="append",
+        default=[],
+        metavar="KEY=TEXT",
+        help="run-specific caveat for the published policy block, repeatable",
+    )
     ap.add_argument("--dry-run", action="store_true")
     args = ap.parse_args()
+
+    # Validate --note here, not where the policy block is built: that happens
+    # after the --dry-run return, so a malformed note survived every rehearsal
+    # and only failed on the real publish.
+    for note in args.note:
+        if "=" not in note or not note.partition("=")[2].strip():
+            print(f"error: --note must be KEY=TEXT, got {note!r}", file=sys.stderr)
+            return 1
 
     if not (ROOT / args.reproduce).exists():
         print(
@@ -137,6 +196,14 @@ def main() -> int:
         latest["title"] = args.label
         latest["hardware"] = {"label": args.gpu}
         latest["frameworks"] = dict(FRAMEWORK_LABELS)
+        # Rebuild the policy block instead of inheriting it. It carries
+        # run-specific prose (a bimodal-latency note from July, a harness bug
+        # fixed in July, an h100-specific "selection" line) that publishing
+        # silently carried into every later run -- and its torch_compile line
+        # still claimed compile was ENABLED for every framework, months after
+        # sglang moved to compile-off. A stale policy block misdescribes the
+        # numbers underneath it.
+        latest["policy"] = _policy_block(merged, args)
         latest["sections"] = sections
         latest["updated_at"] = date_cls.today().isoformat()
         _dump(LATEST, latest)
