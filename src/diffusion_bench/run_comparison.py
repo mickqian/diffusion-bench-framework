@@ -1998,12 +1998,29 @@ def run_single_request(
         median_server = statistics.median(server_lats)
         metrics["server_latency_s"] = round(median_server, 3)
         metrics["client_overhead_s"] = round(median_client - median_server, 3)
-    # A framework whose repeated measured latencies do not converge (e.g. an
-    # intermittent idle/scheduler stall) has no trustworthy single number: flag
-    # it and keep the raw samples so the report marks it anomalous, not fast.
+    # Always keep the raw samples and how far apart they are. A median summarises
+    # a distribution it does not describe, and on the short image cases the
+    # difference is the whole story: sglang's repeats spread 45-63% on B200
+    # (zimage 0.47-0.68s, qwen 2.66-4.27s) while every competitor sits at
+    # 0.3-2%. Reading only the medians there says "sglang is 3-7% slower"; the
+    # samples say sglang's fast mode is FASTER than the competitor's median and
+    # its distribution has a slow tail. Without the samples that is invisible.
+    if repeats >= 2 and min(client_lats) > 0:
+        metrics["latency_samples_s"] = [round(x, 3) for x in client_lats]
+        metrics["latency_spread_pct"] = round(
+            (max(client_lats) - min(client_lats)) / min(client_lats) * 100, 1
+        )
+        # Dispersed != untrustworthy: a bimodal framework really does produce
+        # both modes, so the median still means something and is still
+        # published. This only tells the reader to look at the samples.
+        if metrics["latency_spread_pct"] >= 25.0:
+            metrics["latency_dispersed"] = True
+    # A framework whose repeated measured latencies do not converge AT ALL (e.g.
+    # an intermittent idle/scheduler stall) has no trustworthy single number:
+    # flag it so the report marks it anomalous rather than fast, and withholds
+    # the value.
     if repeats >= 3 and min(client_lats) > 0 and max(client_lats) / min(client_lats) >= 3.0:
         metrics["latency_unstable"] = True
-        metrics["latency_samples_s"] = [round(x, 3) for x in client_lats]
     result["metrics"] = metrics
     return result
 
