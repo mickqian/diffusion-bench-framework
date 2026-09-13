@@ -32,6 +32,8 @@ once, and the improvised version had bugs the checked-in one does not.
 | Upgrade an EXISTING venv | `scripts/upgrade_framework_stack.sh <fw> [pkg ...]` | For a reused box, where reinstalling means another flash-attn source build. Aborts if torch moved (the compiled attention extensions are built against it) and health-checks before you measure. Re-measure every cell that framework appears in. |
 | Run the matrix | `scripts/run_b200_cross_framework_20260912.sh` (case list) via a dated wrapper like `scripts/run_b200_final_20260913.sh` (settings) | Keep the wrapper in the repo -- `publish_bench_run.py --reproduce` is existence-checked, and pointing it at the case list alone documents half the run. |
 | Compare serve-arg variants | `scripts/tune_sglang_serve_args.sh <case> <rounds> 'tag=args' ...` | Interleaved rounds, clears the cards between arms, echoes the FULL served command (extra args APPEND, so a repeated flag relies on last-wins). Found Cosmos3 T2I's 25%. |
+| Ask what the tuning is worth | `scripts/run_profile_vs_default.sh` (`PVD_ONLY=residency` isolates residency) | Interleaves the pinned profile against a config with the sglang tuning flags stripped, so "how much does our tuning buy over the runtime's own choice" is measured rather than asserted. `scripts/compare_profile_vs_default.py` does the stripping and prints any flag it cannot classify -- that print is how six residency flags were found. |
+| Serialise GPU jobs | `scripts/gpu_job_lock.sh` | `source` it, then `gpu_lock_acquire`. Mandatory for anything that clears the cards; see **Two jobs on one box**. |
 | Ask what a measurement costs | `scripts/probe_perfdump_cost_20260913.sh` | One server, the variable toggled request-by-request. Template for "does X cost anything": hold everything else constant in one process rather than comparing runs. |
 | Ask where a spread comes from | `scripts/probe_zimage_bimodality_20260913.sh` | Records client AND server time per request, splits at the midpoint between modes. |
 | Ask how often it happens | `scripts/probe_zimage_across_instances_20260913.sh` | Restarts the server N times. Needed when the thing that varies is the instance, not the request -- more repeats inside one instance cannot see it. |
@@ -157,6 +159,29 @@ Also record p95 latency when available. For very fast image cases, run multiple 
 For high-pressure cross-framework throughput reports, prefer cases supported by every framework in scope. It is fine to include one or two video cases, but use a smaller request/concurrency budget than fast image cases and keep the image/video budgets explicit in the reproduce script.
 
 Use `py-spy` only for diagnosis, not as part of the benchmark timing path.
+
+### Two jobs on one box
+
+A devbox has one set of cards, and several of these scripts open with
+`nvidia-smi --query-compute-apps=pid ... | xargs kill -9`. A second job that walks
+past the first does not merely add noise -- it kills the first job's server, which
+surfaces as `sglang server exited before health check passed (exit -9)`: a failure
+that reads as sglang's and is not. Both runs then have to be discarded.
+
+- Take the lock: `source scripts/gpu_job_lock.sh; gpu_lock_acquire`. It is a
+  `mkdir` mutex (atomic), releases only when the pid file still names you, and
+  reclaims a lock whose owner is gone.
+- Release must be ownership-checked. An unconditional `rm -rf` in the EXIT trap
+  deleted whatever lock existed when a job was killed -- including the one its
+  successor already held -- and the next starter walked straight in.
+- **Never synchronise on a process name.** It failed three ways in one round:
+  `rxrun.sh` retries re-launched a detached job; `pgrep -fc <path>` also matched
+  the launching `bash -c`; and a waiter ending in `exec` had its argv replaced, so
+  the predicate went to zero and the next job started concurrently.
+- The same trap outlives the fix in the *monitoring* layer. Count what `ps` shows
+  AFTER an `exec` -- or better, read the job's log, where `gpu-lock: waiting for
+  <job>` cannot be confused by a replaced argv. A process-count monitor reported a
+  live job dead, and later reported two instances where exactly one was running.
 
 ## Failure Classification
 
