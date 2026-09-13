@@ -75,17 +75,22 @@ wait $D $E 2>/dev/null
 # job that had legitimately taken the lock behind it.
 # G's own run is short enough that the window below outlasts it: if the signal
 # only released the lock and let the script continue, "G done" would be there.
-bash "$TMP/job.sh" G 4 > "$TMP/g.out" 2>&1 &
+# Timing has to leave room on both sides. bash only runs the handler when the
+# current `sleep 1` returns, so checking one second after the signal is a
+# coin-flip under load -- it passed alone and failed in the full suite. G now
+# runs long enough that "still alive" cannot mean "finished normally", and the
+# marker check waits past the end it would have had.
+bash "$TMP/job.sh" G 10 > "$TMP/g.out" 2>&1 &
 G=$!
 sleep 1
 bash "$TMP/job.sh" H 3 > "$TMP/h.out" 2>&1 &
 H=$!
 sleep 1
-kill -TERM $G 2>/dev/null           # t=2; G would finish on its own at t=4
-sleep 1                              # t=3: still inside G's own run
+kill -TERM $G 2>/dev/null           # t=2; G would run until t=10 on its own
+sleep 3                              # t=5: handler has had 3s, G has 5s left
 kill -0 $G 2>/dev/null; rc=$?
 [ "$rc" != 0 ]; check "a TERM'd holder actually exits" $? "pid $G still alive"
-sleep 5                              # t=8: well past G's own end
+sleep 8                              # t=13: past G's own end
 grep -q "G done" "$TMP/g.out"; rc2=$?
 [ "$rc2" != 0 ]; check "and does not run on past the signal" $? "$(cat "$TMP/g.out" 2>/dev/null | tr '\n' ' ')"
 wait $H 2>/dev/null
