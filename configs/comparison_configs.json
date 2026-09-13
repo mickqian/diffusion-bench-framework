@@ -1403,7 +1403,7 @@
             },
             "report_framework_reasons": {
                 "vllm-omni": "No compatible vLLM-Omni LTX2.3 serving profile is configured.",
-                "lightx2v": "OOM on H100 80GB: LTX-2.3 22B two-stage 121-frame t2av peak exceeds 80GB even with every lossless lever (seq_p_size=2 activation sharding + block cpu_offload + Gemma/VAE offload + exact flash_attn3). Upstream profiles target H200 141GB. command_profiles below are the best-attempted lossless config, kept for provenance.",
+                "lightx2v": "OOM on H100 80GB: LTX-2.3 22B two-stage 121-frame t2av peak exceeds 80GB even with every lossless lever (seq_p_size=2 activation sharding + block cpu_offload + Gemma/VAE offload + exact flash_attn3). Upstream profiles target H200 141GB. THIS VERDICT IS H100-SPECIFIC AND IS BEING APPLIED GLOBALLY -- `status` has no per-hardware form, so the cell is skipped everywhere, including the 4xB200 box (183359 MiB/GPU, ~179GB) where the stated constraint does not hold and upstream's own H200 target is exceeded. Retest on Blackwell before trusting the classification; if it runs, `status` needs a per-hardware form before this can be flipped, or H100 runs will spend ~40 min per attempt re-discovering the OOM. command_profiles below are the best-attempted lossless config, kept for provenance.",
                 "trtllm-visual": "Not yet classified. Confirm framework support and add a validated command profile, or mark unsupported."
             }
         },
