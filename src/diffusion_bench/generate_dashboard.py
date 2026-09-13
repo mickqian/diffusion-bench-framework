@@ -122,6 +122,26 @@ def _fmt_latency(val: float | None) -> str:
     return f"{val:.2f}"
 
 
+def _dispersed_cases(run_data: dict) -> dict[tuple[str, str], list[float]]:
+    """{(case, framework): samples} for repeats that spread far apart.
+
+    The harness flags these and publishes the median anyway, because a framework
+    that really produces two modes produces both -- the median means something,
+    it just does not describe the distribution. That only helps if the reader is
+    told, so the dashboard marks the cell and prints the samples underneath.
+    """
+    out: dict[tuple[str, str], list[float]] = {}
+    for r in run_data.get("results", []) or []:
+        metrics = r.get("metrics") or {}
+        # `latency_unstable` is withheld and explained elsewhere; this is the
+        # weaker flag, where the number stands but the spread is worth seeing.
+        if metrics.get("latency_dispersed") and not metrics.get("latency_unstable"):
+            out[(r.get("case_id"), r.get("framework"))] = (
+                metrics.get("latency_samples_s") or []
+            )
+    return out
+
+
 def _fmt_speedup(sglang_lat: float | None, other_lat: float | None) -> str:
     if sglang_lat is None or other_lat is None or sglang_lat <= 0:
         return "N/A"
@@ -275,6 +295,8 @@ def generate_dashboard(
 
     current_cases = _extract_case_results(current)
     case_ids = list(current_cases.keys())
+    dispersed = _dispersed_cases(current)
+    dispersed_notes: list[str] = []
 
     # ---- Regression detection ----
     REGRESSION_THRESHOLD = 0.05  # 5%
@@ -352,14 +374,29 @@ def generate_dashboard(
         min_lat = min(valid_lats) if valid_lats else None
         for fw in all_frameworks:
             lat = lats[fw]
+            mark = " ~" if (cid, fw) in dispersed else ""
             if lat is not None and min_lat is not None and lat == min_lat:
-                row += f" **{_fmt_latency(lat)}** |"
+                row += f" **{_fmt_latency(lat)}**{mark} |"
             else:
-                row += f" {_fmt_latency(lat)} |"
+                row += f" {_fmt_latency(lat)}{mark} |"
         # Speedup columns
         for ofw in other_frameworks:
             row += f" {_fmt_speedup(sg_lat, case_fws.get(ofw))} |"
         lines.append(row)
+        for fw in all_frameworks:
+            samples = dispersed.get((cid, fw))
+            if samples:
+                dispersed_notes.append(
+                    f"- `{cid}` / **{fw}**: repeats spread "
+                    f"{(max(samples) - min(samples)) / min(samples) * 100:.0f}% "
+                    "(" + ", ".join(f"{s:g}s" for s in samples) + ") — "
+                    "median published; the distribution is wider than it"
+                )
+
+    if dispersed_notes:
+        lines.append("\n`~` = the repeats behind this median spread 25% or more:\n")
+        lines.extend(dispersed_notes)
+        lines.append("")
 
     throughput_cases = _extract_throughput_results(current)
     if throughput_cases:
