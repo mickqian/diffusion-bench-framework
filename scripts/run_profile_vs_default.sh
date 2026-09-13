@@ -113,7 +113,7 @@ done
 
 echo "=== SUMMARY ==="
 python3 - "${DBF_LOG_DIR}" "${ROUNDS}" "pvd${PVD_TAG_SUFFIX:-}" "${CASES[@]}" <<'PY'
-import json, os, statistics, sys
+import json, os, re, statistics, sys
 log_dir, rounds, prefix = sys.argv[1], int(sys.argv[2]), sys.argv[3]
 cases = sys.argv[4:]
 
@@ -130,6 +130,21 @@ def med(case_id, arm):
             vals.append(float(row["latency_s"]))
     return statistics.median(vals) if vals else None, vals
 
+def served(case_id, arm):
+    """The command an arm actually ran, minus the port, which always differs."""
+    try:
+        text = open(os.path.join(log_dir, f"{prefix}_{case_id}_{arm}_1.runlog"),
+                    errors="ignore").read()
+    except OSError:
+        return None
+    m = re.search(r"sglang serve .*", text)
+    if not m:
+        return None
+    toks = m.group(0).split()
+    return [t for i, t in enumerate(toks)
+            if t != "--port" and (i == 0 or toks[i - 1] != "--port")]
+
+
 print(f"  {'case':34s} {'profile':>9s} {'default':>9s} {'delta':>9s}  verdict")
 for case_id in cases:
     p, pv = med(case_id, "profile")
@@ -139,7 +154,23 @@ for case_id in cases:
               f"(profile {len(pv)}, default {len(dv)} round(s))")
         continue
     delta = (d - p) / p * 100
-    if abs(delta) < 3:
+    # An arm that stripped nothing is not a comparison, it is the same command
+    # run twice -- so its spread measures this box, not the pin. Saying "THE PIN
+    # IS HARMING" about a pin that was never removed is how a 14.9% bimodal flip
+    # got reported as a finding.
+    a, b = served(case_id, "profile"), served(case_id, "default")
+    if a is not None and a == b:
+        print(f"  {case_id:34s} {p:9.3f} {d:9.3f} {delta:+8.1f}%  CONTROL: the arms "
+              f"are the same command, so this is the noise floor, not an effect")
+        continue
+    # Under 5% the paired per-round diffs have to agree in sign; a median alone
+    # cannot tell a small effect from one slow instance.
+    pairs = [x - y for x, y in zip(dv, pv)]
+    mixed = len(pairs) > 1 and not (all(x > 0 for x in pairs) or all(x < 0 for x in pairs))
+    if abs(delta) < 5 and mixed:
+        v = (f"within noise -- paired diffs disagree in sign "
+             f"({', '.join(f'{x:+.3f}' for x in pairs)})")
+    elif abs(delta) < 3:
         v = "the pin earns nothing -- drop it, let the runtime adapt"
     elif delta > 0:
         v = f"auto-selection is {delta:.0f}% behind the pin -- a real sglang gap"
