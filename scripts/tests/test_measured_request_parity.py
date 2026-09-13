@@ -10,16 +10,20 @@ server for a per-stage performance dump. No competitor's send path even accepts
 the argument. That asymmetry is what this test pins, and it is reason enough to
 move the dump regardless of what it costs.
 
-What it costs is a separate question, and not one five samples can answer:
+What it costs was measured, 40 requests per arm interleaved against one zimage
+server (scripts/probe_perfdump_cost_20260913.sh):
 
-    zimage sglang,    measured, dump on  : 0.695, 0.478, 0.474, 0.472, 0.473
-    zimage sglang,    warmup,   dump off : 0.523, 0.471, 0.472
-    zimage vllm-omni, warmup,   dump off : 0.485, 0.690, 0.489, 0.484
+    no perf dump    n=40  p50=0.468  max=0.629   outliers at positions 13, 17
+    with perf dump  n=40  p50=0.474  max=0.702   outlier  at position  0
 
-The first line looks like the dump's one-time setup landing on request 1 -- but
-the third is the same outlier with no dump, in a different framework, on the
-same case minutes later. The dump is still collected (it is how the client-side
-read stall was caught), in its own request outside the window.
++233ms on the first request that asks for the dump -- the only outlier in that
+arm, exactly where a lazily-built communicator would put it -- and +6.3ms
+(+1.35%) on every one after, which sglang was paying on every measured request.
+The residual jitter (2 in 40 at +21% and +34%, with no dump at all) is the box,
+not the framework: vLLM-Omni shows the same shape here.
+
+The dump is still collected -- it is how the client-side read stall was caught
+-- in its own request outside the window.
 """
 import ast
 import sys

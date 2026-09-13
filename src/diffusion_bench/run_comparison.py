@@ -2072,17 +2072,21 @@ def run_single_request(
     # They used to carry `perf_dump_path`, which asks the sglang server to
     # collect a per-stage performance dump -- a request shape NO competitor was
     # ever given (their send paths do not even accept the argument), inside the
-    # window whose wall clock is the cross-framework metric. That asymmetry is
-    # reason enough to move it, whatever it costs.
+    # window whose wall clock is the cross-framework metric.
     #
-    # It is NOT established that it costs much. zimage's measured samples were
-    # 0.695, 0.478, 0.474, 0.472, 0.473 against uninstrumented warmups of the
-    # same shape at 0.471, 0.472, which looks like the dump's one-time setup
-    # landing on request 1 -- but vLLM-Omni's uninstrumented warmups on the same
-    # case minutes later were 0.485, 0.69, 0.489, 0.484. Same outlier, no dump,
-    # different framework. Five samples cannot separate the two explanations;
-    # scripts/probe_perfdump_cost_20260913.sh measures it with the dump toggled
-    # request-by-request against one server.
+    # Measured, 40 requests per arm interleaved against one zimage server
+    # (scripts/probe_perfdump_cost_20260913.sh): asking for the dump costs
+    # +233ms on the FIRST request that asks (0.702s against a 0.474s p50 -- the
+    # only outlier in that arm, at position 0) and +6.3ms, +1.35%, on every one
+    # after. sglang pays it because the dump triggers a replica-group all_reduce
+    # in the worker's peak-memory recording, whose communicator is otherwise
+    # unused on the request path, so the first call builds it.
+    #
+    # That is the "sglang variance" on the short image cases: a 47% spread that
+    # was one instrumented request. What remains is not sglang's either -- the
+    # uninstrumented arm still produced 2 outliers in 40 at +21% and +34%, and
+    # vLLM-Omni shows the same on this box (0.690 among 0.485s warmups, 0.852
+    # among 0.66s measurements). That jitter is environmental and hits everyone.
     client_lats: list[float] = []
     server_lats: list[float] = []
     for i in range(1, repeats + 1):
