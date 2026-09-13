@@ -7,16 +7,19 @@ one framework to do inside that window is charged to that framework alone.
 It was charging sglang. `run_single_request` passed `perf_dump_path` on every
 measured request when (and only when) the framework was sglang, which asks the
 server for a per-stage performance dump. No competitor's send path even accepts
-the argument. Warmups did not pass it, so the cost -- a one-time initialisation
--- landed entirely on the FIRST measured request, and that is the whole of the
-"sglang variance" on the short image cases:
+the argument. That asymmetry is what this test pins, and it is reason enough to
+move the dump regardless of what it costs.
 
-    zimage sglang, 4xB200, measured : 0.695, 0.478, 0.474, 0.472, 0.473  (47.3%)
-    zimage sglang, same shape, warm : 0.523, 0.471, 0.472                (uninstrumented)
+What it costs is a separate question, and not one five samples can answer:
 
-The samples after the first match the uninstrumented warmups to within 1%. The
-dump is still collected -- it is how the client-side read stall was caught --
-but in its own request, outside the window.
+    zimage sglang,    measured, dump on  : 0.695, 0.478, 0.474, 0.472, 0.473
+    zimage sglang,    warmup,   dump off : 0.523, 0.471, 0.472
+    zimage vllm-omni, warmup,   dump off : 0.485, 0.690, 0.489, 0.484
+
+The first line looks like the dump's one-time setup landing on request 1 -- but
+the third is the same outlier with no dump, in a different framework, on the
+same case minutes later. The dump is still collected (it is how the client-side
+read stall was caught), in its own request outside the window.
 """
 import ast
 import sys

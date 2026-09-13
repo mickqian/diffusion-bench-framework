@@ -2071,12 +2071,18 @@ def run_single_request(
     # The measured requests are identical to what every other framework is sent.
     # They used to carry `perf_dump_path`, which asks the sglang server to
     # collect a per-stage performance dump -- a request shape NO competitor was
-    # ever given, inside the window whose wall clock is the cross-framework
-    # metric. Its cost is a one-time initialisation, so it landed entirely on
-    # the first measured request and produced the "sglang variance": zimage's
-    # measured samples were 0.695, 0.478, 0.474, 0.472, 0.473 while the
-    # (uninstrumented) warmups of the same shape had already settled at 0.471,
-    # 0.472 -- a 47% spread that was our instrumentation, not sglang.
+    # ever given (their send paths do not even accept the argument), inside the
+    # window whose wall clock is the cross-framework metric. That asymmetry is
+    # reason enough to move it, whatever it costs.
+    #
+    # It is NOT established that it costs much. zimage's measured samples were
+    # 0.695, 0.478, 0.474, 0.472, 0.473 against uninstrumented warmups of the
+    # same shape at 0.471, 0.472, which looks like the dump's one-time setup
+    # landing on request 1 -- but vLLM-Omni's uninstrumented warmups on the same
+    # case minutes later were 0.485, 0.69, 0.489, 0.484. Same outlier, no dump,
+    # different framework. Five samples cannot separate the two explanations;
+    # scripts/probe_perfdump_cost_20260913.sh measures it with the dump toggled
+    # request-by-request against one server.
     client_lats: list[float] = []
     server_lats: list[float] = []
     for i in range(1, repeats + 1):
