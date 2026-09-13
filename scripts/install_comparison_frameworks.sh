@@ -41,7 +41,7 @@ write_desired_stamp() {
         ;;
       lightx2v)
         echo "lightx2v_install_spec=${LIGHTX2V_INSTALL_SPEC:-git+https://github.com/ModelTC/LightX2V.git@7efd05f8e1425b83321fd4f1cef779ef6504076f}"
-        echo "lightx2v_transformers_install_spec=${LIGHTX2V_TRANSFORMERS_INSTALL_SPEC:-transformers<5}"
+        echo "lightx2v_transformers_install_spec=${LIGHTX2V_TRANSFORMERS_INSTALL_SPEC:-<unset: latest, as LightX2V itself declares>}"
         echo "lightx2v_safetensors_install_spec=${LIGHTX2V_SAFETENSORS_INSTALL_SPEC:-safetensors>=0.8.0rc0}"
         echo "lightx2v_flash_attn_install_spec=${LIGHTX2V_FLASH_ATTN_INSTALL_SPEC:-flash-attn==2.8.3}"
         echo "lightx2v_flash_attn3_install_spec=${LIGHTX2V_FLASH_ATTN3_INSTALL_SPEC:-}"
@@ -147,7 +147,21 @@ case "${FRAMEWORK}" in
     ;;
   lightx2v)
     python3 -m pip install --upgrade --force-reinstall "${LIGHTX2V_INSTALL_SPEC:-git+https://github.com/ModelTC/LightX2V.git@7efd05f8e1425b83321fd4f1cef779ef6504076f}"
-    python3 -m pip install --upgrade --force-reinstall "${LIGHTX2V_TRANSFORMERS_INSTALL_SPEC:-transformers<5}"
+    # LightX2V pins neither transformers nor diffusers, so "LightX2V latest" is
+    # whatever pip resolves today. Our own `transformers<5` pin (added
+    # 2026-05-13 for an LTX model-resolution problem) broke that: transformers
+    # 4.x caps huggingface_hub<1.0, diffusers 0.40 needs hub>=1.23, so every
+    # `diffusers.pipelines.*` import raised ImportError. LightX2V's flux2
+    # scheduler imports three names from diffusers in ONE try block, so the two
+    # pipeline imports failing took the scheduler down with them -- it became
+    # None and flux2 died at `NoneType.from_pretrained`, published as a failed
+    # cell. Verified on the latest consistent set (transformers 5.17,
+    # diffusers 0.40, hub 1.31): flux2's scheduler resolves and all 39 runner
+    # modules import, ltx2 and wan included. Override the spec to reproduce a
+    # dated historical report; leave it unset for a fresh latest-vs-latest run.
+    if [[ -n "${LIGHTX2V_TRANSFORMERS_INSTALL_SPEC:-}" ]]; then
+      python3 -m pip install --upgrade --force-reinstall "${LIGHTX2V_TRANSFORMERS_INSTALL_SPEC}"
+    fi
     python3 -m pip install --upgrade --pre --upgrade-strategy only-if-needed "${LIGHTX2V_SAFETENSORS_INSTALL_SPEC:-safetensors>=0.8.0rc0}"
     python3 -m pip install --upgrade ninja packaging matplotlib
     # flash-attn is a source build here (~70 translation units x 4 GPU archs --
