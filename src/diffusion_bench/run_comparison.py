@@ -1925,6 +1925,11 @@ WARMUP_EXTRA_MAX = 4
 # request does not (and those already converge).
 WARMUP_EXTRA_BUDGET_S = 120.0
 
+# sglang's server-side perf dump is collected in its own request, after the
+# measured window. Above this, one extra request costs more than the annotation
+# is worth and it is skipped with a recorded reason.
+PERF_DUMP_MAX_S = 120.0
+
 
 def _run_warmups(
     base_url: str,
@@ -2063,24 +2068,54 @@ def run_single_request(
     default_repeats = single_cfg.get("video_repeats", 2) if is_video else single_cfg.get("image_repeats", 5)
     repeats = max(1, int(single_cfg.get("measured_repeats", default_repeats) or 1))
 
-    perf_dump_path = None
-    if framework == "sglang":
-        perf_dump_path = os.path.join(str(log_dir), f"perf_{case['id']}_measured.json")
-
+    # The measured requests are identical to what every other framework is sent.
+    # They used to carry `perf_dump_path`, which asks the sglang server to
+    # collect a per-stage performance dump -- a request shape NO competitor was
+    # ever given, inside the window whose wall clock is the cross-framework
+    # metric. Its cost is a one-time initialisation, so it landed entirely on
+    # the first measured request and produced the "sglang variance": zimage's
+    # measured samples were 0.695, 0.478, 0.474, 0.472, 0.473 while the
+    # (uninstrumented) warmups of the same shape had already settled at 0.471,
+    # 0.472 -- a 47% spread that was our instrumentation, not sglang.
     client_lats: list[float] = []
     server_lats: list[float] = []
     for i in range(1, repeats + 1):
-        if perf_dump_path and os.path.exists(perf_dump_path):
-            os.remove(perf_dump_path)
         print(f"  Sending measured single request ({i}/{repeats})...")
-        latency = send_request(
-            base_url, case, framework, config, perf_dump_path=perf_dump_path
-        )
+        latency = send_request(base_url, case, framework, config)
         client_lats.append(latency.client_s)
         if latency.server_s is not None:
             server_lats.append(latency.server_s)
 
     median_client = statistics.median(client_lats)
+
+    # Collect the server-side breakdown OUTSIDE the measured window, in one
+    # extra request. It stays a per-framework diagnostic (it is how the
+    # client-side read stall was caught -- server timing flat at 0.36s while
+    # the client varied 45%), it just no longer taxes the number it annotates.
+    # Skipped when a whole extra request is too expensive to spend on an
+    # annotation; the reason is recorded so its absence is not a mystery.
+    perf_dump_note = None
+    if framework == "sglang":
+        if median_client > PERF_DUMP_MAX_S:
+            perf_dump_note = (
+                f"skipped: one extra {median_client:.0f}s request is too much to "
+                f"spend on an annotation (limit {PERF_DUMP_MAX_S:.0f}s)"
+            )
+            print(f"  Server-side perf dump {perf_dump_note}")
+        else:
+            perf_dump_path = os.path.join(str(log_dir), f"perf_{case['id']}_measured.json")
+            if os.path.exists(perf_dump_path):
+                os.remove(perf_dump_path)
+            print("  Sending one unmeasured request for the server-side breakdown...")
+            try:
+                diag = send_request(
+                    base_url, case, framework, config, perf_dump_path=perf_dump_path
+                )
+                if diag.server_s is not None:
+                    server_lats.append(diag.server_s)
+            except Exception as e:
+                perf_dump_note = f"failed: {e}"
+                print(f"  Server-side perf dump {perf_dump_note}")
     result["latency_s"] = round(median_client, 3)
     metrics = {
         "client_latency_s": round(median_client, 3),
@@ -2092,6 +2127,8 @@ def run_single_request(
         median_server = statistics.median(server_lats)
         metrics["server_latency_s"] = round(median_server, 3)
         metrics["client_overhead_s"] = round(median_client - median_server, 3)
+    elif perf_dump_note:
+        metrics["server_latency_note"] = perf_dump_note
     # Always keep the raw samples and how far apart they are. A median summarises
     # a distribution it does not describe, and on the short image cases the
     # difference is the whole story: sglang's repeats spread 45-63% on B200
