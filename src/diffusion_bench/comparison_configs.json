@@ -1481,7 +1481,7 @@
                             "notes": "Tensor-parallel across 2 GPUs plus batch-4 serving pressure; no cache, no torch compile."
                         },
                         "blackwell-2gpu-cfg-parallel": {
-                            "description": "Blackwell 2-GPU CFG-parallel SGLang-Diffusion Cosmos3 T2I profile.",
+                            "description": "Blackwell 2-GPU CFG-parallel + cuDNN-SDPA SGLang-Diffusion Cosmos3 T2I profile.",
                             "hardware": [
                                 "b200",
                                 "gb200",
@@ -1490,11 +1490,11 @@
                             ],
                             "num_gpus": 2,
                             "sglang_ref": "current-main",
-                            "serve_args": "--model-type diffusion --warmup-mode server --attention-backend fa --tp-size 1 --cfg-parallel-size 2 --dit-layerwise-offload false --performance-mode speed --enable-torch-compile false",
+                            "serve_args": "--model-type diffusion --warmup-mode server --attention-backend torch_cudnn_sdpa --tp-size 1 --cfg-parallel-size 2 --dit-layerwise-offload false --performance-mode speed --enable-torch-compile false",
                             "extra_env": {
                                 "SGLANG_DISABLE_COSMOS3_GUARDRAILS": "1"
                             },
-                            "notes": "Measured on 4xB200 2026-09-13, two interleaved rounds against the previous `--tp-size 2` command: 0.765 -> 0.584s and 0.797 -> 0.617s, both about -23%, and the floor is 0.579s in both rounds against 0.751/0.787s. That takes the cell from losing to vLLM-Omni (0.651-0.662s) to beating it. The case is guidance_scale 6.0 -- true CFG, two branches -- so one branch per GPU with the DiT replicated and one combine per step beats splitting every layer and paying an all-reduce per layer; the sibling Cosmos3 T2V profile already does this, and vLLM-Omni runs this same case with --cfg-parallel-size 2. It is also what sglang's own runtime would choose: cosmos3 inherits auto_enable_cfg_parallel=True with get_auto_cfg_parallel_degree(2)->2 and _model_default_uses_cfg()->True, but `--tp-size 2` made _has_explicit_parallel_policy() true and suppressed it. `--attention-backend fa` is kept: torch_cudnn_sdpa measured 0.576 against this profile's 0.584 in round 1, inside the noise on one sample, and fa2 does not run at all (no native transformer for it, so the loader tries a Diffusers fallback and refuses under tp>1). NOTE: with tp_size=1 that refusal no longer guards this cell -- the harness scans the server log for the fallback markers instead."
+                            "notes": "Measured on 4xB200 2026-09-13, two interleaved rounds. Against the previous `--tp-size 2 --attention-backend fa` command: 0.765 -> 0.576s and 0.797 -> 0.575s, about -25%, taking the cell from losing to vLLM-Omni (0.651-0.662s) to beating it. TWO changes, both measured separately. (1) CFG parallelism instead of TP: the case is guidance_scale 6.0 -- true CFG, two branches -- so one branch per GPU with the DiT replicated and one combine per step beats splitting every layer and paying an all-reduce per layer (0.765 -> 0.584, 0.797 -> 0.617). It is also what sglang's own runtime would choose: cosmos3 inherits auto_enable_cfg_parallel=True with get_auto_cfg_parallel_degree(2)->2 and _model_default_uses_cfg()->True, but `--tp-size 2` made _has_explicit_parallel_policy() true and suppressed it. The sibling Cosmos3 T2V profile already uses CFG parallel; T2I was the odd one out. (2) torch_cudnn_sdpa instead of fa, on top of that: 0.584 -> 0.576 and 0.617 -> 0.575, same sign both rounds, and far steadier -- its repeats spread 0.9% (0.572-0.577) where fa's swung 0.579-0.792. Exact softmax, same precision class as fa, and the backend vLLM-Omni serves this case with. fa2 does not run at all: there is no native transformer for it, so the loader tries a Diffusers fallback and refuses under tp>1. NOTE: at tp_size=1 that refusal no longer guards this cell -- the harness scans the server log for the fallback markers instead."
                         }
                     }
                 },
