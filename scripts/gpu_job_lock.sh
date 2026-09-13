@@ -32,14 +32,22 @@ set -u
 GPU_LOCK_DIR="${GPU_LOCK_DIR:-${DBF_STATE_DIR:-/personal/bench0912}/.gpu_lock}"
 GPU_LOCK_POLL="${GPU_LOCK_POLL:-60}"
 
+# Release only a lock we still hold. An unconditional `rm -rf` here destroyed
+# the lock a DIFFERENT job had since taken: killing a job ran its EXIT trap,
+# which deleted the successor's lock directory, and the next starter walked
+# straight in. Two jobs then ran on the same GPUs, one of them silently
+# contaminating the other's measurements while the lock file named only one.
+gpu_lock_release_if_mine() {
+    [ "$(cat "${GPU_LOCK_DIR}/pid" 2>/dev/null)" = "$$" ] && rm -rf "${GPU_LOCK_DIR}"
+}
+
 gpu_lock_acquire() {
     local waited=0
     while true; do
         if mkdir "${GPU_LOCK_DIR}" 2>/dev/null; then
             echo "$$" > "${GPU_LOCK_DIR}/pid"
             echo "${0##*/}" > "${GPU_LOCK_DIR}/job"
-            # shellcheck disable=SC2064
-            trap "rm -rf '${GPU_LOCK_DIR}'" EXIT INT TERM
+            trap gpu_lock_release_if_mine EXIT INT TERM
             [ "${waited}" -gt 0 ] && echo "gpu-lock: acquired after ${waited}s"
             return 0
         fi
@@ -60,6 +68,6 @@ gpu_lock_acquire() {
 }
 
 gpu_lock_release() {
-    rm -rf "${GPU_LOCK_DIR}"
+    gpu_lock_release_if_mine
     trap - EXIT INT TERM
 }
