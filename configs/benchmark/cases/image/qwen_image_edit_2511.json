@@ -21,7 +21,7 @@
           "description": "Best known SGLang command for the benchmark repo default profile.",
           "sglang_ref": "current-main",
           "serve_args": "--model-type diffusion --warmup-mode server --tp-size 2 --dit-layerwise-offload false --performance-mode speed --enable-torch-compile false",
-          "notes": "Keep this profile updated when the best command changes for a SGLang release or commit. Policy-aligned candidate (compile on, offload off) — NOT yet validated on H100; validate (incl. OOM risk) before publishing."
+          "notes": "Keep this profile updated when the best command changes for a SGLang release or commit. Policy-aligned candidate (compile on, offload off) \u2014 NOT yet validated on H100; validate (incl. OOM risk) before publishing. REQUIRED, not tuning: this case sets guidance_scale=1.0 with no negative prompt, so its requests do not use CFG. Without an explicit parallelism flag the runtime auto-enables CFG parallelism from the MODEL's default sampling params (_model_default_uses_cfg), the server starts, and then input_validation rejects every request -- correctly, since cfg-parallel leaves rank 1 with no work and would otherwise hang ~30 min on a gloo timeout. Measured 2026-09-13 on 4xB200 with scripts/run_profile_vs_default.sh: stripping the pin makes this cell unservable. Do not drop `--tp-size` here on the grounds that the runtime would choose for itself."
         }
       }
     },
