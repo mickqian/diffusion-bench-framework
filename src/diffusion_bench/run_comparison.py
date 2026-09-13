@@ -1880,10 +1880,25 @@ def _collect_framework_runtime_metadata() -> dict:
             ),
         },
     }
+    # The published artifact carries ONE runtime block, so it has to name the
+    # versions a cell actually depended on -- not only the framework's own.
+    # LightX2V's FLUX.2 cell was a `failed` row for weeks because transformers
+    # was pinned below 5, which caps huggingface_hub below 1.0, which breaks
+    # every diffusers.pipelines import: three packages that decided whether the
+    # cell ran at all and none of which appeared in the block. torch is here for
+    # the same reason -- flash-attn is compiled against it, so its version is
+    # part of what the row means.
+    SHARED_STACK = ["torch", "transformers", "diffusers", "huggingface_hub"]
     packages_by_framework = {
-        "vllm-omni": ["vllm", "vllm-omni"],
-        "lightx2v": ["lightx2v", "flash-attn", "flash-attn-3", "flashinfer-python"],
-        "trtllm-visual": ["tensorrt-llm", "tensorrt"],
+        "vllm-omni": ["vllm", "vllm-omni", *SHARED_STACK],
+        "lightx2v": [
+            "lightx2v",
+            "flash-attn",
+            "flash-attn-3",
+            "flashinfer-python",
+            *SHARED_STACK,
+        ],
+        "trtllm-visual": ["tensorrt-llm", "tensorrt", *SHARED_STACK],
     }
     for framework, packages in packages_by_framework.items():
         venv_path = _framework_venv_path(framework)
