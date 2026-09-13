@@ -32,6 +32,8 @@ export PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True
 OUT=/personal/bench0912/visible_gpu_rows.jsonl
 : > "$OUT"
 
+source "${DBF_REPO_DIR:-/scratch/dbf2}/scripts/gpu_job_lock.sh"
+gpu_lock_acquire
 echo "=== VISIBLE_GPU_START $(date -Is) ==="
 cd /scratch/dbf2 && git fetch -q origin && git checkout -q -B main origin/main && git log --oneline -1
 
@@ -41,7 +43,11 @@ for round in $(seq 1 "$INSTANCES"); do
     i=$((i + 1))
     PORT=$((PORT_BASE + i * 2))
     echo "--- round $round, visible=$VIS, port $PORT"
-    nvidia-smi --query-compute-apps=pid --format=csv,noheader 2>/dev/null | sort -u | xargs -r kill -9 2>/dev/null
+    # Only this probe's own leftovers: an unfiltered kill took out a
+    # concurrently-running job's server and surfaced as an sglang health-check
+    # failure that had nothing to do with sglang.
+    nvidia-smi --query-compute-apps=pid --format=csv,noheader -i 0,1,2,3 2>/dev/null \
+      | sort -u | xargs -r kill -9 2>/dev/null
     sleep 5
     CUDA_VISIBLE_DEVICES="$VIS" sglang serve --model-path Tongyi-MAI/Z-Image-Turbo \
       --port $PORT --host 127.0.0.1 --backend sglang --num-gpus 2 \

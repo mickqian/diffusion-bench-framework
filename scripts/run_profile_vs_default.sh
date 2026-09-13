@@ -59,6 +59,10 @@ HW="${DBF_HARDWARE_PROFILE:-blackwell}"
 BARE="${DBF_STATE_DIR}/config_bare.json"
 
 cd "${DBF_REPO_DIR}"
+# Serialise against other GPU jobs on this box. Queueing by "wait until that
+# script is gone from ps" failed three ways in one round; see gpu_job_lock.sh.
+source "${DBF_REPO_DIR}/scripts/gpu_job_lock.sh"
+gpu_lock_acquire
 echo "=== PROFILE_VS_DEFAULT_START $(date -Is) ==="
 git log --oneline -1
 
