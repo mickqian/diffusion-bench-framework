@@ -21,6 +21,27 @@ Unless the user asks otherwise, a complete cross-framework run defaults to:
 
 When the user explicitly narrows any of these (a single framework, a pinned ref to reproduce, an existing machine), follow that instead — these are defaults, not overrides of an explicit request.
 
+## Canonical Scripts For A Round
+
+Start from these. They exist because the same work was improvised on a devbox
+once, and the improvised version had bugs the checked-in one does not.
+
+| Step | Script | Notes |
+|---|---|---|
+| Install a competitor | `scripts/install_comparison_frameworks.sh <fw>` | **Pins nothing it does not have to.** It no longer forces `transformers<5` on LightX2V -- that pin capped `huggingface_hub<1.0`, broke every `diffusers.pipelines.*` import, and published FLUX.2 as a `failed` cell for weeks. Override an `*_INSTALL_SPEC` only to reproduce a dated report. |
+| Upgrade an EXISTING venv | `scripts/upgrade_framework_stack.sh <fw> [pkg ...]` | For a reused box, where reinstalling means another flash-attn source build. Aborts if torch moved (the compiled attention extensions are built against it) and health-checks before you measure. Re-measure every cell that framework appears in. |
+| Run the matrix | `scripts/run_b200_cross_framework_20260912.sh` (case list) via a dated wrapper like `scripts/run_b200_final_20260913.sh` (settings) | Keep the wrapper in the repo -- `publish_bench_run.py --reproduce` is existence-checked, and pointing it at the case list alone documents half the run. |
+| Compare serve-arg variants | `scripts/tune_sglang_serve_args.sh <case> <rounds> 'tag=args' ...` | Interleaved rounds, clears the cards between arms, echoes the FULL served command (extra args APPEND, so a repeated flag relies on last-wins). Found Cosmos3 T2I's 25%. |
+| Ask what a measurement costs | `scripts/probe_perfdump_cost_20260913.sh` | One server, the variable toggled request-by-request. Template for "does X cost anything": hold everything else constant in one process rather than comparing runs. |
+| Ask where a spread comes from | `scripts/probe_zimage_bimodality_20260913.sh` | Records client AND server time per request, splits at the midpoint between modes. |
+| Ask how often it happens | `scripts/probe_zimage_across_instances_20260913.sh` | Restarts the server N times. Needed when the thing that varies is the instance, not the request -- more repeats inside one instance cannot see it. |
+| Merge, gate and publish | `scripts/merge_and_publish_run.sh <glob> <run-id> <label> <gpu> <reproduce> [--live] [--note K=V]` | Dry run by default. Hard-fails on command drift, on merged mid-run checkpoints, and on any cell that loaded a native fallback. |
+| Check the harness itself | `scripts/tests/run_all.sh` | Picks an interpreter that can import the harness, and says so when none can -- three tests import `requests`, and running them with the system python3 looks exactly like three failures. |
+
+Remote mechanics: `scripts/rxrun.sh` (retries transport failures only) and
+`scripts/rxpull.sh` (verified pull). Both have the gotchas that bit this round
+recorded under **Running Benchmarks**.
+
 ## Non-Negotiables
 
 - **Goal = best performance under no precision loss.** Split optimizations by whether they change the output:
