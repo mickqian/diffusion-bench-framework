@@ -25,6 +25,20 @@
 #   * /scratch/dbf2                 -- a checkout that is NOT the one being edited
 #
 #   scripts/run_b200_final_20260913.sh
+#
+# Then merge and publish (the --reproduce path is existence-checked):
+#   python3 -m diffusion_bench.build_report_artifacts \
+#       --results <DBF_LOG_DIR>/run_b200final0913_*.json \
+#       --config configs/comparison_configs.json \
+#       --output-json tmp/report/merged.json \
+#       --dashboard-md tmp/report/dashboard.md --issue-md tmp/report/issue.md \
+#       --run-id b200x4-final-20260913
+#   python3 scripts/publish_bench_run.py --merged tmp/report/merged.json \
+#       --run-id b200x4-final-20260913 \
+#       --label "4xB200 cross-framework (latest-vs-latest, all cells re-measured on one harness)" \
+#       --gpu "4x NVIDIA B200 183GB" \
+#       --reproduce scripts/run_b200_final_20260913.sh \
+#       --note harness="..." --note jitter="..."
 set -u
 
 export DBF_STATE_DIR="${DBF_STATE_DIR:-/personal/bench0912}"
