@@ -98,6 +98,18 @@ check(
 body = src[src.index("def run_single_request") :]
 check("the skip is recorded, not silent", "server_latency_note" in body)
 
+# The server figure now comes from that separate instrumented request, so it is
+# not comparable with the uninstrumented measured median -- cosmos3 with CFG
+# parallel produced server 0.66s against a client median of 0.584s. Subtracting
+# them published -0.076s of "client overhead"; say where the number comes from
+# instead of implying a decomposition.
+check("the server figure says where it came from", "server_latency_source" in body)
+check(
+    "no bogus client-overhead subtraction",
+    'metrics["client_overhead_s"]' not in src,
+    "the name may appear in a comment explaining why it is gone",
+)
+
 # Guard the general rule: the only framework branch inside the measured loop
 # should be none at all.
 branches = [

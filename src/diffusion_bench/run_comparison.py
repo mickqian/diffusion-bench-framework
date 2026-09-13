@@ -2136,7 +2136,17 @@ def run_single_request(
     if server_lats:
         median_server = statistics.median(server_lats)
         metrics["server_latency_s"] = round(median_server, 3)
-        metrics["client_overhead_s"] = round(median_client - median_server, 3)
+        # Say where this came from, because the obvious subtraction is wrong.
+        # It is measured on the separate instrumented request, and asking for
+        # the dump adds per-stage timing inside the server's own measured region
+        # too -- on cosmos3 with CFG parallel the server figure (0.66s) came out
+        # ABOVE the client median of the uninstrumented repeats (0.584s). The
+        # old `client_overhead_s = client - server` would have published -0.076s
+        # of "client overhead"; the two numbers are different requests, not a
+        # decomposition of one.
+        metrics["server_latency_source"] = (
+            "separate instrumented request, not one of the measured repeats"
+        )
     elif perf_dump_note:
         metrics["server_latency_note"] = perf_dump_note
     # Always keep the raw samples and how far apart they are. A median summarises
