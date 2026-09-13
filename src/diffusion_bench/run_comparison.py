@@ -65,6 +65,26 @@ REQUEST_TIMEOUT = 1200  # seconds
 # This is a fairness fix, not a tuning one: the overhead scales with response
 # size, so it penalised whichever framework returned the biggest payload.
 
+
+# Async generation is measured by polling for completion, so the poll interval
+# is a quantum on every video latency: the number recorded is the first tick
+# AFTER the work finished, not when it finished.
+#
+# At the old 1s this was visible in the nightly data. Every sglang video result
+# sits at N x (1s + ~4ms of loop overhead) -- the fractional part scales with
+# the integer part, which is how you can tell (ltx2.3 at 13/14/16/17s carries
+# .055/.066/.078/.086). For long cases that rounding is under 0.5% and harmless,
+# but ltx2.3 generates in 13-17s, so a 1s quantum is up to 7% and its nightly
+# series bounced between "regressions" and "recoveries" that were mostly the
+# boundary being crossed.
+#
+# 0.2s bounds the error at ~1.5% for that case while costing a few extra status
+# GETs. NOTE: video latencies measured after this change read up to one old
+# quantum LOWER than earlier published numbers -- the work did not get faster,
+# the ruler got finer.
+POLL_INTERVAL_S = 0.2
+
+
 def _poll_get(url: str, deadline: float, timeout: int = 30):
     """GET a job-status URL, tolerating transient failures.
 
@@ -1090,7 +1110,7 @@ def send_video_request_sglang(
     # Poll for completion
     poll_url = f"{base_url}/v1/videos/{job_id}"
     while True:
-        time.sleep(1)
+        time.sleep(POLL_INTERVAL_S)
         poll_resp = _poll_get(poll_url, start + REQUEST_TIMEOUT)
         poll_resp.raise_for_status()
         poll_data = poll_resp.json()
@@ -1177,7 +1197,7 @@ def send_image_conditioned_request_sglang(
             raise RuntimeError(f"Video submit returned no job id: {job}")
         poll_url = f"{base_url}/v1/videos/{job_id}"
         while True:
-            time.sleep(1)
+            time.sleep(POLL_INTERVAL_S)
             poll_resp = _poll_get(poll_url, start + REQUEST_TIMEOUT)
             poll_resp.raise_for_status()
             poll_data = poll_resp.json()
@@ -1264,7 +1284,7 @@ def send_request_vllm_omni(base_url: str, case: dict, config: dict) -> float:
             raise RuntimeError(f"vLLM-Omni video submit returned no id: {job}")
         poll_url = f"{base_url}/v1/videos/{job_id}"
         while True:
-            time.sleep(1)
+            time.sleep(POLL_INTERVAL_S)
             poll_resp = _poll_get(poll_url, start + REQUEST_TIMEOUT)
             poll_resp.raise_for_status()
             poll_data = poll_resp.json()
@@ -1391,10 +1411,7 @@ def send_request_vllm_omni(base_url: str, case: dict, config: dict) -> float:
 # launch config (see `_write_lightx2v_config`); the request carries prompt,
 # seed, size and the reference image.
 LIGHTX2V_IMAGE_TASKS = ("text-to-image", "image-edit", "image-to-image")
-# Video polls the async task API. 1s (the old value) is a floor on the measured
-# latency and quantises it: on an image case that generates in ~0.4s it more
-# than doubled the number we would have published.
-LIGHTX2V_POLL_INTERVAL_S = 0.2
+LIGHTX2V_POLL_INTERVAL_S = POLL_INTERVAL_S  # kept for readability at the call site
 
 
 def _lightx2v_payload(case: dict, config: dict, is_image: bool) -> dict:
@@ -1557,7 +1574,7 @@ def send_request_generic_http(
             return latency
         poll_url = f"{base_url}{endpoint.rstrip('/')}/{job_id}"
         while True:
-            time.sleep(1)
+            time.sleep(POLL_INTERVAL_S)
             poll_resp = _poll_get(poll_url, start + REQUEST_TIMEOUT)
             poll_resp.raise_for_status()
             poll_data = poll_resp.json()
