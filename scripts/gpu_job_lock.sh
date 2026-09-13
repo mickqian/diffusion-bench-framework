@@ -41,13 +41,27 @@ gpu_lock_release_if_mine() {
     [ "$(cat "${GPU_LOCK_DIR}/pid" 2>/dev/null)" = "$$" ] && rm -rf "${GPU_LOCK_DIR}"
 }
 
+# A trapped signal does NOT end the script: bash runs the handler and resumes on
+# the next line. With the release handler on INT/TERM and nothing else, `kill`
+# made a job give up its lock and KEEP RUNNING -- the worst of both. One did
+# exactly that: TERM'd, it released, the next job took the lock and started
+# measuring, and the "killed" job walked into its next arm, ran
+# `nvidia-smi | xargs kill -9`, and destroyed the running job's server before
+# parking its own model on both cards for twenty minutes. So the signal handler
+# has to exit; only EXIT may be a bare release.
+_gpu_lock_signal_exit() {
+    gpu_lock_release_if_mine
+    exit 143
+}
+
 gpu_lock_acquire() {
     local waited=0
     while true; do
         if mkdir "${GPU_LOCK_DIR}" 2>/dev/null; then
             echo "$$" > "${GPU_LOCK_DIR}/pid"
             echo "${0##*/}" > "${GPU_LOCK_DIR}/job"
-            trap gpu_lock_release_if_mine EXIT INT TERM
+            trap gpu_lock_release_if_mine EXIT
+            trap _gpu_lock_signal_exit INT TERM
             [ "${waited}" -gt 0 ] && echo "gpu-lock: acquired after ${waited}s"
             return 0
         fi
