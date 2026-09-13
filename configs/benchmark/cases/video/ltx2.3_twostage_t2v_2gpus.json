@@ -32,7 +32,7 @@
           "sglang_ref": "current-main",
           "num_gpus": 2,
           "serve_args": "--model-type diffusion --warmup-mode server --enable-cfg-parallel --pipeline-class-name LTX2TwoStagePipeline --ltx2-two-stage-device-mode snapshot",
-          "notes": "Snapshot mode avoids H100 resident VRAM pressure.",
+          "notes": "Snapshot mode avoids H100 resident VRAM pressure. DEAD AGAINST CURRENT SGLANG (checked 2026-09-13): `--ltx2-two-stage-device-mode snapshot` is rejected by the parser -- the choices are now 'original' and 'resident', so `snapshot` was retired upstream. Not guessing a replacement: 'resident' keeps components on the GPU and this profile exists for an 80GB card, so the substitution has to be measured on H100 rather than picked. Not selected on Blackwell (b200 takes `default`, which does not pass the flag at all), so it has not affected any B200 run. Catch this class with scripts/validate_serve_args.py, which found it.",
           "policy_exception": "Measured H100 A/B 2026-07-03 (steady-state single_e2e): speed+compile OOMs on 2x80GB (79.1/79.2 GiB used, 30MiB alloc failure during request) \u2014 two-stage residency + compile workspace does not fit. Snapshot device mode is the fastest configuration that fits (12.03s)."
         },
         "h200-2gpu": {
