@@ -1961,6 +1961,54 @@ NATIVE_FALLBACK_MARKERS = (
 )
 
 
+def _incomplete_snapshot(model: str) -> str | None:
+    """Why this model's cache is not ready to serve, or None if it is.
+
+    A shared cache is not stable under a run. `/cluster-storage/models` had a
+    Z-Image-Turbo snapshot re-materialised at 09:12 while a server started at
+    09:11, and what came out blamed the wrong component entirely:
+
+        FileNotFoundError on a transformer shard
+        -> the native loader fails
+        -> "Native Diffusers fallback for transformer component 'transformer'
+            cannot honor requested distributed execution: tp_size=2"
+        -> "sglang server exited before health check passed (exit 1)"
+
+    which reads as "sglang has no native implementation for this model". It cost
+    twenty minutes to walk back. Launching against a half-built snapshot cannot
+    produce a measurement, so check before paying for the server start.
+    """
+    if not model or model.startswith("/") or os.path.isdir(model):
+        return None  # a local path is the caller's business
+    cache = os.environ.get("HUGGINGFACE_HUB_CACHE") or os.environ.get("HF_HOME")
+    if not cache:
+        return None
+    repo = Path(cache) / ("models--" + model.replace("/", "--"))
+    if not repo.is_dir():
+        return None  # not cached yet; the framework will fetch it as usual
+
+    broken: list[str] = []
+    for snapshot in (repo / "snapshots").glob("*"):
+        for entry in snapshot.rglob("*"):
+            if entry.is_symlink() and not entry.exists():
+                broken.append(str(entry.relative_to(snapshot)))
+    incomplete = [p.name for p in (repo / "blobs").glob("*.incomplete")]
+    if not broken and not incomplete:
+        return None
+    parts = []
+    if broken:
+        parts.append(f"{len(broken)} dangling symlink(s) ({', '.join(broken[:3])})")
+    if incomplete:
+        parts.append(f"{len(incomplete)} partial blob(s)")
+    return (
+        f"the cached snapshot of {model} is mid-download or damaged: "
+        + "; ".join(parts)
+        + f" under {repo}. This is a cache event, not a framework failure -- "
+        "wait for the download to finish, or remove the repo directory and let "
+        "it refetch, then re-run the cell."
+    )
+
+
 def _run_warmups(
     base_url: str,
     case: dict,
@@ -2349,6 +2397,10 @@ def run_case_framework(
     case = _case_for_framework(case, fw_cfg)
     single_result = None
     throughput_result = None
+    cache_problem = _incomplete_snapshot(str(case.get("model") or ""))
+    if cache_problem:
+        raise RuntimeError(cache_problem)
+
     cmd = build_server_cmd(framework, case, fw_cfg, port)
     case["_server_command"] = shlex.join(cmd)
     print(f"\n  Command: {shlex.join(cmd)}")
@@ -2365,6 +2417,7 @@ def run_case_framework(
     log_fh = open(log_file, "w", encoding="utf-8", buffering=1)
     log_thread = None
     native_fallbacks: list[str] = []
+    checkpoint_errors: list[str] = []
 
     proc = None
     startup_t0 = time.time()
@@ -2396,6 +2449,11 @@ def run_case_framework(
                         if pattern in line:
                             native_fallbacks.append(line.strip())
                             break
+                    # A missing checkpoint file is the FIRST link in a chain
+                    # that ends up blaming the framework; keep it so the
+                    # reported error can name it.
+                    if "FileNotFoundError" in line or "No such file or directory" in line:
+                        checkpoint_errors.append(line.strip()[:300])
             except ValueError:
                 pass  # pipe closed
 
@@ -2449,10 +2507,20 @@ def run_case_framework(
             )
 
     except Exception as e:
-        print(f"  ERROR: {e}")
+        message = str(e)
+        if checkpoint_errors:
+            # The framework's own error is three layers downstream of this. On
+            # sglang a missing shard becomes "Native Diffusers fallback ...
+            # cannot honor tp_size=2", which reads as "no native implementation
+            # for this model" and sent me looking in entirely the wrong place.
+            message = (
+                f"{message} -- but the server first failed to READ the "
+                f"checkpoint, which is the real cause: {checkpoint_errors[0]}"
+            )
+        print(f"  ERROR: {message}")
         if MODE_SINGLE_E2E in modes:
             single_result = _base_result(case, framework, MODE_SINGLE_E2E)
-            single_result["error"] = str(e)
+            single_result["error"] = message
         if MODE_THROUGHPUT in modes:
             throughput_result = _base_result(case, framework, MODE_THROUGHPUT)
             throughput_result["error"] = str(e)
