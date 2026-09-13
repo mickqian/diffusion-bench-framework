@@ -56,7 +56,7 @@ export SGLANG_DISABLE_COSMOS3_GUARDRAILS=1
 GPUS="${PVD_GPUS:-0,1}"
 PORT="${PVD_PORT_BASE:-49001}"
 HW="${DBF_HARDWARE_PROFILE:-blackwell}"
-BARE="${DBF_STATE_DIR}/config_bare.json"
+BARE="${DBF_STATE_DIR}/config_bare${PVD_TAG_SUFFIX:-}.json"
 
 cd "${DBF_REPO_DIR}"
 # Serialise against other GPU jobs on this box. Queueing by "wait until that
@@ -67,12 +67,15 @@ echo "=== PROFILE_VS_DEFAULT_START $(date -Is) ==="
 git log --oneline -1
 
 echo "--- building the stripped config"
-python3 scripts/compare_profile_vs_default.py \
+# PVD_ONLY=residency keeps every parallelism pin and strips only the residency
+# flags, so the delta is attributable to residency alone -- stripping both at
+# once leaves their contributions mixed
+python3 scripts/compare_profile_vs_default.py --only "${PVD_ONLY:-all}" \
   --config configs/comparison_configs.json --out "${BARE}" || exit 1
 
 run_arm() {  # run_arm <case_id> <arm> <config>
   local case_id="$1" arm="$2" cfg="$3"
-  local tag="pvd_${case_id}_${arm}_${ROUND}"
+  local tag="pvd${PVD_TAG_SUFFIX:-}_${case_id}_${arm}_${ROUND}"
   nvidia-smi --query-compute-apps=pid --format=csv,noheader -i "${GPUS}" 2>/dev/null \
     | sort -u | xargs -r kill -9 2>/dev/null
   sleep 5
@@ -109,15 +112,15 @@ for ROUND in $(seq 1 "${ROUNDS}"); do
 done
 
 echo "=== SUMMARY ==="
-python3 - "${DBF_LOG_DIR}" "${ROUNDS}" "${CASES[@]}" <<'PY'
+python3 - "${DBF_LOG_DIR}" "${ROUNDS}" "pvd${PVD_TAG_SUFFIX:-}" "${CASES[@]}" <<'PY'
 import json, os, statistics, sys
-log_dir, rounds = sys.argv[1], int(sys.argv[2])
-cases = sys.argv[3:]
+log_dir, rounds, prefix = sys.argv[1], int(sys.argv[2]), sys.argv[3]
+cases = sys.argv[4:]
 
 def med(case_id, arm):
     vals = []
     for r in range(1, rounds + 1):
-        p = os.path.join(log_dir, f"pvd_{case_id}_{arm}_{r}.json")
+        p = os.path.join(log_dir, f"{prefix}_{case_id}_{arm}_{r}.json")
         try:
             d = json.load(open(p))
             row = next(x for x in d.get("results", []) if x.get("framework") == "sglang")

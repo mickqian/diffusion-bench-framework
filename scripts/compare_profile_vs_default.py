@@ -98,12 +98,37 @@ def strip_tuning(serve_args: str) -> tuple[str, list[str]]:
     return " ".join(kept), removed
 
 
+# Component residency on its own. Stripping parallelism and residency together
+# leaves their contributions mixed, so neither can be attributed -- and
+# residency is half the question ("best parallel AND component residency should
+# be automatic"). `--only residency` keeps every parallelism pin and strips just
+# these, so the delta belongs to the runtime's keep_resident_* decisions alone.
+RESIDENCY_FLAGS = {
+    "--dit-layerwise-offload",
+    "--dit-cpu-offload",
+    "--text-encoder-cpu-offload",
+    "--pin-cpu-memory",
+    "--layerwise-offload-components",
+    "--dit-offload-prefetch-size",
+    "--dit-layerwise-resident-layers",
+}
+
+
 def main() -> None:
     ap = argparse.ArgumentParser()
     ap.add_argument("--config", type=Path, default=Path("configs/comparison_configs.json"))
     ap.add_argument("--out", type=Path, required=True)
     ap.add_argument("--hardware", default="b200")
+    ap.add_argument(
+        "--only",
+        choices=("all", "residency"),
+        default="all",
+        help="all: strip every tuning flag. residency: strip only the residency "
+             "flags, so the measured delta is attributable to residency alone.",
+    )
     args = ap.parse_args()
+    if args.only == "residency":
+        TUNING_FLAGS.intersection_update(RESIDENCY_FLAGS)
 
     cfg = json.loads(args.config.read_text())
     total = 0
