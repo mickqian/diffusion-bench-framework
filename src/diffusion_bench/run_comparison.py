@@ -1930,6 +1930,21 @@ WARMUP_EXTRA_BUDGET_S = 120.0
 # is worth and it is skipped with a recorded reason.
 PERF_DUMP_MAX_S = 120.0
 
+# sglang can load a component through a native/Diffusers fallback when it has no
+# customized implementation for it -- so a cell can stop measuring sglang's own
+# code without saying so in the result. Its loader raises rather than fall back
+# only when tp/sp/ulysses/ring/kv_gather > 1 or FSDP is on; with cfg-parallel
+# alone (or a single GPU) none of those is set, and the fallback proceeds with
+# nothing louder than a log line. Cosmos3 on `--attention-backend fa2` is a live
+# example: it has no native transformer for that backend, and only the tp_size=2
+# in the profile turned the swap into an error instead of a silent measurement
+# of Diffusers published as sglang.
+NATIVE_FALLBACK_MARKERS = (
+    "using native version",
+    "falling back to native version",
+    "Native Diffusers fallback",
+)
+
 
 def _run_warmups(
     base_url: str,
@@ -2334,6 +2349,7 @@ def run_case_framework(
     log_file = log_dir / f"{case['id']}_{framework}.log"
     log_fh = open(log_file, "w", encoding="utf-8", buffering=1)
     log_thread = None
+    native_fallbacks: list[str] = []
 
     proc = None
     startup_t0 = time.time()
@@ -2361,6 +2377,10 @@ def run_case_framework(
                     sys.stdout.write(f"  [server] {line}")
                     sys.stdout.flush()
                     fh.write(line)
+                    for pattern in NATIVE_FALLBACK_MARKERS:
+                        if pattern in line:
+                            native_fallbacks.append(line.strip())
+                            break
             except ValueError:
                 pass  # pipe closed
 
@@ -2436,6 +2456,19 @@ def run_case_framework(
                 metrics["server_startup_s"] = server_startup_s
             if warmup_s is not None:
                 metrics["warmup_s"] = warmup_s
+            # A cell that loaded a component through the native fallback is not
+            # measuring this framework's own implementation of it. Say so in the
+            # result rather than leaving it in a server log nobody greps.
+            if native_fallbacks:
+                metrics["native_fallback_components"] = native_fallbacks[:8]
+    if native_fallbacks:
+        print(
+            f"  WARNING: {framework} loaded {len(native_fallbacks)} component(s) "
+            "through a native fallback -- this cell is not measuring its own "
+            "implementation of them:"
+        )
+        for line in native_fallbacks[:8]:
+            print(f"    {line}")
 
     return single_result, throughput_result
 
