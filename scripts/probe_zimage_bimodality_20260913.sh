@@ -44,6 +44,8 @@ export CUDA_VISIBLE_DEVICES=0,1
 for job in final_run probe_zimage_inst; do
   while [ "$(ps -e -o cmd= | grep -cx "bash /personal/bench0912/${job}.sh")" -gt 0 ]; do sleep 120; done
 done
+source "${DBF_REPO_DIR:-/scratch/dbf2}/scripts/gpu_job_lock.sh"
+gpu_lock_acquire
 echo "=== ZIMAGE_BIMODAL_START $(date -Is) ==="
 cd /scratch/dbf2 && git fetch -q origin && git checkout -q -B main origin/main && git log --oneline -1
 

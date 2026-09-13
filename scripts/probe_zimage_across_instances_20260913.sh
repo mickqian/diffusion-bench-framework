@@ -29,6 +29,8 @@ export PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True
 export CUDA_VISIBLE_DEVICES=0,1
 
 while pgrep -f "/personal/bench0912/probe_zimage_bimodal.sh" >/dev/null 2>&1; do sleep 120; done
+source "${DBF_REPO_DIR:-/scratch/dbf2}/scripts/gpu_job_lock.sh"
+gpu_lock_acquire
 echo "=== ZIMAGE_INSTANCES_START $(date -Is) ==="
 cd /scratch/dbf2 && git fetch -q origin && git checkout -q -B main origin/main && git log --oneline -1
 

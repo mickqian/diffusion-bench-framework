@@ -49,6 +49,8 @@ export PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True
 GPUS="${TUNE_GPUS:-0,1}"
 PORT="${TUNE_PORT_BASE:-47001}"
 HW="${DBF_HARDWARE_PROFILE:-blackwell}"
+source "${DBF_REPO_DIR:-/scratch/dbf2}/scripts/gpu_job_lock.sh"
+gpu_lock_acquire
 cd "${DBF_REPO_DIR}"
 
 run_arm() {  # run_arm <tag> <extra serve args>
