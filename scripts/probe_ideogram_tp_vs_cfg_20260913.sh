@@ -52,13 +52,23 @@ for ARM in "tp:--tp-size 2" "cfgpar:--tp-size 1 --cfg-parallel-size 2"; do
     --backend sglang --num-gpus 2 --model-type diffusion --warmup-mode server $extra \
     > "/personal/bench0912/ideogram_${tag}.log" 2>&1 &
   SERVER_PID=$!
-  up=0
-  for _ in $(seq 1 180); do
+  # Poll health only. A `kill -0 $SERVER_PID` early-break was here and reported
+  # "did not come up" on a server that WAS coming up -- it reached "fired up and
+  # ready to roll" 3.5 minutes in, inside a 900s budget. Treating "the pid I
+  # captured looks gone" as "the service failed" is a false negative the health
+  # poll already covers: a server that truly died just times out.
+  up=0; waited=0
+  for _ in $(seq 1 240); do
     curl -sf "http://127.0.0.1:$PORT/health" >/dev/null 2>&1 && { up=1; break; }
-    kill -0 $SERVER_PID 2>/dev/null || break
-    sleep 5
+    sleep 5; waited=$((waited + 5))
   done
-  [ "$up" = 1 ] || { echo "    did not come up"; tail -5 "/personal/bench0912/ideogram_${tag}.log"; kill $SERVER_PID 2>/dev/null; continue; }
+  if [ "$up" != 1 ]; then
+    echo "    never became healthy after ${waited}s"
+    tail -5 "/personal/bench0912/ideogram_${tag}.log"
+    kill "$SERVER_PID" 2>/dev/null; sleep 5; kill -9 "$SERVER_PID" 2>/dev/null
+    continue
+  fi
+  echo "    healthy after ${waited}s"
 
   python3 - "$PORT" "$tag" "$REQUESTS" "$MODEL" <<'PY'
 import json, os, statistics, sys, time, urllib.request
@@ -109,7 +119,9 @@ if dump:
 else:
     print(f"    {tag}: no perf dump")
 PY
-  kill $SERVER_PID 2>/dev/null
+  kill "$SERVER_PID" 2>/dev/null
+  for _ in $(seq 1 12); do kill -0 "$SERVER_PID" 2>/dev/null || break; sleep 5; done
+  kill -9 "$SERVER_PID" 2>/dev/null
   sleep 5
 done
 echo "  Read it as: if the denoise total moves with the client time, the strategy"
