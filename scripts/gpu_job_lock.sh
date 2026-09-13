@@ -21,6 +21,12 @@
 #
 # The name of a process is the wrong thing to synchronise on. `mkdir` is atomic,
 # so a lock directory is a real mutex, and a dead owner is detectable.
+#
+# The same trap survives in the OBSERVABILITY layer even once the lock fixes
+# correctness: a monitor counting `pvd_resid.sh` reported the job dead while it
+# sat in this very wait loop, because that script ends in `exec bash pvd.sh ...`.
+# Count what `ps` shows AFTER any exec -- or better, read the job's log, which
+# says `gpu-lock: waiting for <job>` and cannot be confused by a replaced argv.
 set -u
 
 GPU_LOCK_DIR="${GPU_LOCK_DIR:-${DBF_STATE_DIR:-/personal/bench0912}/.gpu_lock}"
