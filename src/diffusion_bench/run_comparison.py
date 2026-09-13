@@ -2413,6 +2413,41 @@ def _preflight_framework_command(
 
 
 
+
+def _write_run_artifact(
+    output: str,
+    results: list,
+    throughput_results: list,
+    *,
+    partial: bool,
+    **meta,
+) -> dict:
+    """Write the run artifact, including mid-run.
+
+    Called after every framework so a finished measurement survives whatever
+    happens to the ones after it -- a per-case `timeout` used to kill the
+    process before anything was written, discarding 90 minutes of completed
+    wan22 measurements. `partial` marks a checkpoint so a reader can tell an
+    interrupted run from a complete one rather than assuming the missing
+    frameworks were skipped.
+    """
+    data = dict(meta)
+    data["results"] = results
+    data["throughput_results"] = throughput_results
+    data["partial"] = partial
+    if not partial:
+        # One hub round-trip per model, so only on the final write.
+        data["model_revisions"] = _collect_model_revisions(results, throughput_results)
+    os.makedirs(os.path.dirname(output) or ".", exist_ok=True)
+    tmp = f"{output}.tmp"
+    with open(tmp, "w") as f:
+        json.dump(data, f, indent=2)
+    # Atomic: a checkpoint must never leave a half-written file behind if the
+    # timeout lands mid-write.
+    os.replace(tmp, output)
+    return data
+
+
 def _collect_model_revisions(results: list[dict], throughput_results: list[dict]) -> dict:
     """Resolve each benchmarked model to the HF commit actually served.
 
@@ -2519,6 +2554,24 @@ def run_comparison(
     throughput_results = []
     installed_fws: set[str] = set()
 
+    # Static run metadata, built once so every checkpoint carries it.
+    artifact_meta = {
+        "timestamp": timestamp,
+        "commit_sha": commit_sha,
+        "run_id": run_id,
+        "hardware": hardware_metadata,
+        "sglang_runtime": _collect_sglang_runtime_metadata(),
+        "framework_runtime": _collect_framework_runtime_metadata(),
+        "benchmark_env": benchmark_env,
+        "benchmark_framework_args": {
+            "vllm-omni": _vllm_torch_compile_args(),
+            "lightx2v": {"config": _lightx2v_torch_compile_config()},
+        },
+        "torch_compile_disabled": _torch_compile_disabled(),
+        "benchmark_modes": modes,
+        "requested_sglang_profile": _requested_sglang_profile(sglang_profile),
+    }
+
     for fw_name in FRAMEWORK_ORDER:
         pairs = fw_cases.get(fw_name, [])
         if not pairs:
@@ -2575,35 +2628,23 @@ def run_comparison(
             if throughput_result is not None:
                 throughput_results.append(throughput_result)
 
+            # Checkpoint after every framework. The artifact used to be written
+            # only at the very end, so when the per-case `timeout` fired on
+            # wan22 -- 90 minutes in, with sglang and vLLM-Omni both measured --
+            # the process was killed before writing and every one of those
+            # measurements was lost. A finished measurement should survive
+            # whatever happens to the ones after it.
+            _write_run_artifact(
+                output, results, throughput_results, partial=True, **artifact_meta
+            )
+
             # Wait for GPU memory to clear
             print(f"  Waiting {GPU_CLEAR_WAIT}s for GPU memory to clear...")
             time.sleep(GPU_CLEAR_WAIT)
 
-    output_data = {
-        "timestamp": timestamp,
-        "commit_sha": commit_sha,
-        "run_id": run_id,
-        "hardware": hardware_metadata,
-        "sglang_runtime": _collect_sglang_runtime_metadata(),
-        "framework_runtime": _collect_framework_runtime_metadata(),
-        # The model id alone does not identify what was served; see
-        # _collect_model_revisions.
-        "model_revisions": _collect_model_revisions(results, throughput_results),
-        "benchmark_env": benchmark_env,
-        "benchmark_framework_args": {
-            "vllm-omni": _vllm_torch_compile_args(),
-            "lightx2v": {"config": _lightx2v_torch_compile_config()},
-        },
-        "torch_compile_disabled": _torch_compile_disabled(),
-        "benchmark_modes": modes,
-        "requested_sglang_profile": _requested_sglang_profile(sglang_profile),
-        "results": results,
-        "throughput_results": throughput_results,
-    }
-
-    os.makedirs(os.path.dirname(output) or ".", exist_ok=True)
-    with open(output, "w") as f:
-        json.dump(output_data, f, indent=2)
+    output_data = _write_run_artifact(
+        output, results, throughput_results, partial=False, **artifact_meta
+    )
     print(f"\nResults written to {output}")
 
     # Print summary table

@@ -152,6 +152,19 @@ def merge_results(paths: list[Path], output_json: Path, config_path: Path, run_i
                 "cells or unset DIFFUSION_BENCH_STRICT_COMMANDS"
             )
 
+    # A checkpoint written mid-run looks exactly like a finished one apart from
+    # this flag, and merging it silently would publish a partial matrix as if
+    # the missing frameworks had been skipped.
+    partial_sources = [path.name for path, data in runs if data.get("partial")]
+    if partial_sources:
+        print(
+            f"WARNING: {len(partial_sources)} source result(s) are mid-run "
+            f"checkpoints, not finished runs: {partial_sources[:4]}"
+            + (" ..." if len(partial_sources) > 4 else "")
+            + " -- their cases may be missing frameworks that never ran."
+        )
+        merged["partial_sources"] = partial_sources
+
     modes = set()
     for path, data in runs:
         merged["source_results"].append(
