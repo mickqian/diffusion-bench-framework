@@ -36,7 +36,7 @@ def check(name, cond, detail=""):
         fail = 1
 
 
-block = src[src.index("packages_by_framework = {") : src.index("for framework, packages in")]
+block = src[src.index("SHARED_STACK = [") : src.index("for framework, packages in")]
 
 for pkg in ("torch", "transformers", "diffusers", "huggingface_hub"):
     check(f"the shared stack includes {pkg}", f'"{pkg}"' in block)
@@ -51,8 +51,8 @@ for fw, own in (
 
 check(
     "the stack is shared, not copy-pasted per framework",
-    block.count("SHARED_STACK") >= 4,
-    "one list, spread into each framework",
+    block.count("*SHARED_STACK") == 3,
+    f"one list, spread into each of the 3 frameworks (found {block.count('*SHARED_STACK')})",
 )
 
 # pip show tolerates a name that is not installed (it warns and returns the
