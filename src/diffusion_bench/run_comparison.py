@@ -1932,7 +1932,8 @@ def _run_warmups(
     framework: str,
     config: dict | None,
     bench_cfg: dict,
-) -> list[float]:
+) -> tuple[list[float], list[float]]:
+    """Warm the server; return (reduced-step latencies, measured-shape latencies)."""
     warmup_cfg = bench_cfg.get("warmup", {})
     warmup_requests = int(warmup_cfg.get("num_requests", 0) or 0)
     warmup_steps = warmup_cfg.get("num_inference_steps")
@@ -1945,27 +1946,38 @@ def _run_warmups(
         # reach steady state before the (few) measured requests
         warmup_requests = max(warmup_requests, int(warmup_cfg.get("video_num_requests", 3)))
     if warmup_requests <= 0:
-        return []
+        return [], []
     warmup_case = dict(case)
     if warmup_steps is not None:
         warmup_case["num_inference_steps"] = int(warmup_steps)
 
     lats: list[float] = []
+    steady: list[float] = []
 
-    def _warm(label: str) -> None:
+    def _warm(target: dict, sink: list[float], label: str) -> bool:
         print(f"  Sending warmup request ({label})...")
         try:
-            lats.append(send_request(base_url, warmup_case, framework, config).client_s)
+            sink.append(send_request(base_url, target, framework, config).client_s)
+            return True
         except Exception as e:
             print(f"  Warmup request {label} failed (non-fatal): {e}")
+            return False
 
     for wi in range(1, warmup_requests + 1):
-        _warm(f"{wi}/{warmup_requests}")
+        _warm(warmup_case, lats, f"{wi}/{warmup_requests}")
 
     # Keep warming until consecutive requests agree, because a fixed count is
     # not a guarantee of steady state: cosmos3's five MEASURED requests still
     # decayed 1.09 -> 0.72s after the configured warmups, so its median scored
     # the warm-up rather than the model.
+    #
+    # Converge on the shape that will be MEASURED, not on the warmup shape. The
+    # fixed warmups above run a reduced-step request (3 steps against the case's
+    # 50) because they exist to load weights and trigger compile cheaply. Two of
+    # those agreeing says nothing about the 50-step request -- they agree with
+    # each other almost immediately, so gating on them made this loop vacuous
+    # and left the first measured request paying one-time cost the cheap shape
+    # never touches (cosmos3: 1.054s, then 0.827-0.846s).
     #
     # The rule is identical for every framework -- one that settles immediately
     # pays nothing, and no framework gets a private mechanism the others lack.
@@ -1973,34 +1985,61 @@ def _run_warmups(
     # vLLM-Omni's startup dummy run is a fixed 512x512x2-step request, sglang's
     # is the model's default resolution. Handing sglang --warmup-resolutions to
     # settle it faster would be an advantage vLLM-Omni has no equivalent for.)
-    #
+    case_steps = case.get("num_inference_steps")
+    if warmup_steps is None or (case_steps is not None and int(case_steps) == int(warmup_steps)):
+        # The fixed warmups already ran the measured shape; converge on them.
+        full_case, full_lats = warmup_case, lats
+        est = lats[-1] if lats else 0.0
+    else:
+        full_case, full_lats = case, steady
+        # Cost the full-shape request before charging for it, so a 690s video
+        # is not silently billed one because `spent` starts at zero. Steps are
+        # the only scaling signal available before the first one runs; it is a
+        # rough estimate, and it is replaced by the real cost after that.
+        est = (lats[-1] * int(case_steps) / int(warmup_steps)) if lats and warmup_steps else 0.0
+
+    def _converged(xs: list[float]) -> bool:
+        if len(xs) < 2 or min(xs[-2:]) <= 0:
+            return False
+        return (max(xs[-2:]) - min(xs[-2:])) / min(xs[-2:]) * 100 <= WARMUP_CONVERGE_PCT
+
     # Budgeted by wall clock, so this is free where requests are cheap and
     # simply does not trigger where they are not -- and the expensive video
     # cases are the ones already converging (minimax repeats spread 0.1%).
     extra = 0
     spent = 0.0
     while (
-        len(lats) >= 2
-        and extra < WARMUP_EXTRA_MAX
-        and spent < WARMUP_EXTRA_BUDGET_S
-        and min(lats[-2:]) > 0
-        and (max(lats[-2:]) - min(lats[-2:])) / min(lats[-2:]) * 100 > WARMUP_CONVERGE_PCT
+        extra < WARMUP_EXTRA_MAX
+        and spent + est <= WARMUP_EXTRA_BUDGET_S
+        and not _converged(full_lats)
     ):
         extra += 1
-        before = len(lats)
         started = time.time()
-        _warm(f"extra {extra}/{WARMUP_EXTRA_MAX}, last two differ "
-              f"{(max(lats[-2:]) - min(lats[-2:])) / min(lats[-2:]) * 100:.0f}%")
-        spent += time.time() - started
-        if len(lats) == before:  # the request failed; stop rather than spin
+        gap = (
+            f", last two differ "
+            f"{(max(full_lats[-2:]) - min(full_lats[-2:])) / min(full_lats[-2:]) * 100:.0f}%"
+            if len(full_lats) >= 2 and min(full_lats[-2:]) > 0
+            else " at the measured shape"
+        )
+        ok = _warm(full_case, full_lats, f"extra {extra}/{WARMUP_EXTRA_MAX}{gap}")
+        elapsed = time.time() - started
+        spent += elapsed
+        if not ok:  # the request failed; stop rather than spin
             break
+        est = elapsed  # the estimate was a guess; this is the measurement
     if lats:
         print(
             "  Warmup latencies: "
             + ", ".join(f"{x:.3f}s" for x in lats)
+            + (
+                "  | at the measured shape: "
+                + ", ".join(f"{x:.3f}s" for x in steady)
+                if steady
+                else ""
+            )
             + (f"  (+{extra} adaptive)" if extra else "")
         )
-    return lats
+    return lats, steady
 
 
 def run_single_request(
@@ -2287,7 +2326,9 @@ def run_case_framework(
             _benchmark_config(config, case), fw_cfg.get("benchmark", {})
         )
         warmup_t0 = time.time()
-        warmup_lats = _run_warmups(base_url, case, framework, config, bench_cfg)
+        warmup_lats, warmup_steady = _run_warmups(
+            base_url, case, framework, config, bench_cfg
+        )
         warmup_s = round(time.time() - warmup_t0, 2)
 
         if MODE_SINGLE_E2E in modes:
@@ -2297,10 +2338,19 @@ def run_case_framework(
             # Keep the warmup curve next to the measurement: it is the evidence
             # that the measured window opened at steady state, and when it did
             # not, it is the first place to look.
-            if warmup_lats and isinstance(single_result.get("metrics"), dict):
-                single_result["metrics"]["warmup_latencies_s"] = [
-                    round(x, 3) for x in warmup_lats
-                ]
+            if isinstance(single_result.get("metrics"), dict):
+                if warmup_lats:
+                    single_result["metrics"]["warmup_latencies_s"] = [
+                        round(x, 3) for x in warmup_lats
+                    ]
+                # The measured-shape curve is the one that says whether the
+                # measured window opened at steady state; the reduced-step
+                # curve above cannot, and reading it as if it could is what
+                # made the convergence check vacuous in the first place.
+                if warmup_steady:
+                    single_result["metrics"]["warmup_steady_latencies_s"] = [
+                        round(x, 3) for x in warmup_steady
+                    ]
         if MODE_THROUGHPUT in modes:
             throughput_result = run_throughput(
                 base_url, case, framework, config, bench_cfg, log_dir
