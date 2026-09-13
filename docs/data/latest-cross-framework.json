@@ -1,23 +1,37 @@
 {
-  "id": "h200x4-fair-20260825",
-  "title": "H200 cross-framework (latest-vs-latest)",
-  "updated_at": "2026-09-11",
+  "id": "b200x4-final-20260913",
+  "title": "4xB200 cross-framework (latest-vs-latest, every cell re-measured on one harness)",
+  "updated_at": "2026-09-13",
   "source_report": "reports/h100x4-full-20260728/",
   "source_script": "configs/benchmark/ (explicit matrix) + scripts/build_benchmark_config.py",
   "hardware": {
-    "label": "4x NVIDIA H200 143GB"
+    "label": "4x NVIDIA B200 183GB"
   },
   "policy": {
-    "latency_source": "client-side wall clock, steady-state median of back-to-back measured requests after warmup; server-side timers kept only as sglang diagnostics",
-    "selection": "best lossless profile per case (h100-* speed/compile where tuned, else default)",
-    "cache": "no response cache, no Cache-DiT",
-    "torch_compile": "ENABLED for every framework ('no precision loss, best perf' policy)",
-    "attention": "each framework runs its fastest exact-precision attention (FA/FlashInfer/SDPA); no quantized/approximate substitution",
+    "latency_source": "client-side wall clock, steady-state median of back-to-back measured requests after warmup; server-side timers kept only as per-framework diagnostics",
+    "selection": "best lossless profile per case for the hardware this ran on (see each row's profile; configs/benchmark/SELECTED.md lists what the harness selects)",
+    "cache": "no response cache, no Cache-DiT, no quantized checkpoints",
+    "torch_compile": "ON for the competitors; sglang runs compile-off by policy (its fused kernels match or beat compiler fusion, measured)",
+    "attention": "each framework runs its fastest exact-precision attention; no quantized or approximate substitution",
     "version_policy": "latest-vs-latest: sglang runs origin/main HEAD, every competitor runs its newest main/release line (no pinned snapshots)",
-    "qwen_note": "Qwen-Image is reported under both semantics: no-CFG (guidance 1.0, one forward/step) and true-CFG (true_cfg_scale 4 + negative prompt, two forwards/step, served with CFG-parallel). The two rows are not comparable to each other.",
-    "bimodal_latency_note": "During this run, two compile-mode sglang cells (flux1, qwen no-CFG) showed a bimodal latency distribution across independent server restarts (each state internally consistent over its own 5 repeats -- not per-request noise); raw evidence in reports/h100x4-full-20260728/bimodal-evidence-*.json. The published flux1 number is the reproduced fast-mode measurement. The qwen no-CFG cell was subsequently re-measured under its final eager profile (see the profile's policy_exception), where repeats are tight (4.55-4.57s) and the bimodal observation no longer applies. Other sglang image cells were independently re-verified stable (<2% delta). Root cause of the compile-mode bimodality is tracked separately. A video-case fast/slow pattern initially attributed to the same effect turned out NOT to be bimodal: it is the deterministic concurrency slowdown documented in concurrency_slowdown_note. Method note: sustained full load on this machine always settles at ~1455MHz under the 700W power cap (both frameworks, all windows, 94-98% of samples) -- clock state is a constant background here, not a per-cell variable; clock traces for the reruns are archived alongside the raw JSONs.",
-    "post_run_fixes_note": "2026-07-29 follow-up: the initial pass surfaced two sglang bugs and one measured mis-configuration; all three were fixed and the affected cells re-measured on the same machine and sglang base (161fffe) plus the fix commit. (1) ideogram4 and Wan2.2-A14B crashed reading (1,)-placeholder weights -- root-caused to offload_during_compile's residency interaction and fixed in sgl-project/sglang#32743; ideogram4 now measures 4.00s and wan22 T2V 209.9s (fastest of all frameworks). (2) qwen no-CFG was published at 5.74s under torch.compile, which is a measured net loss for this model (inductor GEMMs lose to cublas nvjet, and the #31849 dynamo workaround additionally drops the fused qk-norm-rope kernel when compiling); the profile now runs true eager at 4.56s, near-parity with vLLM's 4.48s. (3) The two Wan2.2-A14B cells previously published as 80GB capacity failures (I2V load, T2V throughput decode OOM) were re-audited from the OOM messages themselves and turned out to be shared-machine contamination (concurrent experiments / an orphan worker from the previous case holding 5.93GiB); clean reruns on the same base+fix pass and beat LightX2V on all four A14B cells (raw-rerun-20260729/).",
-    "harness_step_fix_note": "The wan21_i2v throughput cells published on 2026-07-29 were wrong because of a bug in THIS benchmark harness, not in any framework: bench_serving's multipart video-submit branch dropped num_inference_steps, so the sglang throughput requests ran the model default 50 steps against a 40-step case definition (the single_e2e path sent it correctly). Per-step time was identical in both modes -- 66.1s/50 steps == 52.8s/40 steps == 1.32s/step -- so it read as a 26% 'concurrency slowdown' and cost three days of investigation before the runlog step counters (40/40 vs 50/50) settled it. Fixed, both cells re-measured at 40 steps, and the same omission in the image-edit multipart branch fixed too (that one happened to be harmless because the model default equalled the case). Competitor paths were audited and send steps correctly, so no competitor number was inflated. A controlled same-server serial->conc2->serial A-B-A confirmed sglang has no per-step concurrency penalty at all."
+    "model_revisions": {
+      "Lightricks/LTX-2": "dfcc21083",
+      "Lightricks/LTX-2.3": "5948be4ce",
+      "MiniMaxAI/MiniMax-H3": "42ed227ee",
+      "Qwen/Qwen-Image-2512": "25468b98e",
+      "Qwen/Qwen-Image-Edit-2511": "6f3ccc0b5",
+      "Tongyi-MAI/Z-Image-Turbo": "f332072aa",
+      "Wan-AI/Wan2.2-T2V-A14B": "c8c270b13",
+      "Wan-AI/Wan2.2-T2V-A14B-Diffusers": "5be7df961",
+      "black-forest-labs/FLUX.1-dev": "3de623fc3",
+      "black-forest-labs/FLUX.2-dev": "26afe3a78",
+      "ideogram-ai/ideogram-4-fp8": "ee79a7237",
+      "nvidia/Cosmos3-Nano": "7a312c868"
+    },
+    "harness": "Every cell was re-measured after three harness fixes that move the number: the HTTP client read responses 10 KiB at a time; warmup converged on a reduced-step shape instead of the measured one; and measured requests carried a perf dump only sglang was asked for (+233ms on the first request, +1.35% on the rest). The earlier cells were discarded rather than merged.",
+    "stacks": "Dependency versions, which this run's artifacts predate recording: vLLM-Omni torch 2.13.0 / transformers 5.14.1 / diffusers 0.40.0 / huggingface_hub 1.31.0; LightX2V torch 2.11.0 / transformers 5.17.0 / diffusers 0.40.0 / hub 1.31.0; trtllm-visual torch 2.12.0 / transformers 5.5.4 / diffusers 0.39.0 / hub 1.16.1. LightX2V moved off a transformers<5 pin during this round, which is what un-broke its FLUX.2 cell.",
+    "jitter": "This box produces an occasional slow request in any framework -- 2 in 40 at +21% and +34% with no instrumentation at all. Cells whose repeats spread 25% or more are marked and their samples listed.",
+    "zimage_sglang": "The Z-Image-Turbo sglang cell is published as measured (0.678s, samples 0.68/0.474/0.678/0.68/0.673) but is NOT reproducible: 22 later measurements across 20 freshly started servers on this same box, with the same command, all landed at 0.467-0.487s, which would win the cell rather than lose it. The 0.678s mode has been observed once. Treat this cell as an unexplained outlier pending a controlled re-measure, not as sglang's Z-Image latency."
   },
   "framework_order": [
     "sglang",
@@ -507,23 +521,23 @@
   ],
   "sections": [
     {
-      "id": "h200x4-fair-20260825_single_e2e",
-      "run": "h200x4-fair-20260825",
-      "run_label": "H200 cross-framework (latest-vs-latest)",
-      "date": "2026-08-26",
-      "gpu": "4x NVIDIA H200 143GB",
-      "title": "H200 cross-framework (latest-vs-latest)",
-      "subtitle": "Steady-state single-request latency, best lossless config per framework (compile on, no caches, no quantization). SGLang-Diffusion fastest in 8/9 comparable cases.",
+      "id": "b200x4-final-20260913_single_e2e",
+      "run": "b200x4-final-20260913",
+      "run_label": "4xB200 cross-framework (latest-vs-latest, every cell re-measured on one harness)",
+      "date": "2026-09-13",
+      "gpu": "4x NVIDIA B200 183GB",
+      "title": "4xB200 cross-framework (latest-vs-latest, every cell re-measured on one harness)",
+      "subtitle": "Steady-state single-request latency, best lossless config per framework (compile on, no caches, no quantization). SGLang-Diffusion fastest in 12/13 comparable cases.",
       "mode": "single_e2e",
       "framework_versions": {
-        "sglang": "0.5.18 @ a1f9508dd",
-        "vllm-omni": "vllm-omni 0.27.0rc2.dev180+gd6b66faba + vllm 0.27.1",
-        "lightx2v": "lightx2v 0.1.0",
-        "trtllm-visual": "tensorrt_llm 1.3.0rc24"
+        "sglang": "0.5.19 @ 7b89b9516",
+        "vllm-omni": "vllm-omni 0.29.0rc2.dev43+g7e520f9cc + vllm 0.29.0",
+        "lightx2v": "lightx2v 0.5.0 @ 9bf4d39ac",
+        "trtllm-visual": "tensorrt_llm 1.3.0rc26"
       },
       "summary": {
-        "sglang_wins": 8,
-        "comparable": 9
+        "sglang_wins": 12,
+        "comparable": 13
       },
       "rows": [
         {
@@ -535,14 +549,17 @@
           "cells": {
             "sglang": {
               "gpus": 2,
-              "profile": "h100-h200-2gpu-tp-eager",
+              "profile": "blackwell-2gpu-tp-eager",
               "status": "ok",
-              "latency_s": 4.263,
+              "latency_s": 2.395,
               "ratio_to_sglang": 1.0
             },
             "vllm-omni": {
-              "status": "failed",
-              "reason": "vllm-omni server exited before health check passed (exit 1)"
+              "gpus": 2,
+              "profile": "blackwell-2gpu-tp-eager",
+              "status": "ok",
+              "latency_s": 3.35,
+              "ratio_to_sglang": 1.399
             },
             "lightx2v": {
               "status": "unsupported",
@@ -550,14 +567,14 @@
             },
             "trtllm-visual": {
               "gpus": 2,
-              "profile": "h100-h200-2gpu-tp-speed",
+              "profile": "default",
               "status": "ok",
-              "latency_s": 7.029,
-              "ratio_to_sglang": 1.649
+              "latency_s": 3.519,
+              "ratio_to_sglang": 1.469
             }
           },
           "winner": "sglang",
-          "winner_speedup": "1.65x"
+          "winner_speedup": "1.40x"
         },
         {
           "case_id": "flux2_dev_t2i_1024",
@@ -568,25 +585,35 @@
           "cells": {
             "sglang": {
               "gpus": 2,
-              "profile": "h100-h200-2gpu-tp-eager",
+              "profile": "blackwell-2gpu-tp-eager",
               "status": "ok",
-              "latency_s": 12.884,
+              "latency_s": 6.854,
               "ratio_to_sglang": 1.0
             },
             "vllm-omni": {
-              "status": "failed",
-              "reason": "vllm-omni server exited before health check passed (exit 1)"
+              "gpus": 2,
+              "profile": "blackwell-2gpu-tp-eager",
+              "status": "ok",
+              "latency_s": 9.792,
+              "ratio_to_sglang": 1.429
             },
             "lightx2v": {
-              "status": "failed",
-              "reason": "lightx2v server exited before health check passed (exit 1)"
+              "gpus": 2,
+              "profile": "blackwell-fa2-flashinfer",
+              "status": "ok",
+              "latency_s": 16.545,
+              "ratio_to_sglang": 2.414
             },
             "trtllm-visual": {
-              "status": "failed",
-              "reason": "trtllm-visual server exited before health check passed (exit 1)"
+              "gpus": 2,
+              "profile": "default",
+              "status": "ok",
+              "latency_s": 10.963,
+              "ratio_to_sglang": 1.6
             }
           },
-          "winner": "n/a"
+          "winner": "sglang",
+          "winner_speedup": "1.43x"
         },
         {
           "case_id": "qwen_image_2512_t2i_1024",
@@ -597,17 +624,17 @@
           "cells": {
             "sglang": {
               "gpus": 2,
-              "profile": "h200-2gpu-tp-speed-eager",
+              "profile": "default",
               "status": "ok",
-              "latency_s": 4.975,
+              "latency_s": 2.623,
               "ratio_to_sglang": 1.0
             },
             "vllm-omni": {
               "gpus": 2,
-              "profile": "default",
+              "profile": "blackwell-cudnn",
               "status": "ok",
-              "latency_s": 4.362,
-              "ratio_to_sglang": 0.877
+              "latency_s": 2.731,
+              "ratio_to_sglang": 1.041
             },
             "lightx2v": {
               "status": "unsupported",
@@ -615,14 +642,14 @@
             },
             "trtllm-visual": {
               "gpus": 2,
-              "profile": "h100-h200-2gpu-tp-speed",
+              "profile": "default",
               "status": "ok",
-              "latency_s": 6.718,
-              "ratio_to_sglang": 1.35
+              "latency_s": 3.468,
+              "ratio_to_sglang": 1.322
             }
           },
-          "winner": "vllm-omni",
-          "winner_speedup": "1.14x"
+          "winner": "sglang",
+          "winner_speedup": "1.04x"
         },
         {
           "case_id": "qwen_image_2512_t2i_1024_truecfg",
@@ -633,17 +660,17 @@
           "cells": {
             "sglang": {
               "gpus": 2,
-              "profile": "h100-h200-2gpu-tp-speed-eager",
+              "profile": "default",
               "status": "ok",
-              "latency_s": 6.433,
+              "latency_s": 4.871,
               "ratio_to_sglang": 1.0
             },
             "vllm-omni": {
               "gpus": 2,
-              "profile": "default",
+              "profile": "blackwell-cudnn",
               "status": "ok",
-              "latency_s": 8.564,
-              "ratio_to_sglang": 1.331
+              "latency_s": 5.325,
+              "ratio_to_sglang": 1.093
             },
             "lightx2v": {
               "status": "unsupported",
@@ -655,7 +682,7 @@
             }
           },
           "winner": "sglang",
-          "winner_speedup": "1.33x"
+          "winner_speedup": "1.09x"
         },
         {
           "case_id": "qwen_image_edit_2511",
@@ -668,15 +695,15 @@
               "gpus": 2,
               "profile": "default",
               "status": "ok",
-              "latency_s": 7.408,
+              "latency_s": 4.244,
               "ratio_to_sglang": 1.0
             },
             "vllm-omni": {
               "gpus": 2,
-              "profile": "default",
+              "profile": "blackwell-cudnn",
               "status": "ok",
-              "latency_s": 7.727,
-              "ratio_to_sglang": 1.043
+              "latency_s": 4.462,
+              "ratio_to_sglang": 1.051
             },
             "lightx2v": {
               "status": "unsupported",
@@ -688,7 +715,7 @@
             }
           },
           "winner": "sglang",
-          "winner_speedup": "1.04x"
+          "winner_speedup": "1.05x"
         },
         {
           "case_id": "zimage_turbo_t2i_1024",
@@ -699,32 +726,32 @@
           "cells": {
             "sglang": {
               "gpus": 2,
-              "profile": "h100-h200-2gpu-tp-resident-eager",
+              "profile": "default",
               "status": "ok",
-              "latency_s": 0.647,
+              "latency_s": 0.678,
               "ratio_to_sglang": 1.0
             },
             "vllm-omni": {
               "gpus": 2,
-              "profile": "default",
+              "profile": "blackwell-flashinfer",
               "status": "ok",
-              "latency_s": 0.743,
-              "ratio_to_sglang": 1.148
+              "latency_s": 0.497,
+              "ratio_to_sglang": 0.733
             },
             "lightx2v": {
               "gpus": 2,
-              "profile": "h200-fa3-flashinfer",
+              "profile": "blackwell-fa2",
               "status": "ok",
-              "latency_s": 2.008,
-              "ratio_to_sglang": 3.104
+              "latency_s": 1.008,
+              "ratio_to_sglang": 1.487
             },
             "trtllm-visual": {
               "status": "not_run",
               "reason": "Not yet classified. Confirm framework support and add a validated command profile, or mark unsupported."
             }
           },
-          "winner": "sglang",
-          "winner_speedup": "1.15x"
+          "winner": "vllm-omni",
+          "winner_speedup": "1.36x"
         },
         {
           "case_id": "ideogram4_t2i_1024_2gpu_tp",
@@ -735,9 +762,9 @@
           "cells": {
             "sglang": {
               "gpus": 2,
-              "profile": "h100-h200-2gpu-tp-speed",
+              "profile": "default",
               "status": "ok",
-              "latency_s": 3.764,
+              "latency_s": 3.422,
               "ratio_to_sglang": 1.0
             },
             "vllm-omni": {
@@ -766,22 +793,22 @@
               "gpus": 4,
               "profile": "default",
               "status": "ok",
-              "latency_s": 210.866,
+              "latency_s": 669.376,
               "ratio_to_sglang": 1.0
             },
             "vllm-omni": {
               "gpus": 4,
-              "profile": "h200-4gpu-tp",
+              "profile": "blackwell-cudnn",
               "status": "ok",
-              "latency_s": 250.575,
-              "ratio_to_sglang": 1.188
+              "latency_s": 905.948,
+              "ratio_to_sglang": 1.353
             },
             "lightx2v": {
               "gpus": 4,
-              "profile": "h200-fa3",
+              "profile": "blackwell-fa2",
               "status": "ok",
-              "latency_s": 216.9,
-              "ratio_to_sglang": 1.029
+              "latency_s": 1002.334,
+              "ratio_to_sglang": 1.497
             },
             "trtllm-visual": {
               "status": "not_run",
@@ -789,7 +816,7 @@
             }
           },
           "winner": "sglang",
-          "winner_speedup": "1.03x"
+          "winner_speedup": "1.35x"
         },
         {
           "case_id": "ltx2_twostage_t2v",
@@ -800,25 +827,32 @@
           "cells": {
             "sglang": {
               "gpus": 2,
-              "profile": "h200-2gpu",
+              "profile": "default",
               "status": "ok",
-              "latency_s": 11.022,
+              "latency_s": 6.244,
               "ratio_to_sglang": 1.0
             },
             "vllm-omni": {
-              "status": "failed",
-              "reason": "vllm-omni server exited before health check passed (exit 1)"
+              "gpus": 2,
+              "profile": "blackwell-cudnn",
+              "status": "ok",
+              "latency_s": 15.546,
+              "ratio_to_sglang": 2.49
             },
             "lightx2v": {
-              "status": "failed",
-              "reason": "LightX2V task FAILED: {'task_id': '0244-SM9R-UXQK-29ZQ-AJHI', 'status': 'failed', 'start_time': '2026-08-25T17:50:22.340124', 'end_time': '2026-08-25T18:01:23.172363', 'error': 'CUDA out of memory. Tried to allocate 736.00 MiB. GPU 0 has a total capacity of 139.80 GiB of which 725.62 MiB is free. Process 61502 has 1.86 GiB memory in use. Including non-PyTorch memory, this process has 137.21 GiB memory in use. Of the allocated memory 135.15 GiB is allocated by PyTorch, and 545.17 MiB is reserved by PyTorch but unallocated. If reserved but unallocated memory is large try setting PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True to avoid fragmentation.  See documentation for Memory Management  (https://docs.pytorch.org/docs/stable/notes/cuda.html#optimizing-memory-usage-with-pytorch-cuda-alloc-conf)', 'error_type': 'OutOfMemoryError', 'save_result_path': '/tmp/lightx2v_ltx2_twostage_t2v_1787680222337.mp4'}"
+              "gpus": 2,
+              "profile": "blackwell-fa2",
+              "status": "ok",
+              "latency_s": 34.673,
+              "ratio_to_sglang": 5.553
             },
             "trtllm-visual": {
               "status": "not_run",
               "reason": "Not yet classified. Confirm framework support and add a validated command profile, or mark unsupported."
             }
           },
-          "winner": "n/a"
+          "winner": "sglang",
+          "winner_speedup": "2.49x"
         },
         {
           "case_id": "ltx2.3_twostage_t2v_2gpus",
@@ -829,9 +863,9 @@
           "cells": {
             "sglang": {
               "gpus": 2,
-              "profile": "h200-2gpu",
+              "profile": "default",
               "status": "ok",
-              "latency_s": 11.025,
+              "latency_s": 7.056,
               "ratio_to_sglang": 1.0
             },
             "vllm-omni": {
@@ -840,7 +874,7 @@
             },
             "lightx2v": {
               "status": "failed",
-              "reason": "OOM on H100 80GB: LTX-2.3 22B two-stage 121-frame t2av peak exceeds 80GB even with every lossless lever (seq_p_size=2 activation sharding + block cpu_offload + Gemma/VAE offload + exact flash_attn3). Upstream profiles target H200 141GB. command_profiles below are the best-attempted lossless config, kept for provenance."
+              "reason": "OOM on H100 80GB: LTX-2.3 22B two-stage 121-frame t2av peak exceeds 80GB even with every lossless lever (seq_p_size=2 activation sharding + block cpu_offload + Gemma/VAE offload + exact flash_attn3). Upstream profiles target H200 141GB. THIS VERDICT IS H100-SPECIFIC AND IS BEING APPLIED GLOBALLY -- `status` has no per-hardware form, so the cell is skipped everywhere, including the 4xB200 box (183359 MiB/GPU, ~179GB) where the stated constraint does not hold and upstream's own H200 target is exceeded. Retest on Blackwell before trusting the classification; if it runs, `status` needs a per-hardware form before this can be flipped, or H100 runs will spend ~40 min per attempt re-discovering the OOM. command_profiles below are the best-attempted lossless config, kept for provenance."
             },
             "trtllm-visual": {
               "status": "not_run",
@@ -858,14 +892,17 @@
           "cells": {
             "sglang": {
               "gpus": 2,
-              "profile": "h200-2gpu-tp-fa",
+              "profile": "blackwell-2gpu-cfg-parallel",
               "status": "ok",
-              "latency_s": 1.526,
+              "latency_s": 0.579,
               "ratio_to_sglang": 1.0
             },
             "vllm-omni": {
-              "status": "failed",
-              "reason": "vllm-omni server exited before health check passed (exit 2)"
+              "gpus": 2,
+              "profile": "blackwell-cudnn",
+              "status": "ok",
+              "latency_s": 0.656,
+              "ratio_to_sglang": 1.133
             },
             "lightx2v": {
               "status": "unsupported",
@@ -873,10 +910,11 @@
             },
             "trtllm-visual": {
               "status": "failed",
-              "reason": "trtllm-visual server exited before health check passed (exit 1)"
+              "reason": "Hangs at startup on the current Cosmos3-Nano checkpoint: trtllm-serve reaches 'Orchestrator is creating IPC executor' / 'using MpiPoolSession to spawn MPI processes' and then produces no output at all -- 40 min in the matrix, and 20 min each at tp=1 and tp=2 in a dedicated probe, so it is not a multi-GPU path issue. The startup log warns 'You are using a model of type cosmos3_omni to instantiate a model of type cosmos3': the checkpoint was re-uploaded 2026-08-26 and declares cosmos3_omni, which tensorrt-llm 1.3.0rc26 does not know. Marked failed rather than left supported so a run does not spend 40 minutes per attempt reaching the same hang. Re-test when trtllm adds cosmos3_omni; the profile is kept below."
             }
           },
-          "winner": "n/a"
+          "winner": "sglang",
+          "winner_speedup": "1.13x"
         },
         {
           "case_id": "cosmos3_nano_t2v_720p_189f",
@@ -887,17 +925,17 @@
           "cells": {
             "sglang": {
               "gpus": 4,
-              "profile": "h200-4gpu-cfg-ulysses",
+              "profile": "default",
               "status": "ok",
-              "latency_s": 53.091,
+              "latency_s": 214.899,
               "ratio_to_sglang": 1.0
             },
             "vllm-omni": {
               "gpus": 4,
-              "profile": "h200-4gpu-cfg-ulysses",
+              "profile": "blackwell-cudnn",
               "status": "ok",
-              "latency_s": 68.054,
-              "ratio_to_sglang": 1.282
+              "latency_s": 229.107,
+              "ratio_to_sglang": 1.066
             },
             "lightx2v": {
               "status": "unsupported",
@@ -909,7 +947,7 @@
             }
           },
           "winner": "sglang",
-          "winner_speedup": "1.28x"
+          "winner_speedup": "1.07x"
         },
         {
           "case_id": "cosmos3_nano_i2v_720p_189f",
@@ -920,17 +958,17 @@
           "cells": {
             "sglang": {
               "gpus": 4,
-              "profile": "h200-4gpu-cfg-ulysses",
+              "profile": "default",
               "status": "ok",
-              "latency_s": 53.592,
+              "latency_s": 216.005,
               "ratio_to_sglang": 1.0
             },
             "vllm-omni": {
               "gpus": 4,
-              "profile": "h200-4gpu-cfg-ulysses",
+              "profile": "blackwell-cudnn",
               "status": "ok",
-              "latency_s": 68.632,
-              "ratio_to_sglang": 1.281
+              "latency_s": 232.072,
+              "ratio_to_sglang": 1.074
             },
             "lightx2v": {
               "status": "unsupported",
@@ -942,7 +980,7 @@
             }
           },
           "winner": "sglang",
-          "winner_speedup": "1.28x"
+          "winner_speedup": "1.07x"
         },
         {
           "case_id": "minimax_h3_t2va_5s",
@@ -953,17 +991,17 @@
           "cells": {
             "sglang": {
               "gpus": 2,
-              "profile": "default",
+              "profile": "b200-2gpu",
               "status": "ok",
-              "latency_s": 146.734,
+              "latency_s": 73.36,
               "ratio_to_sglang": 1.0
             },
             "vllm-omni": {
               "gpus": 2,
-              "profile": "default",
+              "profile": "b200-2gpu",
               "status": "ok",
-              "latency_s": 176.777,
-              "ratio_to_sglang": 1.205
+              "latency_s": 76.878,
+              "ratio_to_sglang": 1.048
             },
             "lightx2v": {
               "status": "unsupported",
@@ -975,7 +1013,7 @@
             }
           },
           "winner": "sglang",
-          "winner_speedup": "1.20x"
+          "winner_speedup": "1.05x"
         },
         {
           "case_id": "minimax_h3_ref2va_5s",
@@ -985,10 +1023,18 @@
           "mode": "single_e2e",
           "cells": {
             "sglang": {
-              "status": "not_run"
+              "gpus": 2,
+              "profile": "b200-2gpu",
+              "status": "ok",
+              "latency_s": 112.486,
+              "ratio_to_sglang": 1.0
             },
             "vllm-omni": {
-              "status": "not_run"
+              "gpus": 2,
+              "profile": "b200-2gpu",
+              "status": "ok",
+              "latency_s": 125.005,
+              "ratio_to_sglang": 1.111
             },
             "lightx2v": {
               "status": "unsupported",
@@ -999,30 +1045,31 @@
               "reason": "trtllm-visual's tracked scope in this harness is image cases; H3 is a video+audio model."
             }
           },
-          "winner": "n/a"
+          "winner": "sglang",
+          "winner_speedup": "1.11x"
         }
       ],
-      "reproduce": "scripts/biweekly_fair_bench.sh",
+      "reproduce": "scripts/run_b200_final_20260913.sh",
       "reproduce_link": {
-        "path": "scripts/biweekly_fair_bench.sh",
-        "ref": "598a9b23a",
-        "url": "https://github.com/mickqian/diffusion-bench-framework/blob/598a9b23a6ea831f5abafa44e0ec8bbcd8e23fcb/scripts/biweekly_fair_bench.sh"
+        "path": "scripts/run_b200_final_20260913.sh",
+        "ref": "0de4ae470",
+        "url": "https://github.com/mickqian/diffusion-bench-framework/blob/0de4ae47018f66c4cad34d7a0352ab07b9f3ddf6/scripts/run_b200_final_20260913.sh"
       }
     },
     {
-      "id": "h200x4-fair-20260825_throughput",
-      "run": "h200x4-fair-20260825",
-      "run_label": "H200 cross-framework (latest-vs-latest)",
-      "date": "2026-08-26",
-      "gpu": "4x NVIDIA H200 143GB",
-      "title": "H200 cross-framework (latest-vs-latest) — throughput",
+      "id": "b200x4-final-20260913_throughput",
+      "run": "b200x4-final-20260913",
+      "run_label": "4xB200 cross-framework (latest-vs-latest, every cell re-measured on one harness)",
+      "date": "2026-09-13",
+      "gpu": "4x NVIDIA B200 183GB",
+      "title": "4xB200 cross-framework (latest-vs-latest, every cell re-measured on one harness) — throughput",
       "subtitle": "High-pressure throughput on a representative pair (one popular image model, one video+audio case) — the matrix is deliberately not swept, see configs/benchmark/workloads.json. SGLang-Diffusion highest QPS in 2/2 comparable cases.",
       "mode": "throughput",
       "framework_versions": {
-        "sglang": "0.5.18 @ a1f9508dd",
-        "vllm-omni": "vllm-omni 0.27.0rc2.dev180+gd6b66faba + vllm 0.27.1",
-        "lightx2v": "lightx2v 0.1.0",
-        "trtllm-visual": "tensorrt_llm 1.3.0rc24"
+        "sglang": "0.5.19 @ 7b89b9516",
+        "vllm-omni": "vllm-omni 0.29.0rc2.dev43+g7e520f9cc + vllm 0.29.0",
+        "lightx2v": "lightx2v 0.5.0 @ 9bf4d39ac",
+        "trtllm-visual": "tensorrt_llm 1.3.0rc26"
       },
       "summary": {
         "sglang_wins": 2,
@@ -1038,16 +1085,21 @@
           "cells": {
             "sglang": {
               "gpus": 2,
-              "profile": "h100-h200-2gpu-tp-eager",
+              "profile": "blackwell-2gpu-tp-eager",
               "status": "ok",
-              "qps": 0.2356,
+              "qps": 0.4168,
               "num_requests": 4,
               "concurrency": 2,
               "ratio_to_sglang": 1.0
             },
             "vllm-omni": {
-              "status": "failed",
-              "reason": "vllm-omni server exited before health check passed (exit 1)"
+              "gpus": 2,
+              "profile": "blackwell-2gpu-tp-eager",
+              "status": "ok",
+              "qps": 0.3053,
+              "num_requests": 4,
+              "concurrency": 2,
+              "ratio_to_sglang": 0.732
             },
             "lightx2v": {
               "status": "unsupported",
@@ -1055,16 +1107,16 @@
             },
             "trtllm-visual": {
               "gpus": 2,
-              "profile": "h100-h200-2gpu-tp-speed",
+              "profile": "default",
               "status": "ok",
-              "qps": 0.1422,
+              "qps": 0.2902,
               "num_requests": 4,
               "concurrency": 2,
-              "ratio_to_sglang": 0.604
+              "ratio_to_sglang": 0.696
             }
           },
           "winner": "sglang",
-          "winner_speedup": "1.66x"
+          "winner_speedup": "1.37x"
         },
         {
           "case_id": "minimax_h3_t2va_5s",
@@ -1075,21 +1127,21 @@
           "cells": {
             "sglang": {
               "gpus": 2,
-              "profile": "default",
+              "profile": "b200-2gpu",
               "status": "ok",
-              "qps": 0.0068,
+              "qps": 0.0136,
               "num_requests": 4,
               "concurrency": 2,
               "ratio_to_sglang": 1.0
             },
             "vllm-omni": {
               "gpus": 2,
-              "profile": "default",
+              "profile": "b200-2gpu",
               "status": "ok",
-              "qps": 0.0058,
+              "qps": 0.0131,
               "num_requests": 4,
               "concurrency": 2,
-              "ratio_to_sglang": 0.853
+              "ratio_to_sglang": 0.963
             },
             "lightx2v": {
               "status": "unsupported",
@@ -1101,14 +1153,14 @@
             }
           },
           "winner": "sglang",
-          "winner_speedup": "1.17x"
+          "winner_speedup": "1.04x"
         }
       ],
-      "reproduce": "scripts/biweekly_fair_bench.sh",
+      "reproduce": "scripts/run_b200_final_20260913.sh",
       "reproduce_link": {
-        "path": "scripts/biweekly_fair_bench.sh",
-        "ref": "598a9b23a",
-        "url": "https://github.com/mickqian/diffusion-bench-framework/blob/598a9b23a6ea831f5abafa44e0ec8bbcd8e23fcb/scripts/biweekly_fair_bench.sh"
+        "path": "scripts/run_b200_final_20260913.sh",
+        "ref": "0de4ae470",
+        "url": "https://github.com/mickqian/diffusion-bench-framework/blob/0de4ae47018f66c4cad34d7a0352ab07b9f3ddf6/scripts/run_b200_final_20260913.sh"
       }
     }
   ]
