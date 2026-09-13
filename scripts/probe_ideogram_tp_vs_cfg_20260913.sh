@@ -21,7 +21,11 @@
 #
 # Written for bench-0912 (4xB200).
 set -u
-PORT_BASE="${PORT_BASE:-66001}"
+# 66001 was here. TCP ports stop at 65535, so `--port 66003` was silently
+# ignored: sglang bound 10.13.114.105:60117 instead, the health poll hammered
+# 127.0.0.1:66003 for its full 1200s budget, and the probe reported "never
+# became healthy" about a server that had been serving since minute three.
+PORT_BASE="${PORT_BASE:-46001}"
 REQUESTS="${REQUESTS:-6}"
 export HF_HOME=/cluster-storage/models HUGGINGFACE_HUB_CACHE=/cluster-storage/models
 export HF_TOKEN="$(cat /personal/bench0912/.hftoken)"
@@ -44,6 +48,7 @@ i=0
 for ARM in "tp:--tp-size 2" "cfgpar:--tp-size 1 --cfg-parallel-size 2"; do
   tag="${ARM%%:*}"; extra="${ARM#*:}"
   i=$((i+1)); PORT=$((PORT_BASE + i*2))
+  [ "$PORT" -gt 65535 ] && { echo "    port $PORT is out of range"; exit 1; }
   echo "--- arm $tag ($extra) on port $PORT"
   nvidia-smi --query-compute-apps=pid --format=csv,noheader -i 0,1 2>/dev/null | sort -u | xargs -r kill -9 2>/dev/null
   sleep 5
@@ -57,9 +62,17 @@ for ARM in "tp:--tp-size 2" "cfgpar:--tp-size 1 --cfg-parallel-size 2"; do
   # ready to roll" 3.5 minutes in, inside a 900s budget. Treating "the pid I
   # captured looks gone" as "the service failed" is a false negative the health
   # poll already covers: a server that truly died just times out.
-  up=0; waited=0
+  # A server that never starts times out here. A server that starts somewhere
+  # this poll cannot reach looks IDENTICAL for the whole budget, so treat its
+  # own readiness line as the signal that waiting longer is pointless.
+  up=0; waited=0; LOG="/personal/bench0912/ideogram_${tag}.log"
   for _ in $(seq 1 240); do
     curl -sf "http://127.0.0.1:$PORT/health" >/dev/null 2>&1 && { up=1; break; }
+    if grep -q "fired up and ready to roll" "$LOG" 2>/dev/null; then
+      echo "    server reports ready but 127.0.0.1:$PORT does not answer; it bound:"
+      (ss -ltnp 2>/dev/null || netstat -ltnp 2>/dev/null) | grep -i sgl | head -3 | sed "s/^/      /"
+      break
+    fi
     sleep 5; waited=$((waited + 5))
   done
   if [ "$up" != 1 ]; then
