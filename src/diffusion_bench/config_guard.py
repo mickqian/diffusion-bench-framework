@@ -12,6 +12,10 @@ is one of the hardware tokens in the profile NAME or in any value of its
 ``hardware`` field; the first matching non-default profile in dict order wins,
 else ``default``, else the first profile.
 If you change the runtime selection, change this mirror in the same commit.
+
+``apply_hardware_statuses`` at the bottom is the exception: per-hardware case
+classification has ONE implementation, which the runner, the build lint and the
+report renderers all import. Nothing mirrors it.
 """
 
 from __future__ import annotations
@@ -218,3 +222,104 @@ def verify_merged_commands(
                     f"config changed after the run; re-run before publishing"
                 )
     return warnings
+
+
+# --- per-hardware framework classification ---------------------------------
+#
+# A case's framework ``status`` is one global verdict, which conflates "this
+# framework cannot run this case" with "it could not run it on the box we
+# tried". ``status_by_hardware`` splits the two: the entry for the first
+# matching hardware candidate wins, otherwise the global ``status`` applies.
+# Born from LTX-2.3 two-stage, whose lightx2v cell was classified ``failed``
+# for an 80GB OOM and so was skipped on a 179GB-per-GPU B200 box too.
+#
+# Keys are HARDWARE_TOKENS -- the same vocabulary the runtime derives from the
+# GPU names, that ``command_profiles[*].hardware`` matches against, and that
+# the build's POLICY_HARDWARE is drawn from. One vocabulary, not two.
+
+
+def resolve_status(entry: dict, candidates: list[str]) -> tuple[str, str]:
+    """(status, reason) for a SOURCE case-file framework entry on this hardware."""
+    by_hardware = entry.get("status_by_hardware") or {}
+    for candidate in candidates:
+        override = by_hardware.get(candidate)
+        if override:
+            return str(override.get("status") or ""), str(override.get("reason") or "")
+    return str(entry.get("status") or ""), str(entry.get("reason") or "")
+
+
+def apply_hardware_statuses(
+    config: dict, candidates: list[str]
+) -> tuple[dict, list[str]]:
+    """Flatten a BUILT config's per-hardware classifications for one box.
+
+    Returns (config, notes). Called once at every entry point that pairs a
+    config with real hardware -- the runner, the dashboard, the Pages export --
+    so everything downstream sees a plain single-status config and needs no
+    hardware awareness of its own. Not a mirror of anything: there is one
+    implementation, and all three callers use it.
+
+    A framework that is not ``supported`` here is dropped from ``frameworks``
+    (the runner never attempts it) and folded into ``report_framework_statuses``
+    / ``report_framework_reasons`` (the report still classifies the cell, with
+    its reason, instead of silently showing ``not_run``).
+    """
+    notes: list[str] = []
+    cases = []
+    for case in config.get("cases") or []:
+        overrides = {}
+        for framework, by_hardware in (
+            case.get("framework_status_by_hardware") or {}
+        ).items():
+            for candidate in candidates:
+                if candidate in by_hardware:
+                    overrides[framework] = (candidate, by_hardware[candidate])
+                    break
+        if not overrides:
+            cases.append(case)
+            continue
+
+        frameworks = dict(case.get("frameworks") or {})
+        statuses = dict(case.get("report_framework_statuses") or {})
+        reasons = dict(case.get("report_framework_reasons") or {})
+        for framework, (hardware, override) in sorted(overrides.items()):
+            status = str(override.get("status") or "")
+            reason = str(override.get("reason") or "")
+            if status == "supported":
+                statuses.pop(framework, None)
+                reasons.pop(framework, None)
+            else:
+                frameworks.pop(framework, None)
+                statuses[framework] = status
+                if reason:
+                    reasons[framework] = reason
+            notes.append(
+                f"{case.get('id')}/{framework}: {status} on {hardware} "
+                f"(per-hardware classification){': ' + reason if reason else ''}"
+            )
+        # A body is published as soon as SOME hardware supports it, so on the
+        # rest the baseline classification has to drop it too — otherwise the
+        # runner would attempt a cell the case calls unsupported here.
+        for framework in list(frameworks):
+            if framework in statuses:
+                frameworks.pop(framework)
+
+        resolved = {
+            key: value
+            for key, value in case.items()
+            if key != "framework_status_by_hardware"
+        }
+        resolved["frameworks"] = frameworks
+        for key, value in (
+            ("report_framework_statuses", statuses),
+            ("report_framework_reasons", reasons),
+        ):
+            if value:
+                resolved[key] = value
+            else:
+                resolved.pop(key, None)
+        cases.append(resolved)
+
+    if not notes:
+        return config, notes
+    return {**config, "cases": cases}, notes

@@ -11,6 +11,8 @@ from __future__ import annotations
 
 from typing import Any
 
+from diffusion_bench.config_guard import apply_hardware_statuses, hardware_candidates
+
 REPO_URL = "https://github.com/mickqian/diffusion-bench-framework"
 
 FRAMEWORK_ORDER = ("sglang", "vllm-omni", "lightx2v", "trtllm-visual", "comfyui", "fastvideo")
@@ -400,7 +402,13 @@ def build_sections(
     date: str,
     reproduce: str | None = None,
 ) -> list[dict]:
-    config_cases = {c["id"]: c for c in config["cases"]}
+    # Resolve per-hardware classifications against the run's own hardware, so a
+    # cell the runner skipped by classification publishes as that status with its
+    # reason rather than a bare `not_run`.
+    resolved_config, _ = apply_hardware_statuses(
+        config, hardware_candidates(merged.get("hardware"))
+    )
+    config_cases = {c["id"]: c for c in resolved_config["cases"]}
     case_order = [c["id"] for c in config["cases"]]
     versions = framework_versions(merged)
     sections = []

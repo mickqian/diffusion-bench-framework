@@ -35,6 +35,18 @@ If a SGLang profile OOMs or fails on one hardware class, add a hardware-specific
 
 **Gotcha — profile selection picks the FIRST hardware match, not `default`.** `--hardware-profile <hw>` selects the first profile whose `hardware` list contains `<hw>` (falling back to `default` only if none match). So: (1) editing `default` is a no-op when a hardware-specific profile matches — patch the profile that is actually selected; (2) a stale or broken hardware profile silently *shadows* a newer good one for the same hardware (bit us: a known-OOM `h100-1gpu` shadowed a working `h100-2gpu-tp`; a `--extra_visual_gen_options` added only to `default` never ran because `h100-h200-2gpu-tp-speed` was selected). When adding/patching, dump the resolved profile for the target hardware and confirm it is the one you changed.
 
+## Per-Hardware Status
+
+A framework's `status` is one global verdict. When the verdict is really the *box's* — an OOM, a Hopper-only kernel — scope it with `status_by_hardware` instead of letting it skip the cell everywhere:
+
+```jsonc
+"lightx2v": { "status": "supported",
+              "status_by_hardware": { "h100": { "status": "failed", "reason": "OOM on H100 80GB: ..." } },
+              "command_profiles": { ... } }
+```
+
+The body is published as soon as *some* hardware is `supported`; `config_guard.apply_hardware_statuses` resolves it per box, so the runner skips the cell where it is classified away and the report still prints that status + reason. It works both directions — a `supported` override promotes a cell whose baseline is `unsupported`/`no_profile`. Keys are the tokens the RUNTIME derives (`config_guard.HARDWARE_TOKENS`), the same vocabulary `command_profiles[*].hardware` and POLICY_HARDWARE use; the build rejects anything else, and rejects a non-`supported` verdict with no `reason`. Origin: LTX-2.3's lightx2v cell was `failed` for an 80GB OOM and so went missing from a 179GB-per-GPU B200 matrix too. A per-hardware status is NOT a licence to invent a profile for the newly-enabled hardware — without a validated one it falls back to `default`, which is the honest answer until someone measures.
+
 ## Framework Checklist
 
 - Add dependency installation only in `scripts/install_comparison_frameworks.sh` when the framework cannot share the main env.
