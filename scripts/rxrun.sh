@@ -25,6 +25,14 @@ set -uo pipefail
 # output legitimately contains "unexpected EOF while parsing" (a Python syntax
 # error) and "unexpected EOF" (a truncated heredoc), and retrying those would
 # hide a real failure N times over instead of reporting it once.
+# A released, deleted or expired box is not coming back on the next attempt, and
+# its 409 starts with "rx: " so the transport predicate below happily retried it
+# five times and then reported "giving up after 5 transport failures" -- which
+# reads like flaky networking. It was a devbox whose TTL had run out mid-queue.
+rxrun_is_box_gone() {
+    grep -qiE 'devbox not running|status=released|status=releasing|devbox not found|no such devbox' <<<"$1"
+}
+
 rxrun_is_transport_error() {
     local text="$1"
     grep -qiE \
@@ -45,6 +53,11 @@ rxrun() {
             printf '%s\n' "$out"
             rm -f "$err"
             return 0
+        fi
+        if rxrun_is_box_gone "$(cat "$err")"; then
+            echo "rxrun: the devbox is gone, not retrying: $(head -c 200 "$err")" >&2
+            echo "rxrun: check 'rx devbox why ${box}' -- a TTL expiry looks like this." >&2
+            cat "$out"; rm -f "$err" "$out"; return 2
         fi
         if rxrun_is_transport_error "$(cat "$err")"; then
             echo "rxrun: transport error (attempt $attempt/$tries), retrying: $(head -c 160 "$err")" >&2

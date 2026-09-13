@@ -160,6 +160,27 @@ For high-pressure cross-framework throughput reports, prefer cases supported by 
 
 Use `py-spy` only for diagnosis, not as part of the benchmark timing path.
 
+### The box outliving the queue
+
+Check the devbox's remaining TTL before queuing hours of work, with
+`source scripts/rx_ttl_guard.sh; rx_require_ttl <box> <minutes> "<what>"`.
+
+A 4xB200 was acquired with a 24h TTL and auto-released a day later with five jobs
+queued behind the lock -- `release_requested · auto:ttl_expired` -- and every one
+of them died with it. `rx devbox list` had been printing an EXPIRES column the
+whole time.
+
+There is no `rx devbox extend`: the TTL is fixed at acquire time, and
+`rx devbox keepalive` is about the CPU-busy bar on unattended EC2 agent boxes,
+not about TTL. So acquire with a `--ttl` that covers the work, and check before
+committing to a queue -- after the fact, `rx devbox why <box>` gives the release
+reason and the last commands that ran.
+
+Related: `scripts/rxrun.sh` now fails fast on the resulting 409. That error begins
+`rx: `, so the transport-error predicate matched it and retried a released box
+five times before reporting "giving up after 5 transport failures", which reads
+like flaky networking rather than a box that no longer exists.
+
 ### Two jobs on one box
 
 A devbox has one set of cards, and several of these scripts open with
