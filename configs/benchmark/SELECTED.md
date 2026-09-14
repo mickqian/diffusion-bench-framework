@@ -27,7 +27,7 @@ what `--hardware-profile <hw>` will actually run; edit THAT profile.
 | minimax_h3_t2va_5s | h100 | `default` | yes |  | `--model-type diffusion --warmup-mode server --model-variant fl2va --ulysses-degree 2 --performance-mode speed --enable-torch-compile false` |
 | qwen_image_2512_t2i_1024 | b200 | `default` |  |  | `--model-type diffusion --warmup-mode server --tp-size 2` |
 | qwen_image_2512_t2i_1024 | h100 | `h100-2gpu-ulysses-speed-eager` | yes |  | `--model-type diffusion --warmup-mode server --dit-layerwise-offload false --tp-size 1 --ulysses-degree 2 --enable-cfg-parallel false --performance-mode speed --enable-torch-compile false` |
-| qwen_image_2512_t2i_1024_truecfg | b200 | `default` |  |  | `--model-type diffusion --warmup-mode server --tp-size 2` |
+| qwen_image_2512_t2i_1024_truecfg | b200 | `blackwell-2gpu-cfg-parallel` |  |  | `--model-type diffusion --warmup-mode server --tp-size 1 --cfg-parallel-size 2` |
 | qwen_image_2512_t2i_1024_truecfg | h100 | `h100-h200-2gpu-tp-speed-eager` |  |  | `--model-type diffusion --warmup-mode server --enable-cfg-parallel --performance-mode speed --enable-torch-compile false` |
 | qwen_image_edit_2511 | b200 | `default` |  |  | `--model-type diffusion --warmup-mode server --tp-size 2 --dit-layerwise-offload false --performance-mode speed --enable-torch-compile false` |
 | qwen_image_edit_2511 | h100 | `default` |  |  | `--model-type diffusion --warmup-mode server --tp-size 2 --dit-layerwise-offload false --performance-mode speed --enable-torch-compile false` |

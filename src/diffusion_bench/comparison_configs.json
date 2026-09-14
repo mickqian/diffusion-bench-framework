@@ -668,6 +668,19 @@
                     "serve_args": "--model-type diffusion --warmup-mode server --tp-size 2",
                     "extra_env": {},
                     "command_profiles": {
+                        "blackwell-2gpu-cfg-parallel": {
+                            "description": "Blackwell 2-GPU CFG-parallel SGLang-Diffusion Qwen-Image true-CFG profile.",
+                            "hardware": [
+                                "b200",
+                                "gb200",
+                                "b300",
+                                "gb300"
+                            ],
+                            "num_gpus": 2,
+                            "sglang_ref": "7b89b951",
+                            "serve_args": "--model-type diffusion --warmup-mode server --tp-size 1 --cfg-parallel-size 2",
+                            "notes": "Measured on 4xB200 2026-09-14, two interleaved rounds, against the --tp-size 2 that `default` supplied on Blackwell for want of a hardware profile: 4.862 -> 4.038 and 4.873 -> 3.838, both rounds the same sign, about -19%. The h100/h200 profile already used CFG parallelism for this model; Blackwell simply had no profile and fell back to a TP pin. Note --tp-size N also sets _has_explicit_parallel_policy(), which SUPPRESSES the runtime's own CFG-parallel auto-selection, so the old pin was a decision not to use CFG parallelism. The cfg-parallel arm is bimodal within a run (~3.84 and ~4.04); even its slow mode beats TP by 17%."
+                        },
                         "default": {
                             "description": "Best known SGLang command for the benchmark repo default profile.",
                             "sglang_ref": "current-main",
