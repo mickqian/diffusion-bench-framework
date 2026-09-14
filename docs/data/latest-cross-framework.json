@@ -1,7 +1,7 @@
 {
   "id": "b200x4-final-20260913",
   "title": "4xB200 cross-framework (latest-vs-latest, every cell re-measured on one harness)",
-  "updated_at": "2026-09-13",
+  "updated_at": "2026-09-14",
   "source_report": "reports/h100x4-full-20260728/",
   "source_script": "configs/benchmark/ (explicit matrix) + scripts/build_benchmark_config.py",
   "hardware": {
@@ -28,10 +28,7 @@
       "ideogram-ai/ideogram-4-fp8": "ee79a7237",
       "nvidia/Cosmos3-Nano": "7a312c868"
     },
-    "harness": "Every cell was re-measured after three harness fixes that move the number: the HTTP client read responses 10 KiB at a time; warmup converged on a reduced-step shape instead of the measured one; and measured requests carried a perf dump only sglang was asked for (+233ms on the first request, +1.35% on the rest). The earlier cells were discarded rather than merged.",
-    "stacks": "Dependency versions, which this run's artifacts predate recording: vLLM-Omni torch 2.13.0 / transformers 5.14.1 / diffusers 0.40.0 / huggingface_hub 1.31.0; LightX2V torch 2.11.0 / transformers 5.17.0 / diffusers 0.40.0 / hub 1.31.0; trtllm-visual torch 2.12.0 / transformers 5.5.4 / diffusers 0.39.0 / hub 1.16.1. LightX2V moved off a transformers<5 pin during this round, which is what un-broke its FLUX.2 cell.",
-    "jitter": "This box produces an occasional slow request in any framework -- 2 in 40 at +21% and +34% with no instrumentation at all. Cells whose repeats spread 25% or more are marked and their samples listed.",
-    "zimage_sglang": "The Z-Image-Turbo sglang cell is published as measured (0.678s, samples 0.68/0.474/0.678/0.68/0.673) but is NOT reproducible: 22 later measurements across 20 freshly started servers on this same box, with the same command, all landed at 0.467-0.487s, which would win the cell rather than lose it. The 0.678s mode has been observed once. Treat this cell as an unexplained outlier pending a controlled re-measure, not as sglang's Z-Image latency."
+    "qwen_truecfg_remeasure": "The qwen true-CFG cell was re-measured on 2026-09-14 after the case gained a Blackwell profile: it had been falling back to `default`, whose `--tp-size 2` also suppresses the runtime CFG-parallel auto-selection. 4.871 -> 3.84 for sglang; vllm-omni came out 5.322 against the 5.325 published from the original box, which is how we know the replacement box measures the same thing. Same framework venvs (they live on /personal and survived the first box being released) and the same sglang 7b89b9516."
   },
   "framework_order": [
     "sglang",
@@ -177,17 +174,17 @@
       "cells": {
         "sglang": {
           "gpus": 2,
-          "profile": "default",
+          "profile": "blackwell-2gpu-cfg-parallel",
           "status": "ok",
-          "latency_s": 4.871,
+          "latency_s": 3.84,
           "ratio_to_sglang": 1.0
         },
         "vllm-omni": {
           "gpus": 2,
           "profile": "blackwell-cudnn",
           "status": "ok",
-          "latency_s": 5.325,
-          "ratio_to_sglang": 1.093
+          "latency_s": 5.322,
+          "ratio_to_sglang": 1.386
         },
         "lightx2v": {
           "status": "unsupported",
@@ -199,7 +196,7 @@
         }
       },
       "winner": "sglang",
-      "winner_speedup": "1.09x"
+      "winner_speedup": "1.39x"
     },
     {
       "case_id": "qwen_image_edit_2511",
@@ -571,7 +568,7 @@
       "id": "b200x4-final-20260913_single_e2e",
       "run": "b200x4-final-20260913",
       "run_label": "4xB200 cross-framework (latest-vs-latest, every cell re-measured on one harness)",
-      "date": "2026-09-13",
+      "date": "2026-09-14",
       "gpu": "4x NVIDIA B200 183GB",
       "title": "4xB200 cross-framework (latest-vs-latest, every cell re-measured on one harness)",
       "subtitle": "Steady-state single-request latency, best lossless config per framework (compile on, no caches, no quantization). SGLang-Diffusion fastest in 12/13 comparable cases.",
@@ -707,17 +704,17 @@
           "cells": {
             "sglang": {
               "gpus": 2,
-              "profile": "default",
+              "profile": "blackwell-2gpu-cfg-parallel",
               "status": "ok",
-              "latency_s": 4.871,
+              "latency_s": 3.84,
               "ratio_to_sglang": 1.0
             },
             "vllm-omni": {
               "gpus": 2,
               "profile": "blackwell-cudnn",
               "status": "ok",
-              "latency_s": 5.325,
-              "ratio_to_sglang": 1.093
+              "latency_s": 5.322,
+              "ratio_to_sglang": 1.386
             },
             "lightx2v": {
               "status": "unsupported",
@@ -729,7 +726,7 @@
             }
           },
           "winner": "sglang",
-          "winner_speedup": "1.09x"
+          "winner_speedup": "1.39x"
         },
         {
           "case_id": "qwen_image_edit_2511",
@@ -1099,15 +1096,15 @@
       "reproduce": "scripts/run_b200_final_20260913.sh",
       "reproduce_link": {
         "path": "scripts/run_b200_final_20260913.sh",
-        "ref": "0de4ae470",
-        "url": "https://github.com/mickqian/diffusion-bench-framework/blob/0de4ae47018f66c4cad34d7a0352ab07b9f3ddf6/scripts/run_b200_final_20260913.sh"
+        "ref": "c0be2268e",
+        "url": "https://github.com/mickqian/diffusion-bench-framework/blob/c0be2268eadb4e70f7214a461e7f7fded9bccba7/scripts/run_b200_final_20260913.sh"
       }
     },
     {
       "id": "b200x4-final-20260913_throughput",
       "run": "b200x4-final-20260913",
       "run_label": "4xB200 cross-framework (latest-vs-latest, every cell re-measured on one harness)",
-      "date": "2026-09-13",
+      "date": "2026-09-14",
       "gpu": "4x NVIDIA B200 183GB",
       "title": "4xB200 cross-framework (latest-vs-latest, every cell re-measured on one harness) — throughput",
       "subtitle": "High-pressure throughput on a representative pair (one popular image model, one video+audio case) — the matrix is deliberately not swept, see configs/benchmark/workloads.json. SGLang-Diffusion highest QPS in 2/2 comparable cases.",
@@ -1206,8 +1203,8 @@
       "reproduce": "scripts/run_b200_final_20260913.sh",
       "reproduce_link": {
         "path": "scripts/run_b200_final_20260913.sh",
-        "ref": "0de4ae470",
-        "url": "https://github.com/mickqian/diffusion-bench-framework/blob/0de4ae47018f66c4cad34d7a0352ab07b9f3ddf6/scripts/run_b200_final_20260913.sh"
+        "ref": "c0be2268e",
+        "url": "https://github.com/mickqian/diffusion-bench-framework/blob/c0be2268eadb4e70f7214a461e7f7fded9bccba7/scripts/run_b200_final_20260913.sh"
       }
     }
   ]
