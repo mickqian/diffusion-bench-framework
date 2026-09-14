@@ -85,7 +85,30 @@ with tempfile.TemporaryDirectory() as td:
     write_case(tmp, "pvd", "real_case", "default", [5.76, 5.77],
                "--model-path M --port 11")
 
-    out = run(tmp, ["control_case", "noisy_case", "real_case"])
+    # 4. A default arm that FAILED is the study's strongest finding -- the
+    #    runtime's own choice does not work -- and "missing an arm" buries it.
+    #    Five of fifteen cases were exactly that.
+    write_case(tmp, "pvd", "crash_case", "profile", [6.878, 6.9],
+               "--model-path M --port 13 --tp-size 2")
+    (tmp / "pvd_crash_case_default_1.runlog").write_text(
+        "sglang serve --model-path M --port 15\n"
+        "ValueError: Tensors must be contiguous\n"
+    )
+    write_case(tmp, "pvd", "reject_case", "profile", [2.681, 2.7],
+               "--model-path M --port 17 --tp-size 2")
+    (tmp / "pvd_reject_case_default_1.runlog").write_text(
+        "sglang serve --model-path M --port 19\n"
+        "request does not use classifier-free guidance\n"
+    )
+    # 5. Our own harness limit must not read as an sglang finding.
+    write_case(tmp, "pvd", "ourfault_case", "profile", [1.0, 1.0],
+               "--model-path M --port 21 --tp-size 2")
+    (tmp / "pvd_ourfault_case_default_1.runlog").write_text(
+        "sglang serve --model-path M --port 23\nAssertionError: Invalid device id\n"
+    )
+
+    out = run(tmp, ["control_case", "noisy_case", "real_case",
+                    "crash_case", "reject_case", "ourfault_case"])
     print(out.rstrip())
     print("  ---")
 
@@ -108,6 +131,27 @@ with tempfile.TemporaryDirectory() as td:
         "a large consistent gap is still reported",
         "a real sglang gap" in real,
         real.strip(),
+    )
+    crash = next((ln for ln in out.splitlines() if "crash_case" in ln), "")
+    reject = next((ln for ln in out.splitlines() if "reject_case" in ln), "")
+    ours = next((ln for ln in out.splitlines() if "ourfault_case" in ln), "")
+    check("a crashing default arm says so", "CRASHES" in crash, crash.strip())
+    # The profile arm still has a median worth showing (6.878 and 6.9 -> 6.889);
+    # a failing default must not blank out the half that did run.
+    check(
+        "and keeps the profile arm's number",
+        bool(re.search(r"crash_case\s+\d+\.\d+\s+FAILS", crash)),
+        crash.strip(),
+    )
+    check("a rejecting default arm says so", "REJECTS every request" in reject, reject.strip())
+    check(
+        "our own GPU-count limit is not reported as an sglang result",
+        "needs more GPUs than were exposed" in ours,
+        ours.strip(),
+    )
+    check(
+        "no failing arm is reported as merely missing",
+        all("missing an arm" not in ln for ln in (crash, reject, ours)),
     )
     check("the port is not mistaken for a stripped flag", "CONTROL" not in noisy, noisy.strip())
 

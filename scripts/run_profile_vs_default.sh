@@ -145,13 +145,48 @@ def served(case_id, arm):
             if t != "--port" and (i == 0 or toks[i - 1] != "--port")]
 
 
+
+# A default arm that FAILED is the study's strongest kind of finding -- the
+# runtime's own choice does not work -- and "missing an arm" buries it. Three of
+# the fifteen cases are exactly that: flux2's default crashed in the SP gather,
+# and qwen's two rejected every request under auto-enabled cfg-parallel.
+FAILURE_SIGNATURES = (
+    ("Tensors must be contiguous", "CRASHES: non-contiguous all_gather"),
+    ("does not use classifier-free guidance", "REJECTS every request"),
+    ("Invalid device id", "needs more GPUs than were exposed"),
+    ("exit -9", "server killed by another job -- rerun, do not report"),
+    ("CUDA out of memory", "OOM"),
+    ("Failed to load customized transformer", "component load failed"),
+)
+
+
+def failure_reason(case_id, arm):
+    """Why an arm produced no number, read from its own runlog."""
+    path = os.path.join(log_dir, f"{prefix}_{case_id}_{arm}_1.runlog")
+    try:
+        text = open(path, errors="ignore").read()
+    except OSError:
+        return None
+    for needle, label in FAILURE_SIGNATURES:
+        if needle in text:
+            return label
+    m = re.search(r"sglang server exited[^\n\"]{0,70}", text)
+    return m.group(0) if m else None
+
 print(f"  {'case':34s} {'profile':>9s} {'default':>9s} {'delta':>9s}  verdict")
 for case_id in cases:
     p, pv = med(case_id, "profile")
     d, dv = med(case_id, "default")
     if p is None or d is None:
-        print(f"  {case_id:34s} {'--':>9s} {'--':>9s} {'--':>9s}  missing an arm "
-              f"(profile {len(pv)}, default {len(dv)} round(s))")
+        which = "default" if d is None else "profile"
+        why = failure_reason(case_id, which)
+        if why:
+            other = f"{p:9.3f}" if d is None and p is not None else f"{'--':>9s}"
+            print(f"  {case_id:34s} {other} {'FAILS':>9s} {'--':>9s}  "
+                  f"the {which} arm {why}")
+        else:
+            print(f"  {case_id:34s} {'--':>9s} {'--':>9s} {'--':>9s}  missing an arm "
+                  f"(profile {len(pv)}, default {len(dv)} round(s))")
         continue
     delta = (d - p) / p * 100
     # An arm that stripped nothing is not a comparison, it is the same command
