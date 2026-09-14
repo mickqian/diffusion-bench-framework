@@ -169,11 +169,17 @@ cosmos3 189f pins `--cfg-parallel-size 2 --ulysses-degree 2` and wan22 pins
 run records all three at 4 GPU. `num_gpus` in the profile is only half the story;
 wan22 leaves it null and still needs four.
 
-With two visible the server dies at startup with `AssertionError: Invalid device
-id`, and the harness reports `sglang server exited before health check passed
-(exit 1)`. **Read the exit code before blaming the machine**: exit 1 is the
-server failing on its own, exit -9 is something else clearing the cards. Treating
-the first as contamination sends you hunting a lock bug that is not there.
+With two visible it fails one of TWO ways, and the cheap one is not the common
+one. Sometimes the server dies at startup with `AssertionError: Invalid device
+id`, reported as `sglang server exited before health check passed (exit 1)` --
+about three minutes. Sometimes it neither starts nor dies, and the harness waits
+out its whole budget: `Server at http://127.0.0.1:PORT/health did not start
+within 2400s` -- **forty minutes per arm**. wan22 did the second on its profile
+arm and the first on its default arm, in the same run, for the same reason.
+
+**Read the exit code before blaming the machine**: exit 1 is the server failing
+on its own, exit -9 is something else clearing the cards. Treating the first as
+contamination sends you hunting a lock bug that is not there.
 
 Run those cases with `PVD_GPUS=0,1,2,3` -- the runner honours it, so no edit is
 needed. Check a new case's parallel degrees against the GPUs you are exposing
