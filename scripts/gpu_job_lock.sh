@@ -60,6 +60,7 @@ gpu_lock_acquire() {
         if mkdir "${GPU_LOCK_DIR}" 2>/dev/null; then
             echo "$$" > "${GPU_LOCK_DIR}/pid"
             echo "${0##*/}" > "${GPU_LOCK_DIR}/job"
+            hostname > "${GPU_LOCK_DIR}/host"
             trap gpu_lock_release_if_mine EXIT
             trap _gpu_lock_signal_exit INT TERM
             [ "${waited}" -gt 0 ] && echo "gpu-lock: acquired after ${waited}s"
@@ -68,6 +69,18 @@ gpu_lock_acquire() {
         local owner job
         owner="$(cat "${GPU_LOCK_DIR}/pid" 2>/dev/null || true)"
         job="$(cat "${GPU_LOCK_DIR}/job" 2>/dev/null || echo '?')"
+        # The lock lives under DBF_STATE_DIR, which on these boxes is
+        # /personal -- per-developer cluster storage that OUTLIVES the devbox. A
+        # lock left by a released box therefore names a pid from a machine that
+        # no longer exists, and `kill -0` on this one answers about an unrelated
+        # process that happens to share the number. Check the host first.
+        local host
+        host="$(cat "${GPU_LOCK_DIR}/host" 2>/dev/null || true)"
+        if [ -n "${host}" ] && [ "${host}" != "$(hostname)" ]; then
+            echo "gpu-lock: clearing a lock from ${job} on ${host}; this is $(hostname)"
+            rm -rf "${GPU_LOCK_DIR}"
+            continue
+        fi
         if [ -z "${owner}" ] || ! kill -0 "${owner}" 2>/dev/null; then
             echo "gpu-lock: clearing a stale lock from ${job} (pid ${owner:-none} is gone)"
             rm -rf "${GPU_LOCK_DIR}"

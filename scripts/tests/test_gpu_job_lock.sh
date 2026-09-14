@@ -115,4 +115,26 @@ kill $WATCHDOG 2>/dev/null
 grep -q "stale" "$TMP/f.out"; check "a stale lock is cleared" $? "$(head -1 "$TMP/f.out" 2>/dev/null)"
 grep -q "F done" "$TMP/f.out"; check "and the job proceeds" $?
 
+
+# --- a lock left behind by a DIFFERENT machine ----------------------------
+# The lock lives under DBF_STATE_DIR, which is /personal on these boxes: cluster
+# storage that outlives the devbox. A released box leaves its lock there naming a
+# pid from a machine that no longer exists, and `kill -0` on the next box answers
+# about whatever unrelated process now holds that number. Found for real: a
+# freshly acquired box still had `job=tune_qwen.sh pid=438991` waiting for it.
+mkdir -p "$GPU_LOCK_DIR"
+echo $$          > "$GPU_LOCK_DIR/pid"     # a pid that IS alive here
+echo ghostbox    > "$GPU_LOCK_DIR/job"
+echo not-this-host > "$GPU_LOCK_DIR/host"
+bash "$TMP/job.sh" I 1 > "$TMP/i.out" 2>&1 &
+I=$!
+{ sleep 20; kill -9 $I 2>/dev/null; } 2>/dev/null & WD=$!
+disown $WD 2>/dev/null || true
+wait $I 2>/dev/null; rc=$?
+kill $WD 2>/dev/null
+[ "$rc" = 0 ]; check "a lock from another machine does not block forever" $? "exit=$rc"
+grep -q "this is" "$TMP/i.out"; check "and is reported as another host's" $? "$(head -1 "$TMP/i.out" 2>/dev/null)"
+grep -q "I done" "$TMP/i.out"; check "and the job proceeds" $?
+[ ! -d "$GPU_LOCK_DIR" ]; check "the lock ends free" $?
+
 exit $fail
