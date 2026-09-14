@@ -160,6 +160,26 @@ For high-pressure cross-framework throughput reports, prefer cases supported by 
 
 Use `py-spy` only for diagnosis, not as part of the benchmark timing path.
 
+### A case that needs more GPUs than you exposed
+
+`run_profile_vs_default.sh` takes `PVD_GPUS`, default `0,1`. That is right for the
+ten image cases and for minimax_h3, and wrong for three of the five video cases:
+cosmos3 189f pins `--cfg-parallel-size 2 --ulysses-degree 2` and wan22 pins
+`--enable-cfg-parallel --ulysses-degree 2` -- both 2x2 = 4 -- and the published
+run records all three at 4 GPU. `num_gpus` in the profile is only half the story;
+wan22 leaves it null and still needs four.
+
+With two visible the server dies at startup with `AssertionError: Invalid device
+id`, and the harness reports `sglang server exited before health check passed
+(exit 1)`. **Read the exit code before blaming the machine**: exit 1 is the
+server failing on its own, exit -9 is something else clearing the cards. Treating
+the first as contamination sends you hunting a lock bug that is not there.
+
+Run those cases with `PVD_GPUS=0,1,2,3` -- the runner honours it, so no edit is
+needed. Check a new case's parallel degrees against the GPUs you are exposing
+BEFORE a two-hour queue, or a mid-run peek at the result JSONs will be what tells
+you, as it was here.
+
 ### The box outliving the queue
 
 Check the devbox's remaining TTL before queuing hours of work, with
