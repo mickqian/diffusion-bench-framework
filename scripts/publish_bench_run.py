@@ -84,6 +84,44 @@ def _policy_block(merged: dict, args) -> dict:
     return policy
 
 
+def _headline_summary(section: dict, args) -> dict:
+    """Counts derived from the rows the page actually shows.
+
+    The inherited block said "18 cases ... on H100" over a 15-case B200 run, with
+    14 wins where there were 12. Deriving it means the headline cannot disagree
+    with the table beneath it.
+    """
+    rows = section.get("rows") or []
+    wins: dict[str, int] = {}
+    comparable = 0
+    for row in rows:
+        measured = [
+            fw
+            for fw, cell in (row.get("cells") or {}).items()
+            if cell.get("status") == "ok" and cell.get("latency_s") is not None
+        ]
+        if len(measured) < 2:  # sglang on its own is not a comparison
+            continue
+        comparable += 1
+        winner = row.get("winner")
+        if winner:
+            wins[winner] = wins.get(winner, 0) + 1
+    sglang_wins = wins.get("sglang", 0)
+    return {
+        "cases": len(rows),
+        "comparable_rows": comparable,
+        "sglang_diffusion_wins": sglang_wins,
+        "other_wins": comparable - sglang_wins,
+        "wins": wins,
+        "note": (
+            f"Steady-state single-request latency on {args.gpu}, best lossless "
+            f"config per framework. SGLang-Diffusion fastest in "
+            f"{sglang_wins}/{comparable} comparable cases across "
+            f"{len(rows)} cases. Throughput is reported separately."
+        ),
+    }
+
+
 def main() -> int:
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--merged", required=True, type=Path, help="merged artifact from build_report_artifacts")
@@ -205,6 +243,19 @@ def main() -> int:
         # numbers underneath it.
         latest["policy"] = _policy_block(merged, args)
         latest["sections"] = sections
+        # The main table renders `rows`, NOT `sections` -- and publishing never
+        # replaced it, so every run since inherited the previous one's table. The
+        # 4xB200 artifact carried eighteen H100-era rows under a "4x NVIDIA B200"
+        # heading, including five wan2.1/wan2.2 cases that run has never had, and
+        # a Z-Image number from an h100-h200 profile the B200 harness does not
+        # select. The sections underneath were right the whole time, which is why
+        # it survived review: the history tab showed the real run.
+        single = next(
+            (sec for sec in sections if sec.get("mode") == "single_e2e"), None
+        )
+        if single is not None:
+            latest["rows"] = single["rows"]
+            latest["summary"] = _headline_summary(single, args)
         latest["updated_at"] = date_cls.today().isoformat()
         _dump(LATEST, latest)
         print(f"wrote {LATEST.relative_to(ROOT)}")

@@ -46,11 +46,15 @@
     "trtllm-visual": "TensorRT-LLM VisualGen"
   },
   "summary": {
-    "cases": 18,
-    "comparable_rows": 15,
-    "sglang_diffusion_wins": 14,
+    "cases": 15,
+    "comparable_rows": 13,
+    "sglang_diffusion_wins": 12,
     "other_wins": 1,
-    "note": "Steady-state single-request latency on H100, best lossless config per framework (compile by default, measured-eager where compile is a proven net loss), latest main/HEAD for every framework. Full 18-case image+video matrix. The two sglang bugs the initial pass surfaced were fixed (sgl-project/sglang#32743) and the affected cells re-measured -- see policy.post_run_fixes_note; the two 'capacity' cells were later proven to be shared-machine contamination and now carry clean winning numbers, and the wan21_i2v throughput cells were re-measured after fixing a dropped request parameter in this harness (policy.harness_step_fix_note). Throughput tables live in the report."
+    "wins": {
+      "sglang": 12,
+      "vllm-omni": 1
+    },
+    "note": "Steady-state single-request latency on 4x NVIDIA B200 183GB, best lossless config per framework. SGLang-Diffusion fastest in 12/13 comparable cases across 15 cases. Throughput is reported separately."
   },
   "rows": [
     {
@@ -58,93 +62,132 @@
       "case": "FLUX.1-dev T2I",
       "details": "1024x1024 · 50 steps · cfg 3.5",
       "gpus": "2 GPU",
-      "winner": "sglang",
+      "mode": "single_e2e",
       "cells": {
         "sglang": {
-          "client_latency_s": 4.319,
-          "profile": "h100-h200-2gpu-tp-compile"
+          "gpus": 2,
+          "profile": "blackwell-2gpu-tp-eager",
+          "status": "ok",
+          "latency_s": 2.395,
+          "ratio_to_sglang": 1.0
         },
         "vllm-omni": {
-          "client_latency_s": 5.619,
-          "profile": "h100-h200-2gpu-tp-compile"
+          "gpus": 2,
+          "profile": "blackwell-2gpu-tp-eager",
+          "status": "ok",
+          "latency_s": 3.35,
+          "ratio_to_sglang": 1.399
         },
         "lightx2v": {
           "status": "unsupported",
           "reason": "Tracked LightX2V version has no FLUX.1 serving path; FLUX coverage starts at FLUX.2."
         },
         "trtllm-visual": {
-          "client_latency_s": 7.318,
-          "profile": "h100-h200-2gpu-tp-speed"
+          "gpus": 2,
+          "profile": "default",
+          "status": "ok",
+          "latency_s": 3.519,
+          "ratio_to_sglang": 1.469
         }
       },
-      "winner_speedup": "1.30x"
+      "winner": "sglang",
+      "winner_speedup": "1.40x"
     },
     {
       "case_id": "flux2_dev_t2i_1024",
       "case": "FLUX.2-dev T2I",
       "details": "1024x1024 · 50 steps · cfg 4",
       "gpus": "2 GPU",
-      "winner": "sglang",
+      "mode": "single_e2e",
       "cells": {
         "sglang": {
-          "client_latency_s": 12.767,
-          "profile": "h100-h200-2gpu-tp-compile"
+          "gpus": 2,
+          "profile": "blackwell-2gpu-tp-eager",
+          "status": "ok",
+          "latency_s": 6.854,
+          "ratio_to_sglang": 1.0
         },
         "vllm-omni": {
-          "client_latency_s": 16.663,
-          "profile": "h100-h200-2gpu-tp-compile"
+          "gpus": 2,
+          "profile": "blackwell-2gpu-tp-eager",
+          "status": "ok",
+          "latency_s": 9.792,
+          "ratio_to_sglang": 1.429
         },
         "lightx2v": {
-          "client_latency_s": 65.153,
-          "profile": "h100-cpu-offload"
+          "gpus": 2,
+          "profile": "blackwell-fa2-flashinfer",
+          "status": "ok",
+          "latency_s": 16.545,
+          "ratio_to_sglang": 2.414
         },
         "trtllm-visual": {
-          "status": "profile_issue",
-          "reason": "trtllm-visual OOMs at startup (CUDA out of memory, ~79GB/79GB used on a single H100) loading FLUX.2; likely needs an explicit CPU-offload or multi-GPU profile for this model, not attempted in this run."
+          "gpus": 2,
+          "profile": "default",
+          "status": "ok",
+          "latency_s": 10.963,
+          "ratio_to_sglang": 1.6
         }
       },
-      "winner_speedup": "1.31x"
+      "winner": "sglang",
+      "winner_speedup": "1.43x"
     },
     {
       "case_id": "qwen_image_2512_t2i_1024",
       "case": "Qwen-Image-2512 T2I (no-CFG)",
       "details": "1024x1024 · 50 steps · cfg 1",
       "gpus": "2 GPU",
-      "winner": "vllm-omni",
+      "mode": "single_e2e",
       "cells": {
         "sglang": {
-          "client_latency_s": 4.564,
-          "profile": "h100-2gpu-ulysses-speed-eager"
+          "gpus": 2,
+          "profile": "default",
+          "status": "ok",
+          "latency_s": 2.623,
+          "ratio_to_sglang": 1.0
         },
         "vllm-omni": {
-          "client_latency_s": 4.483,
-          "profile": "default"
+          "gpus": 2,
+          "profile": "blackwell-cudnn",
+          "status": "ok",
+          "latency_s": 2.731,
+          "ratio_to_sglang": 1.041
         },
         "lightx2v": {
           "status": "unsupported",
           "reason": "Tracked LightX2V version has no Qwen-Image text-to-image serving path."
         },
         "trtllm-visual": {
-          "client_latency_s": 7.604,
-          "profile": "h100-h200-2gpu-tp-speed"
+          "gpus": 2,
+          "profile": "default",
+          "status": "ok",
+          "latency_s": 3.468,
+          "ratio_to_sglang": 1.322
         }
       },
-      "winner_speedup": "1.02x"
+      "winner": "sglang",
+      "winner_speedup": "1.04x"
     },
     {
       "case_id": "qwen_image_2512_t2i_1024_truecfg",
       "case": "Qwen-Image-2512 T2I (true-CFG)",
       "details": "1024x1024 · 50 steps · true-cfg 4.0",
       "gpus": "2 GPU",
-      "winner": "sglang",
+      "mode": "single_e2e",
       "cells": {
         "sglang": {
-          "client_latency_s": 6.568,
-          "profile": "h100-h200-2gpu-tp-speed-compile"
+          "gpus": 2,
+          "profile": "default",
+          "status": "ok",
+          "latency_s": 4.871,
+          "ratio_to_sglang": 1.0
         },
         "vllm-omni": {
-          "client_latency_s": 8.799,
-          "profile": "default"
+          "gpus": 2,
+          "profile": "blackwell-cudnn",
+          "status": "ok",
+          "latency_s": 5.325,
+          "ratio_to_sglang": 1.093
         },
         "lightx2v": {
           "status": "unsupported",
@@ -155,22 +198,29 @@
           "reason": "true_cfg_scale honoring unverified for TensorRT-LLM VisualGen; excluded from the true-CFG quality-path comparison to avoid a mismatched single- vs two-pass row."
         }
       },
-      "winner_speedup": "1.34x"
+      "winner": "sglang",
+      "winner_speedup": "1.09x"
     },
     {
       "case_id": "qwen_image_edit_2511",
       "case": "Qwen-Image-Edit-2511",
       "details": "1024x1024 · 40 steps · cfg 1",
       "gpus": "2 GPU",
-      "winner": "sglang",
+      "mode": "single_e2e",
       "cells": {
         "sglang": {
-          "client_latency_s": 7.663,
-          "profile": "default"
+          "gpus": 2,
+          "profile": "default",
+          "status": "ok",
+          "latency_s": 4.244,
+          "ratio_to_sglang": 1.0
         },
         "vllm-omni": {
-          "client_latency_s": 7.791,
-          "profile": "default"
+          "gpus": 2,
+          "profile": "blackwell-cudnn",
+          "status": "ok",
+          "latency_s": 4.462,
+          "ratio_to_sglang": 1.051
         },
         "lightx2v": {
           "status": "unsupported",
@@ -181,44 +231,58 @@
           "reason": "Not yet classified. Confirm framework support and add a validated command profile, or mark unsupported."
         }
       },
-      "winner_speedup": "1.02x"
+      "winner": "sglang",
+      "winner_speedup": "1.05x"
     },
     {
       "case_id": "zimage_turbo_t2i_1024",
       "case": "Z-Image-Turbo T2I",
       "details": "1024x1024 · 9 steps · cfg 0",
       "gpus": "2 GPU",
-      "winner": "sglang",
+      "mode": "single_e2e",
       "cells": {
         "sglang": {
-          "client_latency_s": 0.694,
-          "profile": "h100-h200-2gpu-tp-resident-eager"
+          "gpus": 2,
+          "profile": "default",
+          "status": "ok",
+          "latency_s": 0.678,
+          "ratio_to_sglang": 1.0
         },
         "vllm-omni": {
-          "client_latency_s": 1.252,
-          "profile": "default"
+          "gpus": 2,
+          "profile": "blackwell-flashinfer",
+          "status": "ok",
+          "latency_s": 0.497,
+          "ratio_to_sglang": 0.733
         },
         "lightx2v": {
-          "client_latency_s": 2.007,
-          "profile": "default"
+          "gpus": 2,
+          "profile": "blackwell-fa2",
+          "status": "ok",
+          "latency_s": 1.008,
+          "ratio_to_sglang": 1.487
         },
         "trtllm-visual": {
           "status": "not_run",
           "reason": "Not yet classified. Confirm framework support and add a validated command profile, or mark unsupported."
         }
       },
-      "winner_speedup": "1.80x"
+      "winner": "vllm-omni",
+      "winner_speedup": "1.36x"
     },
     {
       "case_id": "ideogram4_t2i_1024_2gpu_tp",
       "case": "Ideogram-4 (FP8) T2I",
       "details": "1024x1024 · 20 steps · cfg ?",
       "gpus": "2 GPU",
-      "winner": "sglang",
+      "mode": "single_e2e",
       "cells": {
         "sglang": {
-          "client_latency_s": 4.002,
-          "profile": "h100-h200-2gpu-tp-speed"
+          "gpus": 2,
+          "profile": "default",
+          "status": "ok",
+          "latency_s": 3.422,
+          "ratio_to_sglang": 1.0
         },
         "vllm-omni": {
           "status": "unsupported",
@@ -232,225 +296,94 @@
           "status": "unsupported",
           "reason": "Latest TensorRT-LLM VisualGen has no Ideogram-4 serving path (coverage is FLUX/Wan/LTX-2/Qwen-Image/Cosmos3)."
         }
-      }
-    },
-    {
-      "case_id": "cosmos3_nano_t2i_720p",
-      "case": "Cosmos3-Nano T2I 720p",
-      "details": "1280x720 · 35 steps · cfg 6",
-      "gpus": "2 GPU",
-      "winner": "sglang",
-      "cells": {
-        "sglang": {
-          "client_latency_s": 1.219,
-          "profile": "default"
-        },
-        "vllm-omni": {
-          "status": "profile_issue",
-          "reason": "vllm-omni stage config is missing a now-required 'engine_input_source' field (orchestrator init fails before any request runs); the correct value for vllm-omni's current main branch was not determined in this run -- needs a profile update, not a framework limitation."
-        },
-        "lightx2v": {
-          "status": "unsupported",
-          "reason": "No tracked LightX2V Cosmos3 serving path in this benchmark."
-        },
-        "trtllm-visual": {
-          "status": "profile_issue",
-          "reason": "trtllm-visual server starts and passes health checks but returns 400 Bad Request on every generation request; likely a request parameter mismatch for this case, not investigated further."
-        }
-      }
-    },
-    {
-      "case_id": "wan21_t2v_1_3b_480p",
-      "case": "Wan2.1 T2V 1.3B 480p",
-      "details": "832x480x81f · 50 steps · cfg 6",
-      "gpus": "2 GPU",
-      "winner": "sglang",
-      "cells": {
-        "sglang": {
-          "client_latency_s": 25.049,
-          "profile": "h100-2gpu-cfg-speed-compile"
-        },
-        "vllm-omni": {
-          "client_latency_s": 32.139,
-          "profile": "default"
-        },
-        "lightx2v": {
-          "client_latency_s": 27.051,
-          "profile": "default"
-        },
-        "trtllm-visual": {
-          "status": "not_run",
-          "reason": "Not yet classified. Confirm framework support and add a validated command profile, or mark unsupported."
-        }
       },
-      "winner_speedup": "1.08x"
-    },
-    {
-      "case_id": "wan21_i2v_14b_480p",
-      "case": "Wan2.1 I2V 14B 480p",
-      "details": "832x480x81f · 40 steps · cfg 5",
-      "gpus": "4 GPU",
-      "winner": "sglang",
-      "cells": {
-        "sglang": {
-          "client_latency_s": 57.12,
-          "profile": "default"
-        },
-        "vllm-omni": {
-          "client_latency_s": 76.435,
-          "profile": "default"
-        },
-        "lightx2v": {
-          "client_latency_s": 62.121,
-          "profile": "default"
-        },
-        "trtllm-visual": {
-          "status": "not_run",
-          "reason": "Not yet classified. Confirm framework support and add a validated command profile, or mark unsupported."
-        }
-      },
-      "winner_speedup": "1.09x"
-    },
-    {
-      "case_id": "wan21_i2v_14b_720p",
-      "case": "Wan2.1 I2V 14B 720p",
-      "details": "1280x720x81f · 40 steps · cfg 5",
-      "gpus": "4 GPU",
-      "winner": "sglang",
-      "cells": {
-        "sglang": {
-          "client_latency_s": 203.376,
-          "profile": "default"
-        },
-        "vllm-omni": {
-          "client_latency_s": 251.789,
-          "profile": "default"
-        },
-        "lightx2v": {
-          "client_latency_s": 223.996,
-          "profile": "default"
-        },
-        "trtllm-visual": {
-          "status": "not_run",
-          "reason": "Not yet classified. Confirm framework support and add a validated command profile, or mark unsupported."
-        }
-      },
-      "winner_speedup": "1.10x"
+      "winner": "n/a"
     },
     {
       "case_id": "wan22_t2v_a14b_720p",
       "case": "Wan2.2 T2V A14B 720p",
       "details": "1280x720x81f · 40 steps · cfg 4",
       "gpus": "4 GPU",
-      "winner": "sglang",
+      "mode": "single_e2e",
       "cells": {
         "sglang": {
-          "client_latency_s": 209.916,
-          "profile": "default"
+          "gpus": 4,
+          "profile": "default",
+          "status": "ok",
+          "latency_s": 669.376,
+          "ratio_to_sglang": 1.0
         },
         "vllm-omni": {
-          "client_latency_s": 247.638,
-          "profile": "default"
+          "gpus": 4,
+          "profile": "blackwell-cudnn",
+          "status": "ok",
+          "latency_s": 905.948,
+          "ratio_to_sglang": 1.353
         },
         "lightx2v": {
-          "client_latency_s": 214.4,
-          "profile": "default"
+          "gpus": 4,
+          "profile": "blackwell-fa2",
+          "status": "ok",
+          "latency_s": 1002.334,
+          "ratio_to_sglang": 1.497
         },
         "trtllm-visual": {
           "status": "not_run",
           "reason": "Not yet classified. Confirm framework support and add a validated command profile, or mark unsupported."
         }
       },
-      "winner_speedup": "1.02x"
-    },
-    {
-      "case_id": "wan22_i2v_a14b_720p",
-      "case": "Wan2.2 I2V A14B 720p",
-      "details": "1280x720x81f · 40 steps · cfg 3.5",
-      "gpus": "4 GPU",
       "winner": "sglang",
-      "cells": {
-        "sglang": {
-          "client_latency_s": 203.911,
-          "profile": "default"
-        },
-        "vllm-omni": {
-          "client_latency_s": 250.355,
-          "profile": "default"
-        },
-        "lightx2v": {
-          "client_latency_s": 214.414,
-          "profile": "default"
-        },
-        "trtllm-visual": {
-          "status": "not_run",
-          "reason": "Not yet classified. Confirm framework support and add a validated command profile, or mark unsupported."
-        }
-      },
-      "winner_speedup": "1.05x"
-    },
-    {
-      "case_id": "wan22_ti2v_5b_704p",
-      "case": "Wan2.2 TI2V 5B 704p",
-      "details": "1280x704x81f · 50 steps · cfg 5",
-      "gpus": "2 GPU",
-      "winner": "sglang",
-      "cells": {
-        "sglang": {
-          "client_latency_s": 30.564,
-          "profile": "h100-h200-2gpu"
-        },
-        "vllm-omni": {
-          "client_latency_s": 38.334,
-          "profile": "default"
-        },
-        "lightx2v": {
-          "client_latency_s": 32.061,
-          "profile": "default"
-        },
-        "trtllm-visual": {
-          "status": "not_run",
-          "reason": "Not yet classified. Confirm framework support and add a validated command profile, or mark unsupported."
-        }
-      },
-      "winner_speedup": "1.05x"
+      "winner_speedup": "1.35x"
     },
     {
       "case_id": "ltx2_twostage_t2v",
       "case": "LTX-2 two-stage T2V",
       "details": "768x512x121f · 40 steps · cfg 4",
       "gpus": "2 GPU",
-      "winner": "sglang",
+      "mode": "single_e2e",
       "cells": {
         "sglang": {
-          "client_latency_s": 49.111,
-          "profile": "default"
+          "gpus": 2,
+          "profile": "default",
+          "status": "ok",
+          "latency_s": 6.244,
+          "ratio_to_sglang": 1.0
         },
         "vllm-omni": {
-          "status": "profile_issue",
-          "reason": "vllm-omni rejects the current serve_args combination: 'LTX CFG parallelism only supports CFG-only guidance without rescale.' The profile needs to drop or reconfigure the guidance rescale path for LTX-2 CFG-parallel; not attempted in this run."
+          "gpus": 2,
+          "profile": "blackwell-cudnn",
+          "status": "ok",
+          "latency_s": 15.546,
+          "ratio_to_sglang": 2.49
         },
         "lightx2v": {
-          "client_latency_s": 89.728,
-          "profile": "h100-1gpu"
+          "gpus": 2,
+          "profile": "blackwell-fa2",
+          "status": "ok",
+          "latency_s": 34.673,
+          "ratio_to_sglang": 5.553
         },
         "trtllm-visual": {
           "status": "not_run",
           "reason": "Not yet classified. Confirm framework support and add a validated command profile, or mark unsupported."
         }
       },
-      "winner_speedup": "1.83x"
+      "winner": "sglang",
+      "winner_speedup": "2.49x"
     },
     {
       "case_id": "ltx2.3_twostage_t2v_2gpus",
       "case": "LTX-2.3 two-stage T2V",
       "details": "768x512x121f · 30 steps · cfg 3",
       "gpus": "2 GPU",
-      "winner": "sglang",
+      "mode": "single_e2e",
       "cells": {
         "sglang": {
-          "client_latency_s": 12.029,
-          "profile": "h100-80gb-2gpu"
+          "gpus": 2,
+          "profile": "default",
+          "status": "ok",
+          "latency_s": 7.056,
+          "ratio_to_sglang": 1.0
         },
         "vllm-omni": {
           "status": "no_profile",
@@ -458,28 +391,68 @@
         },
         "lightx2v": {
           "status": "failed",
-          "reason": "OOM on H100 80GB: LTX-2.3 22B two-stage 121-frame t2av peak exceeds 80GB even with every lossless lever (seq_p_size=2 activation sharding + block cpu_offload + Gemma/VAE offload + exact flash_attn3). Upstream profiles target H200 141GB. command_profiles below are the best-attempted lossless config, kept for provenance."
+          "reason": "OOM on H100 80GB: LTX-2.3 22B two-stage 121-frame t2av peak exceeds 80GB even with every lossless lever (seq_p_size=2 activation sharding + block cpu_offload + Gemma/VAE offload + exact flash_attn3). Upstream profiles target H200 141GB. THIS VERDICT IS H100-SPECIFIC AND IS BEING APPLIED GLOBALLY -- `status` has no per-hardware form, so the cell is skipped everywhere, including the 4xB200 box (183359 MiB/GPU, ~179GB) where the stated constraint does not hold and upstream's own H200 target is exceeded. Retest on Blackwell before trusting the classification; if it runs, `status` needs a per-hardware form before this can be flipped, or H100 runs will spend ~40 min per attempt re-discovering the OOM. command_profiles below are the best-attempted lossless config, kept for provenance."
         },
         "trtllm-visual": {
           "status": "not_run",
           "reason": "Not yet classified. Confirm framework support and add a validated command profile, or mark unsupported."
         }
-      }
+      },
+      "winner": "n/a"
+    },
+    {
+      "case_id": "cosmos3_nano_t2i_720p",
+      "case": "Cosmos3-Nano T2I 720p",
+      "details": "1280x720 · 35 steps · cfg 6",
+      "gpus": "2 GPU",
+      "mode": "single_e2e",
+      "cells": {
+        "sglang": {
+          "gpus": 2,
+          "profile": "blackwell-2gpu-cfg-parallel",
+          "status": "ok",
+          "latency_s": 0.579,
+          "ratio_to_sglang": 1.0
+        },
+        "vllm-omni": {
+          "gpus": 2,
+          "profile": "blackwell-cudnn",
+          "status": "ok",
+          "latency_s": 0.656,
+          "ratio_to_sglang": 1.133
+        },
+        "lightx2v": {
+          "status": "unsupported",
+          "reason": "No tracked LightX2V Cosmos3 serving path in this benchmark."
+        },
+        "trtllm-visual": {
+          "status": "failed",
+          "reason": "Hangs at startup on the current Cosmos3-Nano checkpoint: trtllm-serve reaches 'Orchestrator is creating IPC executor' / 'using MpiPoolSession to spawn MPI processes' and then produces no output at all -- 40 min in the matrix, and 20 min each at tp=1 and tp=2 in a dedicated probe, so it is not a multi-GPU path issue. The startup log warns 'You are using a model of type cosmos3_omni to instantiate a model of type cosmos3': the checkpoint was re-uploaded 2026-08-26 and declares cosmos3_omni, which tensorrt-llm 1.3.0rc26 does not know. Marked failed rather than left supported so a run does not spend 40 minutes per attempt reaching the same hang. Re-test when trtllm adds cosmos3_omni; the profile is kept below."
+        }
+      },
+      "winner": "sglang",
+      "winner_speedup": "1.13x"
     },
     {
       "case_id": "cosmos3_nano_t2v_720p_189f",
       "case": "Cosmos3-Nano T2V 720p",
       "details": "1280x720x189f · 35 steps · cfg 6",
       "gpus": "4 GPU",
-      "winner": "sglang",
+      "mode": "single_e2e",
       "cells": {
         "sglang": {
-          "client_latency_s": 54.112,
-          "profile": "h100-4gpu-cfg-ulysses-speed-compile"
+          "gpus": 4,
+          "profile": "default",
+          "status": "ok",
+          "latency_s": 214.899,
+          "ratio_to_sglang": 1.0
         },
         "vllm-omni": {
-          "client_latency_s": 66.308,
-          "profile": "default"
+          "gpus": 4,
+          "profile": "blackwell-cudnn",
+          "status": "ok",
+          "latency_s": 229.107,
+          "ratio_to_sglang": 1.066
         },
         "lightx2v": {
           "status": "unsupported",
@@ -490,22 +463,29 @@
           "reason": "Not yet classified. Confirm framework support and add a validated command profile, or mark unsupported."
         }
       },
-      "winner_speedup": "1.23x"
+      "winner": "sglang",
+      "winner_speedup": "1.07x"
     },
     {
       "case_id": "cosmos3_nano_i2v_720p_189f",
       "case": "Cosmos3-Nano I2V 720p",
       "details": "1280x720x189f · 35 steps · cfg 6",
       "gpus": "4 GPU",
-      "winner": "sglang",
+      "mode": "single_e2e",
       "cells": {
         "sglang": {
-          "client_latency_s": 54.111,
-          "profile": "default"
+          "gpus": 4,
+          "profile": "default",
+          "status": "ok",
+          "latency_s": 216.005,
+          "ratio_to_sglang": 1.0
         },
         "vllm-omni": {
-          "client_latency_s": 66.295,
-          "profile": "default"
+          "gpus": 4,
+          "profile": "blackwell-cudnn",
+          "status": "ok",
+          "latency_s": 232.072,
+          "ratio_to_sglang": 1.074
         },
         "lightx2v": {
           "status": "unsupported",
@@ -516,7 +496,74 @@
           "reason": "Not yet classified. Confirm framework support and add a validated command profile, or mark unsupported."
         }
       },
-      "winner_speedup": "1.23x"
+      "winner": "sglang",
+      "winner_speedup": "1.07x"
+    },
+    {
+      "case_id": "minimax_h3_t2va_5s",
+      "case": "MiniMax-H3 T2V+A",
+      "details": "1344x768x124f · 50 steps · cfg ?",
+      "gpus": "2 GPU",
+      "mode": "single_e2e",
+      "cells": {
+        "sglang": {
+          "gpus": 2,
+          "profile": "b200-2gpu",
+          "status": "ok",
+          "latency_s": 73.36,
+          "ratio_to_sglang": 1.0
+        },
+        "vllm-omni": {
+          "gpus": 2,
+          "profile": "b200-2gpu",
+          "status": "ok",
+          "latency_s": 76.878,
+          "ratio_to_sglang": 1.048
+        },
+        "lightx2v": {
+          "status": "unsupported",
+          "reason": "No MiniMax-H3 pipeline in LightX2V as of 2026-08; a turbo LoRA effort for H3 was blocked by the model license's territory clause (excludes EU/UK/South Korea/US), not by missing engineering support."
+        },
+        "trtllm-visual": {
+          "status": "unsupported",
+          "reason": "trtllm-visual's tracked scope in this harness is image cases; H3 is a video+audio model."
+        }
+      },
+      "winner": "sglang",
+      "winner_speedup": "1.05x"
+    },
+    {
+      "case_id": "minimax_h3_ref2va_5s",
+      "case": "MiniMax-H3 Ref2V+A",
+      "details": "1344x768x124f · 50 steps · cfg ?",
+      "gpus": "2 GPU",
+      "mode": "single_e2e",
+      "cells": {
+        "sglang": {
+          "gpus": 2,
+          "profile": "b200-2gpu",
+          "status": "ok",
+          "latency_s": 112.486,
+          "ratio_to_sglang": 1.0
+        },
+        "vllm-omni": {
+          "gpus": 2,
+          "profile": "b200-2gpu",
+          "status": "ok",
+          "latency_s": 125.005,
+          "ratio_to_sglang": 1.111
+        },
+        "lightx2v": {
+          "status": "unsupported",
+          "reason": "No MiniMax-H3 pipeline in LightX2V as of 2026-08; a turbo LoRA effort for H3 was blocked by the model license's territory clause (excludes EU/UK/South Korea/US), not by missing engineering support."
+        },
+        "trtllm-visual": {
+          "status": "unsupported",
+          "reason": "trtllm-visual's tracked scope in this harness is image cases; H3 is a video+audio model."
+        }
+      },
+      "winner": "sglang",
+      "winner_speedup": "1.11x"
     }
   ],
   "sections": [
