@@ -1,7 +1,7 @@
 {
   "id": "b200x4-final-20260913",
   "title": "4xB200 cross-framework (latest-vs-latest, every cell re-measured on one harness)",
-  "updated_at": "2026-09-14",
+  "updated_at": "2026-09-18",
   "source_report": "reports/h100x4-full-20260728/",
   "source_script": "configs/benchmark/ (explicit matrix) + scripts/build_benchmark_config.py",
   "hardware": {
@@ -26,9 +26,10 @@
       "black-forest-labs/FLUX.1-dev": "3de623fc3",
       "black-forest-labs/FLUX.2-dev": "26afe3a78",
       "ideogram-ai/ideogram-4-fp8": "ee79a7237",
-      "nvidia/Cosmos3-Nano": "7a312c868"
+      "nvidia/Cosmos3-Nano": "e59a53c25"
     },
-    "qwen_truecfg_remeasure": "The qwen true-CFG cell was re-measured on 2026-09-14 after the case gained a Blackwell profile: it had been falling back to `default`, whose `--tp-size 2` also suppresses the runtime CFG-parallel auto-selection. 4.871 -> 3.84 for sglang; vllm-omni came out 5.322 against the 5.325 published from the original box, which is how we know the replacement box measures the same thing. Same framework venvs (they live on /personal and survived the first box being released) and the same sglang 7b89b9516."
+    "four_gpu_remeasure": "The three 4-GPU cells (cosmos3 t2v/i2v 189f, wan22 t2v) were re-measured on 2026-09-18 on a different 4xB200. The originals were artifacts of the first box: it was 3-4x slower than H100/H200 on 4-GPU work while 1.7-2.6x FASTER on every 2-GPU case, and all three frameworks in those cells moved together, which no framework regression explains. A fresh box of the same node family scales 4-GPU work normally (cosmos3 t2v: 2 GPU 58.05s -> 4 GPU 32.34s, and 1.64x faster than H200). Re-measured: cosmos3 t2v 214.9 -> 31.7, i2v 216.0 -> 31.9, wan22 669.4 -> 106.5, each now 1.68-1.98x faster than its H200 figure, in line with every 2-GPU cell. Same sglang 7b89b9516 and the same framework venvs as the rest of the run.",
+    "cosmos3_revision": "The two cosmos3 cells were re-measured against Cosmos3-Nano e59a53c25, not the 7a312c868 the rest of this artifact records: the shared cache resolves `main` online, so the revision could not be pinned from the cache. The change does not carry the result -- vLLM-Omni moved by the same factor in the same cells, and no weight update produces a 6.8x shift -- and the two cells reproduce to under 0.1% across two independent runs. Flagged because it is a real difference in provenance, not because it is suspected of mattering."
   },
   "framework_order": [
     "sglang",
@@ -307,22 +308,22 @@
           "gpus": 4,
           "profile": "default",
           "status": "ok",
-          "latency_s": 669.376,
+          "latency_s": 106.487,
           "ratio_to_sglang": 1.0
         },
         "vllm-omni": {
           "gpus": 4,
           "profile": "blackwell-cudnn",
           "status": "ok",
-          "latency_s": 905.948,
-          "ratio_to_sglang": 1.353
+          "latency_s": 130.465,
+          "ratio_to_sglang": 1.225
         },
         "lightx2v": {
           "gpus": 4,
           "profile": "blackwell-fa2",
           "status": "ok",
-          "latency_s": 1002.334,
-          "ratio_to_sglang": 1.497
+          "latency_s": 257.9,
+          "ratio_to_sglang": 2.422
         },
         "trtllm-visual": {
           "status": "not_run",
@@ -330,7 +331,7 @@
         }
       },
       "winner": "sglang",
-      "winner_speedup": "1.35x"
+      "winner_speedup": "1.23x"
     },
     {
       "case_id": "ltx2_twostage_t2v",
@@ -441,15 +442,15 @@
           "gpus": 4,
           "profile": "default",
           "status": "ok",
-          "latency_s": 214.899,
+          "latency_s": 31.701,
           "ratio_to_sglang": 1.0
         },
         "vllm-omni": {
           "gpus": 4,
           "profile": "blackwell-cudnn",
           "status": "ok",
-          "latency_s": 229.107,
-          "ratio_to_sglang": 1.066
+          "latency_s": 35.864,
+          "ratio_to_sglang": 1.131
         },
         "lightx2v": {
           "status": "unsupported",
@@ -461,7 +462,7 @@
         }
       },
       "winner": "sglang",
-      "winner_speedup": "1.07x"
+      "winner_speedup": "1.13x"
     },
     {
       "case_id": "cosmos3_nano_i2v_720p_189f",
@@ -474,15 +475,15 @@
           "gpus": 4,
           "profile": "default",
           "status": "ok",
-          "latency_s": 216.005,
+          "latency_s": 31.897,
           "ratio_to_sglang": 1.0
         },
         "vllm-omni": {
           "gpus": 4,
           "profile": "blackwell-cudnn",
           "status": "ok",
-          "latency_s": 232.072,
-          "ratio_to_sglang": 1.074
+          "latency_s": 36.132,
+          "ratio_to_sglang": 1.133
         },
         "lightx2v": {
           "status": "unsupported",
@@ -494,7 +495,7 @@
         }
       },
       "winner": "sglang",
-      "winner_speedup": "1.07x"
+      "winner_speedup": "1.13x"
     },
     {
       "case_id": "minimax_h3_t2va_5s",
@@ -568,7 +569,7 @@
       "id": "b200x4-final-20260913_single_e2e",
       "run": "b200x4-final-20260913",
       "run_label": "4xB200 cross-framework (latest-vs-latest, every cell re-measured on one harness)",
-      "date": "2026-09-14",
+      "date": "2026-09-18",
       "gpu": "4x NVIDIA B200 183GB",
       "title": "4xB200 cross-framework (latest-vs-latest, every cell re-measured on one harness)",
       "subtitle": "Steady-state single-request latency, best lossless config per framework (compile on, no caches, no quantization). SGLang-Diffusion fastest in 12/13 comparable cases.",
@@ -837,22 +838,22 @@
               "gpus": 4,
               "profile": "default",
               "status": "ok",
-              "latency_s": 669.376,
+              "latency_s": 106.487,
               "ratio_to_sglang": 1.0
             },
             "vllm-omni": {
               "gpus": 4,
               "profile": "blackwell-cudnn",
               "status": "ok",
-              "latency_s": 905.948,
-              "ratio_to_sglang": 1.353
+              "latency_s": 130.465,
+              "ratio_to_sglang": 1.225
             },
             "lightx2v": {
               "gpus": 4,
               "profile": "blackwell-fa2",
               "status": "ok",
-              "latency_s": 1002.334,
-              "ratio_to_sglang": 1.497
+              "latency_s": 257.9,
+              "ratio_to_sglang": 2.422
             },
             "trtllm-visual": {
               "status": "not_run",
@@ -860,7 +861,7 @@
             }
           },
           "winner": "sglang",
-          "winner_speedup": "1.35x"
+          "winner_speedup": "1.23x"
         },
         {
           "case_id": "ltx2_twostage_t2v",
@@ -971,15 +972,15 @@
               "gpus": 4,
               "profile": "default",
               "status": "ok",
-              "latency_s": 214.899,
+              "latency_s": 31.701,
               "ratio_to_sglang": 1.0
             },
             "vllm-omni": {
               "gpus": 4,
               "profile": "blackwell-cudnn",
               "status": "ok",
-              "latency_s": 229.107,
-              "ratio_to_sglang": 1.066
+              "latency_s": 35.864,
+              "ratio_to_sglang": 1.131
             },
             "lightx2v": {
               "status": "unsupported",
@@ -991,7 +992,7 @@
             }
           },
           "winner": "sglang",
-          "winner_speedup": "1.07x"
+          "winner_speedup": "1.13x"
         },
         {
           "case_id": "cosmos3_nano_i2v_720p_189f",
@@ -1004,15 +1005,15 @@
               "gpus": 4,
               "profile": "default",
               "status": "ok",
-              "latency_s": 216.005,
+              "latency_s": 31.897,
               "ratio_to_sglang": 1.0
             },
             "vllm-omni": {
               "gpus": 4,
               "profile": "blackwell-cudnn",
               "status": "ok",
-              "latency_s": 232.072,
-              "ratio_to_sglang": 1.074
+              "latency_s": 36.132,
+              "ratio_to_sglang": 1.133
             },
             "lightx2v": {
               "status": "unsupported",
@@ -1024,7 +1025,7 @@
             }
           },
           "winner": "sglang",
-          "winner_speedup": "1.07x"
+          "winner_speedup": "1.13x"
         },
         {
           "case_id": "minimax_h3_t2va_5s",
@@ -1096,15 +1097,15 @@
       "reproduce": "scripts/run_b200_final_20260913.sh",
       "reproduce_link": {
         "path": "scripts/run_b200_final_20260913.sh",
-        "ref": "c0be2268e",
-        "url": "https://github.com/mickqian/diffusion-bench-framework/blob/c0be2268eadb4e70f7214a461e7f7fded9bccba7/scripts/run_b200_final_20260913.sh"
+        "ref": "af39cec42",
+        "url": "https://github.com/mickqian/diffusion-bench-framework/blob/af39cec42d833ea7de7ae76cb4c5d5d78f76b819/scripts/run_b200_final_20260913.sh"
       }
     },
     {
       "id": "b200x4-final-20260913_throughput",
       "run": "b200x4-final-20260913",
       "run_label": "4xB200 cross-framework (latest-vs-latest, every cell re-measured on one harness)",
-      "date": "2026-09-14",
+      "date": "2026-09-18",
       "gpu": "4x NVIDIA B200 183GB",
       "title": "4xB200 cross-framework (latest-vs-latest, every cell re-measured on one harness) — throughput",
       "subtitle": "High-pressure throughput on a representative pair (one popular image model, one video+audio case) — the matrix is deliberately not swept, see configs/benchmark/workloads.json. SGLang-Diffusion highest QPS in 2/2 comparable cases.",
@@ -1203,8 +1204,8 @@
       "reproduce": "scripts/run_b200_final_20260913.sh",
       "reproduce_link": {
         "path": "scripts/run_b200_final_20260913.sh",
-        "ref": "c0be2268e",
-        "url": "https://github.com/mickqian/diffusion-bench-framework/blob/c0be2268eadb4e70f7214a461e7f7fded9bccba7/scripts/run_b200_final_20260913.sh"
+        "ref": "af39cec42",
+        "url": "https://github.com/mickqian/diffusion-bench-framework/blob/af39cec42d833ea7de7ae76cb4c5d5d78f76b819/scripts/run_b200_final_20260913.sh"
       }
     }
   ]

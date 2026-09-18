@@ -1,6 +1,6 @@
 {
   "id": "historical-cross-framework-20260610",
-  "updated_at": "2026-09-14",
+  "updated_at": "2026-09-18",
   "frameworks": {
     "sglang": "SGLang-Diffusion",
     "vllm-omni": "vLLM-Omni",
@@ -25,7 +25,7 @@
       "id": "b200x4-final-20260913_single_e2e",
       "run": "b200x4-final-20260913",
       "run_label": "4xB200 cross-framework (latest-vs-latest, every cell re-measured on one harness)",
-      "date": "2026-09-14",
+      "date": "2026-09-18",
       "gpu": "4x NVIDIA B200 183GB",
       "title": "4xB200 cross-framework (latest-vs-latest, every cell re-measured on one harness)",
       "subtitle": "Steady-state single-request latency, best lossless config per framework (compile on, no caches, no quantization). SGLang-Diffusion fastest in 12/13 comparable cases.",
@@ -294,22 +294,22 @@
               "gpus": 4,
               "profile": "default",
               "status": "ok",
-              "latency_s": 669.376,
+              "latency_s": 106.487,
               "ratio_to_sglang": 1.0
             },
             "vllm-omni": {
               "gpus": 4,
               "profile": "blackwell-cudnn",
               "status": "ok",
-              "latency_s": 905.948,
-              "ratio_to_sglang": 1.353
+              "latency_s": 130.465,
+              "ratio_to_sglang": 1.225
             },
             "lightx2v": {
               "gpus": 4,
               "profile": "blackwell-fa2",
               "status": "ok",
-              "latency_s": 1002.334,
-              "ratio_to_sglang": 1.497
+              "latency_s": 257.9,
+              "ratio_to_sglang": 2.422
             },
             "trtllm-visual": {
               "status": "not_run",
@@ -317,7 +317,7 @@
             }
           },
           "winner": "sglang",
-          "winner_speedup": "1.35x"
+          "winner_speedup": "1.23x"
         },
         {
           "case_id": "ltx2_twostage_t2v",
@@ -428,15 +428,15 @@
               "gpus": 4,
               "profile": "default",
               "status": "ok",
-              "latency_s": 214.899,
+              "latency_s": 31.701,
               "ratio_to_sglang": 1.0
             },
             "vllm-omni": {
               "gpus": 4,
               "profile": "blackwell-cudnn",
               "status": "ok",
-              "latency_s": 229.107,
-              "ratio_to_sglang": 1.066
+              "latency_s": 35.864,
+              "ratio_to_sglang": 1.131
             },
             "lightx2v": {
               "status": "unsupported",
@@ -448,7 +448,7 @@
             }
           },
           "winner": "sglang",
-          "winner_speedup": "1.07x"
+          "winner_speedup": "1.13x"
         },
         {
           "case_id": "cosmos3_nano_i2v_720p_189f",
@@ -461,15 +461,15 @@
               "gpus": 4,
               "profile": "default",
               "status": "ok",
-              "latency_s": 216.005,
+              "latency_s": 31.897,
               "ratio_to_sglang": 1.0
             },
             "vllm-omni": {
               "gpus": 4,
               "profile": "blackwell-cudnn",
               "status": "ok",
-              "latency_s": 232.072,
-              "ratio_to_sglang": 1.074
+              "latency_s": 36.132,
+              "ratio_to_sglang": 1.133
             },
             "lightx2v": {
               "status": "unsupported",
@@ -481,7 +481,7 @@
             }
           },
           "winner": "sglang",
-          "winner_speedup": "1.07x"
+          "winner_speedup": "1.13x"
         },
         {
           "case_id": "minimax_h3_t2va_5s",
@@ -553,15 +553,15 @@
       "reproduce": "scripts/run_b200_final_20260913.sh",
       "reproduce_link": {
         "path": "scripts/run_b200_final_20260913.sh",
-        "ref": "c0be2268e",
-        "url": "https://github.com/mickqian/diffusion-bench-framework/blob/c0be2268eadb4e70f7214a461e7f7fded9bccba7/scripts/run_b200_final_20260913.sh"
+        "ref": "af39cec42",
+        "url": "https://github.com/mickqian/diffusion-bench-framework/blob/af39cec42d833ea7de7ae76cb4c5d5d78f76b819/scripts/run_b200_final_20260913.sh"
       }
     },
     {
       "id": "b200x4-final-20260913_throughput",
       "run": "b200x4-final-20260913",
       "run_label": "4xB200 cross-framework (latest-vs-latest, every cell re-measured on one harness)",
-      "date": "2026-09-14",
+      "date": "2026-09-18",
       "gpu": "4x NVIDIA B200 183GB",
       "title": "4xB200 cross-framework (latest-vs-latest, every cell re-measured on one harness) — throughput",
       "subtitle": "High-pressure throughput on a representative pair (one popular image model, one video+audio case) — the matrix is deliberately not swept, see configs/benchmark/workloads.json. SGLang-Diffusion highest QPS in 2/2 comparable cases.",
@@ -660,8 +660,8 @@
       "reproduce": "scripts/run_b200_final_20260913.sh",
       "reproduce_link": {
         "path": "scripts/run_b200_final_20260913.sh",
-        "ref": "c0be2268e",
-        "url": "https://github.com/mickqian/diffusion-bench-framework/blob/c0be2268eadb4e70f7214a461e7f7fded9bccba7/scripts/run_b200_final_20260913.sh"
+        "ref": "af39cec42",
+        "url": "https://github.com/mickqian/diffusion-bench-framework/blob/af39cec42d833ea7de7ae76cb4c5d5d78f76b819/scripts/run_b200_final_20260913.sh"
       }
     },
     {
