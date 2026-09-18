@@ -161,6 +161,29 @@ For high-pressure cross-framework throughput reports, prefer cases supported by 
 
 Use `py-spy` only for diagnosis, not as part of the benchmark timing path.
 
+### A box can be broken for 4-GPU work only
+
+The published 4xB200 run has three 4-GPU cells 3-4x SLOWER than the same cases on
+H100 and H200, while every 2-GPU cell in the same run is 1.7-2.6x FASTER. Every
+framework in those cells moved together (sglang 0.25-0.32x, vLLM-Omni 0.28-0.30x,
+LightX2V 0.22x), which already rules out a framework regression -- yet the cell
+was first annotated as a "suspected sglang regression" because the elimination
+"not the box, the image cases are fast" was run without noticing that **every
+image case is 2-GPU**. A per-case sweep cannot see a per-GPU-count fault.
+
+Settled 2026-09-18 on a fresh 4xB200 of the same node family, cosmos3 t2v 189f,
+identical workload and flags: 2 GPU 58.05s, 4 GPU 32.34s -- 1.80x scaling, and
+1.64x faster than H200. bench-0912 reported 214.90s for that cell, 6.6x the
+healthy figure. The hardware is fine; that box was.
+
+Three hypotheses died in that one experiment and are not worth re-running:
+`--attention-backend fa` is NOT pathological on Blackwell (the fast arm pins it),
+the NUMA split that puts GPU3 on the other socket costs nothing measurable
+(58.05 same-socket vs 58.24 across it), and interconnect topology was already
+clean (NV18 all-pairs). **When a subset of cells is slow, group them by GPU count
+before by model** -- and record enough per-cell context that "was anything else on
+the cards" is answerable later, because nothing in the artifact is.
+
 ### A case that needs more GPUs than you exposed
 
 `run_profile_vs_default.sh` takes `PVD_GPUS`, default `0,1`. That is right for the
