@@ -14,6 +14,8 @@ import urllib.request
 from pathlib import Path
 
 REPO = "sgl-project/ci-data-diffusion"
+SGLANG = "sgl-project/sglang"
+DIFF_JOB = "nightly-test-diffusion"
 DIR = "diffusion-comparisons"
 MAX_RUNS = 30
 OUT = Path(__file__).resolve().parent.parent / "docs" / "nightly-data.json"
@@ -27,6 +29,41 @@ def _get(url: str) -> bytes:
         req.add_header("Accept", "application/vnd.github+json")
     with urllib.request.urlopen(req, timeout=60) as resp:
         return resp.read()
+
+
+
+def _runner_names(runs: list[dict], previous: dict[str, str]) -> None:
+    """Attach the self-hosted runner each nightly landed on.
+
+    This is the single most useful field for reading the chart, and it is the
+    one the run records do not carry. The pools are not equivalent: over twelve
+    consecutive nightlies `h100-novita-temp-*` came out 20-25% slower than
+    `h100-novita10-*` / `h100-novita5-*` on the heavyweight cases, with no
+    exceptions -- which is every "regression" those cases have shown. Without
+    this field each alert costs a trip through the Actions API to rule out.
+
+    Runs never change, so a name already mirrored is reused; a fresh nightly
+    costs one request, and a failure leaves the field absent rather than
+    breaking the mirror.
+    """
+    for run in runs:
+        run_id = run.get("run_id")
+        if not run_id:
+            continue
+        known = previous.get(str(run_id))
+        if known:
+            run["runner_name"] = known
+            continue
+        try:
+            jobs = json.loads(
+                _get(f"https://api.github.com/repos/{SGLANG}/actions/runs/{run_id}/jobs")
+            )
+            for job in jobs.get("jobs") or []:
+                if job.get("name") == DIFF_JOB and job.get("runner_name"):
+                    run["runner_name"] = job["runner_name"]
+                    break
+        except Exception as exc:  # noqa: BLE001 - the mirror matters more than the field
+            print(f"no runner for run {run_id}: {exc}", file=sys.stderr)
 
 
 def main() -> int:
@@ -54,6 +91,16 @@ def main() -> int:
     if not runs:
         print("no runs readable", file=sys.stderr)
         return 1
+
+    previous = {}
+    if OUT.exists():
+        try:
+            for old in json.loads(OUT.read_text()).get("runs") or []:
+                if old.get("run_id") and old.get("runner_name"):
+                    previous[str(old["run_id"])] = old["runner_name"]
+        except Exception:  # noqa: BLE001 - a corrupt snapshot just costs refetches
+            previous = {}
+    _runner_names(runs, previous)
 
     runs.sort(key=lambda r: r.get("timestamp") or "")
     bundle = {"source": f"{REPO}/{DIR}", "run_count": len(runs), "runs": runs}
