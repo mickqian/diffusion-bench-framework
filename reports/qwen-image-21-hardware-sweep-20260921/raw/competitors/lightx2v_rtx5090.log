@@ -1,0 +1,29 @@
+=== QI21_LX2VIMG_START 2026-09-21T03:27:08+00:00 hw=rtx5090 host=devbox-qi21-lx2v-5090-0 base=/scratch ===
+  gpu NVIDIA GeForce RTX 5090 cap (12, 0)
+  torch 2.11.0+cu130 cuda 13.0
+  flash_attn: present
+  flash_attn_interface: present
+  flashinfer: present
+  sageattention: present
+  LightX2V at 4d709c43125f 2026-09-21
+--- config: qwen_image_21_5090.json ---
+   {"infer_steps": 40, "resolution": 1024, "attn_type": "flash_attn2", "enable_cfg": false, "sample_guide_scale": 1.0}
+--- weights ---
+  at /scratch/hf/hub/models--Qwen--Qwen-Image-2.1/snapshots/b3179ad355be050328e483a9dfdd9e60cd62adfa
+--- serving (upstream's own launch) ---
+===============================================================================
+LightX2V Base Environment Variables Summary:
+-------------------------------------------------------------------------------
+lightx2v_path: /scratch/LightX2V
+model_path: /scratch/hf/hub/models--Qwen--Qwen-Image-2.1/snapshots/b3179ad355be050328e483a9dfdd9e60cd62adfa
+-------------------------------------------------------------------------------
+Model Inference Data Type: BF16
+Sensitive Layer Data Type: None
+Performance Profiling Debug Level: 2
+===============================================================================
+  ready
+  vram after load: 30667 MiB
+  RESULT lightx2v rtx5090 p50=14.509s [14.51, 14.51, 14.51] bytes=1889562
+  vram peak-ish: 30685 MiB
+  infer_steps': 40
+=== QI21_LX2VIMG_DONE 2026-09-21T03:29:20+00:00 ===

@@ -48,7 +48,15 @@ cd "$REPO_DIR"
 # missing-file)` exports an EMPTY token, which silently replaces a working
 # login with an anonymous one and turns gated models into 401s.
 [ -r "$TOKEN_FILE" ] && export HF_TOKEN="$(cat "$TOKEN_FILE")"
+# HF_HOME alone does not decide where huggingface_hub reads: HF_HUB_CACHE and
+# the legacy HUGGINGFACE_HUB_CACHE both outrank it, and several clusters export
+# HUGGINGFACE_HUB_CACHE=/cluster-storage/models into every shell. Setting only
+# HF_HOME there sends the runtime to a READ-ONLY cache, which surfaces as
+# "Could not get model info for '<model>'" -- a message that reads like an
+# unsupported model rather than a cache it could not write. Pin all three.
 export HF_HOME="${DBF_HF_HOME:-${STATE_DIR}/hf-cache}"
+export HF_HUB_CACHE="${HF_HOME}/hub"
+export HUGGINGFACE_HUB_CACHE="${HF_HUB_CACHE}"
 export SGLANG_DIFFUSION_SKIP_FRAMEWORK_INSTALL=1
 export SGLANG_DIFFUSION_FRAMEWORK_VENV_ROOT="${DBF_VENV_ROOT:-${STATE_DIR}/fw-venvs}"
 export DIFFUSION_BENCH_DISABLE_TORCH_COMPILE=0

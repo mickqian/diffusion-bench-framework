@@ -1,0 +1,55 @@
+{
+  "id": "qwen-image-21-hardware-sweep-20260921",
+  "format_version": 1,
+  "created_at": "2026-09-21",
+  "title": "Qwen-Image-2.1 across datacenter and consumer GPUs",
+  "description": "First benchmark of Qwen-Image-2.1 (text-to-image, 1024x1024, 40 steps, no CFG) in this repo, run on one B200, one H200, one RTX 5090 and one RTX 4090 under each card's cookbook recipe, plus a 2xB200 parallelism sweep (TP / Ulysses / CFG-parallel). Single-framework: no competitor serves this model on its main line yet.",
+  "benchmark_repo": {
+    "base_commit": "4762610221e6229c0835d14058ee34aa67af166e",
+    "case": "configs/benchmark/cases/image/qwen_image_21_t2i_1024.json",
+    "config": "configs/comparison_configs.json",
+    "runner": "scripts/devbox_run_cases.sh (via run_comparison --modes single_e2e)"
+  },
+  "runtime": {
+    "sglang_commit": "6ad78f2281674daff6e39f9f9df2952834c0f036",
+    "sglang_date": "2026-09-21",
+    "model": "Qwen/Qwen-Image-2.1",
+    "model_revision": "b3179ad355be050328e483a9dfdd9e60cd62adfa",
+    "note": "Qwen-Image-2.1 support landed in sglang on 2026-09-17 (#39983). The lmsysorg/sglang:dev image predates it, so every box was moved to origin/main HEAD before measuring."
+  },
+  "workload": {
+    "task": "text-to-image",
+    "resolution": "1024x1024",
+    "num_inference_steps": 40,
+    "guidance_scale": 1.0,
+    "seed": 42,
+    "outputs_per_request": 1,
+    "output_format": "png",
+    "note": "40 steps is the checkpoint default per the cookbook. guidance_scale 1.0 = no CFG, one DiT forward per step. output_format=png is required: the checkpoint emits RGBA and the default JPEG encoder raises `cannot write mode RGBA as JPEG`, reaching the client as a bare HTTP 500."
+  },
+  "policy": {
+    "latency_source": "client-side single_e2e latency_s, median of 5 measured requests after warmup",
+    "torch_compile": "eager everywhere -- the runtime refuses compile for this model (`torch.compile disabled for this model`), so no explicit flag or policy exception is needed",
+    "cache": "no response cache, enable_cache_dit false, no Cache-DiT",
+    "precision": "native BF16/FP32 throughout; no FP8, NVFP4, GGUF or quantized attention",
+    "placement": "each card's cookbook recipe -- resident on H200/B200, DiT+VAE resident with a layerwise encoder on RTX 5090/4090 (resident does not fit)",
+    "hardware": "rx devboxes, one GPU each (plus one 2xB200), not CI/runner/build infrastructure",
+    "cross_framework": "Each framework ran in its own project's published environment with its own published config, on the SAME physical node per GPU class, never concurrently, with the neighbouring devbox's GPU verified idle before each measurement. Sub-5% claims required ABAB-interleaved paired rounds; where the paired diffs disagree in sign the report says so instead of picking a winner."
+  },
+  "frameworks": {
+    "sglang": "measured",
+    "vllm-omni": "unsupported on main HEAD; Qwen-Image-2.1 lives only on the open PR vllm-project/vllm-omni#7759 (opened 2026-09-18)",
+    "lightx2v": "MEASURED. Upstream's main line serves this model (scripts/qwen_image_21/server/), so it was run: LightX2V main 4d709c43 inside upstream's own images (lightx2v/lightx2v:26062001-cu130 and ...-cu130-5090-fix-260921) with upstream's own lossless configs. Its published RTX 5090 figure (5.930 s) is an FP8 + SageAttention2 path and is NOT what was run here.",
+    "trtllm-visual": "unsupported; VisualGen has a Qwen-Image pipeline but nothing for the 2.1 architecture"
+  },
+  "files": {
+    "raw/harness_*.json": "run_comparison output, one per GPU class -- the numbers the single-GPU table publishes",
+    "raw/probe/*.log": "the exploratory probes that settled each card's sglang recipe, including the RTX 5090 A/B",
+    "raw/multigpu_2xb200.log": "the 2xB200 parallelism sweep (probe form; the tracked case is 1 GPU)",
+    "raw/abab_tp_vs_ulysses.log": "the interleaved TP-vs-Ulysses re-measurement",
+    "raw/competitors/lightx2v_*.log": "LightX2V runs in upstream's image, and its server-side timings",
+    "raw/competitors/abab_h200_sglang_vs_lightx2v.log": "the interleaved cross-framework rounds on one H200 node",
+    "scripts/": "the probes, the cross-framework ABAB orchestrator and the paired-verdict analyser used here -- kept with the report rather than in scripts/, because they depend on files staged on specific devboxes",
+    "proposed-sglang-cookbook-rtx5090.patch": "upstream docs change this run justifies; applies to sglang 6ad78f22 and was executed to confirm it moves only the RTX 5090 cell. NOT submitted."
+  }
+}

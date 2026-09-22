@@ -1,0 +1,20 @@
+=== QI21_BENCH_START 2026-09-21T01:40:42+00:00 hw=h200 host=gpu1-10-220-51-55 base=/scratch ===
+  gpu NVIDIA H200 cap (9, 0) vram 139.8 GiB
+--- sglang predates qwen-image-2.1; updating /sgl-workspace/sglang ---
+From https://github.com/sgl-project/sglang
+ * branch              main       -> FETCH_HEAD
+ + 20518d85...6ad78f22 main       -> origin/main  (forced update)
+  now at 6ad78f22 2026-09-21
+  sglang at /sgl-workspace/sglang/python/sglang
+  qwen-image-2.1 files: 8
+  detector present: True
+--- weights ---
+Fetching 27 files:   0%|          | 0/27 [00:00<?, ?it/s]Fetching 27 files:   4%|▎         | 1/27 [00:00<00:03,  6.70it/s]Fetching 27 files:  33%|███▎      | 9/27 [00:00<00:00, 35.75it/s]Fetching 27 files:  56%|█████▌    | 15/27 [00:00<00:00, 43.32it/s]Fetching 27 files:  74%|███████▍  | 20/27 [00:00<00:00, 23.53it/s]Fetching 27 files:  74%|███████▍  | 20/27 [00:20<00:00, 23.53it/s]Fetching 27 files:  78%|███████▊  | 21/27 [00:35<00:20,  3.38s/it]Fetching 27 files:  81%|████████▏ | 22/27 [00:51<00:24,  4.87s/it]Fetching 27 files:  85%|████████▌ | 23/27 [01:01<00:22,  5.58s/it]Fetching 27 files:  93%|█████████▎| 25/27 [01:20<00:11,  5.58s/it]Fetching 27 files:  96%|█████████▋| 26/27 [01:23<00:06,  6.29s/it]Fetching 27 files: 100%|██████████| 27/27 [01:24<00:00,  5.56s/it]Fetching 27 files: 100%|██████████| 27/27 [01:24<00:00,  3.15s/it]
+  at /scratch/hf/hub/models--Qwen--Qwen-Image-2.1/snapshots/b3179ad355be050328e483a9dfdd9e60cd62adfa
+--- serving: --performance-mode speed ---
+  healthy
+  vram after load: 39579 MiB
+  RESULT h200 p50=4.519s [4.51, 4.52, 4.52] bytes=2437134
+  vram peak-ish: 32711 MiB
+  average time per step: 0.1034 seconds
+=== QI21_BENCH_DONE 2026-09-21T01:43:58+00:00 ===

@@ -1,0 +1,17 @@
+=== QI21_BENCH_START 2026-09-21T13:16:58+00:00 hw=resident host=devbox-qi21-4090-trim-0 base=/scratch ===
+  gpu NVIDIA GeForce RTX 4090 cap (8, 9) vram 23.5 GiB
+  sglang at /sgl-workspace/sglang/python/sglang
+  qwen-image-2.1 files: 12
+  detector present: True
+--- weights ---
+Fetching 28 files:   0%|          | 0/28 [00:00<?, ?it/s]Fetching 28 files: 100%|██████████| 28/28 [00:00<00:00, 2417.32it/s]
+  at /scratch/hf/hub/models--Qwen--Qwen-Image-2.1/snapshots/790c92633540aa0cb11d9abf19eb46d861714758
+--- serving: --performance-mode manual --component-residency dit=resident text_encoder=layerwise-offload vae=resident --warmup-resolutions 1024x1024 --layerwise-resident-layers text_encoder=0.8 ---
+  server never became healthy
+    OutOfMemoryError: CUDA out of memory. Tried to allocate 370.00 MiB. GPU 0 has a total capacity of 23.52 GiB of which 121.81 MiB is free. Including non-PyTorch
+    out of memory; retrying warmup at server warmup req (720x720, 2/40 steps)
+    out of memory. Tried to allocate 370.00 MiB. GPU 0 has a total capacity o
+    RuntimeError: Error executing request None: Qwen-Image 2.1 height and width must be divisible by 32[0;0m
+    Traceback
+    ValueError: Qwen-Image 2.1 height and width must be divisible by 32[0;0m
+=== QI21_BENCH_DONE 2026-09-21T13:18:22+00:00 ===

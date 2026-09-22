@@ -20,7 +20,14 @@ than the others, which manufactures step-shaped artifacts whenever the pool
 assignment happens to change. A split whose two sides share no pool is suspect;
 one that holds within a single pool is real.
 
-    scripts/detect_nightly_steps.py [--data docs/nightly-data.json] [--min-sigma 8]
+Results come back in two bands. The headline is what clears --min-sigma. Under
+it sit the same-pool positives that score lower only because a single split
+cannot separate a slow drift from a long, already-varied history -- reported
+rather than dropped, because dropping a real 1.3% regression on a threshold is
+the mistake this script replaced.
+
+    scripts/detect_nightly_steps.py [--data docs/nightly-data.json]
+                                    [--min-sigma 8] [--watch-sigma 4]
 """
 from __future__ import annotations
 
@@ -91,6 +98,12 @@ def main() -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("--data", default=str(ROOT / "docs" / "nightly-data.json"))
     ap.add_argument("--min-sigma", type=float, default=8.0)
+    # A single-split model scores a drift over a long, already-varied history
+    # far lower than the same drift on a quiet one: minimax_h3's +1.3% reaches
+    # only 6 sigma because its "before" side spans months of its own movement.
+    # Dropping it silently is the failure this script was written to end, so
+    # same-pool positives above this weaker bar are listed, separately.
+    ap.add_argument("--watch-sigma", type=float, default=4.0)
     ap.add_argument("--min-pct", type=float, default=0.5)
     args = ap.parse_args()
 
@@ -101,7 +114,7 @@ def main() -> int:
         if len(values) < 8:
             continue
         sigma, i, gap = best_split(values)
-        if sigma < args.min_sigma:
+        if sigma < min(args.min_sigma, args.watch_sigma):
             continue
         pct = gap / statistics.median(values[:i]) * 100
         if abs(pct) < args.min_pct:
@@ -122,23 +135,45 @@ def main() -> int:
         print("no level changes above the threshold")
         return 0
 
-    print(f"  {'case':28s} {'step':>7s} {'sigma':>6s}  window                 verdict")
-    for f in sorted(found, key=lambda x: -abs(x["sigma"])):
-        d0, s0, _, _ = f["from"]
-        d1, s1, _, _ = f["to"]
-        if f["pool_confounded"]:
-            verdict = "runner pool differs across the split -- suspect, not a finding"
-        elif f["pct"] > 0:
-            verdict = "REGRESSION, same pool both sides"
-        else:
-            verdict = "improvement"
-        print(
-            "  %-28s %+6.1f%% %6.0f  %s %s..%s  %s"
-            % (f["case"], f["pct"], f["sigma"], d0, s0, s1, verdict)
-        )
-    regressions = [f for f in found if f["pct"] > 0 and not f["pool_confounded"]]
+    def show(rows):
+        for f in sorted(rows, key=lambda x: -abs(x["sigma"])):
+            d0, s0, _, _ = f["from"]
+            _, s1, _, _ = f["to"]
+            if f["pool_confounded"]:
+                verdict = "runner pool differs across the split -- suspect, not a finding"
+            elif f["pct"] > 0:
+                verdict = "REGRESSION, same pool both sides"
+            else:
+                verdict = "improvement"
+            print(
+                "  %-28s %+6.1f%% %6.0f  %s %s..%s  %s"
+                % (f["case"], f["pct"], f["sigma"], d0, s0, s1, verdict)
+            )
+
+    header = f"  {'case':28s} {'step':>7s} {'sigma':>6s}  window                 verdict"
+    strong = [f for f in found if f["sigma"] >= args.min_sigma]
+    # Only same-pool positives are worth a second band: a weakly-scored
+    # improvement or a pool artifact is not something anyone would act on.
+    watch = [
+        f for f in found
+        if f["sigma"] < args.min_sigma and f["pct"] > 0 and not f["pool_confounded"]
+    ]
+    print(header)
+    if strong:
+        show(strong)
+    else:
+        print("  (none)")
+    if watch:
+        print()
+        print(f"  below {args.min_sigma:g} sigma, same pool, slower -- look before dismissing:")
+        print(header)
+        show(watch)
+    regressions = [f for f in strong if f["pct"] > 0 and not f["pool_confounded"]]
     print()
-    print(f"  {len(regressions)} regression(s) not explained by the runner pool")
+    print(
+        f"  {len(regressions)} regression(s) not explained by the runner pool"
+        + (f", {len(watch)} more under watch" if watch else "")
+    )
     return 0
 
 

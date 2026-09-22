@@ -1,0 +1,141 @@
+{
+  "timestamp": "2026-09-21T02:01:59.251319+00:00",
+  "commit_sha": "4762610221e6229c0835d14058ee34aa67af166e",
+  "run_id": "local",
+  "hardware": {
+    "runner_labels": null,
+    "gpu_config": null,
+    "gpus": [
+      "NVIDIA GeForce RTX 5090, 32607 MiB, 580.105.08"
+    ],
+    "hardware_profile_override": "rtx5090"
+  },
+  "sglang_runtime": {
+    "package_version": "0.5.20",
+    "module_path": "/sgl-workspace/sglang/python/sglang/__init__.py",
+    "git_root": "/sgl-workspace/sglang",
+    "git_commit": "6ad78f2281674daff6e39f9f9df2952834c0f036"
+  },
+  "framework_runtime": {
+    "venv_root": "/scratch/fw-venvs",
+    "install_specs": {
+      "vllm": "vllm==0.18.0",
+      "vllm_omni": "vllm-omni==0.18.0",
+      "lightx2v": "git+https://github.com/ModelTC/LightX2V.git@7efd05f8e1425b83321fd4f1cef779ef6504076f",
+      "lightx2v_flash_attn": "flash-attn==2.8.3",
+      "lightx2v_flash_attn3": "",
+      "lightx2v_fa3_hf_repo": "varunneal/flash-attention-3",
+      "lightx2v_fa3_hf_revision": "de87b9b5af06dd9984df595bef90b2eba44b181a",
+      "lightx2v_fa3_hf_subdir": "build/torch28-cxx11-cu128-x86_64-linux/flash_attention_3",
+      "lightx2v_flashinfer": "flashinfer-python==0.6.11",
+      "trtllm": "tensorrt-llm==1.3.0rc18",
+      "torch_cuda_arch_list": ""
+    },
+    "launchers": {
+      "vllm_omni_server_bin": "vllm",
+      "vllm_omni_required_help_args": "--omni",
+      "trtllm_visual_server_bin": "trtllm-serve"
+    },
+    "vllm-omni": {
+      "venv_path": "/scratch/fw-venvs/vllm-omni"
+    },
+    "lightx2v": {
+      "venv_path": "/scratch/fw-venvs/lightx2v"
+    },
+    "trtllm-visual": {
+      "venv_path": "/scratch/fw-venvs/trtllm-visual"
+    }
+  },
+  "benchmark_env": {},
+  "benchmark_framework_args": {
+    "vllm-omni": [],
+    "lightx2v": {
+      "config": {
+        "compile": true
+      }
+    }
+  },
+  "torch_compile_disabled": false,
+  "benchmark_modes": [
+    "single_e2e"
+  ],
+  "requested_sglang_profile": "auto",
+  "results": [
+    {
+      "case_id": "qwen_image_21_t2i_1024",
+      "framework": "sglang",
+      "mode": "single_e2e",
+      "model": "Qwen/Qwen-Image-2.1",
+      "task": "text-to-image",
+      "width": 1024,
+      "height": 1024,
+      "num_frames": null,
+      "fps": null,
+      "num_inference_steps": 40,
+      "guidance_scale": 1.0,
+      "guidance_scale_2": null,
+      "true_cfg_scale": null,
+      "negative_prompt_set": false,
+      "num_gpus": 1,
+      "latency_s": 14.122,
+      "error": null,
+      "framework_metadata": {
+        "profile": "rtx5090-1gpu-encoder-layerwise-offload",
+        "profile_request": "auto",
+        "profile_source": "hardware",
+        "framework_ref": null,
+        "hardware": [
+          "rtx5090"
+        ],
+        "hardware_candidates": [
+          "rtx5090"
+        ],
+        "description": "RTX 5090 32GB: DiT and VAE resident, Qwen3-VL encoder streamed layerwise.",
+        "notes": "NOT the cookbook's RTX 5090 recipe -- this is the cookbook's RTX 4090 recipe, measured here to be substantially faster on the 5090 as well. A/B on ONE box (bench-5090-qi21, sglang 6ad78f22, same card, same Torch SDPA, same 40 steps / seed 42 / CFG 1 / PNG; only component placement differs, which does not change numerics): cookbook `--dit-layerwise-offload true` p50 19.946s [19.97, 19.95, 19.95], 0.4674 s/step, 19.3 GB steady, vs this recipe p50 14.082s [14.14, 14.08, 14.08], 0.3166 s/step, 17.0 GB steady. 1.42x faster on LESS steady memory, with 0.1% scatter on each arm and no overlap between them. Cause: the cookbook's 5090 branch streams the DiT itself through every one of the 40 steps, while this one keeps the DiT on the card and streams only the encoder, which runs once per request. Peak during load is higher (24.9 GB vs 19.3 GB) and still well inside 32 GB. Upstream's picker gates the DiT-resident branch on `hw === 'rtx4090'`; on this evidence it should cover the RTX 5090 too -- see `consumer-dit-layerwise-offload-reference` for the arm this replaced.",
+        "install_specs": null,
+        "server_bin": null,
+        "use_omni_arg": null,
+        "required_help_args": null,
+        "serve_args": "--model-type diffusion --warmup-mode server --performance-mode manual --component-residency dit=resident text_encoder=layerwise-offload vae=resident --warmup-resolutions 1024x1024",
+        "num_gpus": null,
+        "extra_env_keys": [],
+        "sglang_profile": "rtx5090-1gpu-encoder-layerwise-offload",
+        "sglang_profile_request": "auto",
+        "sglang_profile_source": "hardware",
+        "sglang_ref": "sglang 6ad78f22 (2026-09-21)"
+      },
+      "server_command": "sglang serve --model-path Qwen/Qwen-Image-2.1 --port 47001 --host 127.0.0.1 --backend sglang --model-type diffusion --warmup-mode server --performance-mode manual --component-residency dit=resident text_encoder=layerwise-offload vae=resident --warmup-resolutions 1024x1024",
+      "metrics": {
+        "client_latency_s": 14.122,
+        "client_latency_min_s": 14.076,
+        "client_latency_max_s": 14.134,
+        "measured_repeats": 5,
+        "server_latency_s": 13.879,
+        "server_latency_source": "separate instrumented request, not one of the measured repeats",
+        "latency_samples_s": [
+          14.076,
+          14.105,
+          14.134,
+          14.123,
+          14.122
+        ],
+        "latency_spread_pct": 0.4,
+        "warmup_latencies_s": [
+          1.796,
+          1.772
+        ],
+        "warmup_steady_latencies_s": [
+          13.982,
+          14.07
+        ],
+        "server_startup_s": 46.07,
+        "warmup_s": 31.63
+      }
+    }
+  ],
+  "throughput_results": [],
+  "partial": false,
+  "model_revisions": {
+    "Qwen/Qwen-Image-2.1": "b3179ad355be050328e483a9dfdd9e60cd62adfa"
+  }
+}

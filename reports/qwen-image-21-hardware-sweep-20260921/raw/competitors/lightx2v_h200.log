@@ -1,0 +1,30 @@
+=== QI21_LX2VIMG_START 2026-09-21T03:29:52+00:00 hw=h200 host=gpu1-10-220-51-55 base=/scratch ===
+  gpu NVIDIA H200 cap (9, 0)
+  torch 2.11.0+cu130 cuda 13.0
+  flash_attn: present
+  flash_attn_interface: present
+  flashinfer: present
+  sageattention: present
+--- cloning LightX2V main ---
+  LightX2V at 4d709c43125f 2026-09-21
+--- config: qwen_image_21.json ---
+   {"infer_steps": 40, "resolution": 1024, "attn_type": "flash_attn3", "enable_cfg": false, "sample_guide_scale": 1.0}
+--- weights ---
+  at /scratch/hf/hub/models--Qwen--Qwen-Image-2.1/snapshots/b3179ad355be050328e483a9dfdd9e60cd62adfa
+--- serving (upstream's own launch) ---
+===============================================================================
+LightX2V Base Environment Variables Summary:
+-------------------------------------------------------------------------------
+lightx2v_path: /scratch/LightX2V
+model_path: /scratch/hf/hub/models--Qwen--Qwen-Image-2.1/snapshots/b3179ad355be050328e483a9dfdd9e60cd62adfa
+-------------------------------------------------------------------------------
+Model Inference Data Type: BF16
+Sensitive Layer Data Type: None
+Performance Profiling Debug Level: 2
+===============================================================================
+  ready
+  vram after load: 36499 MiB
+  RESULT lightx2v h200 p50=4.505s [4.5, 4.5, 5.0] bytes=1884168
+  vram peak-ish: 36571 MiB
+  infer_steps': 40
+=== QI21_LX2VIMG_DONE 2026-09-21T03:32:41+00:00 ===

@@ -1,0 +1,50 @@
+=== QI21_BENCH_START 2026-09-21T11:07:47+00:00 hw=rtx5090 host=devbox-qi21-resident-test-0 base=/scratch ===
+  gpu NVIDIA GeForce RTX 5090 cap (12, 0) vram 31.4 GiB
+--- sglang predates qwen-image-2.1; updating /sgl-workspace/sglang ---
+From https://github.com/sgl-project/sglang
+ * branch              main       -> FETCH_HEAD
+ + 20518d85...0f6761b5 main       -> origin/main  (forced update)
+  now at 0f6761b5 2026-09-21
+  sglang at /sgl-workspace/sglang/python/sglang
+  qwen-image-2.1 files: 8
+  detector present: True
+--- weights ---
+Fetching 28 files:   4%|▎         | 1/28 [00:00<00:02,  9.80it/s]Fetching 28 files:   7%|▋         | 2/28 [00:00<00:02,  9.37it/s]Fetching 28 files:  21%|██▏       | 6/28 [00:00<00:00, 22.80it/s]Fetching 28 files:  32%|███▏      | 9/28 [00:00<00:00, 24.15it/s]Fetching 28 files:  43%|████▎     | 12/28 [00:00<00:00, 26.07it/s]Fetching 28 files:  57%|█████▋    | 16/28 [00:00<00:00, 28.98it/s]Fetching 28 files:  68%|██████▊   | 19/28 [00:01<00:00, 12.61it/s]Fetching 28 files:  79%|███████▊  | 22/28 [00:15<00:09,  1.55s/it]Fetching 28 files:  82%|████████▏ | 23/28 [00:24<00:12,  2.48s/it]Fetching 28 files:  89%|████████▉ | 25/28 [00:31<00:08,  2.77s/it]Fetching 28 files:  96%|█████████▋| 27/28 [00:36<00:02,  2.63s/it]Fetching 28 files: 100%|██████████| 28/28 [00:37<00:00,  2.46s/it]Fetching 28 files: 100%|██████████| 28/28 [00:37<00:00,  1.34s/it]
+  at /scratch/hf/hub/models--Qwen--Qwen-Image-2.1/snapshots/790c92633540aa0cb11d9abf19eb46d861714758
+--- serving: --performance-mode manual --component-residency dit=resident text_encoder=layerwise-offload vae=resident --warmup-resolutions 1024x1024 ---
+  healthy
+  vram after load: 24891 MiB
+  RESULT rtx5090 p50=14.136s [14.14, 14.17, 14.11, 14.11, 14.2] bytes=2432136
+  vram peak-ish: 17047 MiB
+  average time per step: 0.3173 seconds
+=== QI21_BENCH_DONE 2026-09-21T11:11:36+00:00 ===
+=== QI21_BENCH_START 2026-09-21T11:11:36+00:00 hw=trimmed host=devbox-qi21-resident-test-0 base=/scratch ===
+  gpu NVIDIA GeForce RTX 5090 cap (12, 0) vram 31.4 GiB
+  sglang at /sgl-workspace/sglang/python/sglang
+  qwen-image-2.1 files: 12
+  detector present: True
+--- weights ---
+Fetching 28 files:   0%|          | 0/28 [00:00<?, ?it/s]Fetching 28 files: 100%|██████████| 28/28 [00:00<00:00, 2947.51it/s]
+  at /scratch/hf/hub/models--Qwen--Qwen-Image-2.1/snapshots/790c92633540aa0cb11d9abf19eb46d861714758
+--- serving: --performance-mode manual --component-residency text_encoder=layerwise-offload ---
+  healthy
+  vram after load: 24891 MiB
+  RESULT trimmed p50=14.115s [14.08, 14.09, 14.17, 14.12, 14.12] bytes=2432136
+  vram peak-ish: 17047 MiB
+  average time per step: 0.3173 seconds
+=== QI21_BENCH_DONE 2026-09-21T11:14:25+00:00 ===
+=== QI21_BENCH_START 2026-09-21T11:14:25+00:00 hw=resident host=devbox-qi21-resident-test-0 base=/scratch ===
+  gpu NVIDIA GeForce RTX 5090 cap (12, 0) vram 31.4 GiB
+  sglang at /sgl-workspace/sglang/python/sglang
+  qwen-image-2.1 files: 12
+  detector present: True
+--- weights ---
+Fetching 28 files:   0%|          | 0/28 [00:00<?, ?it/s]Fetching 28 files: 100%|██████████| 28/28 [00:00<00:00, 2870.00it/s]
+  at /scratch/hf/hub/models--Qwen--Qwen-Image-2.1/snapshots/790c92633540aa0cb11d9abf19eb46d861714758
+--- serving: --performance-mode manual --component-residency dit=resident text_encoder=layerwise-offload vae=resident --warmup-resolutions 1024x1024 --layerwise-resident-layers text_encoder=0.8 ---
+  healthy
+  vram after load: 23915 MiB
+  RESULT resident p50=14.168s [14.17, 14.15, 14.16, 14.18, 14.18] bytes=2432136
+  vram peak-ish: 17047 MiB
+  average time per step: 0.3173 seconds
+=== QI21_BENCH_DONE 2026-09-21T11:17:09+00:00 ===

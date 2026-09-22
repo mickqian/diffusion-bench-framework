@@ -1,0 +1,235 @@
+diff --git a/python/sglang/multimodal_gen/runtime/managers/memory_managers/component_residency_strategies.py b/python/sglang/multimodal_gen/runtime/managers/memory_managers/component_residency_strategies.py
+index fbd406c68e5..852ee9ae7f2 100644
+--- a/python/sglang/multimodal_gen/runtime/managers/memory_managers/component_residency_strategies.py
++++ b/python/sglang/multimodal_gen/runtime/managers/memory_managers/component_residency_strategies.py
+@@ -278,12 +278,26 @@ class LayerwiseOffloadStrategy(ComponentResidencyStrategy):
+     ) -> None:
+         if not isinstance(module, LayerwiseOffloadableModuleMixin):
+             return
++        # A component that runs once per request never reuses its resident set
++        # within a use, so releasing it here made `resident_layers` a no-op for
++        # everything but the DiT: configured, prefetched, dropped. Keep it only
++        # when one was asked for and the room it holds is not the room the next
++        # stage needs.
++        # Free the streamed window first and decide about the resident set
++        # after: measured before, this use's transients are still allocated and
++        # make the device look full exactly when the question is being asked.
+         for manager in module.layerwise_offload_managers:
+-            manager.release_all()
++            manager.release_all(keep_resident=True)
++        keep_resident = module.should_retain_residents_across_uses()
++        if not keep_resident:
++            for manager in module.layerwise_offload_managers:
++                manager.release_all()
+         # The layers are gone; the rest of this component is dead weight on the
+         # device until it is used again, and the stage that follows may be the
+-        # one that needs the room.
+-        module.park_non_layer_weights()
++        # one that needs the room. That does not hold when we just decided the
++        # room is there: parking would undo the transfer we chose to keep.
++        if not keep_resident:
++            module.park_non_layer_weights()
+         if current_platform.is_mps():
+             torch.mps.synchronize()
+             module.restore_mps_cpu_non_layer_weights()
+diff --git a/python/sglang/multimodal_gen/runtime/managers/memory_managers/layerwise_offload.py b/python/sglang/multimodal_gen/runtime/managers/memory_managers/layerwise_offload.py
+index d50542a1725..8f5fce9389d 100644
+--- a/python/sglang/multimodal_gen/runtime/managers/memory_managers/layerwise_offload.py
++++ b/python/sglang/multimodal_gen/runtime/managers/memory_managers/layerwise_offload.py
+@@ -123,6 +123,16 @@ HOST_RESIDENT_TABLE_MIN_BYTES = 256 * 1024**2
+ # free device memory, the component stays where it is.
+ PARK_SIGNIFICANCE = 0.1
+ 
++# The resident set is scoped to one use, so a component that runs once per
++# request (a text encoder, say) re-streams it every time and `resident_layers`
++# buys nothing: it is prefetched at prepare_for_use and dropped again at
++# finish_use. Holding it instead is only safe while the device keeps a margin
++# for whatever runs next, expressed as a share of total device memory rather
++# than of what happens to be free -- free memory at the end of a use still has
++# that use's transients in it, and measuring against it rejected a set that fit
++# with 5.8 GiB to spare.
++RETAIN_ACROSS_USES_MARGIN = 0.10
++
+ 
+ def _resolve_submodule(root: torch.nn.Module, path: str) -> torch.nn.Module | None:
+     current: Any = root
+@@ -1145,6 +1155,14 @@ class LayerwiseOffloadManager:
+             total_bytes += local_tensor.numel() * local_tensor.element_size()
+         return total_bytes
+ 
++    def retained_parameter_bytes(self) -> int:
++        """Device bytes this manager's resident set holds, 0 when it has none."""
++        if not self.enabled or self.resident_layers <= 0 or self.num_layers <= 0:
++            return 0
++        return int(
++            self._managed_parameter_bytes() * self.resident_layers / self.num_layers
++        )
++
+     def _get_shared_empty_tensor(self, dtype: torch.dtype) -> torch.Tensor:
+         placeholder = self._offload_placeholders.get(dtype)
+         if placeholder is None:
+@@ -2122,9 +2140,17 @@ class LayerwiseOffloadManager:
+             torch.mps.empty_cache()
+ 
+     @torch.compiler.disable
+-    def release_all(self) -> None:
+-        """Release every layer, including the resident ones: this ends the
+-        denoise stage that the resident set is scoped to."""
++    def release_all(self, *, keep_resident: bool = False) -> None:
++        """Release every layer; with `keep_resident`, all but the resident set.
++
++        The resident set is scoped to one use by default -- this call ends the
++        denoise stage it belongs to. `keep_resident` widens that scope to the
++        next use of the same component, which is the only way `resident_layers`
++        can pay for a component that runs once per request instead of once per
++        denoise step. The caller decides, because whether the room is better
++        spent here or on the stage that follows is not a question this manager
++        can answer alone.
++        """
+         self._log_direct_read_summary()
+         self._log_debug_timing()
+         if self._mapped_populator is not None:
+@@ -2140,10 +2166,13 @@ class LayerwiseOffloadManager:
+             self._collect_mapped_layer(layer_idx)
+ 
+         for layer_idx in list(self._gpu_layers):
+-            self.release_layer(layer_idx, force=True)
++            # `force` is what overrides release_layer's own skip of the
++            # resident set, so dropping it is all `keep_resident` has to do.
++            self.release_layer(layer_idx, force=not keep_resident)
+         # The next use starts a new request; its first pass over the layers may
+         # find their pages evicted and is the one worth faulting in sequentially.
+-        self._first_pass = True
++        # Layers kept resident are already faulted in and do not need that pass.
++        self._first_pass = not keep_resident
+ 
+     @torch.compiler.disable
+     def load_all_layers(self) -> None:
+@@ -2533,6 +2562,27 @@ class LayerwiseOffloadableModuleMixin:
+                     parked[name] = parameter.detach().to("cpu", copy=True)
+                 parameter.data = self._park_placeholder(parameter)
+ 
++    def should_retain_residents_across_uses(self) -> bool:
++        """Is holding the resident sets until the next use worth the room?
++
++        Only when an operator asked for one -- `resident_layers` defaults to 0,
++        so this is off unless configured -- and when what they hold is not the
++        room the next stage needs. Headroom is measured with the sets still
++        allocated, so it is the space available *besides* them, and the test is
++        deliberately conservative: keep only while at least as much again is
++        free.
++        """
++        managers = self.layerwise_offload_managers
++        if not managers:
++            return False
++        held = sum(manager.retained_parameter_bytes() for manager in managers)
++        if held <= 0:
++            return False
++        # Call this only once the streamed window is gone, or the use's own
++        # transients count against the set that is meant to outlive them.
++        total = current_platform.get_device_total_memory() or 0
++        return self._device_headroom_bytes() >= total * RETAIN_ACROSS_USES_MARGIN
++
+     def _device_headroom_bytes(self) -> int:
+         """What an allocation could get without the allocator growing its pool.
+ 
+diff --git a/python/sglang/multimodal_gen/test/unit/test_layerwise_offload.py b/python/sglang/multimodal_gen/test/unit/test_layerwise_offload.py
+index f7fb99366f5..496a86bcc8c 100644
+--- a/python/sglang/multimodal_gen/test/unit/test_layerwise_offload.py
++++ b/python/sglang/multimodal_gen/test/unit/test_layerwise_offload.py
+@@ -1058,6 +1058,95 @@ def test_prepare_for_next_req_repins_residents(monkeypatch):
+     assert {0, 1, 2} <= manager._gpu_layers
+ 
+ 
++def test_release_all_drops_residents_by_default(monkeypatch):
++    """The default is unchanged: a use ends and the resident set goes with it.
++
++    `resident_layers` defaults to 0 everywhere, so this is the path every
++    existing deployment takes and it must keep behaving exactly as before.
++    """
++    _patch_fake_device(monkeypatch)
++    manager = _resident_manager(
++        _MultiBlockModel(6), num_layers=6, prefetch_size=1, resident_layers=3
++    )
++    _arm_residency(manager)
++    manager.prepare_for_next_req(non_blocking=False)
++    assert manager._gpu_layers
++
++    manager.release_all()
++    assert not manager._gpu_layers
++    assert manager._first_pass is True
++
++
++def test_release_all_can_keep_the_resident_set(monkeypatch):
++    """`keep_resident` widens the set's scope to the next use of the component.
++
++    Without it, a component that runs once per request -- a text encoder --
++    prefetches its resident set at prepare_for_use and drops it again at
++    finish_use, so `resident_layers` buys nothing at all. Measured on
++    Qwen-Image-2.1/RTX 5090: `--layerwise-resident-layers text_encoder=0.8`
++    reported `resident=53/66` and moved neither memory nor latency.
++    """
++    _patch_fake_device(monkeypatch)
++    manager = _resident_manager(
++        _MultiBlockModel(6), num_layers=6, prefetch_size=1, resident_layers=3
++    )
++    _arm_residency(manager)
++    manager.prepare_for_next_req(non_blocking=False)
++
++    manager.release_all(keep_resident=True)
++    assert set(manager._gpu_layers) == set(manager._retained_set)
++    # Those layers are already faulted in, so the next use must not re-do the
++    # sequential first pass that exists for evicted pages.
++    assert manager._first_pass is False
++
++
++def test_retain_across_uses_is_off_without_resident_layers(monkeypatch):
++    """No resident set configured -> nothing to retain, whatever the headroom."""
++    _patch_fake_device(monkeypatch)
++    manager = _resident_manager(
++        _MultiBlockModel(6), num_layers=6, prefetch_size=1, resident_layers=0
++    )
++    assert manager.retained_parameter_bytes() == 0
++
++
++def test_retain_across_uses_yields_when_the_room_is_needed(monkeypatch):
++    """Configured, but the device is near full -> give the room back.
++
++    The test is on the margin left after the set, not on the set's own size:
++    the caller frees the streamed window before asking, so what is free at that
++    point is what the next stage will actually get.
++    """
++    _patch_fake_device(monkeypatch)
++    manager = _resident_manager(
++        _MultiBlockModel(6), num_layers=6, prefetch_size=1, resident_layers=3
++    )
++    monkeypatch.setattr(manager, "_managed_parameter_bytes", lambda: 8 << 30)
++    # 3 of 6 layers resident -> half the managed bytes.
++    assert manager.retained_parameter_bytes() == 4 << 30
++
++    module = _MultiBlockModel(6)
++    module.layerwise_offload_managers = [manager]
++    monkeypatch.setattr(
++        layerwise_offload_mod.current_platform,
++        "get_device_total_memory",
++        lambda device_id=0: 32 << 30,
++    )
++
++    # Below the margin (10% of 32 GiB) the room goes back to the next stage.
++    module._device_headroom_bytes = lambda: 1 << 30
++    assert (
++        LayerwiseOffloadableModuleMixin.should_retain_residents_across_uses(module)
++        is False
++    )
++
++    # Above it, the set is worth holding until this component is used again.
++    module._device_headroom_bytes = lambda: 6 << 30
++    assert (
++        LayerwiseOffloadableModuleMixin.should_retain_residents_across_uses(module)
++        is True
++    )
++
++
+ def _record_prepare(manager, monkeypatch):
+     """Log the order of prefetches and stream waits inside prepare_for_next_req.
+ 

@@ -1,0 +1,35 @@
+=== QI21_MGPU_START 2026-09-21T02:03:02+00:00 host=devbox-qi21-b200-2gpu-0 base=/scratch ===
+  0, NVIDIA B200
+  1, NVIDIA B200
+--- updating sglang ---
+From https://github.com/sgl-project/sglang
+ * branch              main       -> FETCH_HEAD
+ + 20518d85...176dbcb8 main       -> origin/main  (forced update)
+  now at 176dbcb8 2026-09-21
+--- weights ---
+  at /scratch/hf/hub/models--Qwen--Qwen-Image-2.1/snapshots/b3179ad355be050328e483a9dfdd9e60cd62adfa
+--- nocfg_1gpu: gpus=1 cfg=none flags=[] ---
+  vram after load: 39714 MiB 4 MiB 
+  ARM nocfg_1gpu cfg=none p50=2.497s [2.58, 2.5, 2.49] bytes=2434926
+  nocfg_1gpu average time per step: 0.0547 seconds
+--- nocfg_tp2: gpus=2 cfg=none flags=[--tp-size 2] ---
+  vram after load: 26630 MiB 26630 MiB 
+  ARM nocfg_tp2 cfg=none p50=1.626s [1.62, 1.63, 1.63] bytes=2429415
+  nocfg_tp2 average time per step: 0.0343 seconds
+--- nocfg_ulysses2: gpus=2 cfg=none flags=[--tp-size 1 --ulysses-degree 2] ---
+  vram after load: 37390 MiB 37390 MiB 
+  ARM nocfg_ulysses2 cfg=none p50=1.703s [1.71, 1.7, 1.7] bytes=2432692
+  nocfg_ulysses2 average time per step: 0.0375 seconds
+--- truecfg_1gpu: gpus=1 cfg=true flags=[] ---
+  vram after load: 39714 MiB 4 MiB 
+  ARM truecfg_1gpu cfg=true p50=4.827s [4.83, 4.83, 4.84] bytes=2170135
+  truecfg_1gpu average time per step: 0.1125 seconds
+--- truecfg_tp2: gpus=2 cfg=true flags=[--tp-size 2] ---
+  vram after load: 26630 MiB 26630 MiB 
+  ARM truecfg_tp2 cfg=true p50=3.106s [3.11, 3.1, 3.12] bytes=2160092
+  truecfg_tp2 average time per step: 0.0704 seconds
+--- truecfg_cfg2: gpus=2 cfg=true flags=[--tp-size 1 --cfg-parallel-size 2] ---
+  vram after load: 35696 MiB 35696 MiB 
+  ARM truecfg_cfg2 cfg=true p50=2.601s [2.6, 2.6, 2.6] bytes=2163432
+  truecfg_cfg2 average time per step: 0.0560 seconds
+=== QI21_MGPU_DONE 2026-09-21T02:11:07+00:00 ===

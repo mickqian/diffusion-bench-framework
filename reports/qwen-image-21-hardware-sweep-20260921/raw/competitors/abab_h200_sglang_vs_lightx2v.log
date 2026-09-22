@@ -1,0 +1,10 @@
+date: invalid argument 's' for -I
+=== XFW_ABAB_START  hw=h200 rounds=3 reps=5 ===
+  round=1 arm=sglang ::  RESULT h200 p50=4.515s [4.51, 4.51, 4.51, 4.53, 4.53] bytes=2437135 
+  round=1 arm=lightx2v ::  RESULT lightx2v h200 p50=4.505s [4.5, 4.5, 4.5, 4.5, 5.0] bytes=1884168 
+  round=2 arm=sglang ::  RESULT h200 p50=4.524s [4.51, 4.52, 4.52, 4.52, 4.53] bytes=2437135 
+  round=2 arm=lightx2v ::  RESULT lightx2v h200 p50=5.004s [4.51, 4.5, 5.0, 5.01, 5.01] bytes=1884168 
+  round=3 arm=sglang ::  RESULT h200 p50=4.522s [4.51, 4.51, 4.52, 4.57, 4.57] bytes=2437135 
+  round=3 arm=lightx2v ::  RESULT lightx2v h200 p50=4.505s [4.5, 4.5, 4.5, 4.51, 5.0] bytes=1884168 
+date: invalid argument 's' for -I
+=== XFW_ABAB_DONE  ===

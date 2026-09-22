@@ -41,15 +41,22 @@ VALID_STATUS = {"supported", "unsupported", "no_profile", "failed", "not_run", "
 # selects by "b200". Linting "blackwell" only checked profiles named
 # blackwell-*, and silently skipped cases whose Blackwell profile is named
 # b200-* (minimax-h3), leaving them outside the compile policy.
-POLICY_HARDWARE = ("h100", "b200")
+POLICY_HARDWARE = ("h100", "h200", "b200", "b300", "rtx5090", "rtx4090")
 # "Best lossless" policy: the selected sglang profile must run resident, and
 # must NOT enable torch.compile — sglang's explicitly-fused kernels now match or
 # beat compiler fusion on most diffusion models, so compile-on is the slower
 # path as well as a long autotune before every measurement. A profile may opt
 # out ONLY with a `policy_exception` string carrying measured evidence.
+# The same switch has three spellings in this CLI and the guard only knew one
+# of them. `--component-residency dit=layerwise-offload` and
+# `--layerwise-offload-components all` are what the Qwen-Image-2.1 cookbook
+# emits for consumer cards, and both slipped past a pattern that looked only for
+# the dedicated `--*-offload` flags.
 _OFFLOAD_ENABLE_RE = re.compile(
     r"--(?:text-encoder|image-encoder|vae|dit)-cpu-offload(?!\s+false)"
     r"|--dit-layerwise-offload(?!\s+false)"
+    r"|--component-residency(?:\s+[\w.-]+=[\w-]+)*?\s+[\w.-]+=(?:layerwise-offload|cpu-offload)"
+    r"|--layerwise-offload-components(?!\s+none)"
 )
 
 

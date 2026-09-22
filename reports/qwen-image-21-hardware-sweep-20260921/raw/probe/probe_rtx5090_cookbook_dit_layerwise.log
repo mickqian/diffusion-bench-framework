@@ -1,0 +1,16 @@
+=== QI21_PROBE_START 2026-09-21T01:27:13+00:00 host=devbox-bench-5090-qi21-0 ===
+  gpu NVIDIA GeForce RTX 5090 cap (12, 0)
+--- does this sglang know the model? ---
+   sglang at /sgl-workspace/sglang/python/sglang
+   qwen-image-2.1 files: 7
+   detector present: True
+--- fetching weights ---
+Fetching 27 files:   0%|          | 0/27 [00:00<?, ?it/s]Fetching 27 files: 100%|██████████| 27/27 [00:00<00:00, 2294.99it/s]
+  at /scratch/hf/hub/models--Qwen--Qwen-Image-2.1/snapshots/b3179ad355be050328e483a9dfdd9e60cd62adfa
+--- serving with the cookbook 5090 recipe ---
+  healthy
+  vram after load: 19331 MiB
+  RESULT 5090 p50=19.946s [19.97, 19.95, 19.95] bytes=2432136
+  vram peak-ish: 19333 MiB
+  average time per step: 0.4674 seconds
+=== QI21_PROBE_DONE 2026-09-21T01:29:34+00:00 ===

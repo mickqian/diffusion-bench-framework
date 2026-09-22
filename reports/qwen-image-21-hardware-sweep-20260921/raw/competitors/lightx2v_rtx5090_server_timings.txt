@@ -1,0 +1,18 @@
+_Log Load models cost 16.731698 s
+_Log Warmup cost 6.852019 s
+_Log Run DiT cost 13.096783 s
+_Log RUN pipeline cost 13.934904 s
+_Log Run DiT cost 13.193946 s
+_Log RUN pipeline cost 14.005285 s
+_Log Run DiT cost 13.232374 s
+_Log RUN pipeline cost 14.039189 s
+_Log Run DiT cost 13.254459 s
+_Log RUN pipeline cost 14.066501 s
+_Log Run DiT cost 13.286392 s
+_Log RUN pipeline cost 14.098545 s
+_Log Run DiT cost 13.306664 s
+_Log RUN pipeline cost 14.120322 s
+_Log Run DiT cost 13.318774 s
+_Log RUN pipeline cost 14.139841 s
+_Log Run DiT cost 13.352824 s
+_Log RUN pipeline cost 14.199110 s

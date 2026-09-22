@@ -105,10 +105,27 @@ check(
     out.strip()[:110],
 )
 
-# 4. against the real data, the two known live regressions must both appear.
+# 4. Against the real data, both known live regressions must appear -- and in
+#    the right band. They do not score alike: cosmos3_super steps 3.5% out of a
+#    quiet history and clears the bar easily, while minimax_h3's 1.3% drift sits
+#    at ~6 sigma because its "before" side spans months of its own movement. A
+#    single headline threshold therefore cannot hold both, and the earlier
+#    version of this file asserted it could. The watch band is what keeps the
+#    weaker one visible instead of silently dropped.
 real = run_detector(json.loads((ROOT / "docs" / "nightly-data.json").read_text()))
-for case in ("cosmos3_super_t2v_2gpu", "minimax_h3_t2va_5s"):
-    line = next((ln for ln in real.splitlines() if case in ln), "")
-    check(f"{case} is caught on the real data", "REGRESSION" in line, line.strip()[:100])
+headline, _, watch = real.partition("look before dismissing:")
+
+for case, section, where in (
+    ("cosmos3_super_t2v_2gpu", headline, "the headline"),
+    ("minimax_h3_t2va_5s", watch, "the watch band"),
+):
+    line = next((ln for ln in section.splitlines() if case in ln), "")
+    check(f"{case} is caught, in {where}", "REGRESSION" in line, line.strip()[:100])
+
+check(
+    "the summary counts the watch band instead of hiding it",
+    "under watch" in real,
+    real.strip()[-90:],
+)
 
 sys.exit(fail)

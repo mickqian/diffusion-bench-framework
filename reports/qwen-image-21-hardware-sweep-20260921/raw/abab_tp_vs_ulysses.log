@@ -1,0 +1,8 @@
+=== QI21_ABAB_START 2026-09-21T02:17:20+00:00 host=devbox-qi21-b200-2gpu-0 rounds=3 ===
+  PAIR round=1 arm=tp2 p50=1.6217
+  PAIR round=1 arm=ulysses2 p50=1.7566
+  PAIR round=2 arm=tp2 p50=1.6246
+  PAIR round=2 arm=ulysses2 p50=1.7407
+  PAIR round=3 arm=tp2 p50=1.6171
+  PAIR round=3 arm=ulysses2 p50=1.9309
+=== QI21_ABAB_DONE 2026-09-21T02:23:23+00:00 ===

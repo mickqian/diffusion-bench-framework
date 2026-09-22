@@ -6,32 +6,98 @@ what `--hardware-profile <hw>` will actually run; edit THAT profile.
 | case | hw | selected profile | exception | ambiguous matches | serve_args |
 |---|---|---|---|---|---|
 | cosmos3_nano_i2v_720p_189f | b200 | `default` |  |  | `--model-type diffusion --warmup-mode server --attention-backend fa --cfg-parallel-size 2 --ulysses-degree 2 --dit-layerwise-offload false --performance-mode speed --enable-torch-compile false` |
+| cosmos3_nano_i2v_720p_189f | b300 | `default` |  |  | `--model-type diffusion --warmup-mode server --attention-backend fa --cfg-parallel-size 2 --ulysses-degree 2 --dit-layerwise-offload false --performance-mode speed --enable-torch-compile false` |
 | cosmos3_nano_i2v_720p_189f | h100 | `default` |  |  | `--model-type diffusion --warmup-mode server --attention-backend fa --cfg-parallel-size 2 --ulysses-degree 2 --dit-layerwise-offload false --performance-mode speed --enable-torch-compile false` |
+| cosmos3_nano_i2v_720p_189f | h200 | `h200-4gpu-cfg-ulysses` |  | AMBIGUOUS: h200-4gpu-cfg-ulysses-speed, h200-2gpu-cfg, h200-2gpu-cfg-speed | `--model-type diffusion --warmup-mode server --attention-backend fa --cfg-parallel-size 2 --ulysses-degree 2` |
+| cosmos3_nano_i2v_720p_189f | rtx4090 | `default` |  |  | `--model-type diffusion --warmup-mode server --attention-backend fa --cfg-parallel-size 2 --ulysses-degree 2 --dit-layerwise-offload false --performance-mode speed --enable-torch-compile false` |
+| cosmos3_nano_i2v_720p_189f | rtx5090 | `default` |  |  | `--model-type diffusion --warmup-mode server --attention-backend fa --cfg-parallel-size 2 --ulysses-degree 2 --dit-layerwise-offload false --performance-mode speed --enable-torch-compile false` |
 | cosmos3_nano_t2i_720p | b200 | `blackwell-2gpu-cfg-parallel` |  |  | `--model-type diffusion --warmup-mode server --attention-backend torch_cudnn_sdpa --tp-size 1 --cfg-parallel-size 2 --dit-layerwise-offload false --performance-mode speed --enable-torch-compile false` |
+| cosmos3_nano_t2i_720p | b300 | `blackwell-2gpu-cfg-parallel` |  |  | `--model-type diffusion --warmup-mode server --attention-backend torch_cudnn_sdpa --tp-size 1 --cfg-parallel-size 2 --dit-layerwise-offload false --performance-mode speed --enable-torch-compile false` |
 | cosmos3_nano_t2i_720p | h100 | `default` |  |  | `--model-type diffusion --warmup-mode server --attention-backend fa --tp-size 2 --dit-layerwise-offload false --performance-mode speed --enable-torch-compile false` |
+| cosmos3_nano_t2i_720p | h200 | `h200-2gpu-tp-fa` |  | AMBIGUOUS: h200-2gpu-tp-fa-speed, h200-2gpu-tp-fa-batch4 | `--model-type diffusion --warmup-mode server --attention-backend fa --tp-size 2` |
+| cosmos3_nano_t2i_720p | rtx4090 | `default` |  |  | `--model-type diffusion --warmup-mode server --attention-backend fa --tp-size 2 --dit-layerwise-offload false --performance-mode speed --enable-torch-compile false` |
+| cosmos3_nano_t2i_720p | rtx5090 | `default` |  |  | `--model-type diffusion --warmup-mode server --attention-backend fa --tp-size 2 --dit-layerwise-offload false --performance-mode speed --enable-torch-compile false` |
 | cosmos3_nano_t2v_720p_189f | b200 | `default` |  |  | `--model-type diffusion --warmup-mode server --attention-backend fa --cfg-parallel-size 2 --ulysses-degree 2` |
+| cosmos3_nano_t2v_720p_189f | b300 | `default` |  |  | `--model-type diffusion --warmup-mode server --attention-backend fa --cfg-parallel-size 2 --ulysses-degree 2` |
 | cosmos3_nano_t2v_720p_189f | h100 | `h100-4gpu-cfg-ulysses-speed-eager` |  |  | `--model-type diffusion --warmup-mode server --attention-backend fa --cfg-parallel-size 2 --ulysses-degree 2 --dit-layerwise-offload false --performance-mode speed --enable-torch-compile false` |
+| cosmos3_nano_t2v_720p_189f | h200 | `h200-4gpu-cfg-ulysses` |  | AMBIGUOUS: h200-4gpu-cfg-ulysses-speed, h200-2gpu-cfg, h200-2gpu-cfg-speed | `--model-type diffusion --warmup-mode server --attention-backend fa --cfg-parallel-size 2 --ulysses-degree 2` |
+| cosmos3_nano_t2v_720p_189f | rtx4090 | `default` |  |  | `--model-type diffusion --warmup-mode server --attention-backend fa --cfg-parallel-size 2 --ulysses-degree 2` |
+| cosmos3_nano_t2v_720p_189f | rtx5090 | `default` |  |  | `--model-type diffusion --warmup-mode server --attention-backend fa --cfg-parallel-size 2 --ulysses-degree 2` |
 | flux1_dev_t2i_1024 | b200 | `blackwell-2gpu-tp-eager` |  | AMBIGUOUS: blackwell-2gpu-tp-speed-eager | `--model-type diffusion --warmup-mode server --dit-layerwise-offload false --tp-size 2 --enable-torch-compile false` |
+| flux1_dev_t2i_1024 | b300 | `blackwell-2gpu-tp-eager` |  | AMBIGUOUS: blackwell-2gpu-tp-speed-eager | `--model-type diffusion --warmup-mode server --dit-layerwise-offload false --tp-size 2 --enable-torch-compile false` |
 | flux1_dev_t2i_1024 | h100 | `h100-h200-2gpu-tp-eager` |  | AMBIGUOUS: h100-h200-2gpu-tp-speed-eager | `--model-type diffusion --warmup-mode server --dit-layerwise-offload false --tp-size 2 --enable-torch-compile false` |
+| flux1_dev_t2i_1024 | h200 | `h100-h200-2gpu-tp-eager` |  | AMBIGUOUS: h100-h200-2gpu-tp-speed-eager | `--model-type diffusion --warmup-mode server --dit-layerwise-offload false --tp-size 2 --enable-torch-compile false` |
+| flux1_dev_t2i_1024 | rtx4090 | `default` |  |  | `--model-type diffusion --warmup-mode server --dit-layerwise-offload false --tp-size 2` |
+| flux1_dev_t2i_1024 | rtx5090 | `default` |  |  | `--model-type diffusion --warmup-mode server --dit-layerwise-offload false --tp-size 2` |
 | flux2_dev_t2i_1024 | b200 | `blackwell-2gpu-tp-eager` |  | AMBIGUOUS: blackwell-2gpu-tp-speed-eager | `--model-type diffusion --warmup-mode server --dit-layerwise-offload false --tp-size 2 --enable-torch-compile false` |
+| flux2_dev_t2i_1024 | b300 | `blackwell-2gpu-tp-eager` |  | AMBIGUOUS: blackwell-2gpu-tp-speed-eager | `--model-type diffusion --warmup-mode server --dit-layerwise-offload false --tp-size 2 --enable-torch-compile false` |
 | flux2_dev_t2i_1024 | h100 | `h100-h200-2gpu-tp-eager` |  | AMBIGUOUS: h100-h200-2gpu-tp-speed-eager | `--model-type diffusion --warmup-mode server --dit-layerwise-offload false --tp-size 2 --enable-torch-compile false` |
+| flux2_dev_t2i_1024 | h200 | `h100-h200-2gpu-tp-eager` |  | AMBIGUOUS: h100-h200-2gpu-tp-speed-eager | `--model-type diffusion --warmup-mode server --dit-layerwise-offload false --tp-size 2 --enable-torch-compile false` |
+| flux2_dev_t2i_1024 | rtx4090 | `default` |  |  | `--model-type diffusion --warmup-mode server --dit-layerwise-offload false --tp-size 2` |
+| flux2_dev_t2i_1024 | rtx5090 | `default` |  |  | `--model-type diffusion --warmup-mode server --dit-layerwise-offload false --tp-size 2` |
 | ideogram4_t2i_1024_2gpu_tp | b200 | `default` |  |  | `--model-type diffusion --warmup-mode server --dit-layerwise-offload false --tp-size 2` |
+| ideogram4_t2i_1024_2gpu_tp | b300 | `default` |  |  | `--model-type diffusion --warmup-mode server --dit-layerwise-offload false --tp-size 2` |
 | ideogram4_t2i_1024_2gpu_tp | h100 | `h100-h200-2gpu-tp-speed` |  |  | `--model-type diffusion --warmup-mode server --dit-layerwise-offload false --tp-size 2 --performance-mode speed --enable-torch-compile false` |
+| ideogram4_t2i_1024_2gpu_tp | h200 | `h100-h200-2gpu-tp-speed` |  |  | `--model-type diffusion --warmup-mode server --dit-layerwise-offload false --tp-size 2 --performance-mode speed --enable-torch-compile false` |
+| ideogram4_t2i_1024_2gpu_tp | rtx4090 | `default` |  |  | `--model-type diffusion --warmup-mode server --dit-layerwise-offload false --tp-size 2` |
+| ideogram4_t2i_1024_2gpu_tp | rtx5090 | `default` |  |  | `--model-type diffusion --warmup-mode server --dit-layerwise-offload false --tp-size 2` |
 | ltx2.3_twostage_t2v_2gpus | b200 | `default` |  |  | `--model-type diffusion --warmup-mode server --enable-cfg-parallel --pipeline-class-name LTX2TwoStagePipeline` |
+| ltx2.3_twostage_t2v_2gpus | b300 | `default` |  |  | `--model-type diffusion --warmup-mode server --enable-cfg-parallel --pipeline-class-name LTX2TwoStagePipeline` |
 | ltx2.3_twostage_t2v_2gpus | h100 | `h100-80gb-2gpu` | yes |  | `--model-type diffusion --warmup-mode server --enable-cfg-parallel --pipeline-class-name LTX2TwoStagePipeline --ltx2-two-stage-device-mode snapshot` |
+| ltx2.3_twostage_t2v_2gpus | h200 | `h200-2gpu` |  |  | `--model-type diffusion --warmup-mode server --enable-cfg-parallel --pipeline-class-name LTX2TwoStagePipeline --ltx2-two-stage-device-mode resident` |
+| ltx2.3_twostage_t2v_2gpus | rtx4090 | `default` |  |  | `--model-type diffusion --warmup-mode server --enable-cfg-parallel --pipeline-class-name LTX2TwoStagePipeline` |
+| ltx2.3_twostage_t2v_2gpus | rtx5090 | `default` |  |  | `--model-type diffusion --warmup-mode server --enable-cfg-parallel --pipeline-class-name LTX2TwoStagePipeline` |
 | ltx2_twostage_t2v | b200 | `default` |  |  | `--model-type diffusion --warmup-mode server --enable-cfg-parallel --pipeline-class-name LTX2TwoStagePipeline --dit-layerwise-offload false --performance-mode speed --enable-torch-compile false` |
+| ltx2_twostage_t2v | b300 | `default` |  |  | `--model-type diffusion --warmup-mode server --enable-cfg-parallel --pipeline-class-name LTX2TwoStagePipeline --dit-layerwise-offload false --performance-mode speed --enable-torch-compile false` |
 | ltx2_twostage_t2v | h100 | `default` |  |  | `--model-type diffusion --warmup-mode server --enable-cfg-parallel --pipeline-class-name LTX2TwoStagePipeline --dit-layerwise-offload false --performance-mode speed --enable-torch-compile false` |
+| ltx2_twostage_t2v | h200 | `h200-2gpu` |  |  | `--model-type diffusion --warmup-mode server --enable-cfg-parallel --pipeline-class-name LTX2TwoStagePipeline --ltx2-two-stage-device-mode resident` |
+| ltx2_twostage_t2v | rtx4090 | `default` |  |  | `--model-type diffusion --warmup-mode server --enable-cfg-parallel --pipeline-class-name LTX2TwoStagePipeline --dit-layerwise-offload false --performance-mode speed --enable-torch-compile false` |
+| ltx2_twostage_t2v | rtx5090 | `default` |  |  | `--model-type diffusion --warmup-mode server --enable-cfg-parallel --pipeline-class-name LTX2TwoStagePipeline --dit-layerwise-offload false --performance-mode speed --enable-torch-compile false` |
 | minimax_h3_ref2va_5s | b200 | `b200-2gpu` | yes |  | `--model-type diffusion --warmup-mode server --model-variant ref2va --ulysses-degree 2 --performance-mode speed --enable-torch-compile false` |
+| minimax_h3_ref2va_5s | b300 | `b200-2gpu` | yes |  | `--model-type diffusion --warmup-mode server --model-variant ref2va --ulysses-degree 2 --performance-mode speed --enable-torch-compile false` |
 | minimax_h3_ref2va_5s | h100 | `default` | yes |  | `--model-type diffusion --warmup-mode server --model-variant ref2va --ulysses-degree 2 --performance-mode speed --enable-torch-compile false` |
+| minimax_h3_ref2va_5s | h200 | `default` | yes |  | `--model-type diffusion --warmup-mode server --model-variant ref2va --ulysses-degree 2 --performance-mode speed --enable-torch-compile false` |
+| minimax_h3_ref2va_5s | rtx4090 | `default` | yes |  | `--model-type diffusion --warmup-mode server --model-variant ref2va --ulysses-degree 2 --performance-mode speed --enable-torch-compile false` |
+| minimax_h3_ref2va_5s | rtx5090 | `rtx5090-2gpu` | yes |  | `--model-type diffusion --warmup-mode server --model-variant ref2va --tp-size 2 --ulysses-degree 1 --performance-mode memory --layerwise-offload-components dit,text_encoder,vae --dit-offload-prefetch-size 1 --dit-layerwise-resident-layers 20 --enable-torch-compile false` |
 | minimax_h3_t2va_5s | b200 | `b200-2gpu` | yes |  | `--model-type diffusion --warmup-mode server --model-variant fl2va --ulysses-degree 2 --performance-mode speed --enable-torch-compile false` |
+| minimax_h3_t2va_5s | b300 | `b200-2gpu` | yes |  | `--model-type diffusion --warmup-mode server --model-variant fl2va --ulysses-degree 2 --performance-mode speed --enable-torch-compile false` |
 | minimax_h3_t2va_5s | h100 | `default` | yes |  | `--model-type diffusion --warmup-mode server --model-variant fl2va --ulysses-degree 2 --performance-mode speed --enable-torch-compile false` |
+| minimax_h3_t2va_5s | h200 | `default` | yes |  | `--model-type diffusion --warmup-mode server --model-variant fl2va --ulysses-degree 2 --performance-mode speed --enable-torch-compile false` |
+| minimax_h3_t2va_5s | rtx4090 | `default` | yes |  | `--model-type diffusion --warmup-mode server --model-variant fl2va --ulysses-degree 2 --performance-mode speed --enable-torch-compile false` |
+| minimax_h3_t2va_5s | rtx5090 | `rtx5090-2gpu` | yes |  | `--model-type diffusion --warmup-mode server --model-variant fl2va --tp-size 2 --ulysses-degree 1 --performance-mode memory --layerwise-offload-components dit,text_encoder,vae --dit-offload-prefetch-size 1 --dit-layerwise-resident-layers 20 --enable-torch-compile false` |
+| qwen_image_21_t2i_1024 | b200 | `b200-1gpu-resident-fa` |  |  | `--model-type diffusion --warmup-mode server --performance-mode speed --attention-backend fa` |
+| qwen_image_21_t2i_1024 | b300 | `b200-1gpu-resident-fa` |  |  | `--model-type diffusion --warmup-mode server --performance-mode speed --attention-backend fa` |
+| qwen_image_21_t2i_1024 | h100 | `h200-1gpu-resident` |  |  | `--model-type diffusion --warmup-mode server --performance-mode speed` |
+| qwen_image_21_t2i_1024 | h200 | `h200-1gpu-resident` |  |  | `--model-type diffusion --warmup-mode server --performance-mode speed` |
+| qwen_image_21_t2i_1024 | rtx4090 | `rtx4090-1gpu-encoder-layerwise-offload` | yes |  | `--model-type diffusion --warmup-mode server --performance-mode manual --component-residency dit=resident text_encoder=layerwise-offload vae=resident --warmup-resolutions 1024x1024` |
+| qwen_image_21_t2i_1024 | rtx5090 | `rtx5090-1gpu-encoder-layerwise-offload` | yes |  | `--model-type diffusion --warmup-mode server --performance-mode manual --component-residency dit=resident text_encoder=layerwise-offload vae=resident --warmup-resolutions 1024x1024` |
 | qwen_image_2512_t2i_1024 | b200 | `default` |  |  | `--model-type diffusion --warmup-mode server --tp-size 2` |
+| qwen_image_2512_t2i_1024 | b300 | `default` |  |  | `--model-type diffusion --warmup-mode server --tp-size 2` |
 | qwen_image_2512_t2i_1024 | h100 | `h100-2gpu-ulysses-speed-eager` | yes |  | `--model-type diffusion --warmup-mode server --dit-layerwise-offload false --tp-size 1 --ulysses-degree 2 --enable-cfg-parallel false --performance-mode speed --enable-torch-compile false` |
+| qwen_image_2512_t2i_1024 | h200 | `h200-2gpu-tp-speed-eager` |  |  | `--model-type diffusion --warmup-mode server --dit-layerwise-offload false --tp-size 2 --performance-mode speed --enable-torch-compile false` |
+| qwen_image_2512_t2i_1024 | rtx4090 | `default` |  |  | `--model-type diffusion --warmup-mode server --tp-size 2` |
+| qwen_image_2512_t2i_1024 | rtx5090 | `default` |  |  | `--model-type diffusion --warmup-mode server --tp-size 2` |
 | qwen_image_2512_t2i_1024_truecfg | b200 | `blackwell-2gpu-cfg-parallel` |  |  | `--model-type diffusion --warmup-mode server --tp-size 1 --cfg-parallel-size 2` |
+| qwen_image_2512_t2i_1024_truecfg | b300 | `blackwell-2gpu-cfg-parallel` |  |  | `--model-type diffusion --warmup-mode server --tp-size 1 --cfg-parallel-size 2` |
 | qwen_image_2512_t2i_1024_truecfg | h100 | `h100-h200-2gpu-tp-speed-eager` |  |  | `--model-type diffusion --warmup-mode server --enable-cfg-parallel --performance-mode speed --enable-torch-compile false` |
+| qwen_image_2512_t2i_1024_truecfg | h200 | `h100-h200-2gpu-tp-speed-eager` |  |  | `--model-type diffusion --warmup-mode server --enable-cfg-parallel --performance-mode speed --enable-torch-compile false` |
+| qwen_image_2512_t2i_1024_truecfg | rtx4090 | `default` |  |  | `--model-type diffusion --warmup-mode server --tp-size 2` |
+| qwen_image_2512_t2i_1024_truecfg | rtx5090 | `default` |  |  | `--model-type diffusion --warmup-mode server --tp-size 2` |
 | qwen_image_edit_2511 | b200 | `default` |  |  | `--model-type diffusion --warmup-mode server --tp-size 2 --dit-layerwise-offload false --performance-mode speed --enable-torch-compile false` |
+| qwen_image_edit_2511 | b300 | `default` |  |  | `--model-type diffusion --warmup-mode server --tp-size 2 --dit-layerwise-offload false --performance-mode speed --enable-torch-compile false` |
 | qwen_image_edit_2511 | h100 | `default` |  |  | `--model-type diffusion --warmup-mode server --tp-size 2 --dit-layerwise-offload false --performance-mode speed --enable-torch-compile false` |
+| qwen_image_edit_2511 | h200 | `default` |  |  | `--model-type diffusion --warmup-mode server --tp-size 2 --dit-layerwise-offload false --performance-mode speed --enable-torch-compile false` |
+| qwen_image_edit_2511 | rtx4090 | `default` |  |  | `--model-type diffusion --warmup-mode server --tp-size 2 --dit-layerwise-offload false --performance-mode speed --enable-torch-compile false` |
+| qwen_image_edit_2511 | rtx5090 | `default` |  |  | `--model-type diffusion --warmup-mode server --tp-size 2 --dit-layerwise-offload false --performance-mode speed --enable-torch-compile false` |
 | wan22_t2v_a14b_720p | b200 | `default` |  |  | `--model-type diffusion --warmup-mode server --enable-cfg-parallel --ulysses-degree 2 --dit-cpu-offload false --pin-cpu-memory --dit-layerwise-offload false --performance-mode speed --enable-torch-compile false` |
+| wan22_t2v_a14b_720p | b300 | `default` |  |  | `--model-type diffusion --warmup-mode server --enable-cfg-parallel --ulysses-degree 2 --dit-cpu-offload false --pin-cpu-memory --dit-layerwise-offload false --performance-mode speed --enable-torch-compile false` |
 | wan22_t2v_a14b_720p | h100 | `default` |  |  | `--model-type diffusion --warmup-mode server --enable-cfg-parallel --ulysses-degree 2 --dit-cpu-offload false --pin-cpu-memory --dit-layerwise-offload false --performance-mode speed --enable-torch-compile false` |
+| wan22_t2v_a14b_720p | h200 | `default` |  |  | `--model-type diffusion --warmup-mode server --enable-cfg-parallel --ulysses-degree 2 --dit-cpu-offload false --pin-cpu-memory --dit-layerwise-offload false --performance-mode speed --enable-torch-compile false` |
+| wan22_t2v_a14b_720p | rtx4090 | `default` |  |  | `--model-type diffusion --warmup-mode server --enable-cfg-parallel --ulysses-degree 2 --dit-cpu-offload false --pin-cpu-memory --dit-layerwise-offload false --performance-mode speed --enable-torch-compile false` |
+| wan22_t2v_a14b_720p | rtx5090 | `default` |  |  | `--model-type diffusion --warmup-mode server --enable-cfg-parallel --ulysses-degree 2 --dit-cpu-offload false --pin-cpu-memory --dit-layerwise-offload false --performance-mode speed --enable-torch-compile false` |
 | zimage_turbo_t2i_1024 | b200 | `default` |  |  | `--model-type diffusion --warmup-mode server --tp-size 2` |
+| zimage_turbo_t2i_1024 | b300 | `default` |  |  | `--model-type diffusion --warmup-mode server --tp-size 2` |
 | zimage_turbo_t2i_1024 | h100 | `h100-h200-2gpu-tp-resident-eager` | yes |  | `--model-type diffusion --warmup-mode server --tp-size 2 --dit-layerwise-offload false --performance-mode speed --enable-torch-compile false` |
+| zimage_turbo_t2i_1024 | h200 | `h100-h200-2gpu-tp-resident-eager` | yes |  | `--model-type diffusion --warmup-mode server --tp-size 2 --dit-layerwise-offload false --performance-mode speed --enable-torch-compile false` |
+| zimage_turbo_t2i_1024 | rtx4090 | `default` |  |  | `--model-type diffusion --warmup-mode server --tp-size 2` |
+| zimage_turbo_t2i_1024 | rtx5090 | `default` |  |  | `--model-type diffusion --warmup-mode server --tp-size 2` |

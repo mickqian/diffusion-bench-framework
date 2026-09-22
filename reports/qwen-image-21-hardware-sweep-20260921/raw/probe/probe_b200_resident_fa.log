@@ -1,0 +1,20 @@
+=== QI21_BENCH_START 2026-09-21T01:40:42+00:00 hw=b200 host=devbox-qi21-b200-0 base=/scratch ===
+  gpu NVIDIA B200 cap (10, 0) vram 178.4 GiB
+--- sglang predates qwen-image-2.1; updating /sgl-workspace/sglang ---
+From https://github.com/sgl-project/sglang
+ * branch              main       -> FETCH_HEAD
+ + 20518d85...6ad78f22 main       -> origin/main  (forced update)
+  now at 6ad78f22 2026-09-21
+  sglang at /sgl-workspace/sglang/python/sglang
+  qwen-image-2.1 files: 8
+  detector present: True
+--- weights ---
+Fetching 27 files:   4%|▎         | 1/27 [00:00<00:04,  6.41it/s]Fetching 27 files:   7%|▋         | 2/27 [00:00<00:03,  6.99it/s]Fetching 27 files:  37%|███▋      | 10/27 [00:00<00:00, 28.43it/s]Fetching 27 files:  56%|█████▌    | 15/27 [00:00<00:00, 34.64it/s]Fetching 27 files:  70%|███████   | 19/27 [00:00<00:00, 20.30it/s]Fetching 27 files:  78%|███████▊  | 21/27 [00:20<00:00, 20.30it/s]Fetching 27 files:  81%|████████▏ | 22/27 [00:23<00:09,  1.99s/it]Fetching 27 files:  85%|████████▌ | 23/27 [00:24<00:07,  1.95s/it]Fetching 27 files:  93%|█████████▎| 25/27 [00:31<00:04,  2.26s/it]Fetching 27 files: 100%|██████████| 27/27 [00:34<00:00,  2.11s/it]Fetching 27 files: 100%|██████████| 27/27 [00:34<00:00,  1.28s/it]
+  at /scratch/hf/hub/models--Qwen--Qwen-Image-2.1/snapshots/b3179ad355be050328e483a9dfdd9e60cd62adfa
+--- serving: --performance-mode speed --attention-backend fa ---
+  healthy
+  vram after load: 39714 MiB
+  RESULT b200 p50=2.454s [2.45, 2.46, 2.45] bytes=2434927
+  vram peak-ish: 32828 MiB
+  average time per step: 0.0537 seconds
+=== QI21_BENCH_DONE 2026-09-21T01:42:52+00:00 ===

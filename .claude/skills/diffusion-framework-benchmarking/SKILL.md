@@ -272,6 +272,109 @@ that reads as sglang's and is not. Both runs then have to be discarded.
   <job>` cannot be confused by a replaced argv. A process-count monitor reported a
   live job dead, and later reported two instances where exactly one was running.
 
+### Acquiring and driving a box from a script
+
+Four things that cost real minutes on 2026-09-22, all in the plumbing rather than the benchmark:
+
+- **`rx devbox acquire` has two interactive prompts, and a script has to survive both.** With any devbox already active it asks `Acquire another devbox? [y/N]` — on EOF (no TTY) it prints `Cancelled.` and exits **0**, so `set -e` sails on believing it has a box. Without `--image` it then shows an image menu (`Choose [1-6/c], or Enter for default:`), and the piped `y` that answered the first prompt is an invalid choice here (`Invalid choice. Cancelled.`, exit 1). Working shape: `yes y | rx devbox acquire --gpu h200 --count 1 --ttl 5h --image lmsysorg/sglang:latest --name X`, then **grep the output for `Cancelled`** — the exit code alone is not a verdict. Filed as gpu_platform#140.
+- **`rx devbox list` columns shift.** UTIL is `—` while provisioning and `NN%` once running, so `awk '{print $7}'` reads STATUS in one state and UTIL in the other (a `10%` that looked like "not running yet"). Test the row with `grep -F <name> | grep -qw running`; never index columns.
+- **Do not `sed`-edit a remote script through the rx quoting layer.** `rxrun.sh box 'sed -e "s#…\#…#" a.sh > b.sh; nohup bash b.sh &'` lost the `\#` to the remote `bash -c`, sed died with `unterminated s command`, the redirect left a **0-byte b.sh**, `nohup bash` of an empty file exited at once, and the waiter sat 30 minutes on a DONE marker that could never appear. Generate variants **locally** (python, asserting each replacement matches exactly once), push with `scripts/rxput.sh` (md5-verified), and after launching **read the log's first lines before arming any waiter**. Waiters must match the failure markers too (`NEVER BECAME HEALTHY`, `REQUESTS FAILED`), not only the success one.
+- **The first request of the first server on a box is a page-cache artifact.** Same config read 6.9 s as the first server after a fresh download and 4.8 s as the second; the five steady-state samples agreed to ~10 ms in both orders. Never quote a first request from the first server, and when both arms restart cheaply, run AB then BA with a fresh server per arm — "every sample of one arm below every sample of the other, in both orders" is the acceptance that survived here (permanent vs forward resident lifetime, H200, −0.23 s, 20 samples disjoint, md5 identical).
+
+### Two things a fresh `lmsysorg/sglang:dev` box lies to you about
+
+Both cost a full round of four boxes on 2026-09-21, and both produce an error
+message that points at the wrong layer.
+
+- **Its git clone carries a dead credential.** The image bakes a GitHub Actions
+  token into `/sgl-workspace/sglang`'s `http.https://github.com/.extraheader`.
+  It expires, and git then sends a dead credential to a PUBLIC repo, gets 401,
+  and reports `fatal: could not read Username for 'https://github.com': No such
+  device or address` -- which reads like missing network or missing setup. The
+  network is fine. Fetch with the header blanked for that command only:
+  `git -C <repo> -c http.https://github.com/.extraheader= fetch --depth=50 origin main`.
+  You will need this whenever the image predates the model you are benchmarking.
+- **`HF_HOME` does not decide where weights are read from.** Several clusters
+  export `HUGGINGFACE_HUB_CACHE=/cluster-storage/models` into every shell, and
+  both it and `HF_HUB_CACHE` outrank `HF_HOME`. Set only `HF_HOME` and the
+  runtime reads a READ-ONLY cache, which surfaces as `ValueError: Could not get
+  model info for '<model>'. If using a safetensors file, please specify
+  pipeline_class_name` -- a message that reads as "this model is unsupported".
+  `scripts/devbox_run_cases.sh` now pins all three; do the same in any ad-hoc
+  script.
+
+### When the client metric cannot resolve the frameworks
+
+The Fairness Checklist makes client-side wall clock the headline because it is
+the only framework-agnostic number. That is right, and it carries an unstated
+precondition: the client metric's *resolution* has to be finer than the
+difference being measured. Check it, because a framework can break it.
+
+LightX2V's sync endpoint releases responses on a ~0.5 s tick. Every client
+latency measured against it on Qwen-Image-2.1 landed within 0.010 s of a 0.5 s
+multiple (4.505, 5.004, 14.509, 14.510) while its own server-side `RUN pipeline`
+times (4.443-4.477 s, 14.10-14.20 s) were nowhere near one. On a 4.5 s workload
+that tick is 11%, against framework gaps of ~2%: the client number reports the
+quantiser, not the framework, and whichever side of the boundary the compute
+lands on decides the "winner".
+
+It took three things stacked to see it, and any one alone gives a wrong answer:
+
+- **repeat more than three times.** Three repeats read 4.505 s and looked like a
+  tie; seven read 5.004 s and looked like a 9.4% sglang win. Both were sampling
+  a bimodal client distribution.
+- **interleave.** The paired ABAB rounds came out -0.2%, +9.6%, -0.4% -- mixed
+  sign, so no resolvable difference. A sequential pass would have published
+  whichever round it happened to run.
+- **read the competitor's own server log.** It showed the compute is not bimodal
+  at all (0.8% spread), which is what proves the variance is in the serving
+  layer rather than the kernels.
+
+So: when two frameworks land within a few percent, say "not separable" and give
+the server-side numbers as diagnostics, rather than promoting a difference the
+measurement cannot support. A quantised serving layer is still a real cost to a
+real user -- report it as the distribution's shape (sglang 4.51-4.57 across
+fifteen samples; LightX2V ten at 4.50 and five at 5.00), not as a median.
+
+### Installing a competitor when the box's torch has moved on
+
+`install_comparison_frameworks.sh` builds flash-attn from source on purpose
+(`--no-binary flash-attn`). On a devbox whose torch is 2.14+cu130 that build
+fails with `#error C++20 or later compatible compiler is required to use ATen`
+and a wall of `std::string_view has no member named ends_with`: flash-attn
+2.8.3's setup.py pins `-std=c++17`, and 2.8.3.post1 is the newest release on
+PyPI, so there is nothing to bump to. Do not patch a competitor's build to get a
+number -- run it in the environment its own project publishes, which is both
+faster and the more faithful reading of "give each framework its best supported
+path".
+
+Two traps when you do: a project's README may name an image tag that does not
+exist (LightX2V documents `lightx2v/lightx2v:26062001`, and the real tags carry
+a platform suffix -- `26062001-cu130` for datacenter, `...-cu130-5090-*` for
+sm120), and `rx devbox acquire` caps you at 6 active boxes, so a second image
+usually means releasing a finished one first. Check every artifact is already
+pulled locally before releasing -- a released box is gone.
+
+### A checkpoint whose images are RGBA
+
+Qwen-Image-2.1 emits RGBA. The default response encoder is JPEG, which cannot
+hold an alpha channel, so every request dies with `OSError: cannot write mode
+RGBA as JPEG` and reaches the client as a bare `HTTP 500` with no hint. Carry
+`output_format: png` in the case's `request_extra` -- both `single_e2e` and
+`throughput` read it (`_build_sglang_payload` and `_bench_extra_body` each merge
+`_request_extra`). Check a new checkpoint's mode before blaming the server.
+
+### The generated config is not the sources
+
+`configs/comparison_configs.json` is built from `configs/benchmark/cases/`. Edit
+a case and forget `scripts/build_benchmark_config.py` and nothing tells you:
+`test_config_copies_in_sync.py` compares the two GENERATED copies with each
+other, and they are equally stale. A case field renamed to the name the harness
+actually reads shipped that way, and four GPUs ran with the dead key.
+`scripts/tests/test_built_config_matches_sources.py` now rebuilds into a scratch
+copy and requires a match -- run the suite, not just the build.
+
+
 ## Failure Classification
 
 Classify every failed or missing cell:

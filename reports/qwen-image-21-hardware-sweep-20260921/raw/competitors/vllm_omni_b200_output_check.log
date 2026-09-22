@@ -1,0 +1,6 @@
+=== VO_VERIFY_START 2026-09-21T04:05:13+00:00 ===
+  latency 3.786s  response 5596007 bytes
+  decoded image: 4196804 bytes, magic 89504e470d0a1a0a
+  PNG 1024x1024, bit depth 8, color type 6 (RGBA)
+  raw pixels would be 4.00 MiB; file is 4.00 MiB
+=== VO_VERIFY_DONE 2026-09-21T04:05:52+00:00 ===

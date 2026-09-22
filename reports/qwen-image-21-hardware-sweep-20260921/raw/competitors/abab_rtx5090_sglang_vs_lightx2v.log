@@ -1,0 +1,10 @@
+date: invalid argument 's' for -I
+=== XFW_ABAB_START  hw=rtx5090 rounds=3 reps=5 ===
+  round=1 arm=sglang ::  RESULT rtx5090 p50=14.087s [14.04, 14.07, 14.09, 14.1, 14.11] bytes=2432136 
+  round=1 arm=lightx2v ::  RESULT lightx2v rtx5090 p50=14.514s [14.51, 14.51, 14.51, 14.51, 14.51] bytes=1889562 
+  round=2 arm=sglang ::  RESULT rtx5090 p50=14.096s [14.03, 14.07, 14.1, 14.1, 14.1] bytes=2432135 
+  round=2 arm=lightx2v ::  RESULT lightx2v rtx5090 p50=14.513s [14.52, 14.52, 14.51, 14.51, 14.51] bytes=1889562 
+  round=3 arm=sglang ::  RESULT rtx5090 p50=14.080s [14.03, 14.07, 14.08, 14.09, 14.11] bytes=2432136 
+  round=3 arm=lightx2v ::  RESULT lightx2v rtx5090 p50=14.512s [14.51, 14.51, 14.51, 14.51, 14.51] bytes=1889562 
+date: invalid argument 's' for -I
+=== XFW_ABAB_DONE  ===

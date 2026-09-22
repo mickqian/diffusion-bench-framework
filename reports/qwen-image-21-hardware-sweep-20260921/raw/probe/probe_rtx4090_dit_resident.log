@@ -1,0 +1,20 @@
+=== QI21_BENCH_START 2026-09-21T01:40:43+00:00 hw=rtx4090 host=devbox-qi21-4090-0 base=/root ===
+  gpu NVIDIA GeForce RTX 4090 cap (8, 9) vram 23.5 GiB
+--- sglang predates qwen-image-2.1; updating /sgl-workspace/sglang ---
+From https://github.com/sgl-project/sglang
+ * branch              main       -> FETCH_HEAD
+ + 20518d85...6ad78f22 main       -> origin/main  (forced update)
+  now at 6ad78f22 2026-09-21
+  sglang at /sgl-workspace/sglang/python/sglang
+  qwen-image-2.1 files: 8
+  detector present: True
+--- weights ---
+Fetching 27 files:  22%|██▏       | 6/27 [00:00<00:00, 55.51it/s]Fetching 27 files:  59%|█████▉    | 16/27 [00:00<00:00, 62.30it/s]Fetching 27 files:  74%|███████▍  | 20/27 [00:20<00:00, 62.30it/s]Fetching 27 files:  78%|███████▊  | 21/27 [00:53<00:21,  3.59s/it]Fetching 27 files:  81%|████████▏ | 22/27 [01:29<00:32,  6.43s/it]Fetching 27 files:  85%|████████▌ | 23/27 [02:38<00:53, 13.27s/it]Fetching 27 files:  89%|████████▉ | 24/27 [02:38<00:34, 11.48s/it]Fetching 27 files:  96%|█████████▋| 26/27 [02:50<00:11, 11.48s/it]Fetching 27 files: 100%|██████████| 27/27 [03:16<00:00, 11.96s/it]Fetching 27 files: 100%|██████████| 27/27 [03:16<00:00,  7.28s/it]
+  at /root/hf/hub/models--Qwen--Qwen-Image-2.1/snapshots/b3179ad355be050328e483a9dfdd9e60cd62adfa
+--- serving: --performance-mode manual --component-residency dit=resident text_encoder=layerwise-offload vae=resident --warmup-resolutions 1024x1024 ---
+  healthy
+  vram after load: 20598 MiB
+  RESULT rtx4090 p50=19.309s [19.2, 19.31, 19.32] bytes=2439820
+  vram peak-ish: 16648 MiB
+  average time per step: 0.4353 seconds
+=== QI21_BENCH_DONE 2026-09-21T01:47:30+00:00 ===

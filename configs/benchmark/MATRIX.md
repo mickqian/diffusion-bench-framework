@@ -10,6 +10,7 @@ Scope matrix (has a command profile), NOT run-results. `profile`=configured to r
 | qwen_image_2512_t2i_1024 | text-to-image | profile | profile | n/a | profile |
 | qwen_image_2512_t2i_1024_truecfg | text-to-image | profile | profile | n/a | n/a |
 | qwen_image_edit_2511 | image-edit | profile | profile | n/a | TODO |
+| qwen_image_21_t2i_1024 | text-to-image | profile | n/a | profile | n/a |
 | zimage_turbo_t2i_1024 | text-to-image | profile | profile | profile | TODO |
 | ideogram4_t2i_1024_2gpu_tp | text-to-image | profile | n/a | n/a | n/a |
 | wan22_t2v_a14b_720p | text-to-video | profile | profile | profile | TODO |

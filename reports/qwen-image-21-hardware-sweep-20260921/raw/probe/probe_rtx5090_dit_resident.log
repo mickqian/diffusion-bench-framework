@@ -1,0 +1,15 @@
+=== QI21_BENCH_START 2026-09-21T01:48:54+00:00 hw=rtx5090 host=devbox-bench-5090-qi21-0 base=/scratch ===
+  gpu NVIDIA GeForce RTX 5090 cap (12, 0) vram 31.4 GiB
+  sglang at /sgl-workspace/sglang/python/sglang
+  qwen-image-2.1 files: 12
+  detector present: True
+--- weights ---
+Fetching 27 files:   0%|          | 0/27 [00:00<?, ?it/s]Fetching 27 files: 100%|██████████| 27/27 [00:00<00:00, 2909.34it/s]
+  at /scratch/hf/hub/models--Qwen--Qwen-Image-2.1/snapshots/b3179ad355be050328e483a9dfdd9e60cd62adfa
+--- serving: --performance-mode manual --component-residency dit=resident text_encoder=layerwise-offload vae=resident --warmup-resolutions 1024x1024 ---
+  healthy
+  vram after load: 24891 MiB
+  RESULT rtx5090 p50=14.082s [14.14, 14.08, 14.08] bytes=2432136
+  vram peak-ish: 17047 MiB
+  average time per step: 0.3166 seconds
+=== QI21_BENCH_DONE 2026-09-21T01:51:10+00:00 ===

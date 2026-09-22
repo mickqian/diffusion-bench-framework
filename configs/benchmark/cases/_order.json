@@ -5,6 +5,7 @@
     "qwen_image_2512_t2i_1024",
     "qwen_image_2512_t2i_1024_truecfg",
     "qwen_image_edit_2511",
+    "qwen_image_21_t2i_1024",
     "zimage_turbo_t2i_1024",
     "ideogram4_t2i_1024_2gpu_tp",
     "wan22_t2v_a14b_720p",

@@ -1,0 +1,13 @@
+=== QI21_VO_START 2026-09-21T03:10:39+00:00 host=devbox-qi21-b200-0 base=/scratch ===
+  gpu NVIDIA B200 cap (10, 0)
+--- cloning vllm-omni @ qwen-image-2.1 (PR #7759) ---
+  at 3ea9e605011f 2026-09-20
+--- venv + vllm 0.29.0 + omni (editable) ---
+  vllm 0.29.0
+  vllm-omni 0.1.dev1+g3ea9e6050
+--- serving (upstream's own command) ---
+  healthy
+  vram after load: 34052 MiB
+  RESULT vllm-omni p50=3.421s [3.41, 3.42, 3.42] bytes=5596006
+  vram peak-ish: 41254 MiB
+=== QI21_VO_DONE 2026-09-21T04:04:15+00:00 ===

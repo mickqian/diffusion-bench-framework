@@ -1,0 +1,144 @@
+{
+  "timestamp": "2026-09-21T02:01:58.864159+00:00",
+  "commit_sha": "4762610221e6229c0835d14058ee34aa67af166e",
+  "run_id": "local",
+  "hardware": {
+    "runner_labels": null,
+    "gpu_config": null,
+    "gpus": [
+      "NVIDIA B200, 183359 MiB, 590.48.01"
+    ],
+    "hardware_profile_override": "b200"
+  },
+  "sglang_runtime": {
+    "package_version": "0.0.0.dev1+g20518d851",
+    "module_path": "/sgl-workspace/sglang/python/sglang/__init__.py",
+    "git_root": "/sgl-workspace/sglang",
+    "git_commit": "6ad78f2281674daff6e39f9f9df2952834c0f036"
+  },
+  "framework_runtime": {
+    "venv_root": "/scratch/fw-venvs",
+    "install_specs": {
+      "vllm": "vllm==0.18.0",
+      "vllm_omni": "vllm-omni==0.18.0",
+      "lightx2v": "git+https://github.com/ModelTC/LightX2V.git@7efd05f8e1425b83321fd4f1cef779ef6504076f",
+      "lightx2v_flash_attn": "flash-attn==2.8.3",
+      "lightx2v_flash_attn3": "",
+      "lightx2v_fa3_hf_repo": "varunneal/flash-attention-3",
+      "lightx2v_fa3_hf_revision": "de87b9b5af06dd9984df595bef90b2eba44b181a",
+      "lightx2v_fa3_hf_subdir": "build/torch28-cxx11-cu128-x86_64-linux/flash_attention_3",
+      "lightx2v_flashinfer": "flashinfer-python==0.6.11",
+      "trtllm": "tensorrt-llm==1.3.0rc18",
+      "torch_cuda_arch_list": ""
+    },
+    "launchers": {
+      "vllm_omni_server_bin": "vllm",
+      "vllm_omni_required_help_args": "--omni",
+      "trtllm_visual_server_bin": "trtllm-serve"
+    },
+    "vllm-omni": {
+      "venv_path": "/scratch/fw-venvs/vllm-omni"
+    },
+    "lightx2v": {
+      "venv_path": "/scratch/fw-venvs/lightx2v"
+    },
+    "trtllm-visual": {
+      "venv_path": "/scratch/fw-venvs/trtllm-visual"
+    }
+  },
+  "benchmark_env": {},
+  "benchmark_framework_args": {
+    "vllm-omni": [],
+    "lightx2v": {
+      "config": {
+        "compile": true
+      }
+    }
+  },
+  "torch_compile_disabled": false,
+  "benchmark_modes": [
+    "single_e2e"
+  ],
+  "requested_sglang_profile": "auto",
+  "results": [
+    {
+      "case_id": "qwen_image_21_t2i_1024",
+      "framework": "sglang",
+      "mode": "single_e2e",
+      "model": "Qwen/Qwen-Image-2.1",
+      "task": "text-to-image",
+      "width": 1024,
+      "height": 1024,
+      "num_frames": null,
+      "fps": null,
+      "num_inference_steps": 40,
+      "guidance_scale": 1.0,
+      "guidance_scale_2": null,
+      "true_cfg_scale": null,
+      "negative_prompt_set": false,
+      "num_gpus": 1,
+      "latency_s": 2.467,
+      "error": null,
+      "framework_metadata": {
+        "profile": "b200-1gpu-resident-fa",
+        "profile_request": "auto",
+        "profile_source": "hardware",
+        "framework_ref": null,
+        "hardware": [
+          "b200",
+          "gb200",
+          "b300",
+          "gb300"
+        ],
+        "hardware_candidates": [
+          "b200"
+        ],
+        "description": "B200 resident with an explicit FlashAttention backend.",
+        "notes": "Cookbook verifiedRecipes `b200-1-resident` (default: true). --attention-backend fa is NOT decoration: the picker's 'Automatic' option emits it for b200 and for no other card, so dropping it changes the kernel this cell measures. VALIDATED 2026-09-21 on a 1x B200 devbox (sglang 6ad78f22): p50 2.454s over 3 repeats after warmup [2.45, 2.46, 2.45], 0.0537 s/step x 40 = 2.15s of the 2.45s, 39.7 GB after load settling to 32.8 GB steady out of 183 GB. 1.84x the H200 on the same command shape, and the per-step gap (0.0537 vs 0.1034) carries essentially all of it.",
+        "install_specs": null,
+        "server_bin": null,
+        "use_omni_arg": null,
+        "required_help_args": null,
+        "serve_args": "--model-type diffusion --warmup-mode server --performance-mode speed --attention-backend fa",
+        "num_gpus": null,
+        "extra_env_keys": [],
+        "sglang_profile": "b200-1gpu-resident-fa",
+        "sglang_profile_request": "auto",
+        "sglang_profile_source": "hardware",
+        "sglang_ref": "sglang 6ad78f22 (2026-09-21)"
+      },
+      "server_command": "sglang serve --model-path Qwen/Qwen-Image-2.1 --port 47001 --host 127.0.0.1 --backend sglang --model-type diffusion --warmup-mode server --performance-mode speed --attention-backend fa",
+      "metrics": {
+        "client_latency_s": 2.467,
+        "client_latency_min_s": 2.463,
+        "client_latency_max_s": 2.472,
+        "measured_repeats": 5,
+        "server_latency_s": 2.328,
+        "server_latency_source": "separate instrumented request, not one of the measured repeats",
+        "latency_samples_s": [
+          2.463,
+          2.466,
+          2.47,
+          2.472,
+          2.467
+        ],
+        "latency_spread_pct": 0.3,
+        "warmup_latencies_s": [
+          0.393,
+          0.363
+        ],
+        "warmup_steady_latencies_s": [
+          2.459,
+          2.458
+        ],
+        "server_startup_s": 34.07,
+        "warmup_s": 5.68
+      }
+    }
+  ],
+  "throughput_results": [],
+  "partial": false,
+  "model_revisions": {
+    "Qwen/Qwen-Image-2.1": "b3179ad355be050328e483a9dfdd9e60cd62adfa"
+  }
+}

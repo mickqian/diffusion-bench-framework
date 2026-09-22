@@ -1,0 +1,35 @@
+=== QI21_BENCH_START 2026-09-21T11:19:42+00:00 hw=rtx5090 host=devbox-qi21-4090-trim-0 base=/scratch ===
+  gpu NVIDIA GeForce RTX 4090 cap (8, 9) vram 23.5 GiB
+--- sglang predates qwen-image-2.1; updating /sgl-workspace/sglang ---
+From https://github.com/sgl-project/sglang
+ * branch              main       -> FETCH_HEAD
+ + 20518d85...0f6761b5 main       -> origin/main  (forced update)
+  now at 0f6761b5 2026-09-21
+  sglang at /sgl-workspace/sglang/python/sglang
+  qwen-image-2.1 files: 8
+  detector present: True
+--- weights ---
+Fetching 28 files:  25%|██▌       | 7/28 [00:00<00:00, 56.02it/s]Fetching 28 files:  57%|█████▋    | 16/28 [00:00<00:00, 61.51it/s]Fetching 28 files:  75%|███████▌  | 21/28 [00:20<00:00, 61.51it/s]Fetching 28 files:  79%|███████▊  | 22/28 [00:30<00:11,  1.92s/it]Fetching 28 files:  82%|████████▏ | 23/28 [01:07<00:24,  4.89s/it]Fetching 28 files:  86%|████████▌ | 24/28 [02:20<00:48, 12.07s/it]Fetching 28 files:  89%|████████▉ | 25/28 [02:29<00:35, 11.67s/it]Fetching 28 files:  96%|█████████▋| 27/28 [02:40<00:11, 11.67s/it]Fetching 28 files: 100%|██████████| 28/28 [03:03<00:00, 11.56s/it]Fetching 28 files: 100%|██████████| 28/28 [03:03<00:00,  6.55s/it]
+  at /scratch/hf/hub/models--Qwen--Qwen-Image-2.1/snapshots/790c92633540aa0cb11d9abf19eb46d861714758
+--- serving: --performance-mode manual --component-residency dit=resident text_encoder=layerwise-offload vae=resident --warmup-resolutions 1024x1024 ---
+  healthy
+  vram after load: 20598 MiB
+  RESULT rtx5090 p50=18.668s [18.55, 18.66, 18.67, 18.71, 18.72] bytes=2439823
+  vram peak-ish: 16648 MiB
+  average time per step: 0.4208 seconds
+=== QI21_BENCH_DONE 2026-09-21T11:26:52+00:00 ===
+=== QI21_BENCH_START 2026-09-21T11:26:52+00:00 hw=trimmed host=devbox-qi21-4090-trim-0 base=/scratch ===
+  gpu NVIDIA GeForce RTX 4090 cap (8, 9) vram 23.5 GiB
+  sglang at /sgl-workspace/sglang/python/sglang
+  qwen-image-2.1 files: 12
+  detector present: True
+--- weights ---
+Fetching 28 files:   0%|          | 0/28 [00:00<?, ?it/s]Fetching 28 files: 100%|██████████| 28/28 [00:00<00:00, 2239.65it/s]
+  at /scratch/hf/hub/models--Qwen--Qwen-Image-2.1/snapshots/790c92633540aa0cb11d9abf19eb46d861714758
+--- serving: --performance-mode manual --component-residency text_encoder=layerwise-offload ---
+  healthy
+  vram after load: 20598 MiB
+  RESULT trimmed p50=18.673s [18.55, 18.56, 18.67, 18.68, 18.69] bytes=2439824
+  vram peak-ish: 16648 MiB
+  average time per step: 0.4201 seconds
+=== QI21_BENCH_DONE 2026-09-21T11:30:24+00:00 ===

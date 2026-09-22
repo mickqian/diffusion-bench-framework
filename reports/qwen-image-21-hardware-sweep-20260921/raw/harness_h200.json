@@ -1,0 +1,142 @@
+{
+  "timestamp": "2026-09-21T02:01:59.271089+00:00",
+  "commit_sha": "4762610221e6229c0835d14058ee34aa67af166e",
+  "run_id": "local",
+  "hardware": {
+    "runner_labels": null,
+    "gpu_config": null,
+    "gpus": [
+      "NVIDIA H200, 143771 MiB, 580.105.08"
+    ],
+    "hardware_profile_override": "h200"
+  },
+  "sglang_runtime": {
+    "package_version": "0.0.0.dev1+g20518d851",
+    "module_path": "/sgl-workspace/sglang/python/sglang/__init__.py",
+    "git_root": "/sgl-workspace/sglang",
+    "git_commit": "6ad78f2281674daff6e39f9f9df2952834c0f036"
+  },
+  "framework_runtime": {
+    "venv_root": "/scratch/fw-venvs",
+    "install_specs": {
+      "vllm": "vllm==0.18.0",
+      "vllm_omni": "vllm-omni==0.18.0",
+      "lightx2v": "git+https://github.com/ModelTC/LightX2V.git@7efd05f8e1425b83321fd4f1cef779ef6504076f",
+      "lightx2v_flash_attn": "flash-attn==2.8.3",
+      "lightx2v_flash_attn3": "",
+      "lightx2v_fa3_hf_repo": "varunneal/flash-attention-3",
+      "lightx2v_fa3_hf_revision": "de87b9b5af06dd9984df595bef90b2eba44b181a",
+      "lightx2v_fa3_hf_subdir": "build/torch28-cxx11-cu128-x86_64-linux/flash_attention_3",
+      "lightx2v_flashinfer": "flashinfer-python==0.6.11",
+      "trtllm": "tensorrt-llm==1.3.0rc18",
+      "torch_cuda_arch_list": ""
+    },
+    "launchers": {
+      "vllm_omni_server_bin": "vllm",
+      "vllm_omni_required_help_args": "--omni",
+      "trtllm_visual_server_bin": "trtllm-serve"
+    },
+    "vllm-omni": {
+      "venv_path": "/scratch/fw-venvs/vllm-omni"
+    },
+    "lightx2v": {
+      "venv_path": "/scratch/fw-venvs/lightx2v"
+    },
+    "trtllm-visual": {
+      "venv_path": "/scratch/fw-venvs/trtllm-visual"
+    }
+  },
+  "benchmark_env": {},
+  "benchmark_framework_args": {
+    "vllm-omni": [],
+    "lightx2v": {
+      "config": {
+        "compile": true
+      }
+    }
+  },
+  "torch_compile_disabled": false,
+  "benchmark_modes": [
+    "single_e2e"
+  ],
+  "requested_sglang_profile": "auto",
+  "results": [
+    {
+      "case_id": "qwen_image_21_t2i_1024",
+      "framework": "sglang",
+      "mode": "single_e2e",
+      "model": "Qwen/Qwen-Image-2.1",
+      "task": "text-to-image",
+      "width": 1024,
+      "height": 1024,
+      "num_frames": null,
+      "fps": null,
+      "num_inference_steps": 40,
+      "guidance_scale": 1.0,
+      "guidance_scale_2": null,
+      "true_cfg_scale": null,
+      "negative_prompt_set": false,
+      "num_gpus": 1,
+      "latency_s": 4.535,
+      "error": null,
+      "framework_metadata": {
+        "profile": "h200-1gpu-resident",
+        "profile_request": "auto",
+        "profile_source": "hardware",
+        "framework_ref": null,
+        "hardware": [
+          "h200",
+          "h100"
+        ],
+        "hardware_candidates": [
+          "h200"
+        ],
+        "description": "H200 resident, platform attention (FlashAttention on Hopper, no flag needed).",
+        "notes": "Cookbook verifiedRecipes `h200-1-resident` (default: true), attentions [fa, sdpa]. The picker's 'Automatic' attention emits NO flag on H200 because the runtime already selects FlashAttention there; only B200 gets an explicit --attention-backend fa. VALIDATED 2026-09-21 on a 1x H200 devbox (sglang 6ad78f22): p50 4.519s over 3 repeats after warmup [4.51, 4.52, 4.52], 0.1034 s/step x 40 = 4.14s of the 4.52s, 39.6 GB after load settling to 32.7 GB steady out of 140 GB.",
+        "install_specs": null,
+        "server_bin": null,
+        "use_omni_arg": null,
+        "required_help_args": null,
+        "serve_args": "--model-type diffusion --warmup-mode server --performance-mode speed",
+        "num_gpus": null,
+        "extra_env_keys": [],
+        "sglang_profile": "h200-1gpu-resident",
+        "sglang_profile_request": "auto",
+        "sglang_profile_source": "hardware",
+        "sglang_ref": "sglang 6ad78f22 (2026-09-21)"
+      },
+      "server_command": "sglang serve --model-path Qwen/Qwen-Image-2.1 --port 47001 --host 127.0.0.1 --backend sglang --model-type diffusion --warmup-mode server --performance-mode speed",
+      "metrics": {
+        "client_latency_s": 4.535,
+        "client_latency_min_s": 4.529,
+        "client_latency_max_s": 4.538,
+        "measured_repeats": 5,
+        "server_latency_s": 4.342,
+        "server_latency_source": "separate instrumented request, not one of the measured repeats",
+        "latency_samples_s": [
+          4.529,
+          4.535,
+          4.535,
+          4.538,
+          4.535
+        ],
+        "latency_spread_pct": 0.2,
+        "warmup_latencies_s": [
+          0.581,
+          0.548
+        ],
+        "warmup_steady_latencies_s": [
+          4.524,
+          4.519
+        ],
+        "server_startup_s": 38.06,
+        "warmup_s": 10.18
+      }
+    }
+  ],
+  "throughput_results": [],
+  "partial": false,
+  "model_revisions": {
+    "Qwen/Qwen-Image-2.1": "b3179ad355be050328e483a9dfdd9e60cd62adfa"
+  }
+}
