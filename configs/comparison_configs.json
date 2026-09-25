@@ -4612,6 +4612,8 @@
                         },
                         "reference_image": true,
                         "compile": true,
+                        "reference_short_edge": 2048,
+                        "reference_multiple": 32,
                         "workflow_graph": {
                             "1": {
                                 "class_type": "UNETLoader",
@@ -4676,7 +4678,7 @@
                                     "width": "{{width}}",
                                     "height": "{{height}}",
                                     "length": "{{num_frames}}",
-                                    "ref_image_size": "match",
+                                    "ref_image_size": "max",
                                     "ref_images.ref_image_0": [
                                         "16",
                                         0
@@ -4806,7 +4808,7 @@
                             "framework_ref": "ComfyUI master HEAD",
                             "num_gpus": 1,
                             "serve_args": "",
-                            "notes": "Official video_minimax_h3_r2v template with one reference image (the shared test image) and the full bf16 ref2va DiT. ref_image_size 'match' only ever scales down to the generation area; the 1024x704 test image is already smaller than 1344x768, so 'match' and 'max' feed the same reference. No CFG, as in sglang. Weights are the full-precision single-file checkpoints ComfyUI loads (Comfy-Org repackaging or the model's own single-file release); the official template's fp8/int8/nvfp4 defaults are swapped out because they are a different numeric class from every other row. Sampler, scheduler and shift follow the official ComfyUI workflow; steps, CFG, size, frames and seed follow the case. Compile on: the core TorchCompileModel node (inductor) goes behind every diffusion-model loader, as the other competitors run compile-on; measured on FLUX.1 / 1xB200 2026-09-25 at 4.89s against 5.94s and 5.77s eager."
+                            "notes": "Official video_minimax_h3_r2v template with one reference image (the shared test image) and the full bf16 ref2va DiT. The reference is resized by the harness to the reference pipeline's shape -- 2048px short edge, upscaling allowed, LANCZOS, each side to the nearest 32 (sglang's reference_encoding.py, which vLLM-Omni's +51% over its T2VA also matches) -- and the node runs in 'max' mode, whose scale is exactly 1 at a 2048 short edge. ComfyUI's node never upscales, so without this the 1024x704 test image entered at 2816 reference tokens against about 23800 for the other rows: the 2026-09-25 round's first ComfyUI ref2va number (343.5s, only +8% over its T2VA while sglang/vLLM-Omni paid +53%/+51%) measured less work and is superseded. No CFG, as in sglang. Weights are the full-precision single-file checkpoints ComfyUI loads (Comfy-Org repackaging or the model's own single-file release); the official template's fp8/int8/nvfp4 defaults are swapped out because they are a different numeric class from every other row. Sampler, scheduler and shift follow the official ComfyUI workflow; steps, CFG, size, frames and seed follow the case. Compile on: the core TorchCompileModel node (inductor) goes behind every diffusion-model loader, as the other competitors run compile-on; measured on FLUX.1 / 1xB200 2026-09-25 at 4.89s against 5.94s and 5.77s eager."
                         },
                         "blackwell-gpuonly": {
                             "description": "Blackwell: the default graph with every model resident on the GPU (--gpu-only).",

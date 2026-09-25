@@ -666,14 +666,36 @@ def _prepare_comfyui_workspace(case: dict, fw_cfg: dict, config: dict | None) ->
     # MiniMax-H3 Ref2VA takes its reference through request extras, not the
     # harness's reference_image field, so the spec can ask for the image too.
     if case.get("reference_image") or spec.get("reference_image"):
-        shutil.copyfile(
-            _get_ref_image_path(config or {}, case),
-            workspace / "input" / comfyui_client.REF_IMAGE_NAME,
-        )
+        target = workspace / "input" / comfyui_client.REF_IMAGE_NAME
+        source = _get_ref_image_path(config or {}, case)
+        short_edge = spec.get("reference_short_edge")
+        if short_edge:
+            _resize_reference_to_short_edge(source, target, int(short_edge), int(spec.get("reference_multiple", 1)))
+        else:
+            shutil.copyfile(source, target)
     folders = sorted({Path(rel).parts[0] for rel in spec["models"]})
     lines = ["diffusion_bench:", f"  base_path: {models_dir}", "  is_default: true"]
     lines += [f"  {folder}: {folder}" for folder in folders]
     (workspace / "extra_model_paths.yaml").write_text("\n".join(lines) + "\n")
+
+
+def _resize_reference_to_short_edge(source: str, target: Path, short_edge: int, multiple: int) -> None:
+    """Hand ComfyUI the reference at the size the reference pipeline uses.
+
+    MiniMax-H3 Ref2VA resizes an image reference to a 2048px short edge, upscaling
+    if needed, LANCZOS, each side to the nearest multiple of 32 -- which is what
+    sglang and vLLM-Omni do. ComfyUI's node never upscales (its 'max' mode only
+    caps at 2048), so the 1024x704 test image entered its graph at 8x fewer
+    reference tokens than theirs. Resizing here with the same rule and running
+    the node in 'max' mode (a no-op scale at exactly 2048) gives it the same pixels.
+    """
+    from PIL import Image
+
+    with Image.open(source) as image:
+        image = image.convert("RGB")
+        scale = short_edge / min(image.size)
+        size = tuple(max(multiple, round(side * scale / multiple) * multiple) for side in image.size)
+        image.resize(size, Image.Resampling.LANCZOS).save(target)
 
 
 def _build_comfyui_cmd(case: dict, fw_cfg: dict, port: int) -> list[str]:
