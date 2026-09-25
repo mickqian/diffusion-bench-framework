@@ -26,8 +26,6 @@ import re
 import time
 import uuid
 
-import requests
-
 # A placeholder that is the whole string keeps the value's type (an int stays an
 # int); one embedded in text is interpolated.
 _FULL_TOKEN = re.compile(r"^\{\{(\w+)\}\}$")
@@ -75,6 +73,11 @@ def workflow_params(case: dict, spec: dict) -> dict:
         "steps": steps,
         # Two-expert models (Wan2.2) hand over between samplers mid-schedule.
         "half_steps": max(1, steps // 2),
+        # Two-stage pipelines (LTX-2) run their first stage at half resolution.
+        "half_width": case["width"] // 2 if case.get("width") else None,
+        "half_height": case["height"] // 2 if case.get("height") else None,
+        # GPUs the MultiGPU CFG Split node spreads guidance branches over; 1 is a no-op.
+        "cfg_gpus": 1,
         "num_frames": case.get("num_frames"),
         "fps": case.get("fps"),
         "guidance": case.get("guidance_scale"),
@@ -98,6 +101,8 @@ def _output_files(history_entry: dict) -> list[dict]:
 
 
 def _fetch(base_url: str, entry: dict, first_chunk_only: bool) -> int:
+    import requests
+
     params = {
         "filename": entry["filename"],
         "subfolder": entry.get("subfolder", ""),
@@ -128,6 +133,8 @@ def run_prompt(
     completion and the outputs are only checked to exist (video: the other
     frameworks' video timings also end at job completion).
     """
+    # Imported here so the config builder can render workflows with a bare python3.
+    import requests
     import websocket  # websocket-client
 
     client_id = uuid.uuid4().hex

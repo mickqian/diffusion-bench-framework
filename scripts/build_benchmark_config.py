@@ -20,11 +20,13 @@ import re
 import sys
 
 sys.path.insert(0, os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "src"))
+from diffusion_bench import comfyui_client  # noqa: E402
 from diffusion_bench.config_guard import select_profile  # noqa: E402
 
 REPO = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 BENCH = os.path.join(REPO, "configs", "benchmark")
 CASES = os.path.join(BENCH, "cases")
+COMFYUI_WORKFLOWS = os.path.join(BENCH, "comfyui")
 OUT_EDITABLE = os.path.join(REPO, "configs", "comparison_configs.json")
 OUT_PACKAGED = os.path.join(REPO, "src", "diffusion_bench", "comparison_configs.json")
 
@@ -142,6 +144,57 @@ def _lint_sglang_policy(cid: str, body: dict) -> list[str]:
     return errs
 
 
+def _inline_comfyui(cid: str, case: dict, body: dict) -> list[str]:
+    """Inline every ComfyUI workflow template and dry-render it for this case.
+
+    The template is looked up by name at build time so the built config is
+    self-contained, and it is rendered with the case's own parameters so a
+    placeholder with no value, a graph with no nonce (every request after the
+    first would be a cache hit) or a checkpoint the spec does not map fails
+    here rather than forty minutes into a GPU run.
+    """
+    errs = []
+    base = body.get("comfyui") or {}
+    blocks = [("inline", base)] + [
+        (name, (prof or {}).get("comfyui"))
+        for name, prof in (body.get("command_profiles") or {}).items()
+    ]
+    for name, block in blocks:
+        if not block:
+            continue
+        where = f"{cid}/comfyui[{name}]"
+        effective = {**base, **block, "params": {**(base.get("params") or {}), **(block.get("params") or {})}}
+        workflow = block.get("workflow")
+        if not workflow:
+            if name == "inline":
+                errs.append(f"{where}: no `workflow` template named")
+            continue
+        path = os.path.join(COMFYUI_WORKFLOWS, workflow)
+        if not os.path.isfile(path):
+            errs.append(f"{where}: workflow template {workflow!r} not found under configs/benchmark/comfyui/")
+            continue
+        graph = load(path)
+        block["workflow_graph"] = graph
+        try:
+            rendered = comfyui_client.render_workflow(graph, comfyui_client.workflow_params(case, effective))
+        except KeyError as exc:
+            errs.append(f"{where}: {exc.args[0]}")
+            continue
+        nodes = rendered.values()
+        if not any(comfyui_client.NONCE_INPUT in (n.get("inputs") or {}) for n in nodes):
+            errs.append(f"{where}: no node carries {comfyui_client.NONCE_INPUT}; every repeat would be a cache hit")
+        if not any(n.get("class_type") in comfyui_client.SAMPLER_CLASSES for n in nodes):
+            errs.append(f"{where}: no sampler node")
+        mapped = {os.path.basename(rel) for rel in (effective.get("models") or {})}
+        wanted = {
+            v for n in nodes for v in (n.get("inputs") or {}).values()
+            if isinstance(v, str) and v.endswith(".safetensors")
+        }
+        for missing in sorted(wanted - mapped):
+            errs.append(f"{where}: workflow loads {missing!r} but `models` does not map it")
+    return errs
+
+
 def load(path):
     return json.load(open(path))
 
@@ -199,6 +252,8 @@ def build():
                 errors.extend(_lint_model_override(cid, c.get("model"), fw, body))
                 if fw == "sglang":
                     policy_errors.extend(_lint_sglang_policy(cid, body))
+                if fw == "comfyui":
+                    errors.extend(_inline_comfyui(cid, c, body))
                 frameworks[fw] = body
             else:
                 statuses[fw] = status

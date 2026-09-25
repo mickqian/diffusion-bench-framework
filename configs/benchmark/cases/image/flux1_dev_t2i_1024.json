@@ -207,6 +207,29 @@
           "notes": "Harness appends --tp_size 2 when num_gpus=2. trtllm-serve auto-detects the FLUX.1 diffusion model; add --extra_visual_gen_options <model>.yml for steady-state tuning. PyTorch backend, no TeaCache and no torch compile so the row stays cache-free and comparable. Needs GPU validation."
         }
       }
+    },
+    "comfyui": {
+      "status": "supported",
+      "num_gpus": 1,
+      "serve_args": "",
+      "comfyui": {
+        "workflow": "flux1_dev_t2i.json",
+        "models": {
+          "diffusion_models/flux1-dev.safetensors": "black-forest-labs/FLUX.1-dev:flux1-dev.safetensors",
+          "text_encoders/clip_l.safetensors": "comfyanonymous/flux_text_encoders:clip_l.safetensors",
+          "text_encoders/t5xxl_fp16.safetensors": "comfyanonymous/flux_text_encoders:t5xxl_fp16.safetensors",
+          "vae/ae.safetensors": "black-forest-labs/FLUX.1-dev:ae.safetensors"
+        }
+      },
+      "command_profiles": {
+        "default": {
+          "description": "ComfyUI master, core nodes only, the model's official workflow with full-precision weights.",
+          "framework_ref": "ComfyUI master HEAD",
+          "num_gpus": 1,
+          "serve_args": "",
+          "notes": "Official 'Text to Image (Flux.1 Dev)' blueprint plus an explicit FluxGuidance node carrying the case's embedded guidance (the blueprint relies on the model default, 3.5, which is the same value). Guidance-distilled: KSampler cfg 1, one DiT forward per step, as in the sglang row. Weights are the full-precision single-file checkpoints ComfyUI loads (Comfy-Org repackaging or the model's own single-file release); the official template's fp8/int8/nvfp4 defaults are swapped out because they are a different numeric class from every other row. Sampler, scheduler and shift follow the official ComfyUI workflow; steps, CFG, size, frames and seed follow the case."
+        }
+      }
     }
   }
 }

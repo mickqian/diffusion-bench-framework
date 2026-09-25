@@ -127,6 +127,30 @@
     "diffusers": {
       "status": "unsupported",
       "reason": "MiniMax-H3 is integrated as Modular Diffusers blocks only (no DiffusionPipeline), and only via an unmerged PR (huggingface/diffusers#14355 -- pip install git+.../diffusers.git@refs/pull/14355/head). Not a servable baseline path today."
+    },
+    "comfyui": {
+      "status": "supported",
+      "num_gpus": 1,
+      "serve_args": "",
+      "comfyui": {
+        "workflow": "minimax_h3_ref2va.json",
+        "models": {
+          "diffusion_models/minimax_h3_ref2va_bf16.safetensors": "Comfy-Org/MiniMax-H3:diffusion_models/minimax_h3_ref2va_bf16.safetensors",
+          "text_encoders/qwen3vl_32b_minimax_h3_bf16.safetensors": "Comfy-Org/MiniMax-H3:text_encoders/qwen3vl_32b_minimax_h3_bf16.safetensors",
+          "vae/minimax_h3_video_vae_fp16.safetensors": "Comfy-Org/MiniMax-H3:vae/minimax_h3_video_vae_fp16.safetensors",
+          "vae/minimax_h3_audio_vae_fp32.safetensors": "Comfy-Org/MiniMax-H3:vae/minimax_h3_audio_vae_fp32.safetensors"
+        },
+        "reference_image": true
+      },
+      "command_profiles": {
+        "default": {
+          "description": "ComfyUI master, core nodes only, the model's official workflow with full-precision weights.",
+          "framework_ref": "ComfyUI master HEAD",
+          "num_gpus": 1,
+          "serve_args": "",
+          "notes": "Official video_minimax_h3_r2v template with one reference image (the shared test image) and the full bf16 ref2va DiT. ref_image_size 'match' only ever scales down to the generation area; the 1024x704 test image is already smaller than 1344x768, so 'match' and 'max' feed the same reference. No CFG, as in sglang. Weights are the full-precision single-file checkpoints ComfyUI loads (Comfy-Org repackaging or the model's own single-file release); the official template's fp8/int8/nvfp4 defaults are swapped out because they are a different numeric class from every other row. Sampler, scheduler and shift follow the official ComfyUI workflow; steps, CFG, size, frames and seed follow the case."
+        }
+      }
     }
   },
   "_note": "Ref2VA is selected by the conditions[] entry with role=reference, not by the harness's reference_image multipart path; __TEST_IMAGE_URL__ is substituted with meta.test_image_url at request time. Validated on 2x H200 2026-08-26: 222.4s single_e2e (t2va on the same box is 146.7s -- reference conditioning costs ~1.5x)."

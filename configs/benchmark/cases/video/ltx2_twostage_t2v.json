@@ -166,6 +166,33 @@
     "trtllm-visual": {
       "status": "not_run",
       "reason": "Not yet classified. Confirm framework support and add a validated command profile, or mark unsupported."
+    },
+    "comfyui": {
+      "status": "supported",
+      "num_gpus": 2,
+      "serve_args": "",
+      "comfyui": {
+        "workflow": "ltx2_twostage_t2v.json",
+        "models": {
+          "checkpoints/ltx-2-19b-dev.safetensors": "Lightricks/LTX-2:ltx-2-19b-dev.safetensors",
+          "text_encoders/gemma_3_12B_it.safetensors": "Comfy-Org/ltx-2:split_files/text_encoders/gemma_3_12B_it.safetensors",
+          "loras/ltx-2-19b-distilled-lora-384.safetensors": "Lightricks/LTX-2:ltx-2-19b-distilled-lora-384.safetensors",
+          "latent_upscale_models/ltx-2-spatial-upscaler-x2-1.0.safetensors": "Lightricks/LTX-2:ltx-2-spatial-upscaler-x2-1.0.safetensors"
+        },
+        "params": {
+          "cfg_gpus": 2,
+          "negative_prompt": "blurry, out of focus, overexposed, underexposed, low contrast, washed out colors, excessive noise, grainy texture, poor lighting, flickering, motion blur, distorted proportions, unnatural skin tones, deformed facial features, asymmetrical face, missing facial features, extra limbs, disfigured hands, wrong hand count, artifacts around text, inconsistent perspective, camera shake, incorrect depth of field, background too sharp, background clutter, distracting reflections, harsh shadows, inconsistent lighting direction, color banding, cartoonish rendering, 3D CGI look, unrealistic materials, uncanny valley effect, incorrect ethnicity, wrong gender, exaggerated expressions, wrong gaze direction, mismatched lip sync, silent or muted audio, distorted voice, robotic voice, echo, background noise, off-sync audio, incorrect dialogue, added dialogue, repetitive speech, jittery movement, awkward pauses, incorrect timing, unnatural transitions, inconsistent framing, tilted camera, flat lighting, inconsistent tone, cinematic oversaturation, stylized filters, or AI artifacts."
+        }
+      },
+      "command_profiles": {
+        "default": {
+          "description": "ComfyUI master, core nodes only, the model's official workflow with full-precision weights.",
+          "framework_ref": "ComfyUI master HEAD",
+          "num_gpus": 2,
+          "serve_args": "",
+          "notes": "Official video_ltx2_t2v two-stage workflow, which is the ltx-pipelines two-stage recipe sglang's LTX2TwoStagePipeline implements: stage 1 at half resolution on the full model with CFG (case guidance 4.0, negative prompt = sglang's ltx-pipelines default), latent x2 spatial upsample, stage 2 with the distilled LoRA on the same three distilled sigmas. bf16 checkpoint and Gemma-3-12B in place of fp8 / fp4_mixed; untiled VAEDecode in place of the template's tiled decode (a memory measure for small cards, and not bit-exact). Two GPUs through the MultiGPU CFG Split node on the stage-1 model, the counterpart of sglang's --enable-cfg-parallel. Weights are the full-precision single-file checkpoints ComfyUI loads (Comfy-Org repackaging or the model's own single-file release); the official template's fp8/int8/nvfp4 defaults are swapped out because they are a different numeric class from every other row. Sampler, scheduler and shift follow the official ComfyUI workflow; steps, CFG, size, frames and seed follow the case."
+        }
+      }
     }
   }
 }

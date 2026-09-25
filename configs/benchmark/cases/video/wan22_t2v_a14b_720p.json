@@ -172,6 +172,33 @@
     "trtllm-visual": {
       "status": "not_run",
       "reason": "Not yet classified. Confirm framework support and add a validated command profile, or mark unsupported."
+    },
+    "comfyui": {
+      "status": "supported",
+      "num_gpus": 2,
+      "serve_args": "",
+      "comfyui": {
+        "workflow": "wan22_t2v_a14b.json",
+        "models": {
+          "diffusion_models/wan2.2_t2v_high_noise_14B_fp16.safetensors": "Comfy-Org/Wan_2.2_ComfyUI_Repackaged:split_files/diffusion_models/wan2.2_t2v_high_noise_14B_fp16.safetensors",
+          "diffusion_models/wan2.2_t2v_low_noise_14B_fp16.safetensors": "Comfy-Org/Wan_2.2_ComfyUI_Repackaged:split_files/diffusion_models/wan2.2_t2v_low_noise_14B_fp16.safetensors",
+          "text_encoders/umt5_xxl_fp16.safetensors": "Comfy-Org/Wan_2.2_ComfyUI_Repackaged:split_files/text_encoders/umt5_xxl_fp16.safetensors",
+          "vae/wan_2.1_vae.safetensors": "Comfy-Org/Wan_2.2_ComfyUI_Repackaged:split_files/vae/wan_2.1_vae.safetensors"
+        },
+        "params": {
+          "cfg_gpus": 2,
+          "negative_prompt": "色调艳丽，过曝，静态，细节模糊不清，字幕，风格，作品，画作，画面，静止，整体发灰，最差质量，低质量，JPEG压缩残留，丑陋的，残缺的，多余的手指，画得不好的手部，画得不好的脸部，畸形的，毁容的，形态畸形的肢体，手指融合，静止不动的画面，杂乱的背景，三条腿，背景人很多，倒着走"
+        }
+      },
+      "command_profiles": {
+        "default": {
+          "description": "ComfyUI master, core nodes only, the model's official workflow with full-precision weights.",
+          "framework_ref": "ComfyUI master HEAD",
+          "num_gpus": 2,
+          "serve_args": "",
+          "notes": "Official 'Text to Video (Wan 2.2)' full-step workflow (no Lightning LoRA) with fp16 experts and UMT5 in place of fp8_scaled: two KSamplerAdvanced passes, high-noise expert then low-noise, cfg 4.0 / 3.0 as the case, shift 5.0 (sglang's 720p Wan config uses the same). The experts hand over at the half-way step -- both are 14B, so where the hand-over falls does not change the cost. Negative prompt = sglang's Wan2.2 default, encoded every request as sglang does. Two GPUs through the MultiGPU CFG Split node (ComfyUI has no sequence parallelism). Weights are the full-precision single-file checkpoints ComfyUI loads (Comfy-Org repackaging or the model's own single-file release); the official template's fp8/int8/nvfp4 defaults are swapped out because they are a different numeric class from every other row. Sampler, scheduler and shift follow the official ComfyUI workflow; steps, CFG, size, frames and seed follow the case."
+        }
+      }
     }
   }
 }

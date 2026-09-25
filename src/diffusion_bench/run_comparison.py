@@ -663,7 +663,9 @@ def _prepare_comfyui_workspace(case: dict, fw_cfg: dict, config: dict | None) ->
         target.symlink_to(_resolve_comfyui_model(source))
     for sub in ("input", "output"):
         (workspace / sub).mkdir(parents=True, exist_ok=True)
-    if case.get("reference_image"):
+    # MiniMax-H3 Ref2VA takes its reference through request extras, not the
+    # harness's reference_image field, so the spec can ask for the image too.
+    if case.get("reference_image") or spec.get("reference_image"):
         shutil.copyfile(
             _get_ref_image_path(config or {}, case),
             workspace / "input" / comfyui_client.REF_IMAGE_NAME,
@@ -904,6 +906,12 @@ def _resolve_framework_config(
         )
     if "lightx2v_config" in resolved:
         metadata["lightx2v_config_keys"] = sorted(resolved["lightx2v_config"])
+    if "comfyui" in resolved:
+        # A ComfyUI row is defined by its graph and the files it loads, not by
+        # the case's model id, so both go into the published row.
+        metadata["comfyui_workflow"] = resolved["comfyui"].get("workflow")
+        metadata["comfyui_models"] = resolved["comfyui"].get("models")
+        metadata["comfyui_params"] = resolved["comfyui"].get("params")
     resolved["_benchmark_metadata"] = metadata
     return resolved
 

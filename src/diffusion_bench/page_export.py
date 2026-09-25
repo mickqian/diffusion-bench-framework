@@ -13,12 +13,13 @@ from typing import Any
 
 REPO_URL = "https://github.com/mickqian/diffusion-bench-framework"
 
-FRAMEWORK_ORDER = ("sglang", "vllm-omni", "lightx2v", "trtllm-visual")
+FRAMEWORK_ORDER = ("sglang", "vllm-omni", "lightx2v", "trtllm-visual", "comfyui")
 FRAMEWORK_LABELS = {
     "sglang": "SGLang-Diffusion",
     "vllm-omni": "vLLM-Omni",
     "lightx2v": "LightX2V",
     "trtllm-visual": "TensorRT-LLM VisualGen",
+    "comfyui": "ComfyUI",
 }
 
 
@@ -267,6 +268,12 @@ def framework_versions(merged: dict) -> dict:
                 )
         if parts:
             out[fw] = " + ".join(parts)
+    # ComfyUI is a checkout, not a package: its identity is the commit.
+    comfy = runtime.get("comfyui") or {}
+    if comfy.get("source_commit"):
+        torch_entry = (comfy.get("packages") or {}).get("torch") or {}
+        torch_ver = torch_entry.get("Version") if isinstance(torch_entry, dict) else None
+        out["comfyui"] = f"ComfyUI @ {comfy['source_commit'][:9]}" + (f" + torch {torch_ver}" if torch_ver else "")
     return out
 
 

@@ -246,6 +246,10 @@
     "trtllm-visual": {
       "status": "not_run",
       "reason": "Not yet classified. Confirm framework support and add a validated command profile, or mark unsupported."
+    },
+    "comfyui": {
+      "status": "unsupported",
+      "reason": "ComfyUI core has no Cosmos3: comfy/ldm/cosmos covers Cosmos Predict1 and Predict2 only (CosmosT2V/I2V, CosmosT2IPredict2/I2VPredict2 in comfy/supported_models.py) at master 88ab4a06, 2026-09-25."
     }
   }
 }

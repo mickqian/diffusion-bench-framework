@@ -171,6 +171,10 @@
     "trtllm-visual": {
       "status": "not_run",
       "reason": "Not yet classified. Confirm framework support and add a validated command profile, or mark unsupported."
+    },
+    "comfyui": {
+      "status": "no_profile",
+      "reason": "ComfyUI loads LTX-2.3, but no official workflow reproduces this case: sglang runs LTX-2.3's multimodal guidance in stage 1 (video CFG 3 + STG 1.0 on block 28 + modality 3, audio CFG 7 + STG + modality -- up to four DiT passes per step, LTX23SamplingParams), while ComfyUI's LTX-2.3 T2V template (and the LTX-2.5 one) is the distilled-LoRA fast path at cfg 1. A graph built from LTXVSpatioTemporalGuidance / LTXVModalityGuidance / LTXVDualCFGGuider could match it but has no upstream reference and is not validated."
     }
   }
 }

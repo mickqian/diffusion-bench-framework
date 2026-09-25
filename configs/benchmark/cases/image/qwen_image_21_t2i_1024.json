@@ -158,6 +158,28 @@
     "trtllm-visual": {
       "status": "unsupported",
       "reason": "TensorRT-LLM VisualGen carries a Qwen-Image pipeline (tensorrt_llm/_torch/visual_gen/models/qwen_image/) but nothing for the 2.1 architecture: a code search for QwenImage21 / Qwen-Image-2.1 over NVIDIA/TensorRT-LLM returns no hits, and the model is absent from pipeline_registry.py. Qwen-Image-2.1 is a distinct architecture (QwenImage21Pipeline / QwenImage21Transformer2DModel / AutoencoderKLQwenImage21 / Qwen3-VL encoder), so the existing Qwen-Image pipeline does not cover it."
+    },
+    "comfyui": {
+      "status": "supported",
+      "num_gpus": 1,
+      "serve_args": "",
+      "comfyui": {
+        "workflow": "qwen_image_21_t2i.json",
+        "models": {
+          "diffusion_models/qwen_image_2.1_bf16.safetensors": "Comfy-Org/Qwen-Image-2.1:diffusion_models/qwen_image_2.1_bf16.safetensors",
+          "text_encoders/qwen3vl_8b_bf16.safetensors": "Comfy-Org/Qwen-Image-2.1:text_encoders/qwen3vl_8b_bf16.safetensors",
+          "vae/qwen_image_2.1_vae_bf16.safetensors": "Comfy-Org/Qwen-Image-2.1:vae/qwen_image_2.1_vae_bf16.safetensors"
+        }
+      },
+      "command_profiles": {
+        "default": {
+          "description": "ComfyUI master, core nodes only, the model's official workflow with full-precision weights.",
+          "framework_ref": "ComfyUI master HEAD",
+          "num_gpus": 1,
+          "serve_args": "",
+          "notes": "Official image_qwen_image_2_1_t2i template (bf16 DiT and Qwen3-VL-8B in place of int8_convrot). ComfyUI's Qwen-Image 2.1 prefix KV cache is on by default (QwenImage21Cache 'auto', lossless storage), the counterpart of sglang's own prefix cache, so no node is added for it. Weights are the full-precision single-file checkpoints ComfyUI loads (Comfy-Org repackaging or the model's own single-file release); the official template's fp8/int8/nvfp4 defaults are swapped out because they are a different numeric class from every other row. Sampler, scheduler and shift follow the official ComfyUI workflow; steps, CFG, size, frames and seed follow the case."
+        }
+      }
     }
   }
 }

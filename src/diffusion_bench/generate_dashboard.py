@@ -1032,6 +1032,10 @@ def _framework_version(results: dict, manifest: dict, framework: str) -> str:
         manifest_version = _manifest_framework_version(manifest, "lightx2v")
         if manifest_version:
             return manifest_version
+    elif framework == "comfyui":
+        commit = ((framework_runtime or {}).get("comfyui") or {}).get("source_commit")
+        if commit:
+            return f"master @ {_short_sha(commit)}"
     elif framework == "trtllm-visual":
         version = _package_version(framework_runtime, framework, "tensorrt-llm")
         if version:

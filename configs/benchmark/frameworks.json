@@ -29,6 +29,15 @@
       "engines": "TensorRT engines same-dtype, no quantization, no TeaCache, no torch compile (cache-free, comparable)",
       "coverage": "FLUX / Wan / LTX-2 / Qwen-Image / Cosmos3",
       "scope": "required for image cases; video (Wan / LTX-2 / Cosmos3) supported per coverage — classify per case, do not drop"
+    },
+    "comfyui": {
+      "role": "competitor (ComfyUI -- the node-graph runtime most consumer-GPU users run these models in)",
+      "version_policy": "ComfyUI master HEAD + newest stable torch from PyTorch's CUDA index",
+      "launch": "python main.py (workflow-graph API: POST /prompt, websocket completion)",
+      "weights": "full-precision single-file checkpoints (Comfy-Org repackaging or the model's own single-file release). The official templates default to fp8/int8/nvfp4 variants, a different numeric class -- never use those in the main comparison.",
+      "parallel": "single GPU; the one multi-GPU path is the core MultiGPU CFG Split node, which runs CFG branches on separate cards",
+      "workflows": "configs/benchmark/comfyui/<name>.json, API format; build_benchmark_config.py inlines them",
+      "scope": "every case ComfyUI's core nodes support; classify the rest"
     }
   }
 }
