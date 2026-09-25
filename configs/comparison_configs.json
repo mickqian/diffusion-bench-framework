@@ -1223,7 +1223,7 @@
                         "params": {
                             "cfg_gpus": 2
                         },
-                        "compile": true,
+                        "compile": false,
                         "workflow_graph": {
                             "1": {
                                 "class_type": "UNETLoader",
@@ -1354,7 +1354,7 @@
                             "framework_ref": "ComfyUI master HEAD",
                             "num_gpus": 2,
                             "serve_args": "",
-                            "notes": "Same graph with true CFG (KSampler cfg = true_cfg_scale, the case's negative prompt encoded every request). Two GPUs through ComfyUI's only multi-GPU path, the core MultiGPU CFG Split node, which runs the two guidance branches on separate cards -- the counterpart of sglang's CFG parallelism here. Weights are the full-precision single-file checkpoints ComfyUI loads (Comfy-Org repackaging or the model's own single-file release); the official template's fp8/int8/nvfp4 defaults are swapped out because they are a different numeric class from every other row. Sampler, scheduler and shift follow the official ComfyUI workflow; steps, CFG, size, frames and seed follow the case. Compile on: the core TorchCompileModel node (inductor) goes behind every diffusion-model loader, as the other competitors run compile-on; measured on FLUX.1 / 1xB200 2026-09-25 at 4.89s against 5.94s and 5.77s eager."
+                            "notes": "Same graph with true CFG (KSampler cfg = true_cfg_scale, the case's negative prompt encoded every request). Two GPUs through ComfyUI's only multi-GPU path, the core MultiGPU CFG Split node, which runs the two guidance branches on separate cards -- the counterpart of sglang's CFG parallelism here. Weights are the full-precision single-file checkpoints ComfyUI loads (Comfy-Org repackaging or the model's own single-file release); the official template's fp8/int8/nvfp4 defaults are swapped out because they are a different numeric class from every other row. Sampler, scheduler and shift follow the official ComfyUI workflow; steps, CFG, size, frames and seed follow the case. Compile off: TorchCompileModel together with the MultiGPU CFG Split node fails on the first request (dynamo: 'Tensor device mismatch' in KSampler; ComfyUI 88ab4a06, 1xB200->2xB200, 2026-09-25). Splitting the two CFG branches over two cards roughly halves each step, which outweighs compile's measured 16-18% on FLUX.1, so the cell keeps the split and runs eager."
                         },
                         "blackwell-gpuonly": {
                             "description": "Blackwell: the default graph with every model resident on the GPU (--gpu-only).",
@@ -2262,7 +2262,7 @@
                             "text_encoders/qwen3vl_8b_bf16.safetensors": "Comfy-Org/Qwen3-VL:text_encoders/qwen3vl_8b_bf16.safetensors",
                             "vae/flux2-vae.safetensors": "Comfy-Org/Ideogram-4:vae/flux2-vae.safetensors"
                         },
-                        "compile": true,
+                        "compile": false,
                         "workflow_graph": {
                             "1": {
                                 "class_type": "UNETLoader",
@@ -2432,7 +2432,7 @@
                             "framework_ref": "ComfyUI master HEAD",
                             "num_gpus": 1,
                             "serve_args": "",
-                            "notes": "Official image_ideogram4_t2i template without its LLM prompt-rewrite stage (the other rows take the case prompt as is). fp8 DiTs are the model's release precision, as in the sglang row (ideogram-ai/ideogram-4-fp8); the text encoder is bf16 in place of fp8_scaled. Conditional + unconditional models through DualModelGuider, cfg 7 with the template's CFGOverride, i.e. two forwards on every step like sglang's V4_DEFAULT_20 preset. One GPU: the guidance branches run on two different models, which the CFG Split node does not cover. Weights are the full-precision single-file checkpoints ComfyUI loads (Comfy-Org repackaging or the model's own single-file release); the official template's fp8/int8/nvfp4 defaults are swapped out because they are a different numeric class from every other row. Sampler, scheduler and shift follow the official ComfyUI workflow; steps, CFG, size, frames and seed follow the case. Compile on: the core TorchCompileModel node (inductor) goes behind every diffusion-model loader, as the other competitors run compile-on; measured on FLUX.1 / 1xB200 2026-09-25 at 4.89s against 5.94s and 5.77s eager."
+                            "notes": "Official image_ideogram4_t2i template without its LLM prompt-rewrite stage (the other rows take the case prompt as is). fp8 DiTs are the model's release precision, as in the sglang row (ideogram-ai/ideogram-4-fp8); the text encoder is bf16 in place of fp8_scaled. Conditional + unconditional models through DualModelGuider, cfg 7 with the template's CFGOverride, i.e. two forwards on every step like sglang's V4_DEFAULT_20 preset. One GPU: the guidance branches run on two different models, which the CFG Split node does not cover. Weights are the full-precision single-file checkpoints ComfyUI loads (Comfy-Org repackaging or the model's own single-file release); the official template's fp8/int8/nvfp4 defaults are swapped out because they are a different numeric class from every other row. Sampler, scheduler and shift follow the official ComfyUI workflow; steps, CFG, size, frames and seed follow the case. Compile off: the first compiled request fails in SamplerCustomAdvanced with 'AssertionError: Expect size to be a plain tuple of ints but got torch.Size([1, s81])' (a dynamo dynamic-shape failure on this graph; ComfyUI 88ab4a06, B200, 2026-09-25), so the cell runs eager."
                         },
                         "blackwell-gpuonly": {
                             "description": "Blackwell: the default graph with every model resident on the GPU (--gpu-only).",
@@ -2644,7 +2644,7 @@
                             "cfg_gpus": 2,
                             "negative_prompt": "色调艳丽，过曝，静态，细节模糊不清，字幕，风格，作品，画作，画面，静止，整体发灰，最差质量，低质量，JPEG压缩残留，丑陋的，残缺的，多余的手指，画得不好的手部，画得不好的脸部，畸形的，毁容的，形态畸形的肢体，手指融合，静止不动的画面，杂乱的背景，三条腿，背景人很多，倒着走"
                         },
-                        "compile": true,
+                        "compile": false,
                         "workflow_graph": {
                             "1": {
                                 "class_type": "UNETLoader",
@@ -2848,7 +2848,7 @@
                             "framework_ref": "ComfyUI master HEAD",
                             "num_gpus": 2,
                             "serve_args": "",
-                            "notes": "Official 'Text to Video (Wan 2.2)' full-step workflow (no Lightning LoRA) with fp16 experts and UMT5 in place of fp8_scaled: two KSamplerAdvanced passes, high-noise expert then low-noise, cfg 4.0 / 3.0 as the case, shift 5.0 (sglang's 720p Wan config uses the same). The experts hand over at the half-way step -- both are 14B, so where the hand-over falls does not change the cost. Negative prompt = sglang's Wan2.2 default, encoded every request as sglang does. Two GPUs through the MultiGPU CFG Split node (ComfyUI has no sequence parallelism). Weights are the full-precision single-file checkpoints ComfyUI loads (Comfy-Org repackaging or the model's own single-file release); the official template's fp8/int8/nvfp4 defaults are swapped out because they are a different numeric class from every other row. Sampler, scheduler and shift follow the official ComfyUI workflow; steps, CFG, size, frames and seed follow the case. Compile on: the core TorchCompileModel node (inductor) goes behind every diffusion-model loader, as the other competitors run compile-on; measured on FLUX.1 / 1xB200 2026-09-25 at 4.89s against 5.94s and 5.77s eager."
+                            "notes": "Official 'Text to Video (Wan 2.2)' full-step workflow (no Lightning LoRA) with fp16 experts and UMT5 in place of fp8_scaled: two KSamplerAdvanced passes, high-noise expert then low-noise, cfg 4.0 / 3.0 as the case, shift 5.0 (sglang's 720p Wan config uses the same). The experts hand over at the half-way step -- both are 14B, so where the hand-over falls does not change the cost. Negative prompt = sglang's Wan2.2 default, encoded every request as sglang does. Two GPUs through the MultiGPU CFG Split node (ComfyUI has no sequence parallelism). Weights are the full-precision single-file checkpoints ComfyUI loads (Comfy-Org repackaging or the model's own single-file release); the official template's fp8/int8/nvfp4 defaults are swapped out because they are a different numeric class from every other row. Sampler, scheduler and shift follow the official ComfyUI workflow; steps, CFG, size, frames and seed follow the case. Compile off: TorchCompileModel together with the MultiGPU CFG Split node fails on the first request (dynamo: 'RuntimeError when making fake tensor call' in KSamplerAdvanced; ComfyUI 88ab4a06, 1xB200->2xB200, 2026-09-25). Splitting the two CFG branches over two cards roughly halves each step, which outweighs compile's measured 16-18% on FLUX.1, so the cell keeps the split and runs eager."
                         },
                         "blackwell-gpuonly": {
                             "description": "Blackwell: the default graph with every model resident on the GPU (--gpu-only).",
@@ -3050,7 +3050,7 @@
                             "cfg_gpus": 2,
                             "negative_prompt": "blurry, out of focus, overexposed, underexposed, low contrast, washed out colors, excessive noise, grainy texture, poor lighting, flickering, motion blur, distorted proportions, unnatural skin tones, deformed facial features, asymmetrical face, missing facial features, extra limbs, disfigured hands, wrong hand count, artifacts around text, inconsistent perspective, camera shake, incorrect depth of field, background too sharp, background clutter, distracting reflections, harsh shadows, inconsistent lighting direction, color banding, cartoonish rendering, 3D CGI look, unrealistic materials, uncanny valley effect, incorrect ethnicity, wrong gender, exaggerated expressions, wrong gaze direction, mismatched lip sync, silent or muted audio, distorted voice, robotic voice, echo, background noise, off-sync audio, incorrect dialogue, added dialogue, repetitive speech, jittery movement, awkward pauses, incorrect timing, unnatural transitions, inconsistent framing, tilted camera, flat lighting, inconsistent tone, cinematic oversaturation, stylized filters, or AI artifacts."
                         },
-                        "compile": true,
+                        "compile": false,
                         "workflow_graph": {
                             "1": {
                                 "class_type": "CheckpointLoaderSimple",
@@ -3418,7 +3418,7 @@
                             "framework_ref": "ComfyUI master HEAD",
                             "num_gpus": 2,
                             "serve_args": "",
-                            "notes": "Official video_ltx2_t2v two-stage workflow, which is the ltx-pipelines two-stage recipe sglang's LTX2TwoStagePipeline implements: stage 1 at half resolution on the full model with CFG (case guidance 4.0, negative prompt = sglang's ltx-pipelines default), latent x2 spatial upsample, stage 2 with the distilled LoRA on the same three distilled sigmas. bf16 checkpoint and Gemma-3-12B in place of fp8 / fp4_mixed; untiled VAEDecode in place of the template's tiled decode (a memory measure for small cards, and not bit-exact). Two GPUs through the MultiGPU CFG Split node on the stage-1 model, the counterpart of sglang's --enable-cfg-parallel. Weights are the full-precision single-file checkpoints ComfyUI loads (Comfy-Org repackaging or the model's own single-file release); the official template's fp8/int8/nvfp4 defaults are swapped out because they are a different numeric class from every other row. Sampler, scheduler and shift follow the official ComfyUI workflow; steps, CFG, size, frames and seed follow the case. Compile on: the core TorchCompileModel node (inductor) goes behind every diffusion-model loader, as the other competitors run compile-on; measured on FLUX.1 / 1xB200 2026-09-25 at 4.89s against 5.94s and 5.77s eager."
+                            "notes": "Official video_ltx2_t2v two-stage workflow, which is the ltx-pipelines two-stage recipe sglang's LTX2TwoStagePipeline implements: stage 1 at half resolution on the full model with CFG (case guidance 4.0, negative prompt = sglang's ltx-pipelines default), latent x2 spatial upsample, stage 2 with the distilled LoRA on the same three distilled sigmas. bf16 checkpoint and Gemma-3-12B in place of fp8 / fp4_mixed; untiled VAEDecode in place of the template's tiled decode (a memory measure for small cards, and not bit-exact). Two GPUs through the MultiGPU CFG Split node on the stage-1 model, the counterpart of sglang's --enable-cfg-parallel. Weights are the full-precision single-file checkpoints ComfyUI loads (Comfy-Org repackaging or the model's own single-file release); the official template's fp8/int8/nvfp4 defaults are swapped out because they are a different numeric class from every other row. Sampler, scheduler and shift follow the official ComfyUI workflow; steps, CFG, size, frames and seed follow the case. Compile off: TorchCompileModel together with the MultiGPU CFG Split node fails on the first request (dynamo: 'Tensor device mismatch' in the stage-1 SamplerCustomAdvanced; ComfyUI 88ab4a06, 1xB200->2xB200, 2026-09-25). Splitting the two CFG branches over two cards roughly halves each step, which outweighs compile's measured 16-18% on FLUX.1, so the cell keeps the split and runs eager."
                         },
                         "blackwell-gpuonly": {
                             "description": "Blackwell: the default graph with every model resident on the GPU (--gpu-only).",
