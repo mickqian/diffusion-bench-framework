@@ -13,6 +13,7 @@ import platform
 import shutil
 import site
 import sys
+import tempfile
 from pathlib import Path
 
 import torch
@@ -39,8 +40,15 @@ if not subdir:
     subdir = f"build/{_variant()}/flash_attention_3"
 print(f"FA3: torch {torch.__version__} cuda {torch.version.cuda} -> {subdir}")
 
+# A private download dir, not the ambient HF cache: the artifact is copied into
+# site-packages below, and on clusters whose shared cache is mounted read-only
+# (b200-verda-k8s exports HF_HOME=/cluster-storage/models) fetching into it
+# failed with "Read-only file system" after a 25-minute flash-attn build.
+cache_dir = os.environ.get("LIGHTX2V_FA3_CACHE_DIR") or tempfile.mkdtemp(prefix="lightx2v-fa3-")
 try:
-    snapshot = Path(snapshot_download(repo, revision=revision, allow_patterns=[subdir + "/*"]))
+    snapshot = Path(
+        snapshot_download(repo, revision=revision, allow_patterns=[subdir + "/*"], cache_dir=cache_dir)
+    )
 except Exception as exc:  # noqa: BLE001 - report which variant is missing
     raise SystemExit(f"FA3: cannot fetch {subdir} from {repo}@{revision}: {exc}")
 src = snapshot / subdir
