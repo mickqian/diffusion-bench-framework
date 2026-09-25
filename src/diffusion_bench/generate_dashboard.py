@@ -715,7 +715,9 @@ def _framework_sort_key(framework: str) -> tuple[int, str]:
         "sglang": 0,
         "vllm-omni": 1,
         "lightx2v": 2,
-        "diffusers": 3,
+        "trtllm-visual": 3,
+        "comfyui": 4,
+        "diffusers": 5,
     }
     return preferred.get(framework, 100), framework
 
@@ -725,6 +727,7 @@ def _framework_display_name(framework: str) -> str:
         "sglang": "SGLang-Diffusion",
         "vllm-omni": "vLLM-Omni",
         "lightx2v": "LightX2V",
+        "comfyui": "ComfyUI",
     }.get(framework, framework)
 
 
