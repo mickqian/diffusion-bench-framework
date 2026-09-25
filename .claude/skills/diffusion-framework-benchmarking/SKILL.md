@@ -355,6 +355,83 @@ sm120), and `rx devbox acquire` caps you at 6 active boxes, so a second image
 usually means releasing a finished one first. Check every artifact is already
 pulled locally before releasing -- a released box is gone.
 
+When a second box is not worth it, the same principle works inside the venv:
+hold torch at the version the competitor's own image ships. For LightX2V that
+is torch 2.11.0 (lightx2v/lightx2v:26062001-cu130), passed as
+`PIP_CONSTRAINT=<file with torch==2.11.0, torchvision==0.26.0,
+torchaudio==2.11.0>` around a normal `install_comparison_frameworks.sh
+lightx2v`. LightX2V pins no torch, so on 2026-09-25 pip took the just-released
+2.14 and the flash-attn build died on `namespace "std" has no member
+"strong_ordering"` (torch 2.14's headers need C++20); with the constraint the
+same installer built cleanly. This selects the upstream environment rather than
+patching the competitor's build.
+
+**Install each round into a FRESH venv root.** The 2026-09-15 biweekly run lost
+every vLLM-Omni cell because `python3 -m venv --clear` over the existing tree
+on /personal failed with `Directory not empty: 'torch'` -- NFS will not always
+delete a large tree in one pass -- and the installer went on without a venv.
+A new root costs one install per framework and cannot hit it.
+
+### A read-only model cache with empty snapshots
+
+On b200-verda-k8s `/cluster-storage/models` is mounted read-only and its
+`snapshots/` directories are empty while `blobs/` and `refs/` are complete.
+huggingface_hub decides "already downloaded" by looking for `blobs/<etag>` in
+ITS OWN cache dir, so build an overlay in a writable cache (`/scratch/hf/hub`):
+per repo, copy `refs/`, symlink every shared blob into `blobs/`, leave
+`snapshots/` empty. `snapshot_download` / `hf_hub_download` then materialise
+snapshot links in the writable dir for every cached file and download only what
+is missing. On 2026-09-25 the thirteen sglang repos of the matrix resolved this
+way with 0 GiB transferred. Point the runner at it with `DBF_HF_HOME=/scratch/hf`
+(devbox_run_cases.sh derives `HF_HUB_CACHE=$HF_HOME/hub` from it).
+
+### ComfyUI
+
+ComfyUI (added 2026-09-25) serves workflow graphs, not a generation endpoint:
+the harness renders `configs/benchmark/comfyui/<name>.json` (API format,
+`{{placeholders}}` filled from the case) per request, POSTs it to `/prompt`
+and waits on the websocket. Things that decide whether its number means
+anything:
+
+- **Its node cache answers repeats.** The harness sends the same prompt and
+  seed every time; a second identical graph comes back from cache without
+  sampling. Templates therefore put an undeclared `__bench_nonce` input on the
+  node(s) that consume the request (text encoders). Undeclared inputs are part
+  of the cache key but are not passed to the node (verified in
+  `comfy_execution/caching.py` / `execution.get_input_data` at 88ab4a06), so the
+  encoder and everything downstream re-run while the loaders stay cached --
+  what a resident server does. Every request is checked: a sampler in the
+  `execution_cached` list is a failure. The runlog prints the cached nodes
+  (`cached node(s): 1,2,3,7` on FLUX.1 = three loaders + the empty latent).
+- **Completion is `executing` with `node: null`.** `execution_success` is sent
+  before /history is written, so reading outputs right after it can race.
+- **The official templates default to quantized weights** (fp8_scaled,
+  fp8mixed, int8_convrot, nvfp4_awq, pruned DiTs). Every cell here swaps in the
+  full-precision file from the same repo family; the case's `comfyui.models`
+  maps each loader filename to `repo:path`, and the builder fails if a graph
+  loads a file the map does not name.
+- **One multi-GPU path only**: the core `MultiGPU_WorkUnits` ("MultiGPU CFG
+  Split") node puts CFG branches on separate cards; there is no SP/TP.
+  `max_gpus=1` is a no-op, so templates carry it with `{{cfg_gpus}}`. ComfyUI
+  has no GPU-count flag and `--cuda-device` rewrites CUDA_VISIBLE_DEVICES with
+  ABSOLUTE ids, so the harness narrows visibility to the first `num_gpus` of
+  what it was given instead.
+- Each case gets its own model tree of symlinks (`--extra-model-paths-config`),
+  because the checkpoints do not have unique names (FLUX.1, Z-Image and FLUX.2
+  all ship `vae/ae.safetensors`).
+- V3 autogrow inputs are keyed `<input>.<name>` in API format:
+  `ref_images.ref_image_0` (MiniMax-H3 R2V), `images.image_1` (Qwen-Image 2.1).
+- **No official workflow reproduces LTX-2.3's stage-1 guidance.** sglang runs
+  its multimodal guider (video CFG 3 + STG + modality, audio CFG 7 + STG +
+  modality: up to four DiT passes per step); ComfyUI's LTX-2.3 and LTX-2.5 T2V
+  templates are the distilled fast path at cfg 1. That cell is `no_profile`
+  until a graph from LTXVSpatioTemporalGuidance / LTXVModalityGuidance /
+  LTXVDualCFGGuider is built and validated. LTX-2 is fine: its official
+  two-stage template is the ltx-pipelines recipe sglang implements.
+- Before a round, `scripts/smoke_comfyui_workflows.py` runs every workflow once
+  at 2 steps through the harness's own launch/request path (all twelve passed
+  in about ten minutes on 2026-09-25).
+
 ### A checkpoint whose images are RGBA
 
 Qwen-Image-2.1 emits RGBA. The default response encoder is JPEG, which cannot

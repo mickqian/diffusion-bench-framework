@@ -216,6 +216,20 @@
             "workflow": "qwen_image_21_t2i_compile.json"
           },
           "notes": "Carries no hardware token so it is never auto-selected. Exists to measure whether compile is ComfyUI's fastest lossless path here, as it is for the other competitors."
+        },
+        "gpuonly-probe": {
+          "description": "PROBE, selected only explicitly (DIFFUSION_BENCH_COMFYUI_PROFILE=gpuonly-probe): every model (text encoders included) stored and run on the GPU.",
+          "framework_ref": "ComfyUI master HEAD",
+          "num_gpus": 1,
+          "serve_args": "--gpu-only",
+          "notes": "Carries no hardware token so it is never auto-selected. Placement flags do not change numerics; this measures whether ComfyUI's default memory management is its fastest lossless setting on a 183 GB card."
+        },
+        "gpuonly-nodyn-probe": {
+          "description": "PROBE, selected only explicitly (DIFFUSION_BENCH_COMFYUI_PROFILE=gpuonly-nodyn-probe): as gpuonly-probe, with ComfyUI's dynamic VRAM manager replaced by estimate-based loading.",
+          "framework_ref": "ComfyUI master HEAD",
+          "num_gpus": 1,
+          "serve_args": "--gpu-only --disable-dynamic-vram",
+          "notes": "Carries no hardware token so it is never auto-selected. Placement flags do not change numerics; this measures whether ComfyUI's default memory management is its fastest lossless setting on a 183 GB card."
         }
       }
     }
