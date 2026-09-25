@@ -143,6 +143,19 @@
           "num_gpus": 1,
           "serve_args": "",
           "notes": "Official video_minimax_h3_t2v template: the fl2va checkpoint with no frames attached is T2VA, which is also what sglang serves (model_variant defaults to fl2va). Full bf16 DiT in place of the pruned int8_convrot, bf16 Qwen3-VL-32B in place of nvfp4_awq, fp16 video VAE in place of int8_convrot. BasicGuider = no CFG, matching sglang's fixed guidance 1.0; sigma shift 12 / 3 as the case's flow_shift / audio_flow_shift. One GPU: without CFG there is no branch to split. Weights are the full-precision single-file checkpoints ComfyUI loads (Comfy-Org repackaging or the model's own single-file release); the official template's fp8/int8/nvfp4 defaults are swapped out because they are a different numeric class from every other row. Sampler, scheduler and shift follow the official ComfyUI workflow; steps, CFG, size, frames and seed follow the case. Compile on: the core TorchCompileModel node (inductor) goes behind every diffusion-model loader, as the other competitors run compile-on; measured on FLUX.1 / 1xB200 2026-09-25 at 4.89s against 5.94s and 5.77s eager."
+        },
+        "blackwell-gpuonly": {
+          "description": "Blackwell: the default graph with every model resident on the GPU (--gpu-only).",
+          "hardware": [
+            "b200",
+            "gb200",
+            "b300",
+            "gb300"
+          ],
+          "framework_ref": "ComfyUI master HEAD",
+          "num_gpus": 1,
+          "serve_args": "--gpu-only",
+          "notes": "B200: --gpu-only keeps every model, text encoders included, stored and run on the card; a 183 GB B200 holds the largest graph here (MiniMax-H3: 62 GB DiT + 48 GB Qwen3-VL-32B + VAEs). Placement only, numerics unchanged. Measured 2026-09-25 on 1xB200, FLUX.1 eager, interleaved arms: default 5.94 / 5.77 / 5.79s against --gpu-only 5.56s and --gpu-only --disable-dynamic-vram 5.57s (Qwen-Image-2.1: 3.75 / 3.91 against 3.47 / 3.48) -- every --gpu-only arm below every default arm; disabling dynamic VRAM on top adds nothing, so the simpler flag is kept."
         }
       }
     }

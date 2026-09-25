@@ -208,19 +208,18 @@
           "serve_args": "",
           "notes": "Official image_qwen_image_2_1_t2i template (bf16 DiT and Qwen3-VL-8B in place of int8_convrot). ComfyUI's Qwen-Image 2.1 prefix KV cache is on by default (QwenImage21Cache 'auto', lossless storage), the counterpart of sglang's own prefix cache, so no node is added for it. Weights are the full-precision single-file checkpoints ComfyUI loads (Comfy-Org repackaging or the model's own single-file release); the official template's fp8/int8/nvfp4 defaults are swapped out because they are a different numeric class from every other row. Sampler, scheduler and shift follow the official ComfyUI workflow; steps, CFG, size, frames and seed follow the case. Compile off: TorchCompileModel breaks this model in ComfyUI 88ab4a06 -- the first request fails in KSampler with AttributeError: 'torch.Stream' object has no attribute 'cuda_stream' (2026-09-25, B200), so the cell runs eager as the policy prescribes for a broken compile path."
         },
-        "gpuonly-probe": {
-          "description": "PROBE, selected only explicitly (DIFFUSION_BENCH_COMFYUI_PROFILE=gpuonly-probe): every model (text encoders included) stored and run on the GPU.",
+        "blackwell-gpuonly": {
+          "description": "Blackwell: the default graph with every model resident on the GPU (--gpu-only).",
+          "hardware": [
+            "b200",
+            "gb200",
+            "b300",
+            "gb300"
+          ],
           "framework_ref": "ComfyUI master HEAD",
           "num_gpus": 1,
           "serve_args": "--gpu-only",
-          "notes": "Carries no hardware token so it is never auto-selected. Placement flags do not change numerics; this measures whether ComfyUI's default memory management is its fastest lossless setting on a 183 GB card."
-        },
-        "gpuonly-nodyn-probe": {
-          "description": "PROBE, selected only explicitly (DIFFUSION_BENCH_COMFYUI_PROFILE=gpuonly-nodyn-probe): as gpuonly-probe, with ComfyUI's dynamic VRAM manager replaced by estimate-based loading.",
-          "framework_ref": "ComfyUI master HEAD",
-          "num_gpus": 1,
-          "serve_args": "--gpu-only --disable-dynamic-vram",
-          "notes": "Carries no hardware token so it is never auto-selected. Placement flags do not change numerics; this measures whether ComfyUI's default memory management is its fastest lossless setting on a 183 GB card."
+          "notes": "B200: --gpu-only keeps every model, text encoders included, stored and run on the card; a 183 GB B200 holds the largest graph here (MiniMax-H3: 62 GB DiT + 48 GB Qwen3-VL-32B + VAEs). Placement only, numerics unchanged. Measured 2026-09-25 on 1xB200, FLUX.1 eager, interleaved arms: default 5.94 / 5.77 / 5.79s against --gpu-only 5.56s and --gpu-only --disable-dynamic-vram 5.57s (Qwen-Image-2.1: 3.75 / 3.91 against 3.47 / 3.48) -- every --gpu-only arm below every default arm; disabling dynamic VRAM on top adds nothing, so the simpler flag is kept."
         }
       }
     }
