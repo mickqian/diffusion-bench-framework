@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-FRAMEWORK="${1:?usage: install_comparison_frameworks.sh <vllm-omni|lightx2v|trtllm-visual>}"
+FRAMEWORK="${1:?usage: install_comparison_frameworks.sh <vllm-omni|lightx2v|trtllm-visual|comfyui>}"
 VENV_ROOT="${SGLANG_DIFFUSION_FRAMEWORK_VENV_ROOT:-/tmp/sglang-diffusion-framework-venvs}"
 VENV_PATH="${VENV_ROOT}/${FRAMEWORK}"
 PIP_TMPDIR="${SGLANG_DIFFUSION_PIP_TMPDIR:-${VENV_ROOT}/pip-tmp}"
@@ -14,7 +14,7 @@ mkdir -p "${PIP_TMPDIR}"
 export TMPDIR="${PIP_TMPDIR}"
 
 case "${FRAMEWORK}" in
-  vllm-omni|lightx2v|trtllm-visual) ;;
+  vllm-omni|lightx2v|trtllm-visual|comfyui) ;;
   *)
     echo "Unknown comparison framework: ${FRAMEWORK}" >&2
     exit 1
@@ -61,6 +61,11 @@ write_desired_stamp() {
         echo "trtllm_pip_extra_index_url=${TRTLLM_PIP_EXTRA_INDEX_URL:-https://pypi.nvidia.com}"
         echo "trtllm_visual_server_bin=${TRTLLM_VISUAL_SERVER_BIN:-trtllm-serve}"
         ;;
+      comfyui)
+        echo "comfyui_install_spec=${COMFYUI_INSTALL_SPEC:-https://github.com/comfyanonymous/ComfyUI.git@master}"
+        echo "comfyui_torch_install_spec=${COMFYUI_TORCH_INSTALL_SPEC:-torch torchvision torchaudio}"
+        echo "comfyui_torch_index_url=${COMFYUI_TORCH_INDEX_URL:-https://download.pytorch.org/whl/cu130}"
+        ;;
     esac
   } > "${path}"
 }
@@ -84,6 +89,11 @@ framework_health_check() {
       "${VENV_PATH}/bin/python3" -c 'import importlib.util; assert importlib.util.find_spec("tensorrt_llm")'
       local trtllm_bin="${TRTLLM_VISUAL_SERVER_BIN:-trtllm-serve}"
       [[ -x "${VENV_PATH}/bin/${trtllm_bin}" ]] || return 1
+      ;;
+    comfyui)
+      # --quick-test-for-ci imports every node (core + comfy_extras) and exits,
+      # so a missing dependency of any model family fails here, not mid-round.
+      ( cd "${VENV_PATH}/ComfyUI" && "${VENV_PATH}/bin/python3" main.py --quick-test-for-ci --cpu )
       ;;
   esac
 }
@@ -236,6 +246,24 @@ if cute_dir.exists():
     # Local patch: let VisualGen run in eager mode (TORCH_COMPILE_DISABLE=1) for
     # a same-policy compile-off comparison. See the patcher's docstring.
     python3 "$(dirname "$0")/patches/apply_trtllm_visual_patches.py"
+    ;;
+  comfyui)
+    # ComfyUI is not a pip package: the server is main.py in a checkout, so the
+    # checkout lives inside the venv directory and the harness finds it there.
+    # Its requirements.txt leaves torch unpinned and upstream's README installs
+    # the newest stable wheel from PyTorch's CUDA index, so do the same first
+    # and let requirements.txt keep it.
+    comfy_spec="${COMFYUI_INSTALL_SPEC:-https://github.com/comfyanonymous/ComfyUI.git@master}"
+    comfy_url="${comfy_spec%@*}"
+    comfy_ref="${comfy_spec##*@}"
+    [[ "${comfy_spec}" == *"@"* ]] || { comfy_url="${comfy_spec}"; comfy_ref="master"; }
+    git clone -q --filter=blob:none "${comfy_url}" "${VENV_PATH}/ComfyUI"
+    git -C "${VENV_PATH}/ComfyUI" checkout -q "${comfy_ref}"
+    echo "ComfyUI source at $(git -C "${VENV_PATH}/ComfyUI" rev-parse --short=12 HEAD)"
+    # shellcheck disable=SC2086 -- the spec is a package list on purpose
+    python3 -m pip install ${COMFYUI_TORCH_INSTALL_SPEC:-torch torchvision torchaudio} \
+      --index-url "${COMFYUI_TORCH_INDEX_URL:-https://download.pytorch.org/whl/cu130}"
+    python3 -m pip install --upgrade-strategy only-if-needed -r "${VENV_PATH}/ComfyUI/requirements.txt"
     ;;
   *)
     echo "Unknown comparison framework: ${FRAMEWORK}" >&2

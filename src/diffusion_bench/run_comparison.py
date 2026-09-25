@@ -27,6 +27,7 @@ import io
 import json
 import os
 import shlex
+import shutil
 import signal
 import statistics
 import subprocess
@@ -39,6 +40,8 @@ from datetime import datetime, timezone
 from pathlib import Path
 
 import requests
+
+from diffusion_bench import comfyui_client
 
 # ---------------------------------------------------------------------------
 # Constants
@@ -177,8 +180,8 @@ class LatencyBreakdown:
 
 
 # Frameworks that need separate installation (conflict with sglang's deps)
-INSTALLABLE_FRAMEWORKS = {"vllm-omni", "lightx2v", "trtllm-visual"}
-FRAMEWORK_ORDER = ["sglang", "vllm-omni", "lightx2v", "trtllm-visual"]
+INSTALLABLE_FRAMEWORKS = {"vllm-omni", "lightx2v", "trtllm-visual", "comfyui"}
+FRAMEWORK_ORDER = ["sglang", "vllm-omni", "lightx2v", "trtllm-visual", "comfyui"]
 
 # Frameworks served through the generic, config-driven HTTP path (no bespoke
 # command builder / request sender). A framework opts in by declaring an
@@ -212,6 +215,7 @@ FRAMEWORK_PROFILE_RUNTIME_KEYS = SGLANG_PROFILE_RUNTIME_KEYS | {
     "required_help_args",
     "http_server",
     "http_request",
+    "comfyui",
 }
 
 # Cached reference images keyed by URL.
@@ -618,11 +622,102 @@ def _build_generic_http_cmd(case: dict, fw_cfg: dict, port: int) -> list[str]:
     return cmd
 
 
+COMFYUI_WORKSPACE_ENV = "DIFFUSION_BENCH_COMFYUI_WORKSPACE"
+
+
+def _comfyui_workspace(case: dict) -> Path:
+    root = os.environ.get(COMFYUI_WORKSPACE_ENV) or os.path.join(
+        tempfile.gettempdir(), "diffusion-bench-comfyui"
+    )
+    return Path(root) / case["id"]
+
+
+def _resolve_comfyui_model(source: str) -> str:
+    """`repo:path` names a file in a Hugging Face repo; anything else is a local path."""
+    if os.path.isabs(source):
+        if not os.path.exists(source):
+            raise FileNotFoundError(f"ComfyUI model file {source} does not exist")
+        return source
+    repo, _, filename = source.partition(":")
+    if not filename:
+        raise ValueError(f"ComfyUI model source {source!r} is neither a path nor repo:path")
+    from huggingface_hub import hf_hub_download
+
+    return hf_hub_download(repo_id=repo, filename=filename)
+
+
+def _prepare_comfyui_workspace(case: dict, fw_cfg: dict, config: dict | None) -> None:
+    """Lay out the one case's models, input image and paths file ComfyUI starts against.
+
+    Each case gets its own model tree of symlinks because the checkpoints do not
+    have unique names: FLUX.1, Z-Image and FLUX.2 all ship a `vae/ae.safetensors`.
+    """
+    spec = fw_cfg["comfyui"]
+    workspace = _comfyui_workspace(case)
+    models_dir = workspace / "models"
+    if models_dir.exists():
+        shutil.rmtree(models_dir)  # symlinks only; the targets are untouched
+    for rel, source in spec["models"].items():
+        target = models_dir / rel
+        target.parent.mkdir(parents=True, exist_ok=True)
+        target.symlink_to(_resolve_comfyui_model(source))
+    for sub in ("input", "output"):
+        (workspace / sub).mkdir(parents=True, exist_ok=True)
+    if case.get("reference_image"):
+        shutil.copyfile(
+            _get_ref_image_path(config or {}, case),
+            workspace / "input" / comfyui_client.REF_IMAGE_NAME,
+        )
+    folders = sorted({Path(rel).parts[0] for rel in spec["models"]})
+    lines = ["diffusion_bench:", f"  base_path: {models_dir}", "  is_default: true"]
+    lines += [f"  {folder}: {folder}" for folder in folders]
+    (workspace / "extra_model_paths.yaml").write_text("\n".join(lines) + "\n")
+
+
+def _build_comfyui_cmd(case: dict, fw_cfg: dict, port: int) -> list[str]:
+    workspace = _comfyui_workspace(case)
+    main_py = _framework_venv_path("comfyui") / "ComfyUI" / "main.py"
+    cmd = [
+        "python3",
+        str(main_py),
+        "--listen",
+        DEFAULT_HOST,
+        "--port",
+        str(port),
+        "--disable-auto-launch",
+        "--extra-model-paths-config",
+        str(workspace / "extra_model_paths.yaml"),
+        "--input-directory",
+        str(workspace / "input"),
+        "--output-directory",
+        str(workspace / "output"),
+    ]
+    if fw_cfg.get("serve_args", "").strip():
+        cmd += fw_cfg["serve_args"].strip().split()
+    return cmd
+
+
+def _visible_gpus_env(env: dict[str, str], num_gpus: int) -> dict[str, str]:
+    """Expose only the first `num_gpus` of the GPUs this process can see.
+
+    ComfyUI takes no GPU-count flag: it runs on device 0, and its multi-GPU node
+    uses every device it can see. So the count is set through visibility.
+    """
+    visible = env.get("CUDA_VISIBLE_DEVICES")
+    ids = [x for x in visible.split(",") if x.strip()] if visible else [str(i) for i in range(num_gpus)]
+    if len(ids) < num_gpus:
+        raise RuntimeError(f"case needs {num_gpus} GPU(s) but only {ids} are visible")
+    env = dict(env)
+    env["CUDA_VISIBLE_DEVICES"] = ",".join(ids[:num_gpus])
+    return env
+
+
 def build_server_cmd(framework: str, case: dict, fw_cfg: dict, port: int) -> list[str]:
     builders = {
         "sglang": _build_sglang_cmd,
         "vllm-omni": _build_vllm_cmd,
         "lightx2v": _build_lightx2v_cmd,
+        "comfyui": _build_comfyui_cmd,
     }
     builder = builders.get(framework)
     if builder is None:
@@ -822,6 +917,7 @@ HEALTH_ENDPOINTS = {
     "sglang": "/health",
     "vllm-omni": "/health",
     "lightx2v": "/v1/service/status",
+    "comfyui": comfyui_client.HEALTH_PATH,
 }
 
 
@@ -1637,6 +1733,30 @@ def send_request_generic_http(
 
 
 # ---------------------------------------------------------------------------
+# Request helpers — ComfyUI
+# ---------------------------------------------------------------------------
+
+
+def send_request_comfyui(base_url: str, case: dict, config: dict) -> float:
+    """Render the case's workflow for one request and run it (see comfyui_client)."""
+    spec = case["_comfyui"]
+    graph = comfyui_client.render_workflow(
+        spec["workflow_graph"], comfyui_client.workflow_params(case, spec)
+    )
+    latency, info = comfyui_client.run_prompt(
+        base_url,
+        graph,
+        timeout_s=REQUEST_TIMEOUT,
+        fetch_outputs=not case.get("num_frames"),
+    )
+    print(
+        f"  Generated in {latency:.2f}s (comfyui, {len(info['cached_nodes'])} cached node(s): "
+        f"{','.join(info['cached_nodes']) or '-'})"
+    )
+    return latency
+
+
+# ---------------------------------------------------------------------------
 # Unified request dispatcher
 # ---------------------------------------------------------------------------
 
@@ -1657,6 +1777,8 @@ def send_request(
         return LatencyBreakdown(
             client_s=send_request_lightx2v(base_url, case, config)
         )
+    elif framework == "comfyui":
+        return LatencyBreakdown(client_s=send_request_comfyui(base_url, case, config))
     elif framework in GENERIC_HTTP_FRAMEWORKS or (
         framework != "sglang"
         and ((case.get("frameworks") or {}).get(framework) or {}).get("http_server")
@@ -1733,6 +1855,8 @@ def _case_for_framework(case: dict, fw_cfg: dict) -> dict:
     metadata = fw_cfg.get("_benchmark_metadata")
     if metadata:
         case_for_fw["_framework_metadata"] = metadata
+    if "comfyui" in fw_cfg:
+        case_for_fw["_comfyui"] = fw_cfg["comfyui"]
     return case_for_fw
 
 
@@ -1899,6 +2023,15 @@ def _collect_framework_runtime_metadata() -> dict:
             *SHARED_STACK,
         ],
         "trtllm-visual": ["tensorrt-llm", "tensorrt", *SHARED_STACK],
+        "comfyui": [
+            "torchvision",
+            "torchaudio",
+            "comfy-kitchen",
+            "comfy-aimdo",
+            "comfyui-frontend-package",
+            "safetensors",
+            *SHARED_STACK,
+        ],
     }
     for framework, packages in packages_by_framework.items():
         venv_path = _framework_venv_path(framework)
@@ -1917,6 +2050,22 @@ def _collect_framework_runtime_metadata() -> dict:
             except (FileNotFoundError, subprocess.TimeoutExpired):
                 pass
         site_packages = next(venv_path.glob("lib/python*/site-packages"), None)
+        # ComfyUI is a checkout, not a package: its version is the commit.
+        comfy_checkout = venv_path / "ComfyUI"
+        if (comfy_checkout / ".git").exists():
+            try:
+                ret = subprocess.run(
+                    ["git", "-C", str(comfy_checkout), "log", "-1", "--format=%H %cI"],
+                    capture_output=True,
+                    text=True,
+                    timeout=10,
+                )
+                if ret.returncode == 0 and ret.stdout.strip():
+                    commit, _, date = ret.stdout.strip().partition(" ")
+                    framework_metadata["source_commit"] = commit
+                    framework_metadata["source_commit_date"] = date
+            except (FileNotFoundError, subprocess.TimeoutExpired):
+                pass
         if site_packages is not None:
             direct_urls = {}
             for direct_url in site_packages.glob("*.dist-info/direct_url.json"):
@@ -2327,6 +2476,14 @@ def run_throughput(
         cmd.extend(["--extra-body", json.dumps(extra_body)])
     if case.get("reference_image"):
         cmd.extend(["--image-path", _get_ref_image_path(config or {}, case)])
+    if framework == "comfyui":
+        bundle_path = log_dir / f"comfyui_request_{case['id']}.json"
+        bundle = {
+            "case": {k: v for k, v in case.items() if not k.startswith("_") and k != "frameworks"},
+            "spec": case["_comfyui"],
+        }
+        bundle_path.write_text(json.dumps(bundle))
+        cmd.extend(["--comfyui-request-json", str(bundle_path)])
 
     print(
         f"  Running bench_serving throughput: requests={num_requests}, "
@@ -2428,6 +2585,9 @@ def run_case_framework(
         # drifted (upstream renamed a flag) must fail its own cells, not
         # abort the whole matrix and discard every framework already run.
         _preflight_framework_command(framework, fw_cfg, env)
+        if framework == "comfyui":
+            env = _visible_gpus_env(env, int(case.get("num_gpus") or 1))
+            _prepare_comfyui_workspace(case, fw_cfg, config)
         proc = subprocess.Popen(
             cmd,
             stdout=subprocess.PIPE,

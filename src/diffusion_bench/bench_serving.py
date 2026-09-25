@@ -30,6 +30,7 @@ import numpy as np
 import requests
 from tqdm.asyncio import tqdm
 
+from diffusion_bench import comfyui_client
 from diffusion_bench.datasets import (
     FixedDataset,
     RandomDataset,
@@ -676,7 +677,10 @@ def calculate_metrics(
 
 
 def wait_for_service(base_url: str, backend: str, timeout: int = 1200) -> None:
-    endpoint = "/v1/service/status" if backend == "lightx2v" else "/health"
+    endpoint = {
+        "lightx2v": "/v1/service/status",
+        "comfyui": comfyui_client.HEALTH_PATH,
+    }.get(backend, "/health")
     logger.info(f"Waiting for service at {base_url}{endpoint}...")
     start_time = time.time()
     while True:
@@ -694,6 +698,53 @@ def wait_for_service(base_url: str, backend: str, timeout: int = 1200) -> None:
             )
 
         time.sleep(1)
+
+
+def make_comfyui_request_func(bundle_path: str, request_timeout: float):
+    """ComfyUI request function for the dataset loop.
+
+    ComfyUI takes a workflow graph, not a payload, so the runner hands over the
+    case and its resolved ComfyUI spec; each request renders its own graph with
+    a fresh nonce (see comfyui_client) and the request's steps and seed.
+    """
+    with open(bundle_path) as f:
+        bundle = json.load(f)
+    spec = bundle["spec"]
+
+    async def async_request_comfyui(
+        input: RequestFuncInput,
+        session: aiohttp.ClientSession,
+        pbar: Optional[tqdm] = None,
+    ) -> RequestFuncOutput:
+        output = RequestFuncOutput()
+        output.start_time = time.perf_counter()
+        case = dict(bundle["case"])
+        if input.num_inference_steps:
+            case["num_inference_steps"] = input.num_inference_steps
+        if "seed" in input.extra_body:
+            case["seed"] = input.extra_body["seed"]
+        try:
+            graph = comfyui_client.render_workflow(
+                spec["workflow_graph"], comfyui_client.workflow_params(case, spec)
+            )
+            await asyncio.to_thread(
+                comfyui_client.run_prompt,
+                input.api_url,
+                graph,
+                timeout_s=request_timeout,
+                fetch_outputs=not case.get("num_frames"),
+            )
+            output.success = True
+            output.output_count = 1
+        except Exception as e:  # noqa: BLE001 - a failed request is a recorded error
+            output.success = False
+            output.error = f"{type(e).__name__}: {e}"
+        output.latency = time.perf_counter() - output.start_time
+        if pbar:
+            pbar.update(1)
+        return output
+
+    return async_request_comfyui
 
 
 async def benchmark(args):
@@ -772,6 +823,13 @@ async def benchmark(args):
     elif backend == "lightx2v":
         api_url = f"{args.base_url}/v1/tasks/"
         request_func = async_request_lightx2v
+    elif backend == "comfyui":
+        if not args.comfyui_request_json:
+            raise ValueError("--backend comfyui needs --comfyui-request-json")
+        api_url = args.base_url
+        request_func = make_comfyui_request_func(
+            args.comfyui_request_json, args.request_timeout
+        )
     elif task_name in (
         "text-to-video",
         "image-to-video",
@@ -946,8 +1004,14 @@ def main() -> None:
         "--backend",
         type=str,
         default="sglang",
-        choices=["sglang", "vllm-omni", "lightx2v", "trtllm-visual"],
+        choices=["sglang", "vllm-omni", "lightx2v", "trtllm-visual", "comfyui"],
         help="Serving backend API to benchmark.",
+    )
+    parser.add_argument(
+        "--comfyui-request-json",
+        type=str,
+        default=None,
+        help="ComfyUI only: the case and its resolved ComfyUI spec, written by run_comparison.",
     )
     parser.add_argument(
         "--base-url",
