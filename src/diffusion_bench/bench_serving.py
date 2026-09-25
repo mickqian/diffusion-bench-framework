@@ -724,9 +724,7 @@ def make_comfyui_request_func(bundle_path: str, request_timeout: float):
         if "seed" in input.extra_body:
             case["seed"] = input.extra_body["seed"]
         try:
-            graph = comfyui_client.render_workflow(
-                spec["workflow_graph"], comfyui_client.workflow_params(case, spec)
-            )
+            graph = comfyui_client.build_graph(case, spec)
             await asyncio.to_thread(
                 comfyui_client.run_prompt,
                 input.api_url,

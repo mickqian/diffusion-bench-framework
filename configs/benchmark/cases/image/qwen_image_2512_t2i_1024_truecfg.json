@@ -121,7 +121,8 @@
         },
         "params": {
           "cfg_gpus": 2
-        }
+        },
+        "compile": true
       },
       "command_profiles": {
         "default": {
@@ -129,7 +130,7 @@
           "framework_ref": "ComfyUI master HEAD",
           "num_gpus": 2,
           "serve_args": "",
-          "notes": "Same graph with true CFG (KSampler cfg = true_cfg_scale, the case's negative prompt encoded every request). Two GPUs through ComfyUI's only multi-GPU path, the core MultiGPU CFG Split node, which runs the two guidance branches on separate cards -- the counterpart of sglang's CFG parallelism here. Weights are the full-precision single-file checkpoints ComfyUI loads (Comfy-Org repackaging or the model's own single-file release); the official template's fp8/int8/nvfp4 defaults are swapped out because they are a different numeric class from every other row. Sampler, scheduler and shift follow the official ComfyUI workflow; steps, CFG, size, frames and seed follow the case."
+          "notes": "Same graph with true CFG (KSampler cfg = true_cfg_scale, the case's negative prompt encoded every request). Two GPUs through ComfyUI's only multi-GPU path, the core MultiGPU CFG Split node, which runs the two guidance branches on separate cards -- the counterpart of sglang's CFG parallelism here. Weights are the full-precision single-file checkpoints ComfyUI loads (Comfy-Org repackaging or the model's own single-file release); the official template's fp8/int8/nvfp4 defaults are swapped out because they are a different numeric class from every other row. Sampler, scheduler and shift follow the official ComfyUI workflow; steps, CFG, size, frames and seed follow the case. Compile on: the core TorchCompileModel node (inductor) goes behind every diffusion-model loader, as the other competitors run compile-on; measured on FLUX.1 / 1xB200 2026-09-25 at 4.89s against 5.94s and 5.77s eager."
         }
       }
     }

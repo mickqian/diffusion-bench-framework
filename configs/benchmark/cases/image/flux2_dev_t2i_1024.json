@@ -286,7 +286,8 @@
           "diffusion_models/flux2-dev.safetensors": "black-forest-labs/FLUX.2-dev:flux2-dev.safetensors",
           "text_encoders/mistral_3_small_flux2_bf16.safetensors": "Comfy-Org/flux2-dev:split_files/text_encoders/mistral_3_small_flux2_bf16.safetensors",
           "vae/flux2-vae.safetensors": "Comfy-Org/flux2-dev:split_files/vae/flux2-vae.safetensors"
-        }
+        },
+        "compile": true
       },
       "command_profiles": {
         "default": {
@@ -294,7 +295,7 @@
           "framework_ref": "ComfyUI master HEAD",
           "num_gpus": 1,
           "serve_args": "",
-          "notes": "Official 'Text to Image (Flux.2 Dev)' blueprint with the bf16 DiT from BFL's own repo in place of flux2_dev_fp8mixed, and the full FLUX.2 VAE in place of the blueprint's small-decoder variant (a different decoder). Guidance-distilled: FluxGuidance + BasicGuider, no CFG. Weights are the full-precision single-file checkpoints ComfyUI loads (Comfy-Org repackaging or the model's own single-file release); the official template's fp8/int8/nvfp4 defaults are swapped out because they are a different numeric class from every other row. Sampler, scheduler and shift follow the official ComfyUI workflow; steps, CFG, size, frames and seed follow the case."
+          "notes": "Official 'Text to Image (Flux.2 Dev)' blueprint with the bf16 DiT from BFL's own repo in place of flux2_dev_fp8mixed, and the full FLUX.2 VAE in place of the blueprint's small-decoder variant (a different decoder). Guidance-distilled: FluxGuidance + BasicGuider, no CFG. Weights are the full-precision single-file checkpoints ComfyUI loads (Comfy-Org repackaging or the model's own single-file release); the official template's fp8/int8/nvfp4 defaults are swapped out because they are a different numeric class from every other row. Sampler, scheduler and shift follow the official ComfyUI workflow; steps, CFG, size, frames and seed follow the case. Compile on: the core TorchCompileModel node (inductor) goes behind every diffusion-model loader, as the other competitors run compile-on; measured on FLUX.1 / 1xB200 2026-09-25 at 4.89s against 5.94s and 5.77s eager."
         }
       }
     }

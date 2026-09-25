@@ -133,7 +133,8 @@
           "text_encoders/qwen3vl_32b_minimax_h3_bf16.safetensors": "Comfy-Org/MiniMax-H3:text_encoders/qwen3vl_32b_minimax_h3_bf16.safetensors",
           "vae/minimax_h3_video_vae_fp16.safetensors": "Comfy-Org/MiniMax-H3:vae/minimax_h3_video_vae_fp16.safetensors",
           "vae/minimax_h3_audio_vae_fp32.safetensors": "Comfy-Org/MiniMax-H3:vae/minimax_h3_audio_vae_fp32.safetensors"
-        }
+        },
+        "compile": true
       },
       "command_profiles": {
         "default": {
@@ -141,7 +142,7 @@
           "framework_ref": "ComfyUI master HEAD",
           "num_gpus": 1,
           "serve_args": "",
-          "notes": "Official video_minimax_h3_t2v template: the fl2va checkpoint with no frames attached is T2VA, which is also what sglang serves (model_variant defaults to fl2va). Full bf16 DiT in place of the pruned int8_convrot, bf16 Qwen3-VL-32B in place of nvfp4_awq, fp16 video VAE in place of int8_convrot. BasicGuider = no CFG, matching sglang's fixed guidance 1.0; sigma shift 12 / 3 as the case's flow_shift / audio_flow_shift. One GPU: without CFG there is no branch to split. Weights are the full-precision single-file checkpoints ComfyUI loads (Comfy-Org repackaging or the model's own single-file release); the official template's fp8/int8/nvfp4 defaults are swapped out because they are a different numeric class from every other row. Sampler, scheduler and shift follow the official ComfyUI workflow; steps, CFG, size, frames and seed follow the case."
+          "notes": "Official video_minimax_h3_t2v template: the fl2va checkpoint with no frames attached is T2VA, which is also what sglang serves (model_variant defaults to fl2va). Full bf16 DiT in place of the pruned int8_convrot, bf16 Qwen3-VL-32B in place of nvfp4_awq, fp16 video VAE in place of int8_convrot. BasicGuider = no CFG, matching sglang's fixed guidance 1.0; sigma shift 12 / 3 as the case's flow_shift / audio_flow_shift. One GPU: without CFG there is no branch to split. Weights are the full-precision single-file checkpoints ComfyUI loads (Comfy-Org repackaging or the model's own single-file release); the official template's fp8/int8/nvfp4 defaults are swapped out because they are a different numeric class from every other row. Sampler, scheduler and shift follow the official ComfyUI workflow; steps, CFG, size, frames and seed follow the case. Compile on: the core TorchCompileModel node (inductor) goes behind every diffusion-model loader, as the other competitors run compile-on; measured on FLUX.1 / 1xB200 2026-09-25 at 4.89s against 5.94s and 5.77s eager."
         }
       }
     }

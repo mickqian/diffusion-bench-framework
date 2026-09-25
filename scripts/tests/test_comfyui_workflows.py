@@ -51,8 +51,12 @@ for case in cfg["cases"]:
         seen += 1
         where = f"{case['id']}[{name}]"
         check(f"{where}: workflow inlined by the build", isinstance(spec.get("workflow_graph"), dict))
-        first = cc.render_workflow(spec["workflow_graph"], cc.workflow_params(case, spec))
-        second = cc.render_workflow(spec["workflow_graph"], cc.workflow_params(case, spec))
+        first = cc.build_graph(case, spec)
+        second = cc.build_graph(case, spec)
+        if spec.get("compile"):
+            loaders = [n for n in first.values() if n["class_type"] in cc.MODEL_LOADERS]
+            compiled = [n for n in first.values() if n["class_type"] == "TorchCompileModel"]
+            check(f"{where}: one compile node per model loader", len(loaders) == len(compiled) > 0)
 
         def strip(graph):
             return {

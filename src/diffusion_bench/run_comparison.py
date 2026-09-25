@@ -912,6 +912,7 @@ def _resolve_framework_config(
         metadata["comfyui_workflow"] = resolved["comfyui"].get("workflow")
         metadata["comfyui_models"] = resolved["comfyui"].get("models")
         metadata["comfyui_params"] = resolved["comfyui"].get("params")
+        metadata["comfyui_compile"] = bool(resolved["comfyui"].get("compile"))
     resolved["_benchmark_metadata"] = metadata
     return resolved
 
@@ -1747,10 +1748,7 @@ def send_request_generic_http(
 
 def send_request_comfyui(base_url: str, case: dict, config: dict) -> float:
     """Render the case's workflow for one request and run it (see comfyui_client)."""
-    spec = case["_comfyui"]
-    graph = comfyui_client.render_workflow(
-        spec["workflow_graph"], comfyui_client.workflow_params(case, spec)
-    )
+    graph = comfyui_client.build_graph(case, case["_comfyui"])
     latency, info = comfyui_client.run_prompt(
         base_url,
         graph,

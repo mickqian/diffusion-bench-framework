@@ -78,7 +78,8 @@
           "diffusion_models/qwen_image_edit_2511_bf16.safetensors": "Comfy-Org/Qwen-Image-Edit_ComfyUI:split_files/diffusion_models/qwen_image_edit_2511_bf16.safetensors",
           "text_encoders/qwen_2.5_vl_7b.safetensors": "Comfy-Org/Qwen-Image_ComfyUI:split_files/text_encoders/qwen_2.5_vl_7b.safetensors",
           "vae/qwen_image_vae.safetensors": "Comfy-Org/Qwen-Image_ComfyUI:split_files/vae/qwen_image_vae.safetensors"
-        }
+        },
+        "compile": true
       },
       "command_profiles": {
         "default": {
@@ -86,7 +87,7 @@
           "framework_ref": "ComfyUI master HEAD",
           "num_gpus": 1,
           "serve_args": "",
-          "notes": "Official 'Image Edit (Qwen 2511)' blueprint (bf16 DiT; bf16 text encoder in place of fp8_scaled). guidance_scale 1.0 = no CFG. The output latent is an empty latent at the case's size rather than the VAE-encoded input, so ComfyUI renders the same 1024x1024 the other rows render; the reference still enters through TextEncodeQwenImageEditPlus (VL tokens + reference latent). The Comfy files need no Edit Model Reference Method node, per the blueprint's own note. Weights are the full-precision single-file checkpoints ComfyUI loads (Comfy-Org repackaging or the model's own single-file release); the official template's fp8/int8/nvfp4 defaults are swapped out because they are a different numeric class from every other row. Sampler, scheduler and shift follow the official ComfyUI workflow; steps, CFG, size, frames and seed follow the case."
+          "notes": "Official 'Image Edit (Qwen 2511)' blueprint (bf16 DiT; bf16 text encoder in place of fp8_scaled). guidance_scale 1.0 = no CFG. The output latent is an empty latent at the case's size rather than the VAE-encoded input, so ComfyUI renders the same 1024x1024 the other rows render; the reference still enters through TextEncodeQwenImageEditPlus (VL tokens + reference latent). The Comfy files need no Edit Model Reference Method node, per the blueprint's own note. Weights are the full-precision single-file checkpoints ComfyUI loads (Comfy-Org repackaging or the model's own single-file release); the official template's fp8/int8/nvfp4 defaults are swapped out because they are a different numeric class from every other row. Sampler, scheduler and shift follow the official ComfyUI workflow; steps, CFG, size, frames and seed follow the case. Compile on: the core TorchCompileModel node (inductor) goes behind every diffusion-model loader, as the other competitors run compile-on; measured on FLUX.1 / 1xB200 2026-09-25 at 4.89s against 5.94s and 5.77s eager."
         }
       }
     }

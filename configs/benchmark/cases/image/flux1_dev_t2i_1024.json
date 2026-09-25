@@ -219,7 +219,8 @@
           "text_encoders/clip_l.safetensors": "comfyanonymous/flux_text_encoders:clip_l.safetensors",
           "text_encoders/t5xxl_fp16.safetensors": "comfyanonymous/flux_text_encoders:t5xxl_fp16.safetensors",
           "vae/ae.safetensors": "black-forest-labs/FLUX.1-dev:ae.safetensors"
-        }
+        },
+        "compile": true
       },
       "command_profiles": {
         "default": {
@@ -227,17 +228,7 @@
           "framework_ref": "ComfyUI master HEAD",
           "num_gpus": 1,
           "serve_args": "",
-          "notes": "Official 'Text to Image (Flux.1 Dev)' blueprint plus an explicit FluxGuidance node carrying the case's embedded guidance (the blueprint relies on the model default, 3.5, which is the same value). Guidance-distilled: KSampler cfg 1, one DiT forward per step, as in the sglang row. Weights are the full-precision single-file checkpoints ComfyUI loads (Comfy-Org repackaging or the model's own single-file release); the official template's fp8/int8/nvfp4 defaults are swapped out because they are a different numeric class from every other row. Sampler, scheduler and shift follow the official ComfyUI workflow; steps, CFG, size, frames and seed follow the case."
-        },
-        "compile-probe": {
-          "description": "PROBE, selected only explicitly (DIFFUSION_BENCH_COMFYUI_PROFILE=compile-probe): the same graph with the core TorchCompileModel node (inductor) on the DiT.",
-          "framework_ref": "ComfyUI master HEAD",
-          "num_gpus": 1,
-          "serve_args": "",
-          "comfyui": {
-            "workflow": "flux1_dev_t2i_compile.json"
-          },
-          "notes": "Carries no hardware token so it is never auto-selected. Exists to measure whether compile is ComfyUI's fastest lossless path here, as it is for the other competitors."
+          "notes": "Official 'Text to Image (Flux.1 Dev)' blueprint plus an explicit FluxGuidance node carrying the case's embedded guidance (the blueprint relies on the model default, 3.5, which is the same value). Guidance-distilled: KSampler cfg 1, one DiT forward per step, as in the sglang row. Weights are the full-precision single-file checkpoints ComfyUI loads (Comfy-Org repackaging or the model's own single-file release); the official template's fp8/int8/nvfp4 defaults are swapped out because they are a different numeric class from every other row. Sampler, scheduler and shift follow the official ComfyUI workflow; steps, CFG, size, frames and seed follow the case. Compile on: the core TorchCompileModel node (inductor) goes behind every diffusion-model loader, as the other competitors run compile-on; measured on FLUX.1 / 1xB200 2026-09-25 at 4.89s against 5.94s and 5.77s eager."
         },
         "gpuonly-probe": {
           "description": "PROBE, selected only explicitly (DIFFUSION_BENCH_COMFYUI_PROFILE=gpuonly-probe): every model (text encoders included) stored and run on the GPU.",

@@ -232,6 +232,7 @@
                             "text_encoders/t5xxl_fp16.safetensors": "comfyanonymous/flux_text_encoders:t5xxl_fp16.safetensors",
                             "vae/ae.safetensors": "black-forest-labs/FLUX.1-dev:ae.safetensors"
                         },
+                        "compile": true,
                         "workflow_graph": {
                             "1": {
                                 "class_type": "UNETLoader",
@@ -351,139 +352,7 @@
                             "framework_ref": "ComfyUI master HEAD",
                             "num_gpus": 1,
                             "serve_args": "",
-                            "notes": "Official 'Text to Image (Flux.1 Dev)' blueprint plus an explicit FluxGuidance node carrying the case's embedded guidance (the blueprint relies on the model default, 3.5, which is the same value). Guidance-distilled: KSampler cfg 1, one DiT forward per step, as in the sglang row. Weights are the full-precision single-file checkpoints ComfyUI loads (Comfy-Org repackaging or the model's own single-file release); the official template's fp8/int8/nvfp4 defaults are swapped out because they are a different numeric class from every other row. Sampler, scheduler and shift follow the official ComfyUI workflow; steps, CFG, size, frames and seed follow the case."
-                        },
-                        "compile-probe": {
-                            "description": "PROBE, selected only explicitly (DIFFUSION_BENCH_COMFYUI_PROFILE=compile-probe): the same graph with the core TorchCompileModel node (inductor) on the DiT.",
-                            "framework_ref": "ComfyUI master HEAD",
-                            "num_gpus": 1,
-                            "serve_args": "",
-                            "comfyui": {
-                                "workflow": "flux1_dev_t2i_compile.json",
-                                "workflow_graph": {
-                                    "1": {
-                                        "class_type": "UNETLoader",
-                                        "inputs": {
-                                            "unet_name": "flux1-dev.safetensors",
-                                            "weight_dtype": "default"
-                                        }
-                                    },
-                                    "2": {
-                                        "class_type": "DualCLIPLoader",
-                                        "inputs": {
-                                            "clip_name1": "clip_l.safetensors",
-                                            "clip_name2": "t5xxl_fp16.safetensors",
-                                            "type": "flux",
-                                            "device": "default"
-                                        }
-                                    },
-                                    "3": {
-                                        "class_type": "VAELoader",
-                                        "inputs": {
-                                            "vae_name": "ae.safetensors"
-                                        }
-                                    },
-                                    "4": {
-                                        "class_type": "CLIPTextEncode",
-                                        "inputs": {
-                                            "text": "{{prompt}}",
-                                            "clip": [
-                                                "2",
-                                                0
-                                            ],
-                                            "__bench_nonce": "{{nonce}}"
-                                        }
-                                    },
-                                    "5": {
-                                        "class_type": "FluxGuidance",
-                                        "inputs": {
-                                            "conditioning": [
-                                                "4",
-                                                0
-                                            ],
-                                            "guidance": "{{guidance}}"
-                                        }
-                                    },
-                                    "6": {
-                                        "class_type": "ConditioningZeroOut",
-                                        "inputs": {
-                                            "conditioning": [
-                                                "4",
-                                                0
-                                            ]
-                                        }
-                                    },
-                                    "7": {
-                                        "class_type": "EmptySD3LatentImage",
-                                        "inputs": {
-                                            "width": "{{width}}",
-                                            "height": "{{height}}",
-                                            "batch_size": 1
-                                        }
-                                    },
-                                    "8": {
-                                        "class_type": "KSampler",
-                                        "inputs": {
-                                            "model": [
-                                                "20",
-                                                0
-                                            ],
-                                            "seed": "{{seed}}",
-                                            "steps": "{{steps}}",
-                                            "cfg": 1.0,
-                                            "sampler_name": "euler",
-                                            "scheduler": "simple",
-                                            "positive": [
-                                                "5",
-                                                0
-                                            ],
-                                            "negative": [
-                                                "6",
-                                                0
-                                            ],
-                                            "latent_image": [
-                                                "7",
-                                                0
-                                            ],
-                                            "denoise": 1.0
-                                        }
-                                    },
-                                    "9": {
-                                        "class_type": "VAEDecode",
-                                        "inputs": {
-                                            "samples": [
-                                                "8",
-                                                0
-                                            ],
-                                            "vae": [
-                                                "3",
-                                                0
-                                            ]
-                                        }
-                                    },
-                                    "10": {
-                                        "class_type": "SaveImage",
-                                        "inputs": {
-                                            "images": [
-                                                "9",
-                                                0
-                                            ],
-                                            "filename_prefix": "{{filename_prefix}}"
-                                        }
-                                    },
-                                    "20": {
-                                        "class_type": "TorchCompileModel",
-                                        "inputs": {
-                                            "model": [
-                                                "1",
-                                                0
-                                            ],
-                                            "backend": "inductor"
-                                        }
-                                    }
-                                }
-                            },
-                            "notes": "Carries no hardware token so it is never auto-selected. Exists to measure whether compile is ComfyUI's fastest lossless path here, as it is for the other competitors."
+                            "notes": "Official 'Text to Image (Flux.1 Dev)' blueprint plus an explicit FluxGuidance node carrying the case's embedded guidance (the blueprint relies on the model default, 3.5, which is the same value). Guidance-distilled: KSampler cfg 1, one DiT forward per step, as in the sglang row. Weights are the full-precision single-file checkpoints ComfyUI loads (Comfy-Org repackaging or the model's own single-file release); the official template's fp8/int8/nvfp4 defaults are swapped out because they are a different numeric class from every other row. Sampler, scheduler and shift follow the official ComfyUI workflow; steps, CFG, size, frames and seed follow the case. Compile on: the core TorchCompileModel node (inductor) goes behind every diffusion-model loader, as the other competitors run compile-on; measured on FLUX.1 / 1xB200 2026-09-25 at 4.89s against 5.94s and 5.77s eager."
                         },
                         "gpuonly-probe": {
                             "description": "PROBE, selected only explicitly (DIFFUSION_BENCH_COMFYUI_PROFILE=gpuonly-probe): every model (text encoders included) stored and run on the GPU.",
@@ -793,6 +662,7 @@
                             "text_encoders/mistral_3_small_flux2_bf16.safetensors": "Comfy-Org/flux2-dev:split_files/text_encoders/mistral_3_small_flux2_bf16.safetensors",
                             "vae/flux2-vae.safetensors": "Comfy-Org/flux2-dev:split_files/vae/flux2-vae.safetensors"
                         },
+                        "compile": true,
                         "workflow_graph": {
                             "1": {
                                 "class_type": "UNETLoader",
@@ -933,7 +803,7 @@
                             "framework_ref": "ComfyUI master HEAD",
                             "num_gpus": 1,
                             "serve_args": "",
-                            "notes": "Official 'Text to Image (Flux.2 Dev)' blueprint with the bf16 DiT from BFL's own repo in place of flux2_dev_fp8mixed, and the full FLUX.2 VAE in place of the blueprint's small-decoder variant (a different decoder). Guidance-distilled: FluxGuidance + BasicGuider, no CFG. Weights are the full-precision single-file checkpoints ComfyUI loads (Comfy-Org repackaging or the model's own single-file release); the official template's fp8/int8/nvfp4 defaults are swapped out because they are a different numeric class from every other row. Sampler, scheduler and shift follow the official ComfyUI workflow; steps, CFG, size, frames and seed follow the case."
+                            "notes": "Official 'Text to Image (Flux.2 Dev)' blueprint with the bf16 DiT from BFL's own repo in place of flux2_dev_fp8mixed, and the full FLUX.2 VAE in place of the blueprint's small-decoder variant (a different decoder). Guidance-distilled: FluxGuidance + BasicGuider, no CFG. Weights are the full-precision single-file checkpoints ComfyUI loads (Comfy-Org repackaging or the model's own single-file release); the official template's fp8/int8/nvfp4 defaults are swapped out because they are a different numeric class from every other row. Sampler, scheduler and shift follow the official ComfyUI workflow; steps, CFG, size, frames and seed follow the case. Compile on: the core TorchCompileModel node (inductor) goes behind every diffusion-model loader, as the other competitors run compile-on; measured on FLUX.1 / 1xB200 2026-09-25 at 4.89s against 5.94s and 5.77s eager."
                         }
                     }
                 }
@@ -1084,6 +954,7 @@
                             "text_encoders/qwen_2.5_vl_7b.safetensors": "Comfy-Org/Qwen-Image_ComfyUI:split_files/text_encoders/qwen_2.5_vl_7b.safetensors",
                             "vae/qwen_image_vae.safetensors": "Comfy-Org/Qwen-Image_ComfyUI:split_files/vae/qwen_image_vae.safetensors"
                         },
+                        "compile": true,
                         "workflow_graph": {
                             "1": {
                                 "class_type": "UNETLoader",
@@ -1202,7 +1073,7 @@
                             "framework_ref": "ComfyUI master HEAD",
                             "num_gpus": 1,
                             "serve_args": "",
-                            "notes": "Official 'Text to Image (Qwen-Image 2512)' blueprint with bf16 DiT and text encoder. guidance_scale 1.0 = no CFG, so the negative branch is a ConditioningZeroOut and KSampler cfg 1 runs one forward per step. Weights are the full-precision single-file checkpoints ComfyUI loads (Comfy-Org repackaging or the model's own single-file release); the official template's fp8/int8/nvfp4 defaults are swapped out because they are a different numeric class from every other row. Sampler, scheduler and shift follow the official ComfyUI workflow; steps, CFG, size, frames and seed follow the case."
+                            "notes": "Official 'Text to Image (Qwen-Image 2512)' blueprint with bf16 DiT and text encoder. guidance_scale 1.0 = no CFG, so the negative branch is a ConditioningZeroOut and KSampler cfg 1 runs one forward per step. Weights are the full-precision single-file checkpoints ComfyUI loads (Comfy-Org repackaging or the model's own single-file release); the official template's fp8/int8/nvfp4 defaults are swapped out because they are a different numeric class from every other row. Sampler, scheduler and shift follow the official ComfyUI workflow; steps, CFG, size, frames and seed follow the case. Compile on: the core TorchCompileModel node (inductor) goes behind every diffusion-model loader, as the other competitors run compile-on; measured on FLUX.1 / 1xB200 2026-09-25 at 4.89s against 5.94s and 5.77s eager."
                         }
                     }
                 }
@@ -1327,6 +1198,7 @@
                         "params": {
                             "cfg_gpus": 2
                         },
+                        "compile": true,
                         "workflow_graph": {
                             "1": {
                                 "class_type": "UNETLoader",
@@ -1457,7 +1329,7 @@
                             "framework_ref": "ComfyUI master HEAD",
                             "num_gpus": 2,
                             "serve_args": "",
-                            "notes": "Same graph with true CFG (KSampler cfg = true_cfg_scale, the case's negative prompt encoded every request). Two GPUs through ComfyUI's only multi-GPU path, the core MultiGPU CFG Split node, which runs the two guidance branches on separate cards -- the counterpart of sglang's CFG parallelism here. Weights are the full-precision single-file checkpoints ComfyUI loads (Comfy-Org repackaging or the model's own single-file release); the official template's fp8/int8/nvfp4 defaults are swapped out because they are a different numeric class from every other row. Sampler, scheduler and shift follow the official ComfyUI workflow; steps, CFG, size, frames and seed follow the case."
+                            "notes": "Same graph with true CFG (KSampler cfg = true_cfg_scale, the case's negative prompt encoded every request). Two GPUs through ComfyUI's only multi-GPU path, the core MultiGPU CFG Split node, which runs the two guidance branches on separate cards -- the counterpart of sglang's CFG parallelism here. Weights are the full-precision single-file checkpoints ComfyUI loads (Comfy-Org repackaging or the model's own single-file release); the official template's fp8/int8/nvfp4 defaults are swapped out because they are a different numeric class from every other row. Sampler, scheduler and shift follow the official ComfyUI workflow; steps, CFG, size, frames and seed follow the case. Compile on: the core TorchCompileModel node (inductor) goes behind every diffusion-model loader, as the other competitors run compile-on; measured on FLUX.1 / 1xB200 2026-09-25 at 4.89s against 5.94s and 5.77s eager."
                         }
                     }
                 }
@@ -1541,6 +1413,7 @@
                             "text_encoders/qwen_2.5_vl_7b.safetensors": "Comfy-Org/Qwen-Image_ComfyUI:split_files/text_encoders/qwen_2.5_vl_7b.safetensors",
                             "vae/qwen_image_vae.safetensors": "Comfy-Org/Qwen-Image_ComfyUI:split_files/vae/qwen_image_vae.safetensors"
                         },
+                        "compile": true,
                         "workflow_graph": {
                             "1": {
                                 "class_type": "UNETLoader",
@@ -1682,7 +1555,7 @@
                             "framework_ref": "ComfyUI master HEAD",
                             "num_gpus": 1,
                             "serve_args": "",
-                            "notes": "Official 'Image Edit (Qwen 2511)' blueprint (bf16 DiT; bf16 text encoder in place of fp8_scaled). guidance_scale 1.0 = no CFG. The output latent is an empty latent at the case's size rather than the VAE-encoded input, so ComfyUI renders the same 1024x1024 the other rows render; the reference still enters through TextEncodeQwenImageEditPlus (VL tokens + reference latent). The Comfy files need no Edit Model Reference Method node, per the blueprint's own note. Weights are the full-precision single-file checkpoints ComfyUI loads (Comfy-Org repackaging or the model's own single-file release); the official template's fp8/int8/nvfp4 defaults are swapped out because they are a different numeric class from every other row. Sampler, scheduler and shift follow the official ComfyUI workflow; steps, CFG, size, frames and seed follow the case."
+                            "notes": "Official 'Image Edit (Qwen 2511)' blueprint (bf16 DiT; bf16 text encoder in place of fp8_scaled). guidance_scale 1.0 = no CFG. The output latent is an empty latent at the case's size rather than the VAE-encoded input, so ComfyUI renders the same 1024x1024 the other rows render; the reference still enters through TextEncodeQwenImageEditPlus (VL tokens + reference latent). The Comfy files need no Edit Model Reference Method node, per the blueprint's own note. Weights are the full-precision single-file checkpoints ComfyUI loads (Comfy-Org repackaging or the model's own single-file release); the official template's fp8/int8/nvfp4 defaults are swapped out because they are a different numeric class from every other row. Sampler, scheduler and shift follow the official ComfyUI workflow; steps, CFG, size, frames and seed follow the case. Compile on: the core TorchCompileModel node (inductor) goes behind every diffusion-model loader, as the other competitors run compile-on; measured on FLUX.1 / 1xB200 2026-09-25 at 4.89s against 5.94s and 5.77s eager."
                         }
                     }
                 }
@@ -1885,6 +1758,7 @@
                             "text_encoders/qwen3vl_8b_bf16.safetensors": "Comfy-Org/Qwen-Image-2.1:text_encoders/qwen3vl_8b_bf16.safetensors",
                             "vae/qwen_image_2.1_vae_bf16.safetensors": "Comfy-Org/Qwen-Image-2.1:vae/qwen_image_2.1_vae_bf16.safetensors"
                         },
+                        "compile": false,
                         "workflow_graph": {
                             "1": {
                                 "class_type": "UNETLoader",
@@ -1986,121 +1860,7 @@
                             "framework_ref": "ComfyUI master HEAD",
                             "num_gpus": 1,
                             "serve_args": "",
-                            "notes": "Official image_qwen_image_2_1_t2i template (bf16 DiT and Qwen3-VL-8B in place of int8_convrot). ComfyUI's Qwen-Image 2.1 prefix KV cache is on by default (QwenImage21Cache 'auto', lossless storage), the counterpart of sglang's own prefix cache, so no node is added for it. Weights are the full-precision single-file checkpoints ComfyUI loads (Comfy-Org repackaging or the model's own single-file release); the official template's fp8/int8/nvfp4 defaults are swapped out because they are a different numeric class from every other row. Sampler, scheduler and shift follow the official ComfyUI workflow; steps, CFG, size, frames and seed follow the case."
-                        },
-                        "compile-probe": {
-                            "description": "PROBE, selected only explicitly (DIFFUSION_BENCH_COMFYUI_PROFILE=compile-probe): the same graph with the core TorchCompileModel node (inductor) on the DiT.",
-                            "framework_ref": "ComfyUI master HEAD",
-                            "num_gpus": 1,
-                            "serve_args": "",
-                            "comfyui": {
-                                "workflow": "qwen_image_21_t2i_compile.json",
-                                "workflow_graph": {
-                                    "1": {
-                                        "class_type": "UNETLoader",
-                                        "inputs": {
-                                            "unet_name": "qwen_image_2.1_bf16.safetensors",
-                                            "weight_dtype": "default"
-                                        }
-                                    },
-                                    "2": {
-                                        "class_type": "CLIPLoader",
-                                        "inputs": {
-                                            "clip_name": "qwen3vl_8b_bf16.safetensors",
-                                            "type": "qwen_image",
-                                            "device": "default"
-                                        }
-                                    },
-                                    "3": {
-                                        "class_type": "VAELoader",
-                                        "inputs": {
-                                            "vae_name": "qwen_image_2.1_vae_bf16.safetensors"
-                                        }
-                                    },
-                                    "4": {
-                                        "class_type": "TextEncodeQwenImage21",
-                                        "inputs": {
-                                            "clip": [
-                                                "2",
-                                                0
-                                            ],
-                                            "prompt": "{{prompt}}",
-                                            "negative_prompt": "{{negative_prompt}}",
-                                            "resolution": 1024,
-                                            "__bench_nonce": "{{nonce}}"
-                                        }
-                                    },
-                                    "5": {
-                                        "class_type": "EmptyLatentImage",
-                                        "inputs": {
-                                            "width": "{{width}}",
-                                            "height": "{{height}}",
-                                            "batch_size": 1
-                                        }
-                                    },
-                                    "6": {
-                                        "class_type": "KSampler",
-                                        "inputs": {
-                                            "model": [
-                                                "20",
-                                                0
-                                            ],
-                                            "seed": "{{seed}}",
-                                            "steps": "{{steps}}",
-                                            "cfg": "{{guidance}}",
-                                            "sampler_name": "euler",
-                                            "scheduler": "simple",
-                                            "positive": [
-                                                "4",
-                                                0
-                                            ],
-                                            "negative": [
-                                                "4",
-                                                1
-                                            ],
-                                            "latent_image": [
-                                                "5",
-                                                0
-                                            ],
-                                            "denoise": 1.0
-                                        }
-                                    },
-                                    "7": {
-                                        "class_type": "VAEDecode",
-                                        "inputs": {
-                                            "samples": [
-                                                "6",
-                                                0
-                                            ],
-                                            "vae": [
-                                                "3",
-                                                0
-                                            ]
-                                        }
-                                    },
-                                    "8": {
-                                        "class_type": "SaveImage",
-                                        "inputs": {
-                                            "images": [
-                                                "7",
-                                                0
-                                            ],
-                                            "filename_prefix": "{{filename_prefix}}"
-                                        }
-                                    },
-                                    "20": {
-                                        "class_type": "TorchCompileModel",
-                                        "inputs": {
-                                            "model": [
-                                                "1",
-                                                0
-                                            ],
-                                            "backend": "inductor"
-                                        }
-                                    }
-                                }
-                            },
-                            "notes": "Carries no hardware token so it is never auto-selected. Exists to measure whether compile is ComfyUI's fastest lossless path here, as it is for the other competitors."
+                            "notes": "Official image_qwen_image_2_1_t2i template (bf16 DiT and Qwen3-VL-8B in place of int8_convrot). ComfyUI's Qwen-Image 2.1 prefix KV cache is on by default (QwenImage21Cache 'auto', lossless storage), the counterpart of sglang's own prefix cache, so no node is added for it. Weights are the full-precision single-file checkpoints ComfyUI loads (Comfy-Org repackaging or the model's own single-file release); the official template's fp8/int8/nvfp4 defaults are swapped out because they are a different numeric class from every other row. Sampler, scheduler and shift follow the official ComfyUI workflow; steps, CFG, size, frames and seed follow the case. Compile off: TorchCompileModel breaks this model in ComfyUI 88ab4a06 -- the first request fails in KSampler with AttributeError: 'torch.Stream' object has no attribute 'cuda_stream' (2026-09-25, B200), so the cell runs eager as the policy prescribes for a broken compile path."
                         },
                         "gpuonly-probe": {
                             "description": "PROBE, selected only explicitly (DIFFUSION_BENCH_COMFYUI_PROFILE=gpuonly-probe): every model (text encoders included) stored and run on the GPU.",
@@ -2258,6 +2018,7 @@
                             "text_encoders/qwen_3_4b.safetensors": "Comfy-Org/z_image_turbo:split_files/text_encoders/qwen_3_4b.safetensors",
                             "vae/ae.safetensors": "Comfy-Org/z_image_turbo:split_files/vae/ae.safetensors"
                         },
+                        "compile": true,
                         "workflow_graph": {
                             "1": {
                                 "class_type": "UNETLoader",
@@ -2376,7 +2137,7 @@
                             "framework_ref": "ComfyUI master HEAD",
                             "num_gpus": 1,
                             "serve_args": "",
-                            "notes": "Official 'Text to Image (Z-Image-Turbo)' blueprint at the case's 9 steps (sglang's progress bar reads 9/9 per request). euler instead of the blueprint's res_multistep: the same one forward per step, and closer to the flow-matching Euler (shift 3) the other rows run. Weights are the full-precision single-file checkpoints ComfyUI loads (Comfy-Org repackaging or the model's own single-file release); the official template's fp8/int8/nvfp4 defaults are swapped out because they are a different numeric class from every other row. Sampler, scheduler and shift follow the official ComfyUI workflow; steps, CFG, size, frames and seed follow the case."
+                            "notes": "Official 'Text to Image (Z-Image-Turbo)' blueprint at the case's 9 steps (sglang's progress bar reads 9/9 per request). euler instead of the blueprint's res_multistep: the same one forward per step, and closer to the flow-matching Euler (shift 3) the other rows run. Weights are the full-precision single-file checkpoints ComfyUI loads (Comfy-Org repackaging or the model's own single-file release); the official template's fp8/int8/nvfp4 defaults are swapped out because they are a different numeric class from every other row. Sampler, scheduler and shift follow the official ComfyUI workflow; steps, CFG, size, frames and seed follow the case. Compile on: the core TorchCompileModel node (inductor) goes behind every diffusion-model loader, as the other competitors run compile-on; measured on FLUX.1 / 1xB200 2026-09-25 at 4.89s against 5.94s and 5.77s eager."
                         }
                     }
                 }
@@ -2438,6 +2199,7 @@
                             "text_encoders/qwen3vl_8b_bf16.safetensors": "Comfy-Org/Qwen3-VL:text_encoders/qwen3vl_8b_bf16.safetensors",
                             "vae/flux2-vae.safetensors": "Comfy-Org/Ideogram-4:vae/flux2-vae.safetensors"
                         },
+                        "compile": true,
                         "workflow_graph": {
                             "1": {
                                 "class_type": "UNETLoader",
@@ -2607,7 +2369,7 @@
                             "framework_ref": "ComfyUI master HEAD",
                             "num_gpus": 1,
                             "serve_args": "",
-                            "notes": "Official image_ideogram4_t2i template without its LLM prompt-rewrite stage (the other rows take the case prompt as is). fp8 DiTs are the model's release precision, as in the sglang row (ideogram-ai/ideogram-4-fp8); the text encoder is bf16 in place of fp8_scaled. Conditional + unconditional models through DualModelGuider, cfg 7 with the template's CFGOverride, i.e. two forwards on every step like sglang's V4_DEFAULT_20 preset. One GPU: the guidance branches run on two different models, which the CFG Split node does not cover. Weights are the full-precision single-file checkpoints ComfyUI loads (Comfy-Org repackaging or the model's own single-file release); the official template's fp8/int8/nvfp4 defaults are swapped out because they are a different numeric class from every other row. Sampler, scheduler and shift follow the official ComfyUI workflow; steps, CFG, size, frames and seed follow the case."
+                            "notes": "Official image_ideogram4_t2i template without its LLM prompt-rewrite stage (the other rows take the case prompt as is). fp8 DiTs are the model's release precision, as in the sglang row (ideogram-ai/ideogram-4-fp8); the text encoder is bf16 in place of fp8_scaled. Conditional + unconditional models through DualModelGuider, cfg 7 with the template's CFGOverride, i.e. two forwards on every step like sglang's V4_DEFAULT_20 preset. One GPU: the guidance branches run on two different models, which the CFG Split node does not cover. Weights are the full-precision single-file checkpoints ComfyUI loads (Comfy-Org repackaging or the model's own single-file release); the official template's fp8/int8/nvfp4 defaults are swapped out because they are a different numeric class from every other row. Sampler, scheduler and shift follow the official ComfyUI workflow; steps, CFG, size, frames and seed follow the case. Compile on: the core TorchCompileModel node (inductor) goes behind every diffusion-model loader, as the other competitors run compile-on; measured on FLUX.1 / 1xB200 2026-09-25 at 4.89s against 5.94s and 5.77s eager."
                         }
                     }
                 }
@@ -2806,6 +2568,7 @@
                             "cfg_gpus": 2,
                             "negative_prompt": "色调艳丽，过曝，静态，细节模糊不清，字幕，风格，作品，画作，画面，静止，整体发灰，最差质量，低质量，JPEG压缩残留，丑陋的，残缺的，多余的手指，画得不好的手部，画得不好的脸部，畸形的，毁容的，形态畸形的肢体，手指融合，静止不动的画面，杂乱的背景，三条腿，背景人很多，倒着走"
                         },
+                        "compile": true,
                         "workflow_graph": {
                             "1": {
                                 "class_type": "UNETLoader",
@@ -3009,7 +2772,7 @@
                             "framework_ref": "ComfyUI master HEAD",
                             "num_gpus": 2,
                             "serve_args": "",
-                            "notes": "Official 'Text to Video (Wan 2.2)' full-step workflow (no Lightning LoRA) with fp16 experts and UMT5 in place of fp8_scaled: two KSamplerAdvanced passes, high-noise expert then low-noise, cfg 4.0 / 3.0 as the case, shift 5.0 (sglang's 720p Wan config uses the same). The experts hand over at the half-way step -- both are 14B, so where the hand-over falls does not change the cost. Negative prompt = sglang's Wan2.2 default, encoded every request as sglang does. Two GPUs through the MultiGPU CFG Split node (ComfyUI has no sequence parallelism). Weights are the full-precision single-file checkpoints ComfyUI loads (Comfy-Org repackaging or the model's own single-file release); the official template's fp8/int8/nvfp4 defaults are swapped out because they are a different numeric class from every other row. Sampler, scheduler and shift follow the official ComfyUI workflow; steps, CFG, size, frames and seed follow the case."
+                            "notes": "Official 'Text to Video (Wan 2.2)' full-step workflow (no Lightning LoRA) with fp16 experts and UMT5 in place of fp8_scaled: two KSamplerAdvanced passes, high-noise expert then low-noise, cfg 4.0 / 3.0 as the case, shift 5.0 (sglang's 720p Wan config uses the same). The experts hand over at the half-way step -- both are 14B, so where the hand-over falls does not change the cost. Negative prompt = sglang's Wan2.2 default, encoded every request as sglang does. Two GPUs through the MultiGPU CFG Split node (ComfyUI has no sequence parallelism). Weights are the full-precision single-file checkpoints ComfyUI loads (Comfy-Org repackaging or the model's own single-file release); the official template's fp8/int8/nvfp4 defaults are swapped out because they are a different numeric class from every other row. Sampler, scheduler and shift follow the official ComfyUI workflow; steps, CFG, size, frames and seed follow the case. Compile on: the core TorchCompileModel node (inductor) goes behind every diffusion-model loader, as the other competitors run compile-on; measured on FLUX.1 / 1xB200 2026-09-25 at 4.89s against 5.94s and 5.77s eager."
                         }
                     }
                 }
@@ -3198,6 +2961,7 @@
                             "cfg_gpus": 2,
                             "negative_prompt": "blurry, out of focus, overexposed, underexposed, low contrast, washed out colors, excessive noise, grainy texture, poor lighting, flickering, motion blur, distorted proportions, unnatural skin tones, deformed facial features, asymmetrical face, missing facial features, extra limbs, disfigured hands, wrong hand count, artifacts around text, inconsistent perspective, camera shake, incorrect depth of field, background too sharp, background clutter, distracting reflections, harsh shadows, inconsistent lighting direction, color banding, cartoonish rendering, 3D CGI look, unrealistic materials, uncanny valley effect, incorrect ethnicity, wrong gender, exaggerated expressions, wrong gaze direction, mismatched lip sync, silent or muted audio, distorted voice, robotic voice, echo, background noise, off-sync audio, incorrect dialogue, added dialogue, repetitive speech, jittery movement, awkward pauses, incorrect timing, unnatural transitions, inconsistent framing, tilted camera, flat lighting, inconsistent tone, cinematic oversaturation, stylized filters, or AI artifacts."
                         },
+                        "compile": true,
                         "workflow_graph": {
                             "1": {
                                 "class_type": "CheckpointLoaderSimple",
@@ -3565,7 +3329,7 @@
                             "framework_ref": "ComfyUI master HEAD",
                             "num_gpus": 2,
                             "serve_args": "",
-                            "notes": "Official video_ltx2_t2v two-stage workflow, which is the ltx-pipelines two-stage recipe sglang's LTX2TwoStagePipeline implements: stage 1 at half resolution on the full model with CFG (case guidance 4.0, negative prompt = sglang's ltx-pipelines default), latent x2 spatial upsample, stage 2 with the distilled LoRA on the same three distilled sigmas. bf16 checkpoint and Gemma-3-12B in place of fp8 / fp4_mixed; untiled VAEDecode in place of the template's tiled decode (a memory measure for small cards, and not bit-exact). Two GPUs through the MultiGPU CFG Split node on the stage-1 model, the counterpart of sglang's --enable-cfg-parallel. Weights are the full-precision single-file checkpoints ComfyUI loads (Comfy-Org repackaging or the model's own single-file release); the official template's fp8/int8/nvfp4 defaults are swapped out because they are a different numeric class from every other row. Sampler, scheduler and shift follow the official ComfyUI workflow; steps, CFG, size, frames and seed follow the case."
+                            "notes": "Official video_ltx2_t2v two-stage workflow, which is the ltx-pipelines two-stage recipe sglang's LTX2TwoStagePipeline implements: stage 1 at half resolution on the full model with CFG (case guidance 4.0, negative prompt = sglang's ltx-pipelines default), latent x2 spatial upsample, stage 2 with the distilled LoRA on the same three distilled sigmas. bf16 checkpoint and Gemma-3-12B in place of fp8 / fp4_mixed; untiled VAEDecode in place of the template's tiled decode (a memory measure for small cards, and not bit-exact). Two GPUs through the MultiGPU CFG Split node on the stage-1 model, the counterpart of sglang's --enable-cfg-parallel. Weights are the full-precision single-file checkpoints ComfyUI loads (Comfy-Org repackaging or the model's own single-file release); the official template's fp8/int8/nvfp4 defaults are swapped out because they are a different numeric class from every other row. Sampler, scheduler and shift follow the official ComfyUI workflow; steps, CFG, size, frames and seed follow the case. Compile on: the core TorchCompileModel node (inductor) goes behind every diffusion-model loader, as the other competitors run compile-on; measured on FLUX.1 / 1xB200 2026-09-25 at 4.89s against 5.94s and 5.77s eager."
                         }
                     }
                 }
@@ -4407,6 +4171,7 @@
                             "vae/minimax_h3_video_vae_fp16.safetensors": "Comfy-Org/MiniMax-H3:vae/minimax_h3_video_vae_fp16.safetensors",
                             "vae/minimax_h3_audio_vae_fp32.safetensors": "Comfy-Org/MiniMax-H3:vae/minimax_h3_audio_vae_fp32.safetensors"
                         },
+                        "compile": true,
                         "workflow_graph": {
                             "1": {
                                 "class_type": "UNETLoader",
@@ -4586,7 +4351,7 @@
                             "framework_ref": "ComfyUI master HEAD",
                             "num_gpus": 1,
                             "serve_args": "",
-                            "notes": "Official video_minimax_h3_t2v template: the fl2va checkpoint with no frames attached is T2VA, which is also what sglang serves (model_variant defaults to fl2va). Full bf16 DiT in place of the pruned int8_convrot, bf16 Qwen3-VL-32B in place of nvfp4_awq, fp16 video VAE in place of int8_convrot. BasicGuider = no CFG, matching sglang's fixed guidance 1.0; sigma shift 12 / 3 as the case's flow_shift / audio_flow_shift. One GPU: without CFG there is no branch to split. Weights are the full-precision single-file checkpoints ComfyUI loads (Comfy-Org repackaging or the model's own single-file release); the official template's fp8/int8/nvfp4 defaults are swapped out because they are a different numeric class from every other row. Sampler, scheduler and shift follow the official ComfyUI workflow; steps, CFG, size, frames and seed follow the case."
+                            "notes": "Official video_minimax_h3_t2v template: the fl2va checkpoint with no frames attached is T2VA, which is also what sglang serves (model_variant defaults to fl2va). Full bf16 DiT in place of the pruned int8_convrot, bf16 Qwen3-VL-32B in place of nvfp4_awq, fp16 video VAE in place of int8_convrot. BasicGuider = no CFG, matching sglang's fixed guidance 1.0; sigma shift 12 / 3 as the case's flow_shift / audio_flow_shift. One GPU: without CFG there is no branch to split. Weights are the full-precision single-file checkpoints ComfyUI loads (Comfy-Org repackaging or the model's own single-file release); the official template's fp8/int8/nvfp4 defaults are swapped out because they are a different numeric class from every other row. Sampler, scheduler and shift follow the official ComfyUI workflow; steps, CFG, size, frames and seed follow the case. Compile on: the core TorchCompileModel node (inductor) goes behind every diffusion-model loader, as the other competitors run compile-on; measured on FLUX.1 / 1xB200 2026-09-25 at 4.89s against 5.94s and 5.77s eager."
                         }
                     }
                 }
@@ -4731,6 +4496,7 @@
                             "vae/minimax_h3_audio_vae_fp32.safetensors": "Comfy-Org/MiniMax-H3:vae/minimax_h3_audio_vae_fp32.safetensors"
                         },
                         "reference_image": true,
+                        "compile": true,
                         "workflow_graph": {
                             "1": {
                                 "class_type": "UNETLoader",
@@ -4925,7 +4691,7 @@
                             "framework_ref": "ComfyUI master HEAD",
                             "num_gpus": 1,
                             "serve_args": "",
-                            "notes": "Official video_minimax_h3_r2v template with one reference image (the shared test image) and the full bf16 ref2va DiT. ref_image_size 'match' only ever scales down to the generation area; the 1024x704 test image is already smaller than 1344x768, so 'match' and 'max' feed the same reference. No CFG, as in sglang. Weights are the full-precision single-file checkpoints ComfyUI loads (Comfy-Org repackaging or the model's own single-file release); the official template's fp8/int8/nvfp4 defaults are swapped out because they are a different numeric class from every other row. Sampler, scheduler and shift follow the official ComfyUI workflow; steps, CFG, size, frames and seed follow the case."
+                            "notes": "Official video_minimax_h3_r2v template with one reference image (the shared test image) and the full bf16 ref2va DiT. ref_image_size 'match' only ever scales down to the generation area; the 1024x704 test image is already smaller than 1344x768, so 'match' and 'max' feed the same reference. No CFG, as in sglang. Weights are the full-precision single-file checkpoints ComfyUI loads (Comfy-Org repackaging or the model's own single-file release); the official template's fp8/int8/nvfp4 defaults are swapped out because they are a different numeric class from every other row. Sampler, scheduler and shift follow the official ComfyUI workflow; steps, CFG, size, frames and seed follow the case. Compile on: the core TorchCompileModel node (inductor) goes behind every diffusion-model loader, as the other competitors run compile-on; measured on FLUX.1 / 1xB200 2026-09-25 at 4.89s against 5.94s and 5.77s eager."
                         }
                     }
                 }

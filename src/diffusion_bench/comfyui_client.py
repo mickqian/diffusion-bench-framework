@@ -34,6 +34,8 @@ _PART_TOKEN = re.compile(r"\{\{(\w+)\}\}")
 NONCE_INPUT = "__bench_nonce"
 SAMPLER_CLASSES = {"KSampler", "KSamplerAdvanced", "SamplerCustom", "SamplerCustomAdvanced"}
 REF_IMAGE_NAME = "bench_reference.png"
+# Loaders whose output 0 is a diffusion MODEL (compile wraps it).
+MODEL_LOADERS = {"UNETLoader", "CheckpointLoaderSimple"}
 HEALTH_PATH = "/system_stats"
 _READ_CHUNK = 1 << 18
 
@@ -59,6 +61,32 @@ def render_workflow(template: dict, params: dict) -> dict:
         return node
 
     return sub(copy.deepcopy(template))
+
+
+def with_compile(graph: dict) -> dict:
+    """Insert the core TorchCompileModel node after every diffusion-model loader.
+
+    Compile is lossless and the other competitors run it, so ComfyUI gets it too
+    where it works. It goes directly behind the loader, i.e. before sampling
+    patches and before MultiGPU_WorkUnits, whose own docstring asks to come
+    after compile.
+    """
+    graph = copy.deepcopy(graph)
+    loaders = [nid for nid, node in graph.items() if node.get("class_type") in MODEL_LOADERS]
+    for nid in loaders:
+        cid = f"compile_{nid}"
+        for node in graph.values():
+            for key, value in node.get("inputs", {}).items():
+                if value == [nid, 0]:
+                    node["inputs"][key] = [cid, 0]
+        graph[cid] = {"class_type": "TorchCompileModel", "inputs": {"model": [nid, 0], "backend": "inductor"}}
+    return graph
+
+
+def build_graph(case: dict, spec: dict) -> dict:
+    """The graph one request of `case` sends: rendered, then compiled if the spec asks."""
+    graph = render_workflow(spec["workflow_graph"], workflow_params(case, spec))
+    return with_compile(graph) if spec.get("compile") else graph
 
 
 def workflow_params(case: dict, spec: dict) -> dict:
