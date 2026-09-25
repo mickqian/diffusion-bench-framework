@@ -127,6 +127,34 @@
           "serve_args": "",
           "notes": "H200 runs upstream's general config unchanged (FA3 is a Hopper kernel). MEASURED 2026-09-21 on a 1x H200 devbox, LightX2V main 4d709c43 inside upstream's own image (lightx2v/lightx2v:26062001-cu130, torch 2.11.0+cu130, base.sh confirming BF16 with no sensitive-layer override). NO RESOLVABLE SPEED DIFFERENCE against sglang: three interleaved ABAB rounds of 5 requests each, on the SAME physical node (gpu1-10-220-51-55) with the neighbouring devbox's GPU verified idle before each measurement, gave paired diffs of -0.2%, +9.6%, -0.4% -- mixed sign, so nothing to claim. sglang's 15 samples span 4.51-4.57s; LightX2V's 15 are ten at ~4.50 and five at ~5.00. The bimodality is NOT compute: its server-side `RUN pipeline` is 4.443-4.477s across eight requests (0.8% spread). Every LightX2V client latency lands within 0.010s of a 0.5s multiple while its server times do not, i.e. the sync endpoint releases on a ~0.5s tick and the H200's compute sits on the 4.5s boundary. On a 4.5s workload that tick is 11%, coarser than the ~2% being compared, so the client metric cannot separate these two frameworks on this model -- use the server-side numbers (sglang 4.342s) as the diagnostic."
         },
+        "blackwell-1gpu-fa2": {
+          "description": "Blackwell: upstream's general config with FlashAttention2 in place of FA3.",
+          "hardware": [
+            "b200",
+            "gb200",
+            "b300",
+            "gb300"
+          ],
+          "framework_ref": "lightx2v main HEAD",
+          "num_gpus": 1,
+          "serve_args": "",
+          "lightx2v_config": {
+            "resolution": 1024,
+            "vae_scale_factor": 16,
+            "attn_type": "flash_attn2",
+            "rope_type": "flashinfer_rope",
+            "rms_norm_type": "fp32_variance",
+            "layer_norm_type": "Triton",
+            "modulate_type": "triton",
+            "fused_qk_rms_norm": true,
+            "fused_block_ops": true,
+            "fused_block_min_tokens": 1024,
+            "enable_cfg": false,
+            "sample_guide_scale": 1.0,
+            "warmup": true
+          },
+          "notes": "flash_attn3 is a Hopper kernel, so the general config cannot run on B200. Every other LightX2V case in this matrix runs flash_attn2 on Blackwell (their blackwell-fa2 profiles), the same exact-softmax class, so this follows that pattern and changes nothing else (no offload, no quantization, fused kernels as upstream). First measured on B200 in the 2026-09-25 round; the venv holds torch 2.11.0 as LightX2V's own image does, because flash-attn 2.8.3 does not compile against torch 2.14."
+        },
         "rtx5090-1gpu-fa2": {
           "description": "RTX 5090: upstream's own lossless 5090 config -- FlashAttention2 plus text-encoder CPU offload.",
           "hardware": [
