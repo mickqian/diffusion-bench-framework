@@ -352,6 +352,138 @@
                             "num_gpus": 1,
                             "serve_args": "",
                             "notes": "Official 'Text to Image (Flux.1 Dev)' blueprint plus an explicit FluxGuidance node carrying the case's embedded guidance (the blueprint relies on the model default, 3.5, which is the same value). Guidance-distilled: KSampler cfg 1, one DiT forward per step, as in the sglang row. Weights are the full-precision single-file checkpoints ComfyUI loads (Comfy-Org repackaging or the model's own single-file release); the official template's fp8/int8/nvfp4 defaults are swapped out because they are a different numeric class from every other row. Sampler, scheduler and shift follow the official ComfyUI workflow; steps, CFG, size, frames and seed follow the case."
+                        },
+                        "compile-probe": {
+                            "description": "PROBE, selected only explicitly (DIFFUSION_BENCH_COMFYUI_PROFILE=compile-probe): the same graph with the core TorchCompileModel node (inductor) on the DiT.",
+                            "framework_ref": "ComfyUI master HEAD",
+                            "num_gpus": 1,
+                            "serve_args": "",
+                            "comfyui": {
+                                "workflow": "flux1_dev_t2i_compile.json",
+                                "workflow_graph": {
+                                    "1": {
+                                        "class_type": "UNETLoader",
+                                        "inputs": {
+                                            "unet_name": "flux1-dev.safetensors",
+                                            "weight_dtype": "default"
+                                        }
+                                    },
+                                    "2": {
+                                        "class_type": "DualCLIPLoader",
+                                        "inputs": {
+                                            "clip_name1": "clip_l.safetensors",
+                                            "clip_name2": "t5xxl_fp16.safetensors",
+                                            "type": "flux",
+                                            "device": "default"
+                                        }
+                                    },
+                                    "3": {
+                                        "class_type": "VAELoader",
+                                        "inputs": {
+                                            "vae_name": "ae.safetensors"
+                                        }
+                                    },
+                                    "4": {
+                                        "class_type": "CLIPTextEncode",
+                                        "inputs": {
+                                            "text": "{{prompt}}",
+                                            "clip": [
+                                                "2",
+                                                0
+                                            ],
+                                            "__bench_nonce": "{{nonce}}"
+                                        }
+                                    },
+                                    "5": {
+                                        "class_type": "FluxGuidance",
+                                        "inputs": {
+                                            "conditioning": [
+                                                "4",
+                                                0
+                                            ],
+                                            "guidance": "{{guidance}}"
+                                        }
+                                    },
+                                    "6": {
+                                        "class_type": "ConditioningZeroOut",
+                                        "inputs": {
+                                            "conditioning": [
+                                                "4",
+                                                0
+                                            ]
+                                        }
+                                    },
+                                    "7": {
+                                        "class_type": "EmptySD3LatentImage",
+                                        "inputs": {
+                                            "width": "{{width}}",
+                                            "height": "{{height}}",
+                                            "batch_size": 1
+                                        }
+                                    },
+                                    "8": {
+                                        "class_type": "KSampler",
+                                        "inputs": {
+                                            "model": [
+                                                "20",
+                                                0
+                                            ],
+                                            "seed": "{{seed}}",
+                                            "steps": "{{steps}}",
+                                            "cfg": 1.0,
+                                            "sampler_name": "euler",
+                                            "scheduler": "simple",
+                                            "positive": [
+                                                "5",
+                                                0
+                                            ],
+                                            "negative": [
+                                                "6",
+                                                0
+                                            ],
+                                            "latent_image": [
+                                                "7",
+                                                0
+                                            ],
+                                            "denoise": 1.0
+                                        }
+                                    },
+                                    "9": {
+                                        "class_type": "VAEDecode",
+                                        "inputs": {
+                                            "samples": [
+                                                "8",
+                                                0
+                                            ],
+                                            "vae": [
+                                                "3",
+                                                0
+                                            ]
+                                        }
+                                    },
+                                    "10": {
+                                        "class_type": "SaveImage",
+                                        "inputs": {
+                                            "images": [
+                                                "9",
+                                                0
+                                            ],
+                                            "filename_prefix": "{{filename_prefix}}"
+                                        }
+                                    },
+                                    "20": {
+                                        "class_type": "TorchCompileModel",
+                                        "inputs": {
+                                            "model": [
+                                                "1",
+                                                0
+                                            ],
+                                            "backend": "inductor"
+                                        }
+                                    }
+                                }
+                            },
+                            "notes": "Carries no hardware token so it is never auto-selected. Exists to measure whether compile is ComfyUI's fastest lossless path here, as it is for the other competitors."
                         }
                     }
                 }
@@ -1841,6 +1973,120 @@
                             "num_gpus": 1,
                             "serve_args": "",
                             "notes": "Official image_qwen_image_2_1_t2i template (bf16 DiT and Qwen3-VL-8B in place of int8_convrot). ComfyUI's Qwen-Image 2.1 prefix KV cache is on by default (QwenImage21Cache 'auto', lossless storage), the counterpart of sglang's own prefix cache, so no node is added for it. Weights are the full-precision single-file checkpoints ComfyUI loads (Comfy-Org repackaging or the model's own single-file release); the official template's fp8/int8/nvfp4 defaults are swapped out because they are a different numeric class from every other row. Sampler, scheduler and shift follow the official ComfyUI workflow; steps, CFG, size, frames and seed follow the case."
+                        },
+                        "compile-probe": {
+                            "description": "PROBE, selected only explicitly (DIFFUSION_BENCH_COMFYUI_PROFILE=compile-probe): the same graph with the core TorchCompileModel node (inductor) on the DiT.",
+                            "framework_ref": "ComfyUI master HEAD",
+                            "num_gpus": 1,
+                            "serve_args": "",
+                            "comfyui": {
+                                "workflow": "qwen_image_21_t2i_compile.json",
+                                "workflow_graph": {
+                                    "1": {
+                                        "class_type": "UNETLoader",
+                                        "inputs": {
+                                            "unet_name": "qwen_image_2.1_bf16.safetensors",
+                                            "weight_dtype": "default"
+                                        }
+                                    },
+                                    "2": {
+                                        "class_type": "CLIPLoader",
+                                        "inputs": {
+                                            "clip_name": "qwen3vl_8b_bf16.safetensors",
+                                            "type": "qwen_image",
+                                            "device": "default"
+                                        }
+                                    },
+                                    "3": {
+                                        "class_type": "VAELoader",
+                                        "inputs": {
+                                            "vae_name": "qwen_image_2.1_vae_bf16.safetensors"
+                                        }
+                                    },
+                                    "4": {
+                                        "class_type": "TextEncodeQwenImage21",
+                                        "inputs": {
+                                            "clip": [
+                                                "2",
+                                                0
+                                            ],
+                                            "prompt": "{{prompt}}",
+                                            "negative_prompt": "{{negative_prompt}}",
+                                            "resolution": 1024,
+                                            "__bench_nonce": "{{nonce}}"
+                                        }
+                                    },
+                                    "5": {
+                                        "class_type": "EmptyLatentImage",
+                                        "inputs": {
+                                            "width": "{{width}}",
+                                            "height": "{{height}}",
+                                            "batch_size": 1
+                                        }
+                                    },
+                                    "6": {
+                                        "class_type": "KSampler",
+                                        "inputs": {
+                                            "model": [
+                                                "20",
+                                                0
+                                            ],
+                                            "seed": "{{seed}}",
+                                            "steps": "{{steps}}",
+                                            "cfg": "{{guidance}}",
+                                            "sampler_name": "euler",
+                                            "scheduler": "simple",
+                                            "positive": [
+                                                "4",
+                                                0
+                                            ],
+                                            "negative": [
+                                                "4",
+                                                1
+                                            ],
+                                            "latent_image": [
+                                                "5",
+                                                0
+                                            ],
+                                            "denoise": 1.0
+                                        }
+                                    },
+                                    "7": {
+                                        "class_type": "VAEDecode",
+                                        "inputs": {
+                                            "samples": [
+                                                "6",
+                                                0
+                                            ],
+                                            "vae": [
+                                                "3",
+                                                0
+                                            ]
+                                        }
+                                    },
+                                    "8": {
+                                        "class_type": "SaveImage",
+                                        "inputs": {
+                                            "images": [
+                                                "7",
+                                                0
+                                            ],
+                                            "filename_prefix": "{{filename_prefix}}"
+                                        }
+                                    },
+                                    "20": {
+                                        "class_type": "TorchCompileModel",
+                                        "inputs": {
+                                            "model": [
+                                                "1",
+                                                0
+                                            ],
+                                            "backend": "inductor"
+                                        }
+                                    }
+                                }
+                            },
+                            "notes": "Carries no hardware token so it is never auto-selected. Exists to measure whether compile is ComfyUI's fastest lossless path here, as it is for the other competitors."
                         }
                     }
                 }
