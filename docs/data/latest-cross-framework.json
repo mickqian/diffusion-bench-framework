@@ -29,11 +29,11 @@
       "ideogram-ai/ideogram-4-fp8": "ee79a7237",
       "nvidia/Cosmos3-Nano": "e59a53c25"
     },
-    "comfyui": "New this run. ComfyUI runs API-format graphs built from its official workflow templates, with full-precision weights in place of the templates' fp8/int8/nvfp4 files (ideogram4 is published only in fp8, which every framework runs), --gpu-only on Blackwell, and TorchCompileModel in 7 cells. qwen-image-2.1, ideogram4 and the three cells that split CFG across GPUs (qwen-image-2512 true-CFG, LTX-2, Wan2.2) run eager because compile fails there. Splitting CFG is ComfyUI's only multi-GPU path, so single-branch cells run on one GPU.",
+    "comfyui": "New this run. ComfyUI runs API-format graphs built from its official workflow templates, with full-precision weights in place of the templates' fp8/int8/nvfp4 files (ideogram4, released only in FP8, runs that release dequantized to BF16 exactly as sglang's weight-only FP8 computes it, because ComfyUI's own FP8 loader runs W8A8 on sm90+), --gpu-only on Blackwell, and TorchCompileModel in 7 cells. qwen-image-2.1, ideogram4 and the three cells that split CFG across GPUs (qwen-image-2512 true-CFG, LTX-2, Wan2.2) run eager because compile fails there. Splitting CFG is ComfyUI's only multi-GPU path, so single-branch cells run on one GPU.",
     "qwen_image_2512": "A tie, not a vLLM-Omni win: the main pass put sglang 5.2% behind (2.776 vs 2.638 s), and two ABAB-interleaved paired reruns on the same box put it 0.7% and 0.8% ahead (2.597 vs 2.616 s, 2.582 vs 2.602 s). Files in reports/b200x4-full-20260925/evidence/.",
-    "ideogram4": "An sglang gap: ComfyUI on one GPU (3.18 s) beats sglang on two (3.43 s). Both run the fp8 weight-only checkpoint with bf16 compute and two transformer forwards per step, so the configurations match.",
+    "ideogram4": "Corrected 2026-09-26. The first ComfyUI cell (3.18 s) loaded Comfy-Org's fp8_scaled repack, which ComfyUI runs as W8A8 on sm90+ (activations quantized to FP8 in all 211 linears: 2.7% relative error per linear, 1.75x faster GEMMs) and which is per-tensor requantized -- not sglang's weight-only FP8, as this note first claimed. Re-measured on the official FP8 release dequantized to BF16, the weights sglang computes with: 4.16 s. Separately, sglang's own B200 number is held back by masked attention falling onto an sm80 kernel; sgl-project/sglang#41309 measures 2.20 s with that fixed.",
     "h3_ref2va_reference": "sglang and vLLM-Omni upscale the ref2va reference image to a 2048-pixel short edge; ComfyUI's nodes never upscale, which gave it about 8x fewer reference tokens (343.5 s, discarded). The harness now pre-resizes the reference by the same rule for ComfyUI (534.7 s).",
-    "replaced_cells": "Three cells replace their main-pass rows, re-measured the same day on harness c201f19 (bc439d0 plus the ComfyUI reference resize). LTX-2, every framework: the main pass read a text_encoder/config.json that sglang's LTX-2.3 overlay materializer had rewritten inside the shared model cache on 2026-09-13. LTX-2.3, sglang: on the read-only cache the same materializer could not write and the server never started; the rerun materialized into a writable copy. The materializer fix is sgl-project/sglang#41298. MiniMax-H3 ref2va, ComfyUI: after the reference fix above.",
+    "replaced_cells": "Four cells replace their main-pass rows. Re-measured the same day on harness c201f19 (bc439d0 plus the ComfyUI reference resize): LTX-2, every framework, because the main pass read a text_encoder/config.json that sglang's LTX-2.3 overlay materializer had rewritten inside the shared model cache on 2026-09-13; LTX-2.3 sglang, because on the read-only cache the same materializer could not write and the server never started (the rerun materialized into a writable copy; the materializer fix is sgl-project/sglang#41298); MiniMax-H3 ref2va ComfyUI, after the reference fix above. Re-measured 2026-09-26 on harness 4bfdd99: ComfyUI ideogram4 on BF16 weights (see ideogram4).",
     "lightx2v_torch": "LightX2V runs torch 2.11, the pin in its official image, because flash-attn does not build against torch 2.14; vLLM-Omni and TRT-LLM run torch 2.13, ComfyUI 2.14."
   },
   "framework_order": [
@@ -53,14 +53,13 @@
   "summary": {
     "cases": 16,
     "comparable_rows": 15,
-    "sglang_diffusion_wins": 13,
-    "other_wins": 2,
+    "sglang_diffusion_wins": 14,
+    "other_wins": 1,
     "wins": {
-      "sglang": 13,
-      "vllm-omni": 1,
-      "comfyui": 1
+      "sglang": 14,
+      "vllm-omni": 1
     },
-    "note": "Steady-state single-request latency on 4x NVIDIA B200 183GB, best lossless config per framework. SGLang-Diffusion fastest in 13/15 comparable cases across 16 cases. Throughput is reported separately."
+    "note": "Steady-state single-request latency on 4x NVIDIA B200 183GB, best lossless config per framework. SGLang-Diffusion fastest in 14/15 comparable cases across 16 cases. Throughput is reported separately."
   },
   "rows": [
     {
@@ -388,12 +387,12 @@
           "gpus": 1,
           "profile": "blackwell-gpuonly",
           "status": "ok",
-          "latency_s": 3.178,
-          "ratio_to_sglang": 0.927
+          "latency_s": 4.155,
+          "ratio_to_sglang": 1.212
         }
       },
-      "winner": "comfyui",
-      "winner_speedup": "1.08x"
+      "winner": "sglang",
+      "winner_speedup": "1.21x"
     },
     {
       "case_id": "wan22_t2v_a14b_720p",
@@ -714,7 +713,7 @@
       "date": "2026-09-25",
       "gpu": "4x NVIDIA B200 183GB",
       "title": "4xB200 cross-framework, ComfyUI added (latest-vs-latest)",
-      "subtitle": "Steady-state single-request latency, best lossless config per framework (compile on, no caches, no quantization). SGLang-Diffusion fastest in 13/15 comparable cases.",
+      "subtitle": "Steady-state single-request latency, best lossless config per framework (compile on, no caches, no quantization). SGLang-Diffusion fastest in 14/15 comparable cases.",
       "mode": "single_e2e",
       "framework_versions": {
         "sglang": "0.0.0.dev1+g8ca82118e @ 434c2e3ad",
@@ -724,7 +723,7 @@
         "comfyui": "ComfyUI @ 88ab4a065 + torch 2.14.0+cu130"
       },
       "summary": {
-        "sglang_wins": 13,
+        "sglang_wins": 14,
         "comparable": 15
       },
       "rows": [
@@ -1053,12 +1052,12 @@
               "gpus": 1,
               "profile": "blackwell-gpuonly",
               "status": "ok",
-              "latency_s": 3.178,
-              "ratio_to_sglang": 0.927
+              "latency_s": 4.155,
+              "ratio_to_sglang": 1.212
             }
           },
-          "winner": "comfyui",
-          "winner_speedup": "1.08x"
+          "winner": "sglang",
+          "winner_speedup": "1.21x"
         },
         {
           "case_id": "wan22_t2v_a14b_720p",
@@ -1374,8 +1373,8 @@
       "reproduce": "scripts/run_b200_full_20260925.sh",
       "reproduce_link": {
         "path": "scripts/run_b200_full_20260925.sh",
-        "ref": "aec9d3809",
-        "url": "https://github.com/mickqian/diffusion-bench-framework/blob/aec9d38091785f268b7eb5f219f17410d69dcdf4/scripts/run_b200_full_20260925.sh"
+        "ref": "f3a8ffaa7",
+        "url": "https://github.com/mickqian/diffusion-bench-framework/blob/f3a8ffaa7d6c5ab87fd34f13e0ee9a2635cdddef/scripts/run_b200_full_20260925.sh"
       }
     },
     {
@@ -1500,8 +1499,8 @@
       "reproduce": "scripts/run_b200_full_20260925.sh",
       "reproduce_link": {
         "path": "scripts/run_b200_full_20260925.sh",
-        "ref": "aec9d3809",
-        "url": "https://github.com/mickqian/diffusion-bench-framework/blob/aec9d38091785f268b7eb5f219f17410d69dcdf4/scripts/run_b200_full_20260925.sh"
+        "ref": "f3a8ffaa7",
+        "url": "https://github.com/mickqian/diffusion-bench-framework/blob/f3a8ffaa7d6c5ab87fd34f13e0ee9a2635cdddef/scripts/run_b200_full_20260925.sh"
       }
     }
   ]

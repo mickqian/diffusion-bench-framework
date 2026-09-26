@@ -16,7 +16,8 @@
     "harness_note": "c201f19 is bc439d0 plus the ComfyUI MiniMax-H3 ref2va reference resize; nothing else that measures changed.",
     "reproduce": "scripts/run_b200_full_20260925.sh",
     "runner": "scripts/devbox_run_cases.sh",
-    "config": "configs/comparison_configs.json"
+    "config": "configs/comparison_configs.json",
+    "comfyui_ideogram4_rerun_harness_commit": "4bfdd99338bfefd9f28eeeeb98c7b1eb87017de7"
   },
   "frameworks": {
     "sglang": "origin/main 434c2e3adcd77afe42d6604b693d97aef71938e6",
@@ -46,12 +47,14 @@
       "raw/run_b200full0925_zimage_turbo_t2i_1024_zimage_turbo_t2i_1024.json",
       "raw/run_b200full0925r_ltx2b_ltx2_twostage_t2v.json",
       "raw/run_b200full0925r_ltx23b_ltx2.3_twostage_t2v_2gpus.json",
-      "raw/run_b200full0925r_ref2va_minimax_h3_ref2va_5s.json"
+      "raw/run_b200full0925r_ref2va_minimax_h3_ref2va_5s.json",
+      "raw/run_b200full0925r_ideo_ideogram4_t2i_1024_2gpu_tp.json"
     ],
     "replaced": {
       "ltx2_twostage_t2v (every framework)": "run_b200full0925r_ltx2b replaces the main pass, which read a Lightricks/LTX-2 text_encoder/config.json that sglang's LTX-2.3 overlay materializer had rewritten inside the shared model cache on 2026-09-13 (the blob no longer hashed to its own name). sglang read 5.438 s on the rewritten file, 6.048 s on the intact one.",
       "ltx2.3_twostage_t2v_2gpus (sglang)": "run_b200full0925r_ltx23b replaces a main-pass server that never became healthy: on the read-only cache the same materializer failed with EROFS. The rerun materialized into a writable private copy of the cache.",
-      "minimax_h3_ref2va_5s (comfyui)": "run_b200full0925r_ref2va replaces a main-pass cell that fed ComfyUI the reference at its original size while sglang and vLLM-Omni upscale it to a 2048-pixel short edge (343.5 s on about 8x fewer reference tokens)."
+      "minimax_h3_ref2va_5s (comfyui)": "run_b200full0925r_ref2va replaces a main-pass cell that fed ComfyUI the reference at its original size while sglang and vLLM-Omni upscale it to a 2048-pixel short edge (343.5 s on about 8x fewer reference tokens).",
+      "ideogram4_t2i_1024_2gpu_tp (comfyui)": "run_b200full0925r_ideo (2026-09-26, harness 4bfdd99) replaces a main-pass cell that loaded Comfy-Org's fp8_scaled repack. ComfyUI runs such a checkpoint as W8A8 on sm90+ -- activations quantized to FP8 in all 211 linears, 2.7% relative error per linear against weight-only, 1.75x faster GEMMs -- and the repack is per-tensor requantized where the official release scales per row: 3.178 s, a different precision class from the sglang row. The rerun loads the official FP8 release dequantized to BF16 exactly as sglang's weight-only FP8 linears compute it (dequant-fp8: model source): 4.155 s."
     }
   },
   "files": {
@@ -61,7 +64,6 @@
     "evidence/run_abab0925_qwen*_qwen_image_2512_t2i_1024.json": "ABAB-interleaved sglang/vLLM-Omni paired reruns of qwen_image_2512: sglang 0.7% and 0.8% ahead, against 5.2% behind in the main pass -- a tie",
     "evidence/run_ltxsave*_ltx2_twostage_t2v.json": "sglang LTX-2 on fresh servers with host CPU sampled, measuring the mp4 save share of client latency",
     "merged.json": "merged artifact the Pages data was published from",
-    "issue.md": "data-only tracker report with per-cell statuses and reasons",
-    "dashboard.md": "generated comparison dashboard"
+    "issue.md": "data-only tracker report with per-cell statuses and reasons"
   }
 }

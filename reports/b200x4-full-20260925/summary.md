@@ -27,7 +27,7 @@ no validated profile (per-cell reasons in [issue.md](issue.md)).
 | `qwen_image_edit_2511` | **4.25 (2)** | 4.39 (2) | — | — | 12.02 (1) |
 | `qwen_image_21_t2i_1024` | **2.46 (1)** | — | 3.01 (1) | — | 3.47 (1) |
 | `zimage_turbo_t2i_1024` | **0.47 (2)** | 0.49 (2) | 1.01 (2) | — | 0.82 (1) |
-| `ideogram4_t2i_1024_2gpu_tp` | 3.43 (2) | — | — | — | **3.18 (1)** |
+| `ideogram4_t2i_1024_2gpu_tp` | **3.43 (2)** | — | — | — | 4.16 (1) |
 | `wan22_t2v_a14b_720p` | **106.39 (4)** | 129.06 (4) | 258.34 (4) | — | 541.09 (2) |
 | `ltx2_twostage_t2v` | **6.05 (2)** | 15.57 (2) | 34.57 (2) | — | 24.51 (2) |
 | `ltx2.3_twostage_t2v_2gpus` | 7.75 (2) | — | — | — | — |
@@ -56,11 +56,17 @@ Four requests at concurrency 2, one representative image and one video case.
 - **qwen_image_2512 is a tie.** The main pass put sglang 5.2% behind vLLM-Omni;
   two ABAB-interleaved paired reruns on the same box put it 0.7% and 0.8% ahead
   ([evidence/](evidence/)).
-- **ideogram4 is an sglang gap.** ComfyUI on one GPU beats sglang on two by 7.8%.
-  Both run the fp8 weight-only checkpoint (the only one published) with bf16
-  compute and two transformer forwards per step.
+- **ideogram4, corrected 2026-09-26.** The first ComfyUI cell (3.18 s) loaded
+  Comfy-Org's fp8_scaled repack, which ComfyUI runs as W8A8 on sm90+
+  (activations quantized to FP8: 2.7% relative error per linear, 1.75x faster
+  GEMMs) -- not sglang's weight-only FP8, as this note first said. Re-measured
+  on the official FP8 release dequantized to BF16, the weights sglang computes
+  with: 4.16 s. sglang's own B200 number is held back by masked attention
+  falling onto an sm80 kernel; sgl-project/sglang#41309 measures 2.20 s with
+  that fixed.
 - **ComfyUI** runs graphs built from its official workflow templates, with
-  full-precision weights in place of the templates' fp8/int8/nvfp4 files,
+  full-precision weights in place of the templates' fp8/int8/nvfp4 files
+  (ideogram4, released only in FP8, runs that release dequantized to BF16),
   `--gpu-only` on Blackwell, and `TorchCompileModel` in 7 cells. qwen-image-2.1,
   ideogram4 and the three cells that split CFG across GPUs (qwen-image-2512
   true-CFG, LTX-2, Wan2.2) run eager because compile fails there. Splitting CFG
@@ -72,12 +78,14 @@ Four requests at concurrency 2, one representative image and one video case.
   read a `text_encoder/config.json` that sglang's LTX-2.3 overlay materializer
   had rewritten inside the shared model cache; LTX-2.3 sglang was re-run because
   the same materializer could not write to the read-only cache and the server
-  never started; ComfyUI ref2va was re-run after the reference fix. Discarded
-  attempts are in [failures/](failures/).
+  never started; ComfyUI ref2va was re-run after the reference fix, and ComfyUI
+  ideogram4 on BF16 weights (above). Discarded attempts are in
+  [failures/](failures/).
 
 ## Reproduce
 
 `scripts/run_b200_full_20260925.sh` (harness `bc439d0`; the three replaced
-cells ran `c201f19`, which adds only the ComfyUI reference resize). Merge and
+cells ran `c201f19`, which adds only the ComfyUI reference resize, and the
+ComfyUI ideogram4 rerun ran `4bfdd99`, which adds the `dequant-fp8:` source). Merge and
 publish with `scripts/merge_and_publish_run.sh`, inputs in the order listed in
 [manifest.json](manifest.json).

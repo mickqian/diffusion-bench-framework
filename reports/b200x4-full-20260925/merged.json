@@ -1,6 +1,6 @@
 {
-  "timestamp": "2026-09-26T01:46:47.567873+00:00",
-  "commit_sha": "aec9d38091785f268b7eb5f219f17410d69dcdf4",
+  "timestamp": "2026-09-26T13:08:20.266922+00:00",
+  "commit_sha": "f3a8ffaa7d6c5ab87fd34f13e0ee9a2635cdddef",
   "run_id": "b200x4-full-20260925",
   "hardware": {
     "runner_labels": null,
@@ -386,6 +386,12 @@
       "run_id": "local",
       "commit_sha": "c201f1941cf330c5626c875d67c94249368f9445",
       "timestamp": "2026-09-25T13:54:13.318211+00:00"
+    },
+    {
+      "path": "reports/b200x4-full-20260925/raw/run_b200full0925r_ideo_ideogram4_t2i_1024_2gpu_tp.json",
+      "run_id": "local",
+      "commit_sha": "4bfdd99338bfefd9f28eeeeb98c7b1eb87017de7",
+      "timestamp": "2026-09-26T13:03:00.595651+00:00"
     }
   ],
   "results": [
@@ -2369,7 +2375,7 @@
       "true_cfg_scale": null,
       "negative_prompt_set": false,
       "num_gpus": 1,
-      "latency_s": 3.178,
+      "latency_s": 4.155,
       "error": null,
       "framework_metadata": {
         "profile": "blackwell-gpuonly",
@@ -2396,40 +2402,40 @@
         "extra_env_keys": [],
         "comfyui_workflow": "ideogram4_t2i.json",
         "comfyui_models": {
-          "diffusion_models/ideogram4_fp8_scaled.safetensors": "Comfy-Org/Ideogram-4:diffusion_models/ideogram4_fp8_scaled.safetensors",
-          "diffusion_models/ideogram4_unconditional_fp8_scaled.safetensors": "Comfy-Org/Ideogram-4:diffusion_models/ideogram4_unconditional_fp8_scaled.safetensors",
+          "diffusion_models/ideogram4_bf16.safetensors": "dequant-fp8:ideogram-ai/ideogram-4-fp8:transformer",
+          "diffusion_models/ideogram4_unconditional_bf16.safetensors": "dequant-fp8:ideogram-ai/ideogram-4-fp8:unconditional_transformer",
           "text_encoders/qwen3vl_8b_bf16.safetensors": "Comfy-Org/Qwen3-VL:text_encoders/qwen3vl_8b_bf16.safetensors",
           "vae/flux2-vae.safetensors": "Comfy-Org/Ideogram-4:vae/flux2-vae.safetensors"
         },
         "comfyui_params": null,
         "comfyui_compile": false
       },
-      "server_command": "python3 /personal/bench0925/fw-venvs/comfyui/ComfyUI/main.py --listen 127.0.0.1 --port 65029 --disable-auto-launch --extra-model-paths-config /scratch/comfy-ws/ideogram4_t2i_1024_2gpu_tp/extra_model_paths.yaml --input-directory /scratch/comfy-ws/ideogram4_t2i_1024_2gpu_tp/input --output-directory /scratch/comfy-ws/ideogram4_t2i_1024_2gpu_tp/output --gpu-only",
+      "server_command": "python3 /personal/bench0925/fw-venvs/comfyui/ComfyUI/main.py --listen 127.0.0.1 --port 65461 --disable-auto-launch --extra-model-paths-config /tmp/diffusion-bench-comfyui/ideogram4_t2i_1024_2gpu_tp/extra_model_paths.yaml --input-directory /tmp/diffusion-bench-comfyui/ideogram4_t2i_1024_2gpu_tp/input --output-directory /tmp/diffusion-bench-comfyui/ideogram4_t2i_1024_2gpu_tp/output --gpu-only",
       "metrics": {
-        "client_latency_s": 3.178,
-        "client_latency_min_s": 3.152,
-        "client_latency_max_s": 3.609,
+        "client_latency_s": 4.155,
+        "client_latency_min_s": 4.148,
+        "client_latency_max_s": 4.622,
         "measured_repeats": 5,
         "latency_samples_s": [
-          3.609,
-          3.17,
-          3.152,
-          3.178,
-          3.497
+          4.622,
+          4.148,
+          4.149,
+          4.572,
+          4.155
         ],
-        "latency_spread_pct": 14.5,
+        "latency_spread_pct": 11.4,
         "warmup_latencies_s": [
-          9.001,
-          0.647
+          11.875,
+          0.794
         ],
         "warmup_steady_latencies_s": [
-          3.139,
-          3.158
+          4.141,
+          4.159
         ],
-        "server_startup_s": 12.69,
-        "warmup_s": 15.95
+        "server_startup_s": 35.43,
+        "warmup_s": 20.98
       },
-      "source_result": "reports/b200x4-full-20260925/raw/run_b200full0925_ideogram4_t2i_1024_2gpu_tp_ideogram4_t2i_1024_2gpu_tp.json"
+      "source_result": "reports/b200x4-full-20260925/raw/run_b200full0925r_ideo_ideogram4_t2i_1024_2gpu_tp.json"
     },
     {
       "case_id": "wan22_t2v_a14b_720p",

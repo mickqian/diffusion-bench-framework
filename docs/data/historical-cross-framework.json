@@ -29,7 +29,7 @@
       "date": "2026-09-25",
       "gpu": "4x NVIDIA B200 183GB",
       "title": "4xB200 cross-framework, ComfyUI added (latest-vs-latest)",
-      "subtitle": "Steady-state single-request latency, best lossless config per framework (compile on, no caches, no quantization). SGLang-Diffusion fastest in 13/15 comparable cases.",
+      "subtitle": "Steady-state single-request latency, best lossless config per framework (compile on, no caches, no quantization). SGLang-Diffusion fastest in 14/15 comparable cases.",
       "mode": "single_e2e",
       "framework_versions": {
         "sglang": "0.0.0.dev1+g8ca82118e @ 434c2e3ad",
@@ -39,7 +39,7 @@
         "comfyui": "ComfyUI @ 88ab4a065 + torch 2.14.0+cu130"
       },
       "summary": {
-        "sglang_wins": 13,
+        "sglang_wins": 14,
         "comparable": 15
       },
       "rows": [
@@ -368,12 +368,12 @@
               "gpus": 1,
               "profile": "blackwell-gpuonly",
               "status": "ok",
-              "latency_s": 3.178,
-              "ratio_to_sglang": 0.927
+              "latency_s": 4.155,
+              "ratio_to_sglang": 1.212
             }
           },
-          "winner": "comfyui",
-          "winner_speedup": "1.08x"
+          "winner": "sglang",
+          "winner_speedup": "1.21x"
         },
         {
           "case_id": "wan22_t2v_a14b_720p",
@@ -689,8 +689,8 @@
       "reproduce": "scripts/run_b200_full_20260925.sh",
       "reproduce_link": {
         "path": "scripts/run_b200_full_20260925.sh",
-        "ref": "aec9d3809",
-        "url": "https://github.com/mickqian/diffusion-bench-framework/blob/aec9d38091785f268b7eb5f219f17410d69dcdf4/scripts/run_b200_full_20260925.sh"
+        "ref": "f3a8ffaa7",
+        "url": "https://github.com/mickqian/diffusion-bench-framework/blob/f3a8ffaa7d6c5ab87fd34f13e0ee9a2635cdddef/scripts/run_b200_full_20260925.sh"
       }
     },
     {
@@ -815,8 +815,8 @@
       "reproduce": "scripts/run_b200_full_20260925.sh",
       "reproduce_link": {
         "path": "scripts/run_b200_full_20260925.sh",
-        "ref": "aec9d3809",
-        "url": "https://github.com/mickqian/diffusion-bench-framework/blob/aec9d38091785f268b7eb5f219f17410d69dcdf4/scripts/run_b200_full_20260925.sh"
+        "ref": "f3a8ffaa7",
+        "url": "https://github.com/mickqian/diffusion-bench-framework/blob/f3a8ffaa7d6c5ab87fd34f13e0ee9a2635cdddef/scripts/run_b200_full_20260925.sh"
       }
     },
     {

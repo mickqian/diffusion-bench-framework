@@ -1,12 +1,12 @@
-## Diffusion Benchmark Data - 2026-09-26T01:46:47.567873+00:00
+## Diffusion Benchmark Data - 2026-09-26T13:08:20.266922+00:00
 
 | item | value |
 | --- | --- |
 | run_id | b200x4-full-20260925 |
 | data | single_e2e, throughput |
-| bench_commit | aec9d38091785f268b7eb5f219f17410d69dcdf4 |
+| bench_commit | f3a8ffaa7d6c5ab87fd34f13e0ee9a2635cdddef |
 | gpu | 4 x NVIDIA B200, 183359 MiB, 580.126.09 |
-| reproduce | scripts/generate_h200_report_artifacts.sh; inputs: run_b200full0925_cosmos3_nano_i2v_720p_189f_cosmos3_nano_i2v_720p_189f.json, run_b200full0925_cosmos3_nano_t2i_720p_cosmos3_nano_t2i_720p.json, run_b200full0925_cosmos3_nano_t2v_720p_189f_cosmos3_nano_t2v_720p_189f.json, run_b200full0925_flux1_dev_t2i_1024_flux1_dev_t2i_1024.json, run_b200full0925_flux2_dev_t2i_1024_flux2_dev_t2i_1024.json, run_b200full0925_ideogram4_t2i_1024_2gpu_tp_ideogram4_t2i_1024_2gpu_tp.json, run_b200full0925_ltx2.3_twostage_t2v_2gpus_ltx2.3_twostage_t2v_2gpus.json, run_b200full0925_ltx2_twostage_t2v_ltx2_twostage_t2v.json, run_b200full0925_minimax_h3_ref2va_5s_minimax_h3_ref2va_5s.json, run_b200full0925_minimax_h3_t2va_5s_minimax_h3_t2va_5s.json, run_b200full0925_qwen_image_21_t2i_1024_qwen_image_21_t2i_1024.json, run_b200full0925_qwen_image_2512_t2i_1024_qwen_image_2512_t2i_1024.json, run_b200full0925_qwen_image_2512_t2i_1024_truecfg_qwen_image_2512_t2i_1024_truecfg.json, run_b200full0925_qwen_image_edit_2511_qwen_image_edit_2511.json, run_b200full0925_wan22_t2v_a14b_720p_wan22_t2v_a14b_720p.json, run_b200full0925_zimage_turbo_t2i_1024_zimage_turbo_t2i_1024.json, run_b200full0925r_ltx2b_ltx2_twostage_t2v.json, run_b200full0925r_ltx23b_ltx2.3_twostage_t2v_2gpus.json, run_b200full0925r_ref2va_minimax_h3_ref2va_5s.json |
+| reproduce | scripts/generate_h200_report_artifacts.sh; inputs: run_b200full0925_cosmos3_nano_i2v_720p_189f_cosmos3_nano_i2v_720p_189f.json, run_b200full0925_cosmos3_nano_t2i_720p_cosmos3_nano_t2i_720p.json, run_b200full0925_cosmos3_nano_t2v_720p_189f_cosmos3_nano_t2v_720p_189f.json, run_b200full0925_flux1_dev_t2i_1024_flux1_dev_t2i_1024.json, run_b200full0925_flux2_dev_t2i_1024_flux2_dev_t2i_1024.json, run_b200full0925_ideogram4_t2i_1024_2gpu_tp_ideogram4_t2i_1024_2gpu_tp.json, run_b200full0925_ltx2.3_twostage_t2v_2gpus_ltx2.3_twostage_t2v_2gpus.json, run_b200full0925_ltx2_twostage_t2v_ltx2_twostage_t2v.json, run_b200full0925_minimax_h3_ref2va_5s_minimax_h3_ref2va_5s.json, run_b200full0925_minimax_h3_t2va_5s_minimax_h3_t2va_5s.json, run_b200full0925_qwen_image_21_t2i_1024_qwen_image_21_t2i_1024.json, run_b200full0925_qwen_image_2512_t2i_1024_qwen_image_2512_t2i_1024.json, run_b200full0925_qwen_image_2512_t2i_1024_truecfg_qwen_image_2512_t2i_1024_truecfg.json, run_b200full0925_qwen_image_edit_2511_qwen_image_edit_2511.json, run_b200full0925_wan22_t2v_a14b_720p_wan22_t2v_a14b_720p.json, run_b200full0925_zimage_turbo_t2i_1024_zimage_turbo_t2i_1024.json, run_b200full0925r_ltx2b_ltx2_twostage_t2v.json, run_b200full0925r_ltx23b_ltx2.3_twostage_t2v_2gpus.json, run_b200full0925r_ref2va_minimax_h3_ref2va_5s.json, run_b200full0925r_ideo_ideogram4_t2i_1024_2gpu_tp.json |
 
 | framework | version/ref |
 | --- | --- |
@@ -129,7 +129,7 @@ Statuses: `not_run` means configured but absent from this artifact; `unsupported
 | vLLM-Omni | - | - | - | - | unsupported | - | - | - | - | - | - | - | - | unsupported | Latest vLLM-Omni has no Ideogram-4 serving path (image-gen coverage is FLUX/Qwen-Image/Wan). |
 | LightX2V | - | - | - | - | unsupported | - | - | - | - | - | - | - | - | unsupported | Latest LightX2V has no Ideogram-4 serving path. |
 | trtllm-visual | - | - | - | - | unsupported | - | - | - | - | - | - | - | - | unsupported | Latest TensorRT-LLM VisualGen has no Ideogram-4 serving path (coverage is FLUX/Wan/LTX-2/Qwen-Image/Cosmos3). |
-| ComfyUI | blackwell-gpuonly | 1 | 3.178 | 0.927x | ok | - | - | - | - | - | - | - | - | not_run | - |
+| ComfyUI | blackwell-gpuonly | 1 | 4.155 | 1.212x | ok | - | - | - | - | - | - | - | - | not_run | - |
 
 ### wan22_t2v_a14b_720p
 
