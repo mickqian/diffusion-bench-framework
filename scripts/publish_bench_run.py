@@ -40,6 +40,18 @@ def _dump(path: Path, data: dict) -> None:
     path.write_text(json.dumps(data, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
 
 
+def _run_date(merged: dict) -> str:
+    """The day the run's first result was measured.
+
+    merged["timestamp"] is when the artifact was merged, so dating by it
+    relabelled a run every time it was re-merged.
+    """
+    started = min(
+        (s["timestamp"] for s in merged.get("source_results") or [] if s.get("timestamp")),
+        default=merged.get("timestamp") or "",
+    )
+    return started[:10] or date_cls.today().isoformat()
+
 
 def _policy_block(merged: dict, args) -> dict:
     """What this run actually did, rebuilt per publication.
@@ -132,7 +144,7 @@ def main() -> int:
     ap.add_argument(
         "--date",
         default=None,
-        help="run date; defaults to the run's own timestamp, not today",
+        help="run date; defaults to the day of the run's first result, not today",
     )
     # No default: the link is the promise that this file produced these
     # numbers, and defaulting it silently attributed every hand-driven run to
@@ -170,8 +182,7 @@ def main() -> int:
 
     merged = _load(args.merged)
     config = _load(args.config)
-    # Publishing days later must not relabel when the run happened.
-    run_date = args.date or (merged.get("timestamp") or "")[:10] or date_cls.today().isoformat()
+    run_date = args.date or _run_date(merged)
     sections = build_sections(
         merged,
         config,
