@@ -1,6 +1,6 @@
 {
-  "1": {"class_type": "UNETLoader", "inputs": {"unet_name": "ideogram4_fp8_scaled.safetensors", "weight_dtype": "default"}},
-  "2": {"class_type": "UNETLoader", "inputs": {"unet_name": "ideogram4_unconditional_fp8_scaled.safetensors", "weight_dtype": "default"}},
+  "1": {"class_type": "UNETLoader", "inputs": {"unet_name": "ideogram4_bf16.safetensors", "weight_dtype": "default"}},
+  "2": {"class_type": "UNETLoader", "inputs": {"unet_name": "ideogram4_unconditional_bf16.safetensors", "weight_dtype": "default"}},
   "3": {"class_type": "CLIPLoader", "inputs": {"clip_name": "qwen3vl_8b_bf16.safetensors", "type": "ideogram4", "device": "default"}},
   "4": {"class_type": "VAELoader", "inputs": {"vae_name": "flux2-vae.safetensors"}},
   "5": {"class_type": "CLIPTextEncode", "inputs": {"text": "{{prompt}}", "clip": ["3", 0], "__bench_nonce": "{{nonce}}"}},

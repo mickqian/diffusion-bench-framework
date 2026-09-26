@@ -57,8 +57,8 @@
    "comfyui": {
     "workflow": "ideogram4_t2i.json",
     "models": {
-     "diffusion_models/ideogram4_fp8_scaled.safetensors": "Comfy-Org/Ideogram-4:diffusion_models/ideogram4_fp8_scaled.safetensors",
-     "diffusion_models/ideogram4_unconditional_fp8_scaled.safetensors": "Comfy-Org/Ideogram-4:diffusion_models/ideogram4_unconditional_fp8_scaled.safetensors",
+     "diffusion_models/ideogram4_bf16.safetensors": "dequant-fp8:ideogram-ai/ideogram-4-fp8:transformer",
+     "diffusion_models/ideogram4_unconditional_bf16.safetensors": "dequant-fp8:ideogram-ai/ideogram-4-fp8:unconditional_transformer",
      "text_encoders/qwen3vl_8b_bf16.safetensors": "Comfy-Org/Qwen3-VL:text_encoders/qwen3vl_8b_bf16.safetensors",
      "vae/flux2-vae.safetensors": "Comfy-Org/Ideogram-4:vae/flux2-vae.safetensors"
     },
@@ -70,7 +70,7 @@
      "framework_ref": "ComfyUI master HEAD",
      "num_gpus": 1,
      "serve_args": "",
-     "notes": "Official image_ideogram4_t2i template without its LLM prompt-rewrite stage (the other rows take the case prompt as is). fp8 DiTs are the model's release precision, as in the sglang row (ideogram-ai/ideogram-4-fp8); the text encoder is bf16 in place of fp8_scaled. Conditional + unconditional models through DualModelGuider, cfg 7 with the template's CFGOverride, i.e. two forwards on every step like sglang's V4_DEFAULT_20 preset. One GPU: the guidance branches run on two different models, which the CFG Split node does not cover. Weights are the full-precision single-file checkpoints ComfyUI loads (Comfy-Org repackaging or the model's own single-file release); the official template's fp8/int8/nvfp4 defaults are swapped out because they are a different numeric class from every other row. Sampler, scheduler and shift follow the official ComfyUI workflow; steps, CFG, size, frames and seed follow the case. Compile off: the first compiled request fails in SamplerCustomAdvanced with 'AssertionError: Expect size to be a plain tuple of ints but got torch.Size([1, s81])' (a dynamo dynamic-shape failure on this graph; ComfyUI 88ab4a06, B200, 2026-09-25), so the cell runs eager."
+     "notes": "Official image_ideogram4_t2i template without its LLM prompt-rewrite stage (the other rows take the case prompt as is). The DiTs are the model's official FP8 release (ideogram-ai/ideogram-4-fp8, the sglang row's weights) dequantized to BF16 by the harness exactly as sglang's weight-only FP8 linears compute them (dequant-fp8:). ComfyUI's own FP8 loader is not used because on sm90+ it runs an FP8 checkpoint as W8A8 -- Comfy-Org's fp8_scaled repack, per-tensor requantized, got activations quantized to FP8 in all 211 linears (2.7% relative error per linear against weight-only, 1.75x faster GEMMs; measured on B200 2026-09-26), a lossy class the other rows do not use. The text encoder is bf16 in place of fp8_scaled. Conditional + unconditional models through DualModelGuider, cfg 7 with the template's CFGOverride, i.e. two forwards on every step like sglang's V4_DEFAULT_20 preset. One GPU: the guidance branches run on two different models, which the CFG Split node does not cover. Weights are the full-precision single-file checkpoints ComfyUI loads (Comfy-Org repackaging or the model's own single-file release); the official template's fp8/int8/nvfp4 defaults are swapped out because they are a different numeric class from every other row. Sampler, scheduler and shift follow the official ComfyUI workflow; steps, CFG, size, frames and seed follow the case. Compile off: the first compiled request fails in SamplerCustomAdvanced with 'AssertionError: Expect size to be a plain tuple of ints but got torch.Size([1, s81])' (a dynamo dynamic-shape failure on this graph; ComfyUI 88ab4a06, B200, 2026-09-25), so the cell runs eager."
     },
     "blackwell-gpuonly": {
      "description": "Blackwell: the default graph with every model resident on the GPU (--gpu-only).",

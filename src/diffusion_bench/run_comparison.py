@@ -632,8 +632,52 @@ def _comfyui_workspace(case: dict) -> Path:
     return Path(root) / case["id"]
 
 
+COMFYUI_DEQUANT_FP8_PREFIX = "dequant-fp8:"
+
+
+def _dequantized_fp8_checkpoint(spec: str) -> str:
+    """`repo:folder`'s FP8 safetensors as one BF16 file, cached by revision.
+
+    Dequantized exactly as sglang's weight-only FP8 linears do (`weight.to(bf16)
+    * weight_scale.to(bf16)` per row), so ComfyUI runs the same weights in BF16:
+    its own loader runs FP8 checkpoints as W8A8 on sm90+, a lossy class.
+    """
+    import torch
+    from huggingface_hub import constants, snapshot_download
+    from safetensors.torch import load_file, save_file
+
+    repo, _, folder = spec.partition(":")
+    snapshot = Path(snapshot_download(repo_id=repo, allow_patterns=[f"{folder}/*.safetensors"]))
+    out = (
+        Path(constants.HF_HUB_CACHE).parent
+        / "diffusion-bench-derived"
+        / f"{repo.replace('/', '--')}--{folder}--{snapshot.name}.bf16.safetensors"
+    )
+    if out.exists():
+        return str(out)
+    tensors = {}
+    for shard in sorted((snapshot / folder).glob("*.safetensors")):
+        tensors.update(load_file(shard))
+    dequantized = {}
+    for key, tensor in tensors.items():
+        if key.endswith(".weight_scale"):
+            continue
+        if tensor.dtype == torch.float8_e4m3fn:
+            scale = tensors[f"{key}_scale"].to(torch.bfloat16)
+            tensor = tensor.to(torch.bfloat16) * (scale.unsqueeze(1) if scale.ndim == 1 else scale)
+        dequantized[key] = tensor
+    out.parent.mkdir(parents=True, exist_ok=True)
+    tmp = out.with_name(out.name + ".tmp")
+    save_file(dequantized, str(tmp))
+    os.replace(tmp, out)
+    return str(out)
+
+
 def _resolve_comfyui_model(source: str) -> str:
-    """`repo:path` names a file in a Hugging Face repo; anything else is a local path."""
+    """`repo:path` names a file in a Hugging Face repo; `dequant-fp8:repo:folder`
+    that folder's FP8 weights dequantized to BF16; anything else is a local path."""
+    if source.startswith(COMFYUI_DEQUANT_FP8_PREFIX):
+        return _dequantized_fp8_checkpoint(source[len(COMFYUI_DEQUANT_FP8_PREFIX) :])
     if os.path.isabs(source):
         if not os.path.exists(source):
             raise FileNotFoundError(f"ComfyUI model file {source} does not exist")
