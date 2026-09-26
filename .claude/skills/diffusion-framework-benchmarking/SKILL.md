@@ -90,6 +90,7 @@ Every framework entry should carry `command_profiles`, not just inline args.
 ## Framework-Specific Pitfalls
 
 - SGLang-Diffusion should not have failed cells in the final matrix. Treat SGLang import errors, NaNs, wrong scheduler behavior, OOMs, or request failures as bugs or bad profiles to fix before publishing.
+- A sglang cell that gains far less from Blackwell than its neighbours is a signature to profile, not a command to tune. Ideogram-4 was 3.42 s on B200 against 3.76 s on H200 while the other cells ran 1.7-2.6x faster: on sm100 the default attention backend is DYNAMIC_CUDNN_SDPA, USPAttention's masked fast path only served FA, so its all-valid mask became a dense SDPA mask and every call ran PyTorch's `fmha_cutlassF_*_sm80` (47-54% of each step). sgl-project/sglang#41309 routes all-valid masks to the backend kernel (TP2 3.42 -> 2.20 s). Look for `fmha_cutlassF` in a torch profile of the denoising loop.
 - **Diffusion performance on multi-GPU Blackwell is not tracked by sglang CI.** `nightly-test-diffusion` is `runs-on: 4-gpu-h100`; the only Blackwell diffusion job anywhere in the workflows is `pr-test-multimodal-gen`'s **1-gpu-b200** correctness test. So a Blackwell perf gap can persist indefinitely without anyone seeing it -- which is what happened: wan22 measures **4.81 s/denoise-step and 2.19s VAE decode on 4xH100** (nightly, 2026-09-11) against **18.51 s/step and 25.16s decode on 4xB200** (2026-09-12, sglang two days newer). **It is not an sglang regression**: vLLM-Omni on the same B200 box measures 927-951s against its own 250.6s on H200 -- 3.7x, where sglang's gap is 3.2x -- so sglang is in fact 30% FASTER than vLLM-Omni there and both frameworks are hit about equally. That also rules out sglang-only knobs such as `--performance-mode speed`. Check the competitor before concluding a regression; one framework's number is a ratio without a denominator. Same `fa` backend on both sides, same cfg-parallel + ulysses-2 world_size 4, same 40 steps and dims, and both skip the Wan VAE fused fast path (it is gated off by `use_parallel_decode and world_size > 1`) -- so the gap is not the backend, the parallel config, or the fast-path gate. When a Blackwell video number looks wrong, get the nightly's own command and stage timings out of the Actions log (`gh run view --job <id> --log`, grep `average time per step` / `DecodingStage] finished`) and compare stage by stage; the nightly runs sglang's OWN CI case definitions, whose serve_args differ from this repo's, so hardware is never the only variable.
 - **The poll interval is a quantum on every async (video) latency** -- the recorded number is the first tick AFTER the work finished. At the old 1s, every sglang video result in the nightly sat at N x (1s + ~4ms), readable straight off the data because the fractional part scales with the integer part. Harmless on a 200s case, ±7% on ltx2.3 (13-17s), where it made the nightly series look like alternating regressions and recoveries. Now `POLL_INTERVAL_S = 0.2`; `scripts/tests/test_poll_interval_shared.py` keeps every framework on the same ruler. **Video numbers after 2026-09-13 read up to one old quantum lower than earlier published ones.**
 - **sglang on Blackwell: trust its measured auto-selection; do NOT pin `--attention-backend fa`.** Every case without an explicit backend resolves to an SDPA variant on B200 (`dynamic_cudnn_sdpa`, or `torch_sdpa` for minimax-h3) while cosmos3 pins `fa` -- which looks like a mis-selection, especially next to a video case running 3.3x slower than its H200 figure. It is not. Measured on 4xB200, forcing `fa`: wan22 751.6s vs 689s auto (9% worse), ltx2 7.52s vs 6.02s (25% worse), minimax-h3 74.16s vs 73.64s (equal). #38689's measured selection is doing its job on Blackwell, so leave it alone and look elsewhere for a slow video case. (Whether cosmos3's pinned `fa` still beats auto on B200 is untested.)
@@ -434,6 +435,20 @@ anything:
   full-precision file from the same repo family; the case's `comfyui.models`
   maps each loader filename to `repo:path`, and the builder fails if a graph
   loads a file the map does not name.
+- **A `comfy_quant` checkpoint runs W8A8, whatever the startup log says.**
+  Comfy-Org's `*_fp8_scaled` (and int8/nvfp4) repacks carry per-layer
+  `comfy_quant` metadata, which routes them through `mixed_precision_ops`; on
+  sm90+ its inference path quantizes every linear's activations too
+  (`quantize_fp8_tensor_kernel` + an `nvjet_sm100_qqtst` GEMM). The line
+  `model weight dtype torch.bfloat16, manual cast: torch.bfloat16` covers only
+  the unquantized layers -- it is how the 2026-09-25 Ideogram-4 cell got
+  published as "same precision class" while running W8A8 (2.7% relative error
+  per linear, 1.75x faster GEMMs, and per-tensor requantized where the official
+  release scales per row). There is no switch to turn it off. When a model's
+  only release is FP8, map the loader file to `dequant-fp8:<repo>:<folder>`:
+  the harness dequantizes the official FP8 exactly as sglang's weight-only FP8
+  does and ComfyUI loads plain BF16. Confirm with a one-linear kernel probe: no
+  `quantize_fp8` kernel, no `qq` GEMM.
 - **One multi-GPU path only**: the core `MultiGPU_WorkUnits` ("MultiGPU CFG
   Split") node puts CFG branches on separate cards; there is no SP/TP.
   `max_gpus=1` is a no-op, so templates carry it with `{{cfg_gpus}}`. ComfyUI
