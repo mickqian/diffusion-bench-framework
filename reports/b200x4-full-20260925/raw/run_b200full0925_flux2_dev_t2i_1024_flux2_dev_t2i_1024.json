@@ -1,0 +1,619 @@
+{
+  "timestamp": "2026-09-25T08:57:01.247563+00:00",
+  "commit_sha": "bc439d0ba98e3cd2fcfc64475a6a0c8e1889ed42",
+  "run_id": "local",
+  "hardware": {
+    "runner_labels": null,
+    "gpu_config": null,
+    "gpus": [
+      "NVIDIA B200, 183359 MiB, 580.126.09",
+      "NVIDIA B200, 183359 MiB, 580.126.09",
+      "NVIDIA B200, 183359 MiB, 580.126.09",
+      "NVIDIA B200, 183359 MiB, 580.126.09"
+    ],
+    "hardware_profile_override": "b200"
+  },
+  "sglang_runtime": {
+    "package_version": "0.0.0.dev1+g8ca82118e",
+    "module_path": "/sgl-workspace/sglang/python/sglang/__init__.py",
+    "git_root": "/sgl-workspace/sglang",
+    "git_commit": "434c2e3adcd77afe42d6604b693d97aef71938e6"
+  },
+  "framework_runtime": {
+    "venv_root": "/personal/bench0925/fw-venvs",
+    "install_specs": {
+      "vllm": "vllm==0.18.0",
+      "vllm_omni": "vllm-omni==0.18.0",
+      "lightx2v": "git+https://github.com/ModelTC/LightX2V.git@7efd05f8e1425b83321fd4f1cef779ef6504076f",
+      "lightx2v_flash_attn": "flash-attn==2.8.3",
+      "lightx2v_flash_attn3": "",
+      "lightx2v_fa3_hf_repo": "varunneal/flash-attention-3",
+      "lightx2v_fa3_hf_revision": "de87b9b5af06dd9984df595bef90b2eba44b181a",
+      "lightx2v_fa3_hf_subdir": "build/torch28-cxx11-cu128-x86_64-linux/flash_attention_3",
+      "lightx2v_flashinfer": "flashinfer-python==0.6.11",
+      "trtllm": "tensorrt-llm==1.3.0rc18",
+      "torch_cuda_arch_list": ""
+    },
+    "launchers": {
+      "vllm_omni_server_bin": "vllm",
+      "vllm_omni_required_help_args": "--omni",
+      "trtllm_visual_server_bin": "trtllm-serve"
+    },
+    "vllm-omni": {
+      "venv_path": "/personal/bench0925/fw-venvs/vllm-omni",
+      "packages": {
+        "vllm": {
+          "Name": "vllm",
+          "Version": "0.30.0",
+          "Home-page": "https://github.com/vllm-project/vllm",
+          "Location": "/personal/bench0925/fw-venvs/vllm-omni/lib/python3.12/site-packages"
+        },
+        "vllm-omni": {
+          "Name": "vllm-omni",
+          "Version": "0.30.0rc2.dev69+g69de153f6",
+          "Home-page": "https://github.com/vllm-project/vllm-omni",
+          "Location": "/personal/bench0925/fw-venvs/vllm-omni/lib/python3.12/site-packages"
+        },
+        "torch": {
+          "Name": "torch",
+          "Version": "2.13.0",
+          "Home-page": "https://pytorch.org",
+          "Location": "/personal/bench0925/fw-venvs/vllm-omni/lib/python3.12/site-packages"
+        },
+        "transformers": {
+          "Name": "transformers",
+          "Version": "5.14.1",
+          "Home-page": "https://github.com/huggingface/transformers",
+          "Location": "/personal/bench0925/fw-venvs/vllm-omni/lib/python3.12/site-packages"
+        },
+        "diffusers": {
+          "Name": "diffusers",
+          "Version": "0.40.0",
+          "Home-page": "https://github.com/huggingface/diffusers",
+          "Location": "/personal/bench0925/fw-venvs/vllm-omni/lib/python3.12/site-packages"
+        },
+        "huggingface_hub": {
+          "Name": "huggingface_hub",
+          "Version": "1.33.0",
+          "Home-page": "https://github.com/huggingface/huggingface_hub",
+          "Location": "/personal/bench0925/fw-venvs/vllm-omni/lib/python3.12/site-packages"
+        }
+      },
+      "direct_urls": {
+        "vllm_omni-0.30.0rc2.dev69+g69de153f6.dist-info": {
+          "url": "file:///personal/bench0925/fw-venvs/vllm-omni/src/vllm-omni",
+          "dir_info": {
+            "editable": true
+          }
+        }
+      }
+    },
+    "lightx2v": {
+      "venv_path": "/personal/bench0925/fw-venvs/lightx2v",
+      "packages": {
+        "lightx2v": {
+          "Name": "lightx2v",
+          "Version": "0.5.0",
+          "Home-page": "https://github.com/ModelTC/LightX2V",
+          "Location": "/personal/bench0925/fw-venvs/lightx2v/lib/python3.12/site-packages"
+        },
+        "flash_attn": {
+          "Name": "flash_attn",
+          "Version": "2.8.3",
+          "Home-page": "https://github.com/Dao-AILab/flash-attention",
+          "Location": "/personal/bench0925/fw-venvs/lightx2v/lib/python3.12/site-packages"
+        },
+        "flashinfer-python": {
+          "Name": "flashinfer-python",
+          "Version": "0.6.11",
+          "Home-page": "https://github.com/flashinfer-ai/flashinfer",
+          "Location": "/personal/bench0925/fw-venvs/lightx2v/lib/python3.12/site-packages"
+        },
+        "torch": {
+          "Name": "torch",
+          "Version": "2.11.0",
+          "Home-page": "https://pytorch.org",
+          "Location": "/personal/bench0925/fw-venvs/lightx2v/lib/python3.12/site-packages"
+        },
+        "transformers": {
+          "Name": "transformers",
+          "Version": "5.17.0",
+          "Home-page": "https://github.com/huggingface/transformers",
+          "Location": "/personal/bench0925/fw-venvs/lightx2v/lib/python3.12/site-packages"
+        },
+        "diffusers": {
+          "Name": "diffusers",
+          "Version": "0.40.0",
+          "Home-page": "https://github.com/huggingface/diffusers",
+          "Location": "/personal/bench0925/fw-venvs/lightx2v/lib/python3.12/site-packages"
+        },
+        "huggingface_hub": {
+          "Name": "huggingface_hub",
+          "Version": "1.33.0",
+          "Home-page": "https://github.com/huggingface/huggingface_hub",
+          "Location": "/personal/bench0925/fw-venvs/lightx2v/lib/python3.12/site-packages"
+        }
+      },
+      "direct_urls": {
+        "lightx2v-0.5.0.dist-info": {
+          "url": "https://github.com/ModelTC/LightX2V.git",
+          "vcs_info": {
+            "commit_id": "a4b8ce30ac73ae561ec9d1a8bc6629e4aed9d2d8",
+            "requested_revision": "a4b8ce30ac73",
+            "vcs": "git"
+          }
+        }
+      }
+    },
+    "trtllm-visual": {
+      "venv_path": "/personal/bench0925/fw-venvs/trtllm-visual",
+      "packages": {
+        "tensorrt_llm": {
+          "Name": "tensorrt_llm",
+          "Version": "1.3.0rc28",
+          "Home-page": "https://github.com/NVIDIA/TensorRT-LLM",
+          "Location": "/personal/bench0925/fw-venvs/trtllm-visual/lib/python3.12/site-packages"
+        },
+        "torch": {
+          "Name": "torch",
+          "Version": "2.13.0",
+          "Home-page": "https://pytorch.org",
+          "Location": "/personal/bench0925/fw-venvs/trtllm-visual/lib/python3.12/site-packages"
+        },
+        "transformers": {
+          "Name": "transformers",
+          "Version": "5.5.4",
+          "Home-page": "https://github.com/huggingface/transformers",
+          "Location": "/personal/bench0925/fw-venvs/trtllm-visual/lib/python3.12/site-packages"
+        },
+        "diffusers": {
+          "Name": "diffusers",
+          "Version": "0.40.0",
+          "Home-page": "https://github.com/huggingface/diffusers",
+          "Location": "/personal/bench0925/fw-venvs/trtllm-visual/lib/python3.12/site-packages"
+        },
+        "huggingface_hub": {
+          "Name": "huggingface_hub",
+          "Version": "1.33.0",
+          "Home-page": "https://github.com/huggingface/huggingface_hub",
+          "Location": "/personal/bench0925/fw-venvs/trtllm-visual/lib/python3.12/site-packages"
+        }
+      }
+    },
+    "comfyui": {
+      "venv_path": "/personal/bench0925/fw-venvs/comfyui",
+      "packages": {
+        "torchvision": {
+          "Name": "torchvision",
+          "Version": "0.29.0+cu130",
+          "Home-page": "https://github.com/pytorch/vision",
+          "Location": "/personal/bench0925/fw-venvs/comfyui/lib/python3.12/site-packages"
+        },
+        "torchaudio": {
+          "Name": "torchaudio",
+          "Version": "2.11.0+cu130",
+          "Home-page": "https://github.com/pytorch/audio",
+          "Location": "/personal/bench0925/fw-venvs/comfyui/lib/python3.12/site-packages"
+        },
+        "comfy-kitchen": {
+          "Name": "comfy-kitchen",
+          "Version": "0.2.35",
+          "Home-page": "https://github.com/Comfy-Org/comfy-kitchen",
+          "Location": "/personal/bench0925/fw-venvs/comfyui/lib/python3.12/site-packages"
+        },
+        "comfy-aimdo": {
+          "Name": "comfy-aimdo",
+          "Version": "0.5.5",
+          "Home-page": "",
+          "Location": "/personal/bench0925/fw-venvs/comfyui/lib/python3.12/site-packages"
+        },
+        "comfyui_frontend_package": {
+          "Name": "comfyui_frontend_package",
+          "Version": "1.53.6",
+          "Home-page": "",
+          "Location": "/personal/bench0925/fw-venvs/comfyui/lib/python3.12/site-packages"
+        },
+        "safetensors": {
+          "Name": "safetensors",
+          "Version": "0.8.0",
+          "Home-page": "https://github.com/huggingface/safetensors",
+          "Location": "/personal/bench0925/fw-venvs/comfyui/lib/python3.12/site-packages"
+        },
+        "torch": {
+          "Name": "torch",
+          "Version": "2.14.0+cu130",
+          "Home-page": "https://pytorch.org",
+          "Location": "/personal/bench0925/fw-venvs/comfyui/lib/python3.12/site-packages"
+        },
+        "transformers": {
+          "Name": "transformers",
+          "Version": "5.17.0",
+          "Home-page": "https://github.com/huggingface/transformers",
+          "Location": "/personal/bench0925/fw-venvs/comfyui/lib/python3.12/site-packages"
+        },
+        "huggingface_hub": {
+          "Name": "huggingface_hub",
+          "Version": "1.33.0",
+          "Home-page": "https://github.com/huggingface/huggingface_hub",
+          "Location": "/personal/bench0925/fw-venvs/comfyui/lib/python3.12/site-packages"
+        }
+      },
+      "source_commit": "88ab4a06566454ad89db8f0bedb970d6c08cd1b7",
+      "source_commit_date": "2026-09-24T22:33:18-04:00"
+    }
+  },
+  "benchmark_env": {},
+  "benchmark_framework_args": {
+    "vllm-omni": [],
+    "lightx2v": {
+      "config": {
+        "compile": true
+      }
+    }
+  },
+  "torch_compile_disabled": false,
+  "benchmark_modes": [
+    "single_e2e",
+    "throughput"
+  ],
+  "requested_sglang_profile": "auto",
+  "results": [
+    {
+      "case_id": "flux2_dev_t2i_1024",
+      "framework": "sglang",
+      "mode": "single_e2e",
+      "model": "black-forest-labs/FLUX.2-dev",
+      "task": "text-to-image",
+      "width": 1024,
+      "height": 1024,
+      "num_frames": null,
+      "fps": null,
+      "num_inference_steps": 50,
+      "guidance_scale": 4.0,
+      "guidance_scale_2": null,
+      "true_cfg_scale": null,
+      "negative_prompt_set": false,
+      "num_gpus": 2,
+      "latency_s": 6.95,
+      "error": null,
+      "framework_metadata": {
+        "profile": "blackwell-2gpu-tp-eager",
+        "profile_request": "auto",
+        "profile_source": "hardware",
+        "framework_ref": null,
+        "hardware": [
+          "b200",
+          "gb200",
+          "b300",
+          "gb300"
+        ],
+        "hardware_candidates": [
+          "b200"
+        ],
+        "description": "Blackwell 2-GPU TP legacy-compatible FLUX.2 compile profile.",
+        "notes": "Use for SGLang commits before --performance-mode speed existed; TP remains explicit. Measured on 2xB200 (sglang 0.5.19, ABAB interleaved x4, 2026-09-12): this profile and blackwell-2gpu-tp-speed-eager are indistinguishable -- paired diffs +1.6/+7.6/+1.2/-5.8%, mean +1.15% with mixed signs, against within-arm spreads of 6.6% and 7.9%. So the 'legacy' label is about which flags existed, NOT about speed: --performance-mode speed buys nothing measurable here, and the two profiles are left in this order deliberately. Do not re-run this comparison without a reason; two pairs alone look like a +4.6% win and are noise.",
+        "install_specs": null,
+        "server_bin": null,
+        "use_omni_arg": null,
+        "required_help_args": null,
+        "serve_args": "--model-type diffusion --warmup-mode server --dit-layerwise-offload false --tp-size 2 --enable-torch-compile false",
+        "num_gpus": 2,
+        "extra_env_keys": [],
+        "sglang_profile": "blackwell-2gpu-tp-eager",
+        "sglang_profile_request": "auto",
+        "sglang_profile_source": "hardware",
+        "sglang_ref": "legacy-compatible"
+      },
+      "server_command": "sglang serve --model-path black-forest-labs/FLUX.2-dev --port 65009 --host 127.0.0.1 --backend sglang --num-gpus 2 --model-type diffusion --warmup-mode server --dit-layerwise-offload false --tp-size 2 --enable-torch-compile false",
+      "metrics": {
+        "client_latency_s": 6.95,
+        "client_latency_min_s": 6.681,
+        "client_latency_max_s": 7.096,
+        "measured_repeats": 5,
+        "server_latency_s": 6.565,
+        "server_latency_source": "separate instrumented request, not one of the measured repeats",
+        "latency_samples_s": [
+          6.95,
+          7.073,
+          6.681,
+          6.894,
+          7.096
+        ],
+        "latency_spread_pct": 6.2,
+        "warmup_latencies_s": [
+          6.785,
+          6.88
+        ],
+        "server_startup_s": 272.23,
+        "warmup_s": 13.67
+      }
+    },
+    {
+      "case_id": "flux2_dev_t2i_1024",
+      "framework": "vllm-omni",
+      "mode": "single_e2e",
+      "model": "black-forest-labs/FLUX.2-dev",
+      "task": "text-to-image",
+      "width": 1024,
+      "height": 1024,
+      "num_frames": null,
+      "fps": null,
+      "num_inference_steps": 50,
+      "guidance_scale": 4.0,
+      "guidance_scale_2": null,
+      "true_cfg_scale": null,
+      "negative_prompt_set": false,
+      "num_gpus": 2,
+      "latency_s": 9.815,
+      "error": null,
+      "framework_metadata": {
+        "profile": "blackwell-2gpu-tp-eager",
+        "profile_request": "auto",
+        "profile_source": "hardware",
+        "framework_ref": "vllm-omni-latest+blackwell+tp2+compile-allowed",
+        "hardware": [
+          "b200",
+          "gb200",
+          "b300",
+          "gb300"
+        ],
+        "hardware_candidates": [
+          "b200"
+        ],
+        "description": "Blackwell 2-GPU TP fastest vLLM-Omni FLUX.2 profile probe.",
+        "notes": "The harness adds --tensor-parallel-size 2 when num_gpus=2; use with compile allowed.",
+        "install_specs": null,
+        "server_bin": null,
+        "use_omni_arg": null,
+        "required_help_args": null,
+        "serve_args": "",
+        "num_gpus": 2,
+        "extra_env_keys": [
+          "DIFFUSION_ATTENTION_BACKEND"
+        ]
+      },
+      "server_command": "vllm serve black-forest-labs/FLUX.2-dev --port 65009 --host 127.0.0.1 --omni --tensor-parallel-size 2",
+      "metrics": {
+        "client_latency_s": 9.815,
+        "client_latency_min_s": 9.811,
+        "client_latency_max_s": 9.848,
+        "measured_repeats": 5,
+        "latency_samples_s": [
+          9.815,
+          9.817,
+          9.848,
+          9.812,
+          9.811
+        ],
+        "latency_spread_pct": 0.4,
+        "warmup_latencies_s": [
+          9.871,
+          9.794
+        ],
+        "server_startup_s": 150.15,
+        "warmup_s": 19.67
+      }
+    },
+    {
+      "case_id": "flux2_dev_t2i_1024",
+      "framework": "lightx2v",
+      "mode": "single_e2e",
+      "model": "black-forest-labs/FLUX.2-dev",
+      "task": "text-to-image",
+      "width": 1024,
+      "height": 1024,
+      "num_frames": null,
+      "fps": null,
+      "num_inference_steps": 50,
+      "guidance_scale": 4.0,
+      "guidance_scale_2": null,
+      "true_cfg_scale": null,
+      "negative_prompt_set": false,
+      "num_gpus": 2,
+      "latency_s": 16.548,
+      "error": null,
+      "framework_metadata": {
+        "profile": "blackwell-fa2-flashinfer",
+        "profile_request": "auto",
+        "profile_source": "hardware",
+        "framework_ref": "lightx2v-latest-flux2_dev+blackwell-fa2-flashinfer",
+        "hardware": [
+          "b200",
+          "gb200",
+          "b300",
+          "gb300"
+        ],
+        "hardware_candidates": [
+          "b200"
+        ],
+        "description": "Blackwell LightX2V FLUX.2 profile probe using source-built FlashAttention 2 plus FlashInfer RoPE.",
+        "notes": "Uses a source-built FlashAttention 2 wheel with TORCH_CUDA_ARCH_LIST=10.0; the upstream FA3 wheel used for H200 is Hopper-only. LightX2V renamed this runner: its registry key is `flux2` (was `flux2_dev`), and the old name fails at worker init with `KeyError: 'flux2_dev'` from runner_factory -- after a full server start, so it reads as a startup failure rather than a bad name. The registry is the authority: `python -c \"from lightx2v.models.runners.runner_factory import RUNNER_MODULES; print(sorted(RUNNER_MODULES))\"`. The runner also requires `model_variant`: LightX2V split the old flux2_dev runner into `flux2` + model_variant dev|klein, and an absent variant fails at worker init with `ValueError: Unsupported Flux2 model_variant: None` -- a second layer behind the KeyError, each one only visible after the previous is fixed.",
+        "install_specs": null,
+        "server_bin": null,
+        "use_omni_arg": null,
+        "required_help_args": null,
+        "serve_args": "",
+        "num_gpus": 2,
+        "extra_env_keys": [],
+        "lightx2v_config_keys": [
+          "attn_type",
+          "enable_cfg",
+          "feature_caching",
+          "model_variant",
+          "patch_size",
+          "rope_type",
+          "sample_guide_scale",
+          "text_encoder_out_layers",
+          "tokenizer_max_length",
+          "vae_scale_factor"
+        ]
+      },
+      "server_command": "torchrun --nproc_per_node=2 -m lightx2v.server --model_path /scratch/hf/hub/models--black-forest-labs--FLUX.2-dev/snapshots/26afe3a78bb242c0a8bb181dcc8937bb16e5c66c --model_cls flux2 --task t2i --config_json /tmp/lightx2v_config_flux2_dev_t2i_1024.json --host 127.0.0.1 --port 65009",
+      "metrics": {
+        "client_latency_s": 16.548,
+        "client_latency_min_s": 16.542,
+        "client_latency_max_s": 16.748,
+        "measured_repeats": 5,
+        "latency_samples_s": [
+          16.748,
+          16.548,
+          16.549,
+          16.544,
+          16.542
+        ],
+        "latency_spread_pct": 1.2,
+        "warmup_latencies_s": [
+          19.115,
+          16.545,
+          16.541
+        ],
+        "server_startup_s": 114.15,
+        "warmup_s": 52.2
+      }
+    },
+    {
+      "case_id": "flux2_dev_t2i_1024",
+      "framework": "trtllm-visual",
+      "mode": "single_e2e",
+      "model": "black-forest-labs/FLUX.2-dev",
+      "task": "text-to-image",
+      "width": 1024,
+      "height": 1024,
+      "num_frames": null,
+      "fps": null,
+      "num_inference_steps": 50,
+      "guidance_scale": 4.0,
+      "guidance_scale_2": null,
+      "true_cfg_scale": null,
+      "negative_prompt_set": false,
+      "num_gpus": 2,
+      "latency_s": 11.022,
+      "error": null,
+      "framework_metadata": {
+        "profile": "default",
+        "profile_request": "auto",
+        "profile_source": "default",
+        "framework_ref": "tensorrt-llm-visualgen-trtllm-serve",
+        "hardware": null,
+        "hardware_candidates": [
+          "b200"
+        ],
+        "description": "Best known TensorRT-LLM VisualGen command for aligned non-cache FLUX.2 runs.",
+        "notes": "Keep this profile updated as the best command changes. trtllm-serve auto-detects the FLUX.2 diffusion model; add --extra_visual_gen_options <model>.yml for steady-state tuning. PyTorch backend, no TeaCache and no torch compile so the row stays cache-free and comparable. Needs GPU validation.",
+        "install_specs": null,
+        "server_bin": null,
+        "use_omni_arg": null,
+        "required_help_args": null,
+        "serve_args": "--backend pytorch",
+        "num_gpus": 2,
+        "extra_env_keys": []
+      },
+      "server_command": "trtllm-serve serve black-forest-labs/FLUX.2-dev --host 127.0.0.1 --port 65009 --tp_size 2 --backend pytorch",
+      "metrics": {
+        "client_latency_s": 11.022,
+        "client_latency_min_s": 11.009,
+        "client_latency_max_s": 11.026,
+        "measured_repeats": 5,
+        "latency_samples_s": [
+          11.022,
+          11.009,
+          11.011,
+          11.026,
+          11.023
+        ],
+        "latency_spread_pct": 0.2,
+        "warmup_latencies_s": [
+          1.309,
+          0.876
+        ],
+        "warmup_steady_latencies_s": [
+          10.999,
+          11.018
+        ],
+        "server_startup_s": 116.12,
+        "warmup_s": 24.2
+      }
+    },
+    {
+      "case_id": "flux2_dev_t2i_1024",
+      "framework": "comfyui",
+      "mode": "single_e2e",
+      "model": "black-forest-labs/FLUX.2-dev",
+      "task": "text-to-image",
+      "width": 1024,
+      "height": 1024,
+      "num_frames": null,
+      "fps": null,
+      "num_inference_steps": 50,
+      "guidance_scale": 4.0,
+      "guidance_scale_2": null,
+      "true_cfg_scale": null,
+      "negative_prompt_set": false,
+      "num_gpus": 1,
+      "latency_s": 14.563,
+      "error": null,
+      "framework_metadata": {
+        "profile": "blackwell-gpuonly",
+        "profile_request": "auto",
+        "profile_source": "hardware",
+        "framework_ref": "ComfyUI master HEAD",
+        "hardware": [
+          "b200",
+          "gb200",
+          "b300",
+          "gb300"
+        ],
+        "hardware_candidates": [
+          "b200"
+        ],
+        "description": "Blackwell: the default graph with every model resident on the GPU (--gpu-only).",
+        "notes": "B200: --gpu-only keeps every model, text encoders included, stored and run on the card; a 183 GB B200 holds the largest graph here (MiniMax-H3: 62 GB DiT + 48 GB Qwen3-VL-32B + VAEs). Placement only, numerics unchanged. Measured 2026-09-25 on 1xB200, FLUX.1 eager, interleaved arms: default 5.94 / 5.77 / 5.79s against --gpu-only 5.56s and --gpu-only --disable-dynamic-vram 5.57s (Qwen-Image-2.1: 3.75 / 3.91 against 3.47 / 3.48) -- every --gpu-only arm below every default arm; disabling dynamic VRAM on top adds nothing, so the simpler flag is kept.",
+        "install_specs": null,
+        "server_bin": null,
+        "use_omni_arg": null,
+        "required_help_args": null,
+        "serve_args": "--gpu-only",
+        "num_gpus": 1,
+        "extra_env_keys": [],
+        "comfyui_workflow": "flux2_dev_t2i.json",
+        "comfyui_models": {
+          "diffusion_models/flux2-dev.safetensors": "black-forest-labs/FLUX.2-dev:flux2-dev.safetensors",
+          "text_encoders/mistral_3_small_flux2_bf16.safetensors": "Comfy-Org/flux2-dev:split_files/text_encoders/mistral_3_small_flux2_bf16.safetensors",
+          "vae/flux2-vae.safetensors": "Comfy-Org/flux2-dev:split_files/vae/flux2-vae.safetensors"
+        },
+        "comfyui_params": null,
+        "comfyui_compile": true
+      },
+      "server_command": "python3 /personal/bench0925/fw-venvs/comfyui/ComfyUI/main.py --listen 127.0.0.1 --port 65009 --disable-auto-launch --extra-model-paths-config /scratch/comfy-ws/flux2_dev_t2i_1024/extra_model_paths.yaml --input-directory /scratch/comfy-ws/flux2_dev_t2i_1024/input --output-directory /scratch/comfy-ws/flux2_dev_t2i_1024/output --gpu-only",
+      "metrics": {
+        "client_latency_s": 14.563,
+        "client_latency_min_s": 14.35,
+        "client_latency_max_s": 14.631,
+        "measured_repeats": 5,
+        "latency_samples_s": [
+          14.565,
+          14.35,
+          14.631,
+          14.382,
+          14.563
+        ],
+        "latency_spread_pct": 2.0,
+        "warmup_latencies_s": [
+          86.617,
+          1.145
+        ],
+        "warmup_steady_latencies_s": [
+          14.356,
+          14.349
+        ],
+        "server_startup_s": 22.51,
+        "warmup_s": 116.47
+      }
+    }
+  ],
+  "throughput_results": [],
+  "partial": false,
+  "model_revisions": {
+    "black-forest-labs/FLUX.2-dev": "26afe3a78bb242c0a8bb181dcc8937bb16e5c66c"
+  }
+}

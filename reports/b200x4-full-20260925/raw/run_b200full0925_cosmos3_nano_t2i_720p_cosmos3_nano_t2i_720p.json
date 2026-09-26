@@ -1,0 +1,423 @@
+{
+  "timestamp": "2026-09-25T09:54:25.339723+00:00",
+  "commit_sha": "bc439d0ba98e3cd2fcfc64475a6a0c8e1889ed42",
+  "run_id": "local",
+  "hardware": {
+    "runner_labels": null,
+    "gpu_config": null,
+    "gpus": [
+      "NVIDIA B200, 183359 MiB, 580.126.09",
+      "NVIDIA B200, 183359 MiB, 580.126.09",
+      "NVIDIA B200, 183359 MiB, 580.126.09",
+      "NVIDIA B200, 183359 MiB, 580.126.09"
+    ],
+    "hardware_profile_override": "b200"
+  },
+  "sglang_runtime": {
+    "package_version": "0.0.0.dev1+g8ca82118e",
+    "module_path": "/sgl-workspace/sglang/python/sglang/__init__.py",
+    "git_root": "/sgl-workspace/sglang",
+    "git_commit": "434c2e3adcd77afe42d6604b693d97aef71938e6"
+  },
+  "framework_runtime": {
+    "venv_root": "/personal/bench0925/fw-venvs",
+    "install_specs": {
+      "vllm": "vllm==0.18.0",
+      "vllm_omni": "vllm-omni==0.18.0",
+      "lightx2v": "git+https://github.com/ModelTC/LightX2V.git@7efd05f8e1425b83321fd4f1cef779ef6504076f",
+      "lightx2v_flash_attn": "flash-attn==2.8.3",
+      "lightx2v_flash_attn3": "",
+      "lightx2v_fa3_hf_repo": "varunneal/flash-attention-3",
+      "lightx2v_fa3_hf_revision": "de87b9b5af06dd9984df595bef90b2eba44b181a",
+      "lightx2v_fa3_hf_subdir": "build/torch28-cxx11-cu128-x86_64-linux/flash_attention_3",
+      "lightx2v_flashinfer": "flashinfer-python==0.6.11",
+      "trtllm": "tensorrt-llm==1.3.0rc18",
+      "torch_cuda_arch_list": ""
+    },
+    "launchers": {
+      "vllm_omni_server_bin": "vllm",
+      "vllm_omni_required_help_args": "--omni",
+      "trtllm_visual_server_bin": "trtllm-serve"
+    },
+    "vllm-omni": {
+      "venv_path": "/personal/bench0925/fw-venvs/vllm-omni",
+      "packages": {
+        "vllm": {
+          "Name": "vllm",
+          "Version": "0.30.0",
+          "Home-page": "https://github.com/vllm-project/vllm",
+          "Location": "/personal/bench0925/fw-venvs/vllm-omni/lib/python3.12/site-packages"
+        },
+        "vllm-omni": {
+          "Name": "vllm-omni",
+          "Version": "0.30.0rc2.dev69+g69de153f6",
+          "Home-page": "https://github.com/vllm-project/vllm-omni",
+          "Location": "/personal/bench0925/fw-venvs/vllm-omni/lib/python3.12/site-packages"
+        },
+        "torch": {
+          "Name": "torch",
+          "Version": "2.13.0",
+          "Home-page": "https://pytorch.org",
+          "Location": "/personal/bench0925/fw-venvs/vllm-omni/lib/python3.12/site-packages"
+        },
+        "transformers": {
+          "Name": "transformers",
+          "Version": "5.14.1",
+          "Home-page": "https://github.com/huggingface/transformers",
+          "Location": "/personal/bench0925/fw-venvs/vllm-omni/lib/python3.12/site-packages"
+        },
+        "diffusers": {
+          "Name": "diffusers",
+          "Version": "0.40.0",
+          "Home-page": "https://github.com/huggingface/diffusers",
+          "Location": "/personal/bench0925/fw-venvs/vllm-omni/lib/python3.12/site-packages"
+        },
+        "huggingface_hub": {
+          "Name": "huggingface_hub",
+          "Version": "1.33.0",
+          "Home-page": "https://github.com/huggingface/huggingface_hub",
+          "Location": "/personal/bench0925/fw-venvs/vllm-omni/lib/python3.12/site-packages"
+        }
+      },
+      "direct_urls": {
+        "vllm_omni-0.30.0rc2.dev69+g69de153f6.dist-info": {
+          "url": "file:///personal/bench0925/fw-venvs/vllm-omni/src/vllm-omni",
+          "dir_info": {
+            "editable": true
+          }
+        }
+      }
+    },
+    "lightx2v": {
+      "venv_path": "/personal/bench0925/fw-venvs/lightx2v",
+      "packages": {
+        "lightx2v": {
+          "Name": "lightx2v",
+          "Version": "0.5.0",
+          "Home-page": "https://github.com/ModelTC/LightX2V",
+          "Location": "/personal/bench0925/fw-venvs/lightx2v/lib/python3.12/site-packages"
+        },
+        "flash_attn": {
+          "Name": "flash_attn",
+          "Version": "2.8.3",
+          "Home-page": "https://github.com/Dao-AILab/flash-attention",
+          "Location": "/personal/bench0925/fw-venvs/lightx2v/lib/python3.12/site-packages"
+        },
+        "flashinfer-python": {
+          "Name": "flashinfer-python",
+          "Version": "0.6.11",
+          "Home-page": "https://github.com/flashinfer-ai/flashinfer",
+          "Location": "/personal/bench0925/fw-venvs/lightx2v/lib/python3.12/site-packages"
+        },
+        "torch": {
+          "Name": "torch",
+          "Version": "2.11.0",
+          "Home-page": "https://pytorch.org",
+          "Location": "/personal/bench0925/fw-venvs/lightx2v/lib/python3.12/site-packages"
+        },
+        "transformers": {
+          "Name": "transformers",
+          "Version": "5.17.0",
+          "Home-page": "https://github.com/huggingface/transformers",
+          "Location": "/personal/bench0925/fw-venvs/lightx2v/lib/python3.12/site-packages"
+        },
+        "diffusers": {
+          "Name": "diffusers",
+          "Version": "0.40.0",
+          "Home-page": "https://github.com/huggingface/diffusers",
+          "Location": "/personal/bench0925/fw-venvs/lightx2v/lib/python3.12/site-packages"
+        },
+        "huggingface_hub": {
+          "Name": "huggingface_hub",
+          "Version": "1.33.0",
+          "Home-page": "https://github.com/huggingface/huggingface_hub",
+          "Location": "/personal/bench0925/fw-venvs/lightx2v/lib/python3.12/site-packages"
+        }
+      },
+      "direct_urls": {
+        "lightx2v-0.5.0.dist-info": {
+          "url": "https://github.com/ModelTC/LightX2V.git",
+          "vcs_info": {
+            "commit_id": "a4b8ce30ac73ae561ec9d1a8bc6629e4aed9d2d8",
+            "requested_revision": "a4b8ce30ac73",
+            "vcs": "git"
+          }
+        }
+      }
+    },
+    "trtllm-visual": {
+      "venv_path": "/personal/bench0925/fw-venvs/trtllm-visual",
+      "packages": {
+        "tensorrt_llm": {
+          "Name": "tensorrt_llm",
+          "Version": "1.3.0rc28",
+          "Home-page": "https://github.com/NVIDIA/TensorRT-LLM",
+          "Location": "/personal/bench0925/fw-venvs/trtllm-visual/lib/python3.12/site-packages"
+        },
+        "torch": {
+          "Name": "torch",
+          "Version": "2.13.0",
+          "Home-page": "https://pytorch.org",
+          "Location": "/personal/bench0925/fw-venvs/trtllm-visual/lib/python3.12/site-packages"
+        },
+        "transformers": {
+          "Name": "transformers",
+          "Version": "5.5.4",
+          "Home-page": "https://github.com/huggingface/transformers",
+          "Location": "/personal/bench0925/fw-venvs/trtllm-visual/lib/python3.12/site-packages"
+        },
+        "diffusers": {
+          "Name": "diffusers",
+          "Version": "0.40.0",
+          "Home-page": "https://github.com/huggingface/diffusers",
+          "Location": "/personal/bench0925/fw-venvs/trtllm-visual/lib/python3.12/site-packages"
+        },
+        "huggingface_hub": {
+          "Name": "huggingface_hub",
+          "Version": "1.33.0",
+          "Home-page": "https://github.com/huggingface/huggingface_hub",
+          "Location": "/personal/bench0925/fw-venvs/trtllm-visual/lib/python3.12/site-packages"
+        }
+      }
+    },
+    "comfyui": {
+      "venv_path": "/personal/bench0925/fw-venvs/comfyui",
+      "packages": {
+        "torchvision": {
+          "Name": "torchvision",
+          "Version": "0.29.0+cu130",
+          "Home-page": "https://github.com/pytorch/vision",
+          "Location": "/personal/bench0925/fw-venvs/comfyui/lib/python3.12/site-packages"
+        },
+        "torchaudio": {
+          "Name": "torchaudio",
+          "Version": "2.11.0+cu130",
+          "Home-page": "https://github.com/pytorch/audio",
+          "Location": "/personal/bench0925/fw-venvs/comfyui/lib/python3.12/site-packages"
+        },
+        "comfy-kitchen": {
+          "Name": "comfy-kitchen",
+          "Version": "0.2.35",
+          "Home-page": "https://github.com/Comfy-Org/comfy-kitchen",
+          "Location": "/personal/bench0925/fw-venvs/comfyui/lib/python3.12/site-packages"
+        },
+        "comfy-aimdo": {
+          "Name": "comfy-aimdo",
+          "Version": "0.5.5",
+          "Home-page": "",
+          "Location": "/personal/bench0925/fw-venvs/comfyui/lib/python3.12/site-packages"
+        },
+        "comfyui_frontend_package": {
+          "Name": "comfyui_frontend_package",
+          "Version": "1.53.6",
+          "Home-page": "",
+          "Location": "/personal/bench0925/fw-venvs/comfyui/lib/python3.12/site-packages"
+        },
+        "safetensors": {
+          "Name": "safetensors",
+          "Version": "0.8.0",
+          "Home-page": "https://github.com/huggingface/safetensors",
+          "Location": "/personal/bench0925/fw-venvs/comfyui/lib/python3.12/site-packages"
+        },
+        "torch": {
+          "Name": "torch",
+          "Version": "2.14.0+cu130",
+          "Home-page": "https://pytorch.org",
+          "Location": "/personal/bench0925/fw-venvs/comfyui/lib/python3.12/site-packages"
+        },
+        "transformers": {
+          "Name": "transformers",
+          "Version": "5.17.0",
+          "Home-page": "https://github.com/huggingface/transformers",
+          "Location": "/personal/bench0925/fw-venvs/comfyui/lib/python3.12/site-packages"
+        },
+        "huggingface_hub": {
+          "Name": "huggingface_hub",
+          "Version": "1.33.0",
+          "Home-page": "https://github.com/huggingface/huggingface_hub",
+          "Location": "/personal/bench0925/fw-venvs/comfyui/lib/python3.12/site-packages"
+        }
+      },
+      "source_commit": "88ab4a06566454ad89db8f0bedb970d6c08cd1b7",
+      "source_commit_date": "2026-09-24T22:33:18-04:00"
+    }
+  },
+  "benchmark_env": {},
+  "benchmark_framework_args": {
+    "vllm-omni": [],
+    "lightx2v": {
+      "config": {
+        "compile": true
+      }
+    }
+  },
+  "torch_compile_disabled": false,
+  "benchmark_modes": [
+    "single_e2e",
+    "throughput"
+  ],
+  "requested_sglang_profile": "auto",
+  "results": [
+    {
+      "case_id": "cosmos3_nano_t2i_720p",
+      "framework": "sglang",
+      "mode": "single_e2e",
+      "model": "nvidia/Cosmos3-Nano",
+      "task": "text-to-image",
+      "width": 1280,
+      "height": 720,
+      "num_frames": null,
+      "fps": null,
+      "num_inference_steps": 35,
+      "guidance_scale": 6.0,
+      "guidance_scale_2": null,
+      "true_cfg_scale": null,
+      "negative_prompt_set": false,
+      "num_gpus": 2,
+      "latency_s": 0.567,
+      "error": null,
+      "framework_metadata": {
+        "profile": "blackwell-2gpu-cfg-parallel",
+        "profile_request": "auto",
+        "profile_source": "hardware",
+        "framework_ref": null,
+        "hardware": [
+          "b200",
+          "gb200",
+          "b300",
+          "gb300"
+        ],
+        "hardware_candidates": [
+          "b200"
+        ],
+        "description": "Blackwell 2-GPU CFG-parallel + cuDNN-SDPA SGLang-Diffusion Cosmos3 T2I profile.",
+        "notes": "Measured on 4xB200 2026-09-13, two interleaved rounds. Against the previous `--tp-size 2 --attention-backend fa` command: 0.765 -> 0.576s and 0.797 -> 0.575s, about -25%, taking the cell from losing to vLLM-Omni (0.651-0.662s) to beating it. TWO changes, both measured separately. (1) CFG parallelism instead of TP: the case is guidance_scale 6.0 -- true CFG, two branches -- so one branch per GPU with the DiT replicated and one combine per step beats splitting every layer and paying an all-reduce per layer (0.765 -> 0.584, 0.797 -> 0.617). It is also what sglang's own runtime would choose: cosmos3 inherits auto_enable_cfg_parallel=True with get_auto_cfg_parallel_degree(2)->2 and _model_default_uses_cfg()->True, but `--tp-size 2` made _has_explicit_parallel_policy() true and suppressed it. The sibling Cosmos3 T2V profile already uses CFG parallel; T2I was the odd one out. (2) torch_cudnn_sdpa instead of fa, on top of that: 0.584 -> 0.576 and 0.617 -> 0.575, same sign both rounds, and far steadier -- its repeats spread 0.9% (0.572-0.577) where fa's swung 0.579-0.792. Exact softmax, same precision class as fa, and the backend vLLM-Omni serves this case with. fa2 does not run at all: there is no native transformer for it, so the loader tries a Diffusers fallback and refuses under tp>1. NOTE: at tp_size=1 that refusal no longer guards this cell -- the harness scans the server log for the fallback markers instead.",
+        "install_specs": null,
+        "server_bin": null,
+        "use_omni_arg": null,
+        "required_help_args": null,
+        "serve_args": "--model-type diffusion --warmup-mode server --attention-backend torch_cudnn_sdpa --tp-size 1 --cfg-parallel-size 2 --dit-layerwise-offload false --performance-mode speed --enable-torch-compile false",
+        "num_gpus": 2,
+        "extra_env_keys": [
+          "SGLANG_DISABLE_COSMOS3_GUARDRAILS"
+        ],
+        "sglang_profile": "blackwell-2gpu-cfg-parallel",
+        "sglang_profile_request": "auto",
+        "sglang_profile_source": "hardware",
+        "sglang_ref": "current-main"
+      },
+      "server_command": "sglang serve --model-path nvidia/Cosmos3-Nano --port 65033 --host 127.0.0.1 --backend sglang --num-gpus 2 --model-type diffusion --warmup-mode server --attention-backend torch_cudnn_sdpa --tp-size 1 --cfg-parallel-size 2 --dit-layerwise-offload false --performance-mode speed --enable-torch-compile false",
+      "metrics": {
+        "client_latency_s": 0.567,
+        "client_latency_min_s": 0.566,
+        "client_latency_max_s": 0.568,
+        "measured_repeats": 5,
+        "server_latency_s": 0.496,
+        "server_latency_source": "separate instrumented request, not one of the measured repeats",
+        "latency_samples_s": [
+          0.567,
+          0.567,
+          0.567,
+          0.568,
+          0.566
+        ],
+        "latency_spread_pct": 0.4,
+        "warmup_latencies_s": [
+          4.229,
+          0.363
+        ],
+        "warmup_steady_latencies_s": [
+          0.575,
+          0.573
+        ],
+        "server_startup_s": 90.11,
+        "warmup_s": 5.74
+      }
+    },
+    {
+      "case_id": "cosmos3_nano_t2i_720p",
+      "framework": "vllm-omni",
+      "mode": "single_e2e",
+      "model": "nvidia/Cosmos3-Nano",
+      "task": "text-to-image",
+      "width": 1280,
+      "height": 720,
+      "num_frames": null,
+      "fps": null,
+      "num_inference_steps": 35,
+      "guidance_scale": 6.0,
+      "guidance_scale_2": null,
+      "true_cfg_scale": null,
+      "negative_prompt_set": false,
+      "num_gpus": 2,
+      "latency_s": 0.631,
+      "error": null,
+      "framework_metadata": {
+        "profile": "blackwell-cudnn",
+        "profile_request": "auto",
+        "profile_source": "hardware",
+        "framework_ref": "vllm-omni-0.29.0rc2+blackwell-cudnn",
+        "hardware": [
+          "b200",
+          "gb200",
+          "b300",
+          "gb300"
+        ],
+        "hardware_candidates": [
+          "b200"
+        ],
+        "description": "Blackwell vLLM-Omni profile for cosmos3_nano_t2i_720p using cuDNN attention.",
+        "notes": "Blackwell attention choice, measured on this box 2026-09-12. FLASH_ATTN is a Hopper-only precompiled kernel -- vLLM-Omni refuses it on sm_100 with 'FLASH_ATTN was explicitly selected but is unsupported'. FLASHINFER_ATTN starts but dies under torch.compile on dynamic shapes (`AsPythonConstantNotImplementedError: SymNodeVariable() is not a constant` in the FlashInfer backend's _ensure_plan), observed on qwen-image and cosmos3 t2v; it is fine for the static image cases (zimage, flux), which are deliberately left on it. CUDNN_ATTN is exact softmax, the same precision class as the kernels the other frameworks run here, measured at 2.741s on qwen-image (vs TRTLLM_ATTN 3.274s) and already the backend minimax-h3 serves with on this box. Also drops --stage-configs-path: vLLM-Omni 0.29 rejects it outright (`stage_configs_path is no longer supported; use deploy_config instead`), and upstream's own cosmos3 deploy file says the T2I/video checkpoints must keep the default single-stage diffusion fallback -- so cfg-parallel and guardrails move to the first-class flags rather than to a new YAML. The old YAML also pinned enforce_eager, which silently ran this competitor compile-off against the policy.",
+        "install_specs": {
+          "vllm": "vllm==0.22.0",
+          "vllm_omni": "git+https://github.com/vllm-project/vllm-omni.git@40b2959183d7043cd9d35f5f6387fbb8d1375c57"
+        },
+        "server_bin": "vllm",
+        "use_omni_arg": true,
+        "required_help_args": [
+          "--omni",
+          "--model-class-name",
+          "--stage-init-timeout",
+          "--no-guardrails",
+          "--diffusion-attention-backend",
+          "--cache-backend",
+          "--cfg-parallel-size",
+          "--ulysses-degree"
+        ],
+        "serve_args": "--num-gpus 2 --cfg-parallel-size 2 --model-class-name Cosmos3OmniDiffusersPipeline --stage-init-timeout 900 --init-timeout 1800 --no-guardrails --diffusion-attention-backend CUDNN_ATTN --cache-backend none",
+        "num_gpus": 2,
+        "extra_env_keys": []
+      },
+      "server_command": "vllm serve nvidia/Cosmos3-Nano --port 65033 --host 127.0.0.1 --omni --num-gpus 2 --cfg-parallel-size 2 --model-class-name Cosmos3OmniDiffusersPipeline --stage-init-timeout 900 --init-timeout 1800 --no-guardrails --diffusion-attention-backend CUDNN_ATTN --cache-backend none",
+      "metrics": {
+        "client_latency_s": 0.631,
+        "client_latency_min_s": 0.628,
+        "client_latency_max_s": 0.636,
+        "measured_repeats": 5,
+        "latency_samples_s": [
+          0.633,
+          0.636,
+          0.629,
+          0.628,
+          0.631
+        ],
+        "latency_spread_pct": 1.2,
+        "warmup_latencies_s": [
+          1.786,
+          0.166
+        ],
+        "warmup_steady_latencies_s": [
+          0.628,
+          0.628
+        ],
+        "server_startup_s": 114.01,
+        "warmup_s": 3.21
+      }
+    }
+  ],
+  "throughput_results": [],
+  "partial": false,
+  "model_revisions": {
+    "nvidia/Cosmos3-Nano": "e59a53c25979a090fa8706c9acc0c254a6e89b92"
+  }
+}

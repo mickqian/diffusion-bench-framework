@@ -245,6 +245,16 @@ def main() -> int:
         latest["title"] = args.label
         latest["hardware"] = {"label": args.gpu}
         latest["frameworks"] = dict(FRAMEWORK_LABELS)
+        # The page draws the latest table's columns from framework_order, so an
+        # inherited list silently dropped a framework new to this run (ComfyUI).
+        latest["framework_order"] = list(FRAMEWORK_LABELS)
+        # Named in the page footer; inherited, it kept citing the July H100 report.
+        report_dir = args.merged.resolve().parent
+        latest["source_report"] = (
+            f"{report_dir.relative_to(ROOT).as_posix()}/"
+            if report_dir.is_relative_to(ROOT / "reports")
+            else args.run_id
+        )
         # Rebuild the policy block instead of inheriting it. It carries
         # run-specific prose (a bimodal-latency note from July, a harness bug
         # fixed in July, an h100-specific "selection" line) that publishing

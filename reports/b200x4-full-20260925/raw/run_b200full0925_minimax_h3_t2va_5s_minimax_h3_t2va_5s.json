@@ -1,0 +1,666 @@
+{
+  "timestamp": "2026-09-25T09:58:49.497001+00:00",
+  "commit_sha": "bc439d0ba98e3cd2fcfc64475a6a0c8e1889ed42",
+  "run_id": "local",
+  "hardware": {
+    "runner_labels": null,
+    "gpu_config": null,
+    "gpus": [
+      "NVIDIA B200, 183359 MiB, 580.126.09",
+      "NVIDIA B200, 183359 MiB, 580.126.09",
+      "NVIDIA B200, 183359 MiB, 580.126.09",
+      "NVIDIA B200, 183359 MiB, 580.126.09"
+    ],
+    "hardware_profile_override": "b200"
+  },
+  "sglang_runtime": {
+    "package_version": "0.0.0.dev1+g8ca82118e",
+    "module_path": "/sgl-workspace/sglang/python/sglang/__init__.py",
+    "git_root": "/sgl-workspace/sglang",
+    "git_commit": "434c2e3adcd77afe42d6604b693d97aef71938e6"
+  },
+  "framework_runtime": {
+    "venv_root": "/personal/bench0925/fw-venvs",
+    "install_specs": {
+      "vllm": "vllm==0.18.0",
+      "vllm_omni": "vllm-omni==0.18.0",
+      "lightx2v": "git+https://github.com/ModelTC/LightX2V.git@7efd05f8e1425b83321fd4f1cef779ef6504076f",
+      "lightx2v_flash_attn": "flash-attn==2.8.3",
+      "lightx2v_flash_attn3": "",
+      "lightx2v_fa3_hf_repo": "varunneal/flash-attention-3",
+      "lightx2v_fa3_hf_revision": "de87b9b5af06dd9984df595bef90b2eba44b181a",
+      "lightx2v_fa3_hf_subdir": "build/torch28-cxx11-cu128-x86_64-linux/flash_attention_3",
+      "lightx2v_flashinfer": "flashinfer-python==0.6.11",
+      "trtllm": "tensorrt-llm==1.3.0rc18",
+      "torch_cuda_arch_list": ""
+    },
+    "launchers": {
+      "vllm_omni_server_bin": "vllm",
+      "vllm_omni_required_help_args": "--omni",
+      "trtllm_visual_server_bin": "trtllm-serve"
+    },
+    "vllm-omni": {
+      "venv_path": "/personal/bench0925/fw-venvs/vllm-omni",
+      "packages": {
+        "vllm": {
+          "Name": "vllm",
+          "Version": "0.30.0",
+          "Home-page": "https://github.com/vllm-project/vllm",
+          "Location": "/personal/bench0925/fw-venvs/vllm-omni/lib/python3.12/site-packages"
+        },
+        "vllm-omni": {
+          "Name": "vllm-omni",
+          "Version": "0.30.0rc2.dev69+g69de153f6",
+          "Home-page": "https://github.com/vllm-project/vllm-omni",
+          "Location": "/personal/bench0925/fw-venvs/vllm-omni/lib/python3.12/site-packages"
+        },
+        "torch": {
+          "Name": "torch",
+          "Version": "2.13.0",
+          "Home-page": "https://pytorch.org",
+          "Location": "/personal/bench0925/fw-venvs/vllm-omni/lib/python3.12/site-packages"
+        },
+        "transformers": {
+          "Name": "transformers",
+          "Version": "5.14.1",
+          "Home-page": "https://github.com/huggingface/transformers",
+          "Location": "/personal/bench0925/fw-venvs/vllm-omni/lib/python3.12/site-packages"
+        },
+        "diffusers": {
+          "Name": "diffusers",
+          "Version": "0.40.0",
+          "Home-page": "https://github.com/huggingface/diffusers",
+          "Location": "/personal/bench0925/fw-venvs/vllm-omni/lib/python3.12/site-packages"
+        },
+        "huggingface_hub": {
+          "Name": "huggingface_hub",
+          "Version": "1.33.0",
+          "Home-page": "https://github.com/huggingface/huggingface_hub",
+          "Location": "/personal/bench0925/fw-venvs/vllm-omni/lib/python3.12/site-packages"
+        }
+      },
+      "direct_urls": {
+        "vllm_omni-0.30.0rc2.dev69+g69de153f6.dist-info": {
+          "url": "file:///personal/bench0925/fw-venvs/vllm-omni/src/vllm-omni",
+          "dir_info": {
+            "editable": true
+          }
+        }
+      }
+    },
+    "lightx2v": {
+      "venv_path": "/personal/bench0925/fw-venvs/lightx2v",
+      "packages": {
+        "lightx2v": {
+          "Name": "lightx2v",
+          "Version": "0.5.0",
+          "Home-page": "https://github.com/ModelTC/LightX2V",
+          "Location": "/personal/bench0925/fw-venvs/lightx2v/lib/python3.12/site-packages"
+        },
+        "flash_attn": {
+          "Name": "flash_attn",
+          "Version": "2.8.3",
+          "Home-page": "https://github.com/Dao-AILab/flash-attention",
+          "Location": "/personal/bench0925/fw-venvs/lightx2v/lib/python3.12/site-packages"
+        },
+        "flashinfer-python": {
+          "Name": "flashinfer-python",
+          "Version": "0.6.11",
+          "Home-page": "https://github.com/flashinfer-ai/flashinfer",
+          "Location": "/personal/bench0925/fw-venvs/lightx2v/lib/python3.12/site-packages"
+        },
+        "torch": {
+          "Name": "torch",
+          "Version": "2.11.0",
+          "Home-page": "https://pytorch.org",
+          "Location": "/personal/bench0925/fw-venvs/lightx2v/lib/python3.12/site-packages"
+        },
+        "transformers": {
+          "Name": "transformers",
+          "Version": "5.17.0",
+          "Home-page": "https://github.com/huggingface/transformers",
+          "Location": "/personal/bench0925/fw-venvs/lightx2v/lib/python3.12/site-packages"
+        },
+        "diffusers": {
+          "Name": "diffusers",
+          "Version": "0.40.0",
+          "Home-page": "https://github.com/huggingface/diffusers",
+          "Location": "/personal/bench0925/fw-venvs/lightx2v/lib/python3.12/site-packages"
+        },
+        "huggingface_hub": {
+          "Name": "huggingface_hub",
+          "Version": "1.33.0",
+          "Home-page": "https://github.com/huggingface/huggingface_hub",
+          "Location": "/personal/bench0925/fw-venvs/lightx2v/lib/python3.12/site-packages"
+        }
+      },
+      "direct_urls": {
+        "lightx2v-0.5.0.dist-info": {
+          "url": "https://github.com/ModelTC/LightX2V.git",
+          "vcs_info": {
+            "commit_id": "a4b8ce30ac73ae561ec9d1a8bc6629e4aed9d2d8",
+            "requested_revision": "a4b8ce30ac73",
+            "vcs": "git"
+          }
+        }
+      }
+    },
+    "trtllm-visual": {
+      "venv_path": "/personal/bench0925/fw-venvs/trtllm-visual",
+      "packages": {
+        "tensorrt_llm": {
+          "Name": "tensorrt_llm",
+          "Version": "1.3.0rc28",
+          "Home-page": "https://github.com/NVIDIA/TensorRT-LLM",
+          "Location": "/personal/bench0925/fw-venvs/trtllm-visual/lib/python3.12/site-packages"
+        },
+        "torch": {
+          "Name": "torch",
+          "Version": "2.13.0",
+          "Home-page": "https://pytorch.org",
+          "Location": "/personal/bench0925/fw-venvs/trtllm-visual/lib/python3.12/site-packages"
+        },
+        "transformers": {
+          "Name": "transformers",
+          "Version": "5.5.4",
+          "Home-page": "https://github.com/huggingface/transformers",
+          "Location": "/personal/bench0925/fw-venvs/trtllm-visual/lib/python3.12/site-packages"
+        },
+        "diffusers": {
+          "Name": "diffusers",
+          "Version": "0.40.0",
+          "Home-page": "https://github.com/huggingface/diffusers",
+          "Location": "/personal/bench0925/fw-venvs/trtllm-visual/lib/python3.12/site-packages"
+        },
+        "huggingface_hub": {
+          "Name": "huggingface_hub",
+          "Version": "1.33.0",
+          "Home-page": "https://github.com/huggingface/huggingface_hub",
+          "Location": "/personal/bench0925/fw-venvs/trtllm-visual/lib/python3.12/site-packages"
+        }
+      }
+    },
+    "comfyui": {
+      "venv_path": "/personal/bench0925/fw-venvs/comfyui",
+      "packages": {
+        "torchvision": {
+          "Name": "torchvision",
+          "Version": "0.29.0+cu130",
+          "Home-page": "https://github.com/pytorch/vision",
+          "Location": "/personal/bench0925/fw-venvs/comfyui/lib/python3.12/site-packages"
+        },
+        "torchaudio": {
+          "Name": "torchaudio",
+          "Version": "2.11.0+cu130",
+          "Home-page": "https://github.com/pytorch/audio",
+          "Location": "/personal/bench0925/fw-venvs/comfyui/lib/python3.12/site-packages"
+        },
+        "comfy-kitchen": {
+          "Name": "comfy-kitchen",
+          "Version": "0.2.35",
+          "Home-page": "https://github.com/Comfy-Org/comfy-kitchen",
+          "Location": "/personal/bench0925/fw-venvs/comfyui/lib/python3.12/site-packages"
+        },
+        "comfy-aimdo": {
+          "Name": "comfy-aimdo",
+          "Version": "0.5.5",
+          "Home-page": "",
+          "Location": "/personal/bench0925/fw-venvs/comfyui/lib/python3.12/site-packages"
+        },
+        "comfyui_frontend_package": {
+          "Name": "comfyui_frontend_package",
+          "Version": "1.53.6",
+          "Home-page": "",
+          "Location": "/personal/bench0925/fw-venvs/comfyui/lib/python3.12/site-packages"
+        },
+        "safetensors": {
+          "Name": "safetensors",
+          "Version": "0.8.0",
+          "Home-page": "https://github.com/huggingface/safetensors",
+          "Location": "/personal/bench0925/fw-venvs/comfyui/lib/python3.12/site-packages"
+        },
+        "torch": {
+          "Name": "torch",
+          "Version": "2.14.0+cu130",
+          "Home-page": "https://pytorch.org",
+          "Location": "/personal/bench0925/fw-venvs/comfyui/lib/python3.12/site-packages"
+        },
+        "transformers": {
+          "Name": "transformers",
+          "Version": "5.17.0",
+          "Home-page": "https://github.com/huggingface/transformers",
+          "Location": "/personal/bench0925/fw-venvs/comfyui/lib/python3.12/site-packages"
+        },
+        "huggingface_hub": {
+          "Name": "huggingface_hub",
+          "Version": "1.33.0",
+          "Home-page": "https://github.com/huggingface/huggingface_hub",
+          "Location": "/personal/bench0925/fw-venvs/comfyui/lib/python3.12/site-packages"
+        }
+      },
+      "source_commit": "88ab4a06566454ad89db8f0bedb970d6c08cd1b7",
+      "source_commit_date": "2026-09-24T22:33:18-04:00"
+    }
+  },
+  "benchmark_env": {},
+  "benchmark_framework_args": {
+    "vllm-omni": [],
+    "lightx2v": {
+      "config": {
+        "compile": true
+      }
+    }
+  },
+  "torch_compile_disabled": false,
+  "benchmark_modes": [
+    "single_e2e",
+    "throughput"
+  ],
+  "requested_sglang_profile": "auto",
+  "results": [
+    {
+      "case_id": "minimax_h3_t2va_5s",
+      "framework": "sglang",
+      "mode": "single_e2e",
+      "model": "MiniMaxAI/MiniMax-H3",
+      "task": "text-to-video",
+      "width": 1344,
+      "height": 768,
+      "num_frames": 124,
+      "fps": 24,
+      "num_inference_steps": 50,
+      "guidance_scale": null,
+      "guidance_scale_2": null,
+      "true_cfg_scale": null,
+      "negative_prompt_set": false,
+      "num_gpus": 2,
+      "latency_s": 72.878,
+      "error": null,
+      "framework_metadata": {
+        "profile": "b200-2gpu",
+        "profile_request": "auto",
+        "profile_source": "hardware",
+        "framework_ref": null,
+        "hardware": [
+          "b200",
+          "b300"
+        ],
+        "hardware_candidates": [
+          "b200"
+        ],
+        "description": "2x B200 (183 GB), fully resident -- no layerwise offload needed at this memory class.",
+        "notes": "Validated 2026-08-07 on 2 independent fresh 2xB200 devboxes (h3-b200-2gpu-v2 and its predecessor), same request as the rtx5090-2gpu profile. Two back-to-back runs agreed to 2 decimal places: client wall 80.64s/80.63s, server-reported inference_time_s 75.42/75.42, peak_memory_mb 108328/108358 (well under the 183 GB budget -- room to spare, unlike the 32 GB RTX5090 profile which needs the layerwise-offload knobs). ~7.6x faster wall-clock than the rtx5090-2gpu profile on the identical request; expected given B200's raw compute plus the total absence of the 5090 recipe's CPU<->GPU layerwise-transfer tax. See the vllm-omni entry's b200-2gpu profile for the cross-framework comparison on the same hardware.",
+        "install_specs": null,
+        "server_bin": null,
+        "use_omni_arg": null,
+        "required_help_args": null,
+        "serve_args": "--model-type diffusion --warmup-mode server --model-variant fl2va --ulysses-degree 2 --performance-mode speed --enable-torch-compile false",
+        "num_gpus": 2,
+        "extra_env_keys": [],
+        "sglang_profile": "b200-2gpu",
+        "sglang_profile_request": "auto",
+        "sglang_profile_source": "hardware",
+        "sglang_ref": "8d0c77081 (2026-08-07 checkout, includes sgl-project/sglang#33969)"
+      },
+      "server_command": "sglang serve --model-path MiniMaxAI/MiniMax-H3 --port 65037 --host 127.0.0.1 --backend sglang --num-gpus 2 --model-type diffusion --warmup-mode server --model-variant fl2va --ulysses-degree 2 --performance-mode speed --enable-torch-compile false",
+      "metrics": {
+        "client_latency_s": 72.878,
+        "client_latency_min_s": 72.864,
+        "client_latency_max_s": 72.891,
+        "measured_repeats": 2,
+        "server_latency_s": 72.238,
+        "server_latency_source": "separate instrumented request, not one of the measured repeats",
+        "latency_samples_s": [
+          72.891,
+          72.864
+        ],
+        "latency_spread_pct": 0.0,
+        "warmup_latencies_s": [
+          6.664,
+          5.237,
+          5.238
+        ],
+        "warmup_steady_latencies_s": [
+          72.67
+        ],
+        "server_startup_s": 280.25,
+        "warmup_s": 89.81
+      }
+    },
+    {
+      "case_id": "minimax_h3_t2va_5s",
+      "framework": "vllm-omni",
+      "mode": "single_e2e",
+      "model": "MiniMaxAI/MiniMax-H3",
+      "task": "text-to-video",
+      "width": 1344,
+      "height": 768,
+      "num_frames": 124,
+      "fps": 24,
+      "num_inference_steps": 50,
+      "guidance_scale": null,
+      "guidance_scale_2": null,
+      "true_cfg_scale": null,
+      "negative_prompt_set": false,
+      "num_gpus": 2,
+      "latency_s": 78.64,
+      "error": null,
+      "framework_metadata": {
+        "profile": "b200-2gpu",
+        "profile_request": "auto",
+        "profile_source": "hardware",
+        "framework_ref": "vllm-omni recipes/MiniMaxAI/MiniMax-H3.md (2-GPU section) + --enforce-eager; git main 0.26.1.dev50+gcfa6d66ed + vllm==0.26.0",
+        "hardware": [
+          "b200",
+          "b300"
+        ],
+        "hardware_candidates": [
+          "b200"
+        ],
+        "description": "2x B200, same recipe as enforce-eager -- the profile that actually completes a generation for this case.",
+        "notes": "Validated 2026-08-07 on 2xB200 (h3-b200-2gpu-v2): completes the case's T2VA request end to end -- client wall 105.76s, server-reported inference_time_s 103.06, peak_memory_mb 24546. Output verified with ffprobe directly on the returned MP4: 124 frames @ 24 fps = 5.166667s, exactly matching the requested 5s/124-frame shape (the API's own JSON `seconds` field reported a stale '4' on both the submit and completed response -- a cosmetic metadata default unrelated to the real generation params, not a real duration shortfall; confirmed by decoding the actual file). Still uses the recipe's memory-constrained --dlo-resident-layers 20 offload even though B200's 183 GB has no need for it -- vllm-omni ships only one documented 2-GPU H3 recipe, so this is that recipe as-is, not a B200-tuned command; a fully-resident vllm-omni command may be faster but is not a documented starting point. Same request, same 2xB200 hardware, sglang's b200-2gpu profile: 80.64s/80.63s client wall, 75.42s inference_time_s -- sglang is ~1.31x faster than vLLM-Omni here.",
+        "install_specs": null,
+        "server_bin": null,
+        "use_omni_arg": null,
+        "required_help_args": null,
+        "serve_args": "--trust-remote-code --tensor-parallel-size 2 --enforce-eager --enable-distributed-layerwise-offload --dlo-no-use-allgather --dlo-resident-layers 20 --diffusion-attention-backend CUDNN_ATTN",
+        "num_gpus": 2,
+        "extra_env_keys": [
+          "VLLM_OMNI_VIDEO_SYNC_TIMEOUT",
+          "VLLM_WORKER_MULTIPROC_METHOD"
+        ]
+      },
+      "server_command": "vllm serve MiniMaxAI/MiniMax-H3 --port 65037 --host 127.0.0.1 --omni --trust-remote-code --tensor-parallel-size 2 --enforce-eager --enable-distributed-layerwise-offload --dlo-no-use-allgather --dlo-resident-layers 20 --diffusion-attention-backend CUDNN_ATTN",
+      "metrics": {
+        "client_latency_s": 78.64,
+        "client_latency_min_s": 78.558,
+        "client_latency_max_s": 78.723,
+        "measured_repeats": 2,
+        "latency_samples_s": [
+          78.558,
+          78.723
+        ],
+        "latency_spread_pct": 0.2,
+        "warmup_latencies_s": [
+          17.739,
+          9.923,
+          9.865
+        ],
+        "server_startup_s": 346.31,
+        "warmup_s": 37.53
+      }
+    },
+    {
+      "case_id": "minimax_h3_t2va_5s",
+      "framework": "comfyui",
+      "mode": "single_e2e",
+      "model": "MiniMaxAI/MiniMax-H3",
+      "task": "text-to-video",
+      "width": 1344,
+      "height": 768,
+      "num_frames": 124,
+      "fps": 24,
+      "num_inference_steps": 50,
+      "guidance_scale": null,
+      "guidance_scale_2": null,
+      "true_cfg_scale": null,
+      "negative_prompt_set": false,
+      "num_gpus": 1,
+      "latency_s": 319.129,
+      "error": null,
+      "framework_metadata": {
+        "profile": "blackwell-gpuonly",
+        "profile_request": "auto",
+        "profile_source": "hardware",
+        "framework_ref": "ComfyUI master HEAD",
+        "hardware": [
+          "b200",
+          "gb200",
+          "b300",
+          "gb300"
+        ],
+        "hardware_candidates": [
+          "b200"
+        ],
+        "description": "Blackwell: the default graph with every model resident on the GPU (--gpu-only).",
+        "notes": "B200: --gpu-only keeps every model, text encoders included, stored and run on the card; a 183 GB B200 holds the largest graph here (MiniMax-H3: 62 GB DiT + 48 GB Qwen3-VL-32B + VAEs). Placement only, numerics unchanged. Measured 2026-09-25 on 1xB200, FLUX.1 eager, interleaved arms: default 5.94 / 5.77 / 5.79s against --gpu-only 5.56s and --gpu-only --disable-dynamic-vram 5.57s (Qwen-Image-2.1: 3.75 / 3.91 against 3.47 / 3.48) -- every --gpu-only arm below every default arm; disabling dynamic VRAM on top adds nothing, so the simpler flag is kept.",
+        "install_specs": null,
+        "server_bin": null,
+        "use_omni_arg": null,
+        "required_help_args": null,
+        "serve_args": "--gpu-only",
+        "num_gpus": 1,
+        "extra_env_keys": [],
+        "comfyui_workflow": "minimax_h3_t2va.json",
+        "comfyui_models": {
+          "diffusion_models/minimax_h3_fl2va_bf16.safetensors": "Comfy-Org/MiniMax-H3:diffusion_models/minimax_h3_fl2va_bf16.safetensors",
+          "text_encoders/qwen3vl_32b_minimax_h3_bf16.safetensors": "Comfy-Org/MiniMax-H3:text_encoders/qwen3vl_32b_minimax_h3_bf16.safetensors",
+          "vae/minimax_h3_video_vae_fp16.safetensors": "Comfy-Org/MiniMax-H3:vae/minimax_h3_video_vae_fp16.safetensors",
+          "vae/minimax_h3_audio_vae_fp32.safetensors": "Comfy-Org/MiniMax-H3:vae/minimax_h3_audio_vae_fp32.safetensors"
+        },
+        "comfyui_params": null,
+        "comfyui_compile": true
+      },
+      "server_command": "python3 /personal/bench0925/fw-venvs/comfyui/ComfyUI/main.py --listen 127.0.0.1 --port 65037 --disable-auto-launch --extra-model-paths-config /scratch/comfy-ws/minimax_h3_t2va_5s/extra_model_paths.yaml --input-directory /scratch/comfy-ws/minimax_h3_t2va_5s/input --output-directory /scratch/comfy-ws/minimax_h3_t2va_5s/output --gpu-only",
+      "metrics": {
+        "client_latency_s": 319.129,
+        "client_latency_min_s": 318.889,
+        "client_latency_max_s": 319.37,
+        "measured_repeats": 2,
+        "latency_samples_s": [
+          318.889,
+          319.37
+        ],
+        "latency_spread_pct": 0.2,
+        "warmup_latencies_s": [
+          90.032,
+          24.049,
+          24.551
+        ],
+        "server_startup_s": 20.67,
+        "warmup_s": 138.65
+      }
+    }
+  ],
+  "throughput_results": [
+    {
+      "case_id": "minimax_h3_t2va_5s",
+      "framework": "sglang",
+      "mode": "throughput",
+      "model": "MiniMaxAI/MiniMax-H3",
+      "task": "text-to-video",
+      "width": 1344,
+      "height": 768,
+      "num_frames": 124,
+      "fps": 24,
+      "num_inference_steps": 50,
+      "guidance_scale": null,
+      "guidance_scale_2": null,
+      "true_cfg_scale": null,
+      "negative_prompt_set": false,
+      "num_gpus": 2,
+      "latency_s": 145.843,
+      "error": null,
+      "framework_metadata": {
+        "profile": "b200-2gpu",
+        "profile_request": "auto",
+        "profile_source": "hardware",
+        "framework_ref": null,
+        "hardware": [
+          "b200",
+          "b300"
+        ],
+        "hardware_candidates": [
+          "b200"
+        ],
+        "description": "2x B200 (183 GB), fully resident -- no layerwise offload needed at this memory class.",
+        "notes": "Validated 2026-08-07 on 2 independent fresh 2xB200 devboxes (h3-b200-2gpu-v2 and its predecessor), same request as the rtx5090-2gpu profile. Two back-to-back runs agreed to 2 decimal places: client wall 80.64s/80.63s, server-reported inference_time_s 75.42/75.42, peak_memory_mb 108328/108358 (well under the 183 GB budget -- room to spare, unlike the 32 GB RTX5090 profile which needs the layerwise-offload knobs). ~7.6x faster wall-clock than the rtx5090-2gpu profile on the identical request; expected given B200's raw compute plus the total absence of the 5090 recipe's CPU<->GPU layerwise-transfer tax. See the vllm-omni entry's b200-2gpu profile for the cross-framework comparison on the same hardware.",
+        "install_specs": null,
+        "server_bin": null,
+        "use_omni_arg": null,
+        "required_help_args": null,
+        "serve_args": "--model-type diffusion --warmup-mode server --model-variant fl2va --ulysses-degree 2 --performance-mode speed --enable-torch-compile false",
+        "num_gpus": 2,
+        "extra_env_keys": [],
+        "sglang_profile": "b200-2gpu",
+        "sglang_profile_request": "auto",
+        "sglang_profile_source": "hardware",
+        "sglang_ref": "8d0c77081 (2026-08-07 checkout, includes sgl-project/sglang#33969)"
+      },
+      "server_command": "sglang serve --model-path MiniMaxAI/MiniMax-H3 --port 65037 --host 127.0.0.1 --backend sglang --num-gpus 2 --model-type diffusion --warmup-mode server --model-variant fl2va --ulysses-degree 2 --performance-mode speed --enable-torch-compile false",
+      "metrics": {
+        "duration_s": 291.686,
+        "num_requests": 4,
+        "completed_requests": 4,
+        "failed_requests": 0,
+        "max_concurrency": 2,
+        "throughput_rps": 0.0137,
+        "output_throughput_ops": 0.0137,
+        "latency_mean_s": 127.807,
+        "latency_p50_s": 145.843,
+        "latency_p90_s": 146.362,
+        "latency_p95_s": 146.362,
+        "latency_p99_s": 146.363,
+        "errors": [],
+        "server_startup_s": 280.25,
+        "warmup_s": 89.81
+      }
+    },
+    {
+      "case_id": "minimax_h3_t2va_5s",
+      "framework": "vllm-omni",
+      "mode": "throughput",
+      "model": "MiniMaxAI/MiniMax-H3",
+      "task": "text-to-video",
+      "width": 1344,
+      "height": 768,
+      "num_frames": 124,
+      "fps": 24,
+      "num_inference_steps": 50,
+      "guidance_scale": null,
+      "guidance_scale_2": null,
+      "true_cfg_scale": null,
+      "negative_prompt_set": false,
+      "num_gpus": 2,
+      "latency_s": 155.828,
+      "error": null,
+      "framework_metadata": {
+        "profile": "b200-2gpu",
+        "profile_request": "auto",
+        "profile_source": "hardware",
+        "framework_ref": "vllm-omni recipes/MiniMaxAI/MiniMax-H3.md (2-GPU section) + --enforce-eager; git main 0.26.1.dev50+gcfa6d66ed + vllm==0.26.0",
+        "hardware": [
+          "b200",
+          "b300"
+        ],
+        "hardware_candidates": [
+          "b200"
+        ],
+        "description": "2x B200, same recipe as enforce-eager -- the profile that actually completes a generation for this case.",
+        "notes": "Validated 2026-08-07 on 2xB200 (h3-b200-2gpu-v2): completes the case's T2VA request end to end -- client wall 105.76s, server-reported inference_time_s 103.06, peak_memory_mb 24546. Output verified with ffprobe directly on the returned MP4: 124 frames @ 24 fps = 5.166667s, exactly matching the requested 5s/124-frame shape (the API's own JSON `seconds` field reported a stale '4' on both the submit and completed response -- a cosmetic metadata default unrelated to the real generation params, not a real duration shortfall; confirmed by decoding the actual file). Still uses the recipe's memory-constrained --dlo-resident-layers 20 offload even though B200's 183 GB has no need for it -- vllm-omni ships only one documented 2-GPU H3 recipe, so this is that recipe as-is, not a B200-tuned command; a fully-resident vllm-omni command may be faster but is not a documented starting point. Same request, same 2xB200 hardware, sglang's b200-2gpu profile: 80.64s/80.63s client wall, 75.42s inference_time_s -- sglang is ~1.31x faster than vLLM-Omni here.",
+        "install_specs": null,
+        "server_bin": null,
+        "use_omni_arg": null,
+        "required_help_args": null,
+        "serve_args": "--trust-remote-code --tensor-parallel-size 2 --enforce-eager --enable-distributed-layerwise-offload --dlo-no-use-allgather --dlo-resident-layers 20 --diffusion-attention-backend CUDNN_ATTN",
+        "num_gpus": 2,
+        "extra_env_keys": [
+          "VLLM_OMNI_VIDEO_SYNC_TIMEOUT",
+          "VLLM_WORKER_MULTIPROC_METHOD"
+        ]
+      },
+      "server_command": "vllm serve MiniMaxAI/MiniMax-H3 --port 65037 --host 127.0.0.1 --omni --trust-remote-code --tensor-parallel-size 2 --enforce-eager --enable-distributed-layerwise-offload --dlo-no-use-allgather --dlo-resident-layers 20 --diffusion-attention-backend CUDNN_ATTN",
+      "metrics": {
+        "duration_s": 312.67,
+        "num_requests": 4,
+        "completed_requests": 4,
+        "failed_requests": 0,
+        "max_concurrency": 2,
+        "throughput_rps": 0.0128,
+        "output_throughput_ops": 0.0128,
+        "latency_mean_s": 136.797,
+        "latency_p50_s": 155.828,
+        "latency_p90_s": 156.339,
+        "latency_p95_s": 156.343,
+        "latency_p99_s": 156.346,
+        "errors": [],
+        "server_startup_s": 346.31,
+        "warmup_s": 37.53
+      }
+    },
+    {
+      "case_id": "minimax_h3_t2va_5s",
+      "framework": "comfyui",
+      "mode": "throughput",
+      "model": "MiniMaxAI/MiniMax-H3",
+      "task": "text-to-video",
+      "width": 1344,
+      "height": 768,
+      "num_frames": 124,
+      "fps": 24,
+      "num_inference_steps": 50,
+      "guidance_scale": null,
+      "guidance_scale_2": null,
+      "true_cfg_scale": null,
+      "negative_prompt_set": false,
+      "num_gpus": 1,
+      "latency_s": 638.37,
+      "error": null,
+      "framework_metadata": {
+        "profile": "blackwell-gpuonly",
+        "profile_request": "auto",
+        "profile_source": "hardware",
+        "framework_ref": "ComfyUI master HEAD",
+        "hardware": [
+          "b200",
+          "gb200",
+          "b300",
+          "gb300"
+        ],
+        "hardware_candidates": [
+          "b200"
+        ],
+        "description": "Blackwell: the default graph with every model resident on the GPU (--gpu-only).",
+        "notes": "B200: --gpu-only keeps every model, text encoders included, stored and run on the card; a 183 GB B200 holds the largest graph here (MiniMax-H3: 62 GB DiT + 48 GB Qwen3-VL-32B + VAEs). Placement only, numerics unchanged. Measured 2026-09-25 on 1xB200, FLUX.1 eager, interleaved arms: default 5.94 / 5.77 / 5.79s against --gpu-only 5.56s and --gpu-only --disable-dynamic-vram 5.57s (Qwen-Image-2.1: 3.75 / 3.91 against 3.47 / 3.48) -- every --gpu-only arm below every default arm; disabling dynamic VRAM on top adds nothing, so the simpler flag is kept.",
+        "install_specs": null,
+        "server_bin": null,
+        "use_omni_arg": null,
+        "required_help_args": null,
+        "serve_args": "--gpu-only",
+        "num_gpus": 1,
+        "extra_env_keys": [],
+        "comfyui_workflow": "minimax_h3_t2va.json",
+        "comfyui_models": {
+          "diffusion_models/minimax_h3_fl2va_bf16.safetensors": "Comfy-Org/MiniMax-H3:diffusion_models/minimax_h3_fl2va_bf16.safetensors",
+          "text_encoders/qwen3vl_32b_minimax_h3_bf16.safetensors": "Comfy-Org/MiniMax-H3:text_encoders/qwen3vl_32b_minimax_h3_bf16.safetensors",
+          "vae/minimax_h3_video_vae_fp16.safetensors": "Comfy-Org/MiniMax-H3:vae/minimax_h3_video_vae_fp16.safetensors",
+          "vae/minimax_h3_audio_vae_fp32.safetensors": "Comfy-Org/MiniMax-H3:vae/minimax_h3_audio_vae_fp32.safetensors"
+        },
+        "comfyui_params": null,
+        "comfyui_compile": true
+      },
+      "server_command": "python3 /personal/bench0925/fw-venvs/comfyui/ComfyUI/main.py --listen 127.0.0.1 --port 65037 --disable-auto-launch --extra-model-paths-config /scratch/comfy-ws/minimax_h3_t2va_5s/extra_model_paths.yaml --input-directory /scratch/comfy-ws/minimax_h3_t2va_5s/input --output-directory /scratch/comfy-ws/minimax_h3_t2va_5s/output --gpu-only",
+      "metrics": {
+        "duration_s": 1276.756,
+        "num_requests": 4,
+        "completed_requests": 4,
+        "failed_requests": 0,
+        "max_concurrency": 2,
+        "throughput_rps": 0.0031,
+        "output_throughput_ops": 0.0031,
+        "latency_mean_s": 558.562,
+        "latency_p50_s": 638.37,
+        "latency_p90_s": 638.431,
+        "latency_p95_s": 638.433,
+        "latency_p99_s": 638.435,
+        "errors": [],
+        "server_startup_s": 20.67,
+        "warmup_s": 138.65
+      }
+    }
+  ],
+  "partial": false,
+  "model_revisions": {
+    "MiniMaxAI/MiniMax-H3": "42ed227ee7df40d41602854ae760620d6eb651fe"
+  }
+}

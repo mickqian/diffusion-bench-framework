@@ -41,6 +41,7 @@ If a SGLang profile OOMs or fails on one hardware class, add a hardware-specific
 - Keep health checks fail-fast when the server exits.
 - Prefer official framework APIs over local patches.
 - Store framework-specific settings under that framework entry; avoid global settings that only apply to one backend.
+- A new framework also needs registering on the page, which draws from hardcoded lists: `FRAMEWORK_LABELS` in `page_export.py`, then in `docs/index.html` `FRAMEWORK_META`, `FRAMEWORK_RANK`, `frameworkLabels`, `known`, `BNX_ORDER`/`BNX_SHORT`/`BNX_COLOR` and a `--bar-<name>` colour in all three theme blocks. ComfyUI's first run published its data and drew nothing; `scripts/tests/test_page_draws_every_framework.py` now fails until every list has it.
 
 ## Validation
 

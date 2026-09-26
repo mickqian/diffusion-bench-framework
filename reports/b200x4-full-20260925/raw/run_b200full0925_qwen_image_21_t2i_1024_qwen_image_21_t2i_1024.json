@@ -1,0 +1,498 @@
+{
+  "timestamp": "2026-09-25T09:46:30.368272+00:00",
+  "commit_sha": "bc439d0ba98e3cd2fcfc64475a6a0c8e1889ed42",
+  "run_id": "local",
+  "hardware": {
+    "runner_labels": null,
+    "gpu_config": null,
+    "gpus": [
+      "NVIDIA B200, 183359 MiB, 580.126.09",
+      "NVIDIA B200, 183359 MiB, 580.126.09",
+      "NVIDIA B200, 183359 MiB, 580.126.09",
+      "NVIDIA B200, 183359 MiB, 580.126.09"
+    ],
+    "hardware_profile_override": "b200"
+  },
+  "sglang_runtime": {
+    "package_version": "0.0.0.dev1+g8ca82118e",
+    "module_path": "/sgl-workspace/sglang/python/sglang/__init__.py",
+    "git_root": "/sgl-workspace/sglang",
+    "git_commit": "434c2e3adcd77afe42d6604b693d97aef71938e6"
+  },
+  "framework_runtime": {
+    "venv_root": "/personal/bench0925/fw-venvs",
+    "install_specs": {
+      "vllm": "vllm==0.18.0",
+      "vllm_omni": "vllm-omni==0.18.0",
+      "lightx2v": "git+https://github.com/ModelTC/LightX2V.git@7efd05f8e1425b83321fd4f1cef779ef6504076f",
+      "lightx2v_flash_attn": "flash-attn==2.8.3",
+      "lightx2v_flash_attn3": "",
+      "lightx2v_fa3_hf_repo": "varunneal/flash-attention-3",
+      "lightx2v_fa3_hf_revision": "de87b9b5af06dd9984df595bef90b2eba44b181a",
+      "lightx2v_fa3_hf_subdir": "build/torch28-cxx11-cu128-x86_64-linux/flash_attention_3",
+      "lightx2v_flashinfer": "flashinfer-python==0.6.11",
+      "trtllm": "tensorrt-llm==1.3.0rc18",
+      "torch_cuda_arch_list": ""
+    },
+    "launchers": {
+      "vllm_omni_server_bin": "vllm",
+      "vllm_omni_required_help_args": "--omni",
+      "trtllm_visual_server_bin": "trtllm-serve"
+    },
+    "vllm-omni": {
+      "venv_path": "/personal/bench0925/fw-venvs/vllm-omni",
+      "packages": {
+        "vllm": {
+          "Name": "vllm",
+          "Version": "0.30.0",
+          "Home-page": "https://github.com/vllm-project/vllm",
+          "Location": "/personal/bench0925/fw-venvs/vllm-omni/lib/python3.12/site-packages"
+        },
+        "vllm-omni": {
+          "Name": "vllm-omni",
+          "Version": "0.30.0rc2.dev69+g69de153f6",
+          "Home-page": "https://github.com/vllm-project/vllm-omni",
+          "Location": "/personal/bench0925/fw-venvs/vllm-omni/lib/python3.12/site-packages"
+        },
+        "torch": {
+          "Name": "torch",
+          "Version": "2.13.0",
+          "Home-page": "https://pytorch.org",
+          "Location": "/personal/bench0925/fw-venvs/vllm-omni/lib/python3.12/site-packages"
+        },
+        "transformers": {
+          "Name": "transformers",
+          "Version": "5.14.1",
+          "Home-page": "https://github.com/huggingface/transformers",
+          "Location": "/personal/bench0925/fw-venvs/vllm-omni/lib/python3.12/site-packages"
+        },
+        "diffusers": {
+          "Name": "diffusers",
+          "Version": "0.40.0",
+          "Home-page": "https://github.com/huggingface/diffusers",
+          "Location": "/personal/bench0925/fw-venvs/vllm-omni/lib/python3.12/site-packages"
+        },
+        "huggingface_hub": {
+          "Name": "huggingface_hub",
+          "Version": "1.33.0",
+          "Home-page": "https://github.com/huggingface/huggingface_hub",
+          "Location": "/personal/bench0925/fw-venvs/vllm-omni/lib/python3.12/site-packages"
+        }
+      },
+      "direct_urls": {
+        "vllm_omni-0.30.0rc2.dev69+g69de153f6.dist-info": {
+          "url": "file:///personal/bench0925/fw-venvs/vllm-omni/src/vllm-omni",
+          "dir_info": {
+            "editable": true
+          }
+        }
+      }
+    },
+    "lightx2v": {
+      "venv_path": "/personal/bench0925/fw-venvs/lightx2v",
+      "packages": {
+        "lightx2v": {
+          "Name": "lightx2v",
+          "Version": "0.5.0",
+          "Home-page": "https://github.com/ModelTC/LightX2V",
+          "Location": "/personal/bench0925/fw-venvs/lightx2v/lib/python3.12/site-packages"
+        },
+        "flash_attn": {
+          "Name": "flash_attn",
+          "Version": "2.8.3",
+          "Home-page": "https://github.com/Dao-AILab/flash-attention",
+          "Location": "/personal/bench0925/fw-venvs/lightx2v/lib/python3.12/site-packages"
+        },
+        "flashinfer-python": {
+          "Name": "flashinfer-python",
+          "Version": "0.6.11",
+          "Home-page": "https://github.com/flashinfer-ai/flashinfer",
+          "Location": "/personal/bench0925/fw-venvs/lightx2v/lib/python3.12/site-packages"
+        },
+        "torch": {
+          "Name": "torch",
+          "Version": "2.11.0",
+          "Home-page": "https://pytorch.org",
+          "Location": "/personal/bench0925/fw-venvs/lightx2v/lib/python3.12/site-packages"
+        },
+        "transformers": {
+          "Name": "transformers",
+          "Version": "5.17.0",
+          "Home-page": "https://github.com/huggingface/transformers",
+          "Location": "/personal/bench0925/fw-venvs/lightx2v/lib/python3.12/site-packages"
+        },
+        "diffusers": {
+          "Name": "diffusers",
+          "Version": "0.40.0",
+          "Home-page": "https://github.com/huggingface/diffusers",
+          "Location": "/personal/bench0925/fw-venvs/lightx2v/lib/python3.12/site-packages"
+        },
+        "huggingface_hub": {
+          "Name": "huggingface_hub",
+          "Version": "1.33.0",
+          "Home-page": "https://github.com/huggingface/huggingface_hub",
+          "Location": "/personal/bench0925/fw-venvs/lightx2v/lib/python3.12/site-packages"
+        }
+      },
+      "direct_urls": {
+        "lightx2v-0.5.0.dist-info": {
+          "url": "https://github.com/ModelTC/LightX2V.git",
+          "vcs_info": {
+            "commit_id": "a4b8ce30ac73ae561ec9d1a8bc6629e4aed9d2d8",
+            "requested_revision": "a4b8ce30ac73",
+            "vcs": "git"
+          }
+        }
+      }
+    },
+    "trtllm-visual": {
+      "venv_path": "/personal/bench0925/fw-venvs/trtllm-visual",
+      "packages": {
+        "tensorrt_llm": {
+          "Name": "tensorrt_llm",
+          "Version": "1.3.0rc28",
+          "Home-page": "https://github.com/NVIDIA/TensorRT-LLM",
+          "Location": "/personal/bench0925/fw-venvs/trtllm-visual/lib/python3.12/site-packages"
+        },
+        "torch": {
+          "Name": "torch",
+          "Version": "2.13.0",
+          "Home-page": "https://pytorch.org",
+          "Location": "/personal/bench0925/fw-venvs/trtllm-visual/lib/python3.12/site-packages"
+        },
+        "transformers": {
+          "Name": "transformers",
+          "Version": "5.5.4",
+          "Home-page": "https://github.com/huggingface/transformers",
+          "Location": "/personal/bench0925/fw-venvs/trtllm-visual/lib/python3.12/site-packages"
+        },
+        "diffusers": {
+          "Name": "diffusers",
+          "Version": "0.40.0",
+          "Home-page": "https://github.com/huggingface/diffusers",
+          "Location": "/personal/bench0925/fw-venvs/trtllm-visual/lib/python3.12/site-packages"
+        },
+        "huggingface_hub": {
+          "Name": "huggingface_hub",
+          "Version": "1.33.0",
+          "Home-page": "https://github.com/huggingface/huggingface_hub",
+          "Location": "/personal/bench0925/fw-venvs/trtllm-visual/lib/python3.12/site-packages"
+        }
+      }
+    },
+    "comfyui": {
+      "venv_path": "/personal/bench0925/fw-venvs/comfyui",
+      "packages": {
+        "torchvision": {
+          "Name": "torchvision",
+          "Version": "0.29.0+cu130",
+          "Home-page": "https://github.com/pytorch/vision",
+          "Location": "/personal/bench0925/fw-venvs/comfyui/lib/python3.12/site-packages"
+        },
+        "torchaudio": {
+          "Name": "torchaudio",
+          "Version": "2.11.0+cu130",
+          "Home-page": "https://github.com/pytorch/audio",
+          "Location": "/personal/bench0925/fw-venvs/comfyui/lib/python3.12/site-packages"
+        },
+        "comfy-kitchen": {
+          "Name": "comfy-kitchen",
+          "Version": "0.2.35",
+          "Home-page": "https://github.com/Comfy-Org/comfy-kitchen",
+          "Location": "/personal/bench0925/fw-venvs/comfyui/lib/python3.12/site-packages"
+        },
+        "comfy-aimdo": {
+          "Name": "comfy-aimdo",
+          "Version": "0.5.5",
+          "Home-page": "",
+          "Location": "/personal/bench0925/fw-venvs/comfyui/lib/python3.12/site-packages"
+        },
+        "comfyui_frontend_package": {
+          "Name": "comfyui_frontend_package",
+          "Version": "1.53.6",
+          "Home-page": "",
+          "Location": "/personal/bench0925/fw-venvs/comfyui/lib/python3.12/site-packages"
+        },
+        "safetensors": {
+          "Name": "safetensors",
+          "Version": "0.8.0",
+          "Home-page": "https://github.com/huggingface/safetensors",
+          "Location": "/personal/bench0925/fw-venvs/comfyui/lib/python3.12/site-packages"
+        },
+        "torch": {
+          "Name": "torch",
+          "Version": "2.14.0+cu130",
+          "Home-page": "https://pytorch.org",
+          "Location": "/personal/bench0925/fw-venvs/comfyui/lib/python3.12/site-packages"
+        },
+        "transformers": {
+          "Name": "transformers",
+          "Version": "5.17.0",
+          "Home-page": "https://github.com/huggingface/transformers",
+          "Location": "/personal/bench0925/fw-venvs/comfyui/lib/python3.12/site-packages"
+        },
+        "huggingface_hub": {
+          "Name": "huggingface_hub",
+          "Version": "1.33.0",
+          "Home-page": "https://github.com/huggingface/huggingface_hub",
+          "Location": "/personal/bench0925/fw-venvs/comfyui/lib/python3.12/site-packages"
+        }
+      },
+      "source_commit": "88ab4a06566454ad89db8f0bedb970d6c08cd1b7",
+      "source_commit_date": "2026-09-24T22:33:18-04:00"
+    }
+  },
+  "benchmark_env": {},
+  "benchmark_framework_args": {
+    "vllm-omni": [],
+    "lightx2v": {
+      "config": {
+        "compile": true
+      }
+    }
+  },
+  "torch_compile_disabled": false,
+  "benchmark_modes": [
+    "single_e2e",
+    "throughput"
+  ],
+  "requested_sglang_profile": "auto",
+  "results": [
+    {
+      "case_id": "qwen_image_21_t2i_1024",
+      "framework": "sglang",
+      "mode": "single_e2e",
+      "model": "Qwen/Qwen-Image-2.1",
+      "task": "text-to-image",
+      "width": 1024,
+      "height": 1024,
+      "num_frames": null,
+      "fps": null,
+      "num_inference_steps": 40,
+      "guidance_scale": 1.0,
+      "guidance_scale_2": null,
+      "true_cfg_scale": null,
+      "negative_prompt_set": false,
+      "num_gpus": 1,
+      "latency_s": 2.462,
+      "error": null,
+      "framework_metadata": {
+        "profile": "b200-1gpu-resident-fa",
+        "profile_request": "auto",
+        "profile_source": "hardware",
+        "framework_ref": null,
+        "hardware": [
+          "b200",
+          "gb200",
+          "b300",
+          "gb300"
+        ],
+        "hardware_candidates": [
+          "b200"
+        ],
+        "description": "B200 resident with an explicit FlashAttention backend.",
+        "notes": "Cookbook verifiedRecipes `b200-1-resident` (default: true). --attention-backend fa is NOT decoration: the picker's 'Automatic' option emits it for b200 and for no other card, so dropping it changes the kernel this cell measures. VALIDATED 2026-09-21 on a 1x B200 devbox (sglang 6ad78f22): p50 2.454s over 3 repeats after warmup [2.45, 2.46, 2.45], 0.0537 s/step x 40 = 2.15s of the 2.45s, 39.7 GB after load settling to 32.8 GB steady out of 183 GB. 1.84x the H200 on the same command shape, and the per-step gap (0.0537 vs 0.1034) carries essentially all of it.",
+        "install_specs": null,
+        "server_bin": null,
+        "use_omni_arg": null,
+        "required_help_args": null,
+        "serve_args": "--model-type diffusion --warmup-mode server --performance-mode speed --attention-backend fa",
+        "num_gpus": null,
+        "extra_env_keys": [],
+        "sglang_profile": "b200-1gpu-resident-fa",
+        "sglang_profile_request": "auto",
+        "sglang_profile_source": "hardware",
+        "sglang_ref": "sglang 6ad78f22 (2026-09-21)"
+      },
+      "server_command": "sglang serve --model-path Qwen/Qwen-Image-2.1 --port 65025 --host 127.0.0.1 --backend sglang --model-type diffusion --warmup-mode server --performance-mode speed --attention-backend fa",
+      "metrics": {
+        "client_latency_s": 2.462,
+        "client_latency_min_s": 2.457,
+        "client_latency_max_s": 2.468,
+        "measured_repeats": 5,
+        "server_latency_s": 2.334,
+        "server_latency_source": "separate instrumented request, not one of the measured repeats",
+        "latency_samples_s": [
+          2.462,
+          2.468,
+          2.462,
+          2.457,
+          2.463
+        ],
+        "latency_spread_pct": 0.5,
+        "warmup_latencies_s": [
+          1.549,
+          0.337
+        ],
+        "warmup_steady_latencies_s": [
+          2.46,
+          2.634,
+          2.512
+        ],
+        "server_startup_s": 34.07,
+        "warmup_s": 9.5
+      }
+    },
+    {
+      "case_id": "qwen_image_21_t2i_1024",
+      "framework": "lightx2v",
+      "mode": "single_e2e",
+      "model": "Qwen/Qwen-Image-2.1",
+      "task": "text-to-image",
+      "width": 1024,
+      "height": 1024,
+      "num_frames": null,
+      "fps": null,
+      "num_inference_steps": 40,
+      "guidance_scale": 1.0,
+      "guidance_scale_2": null,
+      "true_cfg_scale": null,
+      "negative_prompt_set": false,
+      "num_gpus": 1,
+      "latency_s": 3.008,
+      "error": null,
+      "framework_metadata": {
+        "profile": "blackwell-1gpu-fa2",
+        "profile_request": "auto",
+        "profile_source": "hardware",
+        "framework_ref": "lightx2v main HEAD",
+        "hardware": [
+          "b200",
+          "gb200",
+          "b300",
+          "gb300"
+        ],
+        "hardware_candidates": [
+          "b200"
+        ],
+        "description": "Blackwell: upstream's general config with FlashAttention2 in place of FA3.",
+        "notes": "flash_attn3 is a Hopper kernel, so the general config cannot run on B200. Every other LightX2V case in this matrix runs flash_attn2 on Blackwell (their blackwell-fa2 profiles), the same exact-softmax class, so this follows that pattern and changes nothing else (no offload, no quantization, fused kernels as upstream). First measured on B200 in the 2026-09-25 round; the venv holds torch 2.11.0 as LightX2V's own image does, because flash-attn 2.8.3 does not compile against torch 2.14.",
+        "install_specs": null,
+        "server_bin": null,
+        "use_omni_arg": null,
+        "required_help_args": null,
+        "serve_args": "",
+        "num_gpus": 1,
+        "extra_env_keys": [],
+        "lightx2v_config_keys": [
+          "attn_type",
+          "enable_cfg",
+          "fused_block_min_tokens",
+          "fused_block_ops",
+          "fused_qk_rms_norm",
+          "layer_norm_type",
+          "modulate_type",
+          "resolution",
+          "rms_norm_type",
+          "rope_type",
+          "sample_guide_scale",
+          "vae_scale_factor",
+          "warmup"
+        ]
+      },
+      "server_command": "python3 -m lightx2v.server --model_path /scratch/hf/hub/models--Qwen--Qwen-Image-2.1/snapshots/790c92633540aa0cb11d9abf19eb46d861714758 --model_cls qwen_image_21 --task t2i --config_json /tmp/lightx2v_config_qwen_image_21_t2i_1024.json --host 127.0.0.1 --port 65025",
+      "metrics": {
+        "client_latency_s": 3.008,
+        "client_latency_min_s": 3.008,
+        "client_latency_max_s": 3.009,
+        "measured_repeats": 5,
+        "latency_samples_s": [
+          3.009,
+          3.008,
+          3.008,
+          3.009,
+          3.008
+        ],
+        "latency_spread_pct": 0.0,
+        "warmup_latencies_s": [
+          3.512,
+          3.009,
+          3.01
+        ],
+        "server_startup_s": 26.1,
+        "warmup_s": 9.53
+      }
+    },
+    {
+      "case_id": "qwen_image_21_t2i_1024",
+      "framework": "comfyui",
+      "mode": "single_e2e",
+      "model": "Qwen/Qwen-Image-2.1",
+      "task": "text-to-image",
+      "width": 1024,
+      "height": 1024,
+      "num_frames": null,
+      "fps": null,
+      "num_inference_steps": 40,
+      "guidance_scale": 1.0,
+      "guidance_scale_2": null,
+      "true_cfg_scale": null,
+      "negative_prompt_set": false,
+      "num_gpus": 1,
+      "latency_s": 3.474,
+      "error": null,
+      "framework_metadata": {
+        "profile": "blackwell-gpuonly",
+        "profile_request": "auto",
+        "profile_source": "hardware",
+        "framework_ref": "ComfyUI master HEAD",
+        "hardware": [
+          "b200",
+          "gb200",
+          "b300",
+          "gb300"
+        ],
+        "hardware_candidates": [
+          "b200"
+        ],
+        "description": "Blackwell: the default graph with every model resident on the GPU (--gpu-only).",
+        "notes": "B200: --gpu-only keeps every model, text encoders included, stored and run on the card; a 183 GB B200 holds the largest graph here (MiniMax-H3: 62 GB DiT + 48 GB Qwen3-VL-32B + VAEs). Placement only, numerics unchanged. Measured 2026-09-25 on 1xB200, FLUX.1 eager, interleaved arms: default 5.94 / 5.77 / 5.79s against --gpu-only 5.56s and --gpu-only --disable-dynamic-vram 5.57s (Qwen-Image-2.1: 3.75 / 3.91 against 3.47 / 3.48) -- every --gpu-only arm below every default arm; disabling dynamic VRAM on top adds nothing, so the simpler flag is kept.",
+        "install_specs": null,
+        "server_bin": null,
+        "use_omni_arg": null,
+        "required_help_args": null,
+        "serve_args": "--gpu-only",
+        "num_gpus": 1,
+        "extra_env_keys": [],
+        "comfyui_workflow": "qwen_image_21_t2i.json",
+        "comfyui_models": {
+          "diffusion_models/qwen_image_2.1_bf16.safetensors": "Comfy-Org/Qwen-Image-2.1:diffusion_models/qwen_image_2.1_bf16.safetensors",
+          "text_encoders/qwen3vl_8b_bf16.safetensors": "Comfy-Org/Qwen-Image-2.1:text_encoders/qwen3vl_8b_bf16.safetensors",
+          "vae/qwen_image_2.1_vae_bf16.safetensors": "Comfy-Org/Qwen-Image-2.1:vae/qwen_image_2.1_vae_bf16.safetensors"
+        },
+        "comfyui_params": null,
+        "comfyui_compile": false
+      },
+      "server_command": "python3 /personal/bench0925/fw-venvs/comfyui/ComfyUI/main.py --listen 127.0.0.1 --port 65025 --disable-auto-launch --extra-model-paths-config /scratch/comfy-ws/qwen_image_21_t2i_1024/extra_model_paths.yaml --input-directory /scratch/comfy-ws/qwen_image_21_t2i_1024/input --output-directory /scratch/comfy-ws/qwen_image_21_t2i_1024/output --gpu-only",
+      "metrics": {
+        "client_latency_s": 3.474,
+        "client_latency_min_s": 3.449,
+        "client_latency_max_s": 3.95,
+        "measured_repeats": 5,
+        "latency_samples_s": [
+          3.95,
+          3.469,
+          3.449,
+          3.929,
+          3.474
+        ],
+        "latency_spread_pct": 14.5,
+        "warmup_latencies_s": [
+          7.827,
+          0.55
+        ],
+        "warmup_steady_latencies_s": [
+          3.437,
+          3.455
+        ],
+        "server_startup_s": 10.6,
+        "warmup_s": 15.28
+      }
+    }
+  ],
+  "throughput_results": [],
+  "partial": false,
+  "model_revisions": {
+    "Qwen/Qwen-Image-2.1": "790c92633540aa0cb11d9abf19eb46d861714758"
+  }
+}
