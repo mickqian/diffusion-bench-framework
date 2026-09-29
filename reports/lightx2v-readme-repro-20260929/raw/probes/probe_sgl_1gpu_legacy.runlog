@@ -1,0 +1,104 @@
+Loaded 2 comparison case(s) from /persistent/logs/cells/probe_sgl_1gpu_legacy.config.json
+
+============================================================
+Case: wan21_i2v_14b_480p_1gpu | Model: Wan-AI/Wan2.1-I2V-14B-480P-Diffusers | Framework: sglang
+============================================================
+
+  Command: sglang serve --model-path Wan-AI/Wan2.1-I2V-14B-480P-Diffusers --port 31511 --host 127.0.0.1 --backend sglang --model-type diffusion --warmup-mode server --enable-torch-compile false --dit-layerwise-offload true
+  Waiting for server at http://127.0.0.1:31511/health ...
+  [server] Flax classes are deprecated and will be removed in Diffusers v1.0.0. We recommend migrating to PyTorch classes or pinning your version of Diffusers.
+  [server] Flax classes are deprecated and will be removed in Diffusers v1.0.0. We recommend migrating to PyTorch classes or pinning your version of Diffusers.
+  [server] [2026-09-29 09:32:51] Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
+  [server] [09-29 09:32:52] Enabling large component offloading for GPU with low device memory
+  [server] [09-29 09:32:52] Using layerwise offload components: dit. This reduces peak GPU memory and can increase latency; use --performance-mode speed for GPU-resident defaults when memory allows.
+  [server] [09-29 09:32:52] server_args: {"model_path": "Wan-AI/Wan2.1-I2V-14B-480P-Diffusers", "model_subfolder": null, "model_variant": null, "model_id": null, "served_model_name": "Wan-AI/Wan2.1-I2V-14B-480P-Diffusers", "backend": "sglang", "attention_backend": null, "enable_attention_backend_autotune": false, "attention_backend_config": {}, "component_attention_backends": {}, "cache_dit_config": null, "nccl_port": null, "enable_nccl_nvls": false, "trust_remote_code": false, "revision": null, "num_gpus": 1, "performance_mode": "auto", "base_gpu_id": 0, "gpu_ids": null, "nnodes": 1, "node_rank": 0, "dist_init_addr": null, "tp_size": 1, "sp_degree": 1, "ulysses_degree": 1, "ring_degree": 1, "kv_gather_degree": 1, "sp_split_auto": false, "dp_size": 1, "enable_cfg_parallel": false, "cfg_parallel_degree": 1, "encoder_parallel": "auto", "hsdp_replicate_dim": 1, "hsdp_shard_dim": 1, "dist_timeout": 3600, "scheduler_rpc_timeout": null, "pipeline_class_name": null, "lora_path": null, "lora_nickname": "default", "lora_scale": 1.0, "lora_alpha": null, "lora_merge_mode": "auto", "lora_weight_name": null, "component_paths": {}, "component_weights_paths": {}, "component_direct_gpu_weight_loading": {}, "component_quantizations": {}, "component_precisions": {}, "component_quantization_ignored_layers": {}, "load_diffusion_decoder": false, "transformer_weights_path": null, "minimax_h3_adaln_cache_path": null, "minimax_h3_adaln_online": false, "minimax_h3_adaln_plan_width": 4, "minimax_h3_adaln_host_cache_gb": 8.0, "quantization": null, "quantization_ignored_layers": null, "lora_target_modules": null, "component_residency": null, "cpu_offload_components": null, "dit_cpu_offload": true, "direct_gpu_weight_loading": false, "dit_layerwise_offload": true, "layerwise_offload_components": ["dit"], "dit_offload_prefetch_size": 0.0, "dit_layerwise_resident_layers": 0.0, "dit_layerwise_residency_policy": "leading", "dit_layerwise_residency_lifetime": "forward", "layerwise_prefetch_size": {}, "layerwise_resident_layers": {}, "layerwise_residency_policy": {}, "layerwise_residency_lifetime": {}, "offload_during_compile": true, "text_encoder_cpu_offload": true, "image_encoder_cpu_offload": true, "vae_cpu_offload": false, "use_fsdp_inference": false, "pin_cpu_memory": true, "ltx2_two_stage_device_mode": null, "comfyui_mode": false, "enable_torch_compile": false, "regional_compile": false, "enable_breakable_cuda_graph": false, "bcg_text_buckets": null, "enable_layerwise_nvtx_marker": false, "warmup_mode": "server", "warmup_resolutions": null, "warmup_num_frames": null, "warmup_steps": 1, "warmup_sampling_params": null, "disable_autocast": false, "master_port": 30005, "host": "127.0.0.1", "port": 31511, "enable_metrics": false, "webui": false, "webui_port": 12312, "scheduler_port": 5582, "scheduler_ports": [5582], "batching_mode": "dynamic", "batching_max_size": 1, "batching_delay_ms": 0.0, "batching_config": null, "enable_batching_metrics": false, "strict_ports": false, "output_path": "outputs/", "input_save_path": "inputs/uploads", "prompt_file_path": null, "model_paths": {}, "model_loaded": {"transformer": true, "vae": true, "video_vae": true, "audio_vae": true, "video_dit": true, "audio_dit": true, "dual_tower_bridge": true}, "boundary_ratio": null, "disagg_role": "monolithic", "disagg_timeout": 3600, "disagg_downstream_wait_timeout": 1800, "disagg_dispatch_policy": "round_robin", "disagg_mode": false, "disagg_instance_id": 0, "disagg_max_slots_per_instance": 8, "disagg_transfer_redundancy": 1.25, "disagg_role_device": "auto", "disagg_transfer_backend": "auto", "disagg_transfer_pool_size": 268435456, "disagg_transfer_pin_memory": "auto", "disagg_p2p_hostname": "127.0.0.1", "disagg_ib_device": null, "disagg_server_addr": null, "encoder_urls": null, "denoiser_urls": null, "decoder_urls": null, "encoder_tp": null, "denoiser_tp": null, "denoiser_sp": null, "denoiser_ulysses": null, "denoiser_ring": null, "decoder_sp": null, "pool_work_endpoint": null, "pool_result_endpoint": null, "pool_control_endpoint": null, "pool_control_advertised_endpoint": null, "log_level": "info", "log_requests": false, "log_requests_level": 2, "log_requests_format": "text", "log_requests_target": null, "uvicorn_access_log_exclude_prefixes": [], "enable_cache_report": false, "enable_trace": false, "otlp_traces_endpoint": "localhost:4317", "otlp_service_name": null, "srt_encoder_url": null, "srt_encoder_connect_timeout": 3.05, "srt_encoder_timeout": 100, "pe_server_url": null, "prompt_enhancer_config": null}
+  [server] [09-29 09:32:52] Starting server...
+  [server] Flax classes are deprecated and will be removed in Diffusers v1.0.0. We recommend migrating to PyTorch classes or pinning your version of Diffusers.
+  [server] Flax classes are deprecated and will be removed in Diffusers v1.0.0. We recommend migrating to PyTorch classes or pinning your version of Diffusers.
+  [server] [09-29 09:33:07] Scheduler (dp replica 0) bind at endpoint: tcp://127.0.0.1:5582
+  [server] [09-29 09:33:07] torch.compile cache: TORCHINDUCTOR_CACHE_DIR=/root/.cache/sgl_diffusion/torch_compile_cache/inductor TRITON_CACHE_DIR=/root/.cache/sgl_diffusion/torch_compile_cache/triton
+  [server] [09-29 09:33:07] Initializing distributed environment with world_size=1, device=cuda:0, timeout=3600
+  [server] [09-29 09:33:07] Setting distributed timeout to 3600 seconds
+  [server] [09-29 09:33:07] Worker 0: Shutdown complete.
+  [server] Process sglang-diffusionWorker-0:
+  [server] Traceback (most recent call last):
+  [server]   File "/usr/lib/python3.12/multiprocessing/process.py", line 314, in _bootstrap
+  [server]     self.run()
+  [server]   File "/usr/lib/python3.12/multiprocessing/process.py", line 108, in run
+  [server]     self._target(*self._args, **self._kwargs)
+  [server]   File "/sgl-workspace/sglang/python/sglang/multimodal_gen/runtime/managers/worker_bootstrap.py", line 147, in bootstrap_scheduler_process
+  [server]     gpu_worker.run_scheduler_process(
+  [server]   File "/sgl-workspace/sglang/python/sglang/multimodal_gen/runtime/managers/gpu_worker.py", line 1607, in run_scheduler_process
+  [server]     scheduler = Scheduler(
+  [server]                 ^^^^^^^^^^
+  [server]   File "/sgl-workspace/sglang/python/sglang/multimodal_gen/runtime/managers/scheduler.py", line 139, in __init__
+  [server]     worker = Exec_worker(
+  [server]              ^^^^^^^^^^^^
+  [server]   File "/sgl-workspace/sglang/python/sglang/multimodal_gen/runtime/managers/gpu_worker.py", line 252, in __init__
+  [server]     self.init_device_and_model()
+  [server]   File "/sgl-workspace/sglang/python/sglang/multimodal_gen/runtime/managers/gpu_worker.py", line 390, in init_device_and_model
+  [server]     maybe_init_distributed_environment_and_model_parallel(
+  [server]   File "/sgl-workspace/sglang/python/sglang/multimodal_gen/runtime/distributed/parallel_state.py", line 639, in maybe_init_distributed_environment_and_model_parallel
+  [server]     init_distributed_environment(
+  [server]   File "/sgl-workspace/sglang/python/sglang/multimodal_gen/runtime/distributed/parallel_state.py", line 273, in init_distributed_environment
+  [server]     torch.distributed.init_process_group(
+  [server]   File "/opt/sglang/lib/python3.12/site-packages/torch/distributed/c10d_logger.py", line 83, in wrapper
+  [server]     return func(*args, **kwargs)
+  [server]            ^^^^^^^^^^^^^^^^^^^^^
+  [server]   File "/opt/sglang/lib/python3.12/site-packages/torch/distributed/c10d_logger.py", line 97, in wrapper
+  [server]     func_return = func(*args, **kwargs)
+  [server]                   ^^^^^^^^^^^^^^^^^^^^^
+  [server]   File "/opt/sglang/lib/python3.12/site-packages/torch/distributed/distributed_c10d.py", line 1892, in init_process_group
+  [server]     store, rank, world_size = next(rendezvous_iterator)
+  [server]                               ^^^^^^^^^^^^^^^^^^^^^^^^^
+  [server]   File "/opt/sglang/lib/python3.12/site-packages/torch/distributed/rendezvous.py", line 232, in _tcp_rendezvous_handler
+  [server]     store = _create_c10d_store(
+  [server]             ^^^^^^^^^^^^^^^^^^^
+  [server]   File "/opt/sglang/lib/python3.12/site-packages/torch/distributed/rendezvous.py", line 199, in _create_c10d_store
+  [server]     return TCPStore(
+  [server]            ^^^^^^^^^
+  [server] torch.distributed.DistNetworkError: The server socket has failed to listen on any local network address. port: 30005, useIpv6: false, code: -98, name: EADDRINUSE, message: address already in use
+  [server] [91m[09-29 09:33:10] Rank 0 scheduler is dead. Please check if there are relevant logs.[0;0m
+  [server] [91m[09-29 09:33:11] Exit code: 1[0;0m
+  [server] [09-29 09:33:11] kill_process_tree called: parent_pid=27758, include_parent=False, pid=27758
+  [server] Traceback (most recent call last):
+  [server]   File "/opt/sglang/bin/sglang", line 6, in <module>
+  [server]     sys.exit(main())
+  [server]              ^^^^^^
+  [server]   File "/sgl-workspace/sglang/python/sglang/cli/main.py", line 51, in main
+  [server]     serve(args, extra_argv)
+  [server]   File "/sgl-workspace/sglang/python/sglang/cli/serve.py", line 213, in serve
+  [server]     registered.backend.run(request)
+  [server]   File "/sgl-workspace/sglang/python/sglang/cli/serve.py", line 131, in _run_diffusion
+  [server]     execute_serve_cmd(parsed_args, remaining_argv)
+  [server]   File "/sgl-workspace/sglang/python/sglang/multimodal_gen/runtime/entrypoints/cli/serve.py", line 39, in execute_serve_cmd
+  [server]     dispatch_launch(server_args)
+  [server]   File "/sgl-workspace/sglang/python/sglang/multimodal_gen/runtime/launch_server.py", line 786, in dispatch_launch
+  [server]     launch_server(server_args)
+  [server]   File "/sgl-workspace/sglang/python/sglang/multimodal_gen/runtime/launch_server.py", line 196, in launch_server
+  [server]     data = reader.recv()
+  [server]            ^^^^^^^^^^^^^
+  [server]   File "/usr/lib/python3.12/multiprocessing/connection.py", line 250, in recv
+  [server]     buf = self._recv_bytes()
+  [server]           ^^^^^^^^^^^^^^^^^^
+  [server]   File "/usr/lib/python3.12/multiprocessing/connection.py", line 430, in _recv_bytes
+  [server]     buf = self._recv(4)
+  [server]           ^^^^^^^^^^^^^
+  [server]   File "/usr/lib/python3.12/multiprocessing/connection.py", line 399, in _recv
+  [server]     raise EOFError
+  [server] EOFError
+  ERROR: sglang server exited before health check passed (exit 1)
+  Waiting 15s for GPU memory to clear...
+
+Results written to /persistent/logs/cells/probe_sgl_1gpu_legacy.json
+
+============================================================
+SUMMARY
+============================================================
+  wan21_i2v_14b_480p_1gpu        | sglang       | sglang server exited before health check passed (exit 1)
+
+1 case(s) had errors:
+  wan21_i2v_14b_480p_1gpu (sglang): sglang server exited before health check passed (exit 1)
+
+EXIT=1
+DONE

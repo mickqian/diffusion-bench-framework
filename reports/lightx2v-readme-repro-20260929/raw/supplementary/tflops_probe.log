@@ -1,0 +1,16 @@
+== 2026-09-29T12:32:36Z GPU 0, sglang env ==
+gemm qkvo  32760x5120x5120:    10.64 ms   161.4 TFLOPS
+gemm ffn_up 32760x5120x13824:    29.20 ms   158.8 TFLOPS
+gemm ffn_dn 32760x13824x5120:    29.20 ms   158.8 TFLOPS
+sdpa  L=32760 H=40 d=128:   137.36 ms   160.0 TFLOPS
+flash_attn unavailable: ImportError cannot import name 'flash_attn_func' from 'flash_attn' (unknown location)
+device NVIDIA GeForce RTX 4090 sm=89 SMs=128 torch=2.13.0+cu130
+== lightx2v venv ==
+gemm qkvo  32760x5120x5120:    10.68 ms   160.9 TFLOPS
+gemm ffn_up 32760x5120x13824:    29.41 ms   157.7 TFLOPS
+gemm ffn_dn 32760x13824x5120:    29.34 ms   158.0 TFLOPS
+sdpa  L=32760 H=40 d=128:   136.88 ms   160.6 TFLOPS
+flash_attn L=32760:   133.93 ms   164.1 TFLOPS
+device NVIDIA GeForce RTX 4090 sm=89 SMs=128 torch=2.11.0+cu130
+index, name, clocks.current.sm [MHz], clocks.max.sm [MHz], power.draw [W], power.limit [W]
+0, NVIDIA GeForce RTX 4090, 2670 MHz, 3105 MHz, 132.01 W, 450.00 W

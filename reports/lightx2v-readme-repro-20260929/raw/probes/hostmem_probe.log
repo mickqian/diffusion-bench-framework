@@ -1,0 +1,4 @@
+tree c7be3e93
+HOSTMEM 1gpu idle_avail_mib=1011560 min_avail_mib=951270 used_gib=58 ready=yes
+HOSTMEM 8gpu idle_avail_mib=1011426 min_avail_mib=516879 used_gib=482 ready=yes
+HOSTMEM_DONE 2026-09-29T17:27:38Z

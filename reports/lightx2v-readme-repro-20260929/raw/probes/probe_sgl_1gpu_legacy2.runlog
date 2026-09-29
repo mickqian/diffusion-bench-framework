@@ -1,0 +1,1590 @@
+Loaded 2 comparison case(s) from /persistent/logs/cells/probe_sgl_1gpu_legacy2.config.json
+
+============================================================
+Case: wan21_i2v_14b_480p_1gpu | Model: Wan-AI/Wan2.1-I2V-14B-480P-Diffusers | Framework: sglang
+============================================================
+
+  Command: sglang serve --model-path Wan-AI/Wan2.1-I2V-14B-480P-Diffusers --port 31601 --host 127.0.0.1 --backend sglang --model-type diffusion --warmup-mode server --enable-torch-compile false --dit-layerwise-offload true
+  Waiting for server at http://127.0.0.1:31601/health ...
+  [server] Flax classes are deprecated and will be removed in Diffusers v1.0.0. We recommend migrating to PyTorch classes or pinning your version of Diffusers.
+  [server] Flax classes are deprecated and will be removed in Diffusers v1.0.0. We recommend migrating to PyTorch classes or pinning your version of Diffusers.
+  [server] [09-29 13:54:36] Enabling large component offloading for GPU with low device memory
+  [server] [09-29 13:54:36] Using layerwise offload components: dit. This reduces peak GPU memory and can increase latency; use --performance-mode speed for GPU-resident defaults when memory allows.
+  [server] [09-29 13:54:36] server_args: {"model_path": "Wan-AI/Wan2.1-I2V-14B-480P-Diffusers", "model_subfolder": null, "model_variant": null, "model_id": null, "served_model_name": "Wan-AI/Wan2.1-I2V-14B-480P-Diffusers", "backend": "sglang", "attention_backend": null, "enable_attention_backend_autotune": false, "attention_backend_config": {}, "component_attention_backends": {}, "cache_dit_config": null, "nccl_port": null, "enable_nccl_nvls": false, "trust_remote_code": false, "revision": null, "num_gpus": 1, "performance_mode": "auto", "base_gpu_id": 0, "gpu_ids": null, "nnodes": 1, "node_rank": 0, "dist_init_addr": null, "tp_size": 1, "sp_degree": 1, "ulysses_degree": 1, "ring_degree": 1, "kv_gather_degree": 1, "sp_split_auto": false, "dp_size": 1, "enable_cfg_parallel": false, "cfg_parallel_degree": 1, "encoder_parallel": "auto", "hsdp_replicate_dim": 1, "hsdp_shard_dim": 1, "dist_timeout": 3600, "scheduler_rpc_timeout": null, "pipeline_class_name": null, "lora_path": null, "lora_nickname": "default", "lora_scale": 1.0, "lora_alpha": null, "lora_merge_mode": "auto", "lora_weight_name": null, "component_paths": {}, "component_weights_paths": {}, "component_direct_gpu_weight_loading": {}, "component_quantizations": {}, "component_precisions": {}, "component_quantization_ignored_layers": {}, "load_diffusion_decoder": false, "transformer_weights_path": null, "minimax_h3_adaln_cache_path": null, "minimax_h3_adaln_online": false, "minimax_h3_adaln_plan_width": 4, "minimax_h3_adaln_host_cache_gb": 8.0, "quantization": null, "quantization_ignored_layers": null, "lora_target_modules": null, "component_residency": null, "cpu_offload_components": null, "dit_cpu_offload": true, "direct_gpu_weight_loading": false, "dit_layerwise_offload": true, "layerwise_offload_components": ["dit"], "dit_offload_prefetch_size": 0.0, "dit_layerwise_resident_layers": 0.0, "dit_layerwise_residency_policy": "leading", "dit_layerwise_residency_lifetime": "forward", "layerwise_prefetch_size": {}, "layerwise_resident_layers": {}, "layerwise_residency_policy": {}, "layerwise_residency_lifetime": {}, "offload_during_compile": true, "text_encoder_cpu_offload": true, "image_encoder_cpu_offload": true, "vae_cpu_offload": false, "use_fsdp_inference": false, "pin_cpu_memory": true, "ltx2_two_stage_device_mode": null, "comfyui_mode": false, "enable_torch_compile": false, "regional_compile": false, "enable_breakable_cuda_graph": false, "bcg_text_buckets": null, "enable_layerwise_nvtx_marker": false, "warmup_mode": "server", "warmup_resolutions": null, "warmup_num_frames": null, "warmup_steps": 1, "warmup_sampling_params": null, "disable_autocast": false, "master_port": 30005, "host": "127.0.0.1", "port": 31601, "enable_metrics": false, "webui": false, "webui_port": 12312, "scheduler_port": 5567, "scheduler_ports": [5567], "batching_mode": "dynamic", "batching_max_size": 1, "batching_delay_ms": 0.0, "batching_config": null, "enable_batching_metrics": false, "strict_ports": false, "output_path": "outputs/", "input_save_path": "inputs/uploads", "prompt_file_path": null, "model_paths": {}, "model_loaded": {"transformer": true, "vae": true, "video_vae": true, "audio_vae": true, "video_dit": true, "audio_dit": true, "dual_tower_bridge": true}, "boundary_ratio": null, "disagg_role": "monolithic", "disagg_timeout": 3600, "disagg_downstream_wait_timeout": 1800, "disagg_dispatch_policy": "round_robin", "disagg_mode": false, "disagg_instance_id": 0, "disagg_max_slots_per_instance": 8, "disagg_transfer_redundancy": 1.25, "disagg_role_device": "auto", "disagg_transfer_backend": "auto", "disagg_transfer_pool_size": 268435456, "disagg_transfer_pin_memory": "auto", "disagg_p2p_hostname": "127.0.0.1", "disagg_ib_device": null, "disagg_server_addr": null, "encoder_urls": null, "denoiser_urls": null, "decoder_urls": null, "encoder_tp": null, "denoiser_tp": null, "denoiser_sp": null, "denoiser_ulysses": null, "denoiser_ring": null, "decoder_sp": null, "pool_work_endpoint": null, "pool_result_endpoint": null, "pool_control_endpoint": null, "pool_control_advertised_endpoint": null, "log_level": "info", "log_requests": false, "log_requests_level": 2, "log_requests_format": "text", "log_requests_target": null, "uvicorn_access_log_exclude_prefixes": [], "enable_cache_report": false, "enable_trace": false, "otlp_traces_endpoint": "localhost:4317", "otlp_service_name": null, "srt_encoder_url": null, "srt_encoder_connect_timeout": 3.05, "srt_encoder_timeout": 100, "pe_server_url": null, "prompt_enhancer_config": null}
+  [server] [09-29 13:54:36] Starting server...
+  [server] Flax classes are deprecated and will be removed in Diffusers v1.0.0. We recommend migrating to PyTorch classes or pinning your version of Diffusers.
+  [server] Flax classes are deprecated and will be removed in Diffusers v1.0.0. We recommend migrating to PyTorch classes or pinning your version of Diffusers.
+  [server] [09-29 13:54:50] Scheduler (dp replica 0) bind at endpoint: tcp://127.0.0.1:5567
+  [server] [09-29 13:54:50] torch.compile cache: TORCHINDUCTOR_CACHE_DIR=/root/.cache/sgl_diffusion/torch_compile_cache/inductor TRITON_CACHE_DIR=/root/.cache/sgl_diffusion/torch_compile_cache/triton
+  [server] [09-29 13:54:50] Initializing distributed environment with world_size=1, device=cuda:0, timeout=3600
+  [server] [09-29 13:54:50] Setting distributed timeout to 3600 seconds
+  [server] [09-29 13:54:51] No pipeline_class_name specified, using model_index.json
+  [server] Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
+  [server] [93m[09-29 13:54:52] Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.[0;0m
+  [server] [09-29 13:54:52] Using pipeline from model_index.json: WanImageToVideoPipeline
+  [server] [09-29 13:54:52] Loading pipeline modules...
+  [server] [09-29 13:54:52] Checking for cached model in Hugging Face Hub cache for Wan-AI/Wan2.1-I2V-14B-480P-Diffusers...
+  [server] [09-29 13:54:52] Found complete model in cache at /persistent/hf-cache/hub/models--Wan-AI--Wan2.1-I2V-14B-480P-Diffusers/snapshots/b184e23a8a16b20f108f727c902e769e873ffc73
+  [server] [09-29 13:54:52] Model path: /persistent/hf-cache/hub/models--Wan-AI--Wan2.1-I2V-14B-480P-Diffusers/snapshots/b184e23a8a16b20f108f727c902e769e873ffc73
+  [server] [09-29 13:54:52] Diffusers version: 0.33.0.dev0
+  [server] [09-29 13:54:52] Loading pipeline modules from config: {'_class_name': 'WanImageToVideoPipeline', '_diffusers_version': '0.33.0.dev0', 'image_encoder': ['transformers', 'CLIPVisionModelWithProjection'], 'image_processor': ['transformers', 'CLIPImageProcessor'], 'scheduler': ['diffusers', 'UniPCMultistepScheduler'], 'text_encoder': ['transformers', 'UMT5EncoderModel'], 'tokenizer': ['transformers', 'T5TokenizerFast'], 'transformer': ['diffusers', 'WanTransformer3DModel'], 'vae': ['diffusers', 'AutoencoderKLWan']}
+  [server] [09-29 13:54:52] Loading required components: ['text_encoder', 'tokenizer', 'vae', 'transformer', 'scheduler', 'image_encoder', 'image_processor']
+  [server] [09-29 13:54:52] Memory-aware component load order: ['transformer', 'text_encoder', 'image_encoder', 'vae', 'tokenizer', 'scheduler', 'image_processor']
+  [server] 
+  [server] Loading required modules:   0%|          | 0/7 [00:00<?, ?it/s][09-29 13:54:52] Loading transformer from /persistent/hf-cache/hub/models--Wan-AI--Wan2.1-I2V-14B-480P-Diffusers/snapshots/b184e23a8a16b20f108f727c902e769e873ffc73/transformer. avail mem: 22.24 GB
+  [server] [09-29 13:54:52] Loading WanTransformer3DModel from 14 safetensors file(s) , param_dtype: torch.bfloat16
+  [server] 
+  [server] 
+  [server] Loading safetensors checkpoint shards: 0%|          | 0/14[A
+  [server] Loading safetensors checkpoint shards: 100%|██████████| 14/14
+  [server] [09-29 13:54:55] Attention backends for transformer: fa
+  [server] [09-29 13:54:56] Loaded transformer: WanTransformer3DModel (sgl-diffusion version). model size: 30.54 GB, host mmap: 0.00 GB, host pageable: 30.54 GB. avail GPU mem: 22.24 GB
+  [server] 
+  [server] Loading required modules:  14%|█▍        | 1/7 [00:03<00:21,  3.61s/it][09-29 13:54:56] Loading text_encoder from /persistent/hf-cache/hub/models--Wan-AI--Wan2.1-I2V-14B-480P-Diffusers/snapshots/b184e23a8a16b20f108f727c902e769e873ffc73/text_encoder. avail mem: 22.24 GB
+  [server] 
+  [server] 
+  [server] Loading safetensors checkpoint shards: 0%|          | 0/5[A
+  [server] 
+  [server] Loading safetensors checkpoint shards: 20%|██        | 1/5[A
+  [server] 
+  [server] Loading safetensors checkpoint shards: 40%|████      | 2/5[A
+  [server] 
+  [server] Loading safetensors checkpoint shards: 60%|██████    | 3/5[A
+  [server] 
+  [server] Loading safetensors checkpoint shards: 80%|████████  | 4/5[A
+  [server] 
+  [server] Loading safetensors checkpoint shards: 100%|██████████| 5/5[A
+  [server] Loading safetensors checkpoint shards: 100%|██████████| 5/5
+  [server] [09-29 13:55:00] Loaded text_encoder: UMT5EncoderModel (sgl-diffusion version). model size: 21.16 GB, host pageable: 21.16 GB. avail GPU mem: 22.24 GB
+  [server] 
+  [server] Loading required modules:  29%|██▊       | 2/7 [00:07<00:19,  3.90s/it][09-29 13:55:00] Loading image_encoder from /persistent/hf-cache/hub/models--Wan-AI--Wan2.1-I2V-14B-480P-Diffusers/snapshots/b184e23a8a16b20f108f727c902e769e873ffc73/image_encoder. avail mem: 22.24 GB
+  [server] 
+  [server] 
+  [server] Loading safetensors checkpoint shards: 0%|          | 0/1[A
+  [server] 
+  [server] Loading safetensors checkpoint shards: 100%|██████████| 1/1[A
+  [server] Loading safetensors checkpoint shards: 100%|██████████| 1/1
+  [server] [09-29 13:55:00] Loaded image_encoder: CLIPVisionModel (sgl-diffusion version). model size: 2.35 GB, host pageable: 2.35 GB. avail GPU mem: 22.24 GB
+  [server] 
+  [server] Loading required modules:  43%|████▎     | 3/7 [00:08<00:09,  2.34s/it][09-29 13:55:00] Loading vae from /persistent/hf-cache/hub/models--Wan-AI--Wan2.1-I2V-14B-480P-Diffusers/snapshots/b184e23a8a16b20f108f727c902e769e873ffc73/vae. avail mem: 22.24 GB
+  [server] [09-29 13:55:01] VAE: converted 61 Conv3d weights to channels_last_3d
+  [server] [09-29 13:55:01] Wan VAE: installed quality-gated fast path (29 RMSNorm+SiLU fusions, 3 channels_last upsamples).
+  [server] [09-29 13:55:01] Loaded vae: AutoencoderKLWan (sgl-diffusion version). model size: 0.47 GB, vram: 0.47 GB. avail GPU mem: 21.61 GB
+  [server] 
+  [server] Loading required modules:  57%|█████▋    | 4/7 [00:09<00:05,  1.76s/it][09-29 13:55:01] Loading tokenizer from /persistent/hf-cache/hub/models--Wan-AI--Wan2.1-I2V-14B-480P-Diffusers/snapshots/b184e23a8a16b20f108f727c902e769e873ffc73/tokenizer. avail mem: 21.61 GB
+  [server] [09-29 13:55:02] Loaded tokenizer: T5Tokenizer (sgl-diffusion version). model size: NA GB, weights: none. avail GPU mem: 21.61 GB
+  [server] 
+  [server] Loading required modules:  71%|███████▏  | 5/7 [00:10<00:03,  1.61s/it][09-29 13:55:02] Loading scheduler from /persistent/hf-cache/hub/models--Wan-AI--Wan2.1-I2V-14B-480P-Diffusers/snapshots/b184e23a8a16b20f108f727c902e769e873ffc73/scheduler. avail mem: 21.61 GB
+  [server] [09-29 13:55:02] Loaded scheduler: UniPCMultistepScheduler (sgl-diffusion version). model size: NA GB, weights: none. avail GPU mem: 21.61 GB
+  [server] [09-29 13:55:02] Loading image_processor from /persistent/hf-cache/hub/models--Wan-AI--Wan2.1-I2V-14B-480P-Diffusers/snapshots/b184e23a8a16b20f108f727c902e769e873ffc73/image_processor. avail mem: 21.61 GB
+  [server] [09-29 13:55:02] Loaded image_processor: CLIPImageProcessor (sgl-diffusion version). model size: NA GB, weights: none. avail GPU mem: 21.61 GB
+  [server] 
+  [server] Loading required modules: 100%|██████████| 7/7 [00:10<00:00,  1.49s/it]
+  [server] [09-29 13:55:02] Creating pipeline stages...
+  [server] [09-29 13:55:02] Using fa attention backend
+  [server] [09-29 13:55:02] Pipeline instantiated
+  [server] [09-29 13:55:02] Layerwise offload host memory: 703.4 GiB available (cgroup cap 927.0 GiB, in use 223.6 GiB)
+  [server] [09-29 13:55:02] Configuring layerwise offload for transformer (WanTransformer3DModel): blocks (40 layers)
+  [server] [09-29 13:55:23] Layerwise offload ready for transformer (WanTransformer3DModel) in 21.01s: groups=1, layers=40, prefetch/group=1, resident=0/40 (forward), policy=leading
+  [server] [09-29 13:55:23] Layerwise offload summary: transformer (vram: 1.20 GB, host pinned: 30.09 GB)
+  [server] [09-29 13:55:23] Worker 0: Initialized device, model, and distributed environment.
+  [server] [09-29 13:55:23] Worker 0: Scheduler loop started.
+  [server] [09-29 13:55:23] [server-load] workers_ready_monotonic_ns=22239047411292073
+  [server] [09-29 13:55:23] Starting FastAPI server.
+  [server] [2026-09-29 13:55:23] [32mINFO[0m:     Started server process [[36m46813[0m]
+  [server] [2026-09-29 13:55:23] [32mINFO[0m:     Waiting for application startup.
+  [server] [09-29 13:55:23] ZMQ Broker is listening for offline jobs on tcp://127.0.0.1:31602
+  [server] [2026-09-29 13:55:23] [32mINFO[0m:     Application startup complete.
+  [server] [2026-09-29 13:55:23] [32mINFO[0m:     Uvicorn running on [1mhttp://127.0.0.1:31601[0m (Press CTRL+C to quit)
+  [server] [2026-09-29 13:55:24] [32mINFO[0m:     127.0.0.1:49000 - "[1mGET /health HTTP/1.1[0m" [91m503 Service Unavailable[0m
+  [server] [2026-09-29 13:55:24] [32mINFO[0m:     127.0.0.1:49010 - "[1mGET /liveness HTTP/1.1[0m" [32m200 OK[0m
+  [server] 
+  [server] Warmup requests:   0%|          | 0/3 [00:00<?, ?req/s][2026-09-29 13:55:26] [32mINFO[0m:     127.0.0.1:49016 - "[1mGET /health HTTP/1.1[0m" [91m503 Service Unavailable[0m
+  [server] [2026-09-29 13:55:28] [32mINFO[0m:     127.0.0.1:49018 - "[1mGET /health HTTP/1.1[0m" [91m503 Service Unavailable[0m
+  [server] [2026-09-29 13:55:30] [32mINFO[0m:     127.0.0.1:49028 - "[1mGET /health HTTP/1.1[0m" [91m503 Service Unavailable[0m
+  [server] [2026-09-29 13:55:32] [32mINFO[0m:     127.0.0.1:51512 - "[1mGET /health HTTP/1.1[0m" [91m503 Service Unavailable[0m
+  [server] [2026-09-29 13:55:34] [32mINFO[0m:     127.0.0.1:51526 - "[1mGET /health HTTP/1.1[0m" [91m503 Service Unavailable[0m
+  [server] [2026-09-29 13:55:36] [32mINFO[0m:     127.0.0.1:51542 - "[1mGET /health HTTP/1.1[0m" [91m503 Service Unavailable[0m
+  [server] [2026-09-29 13:55:38] [32mINFO[0m:     127.0.0.1:51548 - "[1mGET /health HTTP/1.1[0m" [91m503 Service Unavailable[0m
+  [server] [2026-09-29 13:55:40] [32mINFO[0m:     127.0.0.1:51554 - "[1mGET /health HTTP/1.1[0m" [91m503 Service Unavailable[0m
+  [server] [rank0]:[W929 13:55:40.236872786 CUDACachingAllocator.cpp:508] expandable_segments: memory mapping failed with OOM on device 0 while trying to map 20971520 bytes (free: 8912896, total: 25250627584).
+  [server] [rank0]:[W929 13:55:40.244458772 CUDACachingAllocator.cpp:508] expandable_segments: memory mapping failed with OOM on device 0 while trying to map 20971520 bytes (free: 8912896, total: 25250627584).
+  [server] [91m[09-29 13:55:40] Error executing request None: CUDA out of memory. Tried to allocate 160.00 MiB. GPU 0 has a total capacity of 23.52 GiB of which 108.50 MiB is free. Process 46813 has 386.00 MiB memory in use. Including non-PyTorch memory, this process has 22.96 GiB memory in use. Of the allocated memory 21.96 GiB is allocated by PyTorch, and 118.45 MiB is reserved by PyTorch but unallocated. If reserved but unallocated memory is large try setting PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True to avoid fragmentation.  See documentation for Memory Management  (https://docs.pytorch.org/docs/stable/notes/cuda.html#optimizing-memory-usage-with-pytorch-cuda-alloc-conf)
+  [server] Traceback (most recent call last):
+  [server]   File "/sgl-workspace/sglang/python/sglang/multimodal_gen/runtime/managers/gpu_worker.py", line 708, in _execute_forward_common
+  [server]     result = forward_fn()
+  [server]              ^^^^^^^^^^^^
+  [server]   File "/sgl-workspace/sglang/python/sglang/multimodal_gen/runtime/managers/gpu_worker.py", line 537, in <lambda>
+  [server]     forward_fn=lambda: self.pipeline.forward(req, self.server_args),
+  [server]                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  [server]   File "/opt/sglang/lib/python3.12/site-packages/torch/utils/_contextlib.py", line 124, in decorate_context
+  [server]     return func(*args, **kwargs)
+  [server]            ^^^^^^^^^^^^^^^^^^^^^
+  [server]   File "/sgl-workspace/sglang/python/sglang/multimodal_gen/runtime/pipelines_core/composed_pipeline_base.py", line 1119, in forward
+  [server]     return self.executor.execute_with_profiling(self.stages, batch, server_args)
+  [server]            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  [server]   File "/sgl-workspace/sglang/python/sglang/multimodal_gen/runtime/pipelines_core/executors/pipeline_executor.py", line 140, in execute_with_profiling
+  [server]     batch = self.execute(stages, batch, server_args)
+  [server]             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  [server]   File "/sgl-workspace/sglang/python/sglang/multimodal_gen/runtime/pipelines_core/executors/parallel_executor.py", line 163, in execute
+  [server]     return self._execute_stages(
+  [server]            ^^^^^^^^^^^^^^^^^^^^^
+  [server]   File "/sgl-workspace/sglang/python/sglang/multimodal_gen/runtime/pipelines_core/executors/parallel_executor.py", line 115, in _execute_stages
+  [server]     batch = self._run_stage_with_executor_hooks(
+  [server]             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  [server]   File "/sgl-workspace/sglang/python/sglang/multimodal_gen/runtime/pipelines_core/executors/pipeline_executor.py", line 120, in _run_stage_with_executor_hooks
+  [server]     payload = self.run_stage_with_context(
+  [server]               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  [server]   File "/sgl-workspace/sglang/python/sglang/multimodal_gen/runtime/pipelines_core/executors/pipeline_executor.py", line 202, in run_stage_with_context
+  [server]     self.component_residency_manager.begin_stage()
+  [server]   File "/sgl-workspace/sglang/python/sglang/multimodal_gen/runtime/managers/memory_managers/component_manager.py", line 344, in begin_stage
+  [server]     self.begin_use(stage_uses[0])
+  [server]   File "/sgl-workspace/sglang/python/sglang/multimodal_gen/runtime/managers/memory_managers/component_manager.py", line 417, in begin_use
+  [server]     module = self._prepare_forward_use(use, module=module)
+  [server]              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  [server]   File "/sgl-workspace/sglang/python/sglang/multimodal_gen/runtime/managers/memory_managers/component_manager.py", line 531, in _prepare_forward_use
+  [server]     strategy.prepare_for_use(module, use, self.state)
+  [server]   File "/sgl-workspace/sglang/python/sglang/multimodal_gen/runtime/managers/memory_managers/component_residency_strategies.py", line 152, in prepare_for_use
+  [server]     self._load_component(module, use)
+  [server]   File "/sgl-workspace/sglang/python/sglang/multimodal_gen/runtime/managers/memory_managers/component_residency_strategies.py", line 144, in _load_component
+  [server]     _module_to_local_device(module, dtype=use.target_dtype)
+  [server]   File "/sgl-workspace/sglang/python/sglang/multimodal_gen/runtime/managers/memory_managers/component_residency_strategies.py", line 49, in _module_to_local_device
+  [server]     module.to(device, non_blocking=True)
+  [server]   File "/opt/sglang/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1383, in to
+  [server]     return self._apply(convert)
+  [server]            ^^^^^^^^^^^^^^^^^^^^
+  [server]   File "/opt/sglang/lib/python3.12/site-packages/torch/nn/modules/module.py", line 933, in _apply
+  [server]     module._apply(fn)
+  [server]   File "/opt/sglang/lib/python3.12/site-packages/torch/nn/modules/module.py", line 933, in _apply
+  [server]     module._apply(fn)
+  [server]   File "/opt/sglang/lib/python3.12/site-packages/torch/nn/modules/module.py", line 933, in _apply
+  [server]     module._apply(fn)
+  [server]   [Previous line repeated 4 more times]
+  [server]   File "/opt/sglang/lib/python3.12/site-packages/torch/nn/modules/module.py", line 964, in _apply
+  [server]     param_applied = fn(param)
+  [server]                     ^^^^^^^^^
+  [server]   File "/opt/sglang/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1369, in convert
+  [server]     return t.to(
+  [server]            ^^^^^
+  [server] torch.OutOfMemoryError: CUDA out of memory. Tried to allocate 160.00 MiB. GPU 0 has a total capacity of 23.52 GiB of which 108.50 MiB is free. Process 46813 has 386.00 MiB memory in use. Including non-PyTorch memory, this process has 22.96 GiB memory in use. Of the allocated memory 21.96 GiB is allocated by PyTorch, and 118.45 MiB is reserved by PyTorch but unallocated. If reserved but unallocated memory is large try setting PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True to avoid fragmentation.  See documentation for Memory Management  (https://docs.pytorch.org/docs/stable/notes/cuda.html#optimizing-memory-usage-with-pytorch-cuda-alloc-conf)[0;0m
+  [server] [93m[09-29 13:55:40] 
+  [server] OOM detected. Possible solutions:
+  [server]   - If the OOM occurs during loading:
+  [server]     1. Check available memory on every selected GPU, not only total capacity.
+  [server]        In multi-GPU runs, the least-free selected GPU is the bottleneck.
+  [server]     2. For single-GPU deployment, use `--performance-mode memory`, component CPU offload,
+  [server]        or `--dit-layerwise-offload` for supported Wan/MOVA DiTs.
+  [server]     3. For multi-GPU deployment, keep the default `--performance-mode auto` or set
+  [server]        `--use-fsdp-inference true` to shard DiT weights with FSDP. FSDP is not a
+  [server]        single-GPU substitute for CPU offload.
+  [server]   - If the OOM occurs during runtime:
+  [server]     1. Reduce resolution, `--num-frames`, or batch size.
+  [server]     2. Use `--performance-mode memory` for lower memory usage.
+  [server]     3. Enable SP/Ulysses/Ring for sequence-heavy workloads in multi-GPU setups.
+  [server]     4. Use FSDP, with CFG parallelism when supported, for validated multi-GPU workloads.
+  [server]     5. Use a lower-memory attention backend or quantization when available.
+  [server]   Or, open an issue on GitHub https://github.com/sgl-project/sglang/issues/new/choose
+  [server] [0;0m
+  [server] 
+  [server] Warmup requests:  33%|███▎      | 1/3 [00:15<00:31, 15.73s/req, server warmup req (832x480x17f, 4/50 steps)][93m[09-29 13:55:40] server warmup req (624x624x17f, 4/50 steps) processing failed: Error executing request None: CUDA out of memory. Tried to allocate 160.00 MiB. GPU 0 has a total capacity of 23.52 GiB of which 108.50 MiB is free. Process 46813 has 386.00 MiB memory in use. Including non-PyTorch memory, this process has 22.96 GiB memory in use. Of the allocated memory 21.96 GiB is allocated by PyTorch, and 118.45 MiB is reserved by PyTorch but unallocated. If reserved but unallocated memory is large try setting PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True to avoid fragmentation.  See documentation for Memory Management  (https://docs.pytorch.org/docs/stable/notes/cuda.html#optimizing-memory-usage-with-pytorch-cuda-alloc-conf)[0;0m
+  [server] [93m[09-29 13:55:40] server warmup req (832x480x17f, 4/50 steps) ran out of memory; retrying warmup at server warmup req (832x480x9f, 4/50 steps)[0;0m
+  [server] [rank0]:[W929 13:55:40.458061792 CUDACachingAllocator.cpp:508] expandable_segments: memory mapping failed with OOM on device 0 while trying to map 20971520 bytes (free: 17301504, total: 25250627584).
+  [server] [rank0]:[W929 13:55:40.458796688 CUDACachingAllocator.cpp:508] expandable_segments: memory mapping failed with OOM on device 0 while trying to map 20971520 bytes (free: 19398656, total: 25250627584).
+  [server] [2026-09-29 13:55:42] [32mINFO[0m:     127.0.0.1:44896 - "[1mGET /health HTTP/1.1[0m" [91m503 Service Unavailable[0m
+  [server] [2026-09-29 13:55:44] [32mINFO[0m:     127.0.0.1:44912 - "[1mGET /health HTTP/1.1[0m" [91m503 Service Unavailable[0m
+  [server] [2026-09-29 13:55:46] [32mINFO[0m:     127.0.0.1:44914 - "[1mGET /health HTTP/1.1[0m" [91m503 Service Unavailable[0m
+  [server] [2026-09-29 13:55:48] [32mINFO[0m:     127.0.0.1:44918 - "[1mGET /health HTTP/1.1[0m" [91m503 Service Unavailable[0m
+  [server] [2026-09-29 13:55:50] [32mINFO[0m:     127.0.0.1:44930 - "[1mGET /health HTTP/1.1[0m" [91m503 Service Unavailable[0m
+  [server] [2026-09-29 13:55:52] [32mINFO[0m:     127.0.0.1:34654 - "[1mGET /health HTTP/1.1[0m" [91m503 Service Unavailable[0m
+  [server] [2026-09-29 13:55:54] [32mINFO[0m:     127.0.0.1:34658 - "[1mGET /health HTTP/1.1[0m" [91m503 Service Unavailable[0m
+  [server] [2026-09-29 13:55:56] [32mINFO[0m:     127.0.0.1:34660 - "[1mGET /health HTTP/1.1[0m" [91m503 Service Unavailable[0m
+  [server] [2026-09-29 13:55:58] [32mINFO[0m:     127.0.0.1:34672 - "[1mGET /health HTTP/1.1[0m" [91m503 Service Unavailable[0m
+  [server] [2026-09-29 13:56:00] [32mINFO[0m:     127.0.0.1:34682 - "[1mGET /health HTTP/1.1[0m" [91m503 Service Unavailable[0m
+  [server] [rank0]:[W929 13:56:00.316927532 CUDACachingAllocator.cpp:508] expandable_segments: memory mapping failed with OOM on device 0 while trying to map 20971520 bytes (free: 2621440, total: 25250627584).
+  [server] [rank0]:[W929 13:56:01.340131022 CUDACachingAllocator.cpp:508] expandable_segments: memory mapping failed with OOM on device 0 while trying to map 20971520 bytes (free: 2621440, total: 25250627584).
+  [server] [91m[09-29 13:56:01] Error executing request None: CUDA out of memory. Tried to allocate 160.00 MiB. GPU 0 has a total capacity of 23.52 GiB of which 62.50 MiB is free. Process 46813 has 386.00 MiB memory in use. Including non-PyTorch memory, this process has 22.97 GiB memory in use. Of the allocated memory 22.01 GiB is allocated by PyTorch, and 70.31 MiB is reserved by PyTorch but unallocated. If reserved but unallocated memory is large try setting PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True to avoid fragmentation.  See documentation for Memory Management  (https://docs.pytorch.org/docs/stable/notes/cuda.html#optimizing-memory-usage-with-pytorch-cuda-alloc-conf)
+  [server] Traceback (most recent call last):
+  [server]   File "/sgl-workspace/sglang/python/sglang/multimodal_gen/runtime/pipelines_core/executors/pipeline_executor.py", line 90, in _component_residency_request
+  [server]     yield
+  [server]   File "/sgl-workspace/sglang/python/sglang/multimodal_gen/runtime/pipelines_core/executors/parallel_executor.py", line 115, in _execute_stages
+  [server]     batch = self._run_stage_with_executor_hooks(
+  [server]             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  [server]   File "/sgl-workspace/sglang/python/sglang/multimodal_gen/runtime/pipelines_core/executors/pipeline_executor.py", line 120, in _run_stage_with_executor_hooks
+  [server]     payload = self.run_stage_with_context(
+  [server]               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  [server]   File "/sgl-workspace/sglang/python/sglang/multimodal_gen/runtime/pipelines_core/executors/pipeline_executor.py", line 204, in run_stage_with_context
+  [server]     return run_stage(stage, payload)
+  [server]            ^^^^^^^^^^^^^^^^^^^^^^^^^
+  [server]   File "/sgl-workspace/sglang/python/sglang/multimodal_gen/runtime/pipelines_core/executors/parallel_executor.py", line 167, in <lambda>
+  [server]     lambda stage, current: stage(current, server_args),
+  [server]                            ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  [server]   File "/sgl-workspace/sglang/python/sglang/multimodal_gen/runtime/pipelines_core/stages/base.py", line 438, in __call__
+  [server]     result = self.forward(batch, server_args)
+  [server]              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  [server]   File "/opt/sglang/lib/python3.12/site-packages/torch/utils/_contextlib.py", line 124, in decorate_context
+  [server]     return func(*args, **kwargs)
+  [server]            ^^^^^^^^^^^^^^^^^^^^^
+  [server]   File "/sgl-workspace/sglang/python/sglang/multimodal_gen/runtime/pipelines_core/stages/text_encoding.py", line 422, in forward
+  [server]     ) = self.encode_text(
+  [server]         ^^^^^^^^^^^^^^^^^
+  [server]   File "/opt/sglang/lib/python3.12/site-packages/torch/utils/_contextlib.py", line 124, in decorate_context
+  [server]     return func(*args, **kwargs)
+  [server]            ^^^^^^^^^^^^^^^^^^^^^
+  [server]   File "/sgl-workspace/sglang/python/sglang/multimodal_gen/runtime/pipelines_core/stages/text_encoding.py", line 726, in encode_text
+  [server]     outputs = self._forward_text_encoder(
+  [server]               ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  [server]   File "/sgl-workspace/sglang/python/sglang/multimodal_gen/runtime/pipelines_core/stages/text_encoding.py", line 521, in _forward_text_encoder
+  [server]     return text_encoder(**encoder_forward_kwargs)
+  [server]            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  [server]   File "/sgl-workspace/sglang/python/sglang/multimodal_gen/runtime/models/encoders/base.py", line 184, in __call__
+  [server]     return super().__call__(*args, **kwargs)
+  [server]            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  [server]   File "/opt/sglang/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1778, in _wrapped_call_impl
+  [server]     return self._call_impl(*args, **kwargs)
+  [server]            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  [server]   File "/opt/sglang/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1789, in _call_impl
+  [server]     return forward_call(*args, **kwargs)
+  [server]            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  [server]   File "/sgl-workspace/sglang/python/sglang/multimodal_gen/runtime/models/encoders/t5.py", line 697, in forward
+  [server]     hidden_states = self.encoder(
+  [server]                     ^^^^^^^^^^^^^
+  [server]   File "/opt/sglang/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1778, in _wrapped_call_impl
+  [server]     return self._call_impl(*args, **kwargs)
+  [server]            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  [server]   File "/opt/sglang/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1789, in _call_impl
+  [server]     return forward_call(*args, **kwargs)
+  [server]            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  [server]   File "/sgl-workspace/sglang/python/sglang/multimodal_gen/runtime/models/encoders/t5.py", line 551, in forward
+  [server]     hidden_states = block(
+  [server]                     ^^^^^^
+  [server]   File "/opt/sglang/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1778, in _wrapped_call_impl
+  [server]     return self._call_impl(*args, **kwargs)
+  [server]            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  [server]   File "/opt/sglang/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1884, in _call_impl
+  [server]     return inner()
+  [server]            ^^^^^^^
+  [server]   File "/opt/sglang/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1832, in inner
+  [server]     result = forward_call(*args, **kwargs)
+  [server]              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  [server]   File "/sgl-workspace/sglang/python/sglang/multimodal_gen/runtime/models/encoders/t5.py", line 482, in forward
+  [server]     hidden_states = self.layer[0](
+  [server]                     ^^^^^^^^^^^^^^
+  [server]   File "/opt/sglang/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1778, in _wrapped_call_impl
+  [server]     return self._call_impl(*args, **kwargs)
+  [server]            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  [server]   File "/opt/sglang/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1789, in _call_impl
+  [server]     return forward_call(*args, **kwargs)
+  [server]            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  [server]   File "/sgl-workspace/sglang/python/sglang/multimodal_gen/runtime/models/encoders/t5.py", line 401, in forward
+  [server]     attention_output = self.SelfAttention(
+  [server]                        ^^^^^^^^^^^^^^^^^^^
+  [server]   File "/opt/sglang/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1778, in _wrapped_call_impl
+  [server]     return self._call_impl(*args, **kwargs)
+  [server]            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  [server]   File "/opt/sglang/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1789, in _call_impl
+  [server]     return forward_call(*args, **kwargs)
+  [server]            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  [server]   File "/sgl-workspace/sglang/python/sglang/multimodal_gen/runtime/models/encoders/t5.py", line 349, in forward
+  [server]     attn_bias = self.compute_bias(seq_len, seq_len).repeat(num_seqs, 1, 1, 1)
+  [server]                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  [server] torch.OutOfMemoryError: CUDA out of memory. Tried to allocate 64.00 MiB. GPU 0 has a total capacity of 23.52 GiB of which 38.50 MiB is free. Process 46813 has 386.00 MiB memory in use. Including non-PyTorch memory, this process has 23.03 GiB memory in use. Of the allocated memory 22.07 GiB is allocated by PyTorch, and 66.31 MiB is reserved by PyTorch but unallocated. If reserved but unallocated memory is large try setting PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True to avoid fragmentation.  See documentation for Memory Management  (https://docs.pytorch.org/docs/stable/notes/cuda.html#optimizing-memory-usage-with-pytorch-cuda-alloc-conf)
+  [server] 
+  [server] During handling of the above exception, another exception occurred:
+  [server] 
+  [server] Traceback (most recent call last):
+  [server]   File "/sgl-workspace/sglang/python/sglang/multimodal_gen/runtime/managers/gpu_worker.py", line 708, in _execute_forward_common
+  [server]     result = forward_fn()
+  [server]              ^^^^^^^^^^^^
+  [server]   File "/sgl-workspace/sglang/python/sglang/multimodal_gen/runtime/managers/gpu_worker.py", line 537, in <lambda>
+  [server]     forward_fn=lambda: self.pipeline.forward(req, self.server_args),
+  [server]                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  [server]   File "/opt/sglang/lib/python3.12/site-packages/torch/utils/_contextlib.py", line 124, in decorate_context
+  [server]     return func(*args, **kwargs)
+  [server]            ^^^^^^^^^^^^^^^^^^^^^
+  [server]   File "/sgl-workspace/sglang/python/sglang/multimodal_gen/runtime/pipelines_core/composed_pipeline_base.py", line 1119, in forward
+  [server]     return self.executor.execute_with_profiling(self.stages, batch, server_args)
+  [server]            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  [server]   File "/sgl-workspace/sglang/python/sglang/multimodal_gen/runtime/pipelines_core/executors/pipeline_executor.py", line 140, in execute_with_profiling
+  [server]     batch = self.execute(stages, batch, server_args)
+  [server]             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  [server]   File "/sgl-workspace/sglang/python/sglang/multimodal_gen/runtime/pipelines_core/executors/parallel_executor.py", line 163, in execute
+  [server]     return self._execute_stages(
+  [server]            ^^^^^^^^^^^^^^^^^^^^^
+  [server]   File "/sgl-workspace/sglang/python/sglang/multimodal_gen/runtime/pipelines_core/executors/parallel_executor.py", line 52, in _execute_stages
+  [server]     with self._component_residency_request(stages, batch, server_args):
+  [server]   File "/usr/lib/python3.12/contextlib.py", line 158, in __exit__
+  [server]     self.gen.throw(value)
+  [server]   File "/sgl-workspace/sglang/python/sglang/multimodal_gen/runtime/pipelines_core/executors/pipeline_executor.py", line 92, in _component_residency_request
+  [server]     self.finish_component_residency_request()
+  [server]   File "/sgl-workspace/sglang/python/sglang/multimodal_gen/runtime/pipelines_core/executors/pipeline_executor.py", line 79, in finish_component_residency_request
+  [server]     self.component_residency_manager.finish_request()
+  [server]   File "/sgl-workspace/sglang/python/sglang/multimodal_gen/runtime/managers/memory_managers/component_manager.py", line 676, in finish_request
+  [server]     strategy.finish_request(module, use, self.state, preferred=preferred)
+  [server]   File "/sgl-workspace/sglang/python/sglang/multimodal_gen/runtime/managers/memory_managers/component_residency_strategies.py", line 216, in finish_request
+  [server]     self.prepare_for_use(module, use, state)
+  [server]   File "/sgl-workspace/sglang/python/sglang/multimodal_gen/runtime/managers/memory_managers/component_residency_strategies.py", line 152, in prepare_for_use
+  [server]     self._load_component(module, use)
+  [server]   File "/sgl-workspace/sglang/python/sglang/multimodal_gen/runtime/managers/memory_managers/component_residency_strategies.py", line 144, in _load_component
+  [server]     _module_to_local_device(module, dtype=use.target_dtype)
+  [server]   File "/sgl-workspace/sglang/python/sglang/multimodal_gen/runtime/managers/memory_managers/component_residency_strategies.py", line 49, in _module_to_local_device
+  [server]     module.to(device, non_blocking=True)
+  [server]   File "/opt/sglang/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1383, in to
+  [server]     return self._apply(convert)
+  [server]            ^^^^^^^^^^^^^^^^^^^^
+  [server]   File "/opt/sglang/lib/python3.12/site-packages/torch/nn/modules/module.py", line 933, in _apply
+  [server]     module._apply(fn)
+  [server]   File "/opt/sglang/lib/python3.12/site-packages/torch/nn/modules/module.py", line 933, in _apply
+  [server]     module._apply(fn)
+  [server]   File "/opt/sglang/lib/python3.12/site-packages/torch/nn/modules/module.py", line 933, in _apply
+  [server]     module._apply(fn)
+  [server]   [Previous line repeated 4 more times]
+  [server]   File "/opt/sglang/lib/python3.12/site-packages/torch/nn/modules/module.py", line 964, in _apply
+  [server]     param_applied = fn(param)
+  [server]                     ^^^^^^^^^
+  [server]   File "/opt/sglang/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1369, in convert
+  [server]     return t.to(
+  [server]            ^^^^^
+  [server] torch.OutOfMemoryError: CUDA out of memory. Tried to allocate 160.00 MiB. GPU 0 has a total capacity of 23.52 GiB of which 62.50 MiB is free. Process 46813 has 386.00 MiB memory in use. Including non-PyTorch memory, this process has 22.97 GiB memory in use. Of the allocated memory 22.01 GiB is allocated by PyTorch, and 70.31 MiB is reserved by PyTorch but unallocated. If reserved but unallocated memory is large try setting PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True to avoid fragmentation.  See documentation for Memory Management  (https://docs.pytorch.org/docs/stable/notes/cuda.html#optimizing-memory-usage-with-pytorch-cuda-alloc-conf)[0;0m
+  [server] [93m[09-29 13:56:01] 
+  [server] OOM detected. Possible solutions:
+  [server]   - If the OOM occurs during loading:
+  [server]     1. Check available memory on every selected GPU, not only total capacity.
+  [server]        In multi-GPU runs, the least-free selected GPU is the bottleneck.
+  [server]     2. For single-GPU deployment, use `--performance-mode memory`, component CPU offload,
+  [server]        or `--dit-layerwise-offload` for supported Wan/MOVA DiTs.
+  [server]     3. For multi-GPU deployment, keep the default `--performance-mode auto` or set
+  [server]        `--use-fsdp-inference true` to shard DiT weights with FSDP. FSDP is not a
+  [server]        single-GPU substitute for CPU offload.
+  [server]   - If the OOM occurs during runtime:
+  [server]     1. Reduce resolution, `--num-frames`, or batch size.
+  [server]     2. Use `--performance-mode memory` for lower memory usage.
+  [server]     3. Enable SP/Ulysses/Ring for sequence-heavy workloads in multi-GPU setups.
+  [server]     4. Use FSDP, with CFG parallelism when supported, for validated multi-GPU workloads.
+  [server]     5. Use a lower-memory attention backend or quantization when available.
+  [server]   Or, open an issue on GitHub https://github.com/sgl-project/sglang/issues/new/choose
+  [server] [0;0m
+  [server] 
+  [server] Warmup requests:  67%|██████▋   | 2/3 [00:36<00:18, 18.89s/req, server warmup req (832x480x9f, 4/50 steps)] [93m[09-29 13:56:01] server warmup req (624x624x9f, 4/50 steps) processing failed: Error executing request None: CUDA out of memory. Tried to allocate 160.00 MiB. GPU 0 has a total capacity of 23.52 GiB of which 62.50 MiB is free. Process 46813 has 386.00 MiB memory in use. Including non-PyTorch memory, this process has 22.97 GiB memory in use. Of the allocated memory 22.01 GiB is allocated by PyTorch, and 70.31 MiB is reserved by PyTorch but unallocated. If reserved but unallocated memory is large try setting PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True to avoid fragmentation.  See documentation for Memory Management  (https://docs.pytorch.org/docs/stable/notes/cuda.html#optimizing-memory-usage-with-pytorch-cuda-alloc-conf)[0;0m
+  [server] [93m[09-29 13:56:01] server warmup req (832x480x9f, 4/50 steps) ran out of memory; retrying warmup at server warmup req (832x480x5f, 4/50 steps)[0;0m
+  [server] [rank0]:[W929 13:56:01.369971338 CUDACachingAllocator.cpp:508] expandable_segments: memory mapping failed with OOM on device 0 while trying to map 20971520 bytes (free: 524288, total: 25250627584).
+  [server] [rank0]:[W929 13:56:01.370688294 CUDACachingAllocator.cpp:508] expandable_segments: memory mapping failed with OOM on device 0 while trying to map 20971520 bytes (free: 2621440, total: 25250627584).
+  [server] [rank0]:[W929 13:56:01.394463486 CUDACachingAllocator.cpp:508] expandable_segments: memory mapping failed with OOM on device 0 while trying to map 20971520 bytes (free: 2621440, total: 25250627584).
+  [server] [rank0]:[W929 13:56:01.400106913 CUDACachingAllocator.cpp:508] expandable_segments: memory mapping failed with OOM on device 0 while trying to map 20971520 bytes (free: 2621440, total: 25250627584).
+  [server] [91m[09-29 13:56:01] Error executing request None: CUDA out of memory. Tried to allocate 160.00 MiB. GPU 0 has a total capacity of 23.52 GiB of which 22.50 MiB is free. Process 46813 has 386.00 MiB memory in use. Including non-PyTorch memory, this process has 23.01 GiB memory in use. Of the allocated memory 22.05 GiB is allocated by PyTorch, and 66.30 MiB is reserved by PyTorch but unallocated. If reserved but unallocated memory is large try setting PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True to avoid fragmentation.  See documentation for Memory Management  (https://docs.pytorch.org/docs/stable/notes/cuda.html#optimizing-memory-usage-with-pytorch-cuda-alloc-conf)
+  [server] Traceback (most recent call last):
+  [server]   File "/sgl-workspace/sglang/python/sglang/multimodal_gen/runtime/pipelines_core/executors/pipeline_executor.py", line 90, in _component_residency_request
+  [server]     yield
+  [server]   File "/sgl-workspace/sglang/python/sglang/multimodal_gen/runtime/pipelines_core/executors/parallel_executor.py", line 115, in _execute_stages
+  [server]     batch = self._run_stage_with_executor_hooks(
+  [server]             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  [server]   File "/sgl-workspace/sglang/python/sglang/multimodal_gen/runtime/pipelines_core/executors/pipeline_executor.py", line 120, in _run_stage_with_executor_hooks
+  [server]     payload = self.run_stage_with_context(
+  [server]               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  [server]   File "/sgl-workspace/sglang/python/sglang/multimodal_gen/runtime/pipelines_core/executors/pipeline_executor.py", line 204, in run_stage_with_context
+  [server]     return run_stage(stage, payload)
+  [server]            ^^^^^^^^^^^^^^^^^^^^^^^^^
+  [server]   File "/sgl-workspace/sglang/python/sglang/multimodal_gen/runtime/pipelines_core/executors/parallel_executor.py", line 167, in <lambda>
+  [server]     lambda stage, current: stage(current, server_args),
+  [server]                            ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  [server]   File "/sgl-workspace/sglang/python/sglang/multimodal_gen/runtime/pipelines_core/stages/base.py", line 438, in __call__
+  [server]     result = self.forward(batch, server_args)
+  [server]              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  [server]   File "/opt/sglang/lib/python3.12/site-packages/torch/utils/_contextlib.py", line 124, in decorate_context
+  [server]     return func(*args, **kwargs)
+  [server]            ^^^^^^^^^^^^^^^^^^^^^
+  [server]   File "/sgl-workspace/sglang/python/sglang/multimodal_gen/runtime/pipelines_core/stages/text_encoding.py", line 422, in forward
+  [server]     ) = self.encode_text(
+  [server]         ^^^^^^^^^^^^^^^^^
+  [server]   File "/opt/sglang/lib/python3.12/site-packages/torch/utils/_contextlib.py", line 124, in decorate_context
+  [server]     return func(*args, **kwargs)
+  [server]            ^^^^^^^^^^^^^^^^^^^^^
+  [server]   File "/sgl-workspace/sglang/python/sglang/multimodal_gen/runtime/pipelines_core/stages/text_encoding.py", line 726, in encode_text
+  [server]     outputs = self._forward_text_encoder(
+  [server]               ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  [server]   File "/sgl-workspace/sglang/python/sglang/multimodal_gen/runtime/pipelines_core/stages/text_encoding.py", line 521, in _forward_text_encoder
+  [server]     return text_encoder(**encoder_forward_kwargs)
+  [server]            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  [server]   File "/sgl-workspace/sglang/python/sglang/multimodal_gen/runtime/models/encoders/base.py", line 184, in __call__
+  [server]     return super().__call__(*args, **kwargs)
+  [server]            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  [server]   File "/opt/sglang/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1778, in _wrapped_call_impl
+  [server]     return self._call_impl(*args, **kwargs)
+  [server]            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  [server]   File "/opt/sglang/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1789, in _call_impl
+  [server]     return forward_call(*args, **kwargs)
+  [server]            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  [server]   File "/sgl-workspace/sglang/python/sglang/multimodal_gen/runtime/models/encoders/t5.py", line 697, in forward
+  [server]     hidden_states = self.encoder(
+  [server]                     ^^^^^^^^^^^^^
+  [server]   File "/opt/sglang/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1778, in _wrapped_call_impl
+  [server]     return self._call_impl(*args, **kwargs)
+  [server]            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  [server]   File "/opt/sglang/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1789, in _call_impl
+  [server]     return forward_call(*args, **kwargs)
+  [server]            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  [server]   File "/sgl-workspace/sglang/python/sglang/multimodal_gen/runtime/models/encoders/t5.py", line 551, in forward
+  [server]     hidden_states = block(
+  [server]                     ^^^^^^
+  [server]   File "/opt/sglang/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1778, in _wrapped_call_impl
+  [server]     return self._call_impl(*args, **kwargs)
+  [server]            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  [server]   File "/opt/sglang/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1884, in _call_impl
+  [server]     return inner()
+  [server]            ^^^^^^^
+  [server]   File "/opt/sglang/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1832, in inner
+  [server]     result = forward_call(*args, **kwargs)
+  [server]              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  [server]   File "/sgl-workspace/sglang/python/sglang/multimodal_gen/runtime/models/encoders/t5.py", line 482, in forward
+  [server]     hidden_states = self.layer[0](
+  [server]                     ^^^^^^^^^^^^^^
+  [server]   File "/opt/sglang/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1778, in _wrapped_call_impl
+  [server]     return self._call_impl(*args, **kwargs)
+  [server]            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  [server]   File "/opt/sglang/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1789, in _call_impl
+  [server]     return forward_call(*args, **kwargs)
+  [server]            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  [server]   File "/sgl-workspace/sglang/python/sglang/multimodal_gen/runtime/models/encoders/t5.py", line 401, in forward
+  [server]     attention_output = self.SelfAttention(
+  [server]                        ^^^^^^^^^^^^^^^^^^^
+  [server]   File "/opt/sglang/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1778, in _wrapped_call_impl
+  [server]     return self._call_impl(*args, **kwargs)
+  [server]            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  [server]   File "/opt/sglang/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1789, in _call_impl
+  [server]     return forward_call(*args, **kwargs)
+  [server]            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  [server]   File "/sgl-workspace/sglang/python/sglang/multimodal_gen/runtime/models/encoders/t5.py", line 349, in forward
+  [server]     attn_bias = self.compute_bias(seq_len, seq_len).repeat(num_seqs, 1, 1, 1)
+  [server]                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  [server]   File "/sgl-workspace/sglang/python/sglang/multimodal_gen/runtime/models/encoders/t5.py", line 313, in compute_bias
+  [server]     values = self.relative_attention_bias(
+  [server]              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  [server]   File "/opt/sglang/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1778, in _wrapped_call_impl
+  [server]     return self._call_impl(*args, **kwargs)
+  [server]            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  [server]   File "/opt/sglang/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1789, in _call_impl
+  [server]     return forward_call(*args, **kwargs)
+  [server]            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  [server]   File "/sgl-workspace/sglang/python/sglang/multimodal_gen/runtime/layers/vocab_parallel_embedding.py", line 474, in forward
+  [server]     output_parallel = self.quant_method.embedding(self, masked_input.long())
+  [server]                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  [server]   File "/sgl-workspace/sglang/python/sglang/multimodal_gen/runtime/layers/vocab_parallel_embedding.py", line 64, in embedding
+  [server]     return F.embedding(input_, layer.weight)
+  [server]            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  [server]   File "/opt/sglang/lib/python3.12/site-packages/torch/nn/functional.py", line 2615, in embedding
+  [server]     return torch.embedding(weight, input, padding_idx, scale_grad_by_freq, sparse)
+  [server]            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  [server] torch.OutOfMemoryError: CUDA out of memory. Tried to allocate 64.00 MiB. GPU 0 has a total capacity of 23.52 GiB of which 22.50 MiB is free. Process 46813 has 386.00 MiB memory in use. Including non-PyTorch memory, this process has 23.01 GiB memory in use. Of the allocated memory 22.05 GiB is allocated by PyTorch, and 66.30 MiB is reserved by PyTorch but unallocated. If reserved but unallocated memory is large try setting PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True to avoid fragmentation.  See documentation for Memory Management  (https://docs.pytorch.org/docs/stable/notes/cuda.html#optimizing-memory-usage-with-pytorch-cuda-alloc-conf)
+  [server] 
+  [server] During handling of the above exception, another exception occurred:
+  [server] 
+  [server] Traceback (most recent call last):
+  [server]   File "/sgl-workspace/sglang/python/sglang/multimodal_gen/runtime/managers/gpu_worker.py", line 708, in _execute_forward_common
+  [server]     result = forward_fn()
+  [server]              ^^^^^^^^^^^^
+  [server]   File "/sgl-workspace/sglang/python/sglang/multimodal_gen/runtime/managers/gpu_worker.py", line 537, in <lambda>
+  [server]     forward_fn=lambda: self.pipeline.forward(req, self.server_args),
+  [server]                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  [server]   File "/opt/sglang/lib/python3.12/site-packages/torch/utils/_contextlib.py", line 124, in decorate_context
+  [server]     return func(*args, **kwargs)
+  [server]            ^^^^^^^^^^^^^^^^^^^^^
+  [server]   File "/sgl-workspace/sglang/python/sglang/multimodal_gen/runtime/pipelines_core/composed_pipeline_base.py", line 1119, in forward
+  [server]     return self.executor.execute_with_profiling(self.stages, batch, server_args)
+  [server]            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  [server]   File "/sgl-workspace/sglang/python/sglang/multimodal_gen/runtime/pipelines_core/executors/pipeline_executor.py", line 140, in execute_with_profiling
+  [server]     batch = self.execute(stages, batch, server_args)
+  [server]             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  [server]   File "/sgl-workspace/sglang/python/sglang/multimodal_gen/runtime/pipelines_core/executors/parallel_executor.py", line 163, in execute
+  [server]     return self._execute_stages(
+  [server]            ^^^^^^^^^^^^^^^^^^^^^
+  [server]   File "/sgl-workspace/sglang/python/sglang/multimodal_gen/runtime/pipelines_core/executors/parallel_executor.py", line 52, in _execute_stages
+  [server]     with self._component_residency_request(stages, batch, server_args):
+  [server]   File "/usr/lib/python3.12/contextlib.py", line 158, in __exit__
+  [server]     self.gen.throw(value)
+  [server]   File "/sgl-workspace/sglang/python/sglang/multimodal_gen/runtime/pipelines_core/executors/pipeline_executor.py", line 92, in _component_residency_request
+  [server]     self.finish_component_residency_request()
+  [server]   File "/sgl-workspace/sglang/python/sglang/multimodal_gen/runtime/pipelines_core/executors/pipeline_executor.py", line 79, in finish_component_residency_request
+  [server]     self.component_residency_manager.finish_request()
+  [server]   File "/sgl-workspace/sglang/python/sglang/multimodal_gen/runtime/managers/memory_managers/component_manager.py", line 676, in finish_request
+  [server]     strategy.finish_request(module, use, self.state, preferred=preferred)
+  [server]   File "/sgl-workspace/sglang/python/sglang/multimodal_gen/runtime/managers/memory_managers/component_residency_strategies.py", line 216, in finish_request
+  [server]     self.prepare_for_use(module, use, state)
+  [server]   File "/sgl-workspace/sglang/python/sglang/multimodal_gen/runtime/managers/memory_managers/component_residency_strategies.py", line 152, in prepare_for_use
+  [server]     self._load_component(module, use)
+  [server]   File "/sgl-workspace/sglang/python/sglang/multimodal_gen/runtime/managers/memory_managers/component_residency_strategies.py", line 144, in _load_component
+  [server]     _module_to_local_device(module, dtype=use.target_dtype)
+  [server]   File "/sgl-workspace/sglang/python/sglang/multimodal_gen/runtime/managers/memory_managers/component_residency_strategies.py", line 49, in _module_to_local_device
+  [server]     module.to(device, non_blocking=True)
+  [server]   File "/opt/sglang/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1383, in to
+  [server]     return self._apply(convert)
+  [server]            ^^^^^^^^^^^^^^^^^^^^
+  [server]   File "/opt/sglang/lib/python3.12/site-packages/torch/nn/modules/module.py", line 933, in _apply
+  [server]     module._apply(fn)
+  [server]   File "/opt/sglang/lib/python3.12/site-packages/torch/nn/modules/module.py", line 933, in _apply
+  [server]     module._apply(fn)
+  [server]   File "/opt/sglang/lib/python3.12/site-packages/torch/nn/modules/module.py", line 933, in _apply
+  [server]     module._apply(fn)
+  [server]   [Previous line repeated 4 more times]
+  [server]   File "/opt/sglang/lib/python3.12/site-packages/torch/nn/modules/module.py", line 964, in _apply
+  [server]     param_applied = fn(param)
+  [server]                     ^^^^^^^^^
+  [server]   File "/opt/sglang/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1369, in convert
+  [server]     return t.to(
+  [server]            ^^^^^
+  [server] torch.OutOfMemoryError: CUDA out of memory. Tried to allocate 160.00 MiB. GPU 0 has a total capacity of 23.52 GiB of which 22.50 MiB is free. Process 46813 has 386.00 MiB memory in use. Including non-PyTorch memory, this process has 23.01 GiB memory in use. Of the allocated memory 22.05 GiB is allocated by PyTorch, and 66.30 MiB is reserved by PyTorch but unallocated. If reserved but unallocated memory is large try setting PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True to avoid fragmentation.  See documentation for Memory Management  (https://docs.pytorch.org/docs/stable/notes/cuda.html#optimizing-memory-usage-with-pytorch-cuda-alloc-conf)[0;0m
+  [server] [93m[09-29 13:56:01] 
+  [server] OOM detected. Possible solutions:
+  [server]   - If the OOM occurs during loading:
+  [server]     1. Check available memory on every selected GPU, not only total capacity.
+  [server]        In multi-GPU runs, the least-free selected GPU is the bottleneck.
+  [server]     2. For single-GPU deployment, use `--performance-mode memory`, component CPU offload,
+  [server]        or `--dit-layerwise-offload` for supported Wan/MOVA DiTs.
+  [server]     3. For multi-GPU deployment, keep the default `--performance-mode auto` or set
+  [server]        `--use-fsdp-inference true` to shard DiT weights with FSDP. FSDP is not a
+  [server]        single-GPU substitute for CPU offload.
+  [server]   - If the OOM occurs during runtime:
+  [server]     1. Reduce resolution, `--num-frames`, or batch size.
+  [server]     2. Use `--performance-mode memory` for lower memory usage.
+  [server]     3. Enable SP/Ulysses/Ring for sequence-heavy workloads in multi-GPU setups.
+  [server]     4. Use FSDP, with CFG parallelism when supported, for validated multi-GPU workloads.
+  [server]     5. Use a lower-memory attention backend or quantization when available.
+  [server]   Or, open an issue on GitHub https://github.com/sgl-project/sglang/issues/new/choose
+  [server] [0;0m
+  [server] 
+  [server] Warmup requests: 100%|██████████| 3/3 [00:36<00:00, 12.29s/req, server warmup req (832x480x5f, 4/50 steps)]
+  [server] [93m[09-29 13:56:01] server warmup req (624x624x5f, 4/50 steps) processing failed: Error executing request None: CUDA out of memory. Tried to allocate 160.00 MiB. GPU 0 has a total capacity of 23.52 GiB of which 22.50 MiB is free. Process 46813 has 386.00 MiB memory in use. Including non-PyTorch memory, this process has 23.01 GiB memory in use. Of the allocated memory 22.05 GiB is allocated by PyTorch, and 66.30 MiB is reserved by PyTorch but unallocated. If reserved but unallocated memory is large try setting PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True to avoid fragmentation.  See documentation for Memory Management  (https://docs.pytorch.org/docs/stable/notes/cuda.html#optimizing-memory-usage-with-pytorch-cuda-alloc-conf)[0;0m
+  [server] [93m[09-29 13:56:01] server warmup req (832x480x5f, 4/50 steps) ran out of memory; retrying warmup at server warmup req (832x480, 4/50 steps)[0;0m
+  [server] 
+  [server] Warmup requests:   0%|          | 0/3 [00:00<?, ?req/s][2026-09-29 13:56:02] [32mINFO[0m:     127.0.0.1:45856 - "[1mGET /health HTTP/1.1[0m" [91m503 Service Unavailable[0m
+  [server] [rank0]:[W929 13:56:03.489450801 CUDACachingAllocator.cpp:508] expandable_segments: memory mapping failed with OOM on device 0 while trying to map 20971520 bytes (free: 524288, total: 25250627584).
+  [server] [rank0]:[W929 13:56:03.490173117 CUDACachingAllocator.cpp:508] expandable_segments: memory mapping failed with OOM on device 0 while trying to map 20971520 bytes (free: 2621440, total: 25250627584).
+  [server] [rank0]:[W929 13:56:03.505363619 CUDACachingAllocator.cpp:508] expandable_segments: memory mapping failed with OOM on device 0 while trying to map 20971520 bytes (free: 2621440, total: 25250627584).
+  [server] [rank0]:[W929 13:56:03.512105350 CUDACachingAllocator.cpp:508] expandable_segments: memory mapping failed with OOM on device 0 while trying to map 20971520 bytes (free: 2621440, total: 25250627584).
+  [server] [91m[09-29 13:56:03] Error executing request None: CUDA out of memory. Tried to allocate 160.00 MiB. GPU 0 has a total capacity of 23.52 GiB of which 22.50 MiB is free. Process 46813 has 386.00 MiB memory in use. Including non-PyTorch memory, this process has 23.01 GiB memory in use. Of the allocated memory 22.05 GiB is allocated by PyTorch, and 66.30 MiB is reserved by PyTorch but unallocated. If reserved but unallocated memory is large try setting PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True to avoid fragmentation.  See documentation for Memory Management  (https://docs.pytorch.org/docs/stable/notes/cuda.html#optimizing-memory-usage-with-pytorch-cuda-alloc-conf)
+  [server] Traceback (most recent call last):
+  [server]   File "/sgl-workspace/sglang/python/sglang/multimodal_gen/runtime/pipelines_core/executors/pipeline_executor.py", line 90, in _component_residency_request
+  [server]     yield
+  [server]   File "/sgl-workspace/sglang/python/sglang/multimodal_gen/runtime/pipelines_core/executors/parallel_executor.py", line 115, in _execute_stages
+  [server]     batch = self._run_stage_with_executor_hooks(
+  [server]             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  [server]   File "/sgl-workspace/sglang/python/sglang/multimodal_gen/runtime/pipelines_core/executors/pipeline_executor.py", line 120, in _run_stage_with_executor_hooks
+  [server]     payload = self.run_stage_with_context(
+  [server]               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  [server]   File "/sgl-workspace/sglang/python/sglang/multimodal_gen/runtime/pipelines_core/executors/pipeline_executor.py", line 204, in run_stage_with_context
+  [server]     return run_stage(stage, payload)
+  [server]            ^^^^^^^^^^^^^^^^^^^^^^^^^
+  [server]   File "/sgl-workspace/sglang/python/sglang/multimodal_gen/runtime/pipelines_core/executors/parallel_executor.py", line 167, in <lambda>
+  [server]     lambda stage, current: stage(current, server_args),
+  [server]                            ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  [server]   File "/sgl-workspace/sglang/python/sglang/multimodal_gen/runtime/pipelines_core/stages/base.py", line 438, in __call__
+  [server]     result = self.forward(batch, server_args)
+  [server]              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  [server]   File "/opt/sglang/lib/python3.12/site-packages/torch/utils/_contextlib.py", line 124, in decorate_context
+  [server]     return func(*args, **kwargs)
+  [server]            ^^^^^^^^^^^^^^^^^^^^^
+  [server]   File "/sgl-workspace/sglang/python/sglang/multimodal_gen/runtime/pipelines_core/stages/text_encoding.py", line 422, in forward
+  [server]     ) = self.encode_text(
+  [server]         ^^^^^^^^^^^^^^^^^
+  [server]   File "/opt/sglang/lib/python3.12/site-packages/torch/utils/_contextlib.py", line 124, in decorate_context
+  [server]     return func(*args, **kwargs)
+  [server]            ^^^^^^^^^^^^^^^^^^^^^
+  [server]   File "/sgl-workspace/sglang/python/sglang/multimodal_gen/runtime/pipelines_core/stages/text_encoding.py", line 726, in encode_text
+  [server]     outputs = self._forward_text_encoder(
+  [server]               ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  [server]   File "/sgl-workspace/sglang/python/sglang/multimodal_gen/runtime/pipelines_core/stages/text_encoding.py", line 521, in _forward_text_encoder
+  [server]     return text_encoder(**encoder_forward_kwargs)
+  [server]            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  [server]   File "/sgl-workspace/sglang/python/sglang/multimodal_gen/runtime/models/encoders/base.py", line 184, in __call__
+  [server]     return super().__call__(*args, **kwargs)
+  [server]            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  [server]   File "/opt/sglang/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1778, in _wrapped_call_impl
+  [server]     return self._call_impl(*args, **kwargs)
+  [server]            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  [server]   File "/opt/sglang/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1789, in _call_impl
+  [server]     return forward_call(*args, **kwargs)
+  [server]            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  [server]   File "/sgl-workspace/sglang/python/sglang/multimodal_gen/runtime/models/encoders/t5.py", line 697, in forward
+  [server]     hidden_states = self.encoder(
+  [server]                     ^^^^^^^^^^^^^
+  [server]   File "/opt/sglang/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1778, in _wrapped_call_impl
+  [server]     return self._call_impl(*args, **kwargs)
+  [server]            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  [server]   File "/opt/sglang/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1789, in _call_impl
+  [server]     return forward_call(*args, **kwargs)
+  [server]            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  [server]   File "/sgl-workspace/sglang/python/sglang/multimodal_gen/runtime/models/encoders/t5.py", line 551, in forward
+  [server]     hidden_states = block(
+  [server]                     ^^^^^^
+  [server]   File "/opt/sglang/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1778, in _wrapped_call_impl
+  [server]     return self._call_impl(*args, **kwargs)
+  [server]            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  [server]   File "/opt/sglang/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1884, in _call_impl
+  [server]     return inner()
+  [server]            ^^^^^^^
+  [server]   File "/opt/sglang/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1832, in inner
+  [server]     result = forward_call(*args, **kwargs)
+  [server]              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  [server]   File "/sgl-workspace/sglang/python/sglang/multimodal_gen/runtime/models/encoders/t5.py", line 482, in forward
+  [server]     hidden_states = self.layer[0](
+  [server]                     ^^^^^^^^^^^^^^
+  [server]   File "/opt/sglang/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1778, in _wrapped_call_impl
+  [server]     return self._call_impl(*args, **kwargs)
+  [server]            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  [server]   File "/opt/sglang/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1789, in _call_impl
+  [server]     return forward_call(*args, **kwargs)
+  [server]            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  [server]   File "/sgl-workspace/sglang/python/sglang/multimodal_gen/runtime/models/encoders/t5.py", line 401, in forward
+  [server]     attention_output = self.SelfAttention(
+  [server]                        ^^^^^^^^^^^^^^^^^^^
+  [server]   File "/opt/sglang/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1778, in _wrapped_call_impl
+  [server]     return self._call_impl(*args, **kwargs)
+  [server]            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  [server]   File "/opt/sglang/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1789, in _call_impl
+  [server]     return forward_call(*args, **kwargs)
+  [server]            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  [server]   File "/sgl-workspace/sglang/python/sglang/multimodal_gen/runtime/models/encoders/t5.py", line 349, in forward
+  [server]     attn_bias = self.compute_bias(seq_len, seq_len).repeat(num_seqs, 1, 1, 1)
+  [server]                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  [server]   File "/sgl-workspace/sglang/python/sglang/multimodal_gen/runtime/models/encoders/t5.py", line 313, in compute_bias
+  [server]     values = self.relative_attention_bias(
+  [server]              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  [server]   File "/opt/sglang/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1778, in _wrapped_call_impl
+  [server]     return self._call_impl(*args, **kwargs)
+  [server]            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  [server]   File "/opt/sglang/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1789, in _call_impl
+  [server]     return forward_call(*args, **kwargs)
+  [server]            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  [server]   File "/sgl-workspace/sglang/python/sglang/multimodal_gen/runtime/layers/vocab_parallel_embedding.py", line 474, in forward
+  [server]     output_parallel = self.quant_method.embedding(self, masked_input.long())
+  [server]                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  [server]   File "/sgl-workspace/sglang/python/sglang/multimodal_gen/runtime/layers/vocab_parallel_embedding.py", line 64, in embedding
+  [server]     return F.embedding(input_, layer.weight)
+  [server]            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  [server]   File "/opt/sglang/lib/python3.12/site-packages/torch/nn/functional.py", line 2615, in embedding
+  [server]     return torch.embedding(weight, input, padding_idx, scale_grad_by_freq, sparse)
+  [server]            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  [server] torch.OutOfMemoryError: CUDA out of memory. Tried to allocate 64.00 MiB. GPU 0 has a total capacity of 23.52 GiB of which 22.50 MiB is free. Process 46813 has 386.00 MiB memory in use. Including non-PyTorch memory, this process has 23.01 GiB memory in use. Of the allocated memory 22.05 GiB is allocated by PyTorch, and 66.30 MiB is reserved by PyTorch but unallocated. If reserved but unallocated memory is large try setting PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True to avoid fragmentation.  See documentation for Memory Management  (https://docs.pytorch.org/docs/stable/notes/cuda.html#optimizing-memory-usage-with-pytorch-cuda-alloc-conf)
+  [server] 
+  [server] During handling of the above exception, another exception occurred:
+  [server] 
+  [server] Traceback (most recent call last):
+  [server]   File "/sgl-workspace/sglang/python/sglang/multimodal_gen/runtime/managers/gpu_worker.py", line 708, in _execute_forward_common
+  [server]     result = forward_fn()
+  [server]              ^^^^^^^^^^^^
+  [server]   File "/sgl-workspace/sglang/python/sglang/multimodal_gen/runtime/managers/gpu_worker.py", line 537, in <lambda>
+  [server]     forward_fn=lambda: self.pipeline.forward(req, self.server_args),
+  [server]                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  [server]   File "/opt/sglang/lib/python3.12/site-packages/torch/utils/_contextlib.py", line 124, in decorate_context
+  [server]     return func(*args, **kwargs)
+  [server]            ^^^^^^^^^^^^^^^^^^^^^
+  [server]   File "/sgl-workspace/sglang/python/sglang/multimodal_gen/runtime/pipelines_core/composed_pipeline_base.py", line 1119, in forward
+  [server]     return self.executor.execute_with_profiling(self.stages, batch, server_args)
+  [server]            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  [server]   File "/sgl-workspace/sglang/python/sglang/multimodal_gen/runtime/pipelines_core/executors/pipeline_executor.py", line 140, in execute_with_profiling
+  [server]     batch = self.execute(stages, batch, server_args)
+  [server]             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  [server]   File "/sgl-workspace/sglang/python/sglang/multimodal_gen/runtime/pipelines_core/executors/parallel_executor.py", line 163, in execute
+  [server]     return self._execute_stages(
+  [server]            ^^^^^^^^^^^^^^^^^^^^^
+  [server]   File "/sgl-workspace/sglang/python/sglang/multimodal_gen/runtime/pipelines_core/executors/parallel_executor.py", line 52, in _execute_stages
+  [server]     with self._component_residency_request(stages, batch, server_args):
+  [server]   File "/usr/lib/python3.12/contextlib.py", line 158, in __exit__
+  [server]     self.gen.throw(value)
+  [server]   File "/sgl-workspace/sglang/python/sglang/multimodal_gen/runtime/pipelines_core/executors/pipeline_executor.py", line 92, in _component_residency_request
+  [server]     self.finish_component_residency_request()
+  [server]   File "/sgl-workspace/sglang/python/sglang/multimodal_gen/runtime/pipelines_core/executors/pipeline_executor.py", line 79, in finish_component_residency_request
+  [server]     self.component_residency_manager.finish_request()
+  [server]   File "/sgl-workspace/sglang/python/sglang/multimodal_gen/runtime/managers/memory_managers/component_manager.py", line 676, in finish_request
+  [server]     strategy.finish_request(module, use, self.state, preferred=preferred)
+  [server]   File "/sgl-workspace/sglang/python/sglang/multimodal_gen/runtime/managers/memory_managers/component_residency_strategies.py", line 216, in finish_request
+  [server]     self.prepare_for_use(module, use, state)
+  [server]   File "/sgl-workspace/sglang/python/sglang/multimodal_gen/runtime/managers/memory_managers/component_residency_strategies.py", line 152, in prepare_for_use
+  [server]     self._load_component(module, use)
+  [server]   File "/sgl-workspace/sglang/python/sglang/multimodal_gen/runtime/managers/memory_managers/component_residency_strategies.py", line 144, in _load_component
+  [server]     _module_to_local_device(module, dtype=use.target_dtype)
+  [server]   File "/sgl-workspace/sglang/python/sglang/multimodal_gen/runtime/managers/memory_managers/component_residency_strategies.py", line 49, in _module_to_local_device
+  [server]     module.to(device, non_blocking=True)
+  [server]   File "/opt/sglang/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1383, in to
+  [server]     return self._apply(convert)
+  [server]            ^^^^^^^^^^^^^^^^^^^^
+  [server]   File "/opt/sglang/lib/python3.12/site-packages/torch/nn/modules/module.py", line 933, in _apply
+  [server]     module._apply(fn)
+  [server]   File "/opt/sglang/lib/python3.12/site-packages/torch/nn/modules/module.py", line 933, in _apply
+  [server]     module._apply(fn)
+  [server]   File "/opt/sglang/lib/python3.12/site-packages/torch/nn/modules/module.py", line 933, in _apply
+  [server]     module._apply(fn)
+  [server]   [Previous line repeated 4 more times]
+  [server]   File "/opt/sglang/lib/python3.12/site-packages/torch/nn/modules/module.py", line 964, in _apply
+  [server]     param_applied = fn(param)
+  [server]                     ^^^^^^^^^
+  [server]   File "/opt/sglang/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1369, in convert
+  [server]     return t.to(
+  [server]            ^^^^^
+  [server] torch.OutOfMemoryError: CUDA out of memory. Tried to allocate 160.00 MiB. GPU 0 has a total capacity of 23.52 GiB of which 22.50 MiB is free. Process 46813 has 386.00 MiB memory in use. Including non-PyTorch memory, this process has 23.01 GiB memory in use. Of the allocated memory 22.05 GiB is allocated by PyTorch, and 66.30 MiB is reserved by PyTorch but unallocated. If reserved but unallocated memory is large try setting PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True to avoid fragmentation.  See documentation for Memory Management  (https://docs.pytorch.org/docs/stable/notes/cuda.html#optimizing-memory-usage-with-pytorch-cuda-alloc-conf)[0;0m
+  [server] [93m[09-29 13:56:03] 
+  [server] OOM detected. Possible solutions:
+  [server]   - If the OOM occurs during loading:
+  [server]     1. Check available memory on every selected GPU, not only total capacity.
+  [server]        In multi-GPU runs, the least-free selected GPU is the bottleneck.
+  [server]     2. For single-GPU deployment, use `--performance-mode memory`, component CPU offload,
+  [server]        or `--dit-layerwise-offload` for supported Wan/MOVA DiTs.
+  [server]     3. For multi-GPU deployment, keep the default `--performance-mode auto` or set
+  [server]        `--use-fsdp-inference true` to shard DiT weights with FSDP. FSDP is not a
+  [server]        single-GPU substitute for CPU offload.
+  [server]   - If the OOM occurs during runtime:
+  [server]     1. Reduce resolution, `--num-frames`, or batch size.
+  [server]     2. Use `--performance-mode memory` for lower memory usage.
+  [server]     3. Enable SP/Ulysses/Ring for sequence-heavy workloads in multi-GPU setups.
+  [server]     4. Use FSDP, with CFG parallelism when supported, for validated multi-GPU workloads.
+  [server]     5. Use a lower-memory attention backend or quantization when available.
+  [server]   Or, open an issue on GitHub https://github.com/sgl-project/sglang/issues/new/choose
+  [server] [0;0m
+  [server] 
+  [server] Warmup requests:  33%|███▎      | 1/3 [00:02<00:04,  2.11s/req, server warmup req (832x480, 4/50 steps)]
+  [server] Warmup requests:  33%|███▎      | 1/3 [00:02<00:04,  2.11s/req, server warmup req (832x480, 4/50 steps)]
+  [server] [93m[09-29 13:56:03] server warmup req (624x624, 4/50 steps) processing failed: Error executing request None: CUDA out of memory. Tried to allocate 160.00 MiB. GPU 0 has a total capacity of 23.52 GiB of which 22.50 MiB is free. Process 46813 has 386.00 MiB memory in use. Including non-PyTorch memory, this process has 23.01 GiB memory in use. Of the allocated memory 22.05 GiB is allocated by PyTorch, and 66.30 MiB is reserved by PyTorch but unallocated. If reserved but unallocated memory is large try setting PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True to avoid fragmentation.  See documentation for Memory Management  (https://docs.pytorch.org/docs/stable/notes/cuda.html#optimizing-memory-usage-with-pytorch-cuda-alloc-conf)[0;0m
+  [server] [93m[09-29 13:56:03] Synthetic server warmup failed; continuing startup
+  [server] Traceback (most recent call last):
+  [server]   File "/sgl-workspace/sglang/python/sglang/multimodal_gen/runtime/server_warmup.py", line 243, in run_async_client_warmup
+  [server]     raise RuntimeError(response.error)
+  [server] RuntimeError: Error executing request None: CUDA out of memory. Tried to allocate 160.00 MiB. GPU 0 has a total capacity of 23.52 GiB of which 22.50 MiB is free. Process 46813 has 386.00 MiB memory in use. Including non-PyTorch memory, this process has 23.01 GiB memory in use. Of the allocated memory 22.05 GiB is allocated by PyTorch, and 66.30 MiB is reserved by PyTorch but unallocated. If reserved but unallocated memory is large try setting PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True to avoid fragmentation.  See documentation for Memory Management  (https://docs.pytorch.org/docs/stable/notes/cuda.html#optimizing-memory-usage-with-pytorch-cuda-alloc-conf)[0;0m
+  [server] [09-29 13:56:03] The server is fired up and ready to roll!
+  [server] [2026-09-29 13:56:04] [32mINFO[0m:     127.0.0.1:45858 - "[1mGET /health HTTP/1.1[0m" [32m200 OK[0m
+  [server] [2026-09-29 13:56:04] [32mINFO[0m:     127.0.0.1:45870 - "[1mGET /v1/models HTTP/1.1[0m" [32m200 OK[0m
+  Server ready in 104.1s
+  Sending warmup request (1/3)...
+  Downloading reference image from https://huggingface.co/datasets/huggingface/documentation-images/resolve/main/diffusers/cat.png ...
+  [server] [09-29 13:56:05] Sequence dimension shard is enabled, disabling frame adjustment for better performance
+  [server] [09-29 13:56:05] Adjusting number of frames from 81 to 81 based on model
+  [server] [2026-09-29 13:56:05] [32mINFO[0m:     127.0.0.1:45886 - "[1mPOST /v1/videos HTTP/1.1[0m" [32m200 OK[0m
+  [server] [09-29 13:56:05] Sampling params:
+  [server]                        width: 832
+  [server]                       height: 480
+  [server]                   num_frames: 81
+  [server]                          fps: 16
+  [server]                       prompt: <redacted, len=49>
+  [server]                   neg_prompt: <redacted, len=392>
+  [server]                         seed: 42
+  [server]                  infer_steps: 3
+  [server]       num_outputs_per_prompt: 1
+  [server]               guidance_scale: 5.0
+  [server]      embedded_guidance_scale: 6.0
+  [server]                     n_tokens: None
+  [server]                   flow_shift: 3.0
+  [server]                   image_path: inputs/uploads/4d6f13f1-a3a2-4e45-96bf-8faf46acc7d0_ref.png
+  [server]                  save_output: True
+  [server]             output_file_path: outputs/4d6f13f1-a3a2-4e45-96bf-8faf46acc7d0.mp4
+  [server]         
+  [server] [09-29 13:56:05] Running pipeline stages: ['InputValidationStage', 'TextEncodingStage', 'ImageEncodingStage', 'ImageVAEEncodingStage', 'LatentPreparationStage', 'TimestepPreparationStage', 'denoising_stage', 'decoding_stage']
+  [server] [09-29 13:56:05] [InputValidationStage] started...
+  [server] [09-29 13:56:05] [InputValidationStage] finished in 0.0391 seconds
+  [server] [09-29 13:56:05] [TextEncodingStage] started...
+  [server] [2026-09-29 13:56:05] [32mINFO[0m:     127.0.0.1:45900 - "[1mGET /v1/videos/4d6f13f1-a3a2-4e45-96bf-8faf46acc7d0 HTTP/1.1[0m" [32m200 OK[0m
+  [server] [2026-09-29 13:56:05] [32mINFO[0m:     127.0.0.1:45912 - "[1mGET /v1/videos/4d6f13f1-a3a2-4e45-96bf-8faf46acc7d0 HTTP/1.1[0m" [32m200 OK[0m
+  [server] [2026-09-29 13:56:05] [32mINFO[0m:     127.0.0.1:45922 - "[1mGET /v1/videos/4d6f13f1-a3a2-4e45-96bf-8faf46acc7d0 HTTP/1.1[0m" [32m200 OK[0m
+  [server] [2026-09-29 13:56:05] [32mINFO[0m:     127.0.0.1:45928 - "[1mGET /v1/videos/4d6f13f1-a3a2-4e45-96bf-8faf46acc7d0 HTTP/1.1[0m" [32m200 OK[0m
+  [server] [rank0]:[W929 13:56:06.599685948 CUDACachingAllocator.cpp:508] expandable_segments: memory mapping failed with OOM on device 0 while trying to map 20971520 bytes (free: 524288, total: 25250627584).
+  [server] [rank0]:[W929 13:56:06.600420044 CUDACachingAllocator.cpp:508] expandable_segments: memory mapping failed with OOM on device 0 while trying to map 20971520 bytes (free: 2621440, total: 25250627584).
+  [server] [91m[09-29 13:56:06] [TextEncodingStage] Error during execution after 860.5801 ms: CUDA out of memory. Tried to allocate 64.00 MiB. GPU 0 has a total capacity of 23.52 GiB of which 22.50 MiB is free. Process 46813 has 386.00 MiB memory in use. Including non-PyTorch memory, this process has 23.01 GiB memory in use. Of the allocated memory 22.05 GiB is allocated by PyTorch, and 66.30 MiB is reserved by PyTorch but unallocated. If reserved but unallocated memory is large try setting PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True to avoid fragmentation.  See documentation for Memory Management  (https://docs.pytorch.org/docs/stable/notes/cuda.html#optimizing-memory-usage-with-pytorch-cuda-alloc-conf)
+  [server] Traceback (most recent call last):
+  [server]   File "/sgl-workspace/sglang/python/sglang/multimodal_gen/runtime/pipelines_core/stages/base.py", line 438, in __call__
+  [server]     result = self.forward(batch, server_args)
+  [server]              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  [server]   File "/opt/sglang/lib/python3.12/site-packages/torch/utils/_contextlib.py", line 124, in decorate_context
+  [server]     return func(*args, **kwargs)
+  [server]            ^^^^^^^^^^^^^^^^^^^^^
+  [server]   File "/sgl-workspace/sglang/python/sglang/multimodal_gen/runtime/pipelines_core/stages/text_encoding.py", line 422, in forward
+  [server]     ) = self.encode_text(
+  [server]         ^^^^^^^^^^^^^^^^^
+  [server]   File "/opt/sglang/lib/python3.12/site-packages/torch/utils/_contextlib.py", line 124, in decorate_context
+  [server]     return func(*args, **kwargs)
+  [server]            ^^^^^^^^^^^^^^^^^^^^^
+  [server]   File "/sgl-workspace/sglang/python/sglang/multimodal_gen/runtime/pipelines_core/stages/text_encoding.py", line 726, in encode_text
+  [server]     outputs = self._forward_text_encoder(
+  [server]               ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  [server]   File "/sgl-workspace/sglang/python/sglang/multimodal_gen/runtime/pipelines_core/stages/text_encoding.py", line 521, in _forward_text_encoder
+  [server]     return text_encoder(**encoder_forward_kwargs)
+  [server]            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  [server]   File "/sgl-workspace/sglang/python/sglang/multimodal_gen/runtime/models/encoders/base.py", line 184, in __call__
+  [server]     return super().__call__(*args, **kwargs)
+  [server]            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  [server]   File "/opt/sglang/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1778, in _wrapped_call_impl
+  [server]     return self._call_impl(*args, **kwargs)
+  [server]            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  [server]   File "/opt/sglang/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1789, in _call_impl
+  [server]     return forward_call(*args, **kwargs)
+  [server]            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  [server]   File "/sgl-workspace/sglang/python/sglang/multimodal_gen/runtime/models/encoders/t5.py", line 697, in forward
+  [server]     hidden_states = self.encoder(
+  [server]                     ^^^^^^^^^^^^^
+  [server]   File "/opt/sglang/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1778, in _wrapped_call_impl
+  [server]     return self._call_impl(*args, **kwargs)
+  [server]            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  [server]   File "/opt/sglang/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1789, in _call_impl
+  [server]     return forward_call(*args, **kwargs)
+  [server]            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  [server]   File "/sgl-workspace/sglang/python/sglang/multimodal_gen/runtime/models/encoders/t5.py", line 551, in forward
+  [server]     hidden_states = block(
+  [server]                     ^^^^^^
+  [server]   File "/opt/sglang/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1778, in _wrapped_call_impl
+  [server]     return self._call_impl(*args, **kwargs)
+  [server]            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  [server]   File "/opt/sglang/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1789, in _call_impl
+  [server]     return forward_call(*args, **kwargs)
+  [server]            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  [server]   File "/sgl-workspace/sglang/python/sglang/multimodal_gen/runtime/models/encoders/t5.py", line 482, in forward
+  [server]     hidden_states = self.layer[0](
+  [server]                     ^^^^^^^^^^^^^^
+  [server]   File "/opt/sglang/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1778, in _wrapped_call_impl
+  [server]     return self._call_impl(*args, **kwargs)
+  [server]            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  [server]   File "/opt/sglang/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1789, in _call_impl
+  [server]     return forward_call(*args, **kwargs)
+  [server]            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  [server]   File "/sgl-workspace/sglang/python/sglang/multimodal_gen/runtime/models/encoders/t5.py", line 401, in forward
+  [server]     attention_output = self.SelfAttention(
+  [server]                        ^^^^^^^^^^^^^^^^^^^
+  [server]   File "/opt/sglang/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1778, in _wrapped_call_impl
+  [server]     return self._call_impl(*args, **kwargs)
+  [server]            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  [server]   File "/opt/sglang/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1789, in _call_impl
+  [server]     return forward_call(*args, **kwargs)
+  [server]            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  [server]   File "/sgl-workspace/sglang/python/sglang/multimodal_gen/runtime/models/encoders/t5.py", line 349, in forward
+  [server]     attn_bias = self.compute_bias(seq_len, seq_len).repeat(num_seqs, 1, 1, 1)
+  [server]                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  [server]   File "/sgl-workspace/sglang/python/sglang/multimodal_gen/runtime/models/encoders/t5.py", line 313, in compute_bias
+  [server]     values = self.relative_attention_bias(
+  [server]              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  [server]   File "/opt/sglang/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1778, in _wrapped_call_impl
+  [server]     return self._call_impl(*args, **kwargs)
+  [server]            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  [server]   File "/opt/sglang/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1789, in _call_impl
+  [server]     return forward_call(*args, **kwargs)
+  [server]            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  [server]   File "/sgl-workspace/sglang/python/sglang/multimodal_gen/runtime/layers/vocab_parallel_embedding.py", line 474, in forward
+  [server]     output_parallel = self.quant_method.embedding(self, masked_input.long())
+  [server]                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  [server]   File "/sgl-workspace/sglang/python/sglang/multimodal_gen/runtime/layers/vocab_parallel_embedding.py", line 64, in embedding
+  [server]     return F.embedding(input_, layer.weight)
+  [server]            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  [server]   File "/opt/sglang/lib/python3.12/site-packages/torch/nn/functional.py", line 2615, in embedding
+  [server]     return torch.embedding(weight, input, padding_idx, scale_grad_by_freq, sparse)
+  [server]            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  [server] torch.OutOfMemoryError: CUDA out of memory. Tried to allocate 64.00 MiB. GPU 0 has a total capacity of 23.52 GiB of which 22.50 MiB is free. Process 46813 has 386.00 MiB memory in use. Including non-PyTorch memory, this process has 23.01 GiB memory in use. Of the allocated memory 22.05 GiB is allocated by PyTorch, and 66.30 MiB is reserved by PyTorch but unallocated. If reserved but unallocated memory is large try setting PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True to avoid fragmentation.  See documentation for Memory Management  (https://docs.pytorch.org/docs/stable/notes/cuda.html#optimizing-memory-usage-with-pytorch-cuda-alloc-conf)[0;0m
+  [server] [2026-09-29 13:56:06] [32mINFO[0m:     127.0.0.1:45944 - "[1mGET /v1/videos/4d6f13f1-a3a2-4e45-96bf-8faf46acc7d0 HTTP/1.1[0m" [32m200 OK[0m
+  [server] [2026-09-29 13:56:06] [32mINFO[0m:     127.0.0.1:45946 - "[1mGET /v1/videos/4d6f13f1-a3a2-4e45-96bf-8faf46acc7d0 HTTP/1.1[0m" [32m200 OK[0m
+  [server] [2026-09-29 13:56:06] [32mINFO[0m:     127.0.0.1:45958 - "[1mGET /v1/videos/4d6f13f1-a3a2-4e45-96bf-8faf46acc7d0 HTTP/1.1[0m" [32m200 OK[0m
+  [server] [2026-09-29 13:56:06] [32mINFO[0m:     127.0.0.1:45970 - "[1mGET /v1/videos/4d6f13f1-a3a2-4e45-96bf-8faf46acc7d0 HTTP/1.1[0m" [32m200 OK[0m
+  [server] [2026-09-29 13:56:06] [32mINFO[0m:     127.0.0.1:45980 - "[1mGET /v1/videos/4d6f13f1-a3a2-4e45-96bf-8faf46acc7d0 HTTP/1.1[0m" [32m200 OK[0m
+  [server] [2026-09-29 13:56:07] [32mINFO[0m:     127.0.0.1:45994 - "[1mGET /v1/videos/4d6f13f1-a3a2-4e45-96bf-8faf46acc7d0 HTTP/1.1[0m" [32m200 OK[0m
+  [server] [2026-09-29 13:56:07] [32mINFO[0m:     127.0.0.1:46002 - "[1mGET /v1/videos/4d6f13f1-a3a2-4e45-96bf-8faf46acc7d0 HTTP/1.1[0m" [32m200 OK[0m
+  [server] [2026-09-29 13:56:07] [32mINFO[0m:     127.0.0.1:46014 - "[1mGET /v1/videos/4d6f13f1-a3a2-4e45-96bf-8faf46acc7d0 HTTP/1.1[0m" [32m200 OK[0m
+  [server] [91m[09-29 13:56:07] Error executing request 4d6f13f1-a3a2-4e45-96bf-8faf46acc7d0: CUDA out of memory. Tried to allocate 64.00 MiB. GPU 0 has a total capacity of 23.52 GiB of which 22.50 MiB is free. Process 46813 has 386.00 MiB memory in use. Including non-PyTorch memory, this process has 23.01 GiB memory in use. Of the allocated memory 22.05 GiB is allocated by PyTorch, and 66.30 MiB is reserved by PyTorch but unallocated. If reserved but unallocated memory is large try setting PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True to avoid fragmentation.  See documentation for Memory Management  (https://docs.pytorch.org/docs/stable/notes/cuda.html#optimizing-memory-usage-with-pytorch-cuda-alloc-conf)
+  [server] Traceback (most recent call last):
+  [server]   File "/sgl-workspace/sglang/python/sglang/multimodal_gen/runtime/managers/gpu_worker.py", line 708, in _execute_forward_common
+  [server]     result = forward_fn()
+  [server]              ^^^^^^^^^^^^
+  [server]   File "/sgl-workspace/sglang/python/sglang/multimodal_gen/runtime/managers/gpu_worker.py", line 537, in <lambda>
+  [server]     forward_fn=lambda: self.pipeline.forward(req, self.server_args),
+  [server]                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  [server]   File "/opt/sglang/lib/python3.12/site-packages/torch/utils/_contextlib.py", line 124, in decorate_context
+  [server]     return func(*args, **kwargs)
+  [server]            ^^^^^^^^^^^^^^^^^^^^^
+  [server]   File "/sgl-workspace/sglang/python/sglang/multimodal_gen/runtime/pipelines_core/composed_pipeline_base.py", line 1119, in forward
+  [server]     return self.executor.execute_with_profiling(self.stages, batch, server_args)
+  [server]            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  [server]   File "/sgl-workspace/sglang/python/sglang/multimodal_gen/runtime/pipelines_core/executors/pipeline_executor.py", line 140, in execute_with_profiling
+  [server]     batch = self.execute(stages, batch, server_args)
+  [server]             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  [server]   File "/sgl-workspace/sglang/python/sglang/multimodal_gen/runtime/pipelines_core/executors/parallel_executor.py", line 163, in execute
+  [server]     return self._execute_stages(
+  [server]            ^^^^^^^^^^^^^^^^^^^^^
+  [server]   File "/sgl-workspace/sglang/python/sglang/multimodal_gen/runtime/pipelines_core/executors/parallel_executor.py", line 115, in _execute_stages
+  [server]     batch = self._run_stage_with_executor_hooks(
+  [server]             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  [server]   File "/sgl-workspace/sglang/python/sglang/multimodal_gen/runtime/pipelines_core/executors/pipeline_executor.py", line 120, in _run_stage_with_executor_hooks
+  [server]     payload = self.run_stage_with_context(
+  [server]               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  [server]   File "/sgl-workspace/sglang/python/sglang/multimodal_gen/runtime/pipelines_core/executors/pipeline_executor.py", line 204, in run_stage_with_context
+  [server]     return run_stage(stage, payload)
+  [server]            ^^^^^^^^^^^^^^^^^^^^^^^^^
+  [server]   File "/sgl-workspace/sglang/python/sglang/multimodal_gen/runtime/pipelines_core/executors/parallel_executor.py", line 167, in <lambda>
+  [server]     lambda stage, current: stage(current, server_args),
+  [server]                            ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  [server]   File "/sgl-workspace/sglang/python/sglang/multimodal_gen/runtime/pipelines_core/stages/base.py", line 438, in __call__
+  [server]     result = self.forward(batch, server_args)
+  [server]              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  [server]   File "/opt/sglang/lib/python3.12/site-packages/torch/utils/_contextlib.py", line 124, in decorate_context
+  [server]     return func(*args, **kwargs)
+  [server]            ^^^^^^^^^^^^^^^^^^^^^
+  [server]   File "/sgl-workspace/sglang/python/sglang/multimodal_gen/runtime/pipelines_core/stages/text_encoding.py", line 422, in forward
+  [server]     ) = self.encode_text(
+  [server]         ^^^^^^^^^^^^^^^^^
+  [server]   File "/opt/sglang/lib/python3.12/site-packages/torch/utils/_contextlib.py", line 124, in decorate_context
+  [server]     return func(*args, **kwargs)
+  [server]            ^^^^^^^^^^^^^^^^^^^^^
+  [server]   File "/sgl-workspace/sglang/python/sglang/multimodal_gen/runtime/pipelines_core/stages/text_encoding.py", line 726, in encode_text
+  [server]     outputs = self._forward_text_encoder(
+  [server]               ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  [server]   File "/sgl-workspace/sglang/python/sglang/multimodal_gen/runtime/pipelines_core/stages/text_encoding.py", line 521, in _forward_text_encoder
+  [server]     return text_encoder(**encoder_forward_kwargs)
+  [server]            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  [server]   File "/sgl-workspace/sglang/python/sglang/multimodal_gen/runtime/models/encoders/base.py", line 184, in __call__
+  [server]     return super().__call__(*args, **kwargs)
+  [server]            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  [server]   File "/opt/sglang/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1778, in _wrapped_call_impl
+  [server]     return self._call_impl(*args, **kwargs)
+  [server]            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  [server]   File "/opt/sglang/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1789, in _call_impl
+  [server]     return forward_call(*args, **kwargs)
+  [server]            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  [server]   File "/sgl-workspace/sglang/python/sglang/multimodal_gen/runtime/models/encoders/t5.py", line 697, in forward
+  [server]     hidden_states = self.encoder(
+  [server]                     ^^^^^^^^^^^^^
+  [server]   File "/opt/sglang/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1778, in _wrapped_call_impl
+  [server]     return self._call_impl(*args, **kwargs)
+  [server]            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  [server]   File "/opt/sglang/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1789, in _call_impl
+  [server]     return forward_call(*args, **kwargs)
+  [server]            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  [server]   File "/sgl-workspace/sglang/python/sglang/multimodal_gen/runtime/models/encoders/t5.py", line 551, in forward
+  [server]     hidden_states = block(
+  [server]                     ^^^^^^
+  [server]   File "/opt/sglang/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1778, in _wrapped_call_impl
+  [server]     return self._call_impl(*args, **kwargs)
+  [server]            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  [server]   File "/opt/sglang/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1789, in _call_impl
+  [server]     return forward_call(*args, **kwargs)
+  [server]            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  [server]   File "/sgl-workspace/sglang/python/sglang/multimodal_gen/runtime/models/encoders/t5.py", line 482, in forward
+  [server]     hidden_states = self.layer[0](
+  [server]                     ^^^^^^^^^^^^^^
+  [server]   File "/opt/sglang/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1778, in _wrapped_call_impl
+  [server]     return self._call_impl(*args, **kwargs)
+  [server]            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  [server]   File "/opt/sglang/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1789, in _call_impl
+  [server]     return forward_call(*args, **kwargs)
+  [server]            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  [server]   File "/sgl-workspace/sglang/python/sglang/multimodal_gen/runtime/models/encoders/t5.py", line 401, in forward
+  [server]     attention_output = self.SelfAttention(
+  [server]                        ^^^^^^^^^^^^^^^^^^^
+  [server]   File "/opt/sglang/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1778, in _wrapped_call_impl
+  [server]     return self._call_impl(*args, **kwargs)
+  [server]            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  [server]   File "/opt/sglang/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1789, in _call_impl
+  [server]     return forward_call(*args, **kwargs)
+  [server]            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  [server]   File "/sgl-workspace/sglang/python/sglang/multimodal_gen/runtime/models/encoders/t5.py", line 349, in forward
+  [server]     attn_bias = self.compute_bias(seq_len, seq_len).repeat(num_seqs, 1, 1, 1)
+  [server]                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  [server]   File "/sgl-workspace/sglang/python/sglang/multimodal_gen/runtime/models/encoders/t5.py", line 313, in compute_bias
+  [server]     values = self.relative_attention_bias(
+  [server]              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  [server]   File "/opt/sglang/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1778, in _wrapped_call_impl
+  [server]     return self._call_impl(*args, **kwargs)
+  [server]            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  [server]   File "/opt/sglang/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1789, in _call_impl
+  [server]     return forward_call(*args, **kwargs)
+  [server]            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  [server]   File "/sgl-workspace/sglang/python/sglang/multimodal_gen/runtime/layers/vocab_parallel_embedding.py", line 474, in forward
+  [server]     output_parallel = self.quant_method.embedding(self, masked_input.long())
+  [server]                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  [server]   File "/sgl-workspace/sglang/python/sglang/multimodal_gen/runtime/layers/vocab_parallel_embedding.py", line 64, in embedding
+  [server]     return F.embedding(input_, layer.weight)
+  [server]            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  [server]   File "/opt/sglang/lib/python3.12/site-packages/torch/nn/functional.py", line 2615, in embedding
+  [server]     return torch.embedding(weight, input, padding_idx, scale_grad_by_freq, sparse)
+  [server]            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  [server] torch.OutOfMemoryError: CUDA out of memory. Tried to allocate 64.00 MiB. GPU 0 has a total capacity of 23.52 GiB of which 22.50 MiB is free. Process 46813 has 386.00 MiB memory in use. Including non-PyTorch memory, this process has 23.01 GiB memory in use. Of the allocated memory 22.05 GiB is allocated by PyTorch, and 66.30 MiB is reserved by PyTorch but unallocated. If reserved but unallocated memory is large try setting PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True to avoid fragmentation.  See documentation for Memory Management  (https://docs.pytorch.org/docs/stable/notes/cuda.html#optimizing-memory-usage-with-pytorch-cuda-alloc-conf)[0;0m
+  [server] [93m[09-29 13:56:07] 
+  [server] OOM detected. Possible solutions:
+  [server]   - If the OOM occurs during loading:
+  [server]     1. Check available memory on every selected GPU, not only total capacity.
+  [server]        In multi-GPU runs, the least-free selected GPU is the bottleneck.
+  [server]     2. For single-GPU deployment, use `--performance-mode memory`, component CPU offload,
+  [server]        or `--dit-layerwise-offload` for supported Wan/MOVA DiTs.
+  [server]     3. For multi-GPU deployment, keep the default `--performance-mode auto` or set
+  [server]        `--use-fsdp-inference true` to shard DiT weights with FSDP. FSDP is not a
+  [server]        single-GPU substitute for CPU offload.
+  [server]   - If the OOM occurs during runtime:
+  [server]     1. Reduce resolution, `--num-frames`, or batch size.
+  [server]     2. Use `--performance-mode memory` for lower memory usage.
+  [server]     3. Enable SP/Ulysses/Ring for sequence-heavy workloads in multi-GPU setups.
+  [server]     4. Use FSDP, with CFG parallelism when supported, for validated multi-GPU workloads.
+  [server]     5. Use a lower-memory attention backend or quantization when available.
+  [server]   Or, open an issue on GitHub https://github.com/sgl-project/sglang/issues/new/choose
+  [server] [0;0m
+  [server] [91m[09-29 13:56:07] Failed to generate output for prompt: Model generation returned no output. Error from scheduler: Error executing request 4d6f13f1-a3a2-4e45-96bf-8faf46acc7d0: CUDA out of memory. Tried to allocate 64.00 MiB. GPU 0 has a total capacity of 23.52 GiB of which 22.50 MiB is free. Process 46813 has 386.00 MiB memory in use. Including non-PyTorch memory, this process has 23.01 GiB memory in use. Of the allocated memory 22.05 GiB is allocated by PyTorch, and 66.30 MiB is reserved by PyTorch but unallocated. If reserved but unallocated memory is large try setting PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True to avoid fragmentation.  See documentation for Memory Management  (https://docs.pytorch.org/docs/stable/notes/cuda.html#optimizing-memory-usage-with-pytorch-cuda-alloc-conf)
+  [server] Traceback (most recent call last):
+  [server]   File "/sgl-workspace/sglang/python/sglang/multimodal_gen/runtime/utils/logging_utils.py", line 683, in log_generation_timer
+  [server]     yield timer
+  [server]   File "/sgl-workspace/sglang/python/sglang/multimodal_gen/runtime/entrypoints/openai/utils.py", line 479, in process_generation_batch
+  [server]     raise RuntimeError(
+  [server] RuntimeError: Model generation returned no output. Error from scheduler: Error executing request 4d6f13f1-a3a2-4e45-96bf-8faf46acc7d0: CUDA out of memory. Tried to allocate 64.00 MiB. GPU 0 has a total capacity of 23.52 GiB of which 22.50 MiB is free. Process 46813 has 386.00 MiB memory in use. Including non-PyTorch memory, this process has 23.01 GiB memory in use. Of the allocated memory 22.05 GiB is allocated by PyTorch, and 66.30 MiB is reserved by PyTorch but unallocated. If reserved but unallocated memory is large try setting PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True to avoid fragmentation.  See documentation for Memory Management  (https://docs.pytorch.org/docs/stable/notes/cuda.html#optimizing-memory-usage-with-pytorch-cuda-alloc-conf)[0;0m
+  [server] [91m[09-29 13:56:07] Video job 4d6f13f1-a3a2-4e45-96bf-8faf46acc7d0 failed
+  [server] Traceback (most recent call last):
+  [server]   File "/sgl-workspace/sglang/python/sglang/multimodal_gen/runtime/entrypoints/openai/video_api.py", line 390, in _dispatch_job_async
+  [server]     save_file_path_list, result = await process_generation_batch(
+  [server]                                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  [server]   File "/sgl-workspace/sglang/python/sglang/multimodal_gen/runtime/entrypoints/openai/utils.py", line 479, in process_generation_batch
+  [server]     raise RuntimeError(
+  [server] RuntimeError: Model generation returned no output. Error from scheduler: Error executing request 4d6f13f1-a3a2-4e45-96bf-8faf46acc7d0: CUDA out of memory. Tried to allocate 64.00 MiB. GPU 0 has a total capacity of 23.52 GiB of which 22.50 MiB is free. Process 46813 has 386.00 MiB memory in use. Including non-PyTorch memory, this process has 23.01 GiB memory in use. Of the allocated memory 22.05 GiB is allocated by PyTorch, and 66.30 MiB is reserved by PyTorch but unallocated. If reserved but unallocated memory is large try setting PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True to avoid fragmentation.  See documentation for Memory Management  (https://docs.pytorch.org/docs/stable/notes/cuda.html#optimizing-memory-usage-with-pytorch-cuda-alloc-conf)[0;0m
+  [server] [2026-09-29 13:56:07] [32mINFO[0m:     127.0.0.1:46026 - "[1mGET /v1/videos/4d6f13f1-a3a2-4e45-96bf-8faf46acc7d0 HTTP/1.1[0m" [32m200 OK[0m
+  Warmup request 1/3 failed (non-fatal): Video generation failed: {'id': '4d6f13f1-a3a2-4e45-96bf-8faf46acc7d0', 'object': 'video', 'model': 'Wan-AI/Wan2.1-I2V-14B-480P-Diffusers', 'status': 'failed', 'progress': 0, 'created_at': 1790690165, 'size': '832x480', 'seconds': '5', 'quality': 'standard', 'url': None, 'remixed_from_video_id': None, 'completed_at': None, 'expires_at': None, 'error': {'message': 'Model generation returned no output. Error from scheduler: Error executing request 4d6f13f1-a3a2-4e45-96bf-8faf46acc7d0: CUDA out of memory. Tried to allocate 64.00 MiB. GPU 0 has a total capacity of 23.52 GiB of which 22.50 MiB is free. Process 46813 has 386.00 MiB memory in use. Including non-PyTorch memory, this process has 23.01 GiB memory in use. Of the allocated memory 22.05 GiB is allocated by PyTorch, and 66.30 MiB is reserved by PyTorch but unallocated. If reserved but unallocated memory is large try setting PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True to avoid fragmentation.  See documentation for Memory Management  (https://docs.pytorch.org/docs/stable/notes/cuda.html#optimizing-memory-usage-with-pytorch-cuda-alloc-conf)'}, 'file_path': None, 'file_paths': None, 'num_outputs': None, 'peak_memory_mb': None, 'inference_time_s': None, 'revised_prompt': None, 'action': None}
+  Sending warmup request (2/3)...
+  [server] [09-29 13:56:07] Sequence dimension shard is enabled, disabling frame adjustment for better performance
+  [server] [09-29 13:56:07] Adjusting number of frames from 81 to 81 based on model
+  [server] [2026-09-29 13:56:07] [32mINFO[0m:     127.0.0.1:46028 - "[1mPOST /v1/videos HTTP/1.1[0m" [32m200 OK[0m
+  [server] [09-29 13:56:07] Sampling params:
+  [server]                        width: 832
+  [server]                       height: 480
+  [server]                   num_frames: 81
+  [server]                          fps: 16
+  [server]                       prompt: <redacted, len=49>
+  [server]                   neg_prompt: <redacted, len=392>
+  [server]                         seed: 42
+  [server]                  infer_steps: 3
+  [server]       num_outputs_per_prompt: 1
+  [server]               guidance_scale: 5.0
+  [server]      embedded_guidance_scale: 6.0
+  [server]                     n_tokens: None
+  [server]                   flow_shift: 3.0
+  [server]                   image_path: inputs/uploads/3150617b-e919-44fe-8375-759b2b0004f2_ref.png
+  [server]                  save_output: True
+  [server]             output_file_path: outputs/3150617b-e919-44fe-8375-759b2b0004f2.mp4
+  [server]         
+  [server] [09-29 13:56:07] Running pipeline stages: ['InputValidationStage', 'TextEncodingStage', 'ImageEncodingStage', 'ImageVAEEncodingStage', 'LatentPreparationStage', 'TimestepPreparationStage', 'denoising_stage', 'decoding_stage']
+  [server] [09-29 13:56:07] [InputValidationStage] started...
+  [server] [09-29 13:56:07] [InputValidationStage] finished in 0.0358 seconds
+  [server] [2026-09-29 13:56:08] [32mINFO[0m:     127.0.0.1:46042 - "[1mGET /v1/videos/3150617b-e919-44fe-8375-759b2b0004f2 HTTP/1.1[0m" [32m200 OK[0m
+  [server] [2026-09-29 13:56:08] [32mINFO[0m:     127.0.0.1:46050 - "[1mGET /v1/videos/3150617b-e919-44fe-8375-759b2b0004f2 HTTP/1.1[0m" [32m200 OK[0m
+  [server] [2026-09-29 13:56:08] [32mINFO[0m:     127.0.0.1:46066 - "[1mGET /v1/videos/3150617b-e919-44fe-8375-759b2b0004f2 HTTP/1.1[0m" [32m200 OK[0m
+  [server] [2026-09-29 13:56:08] [32mINFO[0m:     127.0.0.1:46078 - "[1mGET /v1/videos/3150617b-e919-44fe-8375-759b2b0004f2 HTTP/1.1[0m" [32m200 OK[0m
+  [server] [2026-09-29 13:56:08] [32mINFO[0m:     127.0.0.1:46082 - "[1mGET /v1/videos/3150617b-e919-44fe-8375-759b2b0004f2 HTTP/1.1[0m" [32m200 OK[0m
+  [server] [2026-09-29 13:56:09] [32mINFO[0m:     127.0.0.1:46084 - "[1mGET /v1/videos/3150617b-e919-44fe-8375-759b2b0004f2 HTTP/1.1[0m" [32m200 OK[0m
+  [server] [2026-09-29 13:56:09] [32mINFO[0m:     127.0.0.1:46086 - "[1mGET /v1/videos/3150617b-e919-44fe-8375-759b2b0004f2 HTTP/1.1[0m" [32m200 OK[0m
+  [server] [2026-09-29 13:56:09] [32mINFO[0m:     127.0.0.1:46090 - "[1mGET /v1/videos/3150617b-e919-44fe-8375-759b2b0004f2 HTTP/1.1[0m" [32m200 OK[0m
+  [server] [2026-09-29 13:56:09] [32mINFO[0m:     127.0.0.1:46092 - "[1mGET /v1/videos/3150617b-e919-44fe-8375-759b2b0004f2 HTTP/1.1[0m" [32m200 OK[0m
+  [server] [rank0]:[W929 13:56:09.296074455 CUDACachingAllocator.cpp:508] expandable_segments: memory mapping failed with OOM on device 0 while trying to map 20971520 bytes (free: 4718592, total: 25250627584).
+  [server] [rank0]:[W929 13:56:09.304207068 CUDACachingAllocator.cpp:508] expandable_segments: memory mapping failed with OOM on device 0 while trying to map 20971520 bytes (free: 4718592, total: 25250627584).
+  [server] [2026-09-29 13:56:09] [32mINFO[0m:     127.0.0.1:46108 - "[1mGET /v1/videos/3150617b-e919-44fe-8375-759b2b0004f2 HTTP/1.1[0m" [32m200 OK[0m
+  [server] [2026-09-29 13:56:10] [32mINFO[0m:     127.0.0.1:46124 - "[1mGET /v1/videos/3150617b-e919-44fe-8375-759b2b0004f2 HTTP/1.1[0m" [32m200 OK[0m
+  [server] [2026-09-29 13:56:10] [32mINFO[0m:     127.0.0.1:46136 - "[1mGET /v1/videos/3150617b-e919-44fe-8375-759b2b0004f2 HTTP/1.1[0m" [32m200 OK[0m
+  [server] [2026-09-29 13:56:10] [32mINFO[0m:     127.0.0.1:46144 - "[1mGET /v1/videos/3150617b-e919-44fe-8375-759b2b0004f2 HTTP/1.1[0m" [32m200 OK[0m
+  [server] [91m[09-29 13:56:10] Error executing request 3150617b-e919-44fe-8375-759b2b0004f2: CUDA out of memory. Tried to allocate 160.00 MiB. GPU 0 has a total capacity of 23.52 GiB of which 104.50 MiB is free. Process 46813 has 386.00 MiB memory in use. Including non-PyTorch memory, this process has 22.93 GiB memory in use. Of the allocated memory 21.98 GiB is allocated by PyTorch, and 62.56 MiB is reserved by PyTorch but unallocated. If reserved but unallocated memory is large try setting PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True to avoid fragmentation.  See documentation for Memory Management  (https://docs.pytorch.org/docs/stable/notes/cuda.html#optimizing-memory-usage-with-pytorch-cuda-alloc-conf)
+  [server] Traceback (most recent call last):
+  [server]   File "/sgl-workspace/sglang/python/sglang/multimodal_gen/runtime/managers/gpu_worker.py", line 708, in _execute_forward_common
+  [server]     result = forward_fn()
+  [server]              ^^^^^^^^^^^^
+  [server]   File "/sgl-workspace/sglang/python/sglang/multimodal_gen/runtime/managers/gpu_worker.py", line 537, in <lambda>
+  [server]     forward_fn=lambda: self.pipeline.forward(req, self.server_args),
+  [server]                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  [server]   File "/opt/sglang/lib/python3.12/site-packages/torch/utils/_contextlib.py", line 124, in decorate_context
+  [server]     return func(*args, **kwargs)
+  [server]            ^^^^^^^^^^^^^^^^^^^^^
+  [server]   File "/sgl-workspace/sglang/python/sglang/multimodal_gen/runtime/pipelines_core/composed_pipeline_base.py", line 1119, in forward
+  [server]     return self.executor.execute_with_profiling(self.stages, batch, server_args)
+  [server]            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  [server]   File "/sgl-workspace/sglang/python/sglang/multimodal_gen/runtime/pipelines_core/executors/pipeline_executor.py", line 140, in execute_with_profiling
+  [server]     batch = self.execute(stages, batch, server_args)
+  [server]             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  [server]   File "/sgl-workspace/sglang/python/sglang/multimodal_gen/runtime/pipelines_core/executors/parallel_executor.py", line 163, in execute
+  [server]     return self._execute_stages(
+  [server]            ^^^^^^^^^^^^^^^^^^^^^
+  [server]   File "/sgl-workspace/sglang/python/sglang/multimodal_gen/runtime/pipelines_core/executors/parallel_executor.py", line 115, in _execute_stages
+  [server]     batch = self._run_stage_with_executor_hooks(
+  [server]             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  [server]   File "/sgl-workspace/sglang/python/sglang/multimodal_gen/runtime/pipelines_core/executors/pipeline_executor.py", line 120, in _run_stage_with_executor_hooks
+  [server]     payload = self.run_stage_with_context(
+  [server]               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  [server]   File "/sgl-workspace/sglang/python/sglang/multimodal_gen/runtime/pipelines_core/executors/pipeline_executor.py", line 202, in run_stage_with_context
+  [server]     self.component_residency_manager.begin_stage()
+  [server]   File "/sgl-workspace/sglang/python/sglang/multimodal_gen/runtime/managers/memory_managers/component_manager.py", line 344, in begin_stage
+  [server]     self.begin_use(stage_uses[0])
+  [server]   File "/sgl-workspace/sglang/python/sglang/multimodal_gen/runtime/managers/memory_managers/component_manager.py", line 417, in begin_use
+  [server]     module = self._prepare_forward_use(use, module=module)
+  [server]              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  [server]   File "/sgl-workspace/sglang/python/sglang/multimodal_gen/runtime/managers/memory_managers/component_manager.py", line 531, in _prepare_forward_use
+  [server]     strategy.prepare_for_use(module, use, self.state)
+  [server]   File "/sgl-workspace/sglang/python/sglang/multimodal_gen/runtime/managers/memory_managers/component_residency_strategies.py", line 152, in prepare_for_use
+  [server]     self._load_component(module, use)
+  [server]   File "/sgl-workspace/sglang/python/sglang/multimodal_gen/runtime/managers/memory_managers/component_residency_strategies.py", line 144, in _load_component
+  [server]     _module_to_local_device(module, dtype=use.target_dtype)
+  [server]   File "/sgl-workspace/sglang/python/sglang/multimodal_gen/runtime/managers/memory_managers/component_residency_strategies.py", line 49, in _module_to_local_device
+  [server]     module.to(device, non_blocking=True)
+  [server]   File "/opt/sglang/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1383, in to
+  [server]     return self._apply(convert)
+  [server]            ^^^^^^^^^^^^^^^^^^^^
+  [server]   File "/opt/sglang/lib/python3.12/site-packages/torch/nn/modules/module.py", line 933, in _apply
+  [server]     module._apply(fn)
+  [server]   File "/opt/sglang/lib/python3.12/site-packages/torch/nn/modules/module.py", line 933, in _apply
+  [server]     module._apply(fn)
+  [server]   File "/opt/sglang/lib/python3.12/site-packages/torch/nn/modules/module.py", line 933, in _apply
+  [server]     module._apply(fn)
+  [server]   [Previous line repeated 4 more times]
+  [server]   File "/opt/sglang/lib/python3.12/site-packages/torch/nn/modules/module.py", line 964, in _apply
+  [server]     param_applied = fn(param)
+  [server]                     ^^^^^^^^^
+  [server]   File "/opt/sglang/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1369, in convert
+  [server]     return t.to(
+  [server]            ^^^^^
+  [server] torch.OutOfMemoryError: CUDA out of memory. Tried to allocate 160.00 MiB. GPU 0 has a total capacity of 23.52 GiB of which 104.50 MiB is free. Process 46813 has 386.00 MiB memory in use. Including non-PyTorch memory, this process has 22.93 GiB memory in use. Of the allocated memory 21.98 GiB is allocated by PyTorch, and 62.56 MiB is reserved by PyTorch but unallocated. If reserved but unallocated memory is large try setting PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True to avoid fragmentation.  See documentation for Memory Management  (https://docs.pytorch.org/docs/stable/notes/cuda.html#optimizing-memory-usage-with-pytorch-cuda-alloc-conf)[0;0m
+  [server] [93m[09-29 13:56:10] 
+  [server] OOM detected. Possible solutions:
+  [server]   - If the OOM occurs during loading:
+  [server]     1. Check available memory on every selected GPU, not only total capacity.
+  [server]        In multi-GPU runs, the least-free selected GPU is the bottleneck.
+  [server]     2. For single-GPU deployment, use `--performance-mode memory`, component CPU offload,
+  [server]        or `--dit-layerwise-offload` for supported Wan/MOVA DiTs.
+  [server]     3. For multi-GPU deployment, keep the default `--performance-mode auto` or set
+  [server]        `--use-fsdp-inference true` to shard DiT weights with FSDP. FSDP is not a
+  [server]        single-GPU substitute for CPU offload.
+  [server]   - If the OOM occurs during runtime:
+  [server]     1. Reduce resolution, `--num-frames`, or batch size.
+  [server]     2. Use `--performance-mode memory` for lower memory usage.
+  [server]     3. Enable SP/Ulysses/Ring for sequence-heavy workloads in multi-GPU setups.
+  [server]     4. Use FSDP, with CFG parallelism when supported, for validated multi-GPU workloads.
+  [server]     5. Use a lower-memory attention backend or quantization when available.
+  [server]   Or, open an issue on GitHub https://github.com/sgl-project/sglang/issues/new/choose
+  [server] [0;0m
+  [server] [2026-09-29 13:56:10] [32mINFO[0m:     127.0.0.1:46158 - "[1mGET /v1/videos/3150617b-e919-44fe-8375-759b2b0004f2 HTTP/1.1[0m" [32m200 OK[0m
+  [server] [2026-09-29 13:56:10] [32mINFO[0m:     127.0.0.1:46172 - "[1mGET /v1/videos/3150617b-e919-44fe-8375-759b2b0004f2 HTTP/1.1[0m" [32m200 OK[0m
+  [server] [2026-09-29 13:56:11] [32mINFO[0m:     127.0.0.1:46176 - "[1mGET /v1/videos/3150617b-e919-44fe-8375-759b2b0004f2 HTTP/1.1[0m" [32m200 OK[0m
+  [server] [2026-09-29 13:56:11] [32mINFO[0m:     127.0.0.1:46188 - "[1mGET /v1/videos/3150617b-e919-44fe-8375-759b2b0004f2 HTTP/1.1[0m" [32m200 OK[0m
+  [server] [91m[09-29 13:56:11] Failed to generate output for prompt: Model generation returned no output. Error from scheduler: Error executing request 3150617b-e919-44fe-8375-759b2b0004f2: CUDA out of memory. Tried to allocate 160.00 MiB. GPU 0 has a total capacity of 23.52 GiB of which 104.50 MiB is free. Process 46813 has 386.00 MiB memory in use. Including non-PyTorch memory, this process has 22.93 GiB memory in use. Of the allocated memory 21.98 GiB is allocated by PyTorch, and 62.56 MiB is reserved by PyTorch but unallocated. If reserved but unallocated memory is large try setting PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True to avoid fragmentation.  See documentation for Memory Management  (https://docs.pytorch.org/docs/stable/notes/cuda.html#optimizing-memory-usage-with-pytorch-cuda-alloc-conf)
+  [server] Traceback (most recent call last):
+  [server]   File "/sgl-workspace/sglang/python/sglang/multimodal_gen/runtime/utils/logging_utils.py", line 683, in log_generation_timer
+  [server]     yield timer
+  [server]   File "/sgl-workspace/sglang/python/sglang/multimodal_gen/runtime/entrypoints/openai/utils.py", line 479, in process_generation_batch
+  [server]     raise RuntimeError(
+  [server] RuntimeError: Model generation returned no output. Error from scheduler: Error executing request 3150617b-e919-44fe-8375-759b2b0004f2: CUDA out of memory. Tried to allocate 160.00 MiB. GPU 0 has a total capacity of 23.52 GiB of which 104.50 MiB is free. Process 46813 has 386.00 MiB memory in use. Including non-PyTorch memory, this process has 22.93 GiB memory in use. Of the allocated memory 21.98 GiB is allocated by PyTorch, and 62.56 MiB is reserved by PyTorch but unallocated. If reserved but unallocated memory is large try setting PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True to avoid fragmentation.  See documentation for Memory Management  (https://docs.pytorch.org/docs/stable/notes/cuda.html#optimizing-memory-usage-with-pytorch-cuda-alloc-conf)[0;0m
+  [server] [91m[09-29 13:56:11] Video job 3150617b-e919-44fe-8375-759b2b0004f2 failed
+  [server] Traceback (most recent call last):
+  [server]   File "/sgl-workspace/sglang/python/sglang/multimodal_gen/runtime/entrypoints/openai/video_api.py", line 390, in _dispatch_job_async
+  [server]     save_file_path_list, result = await process_generation_batch(
+  [server]                                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  [server]   File "/sgl-workspace/sglang/python/sglang/multimodal_gen/runtime/entrypoints/openai/utils.py", line 479, in process_generation_batch
+  [server]     raise RuntimeError(
+  [server] RuntimeError: Model generation returned no output. Error from scheduler: Error executing request 3150617b-e919-44fe-8375-759b2b0004f2: CUDA out of memory. Tried to allocate 160.00 MiB. GPU 0 has a total capacity of 23.52 GiB of which 104.50 MiB is free. Process 46813 has 386.00 MiB memory in use. Including non-PyTorch memory, this process has 22.93 GiB memory in use. Of the allocated memory 21.98 GiB is allocated by PyTorch, and 62.56 MiB is reserved by PyTorch but unallocated. If reserved but unallocated memory is large try setting PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True to avoid fragmentation.  See documentation for Memory Management  (https://docs.pytorch.org/docs/stable/notes/cuda.html#optimizing-memory-usage-with-pytorch-cuda-alloc-conf)[0;0m
+  [server] [2026-09-29 13:56:11] [32mINFO[0m:     127.0.0.1:46198 - "[1mGET /v1/videos/3150617b-e919-44fe-8375-759b2b0004f2 HTTP/1.1[0m" [32m200 OK[0m
+  Warmup request 2/3 failed (non-fatal): Video generation failed: {'id': '3150617b-e919-44fe-8375-759b2b0004f2', 'object': 'video', 'model': 'Wan-AI/Wan2.1-I2V-14B-480P-Diffusers', 'status': 'failed', 'progress': 0, 'created_at': 1790690167, 'size': '832x480', 'seconds': '5', 'quality': 'standard', 'url': None, 'remixed_from_video_id': None, 'completed_at': None, 'expires_at': None, 'error': {'message': 'Model generation returned no output. Error from scheduler: Error executing request 3150617b-e919-44fe-8375-759b2b0004f2: CUDA out of memory. Tried to allocate 160.00 MiB. GPU 0 has a total capacity of 23.52 GiB of which 104.50 MiB is free. Process 46813 has 386.00 MiB memory in use. Including non-PyTorch memory, this process has 22.93 GiB memory in use. Of the allocated memory 21.98 GiB is allocated by PyTorch, and 62.56 MiB is reserved by PyTorch but unallocated. If reserved but unallocated memory is large try setting PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True to avoid fragmentation.  See documentation for Memory Management  (https://docs.pytorch.org/docs/stable/notes/cuda.html#optimizing-memory-usage-with-pytorch-cuda-alloc-conf)'}, 'file_path': None, 'file_paths': None, 'num_outputs': None, 'peak_memory_mb': None, 'inference_time_s': None, 'revised_prompt': None, 'action': None}
+  Sending warmup request (3/3)...
+  [server] [09-29 13:56:11] Sequence dimension shard is enabled, disabling frame adjustment for better performance
+  [server] [09-29 13:56:11] Adjusting number of frames from 81 to 81 based on model
+  [server] [2026-09-29 13:56:11] [32mINFO[0m:     127.0.0.1:46208 - "[1mPOST /v1/videos HTTP/1.1[0m" [32m200 OK[0m
+  [server] [09-29 13:56:11] Sampling params:
+  [server]                        width: 832
+  [server]                       height: 480
+  [server]                   num_frames: 81
+  [server]                          fps: 16
+  [server]                       prompt: <redacted, len=49>
+  [server]                   neg_prompt: <redacted, len=392>
+  [server]                         seed: 42
+  [server]                  infer_steps: 3
+  [server]       num_outputs_per_prompt: 1
+  [server]               guidance_scale: 5.0
+  [server]      embedded_guidance_scale: 6.0
+  [server]                     n_tokens: None
+  [server]                   flow_shift: 3.0
+  [server]                   image_path: inputs/uploads/0c6dbefe-7e18-4396-81b1-ab03d10a62b6_ref.png
+  [server]                  save_output: True
+  [server]             output_file_path: outputs/0c6dbefe-7e18-4396-81b1-ab03d10a62b6.mp4
+  [server]         
+  [server] [09-29 13:56:11] Running pipeline stages: ['InputValidationStage', 'TextEncodingStage', 'ImageEncodingStage', 'ImageVAEEncodingStage', 'LatentPreparationStage', 'TimestepPreparationStage', 'denoising_stage', 'decoding_stage']
+  [server] [09-29 13:56:11] [InputValidationStage] started...
+  [server] [09-29 13:56:11] [InputValidationStage] finished in 0.0375 seconds
+  [server] [2026-09-29 13:56:11] [32mINFO[0m:     127.0.0.1:45490 - "[1mGET /v1/videos/0c6dbefe-7e18-4396-81b1-ab03d10a62b6 HTTP/1.1[0m" [32m200 OK[0m
+  [server] [2026-09-29 13:56:11] [32mINFO[0m:     127.0.0.1:45494 - "[1mGET /v1/videos/0c6dbefe-7e18-4396-81b1-ab03d10a62b6 HTTP/1.1[0m" [32m200 OK[0m
+  [server] [2026-09-29 13:56:12] [32mINFO[0m:     127.0.0.1:45500 - "[1mGET /v1/videos/0c6dbefe-7e18-4396-81b1-ab03d10a62b6 HTTP/1.1[0m" [32m200 OK[0m
+  [server] [2026-09-29 13:56:12] [32mINFO[0m:     127.0.0.1:45504 - "[1mGET /v1/videos/0c6dbefe-7e18-4396-81b1-ab03d10a62b6 HTTP/1.1[0m" [32m200 OK[0m
+  [server] [2026-09-29 13:56:12] [32mINFO[0m:     127.0.0.1:45508 - "[1mGET /v1/videos/0c6dbefe-7e18-4396-81b1-ab03d10a62b6 HTTP/1.1[0m" [32m200 OK[0m
+  [server] [rank0]:[W929 13:56:12.023512029 CUDACachingAllocator.cpp:508] expandable_segments: memory mapping failed with OOM on device 0 while trying to map 20971520 bytes (free: 524288, total: 25250627584).
+  [server] [rank0]:[W929 13:56:12.028283091 CUDACachingAllocator.cpp:508] expandable_segments: memory mapping failed with OOM on device 0 while trying to map 20971520 bytes (free: 524288, total: 25250627584).
+  [server] [2026-09-29 13:56:12] [32mINFO[0m:     127.0.0.1:45518 - "[1mGET /v1/videos/0c6dbefe-7e18-4396-81b1-ab03d10a62b6 HTTP/1.1[0m" [32m200 OK[0m
+  [server] [91m[09-29 13:56:12] Error executing request 0c6dbefe-7e18-4396-81b1-ab03d10a62b6: CUDA out of memory. Tried to allocate 160.00 MiB. GPU 0 has a total capacity of 23.52 GiB of which 100.50 MiB is free. Process 46813 has 386.00 MiB memory in use. Including non-PyTorch memory, this process has 22.93 GiB memory in use. Of the allocated memory 21.98 GiB is allocated by PyTorch, and 62.56 MiB is reserved by PyTorch but unallocated. If reserved but unallocated memory is large try setting PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True to avoid fragmentation.  See documentation for Memory Management  (https://docs.pytorch.org/docs/stable/notes/cuda.html#optimizing-memory-usage-with-pytorch-cuda-alloc-conf)
+  [server] Traceback (most recent call last):
+  [server]   File "/sgl-workspace/sglang/python/sglang/multimodal_gen/runtime/managers/gpu_worker.py", line 708, in _execute_forward_common
+  [server]     result = forward_fn()
+  [server]              ^^^^^^^^^^^^
+  [server]   File "/sgl-workspace/sglang/python/sglang/multimodal_gen/runtime/managers/gpu_worker.py", line 537, in <lambda>
+  [server]     forward_fn=lambda: self.pipeline.forward(req, self.server_args),
+  [server]                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  [server]   File "/opt/sglang/lib/python3.12/site-packages/torch/utils/_contextlib.py", line 124, in decorate_context
+  [server]     return func(*args, **kwargs)
+  [server]            ^^^^^^^^^^^^^^^^^^^^^
+  [server]   File "/sgl-workspace/sglang/python/sglang/multimodal_gen/runtime/pipelines_core/composed_pipeline_base.py", line 1119, in forward
+  [server]     return self.executor.execute_with_profiling(self.stages, batch, server_args)
+  [server]            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  [server]   File "/sgl-workspace/sglang/python/sglang/multimodal_gen/runtime/pipelines_core/executors/pipeline_executor.py", line 140, in execute_with_profiling
+  [server]     batch = self.execute(stages, batch, server_args)
+  [server]             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  [server]   File "/sgl-workspace/sglang/python/sglang/multimodal_gen/runtime/pipelines_core/executors/parallel_executor.py", line 163, in execute
+  [server]     return self._execute_stages(
+  [server]            ^^^^^^^^^^^^^^^^^^^^^
+  [server]   File "/sgl-workspace/sglang/python/sglang/multimodal_gen/runtime/pipelines_core/executors/parallel_executor.py", line 115, in _execute_stages
+  [server]     batch = self._run_stage_with_executor_hooks(
+  [server]             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  [server]   File "/sgl-workspace/sglang/python/sglang/multimodal_gen/runtime/pipelines_core/executors/pipeline_executor.py", line 120, in _run_stage_with_executor_hooks
+  [server]     payload = self.run_stage_with_context(
+  [server]               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  [server]   File "/sgl-workspace/sglang/python/sglang/multimodal_gen/runtime/pipelines_core/executors/pipeline_executor.py", line 202, in run_stage_with_context
+  [server]     self.component_residency_manager.begin_stage()
+  [server]   File "/sgl-workspace/sglang/python/sglang/multimodal_gen/runtime/managers/memory_managers/component_manager.py", line 344, in begin_stage
+  [server]     self.begin_use(stage_uses[0])
+  [server]   File "/sgl-workspace/sglang/python/sglang/multimodal_gen/runtime/managers/memory_managers/component_manager.py", line 417, in begin_use
+  [server]     module = self._prepare_forward_use(use, module=module)
+  [server]              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  [server]   File "/sgl-workspace/sglang/python/sglang/multimodal_gen/runtime/managers/memory_managers/component_manager.py", line 531, in _prepare_forward_use
+  [server]     strategy.prepare_for_use(module, use, self.state)
+  [server]   File "/sgl-workspace/sglang/python/sglang/multimodal_gen/runtime/managers/memory_managers/component_residency_strategies.py", line 152, in prepare_for_use
+  [server]     self._load_component(module, use)
+  [server]   File "/sgl-workspace/sglang/python/sglang/multimodal_gen/runtime/managers/memory_managers/component_residency_strategies.py", line 144, in _load_component
+  [server]     _module_to_local_device(module, dtype=use.target_dtype)
+  [server]   File "/sgl-workspace/sglang/python/sglang/multimodal_gen/runtime/managers/memory_managers/component_residency_strategies.py", line 49, in _module_to_local_device
+  [server]     module.to(device, non_blocking=True)
+  [server]   File "/opt/sglang/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1383, in to
+  [server]     return self._apply(convert)
+  [server]            ^^^^^^^^^^^^^^^^^^^^
+  [server]   File "/opt/sglang/lib/python3.12/site-packages/torch/nn/modules/module.py", line 933, in _apply
+  [server]     module._apply(fn)
+  [server]   File "/opt/sglang/lib/python3.12/site-packages/torch/nn/modules/module.py", line 933, in _apply
+  [server]     module._apply(fn)
+  [server]   File "/opt/sglang/lib/python3.12/site-packages/torch/nn/modules/module.py", line 933, in _apply
+  [server]     module._apply(fn)
+  [server]   [Previous line repeated 4 more times]
+  [server]   File "/opt/sglang/lib/python3.12/site-packages/torch/nn/modules/module.py", line 964, in _apply
+  [server]     param_applied = fn(param)
+  [server]                     ^^^^^^^^^
+  [server]   File "/opt/sglang/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1369, in convert
+  [server]     return t.to(
+  [server]            ^^^^^
+  [server] torch.OutOfMemoryError: CUDA out of memory. Tried to allocate 160.00 MiB. GPU 0 has a total capacity of 23.52 GiB of which 100.50 MiB is free. Process 46813 has 386.00 MiB memory in use. Including non-PyTorch memory, this process has 22.93 GiB memory in use. Of the allocated memory 21.98 GiB is allocated by PyTorch, and 62.56 MiB is reserved by PyTorch but unallocated. If reserved but unallocated memory is large try setting PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True to avoid fragmentation.  See documentation for Memory Management  (https://docs.pytorch.org/docs/stable/notes/cuda.html#optimizing-memory-usage-with-pytorch-cuda-alloc-conf)[0;0m
+  [server] [93m[09-29 13:56:12] 
+  [server] OOM detected. Possible solutions:
+  [server]   - If the OOM occurs during loading:
+  [server]     1. Check available memory on every selected GPU, not only total capacity.
+  [server]        In multi-GPU runs, the least-free selected GPU is the bottleneck.
+  [server]     2. For single-GPU deployment, use `--performance-mode memory`, component CPU offload,
+  [server]        or `--dit-layerwise-offload` for supported Wan/MOVA DiTs.
+  [server]     3. For multi-GPU deployment, keep the default `--performance-mode auto` or set
+  [server]        `--use-fsdp-inference true` to shard DiT weights with FSDP. FSDP is not a
+  [server]        single-GPU substitute for CPU offload.
+  [server]   - If the OOM occurs during runtime:
+  [server]     1. Reduce resolution, `--num-frames`, or batch size.
+  [server]     2. Use `--performance-mode memory` for lower memory usage.
+  [server]     3. Enable SP/Ulysses/Ring for sequence-heavy workloads in multi-GPU setups.
+  [server]     4. Use FSDP, with CFG parallelism when supported, for validated multi-GPU workloads.
+  [server]     5. Use a lower-memory attention backend or quantization when available.
+  [server]   Or, open an issue on GitHub https://github.com/sgl-project/sglang/issues/new/choose
+  [server] [0;0m
+  [server] [2026-09-29 13:56:12] [32mINFO[0m:     127.0.0.1:45530 - "[1mGET /v1/videos/0c6dbefe-7e18-4396-81b1-ab03d10a62b6 HTTP/1.1[0m" [32m200 OK[0m
+  [server] [2026-09-29 13:56:13] [32mINFO[0m:     127.0.0.1:45544 - "[1mGET /v1/videos/0c6dbefe-7e18-4396-81b1-ab03d10a62b6 HTTP/1.1[0m" [32m200 OK[0m
+  [server] [2026-09-29 13:56:13] [32mINFO[0m:     127.0.0.1:45554 - "[1mGET /v1/videos/0c6dbefe-7e18-4396-81b1-ab03d10a62b6 HTTP/1.1[0m" [32m200 OK[0m
+  [server] [2026-09-29 13:56:13] [32mINFO[0m:     127.0.0.1:45562 - "[1mGET /v1/videos/0c6dbefe-7e18-4396-81b1-ab03d10a62b6 HTTP/1.1[0m" [32m200 OK[0m
+  [server] [2026-09-29 13:56:13] [32mINFO[0m:     127.0.0.1:45564 - "[1mGET /v1/videos/0c6dbefe-7e18-4396-81b1-ab03d10a62b6 HTTP/1.1[0m" [32m200 OK[0m
+  [server] [2026-09-29 13:56:13] [32mINFO[0m:     127.0.0.1:45578 - "[1mGET /v1/videos/0c6dbefe-7e18-4396-81b1-ab03d10a62b6 HTTP/1.1[0m" [32m200 OK[0m
+  [server] [2026-09-29 13:56:14] [32mINFO[0m:     127.0.0.1:45582 - "[1mGET /v1/videos/0c6dbefe-7e18-4396-81b1-ab03d10a62b6 HTTP/1.1[0m" [32m200 OK[0m
+  [server] [91m[09-29 13:56:14] Failed to generate output for prompt: Model generation returned no output. Error from scheduler: Error executing request 0c6dbefe-7e18-4396-81b1-ab03d10a62b6: CUDA out of memory. Tried to allocate 160.00 MiB. GPU 0 has a total capacity of 23.52 GiB of which 100.50 MiB is free. Process 46813 has 386.00 MiB memory in use. Including non-PyTorch memory, this process has 22.93 GiB memory in use. Of the allocated memory 21.98 GiB is allocated by PyTorch, and 62.56 MiB is reserved by PyTorch but unallocated. If reserved but unallocated memory is large try setting PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True to avoid fragmentation.  See documentation for Memory Management  (https://docs.pytorch.org/docs/stable/notes/cuda.html#optimizing-memory-usage-with-pytorch-cuda-alloc-conf)
+  [server] Traceback (most recent call last):
+  [server]   File "/sgl-workspace/sglang/python/sglang/multimodal_gen/runtime/utils/logging_utils.py", line 683, in log_generation_timer
+  [server]     yield timer
+  [server]   File "/sgl-workspace/sglang/python/sglang/multimodal_gen/runtime/entrypoints/openai/utils.py", line 479, in process_generation_batch
+  [server]     raise RuntimeError(
+  [server] RuntimeError: Model generation returned no output. Error from scheduler: Error executing request 0c6dbefe-7e18-4396-81b1-ab03d10a62b6: CUDA out of memory. Tried to allocate 160.00 MiB. GPU 0 has a total capacity of 23.52 GiB of which 100.50 MiB is free. Process 46813 has 386.00 MiB memory in use. Including non-PyTorch memory, this process has 22.93 GiB memory in use. Of the allocated memory 21.98 GiB is allocated by PyTorch, and 62.56 MiB is reserved by PyTorch but unallocated. If reserved but unallocated memory is large try setting PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True to avoid fragmentation.  See documentation for Memory Management  (https://docs.pytorch.org/docs/stable/notes/cuda.html#optimizing-memory-usage-with-pytorch-cuda-alloc-conf)[0;0m
+  [server] [91m[09-29 13:56:14] Video job 0c6dbefe-7e18-4396-81b1-ab03d10a62b6 failed
+  [server] Traceback (most recent call last):
+  [server]   File "/sgl-workspace/sglang/python/sglang/multimodal_gen/runtime/entrypoints/openai/video_api.py", line 390, in _dispatch_job_async
+  [server]     save_file_path_list, result = await process_generation_batch(
+  [server]                                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  [server]   File "/sgl-workspace/sglang/python/sglang/multimodal_gen/runtime/entrypoints/openai/utils.py", line 479, in process_generation_batch
+  [server]     raise RuntimeError(
+  [server] RuntimeError: Model generation returned no output. Error from scheduler: Error executing request 0c6dbefe-7e18-4396-81b1-ab03d10a62b6: CUDA out of memory. Tried to allocate 160.00 MiB. GPU 0 has a total capacity of 23.52 GiB of which 100.50 MiB is free. Process 46813 has 386.00 MiB memory in use. Including non-PyTorch memory, this process has 22.93 GiB memory in use. Of the allocated memory 21.98 GiB is allocated by PyTorch, and 62.56 MiB is reserved by PyTorch but unallocated. If reserved but unallocated memory is large try setting PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True to avoid fragmentation.  See documentation for Memory Management  (https://docs.pytorch.org/docs/stable/notes/cuda.html#optimizing-memory-usage-with-pytorch-cuda-alloc-conf)[0;0m
+  [server] [2026-09-29 13:56:14] [32mINFO[0m:     127.0.0.1:45584 - "[1mGET /v1/videos/0c6dbefe-7e18-4396-81b1-ab03d10a62b6 HTTP/1.1[0m" [32m200 OK[0m
+  Warmup request 3/3 failed (non-fatal): Video generation failed: {'id': '0c6dbefe-7e18-4396-81b1-ab03d10a62b6', 'object': 'video', 'model': 'Wan-AI/Wan2.1-I2V-14B-480P-Diffusers', 'status': 'failed', 'progress': 0, 'created_at': 1790690171, 'size': '832x480', 'seconds': '5', 'quality': 'standard', 'url': None, 'remixed_from_video_id': None, 'completed_at': None, 'expires_at': None, 'error': {'message': 'Model generation returned no output. Error from scheduler: Error executing request 0c6dbefe-7e18-4396-81b1-ab03d10a62b6: CUDA out of memory. Tried to allocate 160.00 MiB. GPU 0 has a total capacity of 23.52 GiB of which 100.50 MiB is free. Process 46813 has 386.00 MiB memory in use. Including non-PyTorch memory, this process has 22.93 GiB memory in use. Of the allocated memory 21.98 GiB is allocated by PyTorch, and 62.56 MiB is reserved by PyTorch but unallocated. If reserved but unallocated memory is large try setting PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True to avoid fragmentation.  See documentation for Memory Management  (https://docs.pytorch.org/docs/stable/notes/cuda.html#optimizing-memory-usage-with-pytorch-cuda-alloc-conf)'}, 'file_path': None, 'file_paths': None, 'num_outputs': None, 'peak_memory_mb': None, 'inference_time_s': None, 'revised_prompt': None, 'action': None}
+  Sending warmup request (extra 1/4 at the measured shape)...
+  [server] [09-29 13:56:14] Sequence dimension shard is enabled, disabling frame adjustment for better performance
+  [server] [09-29 13:56:14] Adjusting number of frames from 81 to 81 based on model
+  [server] [2026-09-29 13:56:14] [32mINFO[0m:     127.0.0.1:45596 - "[1mPOST /v1/videos HTTP/1.1[0m" [32m200 OK[0m
+  [server] [09-29 13:56:14] Sampling params:
+  [server]                        width: 832
+  [server]                       height: 480
+  [server]                   num_frames: 81
+  [server]                          fps: 16
+  [server]                       prompt: <redacted, len=49>
+  [server]                   neg_prompt: <redacted, len=392>
+  [server]                         seed: 42
+  [server]                  infer_steps: 40
+  [server]       num_outputs_per_prompt: 1
+  [server]               guidance_scale: 5.0
+  [server]      embedded_guidance_scale: 6.0
+  [server]                     n_tokens: None
+  [server]                   flow_shift: 3.0
+  [server]                   image_path: inputs/uploads/34d13251-d97a-47f4-a5e6-7cbbb876066f_ref.png
+  [server]                  save_output: True
+  [server]             output_file_path: outputs/34d13251-d97a-47f4-a5e6-7cbbb876066f.mp4
+  [server]         
+  [server] [09-29 13:56:14] Running pipeline stages: ['InputValidationStage', 'TextEncodingStage', 'ImageEncodingStage', 'ImageVAEEncodingStage', 'LatentPreparationStage', 'TimestepPreparationStage', 'denoising_stage', 'decoding_stage']
+  [server] [09-29 13:56:14] [InputValidationStage] started...
+  [server] [09-29 13:56:14] [InputValidationStage] finished in 0.0355 seconds
+  [server] [2026-09-29 13:56:14] [32mINFO[0m:     127.0.0.1:45598 - "[1mGET /v1/videos/34d13251-d97a-47f4-a5e6-7cbbb876066f HTTP/1.1[0m" [32m200 OK[0m
+  [server] [2026-09-29 13:56:14] [32mINFO[0m:     127.0.0.1:45602 - "[1mGET /v1/videos/34d13251-d97a-47f4-a5e6-7cbbb876066f HTTP/1.1[0m" [32m200 OK[0m
+  [server] [2026-09-29 13:56:14] [32mINFO[0m:     127.0.0.1:45606 - "[1mGET /v1/videos/34d13251-d97a-47f4-a5e6-7cbbb876066f HTTP/1.1[0m" [32m200 OK[0m
+  [server] [2026-09-29 13:56:15] [32mINFO[0m:     127.0.0.1:45622 - "[1mGET /v1/videos/34d13251-d97a-47f4-a5e6-7cbbb876066f HTTP/1.1[0m" [32m200 OK[0m
+  [server] [2026-09-29 13:56:15] [32mINFO[0m:     127.0.0.1:45628 - "[1mGET /v1/videos/34d13251-d97a-47f4-a5e6-7cbbb876066f HTTP/1.1[0m" [32m200 OK[0m
+  [server] [rank0]:[W929 13:56:15.863100811 CUDACachingAllocator.cpp:508] expandable_segments: memory mapping failed with OOM on device 0 while trying to map 20971520 bytes (free: 524288, total: 25250627584).
+  [server] [rank0]:[W929 13:56:15.868257061 CUDACachingAllocator.cpp:508] expandable_segments: memory mapping failed with OOM on device 0 while trying to map 20971520 bytes (free: 524288, total: 25250627584).
+  [server] [2026-09-29 13:56:15] [32mINFO[0m:     127.0.0.1:45644 - "[1mGET /v1/videos/34d13251-d97a-47f4-a5e6-7cbbb876066f HTTP/1.1[0m" [32m200 OK[0m
+  [server] [91m[09-29 13:56:15] Error executing request 34d13251-d97a-47f4-a5e6-7cbbb876066f: CUDA out of memory. Tried to allocate 160.00 MiB. GPU 0 has a total capacity of 23.52 GiB of which 100.50 MiB is free. Process 46813 has 386.00 MiB memory in use. Including non-PyTorch memory, this process has 22.93 GiB memory in use. Of the allocated memory 21.94 GiB is allocated by PyTorch, and 102.56 MiB is reserved by PyTorch but unallocated. If reserved but unallocated memory is large try setting PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True to avoid fragmentation.  See documentation for Memory Management  (https://docs.pytorch.org/docs/stable/notes/cuda.html#optimizing-memory-usage-with-pytorch-cuda-alloc-conf)
+  [server] Traceback (most recent call last):
+  [server]   File "/sgl-workspace/sglang/python/sglang/multimodal_gen/runtime/managers/gpu_worker.py", line 708, in _execute_forward_common
+  [server]     result = forward_fn()
+  [server]              ^^^^^^^^^^^^
+  [server]   File "/sgl-workspace/sglang/python/sglang/multimodal_gen/runtime/managers/gpu_worker.py", line 537, in <lambda>
+  [server]     forward_fn=lambda: self.pipeline.forward(req, self.server_args),
+  [server]                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  [server]   File "/opt/sglang/lib/python3.12/site-packages/torch/utils/_contextlib.py", line 124, in decorate_context
+  [server]     return func(*args, **kwargs)
+  [server]            ^^^^^^^^^^^^^^^^^^^^^
+  [server]   File "/sgl-workspace/sglang/python/sglang/multimodal_gen/runtime/pipelines_core/composed_pipeline_base.py", line 1119, in forward
+  [server]     return self.executor.execute_with_profiling(self.stages, batch, server_args)
+  [server]            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  [server]   File "/sgl-workspace/sglang/python/sglang/multimodal_gen/runtime/pipelines_core/executors/pipeline_executor.py", line 140, in execute_with_profiling
+  [server]     batch = self.execute(stages, batch, server_args)
+  [server]             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  [server]   File "/sgl-workspace/sglang/python/sglang/multimodal_gen/runtime/pipelines_core/executors/parallel_executor.py", line 163, in execute
+  [server]     return self._execute_stages(
+  [server]            ^^^^^^^^^^^^^^^^^^^^^
+  [server]   File "/sgl-workspace/sglang/python/sglang/multimodal_gen/runtime/pipelines_core/executors/parallel_executor.py", line 115, in _execute_stages
+  [server]     batch = self._run_stage_with_executor_hooks(
+  [server]             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  [server]   File "/sgl-workspace/sglang/python/sglang/multimodal_gen/runtime/pipelines_core/executors/pipeline_executor.py", line 120, in _run_stage_with_executor_hooks
+  [server]     payload = self.run_stage_with_context(
+  [server]               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  [server]   File "/sgl-workspace/sglang/python/sglang/multimodal_gen/runtime/pipelines_core/executors/pipeline_executor.py", line 202, in run_stage_with_context
+  [server]     self.component_residency_manager.begin_stage()
+  [server]   File "/sgl-workspace/sglang/python/sglang/multimodal_gen/runtime/managers/memory_managers/component_manager.py", line 344, in begin_stage
+  [server]     self.begin_use(stage_uses[0])
+  [server]   File "/sgl-workspace/sglang/python/sglang/multimodal_gen/runtime/managers/memory_managers/component_manager.py", line 417, in begin_use
+  [server]     module = self._prepare_forward_use(use, module=module)
+  [server]              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  [server]   File "/sgl-workspace/sglang/python/sglang/multimodal_gen/runtime/managers/memory_managers/component_manager.py", line 531, in _prepare_forward_use
+  [server]     strategy.prepare_for_use(module, use, self.state)
+  [server]   File "/sgl-workspace/sglang/python/sglang/multimodal_gen/runtime/managers/memory_managers/component_residency_strategies.py", line 152, in prepare_for_use
+  [server]     self._load_component(module, use)
+  [server]   File "/sgl-workspace/sglang/python/sglang/multimodal_gen/runtime/managers/memory_managers/component_residency_strategies.py", line 144, in _load_component
+  [server]     _module_to_local_device(module, dtype=use.target_dtype)
+  [server]   File "/sgl-workspace/sglang/python/sglang/multimodal_gen/runtime/managers/memory_managers/component_residency_strategies.py", line 49, in _module_to_local_device
+  [server]     module.to(device, non_blocking=True)
+  [server]   File "/opt/sglang/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1383, in to
+  [server]     return self._apply(convert)
+  [server]            ^^^^^^^^^^^^^^^^^^^^
+  [server]   File "/opt/sglang/lib/python3.12/site-packages/torch/nn/modules/module.py", line 933, in _apply
+  [server]     module._apply(fn)
+  [server]   File "/opt/sglang/lib/python3.12/site-packages/torch/nn/modules/module.py", line 933, in _apply
+  [server]     module._apply(fn)
+  [server]   File "/opt/sglang/lib/python3.12/site-packages/torch/nn/modules/module.py", line 933, in _apply
+  [server]     module._apply(fn)
+  [server]   [Previous line repeated 4 more times]
+  [server]   File "/opt/sglang/lib/python3.12/site-packages/torch/nn/modules/module.py", line 964, in _apply
+  [server]     param_applied = fn(param)
+  [server]                     ^^^^^^^^^
+  [server]   File "/opt/sglang/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1369, in convert
+  [server]     return t.to(
+  [server]            ^^^^^
+  [server] torch.OutOfMemoryError: CUDA out of memory. Tried to allocate 160.00 MiB. GPU 0 has a total capacity of 23.52 GiB of which 100.50 MiB is free. Process 46813 has 386.00 MiB memory in use. Including non-PyTorch memory, this process has 22.93 GiB memory in use. Of the allocated memory 21.94 GiB is allocated by PyTorch, and 102.56 MiB is reserved by PyTorch but unallocated. If reserved but unallocated memory is large try setting PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True to avoid fragmentation.  See documentation for Memory Management  (https://docs.pytorch.org/docs/stable/notes/cuda.html#optimizing-memory-usage-with-pytorch-cuda-alloc-conf)[0;0m
+  [server] [93m[09-29 13:56:15] 
+  [server] OOM detected. Possible solutions:
+  [server]   - If the OOM occurs during loading:
+  [server]     1. Check available memory on every selected GPU, not only total capacity.
+  [server]        In multi-GPU runs, the least-free selected GPU is the bottleneck.
+  [server]     2. For single-GPU deployment, use `--performance-mode memory`, component CPU offload,
+  [server]        or `--dit-layerwise-offload` for supported Wan/MOVA DiTs.
+  [server]     3. For multi-GPU deployment, keep the default `--performance-mode auto` or set
+  [server]        `--use-fsdp-inference true` to shard DiT weights with FSDP. FSDP is not a
+  [server]        single-GPU substitute for CPU offload.
+  [server]   - If the OOM occurs during runtime:
+  [server]     1. Reduce resolution, `--num-frames`, or batch size.
+  [server]     2. Use `--performance-mode memory` for lower memory usage.
+  [server]     3. Enable SP/Ulysses/Ring for sequence-heavy workloads in multi-GPU setups.
+  [server]     4. Use FSDP, with CFG parallelism when supported, for validated multi-GPU workloads.
+  [server]     5. Use a lower-memory attention backend or quantization when available.
+  [server]   Or, open an issue on GitHub https://github.com/sgl-project/sglang/issues/new/choose
+  [server] [0;0m
+  [server] [2026-09-29 13:56:15] [32mINFO[0m:     127.0.0.1:45660 - "[1mGET /v1/videos/34d13251-d97a-47f4-a5e6-7cbbb876066f HTTP/1.1[0m" [32m200 OK[0m
+  [server] [2026-09-29 13:56:15] [32mINFO[0m:     127.0.0.1:45662 - "[1mGET /v1/videos/34d13251-d97a-47f4-a5e6-7cbbb876066f HTTP/1.1[0m" [32m200 OK[0m
+  [server] [2026-09-29 13:56:16] [32mINFO[0m:     127.0.0.1:45676 - "[1mGET /v1/videos/34d13251-d97a-47f4-a5e6-7cbbb876066f HTTP/1.1[0m" [32m200 OK[0m
+  [server] [2026-09-29 13:56:16] [32mINFO[0m:     127.0.0.1:45682 - "[1mGET /v1/videos/34d13251-d97a-47f4-a5e6-7cbbb876066f HTTP/1.1[0m" [32m200 OK[0m
+  [server] [2026-09-29 13:56:16] [32mINFO[0m:     127.0.0.1:45696 - "[1mGET /v1/videos/34d13251-d97a-47f4-a5e6-7cbbb876066f HTTP/1.1[0m" [32m200 OK[0m
+  [server] [2026-09-29 13:56:16] [32mINFO[0m:     127.0.0.1:45700 - "[1mGET /v1/videos/34d13251-d97a-47f4-a5e6-7cbbb876066f HTTP/1.1[0m" [32m200 OK[0m
+  [server] [2026-09-29 13:56:16] [32mINFO[0m:     127.0.0.1:45704 - "[1mGET /v1/videos/34d13251-d97a-47f4-a5e6-7cbbb876066f HTTP/1.1[0m" [32m200 OK[0m
+  [server] [91m[09-29 13:56:17] Failed to generate output for prompt: Model generation returned no output. Error from scheduler: Error executing request 34d13251-d97a-47f4-a5e6-7cbbb876066f: CUDA out of memory. Tried to allocate 160.00 MiB. GPU 0 has a total capacity of 23.52 GiB of which 100.50 MiB is free. Process 46813 has 386.00 MiB memory in use. Including non-PyTorch memory, this process has 22.93 GiB memory in use. Of the allocated memory 21.94 GiB is allocated by PyTorch, and 102.56 MiB is reserved by PyTorch but unallocated. If reserved but unallocated memory is large try setting PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True to avoid fragmentation.  See documentation for Memory Management  (https://docs.pytorch.org/docs/stable/notes/cuda.html#optimizing-memory-usage-with-pytorch-cuda-alloc-conf)
+  [server] Traceback (most recent call last):
+  [server]   File "/sgl-workspace/sglang/python/sglang/multimodal_gen/runtime/utils/logging_utils.py", line 683, in log_generation_timer
+  [server]     yield timer
+  [server]   File "/sgl-workspace/sglang/python/sglang/multimodal_gen/runtime/entrypoints/openai/utils.py", line 479, in process_generation_batch
+  [server]     raise RuntimeError(
+  [server] RuntimeError: Model generation returned no output. Error from scheduler: Error executing request 34d13251-d97a-47f4-a5e6-7cbbb876066f: CUDA out of memory. Tried to allocate 160.00 MiB. GPU 0 has a total capacity of 23.52 GiB of which 100.50 MiB is free. Process 46813 has 386.00 MiB memory in use. Including non-PyTorch memory, this process has 22.93 GiB memory in use. Of the allocated memory 21.94 GiB is allocated by PyTorch, and 102.56 MiB is reserved by PyTorch but unallocated. If reserved but unallocated memory is large try setting PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True to avoid fragmentation.  See documentation for Memory Management  (https://docs.pytorch.org/docs/stable/notes/cuda.html#optimizing-memory-usage-with-pytorch-cuda-alloc-conf)[0;0m
+  [server] [91m[09-29 13:56:17] Video job 34d13251-d97a-47f4-a5e6-7cbbb876066f failed
+  [server] Traceback (most recent call last):
+  [server]   File "/sgl-workspace/sglang/python/sglang/multimodal_gen/runtime/entrypoints/openai/video_api.py", line 390, in _dispatch_job_async
+  [server]     save_file_path_list, result = await process_generation_batch(
+  [server]                                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  [server]   File "/sgl-workspace/sglang/python/sglang/multimodal_gen/runtime/entrypoints/openai/utils.py", line 479, in process_generation_batch
+  [server]     raise RuntimeError(
+  [server] RuntimeError: Model generation returned no output. Error from scheduler: Error executing request 34d13251-d97a-47f4-a5e6-7cbbb876066f: CUDA out of memory. Tried to allocate 160.00 MiB. GPU 0 has a total capacity of 23.52 GiB of which 100.50 MiB is free. Process 46813 has 386.00 MiB memory in use. Including non-PyTorch memory, this process has 22.93 GiB memory in use. Of the allocated memory 21.94 GiB is allocated by PyTorch, and 102.56 MiB is reserved by PyTorch but unallocated. If reserved but unallocated memory is large try setting PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True to avoid fragmentation.  See documentation for Memory Management  (https://docs.pytorch.org/docs/stable/notes/cuda.html#optimizing-memory-usage-with-pytorch-cuda-alloc-conf)[0;0m
+  [server] [2026-09-29 13:56:17] [32mINFO[0m:     127.0.0.1:45714 - "[1mGET /v1/videos/34d13251-d97a-47f4-a5e6-7cbbb876066f HTTP/1.1[0m" [32m200 OK[0m
+  Warmup request extra 1/4 at the measured shape failed (non-fatal): Video generation failed: {'id': '34d13251-d97a-47f4-a5e6-7cbbb876066f', 'object': 'video', 'model': 'Wan-AI/Wan2.1-I2V-14B-480P-Diffusers', 'status': 'failed', 'progress': 0, 'created_at': 1790690174, 'size': '832x480', 'seconds': '5', 'quality': 'standard', 'url': None, 'remixed_from_video_id': None, 'completed_at': None, 'expires_at': None, 'error': {'message': 'Model generation returned no output. Error from scheduler: Error executing request 34d13251-d97a-47f4-a5e6-7cbbb876066f: CUDA out of memory. Tried to allocate 160.00 MiB. GPU 0 has a total capacity of 23.52 GiB of which 100.50 MiB is free. Process 46813 has 386.00 MiB memory in use. Including non-PyTorch memory, this process has 22.93 GiB memory in use. Of the allocated memory 21.94 GiB is allocated by PyTorch, and 102.56 MiB is reserved by PyTorch but unallocated. If reserved but unallocated memory is large try setting PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True to avoid fragmentation.  See documentation for Memory Management  (https://docs.pytorch.org/docs/stable/notes/cuda.html#optimizing-memory-usage-with-pytorch-cuda-alloc-conf)'}, 'file_path': None, 'file_paths': None, 'num_outputs': None, 'peak_memory_mb': None, 'inference_time_s': None, 'revised_prompt': None, 'action': None}
+  Sending measured single request (1/1)...
+  [server] [09-29 13:56:17] Sequence dimension shard is enabled, disabling frame adjustment for better performance
+  [server] [09-29 13:56:17] Adjusting number of frames from 81 to 81 based on model
+  [server] [2026-09-29 13:56:17] [32mINFO[0m:     127.0.0.1:45716 - "[1mPOST /v1/videos HTTP/1.1[0m" [32m200 OK[0m
+  [server] [09-29 13:56:17] Sampling params:
+  [server]                        width: 832
+  [server]                       height: 480
+  [server]                   num_frames: 81
+  [server]                          fps: 16
+  [server]                       prompt: <redacted, len=49>
+  [server]                   neg_prompt: <redacted, len=392>
+  [server]                         seed: 42
+  [server]                  infer_steps: 40
+  [server]       num_outputs_per_prompt: 1
+  [server]               guidance_scale: 5.0
+  [server]      embedded_guidance_scale: 6.0
+  [server]                     n_tokens: None
+  [server]                   flow_shift: 3.0
+  [server]                   image_path: inputs/uploads/057bd1c7-afe5-4356-b6da-835d3f67635e_ref.png
+  [server]                  save_output: True
+  [server]             output_file_path: outputs/057bd1c7-afe5-4356-b6da-835d3f67635e.mp4
+  [server]         
+  [server] [09-29 13:56:17] Running pipeline stages: ['InputValidationStage', 'TextEncodingStage', 'ImageEncodingStage', 'ImageVAEEncodingStage', 'LatentPreparationStage', 'TimestepPreparationStage', 'denoising_stage', 'decoding_stage']
+  [server] [09-29 13:56:17] [InputValidationStage] started...
+  [server] [09-29 13:56:17] [InputValidationStage] finished in 0.0359 seconds
+  [server] [2026-09-29 13:56:17] [32mINFO[0m:     127.0.0.1:45726 - "[1mGET /v1/videos/057bd1c7-afe5-4356-b6da-835d3f67635e HTTP/1.1[0m" [32m200 OK[0m
+  [server] [2026-09-29 13:56:17] [32mINFO[0m:     127.0.0.1:45742 - "[1mGET /v1/videos/057bd1c7-afe5-4356-b6da-835d3f67635e HTTP/1.1[0m" [32m200 OK[0m
+  [server] [2026-09-29 13:56:17] [32mINFO[0m:     127.0.0.1:45750 - "[1mGET /v1/videos/057bd1c7-afe5-4356-b6da-835d3f67635e HTTP/1.1[0m" [32m200 OK[0m
+  [server] [2026-09-29 13:56:17] [32mINFO[0m:     127.0.0.1:45766 - "[1mGET /v1/videos/057bd1c7-afe5-4356-b6da-835d3f67635e HTTP/1.1[0m" [32m200 OK[0m
+  [server] [2026-09-29 13:56:18] [32mINFO[0m:     127.0.0.1:45778 - "[1mGET /v1/videos/057bd1c7-afe5-4356-b6da-835d3f67635e HTTP/1.1[0m" [32m200 OK[0m
+  [server] [rank0]:[W929 13:56:18.707250997 CUDACachingAllocator.cpp:508] expandable_segments: memory mapping failed with OOM on device 0 while trying to map 20971520 bytes (free: 524288, total: 25250627584).
+  [server] [rank0]:[W929 13:56:18.712249748 CUDACachingAllocator.cpp:508] expandable_segments: memory mapping failed with OOM on device 0 while trying to map 20971520 bytes (free: 524288, total: 25250627584).
+  [server] [2026-09-29 13:56:18] [32mINFO[0m:     127.0.0.1:45794 - "[1mGET /v1/videos/057bd1c7-afe5-4356-b6da-835d3f67635e HTTP/1.1[0m" [32m200 OK[0m
+  [server] [91m[09-29 13:56:18] Error executing request 057bd1c7-afe5-4356-b6da-835d3f67635e: CUDA out of memory. Tried to allocate 160.00 MiB. GPU 0 has a total capacity of 23.52 GiB of which 100.50 MiB is free. Process 46813 has 386.00 MiB memory in use. Including non-PyTorch memory, this process has 22.93 GiB memory in use. Of the allocated memory 21.94 GiB is allocated by PyTorch, and 102.56 MiB is reserved by PyTorch but unallocated. If reserved but unallocated memory is large try setting PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True to avoid fragmentation.  See documentation for Memory Management  (https://docs.pytorch.org/docs/stable/notes/cuda.html#optimizing-memory-usage-with-pytorch-cuda-alloc-conf)
+  [server] Traceback (most recent call last):
+  [server]   File "/sgl-workspace/sglang/python/sglang/multimodal_gen/runtime/managers/gpu_worker.py", line 708, in _execute_forward_common
+  [server]     result = forward_fn()
+  [server]              ^^^^^^^^^^^^
+  [server]   File "/sgl-workspace/sglang/python/sglang/multimodal_gen/runtime/managers/gpu_worker.py", line 537, in <lambda>
+  [server]     forward_fn=lambda: self.pipeline.forward(req, self.server_args),
+  [server]                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  [server]   File "/opt/sglang/lib/python3.12/site-packages/torch/utils/_contextlib.py", line 124, in decorate_context
+  [server]     return func(*args, **kwargs)
+  [server]            ^^^^^^^^^^^^^^^^^^^^^
+  [server]   File "/sgl-workspace/sglang/python/sglang/multimodal_gen/runtime/pipelines_core/composed_pipeline_base.py", line 1119, in forward
+  [server]     return self.executor.execute_with_profiling(self.stages, batch, server_args)
+  [server]            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  [server]   File "/sgl-workspace/sglang/python/sglang/multimodal_gen/runtime/pipelines_core/executors/pipeline_executor.py", line 140, in execute_with_profiling
+  [server]     batch = self.execute(stages, batch, server_args)
+  [server]             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  [server]   File "/sgl-workspace/sglang/python/sglang/multimodal_gen/runtime/pipelines_core/executors/parallel_executor.py", line 163, in execute
+  [server]     return self._execute_stages(
+  [server]            ^^^^^^^^^^^^^^^^^^^^^
+  [server]   File "/sgl-workspace/sglang/python/sglang/multimodal_gen/runtime/pipelines_core/executors/parallel_executor.py", line 115, in _execute_stages
+  [server]     batch = self._run_stage_with_executor_hooks(
+  [server]             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  [server]   File "/sgl-workspace/sglang/python/sglang/multimodal_gen/runtime/pipelines_core/executors/pipeline_executor.py", line 120, in _run_stage_with_executor_hooks
+  [server]     payload = self.run_stage_with_context(
+  [server]               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  [server]   File "/sgl-workspace/sglang/python/sglang/multimodal_gen/runtime/pipelines_core/executors/pipeline_executor.py", line 202, in run_stage_with_context
+  [server]     self.component_residency_manager.begin_stage()
+  [server]   File "/sgl-workspace/sglang/python/sglang/multimodal_gen/runtime/managers/memory_managers/component_manager.py", line 344, in begin_stage
+  [server]     self.begin_use(stage_uses[0])
+  [server]   File "/sgl-workspace/sglang/python/sglang/multimodal_gen/runtime/managers/memory_managers/component_manager.py", line 417, in begin_use
+  [server]     module = self._prepare_forward_use(use, module=module)
+  [server]              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  [server]   File "/sgl-workspace/sglang/python/sglang/multimodal_gen/runtime/managers/memory_managers/component_manager.py", line 531, in _prepare_forward_use
+  [server]     strategy.prepare_for_use(module, use, self.state)
+  [server]   File "/sgl-workspace/sglang/python/sglang/multimodal_gen/runtime/managers/memory_managers/component_residency_strategies.py", line 152, in prepare_for_use
+  [server]     self._load_component(module, use)
+  [server]   File "/sgl-workspace/sglang/python/sglang/multimodal_gen/runtime/managers/memory_managers/component_residency_strategies.py", line 144, in _load_component
+  [server]     _module_to_local_device(module, dtype=use.target_dtype)
+  [server]   File "/sgl-workspace/sglang/python/sglang/multimodal_gen/runtime/managers/memory_managers/component_residency_strategies.py", line 49, in _module_to_local_device
+  [server]     module.to(device, non_blocking=True)
+  [server]   File "/opt/sglang/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1383, in to
+  [server]     return self._apply(convert)
+  [server]            ^^^^^^^^^^^^^^^^^^^^
+  [server]   File "/opt/sglang/lib/python3.12/site-packages/torch/nn/modules/module.py", line 933, in _apply
+  [server]     module._apply(fn)
+  [server]   File "/opt/sglang/lib/python3.12/site-packages/torch/nn/modules/module.py", line 933, in _apply
+  [server]     module._apply(fn)
+  [server]   File "/opt/sglang/lib/python3.12/site-packages/torch/nn/modules/module.py", line 933, in _apply
+  [server]     module._apply(fn)
+  [server]   [Previous line repeated 4 more times]
+  [server]   File "/opt/sglang/lib/python3.12/site-packages/torch/nn/modules/module.py", line 964, in _apply
+  [server]     param_applied = fn(param)
+  [server]                     ^^^^^^^^^
+  [server]   File "/opt/sglang/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1369, in convert
+  [server]     return t.to(
+  [server]            ^^^^^
+  [server] torch.OutOfMemoryError: CUDA out of memory. Tried to allocate 160.00 MiB. GPU 0 has a total capacity of 23.52 GiB of which 100.50 MiB is free. Process 46813 has 386.00 MiB memory in use. Including non-PyTorch memory, this process has 22.93 GiB memory in use. Of the allocated memory 21.94 GiB is allocated by PyTorch, and 102.56 MiB is reserved by PyTorch but unallocated. If reserved but unallocated memory is large try setting PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True to avoid fragmentation.  See documentation for Memory Management  (https://docs.pytorch.org/docs/stable/notes/cuda.html#optimizing-memory-usage-with-pytorch-cuda-alloc-conf)[0;0m
+  [server] [93m[09-29 13:56:18] 
+  [server] OOM detected. Possible solutions:
+  [server]   - If the OOM occurs during loading:
+  [server]     1. Check available memory on every selected GPU, not only total capacity.
+  [server]        In multi-GPU runs, the least-free selected GPU is the bottleneck.
+  [server]     2. For single-GPU deployment, use `--performance-mode memory`, component CPU offload,
+  [server]        or `--dit-layerwise-offload` for supported Wan/MOVA DiTs.
+  [server]     3. For multi-GPU deployment, keep the default `--performance-mode auto` or set
+  [server]        `--use-fsdp-inference true` to shard DiT weights with FSDP. FSDP is not a
+  [server]        single-GPU substitute for CPU offload.
+  [server]   - If the OOM occurs during runtime:
+  [server]     1. Reduce resolution, `--num-frames`, or batch size.
+  [server]     2. Use `--performance-mode memory` for lower memory usage.
+  [server]     3. Enable SP/Ulysses/Ring for sequence-heavy workloads in multi-GPU setups.
+  [server]     4. Use FSDP, with CFG parallelism when supported, for validated multi-GPU workloads.
+  [server]     5. Use a lower-memory attention backend or quantization when available.
+  [server]   Or, open an issue on GitHub https://github.com/sgl-project/sglang/issues/new/choose
+  [server] [0;0m
+  [server] [2026-09-29 13:56:18] [32mINFO[0m:     127.0.0.1:45798 - "[1mGET /v1/videos/057bd1c7-afe5-4356-b6da-835d3f67635e HTTP/1.1[0m" [32m200 OK[0m
+  [server] [2026-09-29 13:56:18] [32mINFO[0m:     127.0.0.1:45812 - "[1mGET /v1/videos/057bd1c7-afe5-4356-b6da-835d3f67635e HTTP/1.1[0m" [32m200 OK[0m
+  [server] [2026-09-29 13:56:18] [32mINFO[0m:     127.0.0.1:45818 - "[1mGET /v1/videos/057bd1c7-afe5-4356-b6da-835d3f67635e HTTP/1.1[0m" [32m200 OK[0m
+  [server] [2026-09-29 13:56:19] [32mINFO[0m:     127.0.0.1:45820 - "[1mGET /v1/videos/057bd1c7-afe5-4356-b6da-835d3f67635e HTTP/1.1[0m" [32m200 OK[0m
+  [server] [2026-09-29 13:56:19] [32mINFO[0m:     127.0.0.1:45828 - "[1mGET /v1/videos/057bd1c7-afe5-4356-b6da-835d3f67635e HTTP/1.1[0m" [32m200 OK[0m
+  [server] [2026-09-29 13:56:19] [32mINFO[0m:     127.0.0.1:45840 - "[1mGET /v1/videos/057bd1c7-afe5-4356-b6da-835d3f67635e HTTP/1.1[0m" [32m200 OK[0m
+  [server] [2026-09-29 13:56:19] [32mINFO[0m:     127.0.0.1:45850 - "[1mGET /v1/videos/057bd1c7-afe5-4356-b6da-835d3f67635e HTTP/1.1[0m" [32m200 OK[0m
+  [server] [91m[09-29 13:56:19] Failed to generate output for prompt: Model generation returned no output. Error from scheduler: Error executing request 057bd1c7-afe5-4356-b6da-835d3f67635e: CUDA out of memory. Tried to allocate 160.00 MiB. GPU 0 has a total capacity of 23.52 GiB of which 100.50 MiB is free. Process 46813 has 386.00 MiB memory in use. Including non-PyTorch memory, this process has 22.93 GiB memory in use. Of the allocated memory 21.94 GiB is allocated by PyTorch, and 102.56 MiB is reserved by PyTorch but unallocated. If reserved but unallocated memory is large try setting PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True to avoid fragmentation.  See documentation for Memory Management  (https://docs.pytorch.org/docs/stable/notes/cuda.html#optimizing-memory-usage-with-pytorch-cuda-alloc-conf)
+  [server] Traceback (most recent call last):
+  [server]   File "/sgl-workspace/sglang/python/sglang/multimodal_gen/runtime/utils/logging_utils.py", line 683, in log_generation_timer
+  [server]     yield timer
+  [server]   File "/sgl-workspace/sglang/python/sglang/multimodal_gen/runtime/entrypoints/openai/utils.py", line 479, in process_generation_batch
+  [server]     raise RuntimeError(
+  [server] RuntimeError: Model generation returned no output. Error from scheduler: Error executing request 057bd1c7-afe5-4356-b6da-835d3f67635e: CUDA out of memory. Tried to allocate 160.00 MiB. GPU 0 has a total capacity of 23.52 GiB of which 100.50 MiB is free. Process 46813 has 386.00 MiB memory in use. Including non-PyTorch memory, this process has 22.93 GiB memory in use. Of the allocated memory 21.94 GiB is allocated by PyTorch, and 102.56 MiB is reserved by PyTorch but unallocated. If reserved but unallocated memory is large try setting PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True to avoid fragmentation.  See documentation for Memory Management  (https://docs.pytorch.org/docs/stable/notes/cuda.html#optimizing-memory-usage-with-pytorch-cuda-alloc-conf)[0;0m
+  [server] [91m[09-29 13:56:19] Video job 057bd1c7-afe5-4356-b6da-835d3f67635e failed
+  [server] Traceback (most recent call last):
+  [server]   File "/sgl-workspace/sglang/python/sglang/multimodal_gen/runtime/entrypoints/openai/video_api.py", line 390, in _dispatch_job_async
+  [server]     save_file_path_list, result = await process_generation_batch(
+  [server]                                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  [server]   File "/sgl-workspace/sglang/python/sglang/multimodal_gen/runtime/entrypoints/openai/utils.py", line 479, in process_generation_batch
+  [server]     raise RuntimeError(
+  [server] RuntimeError: Model generation returned no output. Error from scheduler: Error executing request 057bd1c7-afe5-4356-b6da-835d3f67635e: CUDA out of memory. Tried to allocate 160.00 MiB. GPU 0 has a total capacity of 23.52 GiB of which 100.50 MiB is free. Process 46813 has 386.00 MiB memory in use. Including non-PyTorch memory, this process has 22.93 GiB memory in use. Of the allocated memory 21.94 GiB is allocated by PyTorch, and 102.56 MiB is reserved by PyTorch but unallocated. If reserved but unallocated memory is large try setting PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True to avoid fragmentation.  See documentation for Memory Management  (https://docs.pytorch.org/docs/stable/notes/cuda.html#optimizing-memory-usage-with-pytorch-cuda-alloc-conf)[0;0m
+  [server] [2026-09-29 13:56:19] [32mINFO[0m:     127.0.0.1:45860 - "[1mGET /v1/videos/057bd1c7-afe5-4356-b6da-835d3f67635e HTTP/1.1[0m" [32m200 OK[0m
+  ERROR: Video generation failed: {'id': '057bd1c7-afe5-4356-b6da-835d3f67635e', 'object': 'video', 'model': 'Wan-AI/Wan2.1-I2V-14B-480P-Diffusers', 'status': 'failed', 'progress': 0, 'created_at': 1790690177, 'size': '832x480', 'seconds': '5', 'quality': 'standard', 'url': None, 'remixed_from_video_id': None, 'completed_at': None, 'expires_at': None, 'error': {'message': 'Model generation returned no output. Error from scheduler: Error executing request 057bd1c7-afe5-4356-b6da-835d3f67635e: CUDA out of memory. Tried to allocate 160.00 MiB. GPU 0 has a total capacity of 23.52 GiB of which 100.50 MiB is free. Process 46813 has 386.00 MiB memory in use. Including non-PyTorch memory, this process has 22.93 GiB memory in use. Of the allocated memory 21.94 GiB is allocated by PyTorch, and 102.56 MiB is reserved by PyTorch but unallocated. If reserved but unallocated memory is large try setting PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True to avoid fragmentation.  See documentation for Memory Management  (https://docs.pytorch.org/docs/stable/notes/cuda.html#optimizing-memory-usage-with-pytorch-cuda-alloc-conf)'}, 'file_path': None, 'file_paths': None, 'num_outputs': None, 'peak_memory_mb': None, 'inference_time_s': None, 'revised_prompt': None, 'action': None}
+  [server] [2026-09-29 13:56:19] [32mINFO[0m:     Shutting down
+  [server] [2026-09-29 13:56:20] [32mINFO[0m:     Waiting for application shutdown.
+  [server] [09-29 13:56:20] FastAPI app is shutting down...
+  [server] [2026-09-29 13:56:20] [32mINFO[0m:     Application shutdown complete.
+  [server] [2026-09-29 13:56:20] [32mINFO[0m:     Finished server process [[36m46813[0m]
+  [server] /usr/lib/python3.12/multiprocessing/resource_tracker.py:254: UserWarning: resource_tracker: There appear to be 1 leaked semaphore objects to clean up at shutdown
+  [server]   warnings.warn('resource_tracker: There appear to be %d '
+  Waiting 15s for GPU memory to clear...
+
+Results written to /persistent/logs/cells/probe_sgl_1gpu_legacy2.json
+
+============================================================
+SUMMARY
+============================================================
+  wan21_i2v_14b_480p_1gpu        | sglang       | Video generation failed: {'id': '057bd1c7-afe5-4356-b6da-835d3f67635e', 'object': 'video', 'model': 'Wan-AI/Wan2.1-I2V-14B-480P-Diffusers', 'status': 'failed', 'progress': 0, 'created_at': 1790690177, 'size': '832x480', 'seconds': '5', 'quality': 'standard', 'url': None, 'remixed_from_video_id': None, 'completed_at': None, 'expires_at': None, 'error': {'message': 'Model generation returned no output. Error from scheduler: Error executing request 057bd1c7-afe5-4356-b6da-835d3f67635e: CUDA out of memory. Tried to allocate 160.00 MiB. GPU 0 has a total capacity of 23.52 GiB of which 100.50 MiB is free. Process 46813 has 386.00 MiB memory in use. Including non-PyTorch memory, this process has 22.93 GiB memory in use. Of the allocated memory 21.94 GiB is allocated by PyTorch, and 102.56 MiB is reserved by PyTorch but unallocated. If reserved but unallocated memory is large try setting PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True to avoid fragmentation.  See documentation for Memory Management  (https://docs.pytorch.org/docs/stable/notes/cuda.html#optimizing-memory-usage-with-pytorch-cuda-alloc-conf)'}, 'file_path': None, 'file_paths': None, 'num_outputs': None, 'peak_memory_mb': None, 'inference_time_s': None, 'revised_prompt': None, 'action': None}
+
+1 case(s) had errors:
+  wan21_i2v_14b_480p_1gpu (sglang): Video generation failed: {'id': '057bd1c7-afe5-4356-b6da-835d3f67635e', 'object': 'video', 'model': 'Wan-AI/Wan2.1-I2V-14B-480P-Diffusers', 'status': 'failed', 'progress': 0, 'created_at': 1790690177, 'size': '832x480', 'seconds': '5', 'quality': 'standard', 'url': None, 'remixed_from_video_id': None, 'completed_at': None, 'expires_at': None, 'error': {'message': 'Model generation returned no output. Error from scheduler: Error executing request 057bd1c7-afe5-4356-b6da-835d3f67635e: CUDA out of memory. Tried to allocate 160.00 MiB. GPU 0 has a total capacity of 23.52 GiB of which 100.50 MiB is free. Process 46813 has 386.00 MiB memory in use. Including non-PyTorch memory, this process has 22.93 GiB memory in use. Of the allocated memory 21.94 GiB is allocated by PyTorch, and 102.56 MiB is reserved by PyTorch but unallocated. If reserved but unallocated memory is large try setting PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True to avoid fragmentation.  See documentation for Memory Management  (https://docs.pytorch.org/docs/stable/notes/cuda.html#optimizing-memory-usage-with-pytorch-cuda-alloc-conf)'}, 'file_path': None, 'file_paths': None, 'num_outputs': None, 'peak_memory_mb': None, 'inference_time_s': None, 'revised_prompt': None, 'action': None}
+
+EXIT=1
+DONE
