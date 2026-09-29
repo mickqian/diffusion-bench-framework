@@ -170,7 +170,8 @@ VLLM_DISABLE_TORCH_COMPILE_ARGS = [
     "--compilation-config",
     '{"mode":0}',
 ]
-LIGHTX2V_DISABLE_TORCH_COMPILE_CONFIG = {"compile": False, "compile_shapes": []}
+# LightX2V reads `use_compile`; it has no `compile` or `compile_shapes` key.
+LIGHTX2V_DISABLE_TORCH_COMPILE_CONFIG = {"use_compile": False}
 
 
 @dataclass(frozen=True)
@@ -251,13 +252,13 @@ def _vllm_torch_compile_args() -> list[str]:
 
 
 def _lightx2v_torch_compile_config() -> dict:
-    # compile OFF -> force it off (+ clear shapes). compile ON ("no precision
-    # loss, best perf" mode) -> request torch.compile; the caller applies this
-    # with setdefault so a profile's lightx2v_config may still opt a specific
-    # model out (compile:false) if that model's compile path breaks.
+    # compile OFF -> force it off. compile ON ("no precision loss, best perf"
+    # mode) -> request torch.compile; the caller applies this with setdefault
+    # so a profile's lightx2v_config may still opt a specific model out
+    # (use_compile:false) if that model's compile path breaks.
     if _torch_compile_disabled():
         return dict(LIGHTX2V_DISABLE_TORCH_COMPILE_CONFIG)
-    return {"compile": True}
+    return {"use_compile": True}
 
 
 # ---------------------------------------------------------------------------
@@ -504,8 +505,8 @@ def _write_lightx2v_config(
         cfg.update(LIGHTX2V_DISABLE_TORCH_COMPILE_CONFIG)
     else:
         # best lossless perf: torch.compile on by default; a profile's
-        # lightx2v_config may set compile:false to opt a model out if it breaks.
-        cfg.setdefault("compile", True)
+        # lightx2v_config may set use_compile:false to opt a model out if it breaks.
+        cfg.setdefault("use_compile", True)
 
     config_path = os.path.join(
         tempfile.gettempdir(), f"lightx2v_config_{case['id']}.json"
