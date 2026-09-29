@@ -55,6 +55,7 @@ HEALTH_TIMEOUT = (
     2400  # seconds (40 min — large checkpoints can need long download/load time)
 )
 REQUEST_TIMEOUT = 1200  # seconds
+KILL_REAP_TIMEOUT_S = 120
 
 # requests' non-streaming path reads a response body in 10 KiB pieces
 # (`CONTENT_CHUNK_SIZE`). Against vLLM-Omni's image responses each of those
@@ -1070,7 +1071,17 @@ def kill_server(proc: subprocess.Popen) -> None:
             os.killpg(os.getpgid(proc.pid), signal.SIGKILL)
         except (ProcessLookupError, PermissionError):
             pass
-        proc.wait(timeout=10)
+        # A multi-rank server with offload pins tens of GiB of host memory per
+        # rank, and unpinning it at exit outlasts a short reap; the cell has
+        # already been measured, so a slow reap must not fail it.
+        try:
+            proc.wait(timeout=KILL_REAP_TIMEOUT_S)
+        except subprocess.TimeoutExpired:
+            print(
+                f"  WARNING: server pid {proc.pid} not reaped {KILL_REAP_TIMEOUT_S}s "
+                "after SIGKILL; continuing",
+                flush=True,
+            )
 
 
 # ---------------------------------------------------------------------------
