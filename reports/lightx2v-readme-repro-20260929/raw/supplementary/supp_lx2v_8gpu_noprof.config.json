@@ -1,0 +1,179 @@
+{
+ "_comment": "Standalone harness config for reproducing the SGL-Diffusion / LightX2V rows of LightX2V's README performance table (updated 2025-12-01): Wan2.1-I2V-14B-480P, 40 steps, 81 frames, CFG on, on 1 and 8 consumer 24 GB GPUs. Kept out of configs/benchmark/cases on purpose: the matrix carries one Wan case, and these are a one-off reproduction on RTX 4090, not published matrix cells. Placement flags are the fitting command for 24 GB, selected by the probes recorded in this directory.",
+ "test_image_url": "https://huggingface.co/datasets/huggingface/documentation-images/resolve/main/diffusers/cat.png",
+ "benchmark_defaults": {
+  "throughput": {
+   "max_concurrency": 2,
+   "num_requests": 4,
+   "request_rate": "inf"
+  },
+  "warmup": {
+   "num_inference_steps": 3,
+   "num_requests": 2,
+   "video_num_requests": 3
+  },
+  "single": {
+   "image_repeats": 5,
+   "video_repeats": 3
+  }
+ },
+ "cases": [
+  {
+   "id": "wan21_i2v_14b_480p_1gpu",
+   "model": "Wan-AI/Wan2.1-I2V-14B-480P-Diffusers",
+   "task": "image-to-video",
+   "label": "Wan2.1 I2V 14B 480p, 1 GPU",
+   "prompt": "The cat starts walking slowly towards the camera.",
+   "reference_image": true,
+   "width": 832,
+   "height": 480,
+   "num_frames": 81,
+   "seed": 42,
+   "num_gpus": 1,
+   "fps": 16,
+   "num_inference_steps": 40,
+   "guidance_scale": 5.0,
+   "frameworks": {
+    "sglang": {
+     "serve_args": "--model-type diffusion --warmup-mode server --enable-torch-compile false --layerwise-offload-components dit,text_encoder,image_encoder,vae",
+     "extra_env": {},
+     "command_profiles": {
+      "default": {
+       "description": "SGLang with the DiT and all three auxiliary components on layerwise offload: the fitting command for one 24 GB GPU.",
+       "sglang_ref": "c7be3e935b5034006cd6ae7977b41e2459b4126c",
+       "serve_args": "--model-type diffusion --warmup-mode server --enable-torch-compile false --layerwise-offload-components dit,text_encoder,image_encoder,vae",
+       "notes": "Probed 2026-09-29 on RTX 4090 24 GB (probe_sgl_1gpu / probe_sgl_1gpu_lw). With no placement flags the runtime's auto policy puts text_encoder, image_encoder and vae on layerwise offload but keeps the ~28 GiB BF16 DiT resident, because WanT2V480PConfig (inherited by WanI2V480PConfig) lists only 'memory' in dit_layerwise_offload_modes; the first request then fails with CUDA OOM. Adding dit to the same layerwise set is exactly what the auto policy would choose if 'auto' were listed. Peak 13.3 GB. Eager."
+      }
+     }
+    },
+    "lightx2v": {
+     "model": "Wan-AI/Wan2.1-I2V-14B-480P",
+     "model_override_reason": "LightX2V loads Wan's original checkpoint layout, not the Diffusers repack; same weights.",
+     "model_cls": "wan2.1",
+     "lightx2v_task": "i2v",
+     "serve_args": "",
+     "extra_env": {},
+     "lightx2v_config": {
+      "infer_steps": 40,
+      "num_frames": 81,
+      "size": [
+       480,
+       832
+      ],
+      "sample_guide_scale": 5.0,
+      "sample_shift": 3.0,
+      "self_attn_1_type": "flash_attn2",
+      "cross_attn_1_type": "flash_attn2",
+      "cross_attn_2_type": "flash_attn2",
+      "enable_cfg": true,
+      "cpu_offload": true,
+      "offload_granularity": "block",
+      "t5_cpu_offload": false,
+      "clip_cpu_offload": false,
+      "vae_cpu_offload": false,
+      "use_compile": false
+     },
+     "command_profiles": {
+      "default": {
+       "description": "LightX2V's own block offload (configs/offload/block/wan_i2v_block.json) at full precision.",
+       "framework_ref": "lightx2v-d46ab933-configs/offload/block/wan_i2v_block.json-without-quant",
+       "serve_args": "",
+       "notes": "Upstream's 24 GB-class Wan2.1 I2V configs quantize DiT/T5/CLIP to fp8 (block) and add SageAttention2 (phase); both are dropped here so the cell stays BF16 with exact attention. FlashAttention 3 is Hopper-only, so all three attention slots use FlashAttention 2. sample_shift 3 follows configs/wan/wan_i2v.json and matches sglang's WanI2V480PConfig."
+      }
+     }
+    }
+   },
+   "report_framework_statuses": {
+    "vllm-omni": "not_run",
+    "trtllm-visual": "not_run",
+    "comfyui": "not_run"
+   },
+   "report_framework_reasons": {
+    "vllm-omni": "Out of scope: this run reproduces the SGL-Diffusion and LightX2V rows of LightX2V's README table.",
+    "trtllm-visual": "Out of scope: this run reproduces the SGL-Diffusion and LightX2V rows of LightX2V's README table.",
+    "comfyui": "Out of scope: this run reproduces the SGL-Diffusion and LightX2V rows of LightX2V's README table."
+   }
+  },
+  {
+   "id": "wan21_i2v_14b_480p_8gpu",
+   "model": "Wan-AI/Wan2.1-I2V-14B-480P-Diffusers",
+   "task": "image-to-video",
+   "label": "Wan2.1 I2V 14B 480p, 8 GPUs (CFG 2 x Ulysses 4)",
+   "prompt": "The cat starts walking slowly towards the camera.",
+   "reference_image": true,
+   "width": 832,
+   "height": 480,
+   "num_frames": 81,
+   "seed": 42,
+   "num_gpus": 8,
+   "fps": 16,
+   "num_inference_steps": 40,
+   "guidance_scale": 5.0,
+   "frameworks": {
+    "sglang": {
+     "serve_args": "--model-type diffusion --warmup-mode server --enable-cfg-parallel --ulysses-degree 4 --enable-torch-compile false --layerwise-offload-components dit,text_encoder,image_encoder,vae",
+     "extra_env": {},
+     "command_profiles": {
+      "default": {
+       "description": "SGLang CFG 2 x Ulysses 4 with the DiT and all three auxiliary components on layerwise offload: the fastest command that fits 24 GB per GPU.",
+       "sglang_ref": "c7be3e935b5034006cd6ae7977b41e2459b4126c",
+       "serve_args": "--model-type diffusion --warmup-mode server --enable-cfg-parallel --ulysses-degree 4 --enable-torch-compile false --layerwise-offload-components dit,text_encoder,image_encoder,vae",
+       "notes": "Probed 2026-09-29 on 8x RTX 4090 24 GB (SYS between every pair). No placement flags: OOM on every rank (probe_sgl_8gpu_auto). --use-fsdp-inference true alone: OOM, dit_cpu_offload stays true and the whole DiT is still moved per card (probe_sgl_8gpu_fsdp). FSDP with --dit-cpu-offload false: runs, 347.1 s e2e, all-gathers cross the host (probe_sgl_8gpu_fsdp2). This layerwise set: 198.9 s (probe_sgl_8gpu_lw); --performance-mode memory resolves to the same placement, 197.6 s (probe_sgl_8gpu_memmode). Same parallel shape as the LightX2V row. Eager."
+      }
+     }
+    },
+    "lightx2v": {
+     "model": "Wan-AI/Wan2.1-I2V-14B-480P",
+     "model_override_reason": "LightX2V loads Wan's original checkpoint layout, not the Diffusers repack; same weights.",
+     "model_cls": "wan2.1",
+     "lightx2v_task": "i2v",
+     "serve_args": "",
+     "extra_env": {},
+     "lightx2v_config": {
+      "infer_steps": 40,
+      "num_frames": 81,
+      "size": [
+       480,
+       832
+      ],
+      "sample_guide_scale": 5.0,
+      "sample_shift": 3.0,
+      "self_attn_1_type": "flash_attn2",
+      "cross_attn_1_type": "flash_attn2",
+      "cross_attn_2_type": "flash_attn2",
+      "enable_cfg": true,
+      "parallel": {
+       "cfg_p_size": 2,
+       "seq_p_size": 4,
+       "seq_p_attn_type": "ulysses-4090"
+      },
+      "cpu_offload": true,
+      "offload_granularity": "block",
+      "t5_cpu_offload": false,
+      "clip_cpu_offload": false,
+      "vae_cpu_offload": false,
+      "use_compile": false
+     },
+     "command_profiles": {
+      "default": {
+       "description": "LightX2V configs/dist_infer/wan_i2v_dist_cfg_ulysses.json shape on its PCIe Ulysses variant, with block offload at full precision.",
+       "framework_ref": "lightx2v-d46ab933-configs/dist_infer/wan_i2v_dist_cfg_ulysses.json+ulysses-4090+block-offload",
+       "serve_args": "",
+       "notes": "ulysses-4090 is LightX2V's round-robin all-to-all for hosts without full P2P (this box is SYS between every GPU pair); it changes communication only. The 14B DiT does not fit 24 GB per GPU in BF16, so block offload stays on. No quantization, no SageAttention, FlashAttention 2 (FA3 is Hopper-only)."
+      }
+     }
+    }
+   },
+   "report_framework_statuses": {
+    "vllm-omni": "not_run",
+    "trtllm-visual": "not_run",
+    "comfyui": "not_run"
+   },
+   "report_framework_reasons": {
+    "vllm-omni": "Out of scope: this run reproduces the SGL-Diffusion and LightX2V rows of LightX2V's README table.",
+    "trtllm-visual": "Out of scope: this run reproduces the SGL-Diffusion and LightX2V rows of LightX2V's README table.",
+    "comfyui": "Out of scope: this run reproduces the SGL-Diffusion and LightX2V rows of LightX2V's README table."
+   }
+  }
+ ]
+}
