@@ -244,6 +244,10 @@
           "notes": "B200: --gpu-only keeps every model, text encoders included, stored and run on the card; a 183 GB B200 holds the largest graph here (MiniMax-H3: 62 GB DiT + 48 GB Qwen3-VL-32B + VAEs). Placement only, numerics unchanged. Measured 2026-09-25 on 1xB200, FLUX.1 eager, interleaved arms: default 5.94 / 5.77 / 5.79s against --gpu-only 5.56s and --gpu-only --disable-dynamic-vram 5.57s (Qwen-Image-2.1: 3.75 / 3.91 against 3.47 / 3.48) -- every --gpu-only arm below every default arm; disabling dynamic VRAM on top adds nothing, so the simpler flag is kept."
         }
       }
+    },
+    "fastvideo": {
+      "status": "no_profile",
+      "reason": "FastVideo main (2b164405c3d1, 2026-10-07) registers FLUX.1-dev, but this harness integrates FastVideo for MiniMax-H3 only (2026-10-08); no command validated."
     }
   }
 }

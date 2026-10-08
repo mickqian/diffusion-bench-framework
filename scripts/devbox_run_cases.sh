@@ -24,7 +24,7 @@
 #   DBF_LOG_DIR=$STATE/logs        DBF_VENV_ROOT=$STATE/fw-venvs
 #   DBF_HF_HOME=$STATE/hf-cache    DBF_HF_TOKEN_FILE=$STATE/.hftoken
 #   DBF_FRAMEWORKS=sglang          DBF_HARDWARE_PROFILE=h100
-#   DBF_CASE_TIMEOUT=3000
+#   DBF_CASE_TIMEOUT=3000         DBF_CONFIG=configs/comparison_configs.json
 set -u
 
 TAG="${1:?tag}"; GPU_IDS="${2:?gpu ids, e.g. 0,1}"; readonly BASE_PORT="${3:?base port}"
@@ -38,6 +38,8 @@ HW_PROFILE="${DBF_HARDWARE_PROFILE:-h100}"
 FRAMEWORKS="${DBF_FRAMEWORKS:-sglang}"
 CASE_TIMEOUT="${DBF_CASE_TIMEOUT:-3000}"
 TOKEN_FILE="${DBF_HF_TOKEN_FILE:-${STATE_DIR}/.hftoken}"
+# A variant config (e.g. an old competitor profile) A/Bs a command on the same box.
+CONFIG="${DBF_CONFIG:-configs/comparison_configs.json}"
 
 mkdir -p "$LOG_DIR"
 LOG="${LOG_DIR}/run_${TAG}.log"
@@ -74,13 +76,13 @@ kill_own_gpus() {
 }
 
 echo "=== RUN $TAG START $(date -u) cases=[${CASES[*]}] modes=[$MODES] gpus=$GPU_IDS ==="
-echo "=== repo=$REPO_DIR hw=$HW_PROFILE frameworks=$FRAMEWORKS venvs=$SGLANG_DIFFUSION_FRAMEWORK_VENV_ROOT hf=$HF_HOME ==="
+echo "=== repo=$REPO_DIR config=$CONFIG hw=$HW_PROFILE frameworks=$FRAMEWORKS venvs=$SGLANG_DIFFUSION_FRAMEWORK_VENV_ROOT hf=$HF_HOME ==="
 port="$BASE_PORT"
 for case_id in "${CASES[@]}"; do
     kill_own_gpus
     CUDA_VISIBLE_DEVICES="$GPU_IDS" PYTHONPATH=src timeout "$CASE_TIMEOUT" \
         python3 -m diffusion_bench.run_comparison \
-        --config configs/comparison_configs.json \
+        --config "$CONFIG" \
         --frameworks $FRAMEWORKS --case-ids "$case_id" --modes $MODES \
         --hardware-profile "$HW_PROFILE" --port "$port" \
         --output "${LOG_DIR}/run_${TAG}_${case_id}.json" \

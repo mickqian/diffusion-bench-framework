@@ -8,7 +8,7 @@ Source of truth (edit these):
   configs/benchmark/frameworks.json   frameworks in scope + version policy
   configs/benchmark/workloads.json    single_e2e / throughput / warmup -> benchmark_defaults
   configs/benchmark/meta.json         top-level (_comment, test_image_url)
-  configs/benchmark/cases/<image|video>/<id>.json   one file per case, all 4 frameworks explicit
+  configs/benchmark/cases/<image|video>/<id>.json   one file per case, every framework explicit
   configs/benchmark/cases/_order.json order the cases appear in the built config
 
 Regenerate after editing:  python3 scripts/build_benchmark_config.py
@@ -20,8 +20,13 @@ import re
 import sys
 
 sys.path.insert(0, os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "src"))
-from diffusion_bench import comfyui_client  # noqa: E402
-from diffusion_bench.config_guard import select_profile  # noqa: E402
+from diffusion_bench import comfyui_client, fastvideo_client  # noqa: E402
+from diffusion_bench.config_guard import (  # noqa: E402
+    hardware_candidates,
+    resolved_config,
+    select_profile,
+    upstream_recipe_problems,
+)
 
 REPO = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 BENCH = os.path.join(REPO, "configs", "benchmark")
@@ -42,8 +47,11 @@ VALID_STATUS = {"supported", "unsupported", "no_profile", "failed", "not_run", "
 # --hardware-profile: it scans the GPU names for known tokens, so a B200 box
 # selects by "b200". Linting "blackwell" only checked profiles named
 # blackwell-*, and silently skipped cases whose Blackwell profile is named
-# b200-* (minimax-h3), leaving them outside the compile policy.
-POLICY_HARDWARE = ("h100", "h200", "b200", "b300", "rtx5090", "rtx4090")
+# b200-* (minimax-h3), leaving them outside the compile policy. Each class is
+# resolved through config_guard.hardware_candidates, as the runtime resolves a
+# box's GPU names, so a GB300 box selects exactly what the lint checked.
+DATACENTER_HARDWARE = ("h100", "h200", "b200", "b300", "gb200", "gb300")
+POLICY_HARDWARE = DATACENTER_HARDWARE + ("rtx5090", "rtx4090")
 # "Best lossless" policy: the selected sglang profile must run resident, and
 # must NOT enable torch.compile — sglang's explicitly-fused kernels now match or
 # beat compiler fusion on most diffusion models, so compile-on is the slower
@@ -61,8 +69,49 @@ _OFFLOAD_ENABLE_RE = re.compile(
     r"|--layerwise-offload-components(?!\s+none)"
 )
 
+# The competitors get the same rule on datacenter cards (on the rtx classes
+# offload is the capacity path): the SELECTED profile runs compiled and
+# resident, or carries a dated `policy_exception`. MiniMax-H3's vLLM-Omni cell
+# ran the recipe's 2x24/32 GB consumer command (TP2 + distributed layerwise
+# offload + eager) on 183 GB B200s for seven weeks because nothing checked.
+# `--dlo-*` only tunes distributed layerwise offload, so any of it means offload.
+_VLLM_EAGER_RE = re.compile(
+    r"--enforce-eager(?![\w-])"
+    r"|--compilation-config[\s=]+\S*\"(?:mode|level)\"\s*:\s*0(?!\d)"
+    r"|\"enforce_eager\"\s*:\s*true"
+)
+_VLLM_OFFLOAD_RE = re.compile(
+    r"--enable-[\w-]*offload(?![\w-])|--diffusion-offload-config(?![\w-])|--dlo-[\w-]+"
+)
+# The harness strips none of these (compile-on only stops it ADDING
+# --enforce-eager), and a stage/deploy YAML hides them from serve_args: the old
+# cosmos3 stage config pinned enforce_eager and ran that cell compile-off.
+_VLLM_CONFIG_FILE_RE = re.compile(r"--(?:stage-configs-path|deploy-config)[\s=]+(\S+)")
+_VLLM_YAML_EAGER_RE = re.compile(r"^\s*enforce_eager\s*:\s*true\b", re.M | re.I)
+_VLLM_YAML_OFFLOAD_RE = re.compile(
+    r"^\s*enable_\w*offload\s*:\s*true\b|^([ \t]*)diffusion_offload_config\s*:\s*(?:\{|\n\1[ \t]+\w)",
+    re.M | re.I,
+)
+_COMFYUI_OFFLOAD_RE = re.compile(r"--(?:lowvram|novram|cpu|cpu-vae|disable-smart-memory)(?![\w-])")
+# LightX2V reads offload_granularity only when cpu_offload is on, and each
+# `<component>_cpu_offload` defaults to cpu_offload, so the switches are those
+# keys plus these two, which stream or release weights between requests.
+_LIGHTX2V_OFFLOAD_KEYS = ("lazy_load", "unload_modules")
 
-SELECTED_ROWS = []  # (case, hw, profile, args, exception?, ambiguous-matches)
+# Competitor cells that violated the policy when the lint landed (2026-09-30)
+# with no dated evidence to cite. They print as errors; any other violation
+# fails the build, and so do these under DIFFUSION_BENCH_STRICT_COMPETITOR_POLICY=1.
+# Delete an entry when its cell is re-derived or justified: the list only shrinks.
+KNOWN_COMPETITOR_VIOLATIONS = {
+    ("cosmos3_nano_t2i_720p", "vllm-omni", "default"),
+    ("cosmos3_nano_t2i_720p", "vllm-omni", "h200-2gpu-cfg"),
+    ("ltx2_twostage_t2v", "lightx2v", "h100-1gpu"),
+}
+STRICT_COMPETITOR_POLICY_ENV = "DIFFUSION_BENCH_STRICT_COMPETITOR_POLICY"
+
+
+SELECTED_ROWS = []  # (case, fw, hw, profile, args, exception, matches, recipe, config)
+MISSING_RECIPES = {}  # (case, fw, profile) -> datacenter classes that select it
 
 
 def _lint_serve_args_shape(cid: str, fw: str, name: str, args: str) -> list[str]:
@@ -108,18 +157,134 @@ def _lint_model_override(cid: str, case_model, fw: str, body: dict) -> list[str]
     return errs
 
 
+def _recipe_label(source: dict) -> str:
+    recipe = source.get("upstream_recipe")
+    if recipe:
+        return f"{recipe.get('repo')}@{recipe.get('commit')} ({recipe.get('commit_date')})"
+    reason = str(source.get("upstream_recipe_reason") or "").strip()
+    return f"none: {reason}" if reason else ""
+
+
+def _config_label(fw: str, cfg: dict) -> str:
+    """What decides a competitor's command besides serve_args."""
+    parts = [f"{key}={value}" for key, value in sorted((cfg.get("extra_env") or {}).items())]
+    if fw == "lightx2v":
+        parts.append(json.dumps(cfg.get("lightx2v_config") or {}, separators=(",", ":"), ensure_ascii=False))
+    if fw == "comfyui":
+        spec = cfg.get("comfyui") or {}
+        parts.append(f"workflow={spec.get('workflow')} compile={json.dumps(bool(spec.get('compile')))}")
+    return " ".join(parts)
+
+
+def _competitor_findings(fw: str, cfg: dict) -> list[str]:
+    """Every switch in the resolved `cfg` that turns compile off or moves weights off the GPU."""
+    args = cfg.get("serve_args") or ""
+    found = []
+    if fw == "vllm-omni":
+        found += [m.group(0) for m in _VLLM_EAGER_RE.finditer(args)]
+        found += [m.group(0) for m in _VLLM_OFFLOAD_RE.finditer(args)]
+        for rel in _VLLM_CONFIG_FILE_RE.findall(args):
+            path = os.path.join(REPO, rel)
+            if not os.path.isfile(path):
+                found.append(f"{rel} (unreadable, so what it enables is unknown)")
+                continue
+            text = open(path).read()
+            for pattern in (_VLLM_YAML_EAGER_RE, _VLLM_YAML_OFFLOAD_RE):
+                m = pattern.search(text)
+                if m:
+                    found.append(f"{m.group(0).strip().splitlines()[0]} in {rel}")
+    elif fw == "lightx2v":
+        lcfg = cfg.get("lightx2v_config") or {}
+        found += [
+            f"lightx2v_config.{key}={json.dumps(value)}"
+            for key, value in lcfg.items()
+            if value and (key == "cpu_offload" or key.endswith("_cpu_offload") or key in _LIGHTX2V_OFFLOAD_KEYS)
+        ]
+        # The key LightX2V reads; upstream's MiniMax-H3 presets ship "use_compile": false.
+        if "use_compile" in lcfg and not lcfg["use_compile"]:
+            found.append("lightx2v_config.use_compile=false")
+    elif fw == "comfyui":
+        found += [m.group(0) for m in _COMFYUI_OFFLOAD_RE.finditer(args)]
+        if not (cfg.get("comfyui") or {}).get("compile"):
+            found.append("comfyui.compile=false")
+    elif fw == "fastvideo":
+        try:
+            overrides = {k: v.lower() for k, v in fastvideo_client.serve_overrides(args.split()).items()}
+        except ValueError as exc:
+            return [f"serve_args are not dotted overrides ({exc})"]
+        # Every offload switch defaults to true, so only an explicit false is resident.
+        for part in fastvideo_client.OFFLOAD_PARTS:
+            key = f"generator.engine.offload.{part}"
+            if overrides.get(key) != "false":
+                found.append(f"--{key} {overrides.get(key, '(unset: true)')}")
+        found += [f"--{key} true" for key in fastvideo_client.DEFERRED_LOAD_KEYS if overrides.get(key) == "true"]
+        if not any(overrides.get(key) == "true" for key in fastvideo_client.COMPILE_KEYS):
+            found.append("DiT compile off (" + " / ".join(fastvideo_client.COMPILE_KEYS) + ")")
+    return found
+
+
+def _lint_competitor_policy(cid: str, fw: str, body: dict) -> list[tuple[tuple | None, str]]:
+    """(cell, error) per selected profile that runs eager or offloaded on
+    datacenter hardware without dated evidence. `cell` is (case, fw, profile),
+    or None for an error KNOWN_COMPETITOR_VIOLATIONS may not excuse."""
+    profiles = body.get("command_profiles") or {}
+    groups = {}  # profile -> (source, findings, classes, datacenter classes)
+    for hw in POLICY_HARDWARE:
+        name, prof, matches = select_profile(profiles, hardware_candidates(None, override=hw))
+        name, source = (name, prof) if prof is not None else ("inline", body)
+        cfg = resolved_config(body, prof)
+        if name not in groups:
+            groups[name] = (source, _competitor_findings(fw, cfg), [], [])
+        _, findings, classes, datacenter = groups[name]
+        classes.append(hw)
+        if hw in DATACENTER_HARDWARE:
+            datacenter.append(hw)
+        status = "yes" if source.get("policy_exception") else (
+            "VIOLATION" if hw in DATACENTER_HARDWARE and findings else ""
+        )
+        SELECTED_ROWS.append(
+            (cid, fw, hw, name, cfg.get("serve_args") or "", status, matches,
+             _recipe_label(source), _config_label(fw, cfg))
+        )
+    errors = []
+    for name, (source, findings, classes, datacenter) in groups.items():
+        exception = source.get("policy_exception")
+        if exception and not re.search(r"20\d\d-\d\d", str(exception)):
+            errors.append((None, f"{cid}/{fw}[{name}]: policy_exception must cite dated evidence (no 20YY-MM found)"))
+        if not datacenter:
+            continue
+        if not (source.get("upstream_recipe") or str(source.get("upstream_recipe_reason") or "").strip()):
+            MISSING_RECIPES[(cid, fw, name)] = datacenter
+        if findings and not exception:
+            errors.append((
+                (cid, fw, name),
+                f"{cid}/{fw}[{name}] (selected on {', '.join(datacenter)}): runs eager or "
+                f"offloaded ({', '.join(findings)}) and no policy_exception",
+            ))
+    return errors
+
+
+def _lint_upstream_recipes(cid: str, fw: str, body: dict) -> list[str]:
+    """A recorded recipe must be complete, or the drift check cannot ask about it."""
+    errs = []
+    for name, source in [("inline", body), *(body.get("command_profiles") or {}).items()]:
+        if "upstream_recipe" in source:
+            errs += [f"{cid}/{fw}[{name}]: {p}" for p in upstream_recipe_problems(source["upstream_recipe"])]
+        if "upstream_recipe_reason" in source and not str(source["upstream_recipe_reason"]).strip():
+            errs.append(f"{cid}/{fw}[{name}]: upstream_recipe_reason is empty")
+    return errs
+
+
 def _lint_sglang_policy(cid: str, body: dict) -> list[str]:
     errs = []
     profiles = body.get("command_profiles") or {}
     if not profiles:
         return errs
     for hw in POLICY_HARDWARE:
-        name, prof, matches = select_profile(profiles, hw)
-        if prof is None:
-            continue
+        name, prof, matches = select_profile(profiles, hardware_candidates(None, override=hw))
         SELECTED_ROWS.append(
-            (cid, hw, name, prof.get("serve_args", ""),
-             bool(prof.get("policy_exception")), matches)
+            (cid, "sglang", hw, name, prof.get("serve_args", ""),
+             "yes" if prof.get("policy_exception") else "", matches, _recipe_label(prof), "")
         )
         exception = prof.get("policy_exception")
         if exception:
@@ -220,6 +385,7 @@ def build():
     cases_by_id = {}
     errors = []
     policy_errors = []
+    competitor_errors = []
     for path in sorted(case_files):
         if os.path.basename(path).startswith("_"):
             continue
@@ -250,8 +416,11 @@ def build():
                         _lint_serve_args_shape(cid, fw, _pn or "inline", _pf.get("serve_args") or "")
                     )
                 errors.extend(_lint_model_override(cid, c.get("model"), fw, body))
+                errors.extend(_lint_upstream_recipes(cid, fw, body))
                 if fw == "sglang":
                     policy_errors.extend(_lint_sglang_policy(cid, body))
+                else:
+                    competitor_errors.extend(_lint_competitor_policy(cid, fw, body))
                 if fw == "comfyui":
                     errors.extend(_inline_comfyui(cid, c, body))
                 frameworks[fw] = body
@@ -283,6 +452,17 @@ def build():
             print("  -", e, file=sys.stderr)
         sys.exit(1)
 
+    known = [msg for cell, msg in competitor_errors if cell in KNOWN_COMPETITOR_VIOLATIONS]
+    policy_errors += [msg for cell, msg in competitor_errors if cell not in KNOWN_COMPETITOR_VIOLATIONS]
+    policy_errors += [
+        f"{'/'.join(cell)}: listed in KNOWN_COMPETITOR_VIOLATIONS but no longer "
+        f"violates -- delete the entry"
+        for cell in sorted(KNOWN_COMPETITOR_VIOLATIONS - {cell for cell, _ in competitor_errors})
+    ]
+    if os.environ.get(STRICT_COMPETITOR_POLICY_ENV) == "1":
+        policy_errors += known
+        known = []
+
     if policy_errors:
         print(
             "BUILD FAILED — best-lossless policy violations (add the measured "
@@ -313,7 +493,25 @@ def build():
         f"{os.path.relpath(OUT_PACKAGED, REPO)}"
     )
 
-    _write_selected()
+    _write_selected(in_scope)
+    if MISSING_RECIPES:
+        print(
+            f"WARNING: {len(MISSING_RECIPES)} competitor profile(s) run on datacenter "
+            "hardware with no `upstream_recipe` (or `upstream_recipe_reason`), so "
+            "scripts/check_competitor_recipes.py cannot tell when their command goes stale:",
+            file=sys.stderr,
+        )
+        for (cid, fw, name), classes in sorted(MISSING_RECIPES.items()):
+            print(f"  - {cid}/{fw}[{name}] on {', '.join(classes)}", file=sys.stderr)
+    if known:
+        print(
+            f"ERROR: {len(known)} pre-existing competitor policy violation(s), not "
+            f"fatal while listed in KNOWN_COMPETITOR_VIOLATIONS "
+            f"({STRICT_COMPETITOR_POLICY_ENV}=1 makes them fatal):",
+            file=sys.stderr,
+        )
+        for e in known:
+            print("  -", e, file=sys.stderr)
 
 
 def _write_matrix(ordered, in_scope):
@@ -339,35 +537,44 @@ def _write_matrix(ordered, in_scope):
 
 
 
-def _write_selected():
-    """SELECTED.md: per case, the sglang profile the harness will ACTUALLY run
-    on the policy hardware — review this, not the raw case files. `AMBIGUOUS`
-    marks cases where >1 profile matches and dict order decides (editing a
-    matching-but-unselected profile is the classic footgun)."""
+def _write_selected(in_scope):
+    """SELECTED.md: per case and framework, the profile the harness will
+    ACTUALLY run on the policy hardware — review this, not the raw case files.
+    `AMBIGUOUS` marks cases where >1 profile matches and dict order decides
+    (editing a matching-but-unselected profile is the classic footgun)."""
+    rank = {fw: i for i, fw in enumerate(in_scope)}
+    rows = sorted(SELECTED_ROWS, key=lambda r: (r[0], rank.get(r[1], len(rank)), r[1], r[2]))
     lines = [
-        "# Selected sglang commands (auto-generated — do not edit)",
+        "# Selected commands (auto-generated — do not edit)",
         "",
         "Regenerated by scripts/build_benchmark_config.py. The `selected` profile is",
         "what `--hardware-profile <hw>` will actually run; edit THAT profile.",
+        "`exception`: `yes` carries a dated `policy_exception`; `VIOLATION` runs eager or",
+        "offloaded on datacenter hardware without one (see KNOWN_COMPETITOR_VIOLATIONS).",
+        "`config` is what decides a competitor's command besides serve_args.",
         "",
-        "| case | hw | selected profile | exception | ambiguous matches | serve_args |",
-        "|---|---|---|---|---|---|",
+        "| case | framework | hw | selected profile | exception | ambiguous matches | upstream recipe | serve_args | config |",
+        "|---|---|---|---|---|---|---|---|---|",
     ]
-    for cid, hw, name, args, has_exc, matches in sorted(SELECTED_ROWS):
+    for cid, fw, hw, name, args, exc, matches, recipe, config in rows:
         amb = ", ".join(m for m in matches[1:]) if len(matches) > 1 else ""
         lines.append(
-            f"| {cid} | {hw} | `{name}` | {'yes' if has_exc else ''} | "
-            f"{('AMBIGUOUS: ' + amb) if amb else ''} | `{args}` |"
+            f"| {cid} | {fw} | {hw} | `{name}` | {exc} | "
+            f"{('AMBIGUOUS: ' + amb) if amb else ''} | {recipe} | "
+            f"{f'`{args}`' if args else ''} | {f'`{config}`' if config else ''} |"
         )
     out = os.path.join(BENCH, "SELECTED.md")
     with open(out, "w") as f:
         f.write("\n".join(lines) + "\n")
     print("wrote", os.path.relpath(out, REPO))
-    ambiguous = [r for r in SELECTED_ROWS if len(r[5]) > 1]
-    for cid, hw, name, _, _, matches in ambiguous:
+    ambiguous = {}
+    for cid, fw, hw, name, _, _, matches, _, _ in rows:
+        if len(matches) > 1:
+            ambiguous.setdefault((cid, fw, name, tuple(matches)), []).append(hw)
+    for (cid, fw, name, matches), classes in ambiguous.items():
         print(
-            f"WARNING: {cid} on {hw}: {len(matches)} profiles match "
-            f"({', '.join(matches)}); dict order selected {name!r}",
+            f"WARNING: {cid}/{fw} on {', '.join(classes)}: {len(matches)} profiles "
+            f"match ({', '.join(matches)}); dict order selected {name!r}",
             file=sys.stderr,
         )
 

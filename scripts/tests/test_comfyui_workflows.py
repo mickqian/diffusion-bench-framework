@@ -1,12 +1,13 @@
 #!/usr/bin/env python3
 """ComfyUI requests must do the same work every time, and only that work.
 
-ComfyUI caches node outputs keyed on their inputs, and the harness repeats an
-identical request (same prompt, same seed) to take a median. Without a per-
-request change the second request is answered from cache and times nothing,
-so every template carries a nonce. The nonce must also be the ONLY thing that
-changes between two requests -- anything else (a seed, a size) would make the
-repeats measure different work.
+ComfyUI caches node outputs keyed on their inputs, and the harness repeats a
+request to take a median. Without a per-request change the second request is
+answered from cache and times nothing, so every template carries a nonce.
+Requests also carry their own prompt tag and reference file (as for every
+framework), and apart from those and the nonce nothing may change between two
+requests -- anything else (a seed, a size) would make the repeats measure
+different work.
 """
 import json
 import sys
@@ -15,6 +16,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT / "src"))
 from diffusion_bench import comfyui_client as cc  # noqa: E402
+from diffusion_bench import run_comparison as rc  # noqa: E402
 
 fail = 0
 
@@ -66,7 +68,20 @@ for case in cfg["cases"]:
 
         nonces = [n["inputs"][cc.NONCE_INPUT] for n in first.values() if cc.NONCE_INPUT in n["inputs"]]
         check(f"{where}: carries a nonce", bool(nonces))
-        check(f"{where}: two requests differ only in the nonce", strip(first) == strip(second))
+        check(f"{where}: two renders of one request differ only in the nonce", strip(first) == strip(second))
+        a, b = (strip(cc.build_graph(rc._request_case(case, i), spec)) for i in (0, 1))
+        differ = {(nid, k) for nid, node in a.items() for k, v in node["inputs"].items() if b[nid]["inputs"][k] != v}
+        conditioning = {
+            (nid, k)
+            for nid, node in a.items()
+            for k, v in node["inputs"].items()
+            if isinstance(v, str) and ("(take 00)" in v or v == cc.reference_name(0))
+        }
+        check(
+            f"{where}: two requests differ only in the nonce, prompt tag and reference file",
+            differ == conditioning and any("(take 00)" in a[nid]["inputs"][k] for nid, k in differ),
+            f"{sorted(differ)} vs {sorted(conditioning)}",
+        )
         check(
             f"{where}: the nonce changes per request",
             {n["inputs"].get(cc.NONCE_INPUT) for n in first.values()}

@@ -41,10 +41,11 @@ def check(name, cond, detail=""):
 with tempfile.TemporaryDirectory() as td:
     tmp = pathlib.Path(td)
     # The build resolves every path from its own __file__, so a copy that keeps
-    # the layout rebuilds in isolation and touches nothing in the repo.
+    # the layout rebuilds in isolation and touches nothing in the repo. All of
+    # configs/: the competitor lint reads the vLLM-Omni stage YAMLs there.
     (tmp / "scripts").mkdir()
     shutil.copy(ROOT / "scripts" / "build_benchmark_config.py", tmp / "scripts")
-    shutil.copytree(ROOT / "configs" / "benchmark", tmp / "configs" / "benchmark")
+    shutil.copytree(ROOT / "configs", tmp / "configs")
     shutil.copytree(ROOT / "src", tmp / "src")
 
     proc = subprocess.run(

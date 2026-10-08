@@ -371,10 +371,12 @@
                 }
             },
             "report_framework_statuses": {
-                "lightx2v": "unsupported"
+                "lightx2v": "unsupported",
+                "fastvideo": "no_profile"
             },
             "report_framework_reasons": {
-                "lightx2v": "Tracked LightX2V version has no FLUX.1 serving path; FLUX coverage starts at FLUX.2."
+                "lightx2v": "Tracked LightX2V version has no FLUX.1 serving path; FLUX coverage starts at FLUX.2.",
+                "fastvideo": "FastVideo main (2b164405c3d1, 2026-10-07) registers FLUX.1-dev, but this harness integrates FastVideo for MiniMax-H3 only (2026-10-08); no command validated."
             }
         },
         {
@@ -575,6 +577,7 @@
                             "num_gpus": 2,
                             "serve_args": "",
                             "notes": "Measured 2026-07-29 on H100 80GB: single-GPU resident load OOMs at ~78GB used during safetensors read, and the upstream TP path (parallel.tensor_p_size=2, configs/flux2/flux2_dev_tp.json) ALSO fails -- lightx2v loads the full model on rank 0 before sharding ('Single GPU - Load models cost 47.9s' then NCCL init hits cuda OOM), so TP does not reduce peak per-GPU load memory in current main. CPU offload is the only working lossless path on 80GB; expect higher latency than the H200 resident profile by design. rope_type must be the registry key 'flashinfer_rope' (bare 'flashinfer' raises KeyError in current main).",
+                            "policy_exception": "Capacity, not speed (measured 2026-07-29 on H100 80GB, see notes): the resident single-GPU load OOMs at ~78 GB during the safetensors read, and upstream's TP path OOMs too because LightX2V loads the full model on rank 0 before sharding; model-granularity CPU offload is the only lossless path that fits.",
                             "lightx2v_config": {
                                 "cpu_offload": true,
                                 "offload_granularity": "model"
@@ -819,6 +822,12 @@
                         }
                     }
                 }
+            },
+            "report_framework_statuses": {
+                "fastvideo": "no_profile"
+            },
+            "report_framework_reasons": {
+                "fastvideo": "FastVideo main (2b164405c3d1, 2026-10-07) registers FLUX.2-dev, but this harness integrates FastVideo for MiniMax-H3 only (2026-10-08); no command validated."
             }
         },
         {
@@ -1104,10 +1113,12 @@
                 }
             },
             "report_framework_statuses": {
-                "lightx2v": "unsupported"
+                "lightx2v": "unsupported",
+                "fastvideo": "unsupported"
             },
             "report_framework_reasons": {
-                "lightx2v": "Tracked LightX2V version has no Qwen-Image text-to-image serving path."
+                "lightx2v": "Tracked LightX2V version has no Qwen-Image text-to-image serving path.",
+                "fastvideo": "No Qwen-Image pipeline in FastVideo main (2b164405c3d1, 2026-10-07)."
             }
         },
         {
@@ -1354,7 +1365,8 @@
                             "framework_ref": "ComfyUI master HEAD",
                             "num_gpus": 2,
                             "serve_args": "",
-                            "notes": "Same graph with true CFG (KSampler cfg = true_cfg_scale, the case's negative prompt encoded every request). Two GPUs through ComfyUI's only multi-GPU path, the core MultiGPU CFG Split node, which runs the two guidance branches on separate cards -- the counterpart of sglang's CFG parallelism here. Weights are the full-precision single-file checkpoints ComfyUI loads (Comfy-Org repackaging or the model's own single-file release); the official template's fp8/int8/nvfp4 defaults are swapped out because they are a different numeric class from every other row. Sampler, scheduler and shift follow the official ComfyUI workflow; steps, CFG, size, frames and seed follow the case. Compile off: TorchCompileModel together with the MultiGPU CFG Split node fails on the first request (dynamo: 'Tensor device mismatch' in KSampler; ComfyUI 88ab4a06, 1xB200->2xB200, 2026-09-25). Splitting the two CFG branches over two cards roughly halves each step, which outweighs compile's measured 16-18% on FLUX.1, so the cell keeps the split and runs eager."
+                            "notes": "Same graph with true CFG (KSampler cfg = true_cfg_scale, the case's negative prompt encoded every request). Two GPUs through ComfyUI's only multi-GPU path, the core MultiGPU CFG Split node, which runs the two guidance branches on separate cards -- the counterpart of sglang's CFG parallelism here. Weights are the full-precision single-file checkpoints ComfyUI loads (Comfy-Org repackaging or the model's own single-file release); the official template's fp8/int8/nvfp4 defaults are swapped out because they are a different numeric class from every other row. Sampler, scheduler and shift follow the official ComfyUI workflow; steps, CFG, size, frames and seed follow the case. Compile off: TorchCompileModel together with the MultiGPU CFG Split node fails on the first request (dynamo: 'Tensor device mismatch' in KSampler; ComfyUI 88ab4a06, 1xB200->2xB200, 2026-09-25). Splitting the two CFG branches over two cards roughly halves each step, which outweighs compile's measured 16-18% on FLUX.1, so the cell keeps the split and runs eager.",
+                            "policy_exception": "Compile broken with the CFG split, not a speed choice (2026-09-25, ComfyUI 88ab4a06, 1xB200->2xB200, see notes): TorchCompileModel with the MultiGPU CFG Split node fails the first request (dynamo 'Tensor device mismatch' in KSampler), and the split is worth more than compile's measured 16-18% on FLUX.1."
                         },
                         "blackwell-gpuonly": {
                             "description": "Blackwell: the default graph with every model resident on the GPU (--gpu-only).",
@@ -1367,18 +1379,21 @@
                             "framework_ref": "ComfyUI master HEAD",
                             "num_gpus": 2,
                             "serve_args": "--gpu-only",
-                            "notes": "B200: --gpu-only keeps every model, text encoders included, stored and run on the card; a 183 GB B200 holds the largest graph here (MiniMax-H3: 62 GB DiT + 48 GB Qwen3-VL-32B + VAEs). Placement only, numerics unchanged. Measured 2026-09-25 on 1xB200, FLUX.1 eager, interleaved arms: default 5.94 / 5.77 / 5.79s against --gpu-only 5.56s and --gpu-only --disable-dynamic-vram 5.57s (Qwen-Image-2.1: 3.75 / 3.91 against 3.47 / 3.48) -- every --gpu-only arm below every default arm; disabling dynamic VRAM on top adds nothing, so the simpler flag is kept."
+                            "notes": "B200: --gpu-only keeps every model, text encoders included, stored and run on the card; a 183 GB B200 holds the largest graph here (MiniMax-H3: 62 GB DiT + 48 GB Qwen3-VL-32B + VAEs). Placement only, numerics unchanged. Measured 2026-09-25 on 1xB200, FLUX.1 eager, interleaved arms: default 5.94 / 5.77 / 5.79s against --gpu-only 5.56s and --gpu-only --disable-dynamic-vram 5.57s (Qwen-Image-2.1: 3.75 / 3.91 against 3.47 / 3.48) -- every --gpu-only arm below every default arm; disabling dynamic VRAM on top adds nothing, so the simpler flag is kept.",
+                            "policy_exception": "Compile broken with the CFG split, not a speed choice (2026-09-25, ComfyUI 88ab4a06, 1xB200->2xB200, see the default profile's notes): TorchCompileModel with the MultiGPU CFG Split node fails the first request (dynamo 'Tensor device mismatch' in KSampler), and the split is worth more than compile's measured 16-18% on FLUX.1."
                         }
                     }
                 }
             },
             "report_framework_statuses": {
                 "lightx2v": "unsupported",
-                "trtllm-visual": "unsupported"
+                "trtllm-visual": "unsupported",
+                "fastvideo": "unsupported"
             },
             "report_framework_reasons": {
                 "lightx2v": "Tracked LightX2V version has no Qwen-Image text-to-image serving path.",
-                "trtllm-visual": "true_cfg_scale honoring unverified for TensorRT-LLM VisualGen; excluded from the true-CFG quality-path comparison to avoid a mismatched single- vs two-pass row."
+                "trtllm-visual": "true_cfg_scale honoring unverified for TensorRT-LLM VisualGen; excluded from the true-CFG quality-path comparison to avoid a mismatched single- vs two-pass row.",
+                "fastvideo": "No Qwen-Image pipeline in FastVideo main (2b164405c3d1, 2026-10-07)."
             }
         },
         {
@@ -1613,11 +1628,13 @@
             },
             "report_framework_statuses": {
                 "lightx2v": "unsupported",
-                "trtllm-visual": "not_run"
+                "trtllm-visual": "not_run",
+                "fastvideo": "unsupported"
             },
             "report_framework_reasons": {
                 "lightx2v": "Tracked LightX2V version has no Qwen-Image-Edit serving path.",
-                "trtllm-visual": "Not yet classified. Confirm framework support and add a validated command profile, or mark unsupported."
+                "trtllm-visual": "Not yet classified. Confirm framework support and add a validated command profile, or mark unsupported.",
+                "fastvideo": "No Qwen-Image pipeline in FastVideo main (2b164405c3d1, 2026-10-07)."
             }
         },
         {
@@ -1911,7 +1928,8 @@
                             "framework_ref": "ComfyUI master HEAD",
                             "num_gpus": 1,
                             "serve_args": "",
-                            "notes": "Official image_qwen_image_2_1_t2i template (bf16 DiT and Qwen3-VL-8B in place of int8_convrot). ComfyUI's Qwen-Image 2.1 prefix KV cache is on by default (QwenImage21Cache 'auto', lossless storage), the counterpart of sglang's own prefix cache, so no node is added for it. Weights are the full-precision single-file checkpoints ComfyUI loads (Comfy-Org repackaging or the model's own single-file release); the official template's fp8/int8/nvfp4 defaults are swapped out because they are a different numeric class from every other row. Sampler, scheduler and shift follow the official ComfyUI workflow; steps, CFG, size, frames and seed follow the case. Compile off: TorchCompileModel breaks this model in ComfyUI 88ab4a06 -- the first request fails in KSampler with AttributeError: 'torch.Stream' object has no attribute 'cuda_stream' (2026-09-25, B200), so the cell runs eager as the policy prescribes for a broken compile path."
+                            "notes": "Official image_qwen_image_2_1_t2i template (bf16 DiT and Qwen3-VL-8B in place of int8_convrot). ComfyUI's Qwen-Image 2.1 prefix KV cache is on by default (QwenImage21Cache 'auto', lossless storage), the counterpart of sglang's own prefix cache, so no node is added for it. Weights are the full-precision single-file checkpoints ComfyUI loads (Comfy-Org repackaging or the model's own single-file release); the official template's fp8/int8/nvfp4 defaults are swapped out because they are a different numeric class from every other row. Sampler, scheduler and shift follow the official ComfyUI workflow; steps, CFG, size, frames and seed follow the case. Compile off: TorchCompileModel breaks this model in ComfyUI 88ab4a06 -- the first request fails in KSampler with AttributeError: 'torch.Stream' object has no attribute 'cuda_stream' (2026-09-25, B200), so the cell runs eager as the policy prescribes for a broken compile path.",
+                            "policy_exception": "Compile broken, not a speed choice (2026-09-25, ComfyUI 88ab4a06 on B200, see notes): with TorchCompileModel the first request fails in KSampler with AttributeError: 'torch.Stream' object has no attribute 'cuda_stream', so the cell runs eager."
                         },
                         "blackwell-gpuonly": {
                             "description": "Blackwell: the default graph with every model resident on the GPU (--gpu-only).",
@@ -1924,18 +1942,21 @@
                             "framework_ref": "ComfyUI master HEAD",
                             "num_gpus": 1,
                             "serve_args": "--gpu-only",
-                            "notes": "B200: --gpu-only keeps every model, text encoders included, stored and run on the card; a 183 GB B200 holds the largest graph here (MiniMax-H3: 62 GB DiT + 48 GB Qwen3-VL-32B + VAEs). Placement only, numerics unchanged. Measured 2026-09-25 on 1xB200, FLUX.1 eager, interleaved arms: default 5.94 / 5.77 / 5.79s against --gpu-only 5.56s and --gpu-only --disable-dynamic-vram 5.57s (Qwen-Image-2.1: 3.75 / 3.91 against 3.47 / 3.48) -- every --gpu-only arm below every default arm; disabling dynamic VRAM on top adds nothing, so the simpler flag is kept."
+                            "notes": "B200: --gpu-only keeps every model, text encoders included, stored and run on the card; a 183 GB B200 holds the largest graph here (MiniMax-H3: 62 GB DiT + 48 GB Qwen3-VL-32B + VAEs). Placement only, numerics unchanged. Measured 2026-09-25 on 1xB200, FLUX.1 eager, interleaved arms: default 5.94 / 5.77 / 5.79s against --gpu-only 5.56s and --gpu-only --disable-dynamic-vram 5.57s (Qwen-Image-2.1: 3.75 / 3.91 against 3.47 / 3.48) -- every --gpu-only arm below every default arm; disabling dynamic VRAM on top adds nothing, so the simpler flag is kept.",
+                            "policy_exception": "Compile broken, not a speed choice (2026-09-25, ComfyUI 88ab4a06 on B200, see the default profile's notes): with TorchCompileModel the first request fails in KSampler with AttributeError: 'torch.Stream' object has no attribute 'cuda_stream', so the cell runs eager."
                         }
                     }
                 }
             },
             "report_framework_statuses": {
                 "vllm-omni": "unsupported",
-                "trtllm-visual": "unsupported"
+                "trtllm-visual": "unsupported",
+                "fastvideo": "unsupported"
             },
             "report_framework_reasons": {
                 "vllm-omni": "No Qwen-Image-2.1 serving path on main HEAD, which is the version policy's target for this framework. vllm-omni's docs/models/supported_models.md lists Qwen-Image, Qwen-Image-2512, Qwen-Image-Edit{,-2509,-2511} and Qwen-Image-Layered but not Qwen-Image-2.1, and a code search for QwenImage21 / Qwen-Image-2.1 across the repo returns nothing. Support lives only on vllm-project/vllm-omni#7759 ('[New model] Qwen-image-2.1 support', opened 2026-09-18, still OPEN as of 2026-09-21); recipes.vllm.ai/Qwen/Qwen-Image-2.1 documents `vllm serve Qwen/Qwen-Image-2.1 --omni` against that PR checkout and states support is not in a tagged release. Re-classify as soon as #7759 merges.",
-                "trtllm-visual": "TensorRT-LLM VisualGen carries a Qwen-Image pipeline (tensorrt_llm/_torch/visual_gen/models/qwen_image/) but nothing for the 2.1 architecture: a code search for QwenImage21 / Qwen-Image-2.1 over NVIDIA/TensorRT-LLM returns no hits, and the model is absent from pipeline_registry.py. Qwen-Image-2.1 is a distinct architecture (QwenImage21Pipeline / QwenImage21Transformer2DModel / AutoencoderKLQwenImage21 / Qwen3-VL encoder), so the existing Qwen-Image pipeline does not cover it."
+                "trtllm-visual": "TensorRT-LLM VisualGen carries a Qwen-Image pipeline (tensorrt_llm/_torch/visual_gen/models/qwen_image/) but nothing for the 2.1 architecture: a code search for QwenImage21 / Qwen-Image-2.1 over NVIDIA/TensorRT-LLM returns no hits, and the model is absent from pipeline_registry.py. Qwen-Image-2.1 is a distinct architecture (QwenImage21Pipeline / QwenImage21Transformer2DModel / AutoencoderKLQwenImage21 / Qwen3-VL encoder), so the existing Qwen-Image pipeline does not cover it.",
+                "fastvideo": "No Qwen-Image pipeline in FastVideo main (2b164405c3d1, 2026-10-07)."
             }
         },
         {
@@ -2206,10 +2227,12 @@
                 }
             },
             "report_framework_statuses": {
-                "trtllm-visual": "not_run"
+                "trtllm-visual": "not_run",
+                "fastvideo": "no_profile"
             },
             "report_framework_reasons": {
-                "trtllm-visual": "Not yet classified. Confirm framework support and add a validated command profile, or mark unsupported."
+                "trtllm-visual": "Not yet classified. Confirm framework support and add a validated command profile, or mark unsupported.",
+                "fastvideo": "FastVideo main (2b164405c3d1, 2026-10-07) registers Z-Image-Turbo, but this harness integrates FastVideo for MiniMax-H3 only (2026-10-08); no command validated."
             }
         },
         {
@@ -2432,7 +2455,8 @@
                             "framework_ref": "ComfyUI master HEAD",
                             "num_gpus": 1,
                             "serve_args": "",
-                            "notes": "Official image_ideogram4_t2i template without its LLM prompt-rewrite stage (the other rows take the case prompt as is). The DiTs are the model's official FP8 release (ideogram-ai/ideogram-4-fp8, the sglang row's weights) dequantized to BF16 by the harness exactly as sglang's weight-only FP8 linears compute them (dequant-fp8:). ComfyUI's own FP8 loader is not used because on sm90+ it runs an FP8 checkpoint as W8A8 -- Comfy-Org's fp8_scaled repack, per-tensor requantized, got activations quantized to FP8 in all 211 linears (2.7% relative error per linear against weight-only, 1.75x faster GEMMs; measured on B200 2026-09-26), a lossy class the other rows do not use. The text encoder is bf16 in place of fp8_scaled. Conditional + unconditional models through DualModelGuider, cfg 7 with the template's CFGOverride, i.e. two forwards on every step like sglang's V4_DEFAULT_20 preset. One GPU: the guidance branches run on two different models, which the CFG Split node does not cover. Weights are the full-precision single-file checkpoints ComfyUI loads (Comfy-Org repackaging or the model's own single-file release); the official template's fp8/int8/nvfp4 defaults are swapped out because they are a different numeric class from every other row. Sampler, scheduler and shift follow the official ComfyUI workflow; steps, CFG, size, frames and seed follow the case. Compile off: the first compiled request fails in SamplerCustomAdvanced with 'AssertionError: Expect size to be a plain tuple of ints but got torch.Size([1, s81])' (a dynamo dynamic-shape failure on this graph; ComfyUI 88ab4a06, B200, 2026-09-25), so the cell runs eager."
+                            "notes": "Official image_ideogram4_t2i template without its LLM prompt-rewrite stage (the other rows take the case prompt as is). The DiTs are the model's official FP8 release (ideogram-ai/ideogram-4-fp8, the sglang row's weights) dequantized to BF16 by the harness exactly as sglang's weight-only FP8 linears compute them (dequant-fp8:). ComfyUI's own FP8 loader is not used because on sm90+ it runs an FP8 checkpoint as W8A8 -- Comfy-Org's fp8_scaled repack, per-tensor requantized, got activations quantized to FP8 in all 211 linears (2.7% relative error per linear against weight-only, 1.75x faster GEMMs; measured on B200 2026-09-26), a lossy class the other rows do not use. The text encoder is bf16 in place of fp8_scaled. Conditional + unconditional models through DualModelGuider, cfg 7 with the template's CFGOverride, i.e. two forwards on every step like sglang's V4_DEFAULT_20 preset. One GPU: the guidance branches run on two different models, which the CFG Split node does not cover. Weights are the full-precision single-file checkpoints ComfyUI loads (Comfy-Org repackaging or the model's own single-file release); the official template's fp8/int8/nvfp4 defaults are swapped out because they are a different numeric class from every other row. Sampler, scheduler and shift follow the official ComfyUI workflow; steps, CFG, size, frames and seed follow the case. Compile off: the first compiled request fails in SamplerCustomAdvanced with 'AssertionError: Expect size to be a plain tuple of ints but got torch.Size([1, s81])' (a dynamo dynamic-shape failure on this graph; ComfyUI 88ab4a06, B200, 2026-09-25), so the cell runs eager.",
+                            "policy_exception": "Compile broken, not a speed choice (2026-09-25, ComfyUI 88ab4a06 on B200, see notes): the first compiled request fails in SamplerCustomAdvanced with a dynamo dynamic-shape AssertionError, so the cell runs eager."
                         },
                         "blackwell-gpuonly": {
                             "description": "Blackwell: the default graph with every model resident on the GPU (--gpu-only).",
@@ -2445,7 +2469,8 @@
                             "framework_ref": "ComfyUI master HEAD",
                             "num_gpus": 1,
                             "serve_args": "--gpu-only",
-                            "notes": "B200: --gpu-only keeps every model, text encoders included, stored and run on the card; a 183 GB B200 holds the largest graph here (MiniMax-H3: 62 GB DiT + 48 GB Qwen3-VL-32B + VAEs). Placement only, numerics unchanged. Measured 2026-09-25 on 1xB200, FLUX.1 eager, interleaved arms: default 5.94 / 5.77 / 5.79s against --gpu-only 5.56s and --gpu-only --disable-dynamic-vram 5.57s (Qwen-Image-2.1: 3.75 / 3.91 against 3.47 / 3.48) -- every --gpu-only arm below every default arm; disabling dynamic VRAM on top adds nothing, so the simpler flag is kept."
+                            "notes": "B200: --gpu-only keeps every model, text encoders included, stored and run on the card; a 183 GB B200 holds the largest graph here (MiniMax-H3: 62 GB DiT + 48 GB Qwen3-VL-32B + VAEs). Placement only, numerics unchanged. Measured 2026-09-25 on 1xB200, FLUX.1 eager, interleaved arms: default 5.94 / 5.77 / 5.79s against --gpu-only 5.56s and --gpu-only --disable-dynamic-vram 5.57s (Qwen-Image-2.1: 3.75 / 3.91 against 3.47 / 3.48) -- every --gpu-only arm below every default arm; disabling dynamic VRAM on top adds nothing, so the simpler flag is kept.",
+                            "policy_exception": "Compile broken, not a speed choice (2026-09-25, ComfyUI 88ab4a06 on B200, see the default profile's notes): the first compiled request fails in SamplerCustomAdvanced with a dynamo dynamic-shape AssertionError, so the cell runs eager."
                         }
                     }
                 }
@@ -2453,12 +2478,14 @@
             "report_framework_statuses": {
                 "vllm-omni": "unsupported",
                 "lightx2v": "unsupported",
-                "trtllm-visual": "unsupported"
+                "trtllm-visual": "unsupported",
+                "fastvideo": "unsupported"
             },
             "report_framework_reasons": {
                 "vllm-omni": "Latest vLLM-Omni has no Ideogram-4 serving path (image-gen coverage is FLUX/Qwen-Image/Wan).",
                 "lightx2v": "Latest LightX2V has no Ideogram-4 serving path.",
-                "trtllm-visual": "Latest TensorRT-LLM VisualGen has no Ideogram-4 serving path (coverage is FLUX/Wan/LTX-2/Qwen-Image/Cosmos3)."
+                "trtllm-visual": "Latest TensorRT-LLM VisualGen has no Ideogram-4 serving path (coverage is FLUX/Wan/LTX-2/Qwen-Image/Cosmos3).",
+                "fastvideo": "No Ideogram pipeline in FastVideo main (2b164405c3d1, 2026-10-07)."
             }
         },
         {
@@ -2848,7 +2875,8 @@
                             "framework_ref": "ComfyUI master HEAD",
                             "num_gpus": 2,
                             "serve_args": "",
-                            "notes": "Official 'Text to Video (Wan 2.2)' full-step workflow (no Lightning LoRA) with fp16 experts and UMT5 in place of fp8_scaled: two KSamplerAdvanced passes, high-noise expert then low-noise, cfg 4.0 / 3.0 as the case, shift 5.0 (sglang's 720p Wan config uses the same). The experts hand over at the half-way step -- both are 14B, so where the hand-over falls does not change the cost. Negative prompt = sglang's Wan2.2 default, encoded every request as sglang does. Two GPUs through the MultiGPU CFG Split node (ComfyUI has no sequence parallelism). Weights are the full-precision single-file checkpoints ComfyUI loads (Comfy-Org repackaging or the model's own single-file release); the official template's fp8/int8/nvfp4 defaults are swapped out because they are a different numeric class from every other row. Sampler, scheduler and shift follow the official ComfyUI workflow; steps, CFG, size, frames and seed follow the case. Compile off: TorchCompileModel together with the MultiGPU CFG Split node fails on the first request (dynamo: 'RuntimeError when making fake tensor call' in KSamplerAdvanced; ComfyUI 88ab4a06, 1xB200->2xB200, 2026-09-25). Splitting the two CFG branches over two cards roughly halves each step, which outweighs compile's measured 16-18% on FLUX.1, so the cell keeps the split and runs eager."
+                            "notes": "Official 'Text to Video (Wan 2.2)' full-step workflow (no Lightning LoRA) with fp16 experts and UMT5 in place of fp8_scaled: two KSamplerAdvanced passes, high-noise expert then low-noise, cfg 4.0 / 3.0 as the case, shift 5.0 (sglang's 720p Wan config uses the same). The experts hand over at the half-way step -- both are 14B, so where the hand-over falls does not change the cost. Negative prompt = sglang's Wan2.2 default, encoded every request as sglang does. Two GPUs through the MultiGPU CFG Split node (ComfyUI has no sequence parallelism). Weights are the full-precision single-file checkpoints ComfyUI loads (Comfy-Org repackaging or the model's own single-file release); the official template's fp8/int8/nvfp4 defaults are swapped out because they are a different numeric class from every other row. Sampler, scheduler and shift follow the official ComfyUI workflow; steps, CFG, size, frames and seed follow the case. Compile off: TorchCompileModel together with the MultiGPU CFG Split node fails on the first request (dynamo: 'RuntimeError when making fake tensor call' in KSamplerAdvanced; ComfyUI 88ab4a06, 1xB200->2xB200, 2026-09-25). Splitting the two CFG branches over two cards roughly halves each step, which outweighs compile's measured 16-18% on FLUX.1, so the cell keeps the split and runs eager.",
+                            "policy_exception": "Compile broken with the CFG split, not a speed choice (2026-09-25, ComfyUI 88ab4a06, 1xB200->2xB200, see notes): TorchCompileModel with the MultiGPU CFG Split node fails the first request (dynamo 'RuntimeError when making fake tensor call' in KSamplerAdvanced), and the split is worth more than compile's measured 16-18% on FLUX.1."
                         },
                         "blackwell-gpuonly": {
                             "description": "Blackwell: the default graph with every model resident on the GPU (--gpu-only).",
@@ -2861,16 +2889,19 @@
                             "framework_ref": "ComfyUI master HEAD",
                             "num_gpus": 2,
                             "serve_args": "--gpu-only",
-                            "notes": "B200: --gpu-only keeps every model, text encoders included, stored and run on the card; a 183 GB B200 holds the largest graph here (MiniMax-H3: 62 GB DiT + 48 GB Qwen3-VL-32B + VAEs). Placement only, numerics unchanged. Measured 2026-09-25 on 1xB200, FLUX.1 eager, interleaved arms: default 5.94 / 5.77 / 5.79s against --gpu-only 5.56s and --gpu-only --disable-dynamic-vram 5.57s (Qwen-Image-2.1: 3.75 / 3.91 against 3.47 / 3.48) -- every --gpu-only arm below every default arm; disabling dynamic VRAM on top adds nothing, so the simpler flag is kept."
+                            "notes": "B200: --gpu-only keeps every model, text encoders included, stored and run on the card; a 183 GB B200 holds the largest graph here (MiniMax-H3: 62 GB DiT + 48 GB Qwen3-VL-32B + VAEs). Placement only, numerics unchanged. Measured 2026-09-25 on 1xB200, FLUX.1 eager, interleaved arms: default 5.94 / 5.77 / 5.79s against --gpu-only 5.56s and --gpu-only --disable-dynamic-vram 5.57s (Qwen-Image-2.1: 3.75 / 3.91 against 3.47 / 3.48) -- every --gpu-only arm below every default arm; disabling dynamic VRAM on top adds nothing, so the simpler flag is kept.",
+                            "policy_exception": "Compile broken with the CFG split, not a speed choice (2026-09-25, ComfyUI 88ab4a06, 1xB200->2xB200, see the default profile's notes): TorchCompileModel with the MultiGPU CFG Split node fails the first request (dynamo 'RuntimeError when making fake tensor call' in KSamplerAdvanced), and the split is worth more than compile's measured 16-18% on FLUX.1."
                         }
                     }
                 }
             },
             "report_framework_statuses": {
-                "trtllm-visual": "not_run"
+                "trtllm-visual": "not_run",
+                "fastvideo": "no_profile"
             },
             "report_framework_reasons": {
-                "trtllm-visual": "Not yet classified. Confirm framework support and add a validated command profile, or mark unsupported."
+                "trtllm-visual": "Not yet classified. Confirm framework support and add a validated command profile, or mark unsupported.",
+                "fastvideo": "FastVideo main (2b164405c3d1, 2026-10-07) registers Wan2.2-T2V-A14B (examples/serving/openai_wan22_t2v_a14b.yaml), but this harness integrates FastVideo for MiniMax-H3 only (2026-10-08); no command validated."
             }
         },
         {
@@ -3418,7 +3449,8 @@
                             "framework_ref": "ComfyUI master HEAD",
                             "num_gpus": 2,
                             "serve_args": "",
-                            "notes": "Official video_ltx2_t2v two-stage workflow, which is the ltx-pipelines two-stage recipe sglang's LTX2TwoStagePipeline implements: stage 1 at half resolution on the full model with CFG (case guidance 4.0, negative prompt = sglang's ltx-pipelines default), latent x2 spatial upsample, stage 2 with the distilled LoRA on the same three distilled sigmas. bf16 checkpoint and Gemma-3-12B in place of fp8 / fp4_mixed; untiled VAEDecode in place of the template's tiled decode (a memory measure for small cards, and not bit-exact). Two GPUs through the MultiGPU CFG Split node on the stage-1 model, the counterpart of sglang's --enable-cfg-parallel. Weights are the full-precision single-file checkpoints ComfyUI loads (Comfy-Org repackaging or the model's own single-file release); the official template's fp8/int8/nvfp4 defaults are swapped out because they are a different numeric class from every other row. Sampler, scheduler and shift follow the official ComfyUI workflow; steps, CFG, size, frames and seed follow the case. Compile off: TorchCompileModel together with the MultiGPU CFG Split node fails on the first request (dynamo: 'Tensor device mismatch' in the stage-1 SamplerCustomAdvanced; ComfyUI 88ab4a06, 1xB200->2xB200, 2026-09-25). Splitting the two CFG branches over two cards roughly halves each step, which outweighs compile's measured 16-18% on FLUX.1, so the cell keeps the split and runs eager."
+                            "notes": "Official video_ltx2_t2v two-stage workflow, which is the ltx-pipelines two-stage recipe sglang's LTX2TwoStagePipeline implements: stage 1 at half resolution on the full model with CFG (case guidance 4.0, negative prompt = sglang's ltx-pipelines default), latent x2 spatial upsample, stage 2 with the distilled LoRA on the same three distilled sigmas. bf16 checkpoint and Gemma-3-12B in place of fp8 / fp4_mixed; untiled VAEDecode in place of the template's tiled decode (a memory measure for small cards, and not bit-exact). Two GPUs through the MultiGPU CFG Split node on the stage-1 model, the counterpart of sglang's --enable-cfg-parallel. Weights are the full-precision single-file checkpoints ComfyUI loads (Comfy-Org repackaging or the model's own single-file release); the official template's fp8/int8/nvfp4 defaults are swapped out because they are a different numeric class from every other row. Sampler, scheduler and shift follow the official ComfyUI workflow; steps, CFG, size, frames and seed follow the case. Compile off: TorchCompileModel together with the MultiGPU CFG Split node fails on the first request (dynamo: 'Tensor device mismatch' in the stage-1 SamplerCustomAdvanced; ComfyUI 88ab4a06, 1xB200->2xB200, 2026-09-25). Splitting the two CFG branches over two cards roughly halves each step, which outweighs compile's measured 16-18% on FLUX.1, so the cell keeps the split and runs eager.",
+                            "policy_exception": "Compile broken with the CFG split, not a speed choice (2026-09-25, ComfyUI 88ab4a06, 1xB200->2xB200, see notes): TorchCompileModel with the MultiGPU CFG Split node fails the first request (dynamo 'Tensor device mismatch' in the stage-1 SamplerCustomAdvanced), and the split is worth more than compile's measured 16-18% on FLUX.1."
                         },
                         "blackwell-gpuonly": {
                             "description": "Blackwell: the default graph with every model resident on the GPU (--gpu-only).",
@@ -3431,16 +3463,19 @@
                             "framework_ref": "ComfyUI master HEAD",
                             "num_gpus": 2,
                             "serve_args": "--gpu-only",
-                            "notes": "B200: --gpu-only keeps every model, text encoders included, stored and run on the card; a 183 GB B200 holds the largest graph here (MiniMax-H3: 62 GB DiT + 48 GB Qwen3-VL-32B + VAEs). Placement only, numerics unchanged. Measured 2026-09-25 on 1xB200, FLUX.1 eager, interleaved arms: default 5.94 / 5.77 / 5.79s against --gpu-only 5.56s and --gpu-only --disable-dynamic-vram 5.57s (Qwen-Image-2.1: 3.75 / 3.91 against 3.47 / 3.48) -- every --gpu-only arm below every default arm; disabling dynamic VRAM on top adds nothing, so the simpler flag is kept."
+                            "notes": "B200: --gpu-only keeps every model, text encoders included, stored and run on the card; a 183 GB B200 holds the largest graph here (MiniMax-H3: 62 GB DiT + 48 GB Qwen3-VL-32B + VAEs). Placement only, numerics unchanged. Measured 2026-09-25 on 1xB200, FLUX.1 eager, interleaved arms: default 5.94 / 5.77 / 5.79s against --gpu-only 5.56s and --gpu-only --disable-dynamic-vram 5.57s (Qwen-Image-2.1: 3.75 / 3.91 against 3.47 / 3.48) -- every --gpu-only arm below every default arm; disabling dynamic VRAM on top adds nothing, so the simpler flag is kept.",
+                            "policy_exception": "Compile broken with the CFG split, not a speed choice (2026-09-25, ComfyUI 88ab4a06, 1xB200->2xB200, see the default profile's notes): TorchCompileModel with the MultiGPU CFG Split node fails the first request (dynamo 'Tensor device mismatch' in the stage-1 SamplerCustomAdvanced), and the split is worth more than compile's measured 16-18% on FLUX.1."
                         }
                     }
                 }
             },
             "report_framework_statuses": {
-                "trtllm-visual": "not_run"
+                "trtllm-visual": "not_run",
+                "fastvideo": "no_profile"
             },
             "report_framework_reasons": {
-                "trtllm-visual": "Not yet classified. Confirm framework support and add a validated command profile, or mark unsupported."
+                "trtllm-visual": "Not yet classified. Confirm framework support and add a validated command profile, or mark unsupported.",
+                "fastvideo": "FastVideo main (2b164405c3d1, 2026-10-07) registers LTX-2, but this harness integrates FastVideo for MiniMax-H3 only (2026-10-08); no command validated."
             }
         },
         {
@@ -3503,13 +3538,15 @@
                 "vllm-omni": "no_profile",
                 "lightx2v": "failed",
                 "trtllm-visual": "not_run",
-                "comfyui": "no_profile"
+                "comfyui": "no_profile",
+                "fastvideo": "no_profile"
             },
             "report_framework_reasons": {
                 "vllm-omni": "No compatible vLLM-Omni LTX2.3 serving profile is configured.",
                 "lightx2v": "OOM on H100 80GB: LTX-2.3 22B two-stage 121-frame t2av peak exceeds 80GB even with every lossless lever (seq_p_size=2 activation sharding + block cpu_offload + Gemma/VAE offload + exact flash_attn3). Upstream profiles target H200 141GB. THIS VERDICT IS H100-SPECIFIC AND IS BEING APPLIED GLOBALLY -- `status` has no per-hardware form, so the cell is skipped everywhere, including the 4xB200 box (183359 MiB/GPU, ~179GB) where the stated constraint does not hold and upstream's own H200 target is exceeded. Retest on Blackwell before trusting the classification; if it runs, `status` needs a per-hardware form before this can be flipped, or H100 runs will spend ~40 min per attempt re-discovering the OOM. command_profiles below are the best-attempted lossless config, kept for provenance.",
                 "trtllm-visual": "Not yet classified. Confirm framework support and add a validated command profile, or mark unsupported.",
-                "comfyui": "ComfyUI loads LTX-2.3, but no official workflow reproduces this case: sglang runs LTX-2.3's multimodal guidance in stage 1 (video CFG 3 + STG 1.0 on block 28 + modality 3, audio CFG 7 + STG + modality -- up to four DiT passes per step, LTX23SamplingParams), while ComfyUI's LTX-2.3 T2V template (and the LTX-2.5 one) is the distilled-LoRA fast path at cfg 1. A graph built from LTXVSpatioTemporalGuidance / LTXVModalityGuidance / LTXVDualCFGGuider could match it but has no upstream reference and is not validated."
+                "comfyui": "ComfyUI loads LTX-2.3, but no official workflow reproduces this case: sglang runs LTX-2.3's multimodal guidance in stage 1 (video CFG 3 + STG 1.0 on block 28 + modality 3, audio CFG 7 + STG + modality -- up to four DiT passes per step, LTX23SamplingParams), while ComfyUI's LTX-2.3 T2V template (and the LTX-2.5 one) is the distilled-LoRA fast path at cfg 1. A graph built from LTXVSpatioTemporalGuidance / LTXVModalityGuidance / LTXVDualCFGGuider could match it but has no upstream reference and is not validated.",
+                "fastvideo": "FastVideo main (2b164405c3d1, 2026-10-07) registers LTX-2.3, but this harness integrates FastVideo for MiniMax-H3 only (2026-10-08); no command validated."
             }
         },
         {
@@ -3663,12 +3700,14 @@
             "report_framework_statuses": {
                 "lightx2v": "unsupported",
                 "trtllm-visual": "failed",
-                "comfyui": "unsupported"
+                "comfyui": "unsupported",
+                "fastvideo": "unsupported"
             },
             "report_framework_reasons": {
                 "lightx2v": "No tracked LightX2V Cosmos3 serving path in this benchmark.",
                 "trtllm-visual": "Hangs at startup on the current Cosmos3-Nano checkpoint: trtllm-serve reaches 'Orchestrator is creating IPC executor' / 'using MpiPoolSession to spawn MPI processes' and then produces no output at all -- 40 min in the matrix, and 20 min each at tp=1 and tp=2 in a dedicated probe, so it is not a multi-GPU path issue. The startup log warns 'You are using a model of type cosmos3_omni to instantiate a model of type cosmos3': the checkpoint was re-uploaded 2026-08-26 and declares cosmos3_omni, which tensorrt-llm 1.3.0rc26 does not know. Marked failed rather than left supported so a run does not spend 40 minutes per attempt reaching the same hang. Re-test when trtllm adds cosmos3_omni; the profile is kept below.",
-                "comfyui": "ComfyUI core has no Cosmos3: comfy/ldm/cosmos covers Cosmos Predict1 and Predict2 only (CosmosT2V/I2V, CosmosT2IPredict2/I2VPredict2 in comfy/supported_models.py) at master 88ab4a06, 2026-09-25."
+                "comfyui": "ComfyUI core has no Cosmos3: comfy/ldm/cosmos covers Cosmos Predict1 and Predict2 only (CosmosT2V/I2V, CosmosT2IPredict2/I2VPredict2 in comfy/supported_models.py) at master 88ab4a06, 2026-09-25.",
+                "fastvideo": "FastVideo main (2b164405c3d1, 2026-10-07) has Cosmos Predict2/2.5 and GEN3C pipelines but no Cosmos3."
             }
         },
         {
@@ -3914,12 +3953,14 @@
             "report_framework_statuses": {
                 "lightx2v": "unsupported",
                 "trtllm-visual": "not_run",
-                "comfyui": "unsupported"
+                "comfyui": "unsupported",
+                "fastvideo": "unsupported"
             },
             "report_framework_reasons": {
                 "lightx2v": "No tracked LightX2V Cosmos3 serving path in this benchmark.",
                 "trtllm-visual": "Not yet classified. Confirm framework support and add a validated command profile, or mark unsupported.",
-                "comfyui": "ComfyUI core has no Cosmos3: comfy/ldm/cosmos covers Cosmos Predict1 and Predict2 only (CosmosT2V/I2V, CosmosT2IPredict2/I2VPredict2 in comfy/supported_models.py) at master 88ab4a06, 2026-09-25."
+                "comfyui": "ComfyUI core has no Cosmos3: comfy/ldm/cosmos covers Cosmos Predict1 and Predict2 only (CosmosT2V/I2V, CosmosT2IPredict2/I2VPredict2 in comfy/supported_models.py) at master 88ab4a06, 2026-09-25.",
+                "fastvideo": "FastVideo main (2b164405c3d1, 2026-10-07) has Cosmos Predict2/2.5 and GEN3C pipelines but no Cosmos3."
             }
         },
         {
@@ -4144,12 +4185,14 @@
             "report_framework_statuses": {
                 "lightx2v": "unsupported",
                 "trtllm-visual": "not_run",
-                "comfyui": "unsupported"
+                "comfyui": "unsupported",
+                "fastvideo": "unsupported"
             },
             "report_framework_reasons": {
                 "lightx2v": "No tracked LightX2V Cosmos3 serving path in this benchmark.",
                 "trtllm-visual": "Not yet classified. Confirm framework support and add a validated command profile, or mark unsupported.",
-                "comfyui": "ComfyUI core has no Cosmos3: comfy/ldm/cosmos covers Cosmos Predict1 and Predict2 only (CosmosT2V/I2V, CosmosT2IPredict2/I2VPredict2 in comfy/supported_models.py) at master 88ab4a06, 2026-09-25."
+                "comfyui": "ComfyUI core has no Cosmos3: comfy/ldm/cosmos covers Cosmos Predict1 and Predict2 only (CosmosT2V/I2V, CosmosT2IPredict2/I2VPredict2 in comfy/supported_models.py) at master 88ab4a06, 2026-09-25.",
+                "fastvideo": "FastVideo main (2b164405c3d1, 2026-10-07) has Cosmos Predict2/2.5 and GEN3C pipelines but no Cosmos3."
             }
         },
         {
@@ -4185,11 +4228,21 @@
                         "task": "t2va",
                         "duration": 5.0,
                         "audio_flow_shift": 3.0,
-                        "aspect_ratio": "16:9"
+                        "aspect_ratio": "16:9",
+                        "preencode_mp4": true
                     },
-                    "flow_shift": 12.0
+                    "flow_shift": 12.0,
+                    "num_inference_steps": 49
+                },
+                "fastvideo": {
+                    "task": "t2va",
+                    "guidance_scale": 1.0
+                },
+                "lightx2v": {
+                    "task": "t2av"
                 }
             },
+            "_note": "vLLM-Omni requests carry extra_params.preencode_mp4=true (2026-10-08): its documented, off-by-default overlap of MP4 encoding with the VAE decode (byte-identical frames), the counterpart of sglang's default streamed encode (#41819). Both engines run their best documented output path. vLLM-Omni gets num_inference_steps 49 (2026-10-08): since vllm-omni #7219 (2026-09-24) it reads N as N model passes on linspace(1, 0, N+1), while sglang, FastVideo and LightX2V's 49 read 50 as 50 sigma grid points, i.e. 49 passes; 49 gives Omni the identical 50-point grid. Earlier H3 rounds ran Omni one pass more.",
             "frameworks": {
                 "sglang": {
                     "serve_args": "--model-type diffusion --warmup-mode server --model-variant fl2va --enable-torch-compile false",
@@ -4228,39 +4281,183 @@
                 },
                 "vllm-omni": {
                     "num_gpus": 2,
-                    "serve_args": "--trust-remote-code --tensor-parallel-size 2 --enforce-eager --enable-distributed-layerwise-offload --dlo-no-use-allgather --dlo-resident-layers 20 --diffusion-attention-backend CUDNN_ATTN",
+                    "serve_args": "--trust-remote-code --task-type fl2va --num-gpus 2 --tensor-parallel-size 2 --usp 1 --ring 1 --text-encoder-tp-size 2 --vae-patch-parallel-size 2 --vae-parallel-mode tile --vae-use-tiling",
                     "extra_env": {
                         "VLLM_WORKER_MULTIPROC_METHOD": "spawn",
                         "VLLM_OMNI_VIDEO_SYNC_TIMEOUT": "1800"
                     },
                     "command_profiles": {
                         "default": {
-                            "description": "vLLM-Omni's own 2-GPU MiniMax-H3 recipe (TP2, distributed layerwise offload, compile path). Reaches health and accepts a request, then crashes during generation -- kept for provenance, not a working profile on any GPU class tested so far.",
-                            "framework_ref": "vllm-omni recipes/MiniMaxAI/MiniMax-H3.md (2-GPU section); installed from git main (0.26.1.dev45+g24ede9e22 on RTX 5090, 0.26.1.dev50+gcfa6d66ed on B200) + vllm==0.26.0, not the repo's default pinned vllm-omni==0.18.0",
+                            "description": "vLLM-Omni's fastest measured MiniMax-H3 command on datacenter GPUs: TP2, text-encoder TP2, native tiled VAE patch parallelism 2, resident, compiled, Omni's default attention for the hardware.",
+                            "framework_ref": "vllm-omni main 56763cd6c383 + vllm==0.30.0",
+                            "upstream_recipe": {
+                                "repo": "vllm-project/vllm-omni",
+                                "path": "recipes/MiniMaxAI/MiniMax-H3.md",
+                                "commit": "7266fc613",
+                                "commit_date": "2026-09-28",
+                                "section": "Two 24/32 GB GPUs: TP2 distributed layerwise offload"
+                            },
                             "num_gpus": 2,
-                            "serve_args": "--trust-remote-code --tensor-parallel-size 2 --enable-distributed-layerwise-offload --dlo-no-use-allgather --dlo-resident-layers 20 --diffusion-attention-backend CUDNN_ATTN",
-                            "notes": "Requires ffmpeg/ffprobe on PATH for MP4 muxing. The request also needs `aspect_ratio` inside extra_params (the recipe's own T2VA example omits it and 422s with 'RuntimeError: t2va requires an explicit aspect_ratio' as written). CONFIRMED HARDWARE-INDEPENDENT 2026-08-07: re-ran this exact profile on 2xB200 (sm100, datacenter Blackwell) -- it segfaults with the identical signature as on RTX 5090 (native segfault, Python trace through torch Dynamo's custom_eval_frame), 1 step into denoising. Same bug on two unrelated GPU architectures rules out a consumer-GPU/SM120 quirk; this is a real vLLM-Omni MiniMax-H3 stability bug in the compiled path, not something fixable from the benchmark harness. Use the enforce-eager / b200-2gpu profile instead."
+                            "serve_args": "--trust-remote-code --task-type fl2va --num-gpus 2 --tensor-parallel-size 2 --usp 1 --ring 1 --text-encoder-tp-size 2 --vae-patch-parallel-size 2 --vae-parallel-mode tile --vae-use-tiling",
+                            "notes": "Measured 2026-09-30, 50-step T2V+A, same box and build per hardware (vllm-omni main 56763cd, vllm 0.30.0), client median of 2 after warmup. 2xB200: this command with --diffusion-attention-backend CUDNN_ATTN 73.55 s; the recipe's high-memory section scaled to two GPUs (USP2, TRTLLM_ATTN) 79.43/79.30 s; the consumer command every published round ran (TP2 + distributed layerwise offload + eager + cuDNN) 78.38 s; sglang 72.36/72.27 s. 2xH200: this command (Omni's default FLASH_ATTN) 148.95 s; USP2 resident 151.23 s; the consumer command 168.67 s; sglang 145.54/145.34 s. The command is the recipe's two-GPU section without its capacity switches (--enable-distributed-layerwise-offload, --dlo-*, --enforce-eager): a 143-183 GB card holds TP2-sharded weights, and the policy runs competitors compiled."
                         },
-                        "enforce-eager": {
-                            "description": "Same recipe with --enforce-eager, tried after the default profile segfaulted. Fails differently (and earlier) on RTX 5090, but is the profile that actually works on B200 -- see command_profiles.b200-2gpu.",
-                            "framework_ref": "vllm-omni recipes/MiniMaxAI/MiniMax-H3.md (2-GPU section) + --enforce-eager",
-                            "num_gpus": 2,
-                            "serve_args": "--trust-remote-code --tensor-parallel-size 2 --enforce-eager --enable-distributed-layerwise-offload --dlo-no-use-allgather --dlo-resident-layers 20 --diffusion-attention-backend CUDNN_ATTN",
-                            "notes": "On RTX 5090 this crashes during server startup (EOFError: a diffusion worker process dies before completing its init handshake) rather than during generation, and never reaches a request. UPDATE 2026-08-07: the identical flags reach health and complete a real generation on 2xB200 -- see command_profiles.b200-2gpu for the hardware-scoped, validated version of this same command."
-                        },
-                        "b200-2gpu": {
-                            "description": "2x B200, same recipe as enforce-eager -- the profile that actually completes a generation for this case.",
+                        "blackwell-2gpu": {
+                            "description": "Datacenter Blackwell: the default command with cuDNN attention, fastest measured on B200.",
                             "hardware": [
                                 "b200",
-                                "b300"
+                                "b300",
+                                "gb200",
+                                "gb300"
+                            ],
+                            "framework_ref": "vllm-omni main 56763cd6c383 + vllm==0.30.0",
+                            "upstream_recipe": {
+                                "repo": "vllm-project/vllm-omni",
+                                "path": "recipes/MiniMaxAI/MiniMax-H3.md",
+                                "commit": "7266fc613",
+                                "commit_date": "2026-09-28",
+                                "section": "Two 24/32 GB GPUs: TP2 distributed layerwise offload"
+                            },
+                            "num_gpus": 2,
+                            "serve_args": "--trust-remote-code --task-type fl2va --num-gpus 2 --tensor-parallel-size 2 --usp 1 --ring 1 --text-encoder-tp-size 2 --vae-patch-parallel-size 2 --vae-parallel-mode tile --vae-use-tiling --diffusion-attention-backend CUDNN_ATTN",
+                            "notes": "The recipe's two-GPU section selects cuDNN attention; on 2xB200 it measured 73.55 s where the high-memory section's TRTLLM_ATTN (with USP2) measured 79.4 s. TP2 with TRTLLM_ATTN is unmeasured. 2xGB300 (merged harness, 2026-09-30): 60.87/60.88 s against sglang 60.45/60.53 s. Not validated on GB200."
+                        },
+                        "rtx5090-2gpu": {
+                            "description": "vLLM-Omni's 2x24/32 GB consumer recipe (TP2 + distributed layerwise offload, 20 resident blocks, eager, cuDNN attention) -- the capacity path for 32 GB cards.",
+                            "hardware": [
+                                "rtx5090",
+                                "rtx4090"
                             ],
                             "framework_ref": "vllm-omni recipes/MiniMaxAI/MiniMax-H3.md (2-GPU section) + --enforce-eager; git main 0.26.1.dev50+gcfa6d66ed + vllm==0.26.0",
                             "num_gpus": 2,
                             "serve_args": "--trust-remote-code --tensor-parallel-size 2 --enforce-eager --enable-distributed-layerwise-offload --dlo-no-use-allgather --dlo-resident-layers 20 --diffusion-attention-backend CUDNN_ATTN",
+                            "notes": "The recipe scopes this command to 'Two 24/32 GB GPUs ... two PCIe consumer GPUs'; 'cuDNN attention is selected explicitly for the RTX consumer path; the server stays eager'. On RTX 5090 it failed at startup on 0.26.1.dev45 (2026-08-07, see `consumer-dlo-compile-20260807`); not re-validated since.",
+                            "policy_exception": "Capacity, not speed (2026-08-07): the model does not fit 2x32 GB resident; offload and eager are the upstream recipe for this memory class."
+                        },
+                        "h100-2gpu-dlo": {
+                            "description": "H100 80 GB: the resident configuration cannot fit (one 62 GB DiT plus the 51.5 GB text encoder on rank 0), so this keeps the consumer TP2 + distributed layerwise offload command the case carried before 2026-09-30.",
+                            "hardware": [
+                                "h100"
+                            ],
+                            "framework_ref": "vllm-omni recipes/MiniMaxAI/MiniMax-H3.md (2-GPU section); installed from git main (0.26.1.dev45+g24ede9e22 on RTX 5090, 0.26.1.dev50+gcfa6d66ed on B200) + vllm==0.26.0, not the repo's default pinned vllm-omni==0.18.0",
+                            "num_gpus": 2,
+                            "serve_args": "--trust-remote-code --tensor-parallel-size 2 --enable-distributed-layerwise-offload --dlo-no-use-allgather --dlo-resident-layers 20 --diffusion-attention-backend CUDNN_ATTN",
+                            "notes": "Never run on H100 in a published round; validate before publishing an H100 H3 cell.",
+                            "policy_exception": "Capacity, not speed (2026-09-30, arithmetic from the recipe's sizes): resident needs >113 GB on rank 0, over H100's 80 GB; the recipe says to offload when the resident configuration does not fit."
+                        },
+                        "recipe-highmem-usp2": {
+                            "description": "The recipe's high-memory section ('Four GPUs: throughput-oriented combined service') scaled to two GPUs: USP2, VAE patch parallel 2, compiled, recipe-default attention. Measured slower than `default` on B200 and H200 (see its notes); kept for comparison, never selected.",
+                            "framework_ref": "vllm-omni main 56763cd6c383 + vllm==0.30.0",
+                            "upstream_recipe": {
+                                "repo": "vllm-project/vllm-omni",
+                                "path": "recipes/MiniMaxAI/MiniMax-H3.md",
+                                "commit": "7266fc613",
+                                "commit_date": "2026-09-28",
+                                "section": "Four GPUs: throughput-oriented combined service"
+                            },
+                            "num_gpus": 2,
+                            "serve_args": "--trust-remote-code --task-type fl2va --num-gpus 2 --usp 2 --ring 1 --vae-patch-parallel-size 2 --vae-parallel-mode tile --vae-use-tiling",
+                            "notes": "Derived 2026-09-30 from the recipe section above: its four-GPU command is `--num-gpus 4 --usp 4 --ring 1 --vae-patch-parallel-size 4 --vae-parallel-mode tile --vae-use-tiling`, scaled to num_gpus=2 the way the sglang profile scales the cookbook's Ulysses-4 resident recipe. `--task-type fl2va` loads only the partition this case serves (a combined server keeps both 62 GB DiTs resident, which with the 51.5 GB text encoder on rank 0 does not fit a 183 GB B200); sglang likewise loads one variant. Replaces the 2x24/32 GB consumer recipe (TP2 + distributed layerwise offload + eager + cuDNN) that every published round from 2026-08-07 to 2026-09-25 ran on 183 GB B200s -- see `consumer-dlo-eager-20260807`."
+                        },
+                        "consumer-dlo-eager-20260807": {
+                            "description": "PROVENANCE ONLY -- never selected. The command every published H3 round ran for vLLM-Omni on B200 from 2026-08-07 to 2026-09-25: the consumer recipe on a 183 GB card.",
+                            "framework_ref": "vllm-omni recipes/MiniMaxAI/MiniMax-H3.md (2-GPU section) + --enforce-eager; git main 0.26.1.dev50+gcfa6d66ed + vllm==0.26.0",
+                            "num_gpus": 2,
+                            "serve_args": "--trust-remote-code --tensor-parallel-size 2 --enforce-eager --enable-distributed-layerwise-offload --dlo-no-use-allgather --dlo-resident-layers 20 --diffusion-attention-backend CUDNN_ATTN",
                             "notes": "Validated 2026-08-07 on 2xB200 (h3-b200-2gpu-v2): completes the case's T2VA request end to end -- client wall 105.76s, server-reported inference_time_s 103.06, peak_memory_mb 24546. Output verified with ffprobe directly on the returned MP4: 124 frames @ 24 fps = 5.166667s, exactly matching the requested 5s/124-frame shape (the API's own JSON `seconds` field reported a stale '4' on both the submit and completed response -- a cosmetic metadata default unrelated to the real generation params, not a real duration shortfall; confirmed by decoding the actual file). Still uses the recipe's memory-constrained --dlo-resident-layers 20 offload even though B200's 183 GB has no need for it -- vllm-omni ships only one documented 2-GPU H3 recipe, so this is that recipe as-is, not a B200-tuned command; a fully-resident vllm-omni command may be faster but is not a documented starting point. Same request, same 2xB200 hardware, sglang's b200-2gpu profile: 80.64s/80.63s client wall, 75.42s inference_time_s -- sglang is ~1.31x faster than vLLM-Omni here."
+                        },
+                        "consumer-dlo-compile-20260807": {
+                            "description": "PROVENANCE ONLY -- never selected. The consumer recipe with compile, as first tried on 2026-08-07; it segfaulted one step into denoising on RTX 5090 and B200 (0.26.1.dev45/dev50).",
+                            "framework_ref": "vllm-omni recipes/MiniMaxAI/MiniMax-H3.md (2-GPU section); installed from git main (0.26.1.dev45+g24ede9e22 on RTX 5090, 0.26.1.dev50+gcfa6d66ed on B200) + vllm==0.26.0, not the repo's default pinned vllm-omni==0.18.0",
+                            "num_gpus": 2,
+                            "serve_args": "--trust-remote-code --tensor-parallel-size 2 --enable-distributed-layerwise-offload --dlo-no-use-allgather --dlo-resident-layers 20 --diffusion-attention-backend CUDNN_ATTN",
+                            "notes": "Requires ffmpeg/ffprobe on PATH for MP4 muxing. The request also needs `aspect_ratio` inside extra_params (the recipe's own T2VA example omits it and 422s with 'RuntimeError: t2va requires an explicit aspect_ratio' as written). CONFIRMED HARDWARE-INDEPENDENT 2026-08-07: re-ran this exact profile on 2xB200 (sm100, datacenter Blackwell) -- it segfaults with the identical signature as on RTX 5090 (native segfault, Python trace through torch Dynamo's custom_eval_frame), 1 step into denoising. Same bug on two unrelated GPU architectures rules out a consumer-GPU/SM120 quirk; this is a real vLLM-Omni MiniMax-H3 stability bug in the compiled path, not something fixable from the benchmark harness. Use the enforce-eager / b200-2gpu profile instead."
                         }
                     },
                     "reason": "Empirically validated 2026-08-07, first on minimax-h3-5090-2gpu-v4 (2x RTX 5090) then on 2xB200: the default (compiled) profile segfaults identically on both GPU classes 1 step into denoising (see command_profiles.default.notes) -- a confirmed hardware-independent vLLM-Omni bug, despite the recipe's own claim that torch.compile is 'not enabled by default on consumer paths.' --enforce-eager avoids that segfault, but on RTX 5090 it fails differently at startup (a diffusion worker process dies before completing its init handshake, surfaced as EOFError) and never completes a request on that GPU class. On 2xB200 the identical --enforce-eager command works cleanly and completes a correct generation -- see command_profiles.b200-2gpu for the validated numbers and the sglang comparison on the same hardware. Net: vLLM-Omni H3 support is real but fragile below the B200 class tested here; RTX 5090 has no working profile for this case in either variant."
+                },
+                "lightx2v": {
+                    "model_cls": "minimax_h3",
+                    "num_gpus": 2,
+                    "serve_args": "--model-variant fl2av",
+                    "model_allow_patterns": [
+                        "transformer/*",
+                        "text_encoder/*",
+                        "tokenizer/*",
+                        "processor/*",
+                        "vae/*",
+                        "audio_vae/*"
+                    ],
+                    "extra_env": {
+                        "DTYPE": "BF16",
+                        "SENSITIVE_LAYER_DTYPE": "BF16",
+                        "PROFILING_DEBUG_LEVEL": "0",
+                        "TOKENIZERS_PARALLELISM": "false",
+                        "PYTORCH_CUDA_ALLOC_CONF": "expandable_segments:True",
+                        "PYTORCH_ALLOC_CONF": "expandable_segments:True"
+                    },
+                    "lightx2v_config": {
+                        "infer_steps": 49,
+                        "video_flow_shift": 12.0,
+                        "audio_flow_shift": 3.0,
+                        "enable_cfg": false,
+                        "cpu_offload": false,
+                        "text_encoder_cpu_offload": false,
+                        "vae_cpu_offload": false,
+                        "use_adaln_cache": false,
+                        "text_encoder_tensor_parallel": true,
+                        "vae_decode_parallel": true,
+                        "lazy_load": false,
+                        "unload_modules": false,
+                        "attn_type": "flash_attn3",
+                        "rms_type": "sgl-kernel",
+                        "rope_type": "torch_real_rope",
+                        "feature_caching": "NoCaching",
+                        "warmup": false,
+                        "vae_spatial_scale_factor": 16,
+                        "audio_sampling_rate": 32000,
+                        "parallel": {
+                            "tensor_p_size": 2
+                        }
+                    },
+                    "command_profiles": {
+                        "default": {
+                            "description": "LightX2V's two-GPU MiniMax-H3 preset made resident and compiled: TP2 DiT, world-TP text encoder, tile-parallel VAE decode, FlashAttention 3 (Hopper).",
+                            "framework_ref": "lightx2v main 0c2edc12 (2026-10-05)",
+                            "upstream_recipe": {
+                                "repo": "ModelTC/LightX2V",
+                                "path": "configs/minimax_h3/minimax_h3_tp.json",
+                                "commit": "fabad30491",
+                                "commit_date": "2026-09-10",
+                                "section": "TP2 preset (scripts/minimax_h3/README.md parallel table: TP2 -> --nproc_per_node 2), served per 'Server and POST' with --model-variant fl2av"
+                            },
+                            "num_gpus": 2,
+                            "serve_args": "--model-variant fl2av",
+                            "notes": "VALIDATION PENDING (2026-10-08): derived offline from LightX2V main 0c2edc12, never run. Upstream's two-GPU MiniMax-H3 preset is configs/minimax_h3/minimax_h3_tp.json (the README's parallel table runs TP2 under torchrun --nproc_per_node 2), served as scripts/minimax_h3/server/start_server.sh does: --model-variant fl2av loads transformer/, there is no startup --task, and each request names task t2av. Kept from the preset: TP2 DiT, the text encoder tensor-parallel over the world group, resident DiT and text encoder, VAE spatiotemporal tile-parallel decode, sgl-kernel RMSNorm, no feature caching. Deviations from the preset, all for the benchmark's lossless policy: attn_type flash_attn3 in place of sage_attn2 (int8-QK SageAttention, a different numeric class; FA3 is the fastest exact kernel on Hopper); use_compile true (harness default) with rope_type torch_real_rope, the pairing of upstream's compile preset configs/minimax_h3/minimax_h3_compile.json (an eager run should go back to minimax_h3_triton_rope), but warmup false: that preset's startup warmup compiles at 480x480x158 and 544x960x124, and under torch.compile(dynamic=None) the second shape recompiles every block shape-dynamic, so the case's shape would be served by that dynamic graph -- the harness warms at the measured shape instead; use_adaln_cache false (the preset's true is required only with cpu_offload): that cache serves the ~13B-parameter, timestep-only AdaLN projections from an offline artifact built for one schedule, while sglang runs the standard path in this benchmark (its --minimax-h3-adaln-cache-path is off too), and the projections it skips are a bandwidth-bound read of about 24 GiB of weights per step, split across TP ranks (est. 0.1-0.4% of a step); infer_steps 49 (preset: 29): LightX2V counts DiT evaluations on linspace(1, 0, infer_steps + 1), sglang's num_inference_steps 50 counts the points of linspace(1, 0, 50), so both run the same 49 forwards on the same grid, shifted 12 (video) / 3 (audio). size and num_frames come from each request ([768, 1344], 124). Weights: the repo's Diffusers-layout components (sglang reads the native FL2VA/ and Ref2VA/ partitions of the same repo and revision -- the same checkpoint, packaged twice by MiniMax); model_allow_patterns fetches only what LightX2V reads. vae_cpu_offload false (preset: true) on 141+ GB cards. Resident per GPU: DiT ~31 GiB + text encoder <= 31 GiB + VAEs ~10 GiB -- fits H200/B200, not an 80 GB H100. First GPU round: A/B Ulysses2 (parallel {tensor_p_size: 1, seq_p_size: 2, seq_p_attn_type: ulysses}, the topology sglang runs here) against TP2, and vae_use_compile true (compiled VAE blocks, which upstream's non-CUDA presets set) against off. Needs LightX2V >= 9ea22feb (2026-09-10, --model-variant); the installer's default pin 7efd05f8 predates H3, so a round sets LIGHTX2V_INSTALL_SPEC to main."
+                        },
+                        "blackwell-tp2-fa2": {
+                            "description": "Datacenter Blackwell: the default command with FlashAttention 2 in place of the Hopper-only FA3.",
+                            "hardware": [
+                                "b200",
+                                "b300",
+                                "gb200",
+                                "gb300"
+                            ],
+                            "framework_ref": "lightx2v main 0c2edc12 (2026-10-05)",
+                            "upstream_recipe": {
+                                "repo": "ModelTC/LightX2V",
+                                "path": "configs/minimax_h3/minimax_h3_tp.json",
+                                "commit": "fabad30491",
+                                "commit_date": "2026-09-10",
+                                "section": "TP2 preset (scripts/minimax_h3/README.md parallel table: TP2 -> --nproc_per_node 2), served per 'Server and POST' with --model-variant fl2av"
+                            },
+                            "num_gpus": 2,
+                            "serve_args": "--model-variant fl2av",
+                            "lightx2v_config": {
+                                "attn_type": "flash_attn2"
+                            },
+                            "notes": "VALIDATION PENDING (2026-10-08). flash_attn3 is a Hopper-only kernel; FlashAttention 2 (source-built for sm_100) is what every LightX2V Blackwell profile here runs, the same exact-softmax class. Untested alternative: torch_sdpa (cuDNN / flash SDPA, what sglang resolves for H3 on B200). Otherwise the default profile; see its notes."
+                        }
+                    }
                 },
                 "comfyui": {
                     "num_gpus": 1,
@@ -4469,17 +4666,305 @@
                             "notes": "B200: --gpu-only keeps every model, text encoders included, stored and run on the card; a 183 GB B200 holds the largest graph here (MiniMax-H3: 62 GB DiT + 48 GB Qwen3-VL-32B + VAEs). Placement only, numerics unchanged. Measured 2026-09-25 on 1xB200, FLUX.1 eager, interleaved arms: default 5.94 / 5.77 / 5.79s against --gpu-only 5.56s and --gpu-only --disable-dynamic-vram 5.57s (Qwen-Image-2.1: 3.75 / 3.91 against 3.47 / 3.48) -- every --gpu-only arm below every default arm; disabling dynamic VRAM on top adds nothing, so the simpler flag is kept."
                         }
                     }
+                },
+                "fastvideo": {
+                    "num_gpus": 2,
+                    "output_audio": true,
+                    "extra_env": {
+                        "FASTVIDEO_MINIMAX_H3_EXACT_KERNELS": "all",
+                        "FASTVIDEO_H3_VAE_TILE_PARALLEL": "1",
+                        "FASTVIDEO_ULYSSES_A2A": "auto",
+                        "FASTVIDEO_MINIMAX_H3_FUSIONS": "0",
+                        "FASTVIDEO_MINIMAX_H3_FA4_PACKED_VARLEN": "0"
+                    },
+                    "command_profiles": {
+                        "default": {
+                            "description": "Hopper (H200): base H3 T2VA, Ulysses 2, DiT FSDP-sharded, text encoder and VAEs resident, regional DiT compile, FA3.",
+                            "framework_ref": "FastVideo main (2b164405c3d1 on 2026-10-07) installed `.[fasth3]` with uv: fastvideo-kernel 0.3.5 built from the same checkout, flash-attn-4 @14c37795, torch 2.12.0+cu130; FA3 from the prebuilt torch212-cu130 artifact",
+                            "upstream_recipe": {
+                                "repo": "hao-ai-lab/FastVideo",
+                                "path": "examples/inference/basic/basic_minimax_h3_t2v.py",
+                                "commit": "6e4813f8b408",
+                                "commit_date": "2026-10-07",
+                                "section": "main(): GeneratorConfig (cookbook recipe minimax-h3-t2v)"
+                            },
+                            "num_gpus": 2,
+                            "serve_args": "--generator.engine.use_fsdp_inference true --generator.engine.parallelism.tp_size 1 --generator.engine.parallelism.sp_size 2 --generator.engine.offload.dit false --generator.engine.offload.dit_layerwise false --generator.engine.offload.text_encoder false --generator.engine.offload.image_encoder false --generator.engine.offload.vae false --generator.engine.offload.lazy_module_load false --generator.engine.compile.enabled false --generator.engine.compile.vae_enabled false --generator.pipeline.workload_type t2v --generator.pipeline.experimental.attention_backend FLASH_ATTN --generator.pipeline.experimental.inference_torch_compile true --generator.pipeline.experimental.h3_sequential_load false --generator.pipeline.experimental.vae_parallel_decode true --generator.pipeline.experimental.vae_parallel_decode_strategy gather",
+                            "extra_env": {
+                                "FASTVIDEO_FA4": "0"
+                            },
+                            "notes": "Derived 2026-10-08 from FastVideo's T2VA recipe (SP = num_gpus, FSDP DiT, text encoder and VAE offloaded, eager DiT) for a resident server: no offload, `inference_torch_compile` (FastVideo's regional per-block compile, safe on FA2/FA3/FA4), VAE uncompiled so #1930's bitwise tile split runs. #1930/#1807's bit-identical switches are on (exact RoPE/AdaLN/SwiGLU kernels, VAE tile split, fused Ulysses all-to-all) and the output-changing ones off (FP32 round-once H3 fusions, FA4 packed varlen). The DiT stays FSDP-sharded on Hopper: replicated, the 66.3 GB DiT, the resident 66.7 GB Qwen3-VL and the 11 GB of VAEs come to 144 GB, more than a 141 GB H200 holds. FA3 is what FastVideo's FLASH_ATTN loads when FASTVIDEO_FA4=0 and flash_attn_interface imports; without it FastVideo falls back to SDPA silently. Steps: FastVideo counts sigma grid points as sglang does (scheduling_minimax_h3.py: linspace(1, 0, num_inference_steps)), so 50 runs 49 forwards, as on sglang; vLLM-Omni counts evaluations and runs 50 for the same field. The 12/3 shifts come from the checkpoint's scheduler configs: FastVideo rejects a flow_shift for H3. VALIDATION PENDING (2026-10-08): check the log for 'Using FlashAttention-3 backend', that compile happens inside the harness warmups, and A/B against DIFFUSION_BENCH_DISABLE_TORCH_COMPILE=1 (eager, where the exact kernels take over)."
+                        },
+                        "blackwell-2gpu": {
+                            "description": "Datacenter Blackwell: base H3 T2VA, Ulysses 2, DiT replicated, everything resident, regional DiT compile, FA4.",
+                            "hardware": [
+                                "b200",
+                                "b300",
+                                "gb200",
+                                "gb300"
+                            ],
+                            "framework_ref": "FastVideo main (2b164405c3d1 on 2026-10-07) installed `.[fasth3]` with uv: fastvideo-kernel 0.3.5 built from the same checkout, flash-attn-4 @14c37795, torch 2.12.0+cu130; FA3 from the prebuilt torch212-cu130 artifact",
+                            "upstream_recipe": {
+                                "repo": "hao-ai-lab/FastVideo",
+                                "path": "examples/inference/basic/basic_minimax_h3_t2v.py",
+                                "commit": "6e4813f8b408",
+                                "commit_date": "2026-10-07",
+                                "section": "main(): GeneratorConfig (cookbook recipe minimax-h3-t2v)"
+                            },
+                            "num_gpus": 2,
+                            "serve_args": "--generator.engine.use_fsdp_inference false --generator.engine.parallelism.tp_size 1 --generator.engine.parallelism.sp_size 2 --generator.engine.offload.dit false --generator.engine.offload.dit_layerwise false --generator.engine.offload.text_encoder false --generator.engine.offload.image_encoder false --generator.engine.offload.vae false --generator.engine.offload.lazy_module_load false --generator.engine.compile.enabled false --generator.engine.compile.vae_enabled false --generator.pipeline.workload_type t2v --generator.pipeline.experimental.attention_backend FLASH_ATTN --generator.pipeline.experimental.inference_torch_compile true --generator.pipeline.experimental.h3_sequential_load false --generator.pipeline.experimental.vae_parallel_decode true --generator.pipeline.experimental.vae_parallel_decode_strategy gather",
+                            "extra_env": {
+                                "FASTVIDEO_FA4": "1"
+                            },
+                            "notes": "The default profile with the DiT replicated (a 183 GB B200 holds both 66 GB models and the 11 GB of VAEs, ~40 GB to spare; FastVideo's measured GB200 FastH3 layout replicates it) and FA4, which FastVideo never auto-selects (FASTVIDEO_FA4=1). VALIDATION PENDING (2026-10-08): check 'Using FlashAttention-4 backend' and the memory headroom on B200, and A/B against FSDP and against compile off."
+                        }
+                    }
                 }
             },
             "report_framework_statuses": {
-                "lightx2v": "unsupported",
                 "trtllm-visual": "unsupported",
                 "diffusers": "unsupported"
             },
             "report_framework_reasons": {
-                "lightx2v": "No MiniMax-H3 pipeline in LightX2V as of 2026-08; a turbo LoRA effort for H3 was blocked by the model license's territory clause (excludes EU/UK/South Korea/US), not by missing engineering support.",
                 "trtllm-visual": "trtllm-visual's tracked scope in this harness is image cases; H3 is a video+audio model.",
                 "diffusers": "MiniMax-H3 is integrated as Modular Diffusers blocks only (no DiffusionPipeline), and only via an unmerged PR (huggingface/diffusers#14355 -- pip install git+.../diffusers.git@refs/pull/14355/head). Not a servable baseline path today."
+            }
+        },
+        {
+            "id": "minimax_h3_t2va_5s_4gpu",
+            "model": "MiniMaxAI/MiniMax-H3",
+            "task": "text-to-video",
+            "label": "MiniMax-H3 T2V+A (4 GPU)",
+            "throughput": false,
+            "prompt": "At night, while their owner sleeps in a bedroom, three cats march in loudly playing tiny brass instruments, then abruptly file out.",
+            "width": 1344,
+            "height": 768,
+            "num_frames": 124,
+            "seed": 1101,
+            "num_gpus": 4,
+            "fps": 24,
+            "num_inference_steps": 50,
+            "framework_request_extra": {
+                "sglang": {
+                    "task": "t2va",
+                    "conditions": [],
+                    "target": {
+                        "short_edge": 768,
+                        "aspect_ratio": "16:9",
+                        "duration_seconds": 5.0
+                    },
+                    "flow_shift": 12.0,
+                    "audio_flow_shift": 3.0,
+                    "num_frames": null,
+                    "fps": null
+                },
+                "vllm-omni": {
+                    "extra_params": {
+                        "task": "t2va",
+                        "duration": 5.0,
+                        "audio_flow_shift": 3.0,
+                        "aspect_ratio": "16:9",
+                        "preencode_mp4": true
+                    },
+                    "flow_shift": 12.0,
+                    "num_inference_steps": 49
+                },
+                "fastvideo": {
+                    "task": "t2va",
+                    "guidance_scale": 1.0
+                },
+                "lightx2v": {
+                    "task": "t2av"
+                }
+            },
+            "_note": "vLLM-Omni requests carry extra_params.preencode_mp4=true (2026-10-08): its documented, off-by-default overlap of MP4 encoding with the VAE decode (byte-identical frames), the counterpart of sglang's default streamed encode (#41819). Both engines run their best documented output path. vLLM-Omni gets num_inference_steps 49 (2026-10-08): since vllm-omni #7219 (2026-09-24) it reads N as N model passes on linspace(1, 0, N+1), while sglang, FastVideo and LightX2V's 49 read 50 as 50 sigma grid points, i.e. 49 passes; 49 gives Omni the identical 50-point grid. Earlier H3 rounds ran Omni one pass more.",
+            "frameworks": {
+                "sglang": {
+                    "serve_args": "--model-type diffusion --warmup-mode server --model-variant fl2va --ulysses-degree 4 --encoder-parallel auto --performance-mode speed --enable-torch-compile false",
+                    "command_profiles": {
+                        "default": {
+                            "description": "sglang's cookbook '4xH200 resident' command: Ulysses 4, encoder folded across the four GPUs, resident (speed), eager.",
+                            "sglang_ref": "origin/main",
+                            "num_gpus": 4,
+                            "serve_args": "--model-type diffusion --warmup-mode server --model-variant fl2va --ulysses-degree 4 --encoder-parallel auto --performance-mode speed --enable-torch-compile false",
+                            "notes": "docs/cookbook/diffusion/MiniMax/MiniMax-H3.mdx, '4xH200 resident' (checked 2026-10-08): pure Ulysses4 is the faster measured topology on H200, not just a capacity default.",
+                            "policy_exception": "Correctness exception, not a speed tradeoff: MiniMax-H3's torch.compile path changes numerical output per the sglang cookbook (docs/cookbook/diffusion/MiniMax/MiniMax-H3.mdx, checked 2026-08-07) -- compile is not enabled by any recommended lossless preset for this model and must not be used to generate consistency ground truth. --enable-torch-compile stays false in every profile for this case until upstream fixes the numerics."
+                        }
+                    }
+                },
+                "vllm-omni": {
+                    "num_gpus": 4,
+                    "serve_args": "--trust-remote-code --task-type fl2va --num-gpus 4 --usp 4 --ring 1 --vae-patch-parallel-size 4 --vae-parallel-mode tile --vae-use-tiling",
+                    "extra_env": {
+                        "VLLM_WORKER_MULTIPROC_METHOD": "spawn",
+                        "VLLM_OMNI_VIDEO_SYNC_TIMEOUT": "1800"
+                    },
+                    "command_profiles": {
+                        "default": {
+                            "description": "vLLM-Omni's 'Four GPUs' recipe as written: no offload, Ulysses 4, native tiled VAE patch parallelism 4, regional compile, Omni's default attention for the hardware.",
+                            "framework_ref": "vllm-omni main",
+                            "upstream_recipe": {
+                                "repo": "vllm-project/vllm-omni",
+                                "path": "recipes/MiniMaxAI/MiniMax-H3.md",
+                                "commit": "b65f97bc4",
+                                "commit_date": "2026-10-04",
+                                "section": "Four GPUs: throughput-oriented combined service"
+                            },
+                            "num_gpus": 4,
+                            "serve_args": "--trust-remote-code --task-type fl2va --num-gpus 4 --usp 4 --ring 1 --vae-patch-parallel-size 4 --vae-parallel-mode tile --vae-use-tiling",
+                            "notes": "The recipe's own four-GPU command, unscaled. VALIDATION PENDING (2026-10-08): attention backend and TP/USP split to be measured per hardware, as on two GPUs."
+                        }
+                    },
+                    "reason": "Empirically validated 2026-08-07, first on minimax-h3-5090-2gpu-v4 (2x RTX 5090) then on 2xB200: the default (compiled) profile segfaults identically on both GPU classes 1 step into denoising (see command_profiles.default.notes) -- a confirmed hardware-independent vLLM-Omni bug, despite the recipe's own claim that torch.compile is 'not enabled by default on consumer paths.' --enforce-eager avoids that segfault, but on RTX 5090 it fails differently at startup (a diffusion worker process dies before completing its init handshake, surfaced as EOFError) and never completes a request on that GPU class. On 2xB200 the identical --enforce-eager command works cleanly and completes a correct generation -- see command_profiles.b200-2gpu for the validated numbers and the sglang comparison on the same hardware. Net: vLLM-Omni H3 support is real but fragile below the B200 class tested here; RTX 5090 has no working profile for this case in either variant."
+                },
+                "lightx2v": {
+                    "model_cls": "minimax_h3",
+                    "num_gpus": 4,
+                    "serve_args": "--model-variant fl2av",
+                    "model_allow_patterns": [
+                        "transformer/*",
+                        "text_encoder/*",
+                        "tokenizer/*",
+                        "processor/*",
+                        "vae/*",
+                        "audio_vae/*"
+                    ],
+                    "extra_env": {
+                        "DTYPE": "BF16",
+                        "SENSITIVE_LAYER_DTYPE": "BF16",
+                        "PROFILING_DEBUG_LEVEL": "0",
+                        "TOKENIZERS_PARALLELISM": "false",
+                        "PYTORCH_CUDA_ALLOC_CONF": "expandable_segments:True",
+                        "PYTORCH_ALLOC_CONF": "expandable_segments:True"
+                    },
+                    "lightx2v_config": {
+                        "infer_steps": 49,
+                        "video_flow_shift": 12.0,
+                        "audio_flow_shift": 3.0,
+                        "enable_cfg": false,
+                        "cpu_offload": false,
+                        "text_encoder_cpu_offload": false,
+                        "vae_cpu_offload": false,
+                        "use_adaln_cache": false,
+                        "text_encoder_tensor_parallel": true,
+                        "vae_decode_parallel": true,
+                        "lazy_load": false,
+                        "unload_modules": false,
+                        "attn_type": "flash_attn3",
+                        "rms_type": "sgl-kernel",
+                        "rope_type": "torch_real_rope",
+                        "feature_caching": "NoCaching",
+                        "warmup": false,
+                        "vae_spatial_scale_factor": 16,
+                        "audio_sampling_rate": 32000,
+                        "parallel": {
+                            "seq_p_size": 4,
+                            "seq_p_attn_type": "ulysses"
+                        }
+                    },
+                    "command_profiles": {
+                        "default": {
+                            "description": "LightX2V's four-GPU MiniMax-H3 preset made resident and compiled: Ulysses SP4, world-TP text encoder, tile-parallel VAE decode, FlashAttention 3 (Hopper).",
+                            "framework_ref": "lightx2v main 0c2edc12 (2026-10-05)",
+                            "upstream_recipe": {
+                                "repo": "ModelTC/LightX2V",
+                                "path": "configs/minimax_h3/minimax_h3_sp.json",
+                                "commit": "fabad30491",
+                                "commit_date": "2026-09-10",
+                                "section": "SP4 preset, the default of scripts/minimax_h3/run_minimax_h3_t2av_parallel.sh; served per 'Server and POST' with --model-variant fl2av"
+                            },
+                            "num_gpus": 4,
+                            "serve_args": "--model-variant fl2av",
+                            "notes": "VALIDATION PENDING (2026-10-08): derived offline from LightX2V main 0c2edc12, never run. configs/minimax_h3/minimax_h3_sp.json is the four-GPU preset scripts/minimax_h3/run_minimax_h3_t2av_parallel.sh launches by default (SP4, Ulysses), served as scripts/minimax_h3/server/start_server.sh does (--model-variant fl2av, no startup --task, each request names task t2av); pure Ulysses 4 is also the topology sglang and vLLM-Omni run for this case. Kept from the preset: SP4 Ulysses, tile-parallel VAE decode, sgl-kernel RMSNorm, no feature caching. cpu_offload, text_encoder_cpu_offload and vae_cpu_offload false (preset: all true) on 141+ GB cards, and text_encoder_tensor_parallel true: the preset offloads a replicated text encoder, which resident would put up to 62 GiB more on every GPU next to the 62 GiB replicated DiT; sharding it over the world group is what upstream's SP8 configs do (minimax_h3_ref2av_sp_sol_5090.json). Deviations from the preset, all for the benchmark's lossless policy: attn_type flash_attn3 in place of sage_attn2 (int8-QK SageAttention, a different numeric class; FA3 is the fastest exact kernel on Hopper); use_compile true (harness default) with rope_type torch_real_rope, the pairing of upstream's compile preset configs/minimax_h3/minimax_h3_compile.json (an eager run should go back to minimax_h3_triton_rope), but warmup false: that preset's startup warmup compiles at 480x480x158 and 544x960x124, and under torch.compile(dynamic=None) the second shape recompiles every block shape-dynamic, so the case's shape would be served by that dynamic graph -- the harness warms at the measured shape instead; use_adaln_cache false (the preset's true is required only with cpu_offload): that cache serves the ~13B-parameter, timestep-only AdaLN projections from an offline artifact built for one schedule, while sglang runs the standard path in this benchmark (its --minimax-h3-adaln-cache-path is off too), and the projections it skips are a bandwidth-bound read of about 24 GiB of weights per step, split across TP ranks (est. 0.1-0.4% of a step); infer_steps 49 (preset: 29): LightX2V counts DiT evaluations on linspace(1, 0, infer_steps + 1), sglang's num_inference_steps 50 counts the points of linspace(1, 0, 50), so both run the same 49 forwards on the same grid, shifted 12 (video) / 3 (audio). size and num_frames come from each request ([768, 1344], 124). Weights: the repo's Diffusers-layout components (sglang reads the native FL2VA/ and Ref2VA/ partitions of the same repo and revision -- the same checkpoint, packaged twice by MiniMax); model_allow_patterns fetches only what LightX2V reads. Resident per GPU: DiT ~62 GiB (replicated under SP) + text encoder <= 16 GiB + VAEs ~10 GiB. First GPU round: A/B TP2 x SP2 (configs/minimax_h3/minimax_h3_tp_sp.json: parallel {tensor_p_size: 2, seq_p_size: 2, seq_p_attn_type: ulysses}) against SP4, and vae_use_compile true against off. Needs LightX2V >= 9ea22feb (2026-09-10, --model-variant); the installer's default pin 7efd05f8 predates H3, so a round sets LIGHTX2V_INSTALL_SPEC to main."
+                        },
+                        "blackwell-sp4-fa2": {
+                            "description": "Datacenter Blackwell: the default command with FlashAttention 2 in place of the Hopper-only FA3.",
+                            "hardware": [
+                                "b200",
+                                "b300",
+                                "gb200",
+                                "gb300"
+                            ],
+                            "framework_ref": "lightx2v main 0c2edc12 (2026-10-05)",
+                            "upstream_recipe": {
+                                "repo": "ModelTC/LightX2V",
+                                "path": "configs/minimax_h3/minimax_h3_sp.json",
+                                "commit": "fabad30491",
+                                "commit_date": "2026-09-10",
+                                "section": "SP4 preset, the default of scripts/minimax_h3/run_minimax_h3_t2av_parallel.sh; served per 'Server and POST' with --model-variant fl2av"
+                            },
+                            "num_gpus": 4,
+                            "serve_args": "--model-variant fl2av",
+                            "lightx2v_config": {
+                                "attn_type": "flash_attn2"
+                            },
+                            "notes": "VALIDATION PENDING (2026-10-08). flash_attn3 is a Hopper-only kernel; FlashAttention 2 (source-built for sm_100) is what every LightX2V Blackwell profile here runs, the same exact-softmax class. Untested alternative: torch_sdpa (cuDNN / flash SDPA, what sglang resolves for H3 on B200). Otherwise the default profile; see its notes."
+                        }
+                    }
+                },
+                "fastvideo": {
+                    "num_gpus": 4,
+                    "output_audio": true,
+                    "extra_env": {
+                        "FASTVIDEO_MINIMAX_H3_EXACT_KERNELS": "all",
+                        "FASTVIDEO_H3_VAE_TILE_PARALLEL": "1",
+                        "FASTVIDEO_ULYSSES_A2A": "auto",
+                        "FASTVIDEO_MINIMAX_H3_FUSIONS": "0",
+                        "FASTVIDEO_MINIMAX_H3_FA4_PACKED_VARLEN": "0"
+                    },
+                    "command_profiles": {
+                        "default": {
+                            "description": "Hopper (H200): base H3 T2VA, Ulysses 4, DiT FSDP-sharded, text encoder and VAEs resident, regional DiT compile, FA3.",
+                            "framework_ref": "FastVideo main (2b164405c3d1 on 2026-10-07) installed `.[fasth3]` with uv: fastvideo-kernel 0.3.5 built from the same checkout, flash-attn-4 @14c37795, torch 2.12.0+cu130; FA3 from the prebuilt torch212-cu130 artifact",
+                            "upstream_recipe": {
+                                "repo": "hao-ai-lab/FastVideo",
+                                "path": "examples/inference/basic/basic_minimax_h3_t2v.py",
+                                "commit": "6e4813f8b408",
+                                "commit_date": "2026-10-07",
+                                "section": "main(): GeneratorConfig (cookbook recipe minimax-h3-t2v)"
+                            },
+                            "num_gpus": 4,
+                            "serve_args": "--generator.engine.use_fsdp_inference true --generator.engine.parallelism.tp_size 1 --generator.engine.parallelism.sp_size 4 --generator.engine.offload.dit false --generator.engine.offload.dit_layerwise false --generator.engine.offload.text_encoder false --generator.engine.offload.image_encoder false --generator.engine.offload.vae false --generator.engine.offload.lazy_module_load false --generator.engine.compile.enabled false --generator.engine.compile.vae_enabled false --generator.pipeline.workload_type t2v --generator.pipeline.experimental.attention_backend FLASH_ATTN --generator.pipeline.experimental.inference_torch_compile true --generator.pipeline.experimental.h3_sequential_load false --generator.pipeline.experimental.vae_parallel_decode true --generator.pipeline.experimental.vae_parallel_decode_strategy gather",
+                            "extra_env": {
+                                "FASTVIDEO_FA4": "0"
+                            },
+                            "notes": "Derived 2026-10-08 from FastVideo's T2VA recipe (SP = num_gpus, FSDP DiT, text encoder and VAE offloaded, eager DiT) for a resident server: no offload, `inference_torch_compile` (FastVideo's regional per-block compile, safe on FA2/FA3/FA4), VAE uncompiled so #1930's bitwise tile split runs. #1930/#1807's bit-identical switches are on (exact RoPE/AdaLN/SwiGLU kernels, VAE tile split, fused Ulysses all-to-all) and the output-changing ones off (FP32 round-once H3 fusions, FA4 packed varlen). The DiT stays FSDP-sharded on Hopper: replicated, the 66.3 GB DiT, the resident 66.7 GB Qwen3-VL and the 11 GB of VAEs come to 144 GB, more than a 141 GB H200 holds. FA3 is what FastVideo's FLASH_ATTN loads when FASTVIDEO_FA4=0 and flash_attn_interface imports; without it FastVideo falls back to SDPA silently. Steps: FastVideo counts sigma grid points as sglang does (scheduling_minimax_h3.py: linspace(1, 0, num_inference_steps)), so 50 runs 49 forwards, as on sglang; vLLM-Omni counts evaluations and runs 50 for the same field. The 12/3 shifts come from the checkpoint's scheduler configs: FastVideo rejects a flow_shift for H3. VALIDATION PENDING (2026-10-08): check the log for 'Using FlashAttention-3 backend', that compile happens inside the harness warmups, and A/B against DIFFUSION_BENCH_DISABLE_TORCH_COMPILE=1 (eager, where the exact kernels take over)."
+                        },
+                        "blackwell-4gpu": {
+                            "description": "Datacenter Blackwell: base H3 T2VA, Ulysses 4, DiT replicated, everything resident, regional DiT compile, FA4.",
+                            "hardware": [
+                                "b200",
+                                "b300",
+                                "gb200",
+                                "gb300"
+                            ],
+                            "framework_ref": "FastVideo main (2b164405c3d1 on 2026-10-07) installed `.[fasth3]` with uv: fastvideo-kernel 0.3.5 built from the same checkout, flash-attn-4 @14c37795, torch 2.12.0+cu130; FA3 from the prebuilt torch212-cu130 artifact",
+                            "upstream_recipe": {
+                                "repo": "hao-ai-lab/FastVideo",
+                                "path": "examples/inference/basic/basic_minimax_h3_t2v.py",
+                                "commit": "6e4813f8b408",
+                                "commit_date": "2026-10-07",
+                                "section": "main(): GeneratorConfig (cookbook recipe minimax-h3-t2v)"
+                            },
+                            "num_gpus": 4,
+                            "serve_args": "--generator.engine.use_fsdp_inference false --generator.engine.parallelism.tp_size 1 --generator.engine.parallelism.sp_size 4 --generator.engine.offload.dit false --generator.engine.offload.dit_layerwise false --generator.engine.offload.text_encoder false --generator.engine.offload.image_encoder false --generator.engine.offload.vae false --generator.engine.offload.lazy_module_load false --generator.engine.compile.enabled false --generator.engine.compile.vae_enabled false --generator.pipeline.workload_type t2v --generator.pipeline.experimental.attention_backend FLASH_ATTN --generator.pipeline.experimental.inference_torch_compile true --generator.pipeline.experimental.h3_sequential_load false --generator.pipeline.experimental.vae_parallel_decode true --generator.pipeline.experimental.vae_parallel_decode_strategy gather",
+                            "extra_env": {
+                                "FASTVIDEO_FA4": "1"
+                            },
+                            "notes": "The default profile with the DiT replicated (a 183 GB B200 holds both 66 GB models and the 11 GB of VAEs, ~40 GB to spare; FastVideo's measured GB200 FastH3 layout replicates it) and FA4, which FastVideo never auto-selects (FASTVIDEO_FA4=1). VALIDATION PENDING (2026-10-08): check 'Using FlashAttention-4 backend' and the memory headroom on B200, and A/B against FSDP and against compile off."
+                        }
+                    }
+                }
+            },
+            "report_framework_statuses": {
+                "trtllm-visual": "unsupported",
+                "diffusers": "unsupported",
+                "comfyui": "not_run"
+            },
+            "report_framework_reasons": {
+                "trtllm-visual": "trtllm-visual's tracked scope in this harness is image cases; H3 is a video+audio model.",
+                "diffusers": "MiniMax-H3 is integrated as Modular Diffusers blocks only (no DiffusionPipeline), and only via an unmerged PR (huggingface/diffusers#14355 -- pip install git+.../diffusers.git@refs/pull/14355/head). Not a servable baseline path today.",
+                "comfyui": "ComfyUI has no sequence or tensor parallelism (its one multi-GPU path splits CFG branches, and H3 runs without CFG), so a four-GPU cell would be its one-GPU number; that number is in minimax_h3_t2va_5s."
             }
         },
         {
@@ -4495,6 +4980,8 @@
             "num_gpus": 2,
             "fps": 24,
             "num_inference_steps": 50,
+            "reference_short_edge": 2048,
+            "reference_multiple": 32,
             "framework_request_extra": {
                 "sglang": {
                     "task": "ref2va",
@@ -4520,12 +5007,26 @@
                         "task": "ref2va",
                         "duration": 5.0,
                         "audio_flow_shift": 3.0,
-                        "aspect_ratio": "16:9"
+                        "aspect_ratio": "16:9",
+                        "preencode_mp4": true
                     },
-                    "flow_shift": 12.0
+                    "flow_shift": 12.0,
+                    "num_inference_steps": 49
+                },
+                "fastvideo": {
+                    "task": "ref2va",
+                    "image_reference": [
+                        {
+                            "image_url": "__TEST_IMAGE_URL__"
+                        }
+                    ],
+                    "guidance_scale": 1.0
+                },
+                "lightx2v": {
+                    "task": "ref2av"
                 }
             },
-            "_note": "Ref2VA is selected by the conditions[] entry with role=reference, not by the harness's reference_image multipart path; __TEST_IMAGE_URL__ is substituted with meta.test_image_url at request time. Validated on 2x H200 2026-08-26: 222.4s single_e2e (t2va on the same box is 146.7s -- reference conditioning costs ~1.5x).",
+            "_note": "Ref2VA is selected by the conditions[] entry with role=reference, not by the harness's reference_image multipart path; __TEST_IMAGE_URL__ is substituted at request time with that request's own copy of meta.test_image_url as a data: URI (until 2026-09-30 with the URL itself, which the server downloaded inside the measured window). Validated on 2x H200 2026-08-26: 222.4s single_e2e (t2va on the same box is 146.7s -- reference conditioning costs ~1.5x). The harness hands every framework the reference already at the official rule's size (reference_short_edge/reference_multiple: 2048px short edge, upscaling allowed, LANCZOS, nearest 32 -- diffusers' MiniMax-H3 modular pipeline `reference_image_short_edge`, and sglang's reference_encoding.py). vLLM-Omni stopped upscaling small references on 2026-09-28 (#8253) and ComfyUI never does, so without this they condition on ~8x fewer reference tokens than the official pipeline (the 1024x704 test image: ~2800 vs ~23800). vLLM-Omni requests carry extra_params.preencode_mp4=true (2026-10-08): its documented, off-by-default overlap of MP4 encoding with the VAE decode (byte-identical frames), the counterpart of sglang's default streamed encode (#41819). Both engines run their best documented output path. vLLM-Omni gets num_inference_steps 49 (2026-10-08): since vllm-omni #7219 (2026-09-24) it reads N as N model passes on linspace(1, 0, N+1), while sglang, FastVideo and LightX2V's 49 read 50 as 50 sigma grid points, i.e. 49 passes; 49 gives Omni the identical 50-point grid. Earlier H3 rounds ran Omni one pass more.",
             "frameworks": {
                 "sglang": {
                     "serve_args": "--model-type diffusion --warmup-mode server --model-variant fl2va --enable-torch-compile false",
@@ -4565,39 +5066,184 @@
                 "vllm-omni": {
                     "reference_image": true,
                     "num_gpus": 2,
-                    "serve_args": "--trust-remote-code --tensor-parallel-size 2 --enforce-eager --enable-distributed-layerwise-offload --dlo-no-use-allgather --dlo-resident-layers 20 --diffusion-attention-backend CUDNN_ATTN",
+                    "serve_args": "--trust-remote-code --task-type ref2va --num-gpus 2 --tensor-parallel-size 2 --usp 1 --ring 1 --text-encoder-tp-size 2 --vae-patch-parallel-size 2 --vae-parallel-mode tile --vae-use-tiling",
                     "extra_env": {
                         "VLLM_WORKER_MULTIPROC_METHOD": "spawn",
                         "VLLM_OMNI_VIDEO_SYNC_TIMEOUT": "1800"
                     },
                     "command_profiles": {
                         "default": {
-                            "description": "vLLM-Omni's own 2-GPU MiniMax-H3 recipe (TP2, distributed layerwise offload, compile path). Reaches health and accepts a request, then crashes during generation -- kept for provenance, not a working profile on any GPU class tested so far.",
-                            "framework_ref": "vllm-omni recipes/MiniMaxAI/MiniMax-H3.md (2-GPU section); installed from git main (0.26.1.dev45+g24ede9e22 on RTX 5090, 0.26.1.dev50+gcfa6d66ed on B200) + vllm==0.26.0, not the repo's default pinned vllm-omni==0.18.0",
+                            "description": "vLLM-Omni's fastest measured MiniMax-H3 command on datacenter GPUs: TP2, text-encoder TP2, native tiled VAE patch parallelism 2, resident, compiled, Omni's default attention for the hardware.",
+                            "framework_ref": "vllm-omni main 56763cd6c383 + vllm==0.30.0",
+                            "upstream_recipe": {
+                                "repo": "vllm-project/vllm-omni",
+                                "path": "recipes/MiniMaxAI/MiniMax-H3.md",
+                                "commit": "7266fc613",
+                                "commit_date": "2026-09-28",
+                                "section": "Two 24/32 GB GPUs: TP2 distributed layerwise offload"
+                            },
                             "num_gpus": 2,
-                            "serve_args": "--trust-remote-code --tensor-parallel-size 2 --enable-distributed-layerwise-offload --dlo-no-use-allgather --dlo-resident-layers 20 --diffusion-attention-backend CUDNN_ATTN",
-                            "notes": "Requires ffmpeg/ffprobe on PATH for MP4 muxing. The request also needs `aspect_ratio` inside extra_params (the recipe's own T2VA example omits it and 422s with 'RuntimeError: t2va requires an explicit aspect_ratio' as written). CONFIRMED HARDWARE-INDEPENDENT 2026-08-07: re-ran this exact profile on 2xB200 (sm100, datacenter Blackwell) -- it segfaults with the identical signature as on RTX 5090 (native segfault, Python trace through torch Dynamo's custom_eval_frame), 1 step into denoising. Same bug on two unrelated GPU architectures rules out a consumer-GPU/SM120 quirk; this is a real vLLM-Omni MiniMax-H3 stability bug in the compiled path, not something fixable from the benchmark harness. Use the enforce-eager / b200-2gpu profile instead."
+                            "serve_args": "--trust-remote-code --task-type ref2va --num-gpus 2 --tensor-parallel-size 2 --usp 1 --ring 1 --text-encoder-tp-size 2 --vae-patch-parallel-size 2 --vae-parallel-mode tile --vae-use-tiling",
+                            "notes": "Same command as minimax_h3_t2va_5s with --task-type ref2va, measured 2026-09-30 with the reference prepared at the official 2048px short edge for every framework: 2xH200 230.71/231.02 s against sglang 225.02/225.25 s. The T2V+A measurements that chose this command are in minimax_h3_t2va_5s."
                         },
-                        "enforce-eager": {
-                            "description": "Same recipe with --enforce-eager, tried after the default profile segfaulted. Fails differently (and earlier) on RTX 5090, but is the profile that actually works on B200 -- see command_profiles.b200-2gpu.",
-                            "framework_ref": "vllm-omni recipes/MiniMaxAI/MiniMax-H3.md (2-GPU section) + --enforce-eager",
-                            "num_gpus": 2,
-                            "serve_args": "--trust-remote-code --tensor-parallel-size 2 --enforce-eager --enable-distributed-layerwise-offload --dlo-no-use-allgather --dlo-resident-layers 20 --diffusion-attention-backend CUDNN_ATTN",
-                            "notes": "On RTX 5090 this crashes during server startup (EOFError: a diffusion worker process dies before completing its init handshake) rather than during generation, and never reaches a request. UPDATE 2026-08-07: the identical flags reach health and complete a real generation on 2xB200 -- see command_profiles.b200-2gpu for the hardware-scoped, validated version of this same command."
-                        },
-                        "b200-2gpu": {
-                            "description": "2x B200, same recipe as enforce-eager -- the profile that actually completes a generation for this case.",
+                        "blackwell-2gpu": {
+                            "description": "Datacenter Blackwell: the default command with cuDNN attention, fastest measured on B200.",
                             "hardware": [
                                 "b200",
-                                "b300"
+                                "b300",
+                                "gb200",
+                                "gb300"
+                            ],
+                            "framework_ref": "vllm-omni main 56763cd6c383 + vllm==0.30.0",
+                            "upstream_recipe": {
+                                "repo": "vllm-project/vllm-omni",
+                                "path": "recipes/MiniMaxAI/MiniMax-H3.md",
+                                "commit": "7266fc613",
+                                "commit_date": "2026-09-28",
+                                "section": "Two 24/32 GB GPUs: TP2 distributed layerwise offload"
+                            },
+                            "num_gpus": 2,
+                            "serve_args": "--trust-remote-code --task-type ref2va --num-gpus 2 --tensor-parallel-size 2 --usp 1 --ring 1 --text-encoder-tp-size 2 --vae-patch-parallel-size 2 --vae-parallel-mode tile --vae-use-tiling --diffusion-attention-backend CUDNN_ATTN",
+                            "notes": "2xB200 with the prepared reference (2026-09-30): 113.49/113.32 s against sglang 110.71/110.92 s. Before the reference was prepared, vLLM-Omni read 84.6 s here because it had stopped upscaling the 1024x704 test image (#8253) and encoded ~8x fewer reference tokens. The recipe's two-GPU section selects cuDNN attention; on 2xB200 T2V+A it measured 73.55 s where the high-memory section's TRTLLM_ATTN (with USP2) measured 79.4 s. TP2 with TRTLLM_ATTN is unmeasured. Not validated on GB200/GB300 for Ref2VA."
+                        },
+                        "rtx5090-2gpu": {
+                            "description": "vLLM-Omni's 2x24/32 GB consumer recipe (TP2 + distributed layerwise offload, 20 resident blocks, eager, cuDNN attention) -- the capacity path for 32 GB cards.",
+                            "hardware": [
+                                "rtx5090",
+                                "rtx4090"
                             ],
                             "framework_ref": "vllm-omni recipes/MiniMaxAI/MiniMax-H3.md (2-GPU section) + --enforce-eager; git main 0.26.1.dev50+gcfa6d66ed + vllm==0.26.0",
                             "num_gpus": 2,
                             "serve_args": "--trust-remote-code --tensor-parallel-size 2 --enforce-eager --enable-distributed-layerwise-offload --dlo-no-use-allgather --dlo-resident-layers 20 --diffusion-attention-backend CUDNN_ATTN",
+                            "notes": "The recipe scopes this command to 'Two 24/32 GB GPUs ... two PCIe consumer GPUs'; 'cuDNN attention is selected explicitly for the RTX consumer path; the server stays eager'. On RTX 5090 it failed at startup on 0.26.1.dev45 (2026-08-07, see `consumer-dlo-compile-20260807`); not re-validated since.",
+                            "policy_exception": "Capacity, not speed (2026-08-07): the model does not fit 2x32 GB resident; offload and eager are the upstream recipe for this memory class."
+                        },
+                        "h100-2gpu-dlo": {
+                            "description": "H100 80 GB: the resident configuration cannot fit (one 62 GB DiT plus the 51.5 GB text encoder on rank 0), so this keeps the consumer TP2 + distributed layerwise offload command the case carried before 2026-09-30.",
+                            "hardware": [
+                                "h100"
+                            ],
+                            "framework_ref": "vllm-omni recipes/MiniMaxAI/MiniMax-H3.md (2-GPU section); installed from git main (0.26.1.dev45+g24ede9e22 on RTX 5090, 0.26.1.dev50+gcfa6d66ed on B200) + vllm==0.26.0, not the repo's default pinned vllm-omni==0.18.0",
+                            "num_gpus": 2,
+                            "serve_args": "--trust-remote-code --tensor-parallel-size 2 --enable-distributed-layerwise-offload --dlo-no-use-allgather --dlo-resident-layers 20 --diffusion-attention-backend CUDNN_ATTN",
+                            "notes": "Never run on H100 in a published round; validate before publishing an H100 H3 cell.",
+                            "policy_exception": "Capacity, not speed (2026-09-30, arithmetic from the recipe's sizes): resident needs >113 GB on rank 0, over H100's 80 GB; the recipe says to offload when the resident configuration does not fit."
+                        },
+                        "recipe-highmem-usp2": {
+                            "description": "The recipe's high-memory section ('Four GPUs: throughput-oriented combined service') scaled to two GPUs: USP2, VAE patch parallel 2, compiled, recipe-default attention. Measured slower than `default` on B200 and H200 (see its notes); kept for comparison, never selected.",
+                            "framework_ref": "vllm-omni main 56763cd6c383 + vllm==0.30.0",
+                            "upstream_recipe": {
+                                "repo": "vllm-project/vllm-omni",
+                                "path": "recipes/MiniMaxAI/MiniMax-H3.md",
+                                "commit": "7266fc613",
+                                "commit_date": "2026-09-28",
+                                "section": "Four GPUs: throughput-oriented combined service"
+                            },
+                            "num_gpus": 2,
+                            "serve_args": "--trust-remote-code --task-type ref2va --num-gpus 2 --usp 2 --ring 1 --vae-patch-parallel-size 2 --vae-parallel-mode tile --vae-use-tiling",
+                            "notes": "Derived 2026-09-30 from the recipe section above: its four-GPU command is `--num-gpus 4 --usp 4 --ring 1 --vae-patch-parallel-size 4 --vae-parallel-mode tile --vae-use-tiling`, scaled to num_gpus=2 the way the sglang profile scales the cookbook's Ulysses-4 resident recipe. `--task-type ref2va` loads only the partition this case serves (a combined server keeps both 62 GB DiTs resident, which with the 51.5 GB text encoder on rank 0 does not fit a 183 GB B200); sglang likewise loads one variant. Replaces the 2x24/32 GB consumer recipe (TP2 + distributed layerwise offload + eager + cuDNN) that every published round from 2026-08-07 to 2026-09-25 ran on 183 GB B200s -- see `consumer-dlo-eager-20260807`."
+                        },
+                        "consumer-dlo-eager-20260807": {
+                            "description": "PROVENANCE ONLY -- never selected. The command every published H3 round ran for vLLM-Omni on B200 from 2026-08-07 to 2026-09-25: the consumer recipe on a 183 GB card.",
+                            "framework_ref": "vllm-omni recipes/MiniMaxAI/MiniMax-H3.md (2-GPU section) + --enforce-eager; git main 0.26.1.dev50+gcfa6d66ed + vllm==0.26.0",
+                            "num_gpus": 2,
+                            "serve_args": "--trust-remote-code --tensor-parallel-size 2 --enforce-eager --enable-distributed-layerwise-offload --dlo-no-use-allgather --dlo-resident-layers 20 --diffusion-attention-backend CUDNN_ATTN",
                             "notes": "Validated 2026-08-07 on 2xB200 (h3-b200-2gpu-v2): completes the case's T2VA request end to end -- client wall 105.76s, server-reported inference_time_s 103.06, peak_memory_mb 24546. Output verified with ffprobe directly on the returned MP4: 124 frames @ 24 fps = 5.166667s, exactly matching the requested 5s/124-frame shape (the API's own JSON `seconds` field reported a stale '4' on both the submit and completed response -- a cosmetic metadata default unrelated to the real generation params, not a real duration shortfall; confirmed by decoding the actual file). Still uses the recipe's memory-constrained --dlo-resident-layers 20 offload even though B200's 183 GB has no need for it -- vllm-omni ships only one documented 2-GPU H3 recipe, so this is that recipe as-is, not a B200-tuned command; a fully-resident vllm-omni command may be faster but is not a documented starting point. Same request, same 2xB200 hardware, sglang's b200-2gpu profile: 80.64s/80.63s client wall, 75.42s inference_time_s -- sglang is ~1.31x faster than vLLM-Omni here."
+                        },
+                        "consumer-dlo-compile-20260807": {
+                            "description": "PROVENANCE ONLY -- never selected. The consumer recipe with compile, as first tried on 2026-08-07; it segfaulted one step into denoising on RTX 5090 and B200 (0.26.1.dev45/dev50).",
+                            "framework_ref": "vllm-omni recipes/MiniMaxAI/MiniMax-H3.md (2-GPU section); installed from git main (0.26.1.dev45+g24ede9e22 on RTX 5090, 0.26.1.dev50+gcfa6d66ed on B200) + vllm==0.26.0, not the repo's default pinned vllm-omni==0.18.0",
+                            "num_gpus": 2,
+                            "serve_args": "--trust-remote-code --tensor-parallel-size 2 --enable-distributed-layerwise-offload --dlo-no-use-allgather --dlo-resident-layers 20 --diffusion-attention-backend CUDNN_ATTN",
+                            "notes": "Requires ffmpeg/ffprobe on PATH for MP4 muxing. The request also needs `aspect_ratio` inside extra_params (the recipe's own T2VA example omits it and 422s with 'RuntimeError: t2va requires an explicit aspect_ratio' as written). CONFIRMED HARDWARE-INDEPENDENT 2026-08-07: re-ran this exact profile on 2xB200 (sm100, datacenter Blackwell) -- it segfaults with the identical signature as on RTX 5090 (native segfault, Python trace through torch Dynamo's custom_eval_frame), 1 step into denoising. Same bug on two unrelated GPU architectures rules out a consumer-GPU/SM120 quirk; this is a real vLLM-Omni MiniMax-H3 stability bug in the compiled path, not something fixable from the benchmark harness. Use the enforce-eager / b200-2gpu profile instead."
                         }
                     },
                     "reason": "Empirically validated 2026-08-07, first on minimax-h3-5090-2gpu-v4 (2x RTX 5090) then on 2xB200: the default (compiled) profile segfaults identically on both GPU classes 1 step into denoising (see command_profiles.default.notes) -- a confirmed hardware-independent vLLM-Omni bug, despite the recipe's own claim that torch.compile is 'not enabled by default on consumer paths.' --enforce-eager avoids that segfault, but on RTX 5090 it fails differently at startup (a diffusion worker process dies before completing its init handshake, surfaced as EOFError) and never completes a request on that GPU class. On 2xB200 the identical --enforce-eager command works cleanly and completes a correct generation -- see command_profiles.b200-2gpu for the validated numbers and the sglang comparison on the same hardware. Net: vLLM-Omni H3 support is real but fragile below the B200 class tested here; RTX 5090 has no working profile for this case in either variant."
+                },
+                "lightx2v": {
+                    "reference_image": true,
+                    "model_cls": "minimax_h3",
+                    "num_gpus": 2,
+                    "serve_args": "--model-variant ref2av",
+                    "model_allow_patterns": [
+                        "transformer_ref/*",
+                        "text_encoder/*",
+                        "tokenizer/*",
+                        "processor/*",
+                        "vae/*",
+                        "audio_vae/*"
+                    ],
+                    "extra_env": {
+                        "DTYPE": "BF16",
+                        "SENSITIVE_LAYER_DTYPE": "BF16",
+                        "PROFILING_DEBUG_LEVEL": "0",
+                        "TOKENIZERS_PARALLELISM": "false",
+                        "PYTORCH_CUDA_ALLOC_CONF": "expandable_segments:True",
+                        "PYTORCH_ALLOC_CONF": "expandable_segments:True"
+                    },
+                    "lightx2v_config": {
+                        "infer_steps": 49,
+                        "video_flow_shift": 12.0,
+                        "audio_flow_shift": 3.0,
+                        "enable_cfg": false,
+                        "cpu_offload": false,
+                        "text_encoder_cpu_offload": false,
+                        "vae_cpu_offload": false,
+                        "use_adaln_cache": false,
+                        "text_encoder_tensor_parallel": true,
+                        "vae_decode_parallel": true,
+                        "lazy_load": false,
+                        "unload_modules": false,
+                        "attn_type": "flash_attn3",
+                        "rms_type": "sgl-kernel",
+                        "rope_type": "torch_real_rope",
+                        "feature_caching": "NoCaching",
+                        "warmup": false,
+                        "vae_spatial_scale_factor": 16,
+                        "audio_sampling_rate": 32000,
+                        "parallel": {
+                            "tensor_p_size": 2
+                        }
+                    },
+                    "command_profiles": {
+                        "default": {
+                            "description": "LightX2V's two-GPU MiniMax-H3 preset on the reference transformer, resident and compiled: TP2 DiT, world-TP text encoder, tile-parallel VAE decode, FlashAttention 3 (Hopper).",
+                            "framework_ref": "lightx2v main 0c2edc12 (2026-10-05)",
+                            "upstream_recipe": {
+                                "repo": "ModelTC/LightX2V",
+                                "path": "configs/minimax_h3/minimax_h3_tp.json",
+                                "commit": "fabad30491",
+                                "commit_date": "2026-09-10",
+                                "section": "TP2 preset, served per scripts/minimax_h3/server/start_server_ref2av.sh with --model-variant ref2av"
+                            },
+                            "num_gpus": 2,
+                            "serve_args": "--model-variant ref2av",
+                            "notes": "VALIDATION PENDING (2026-10-08): derived offline from LightX2V main 0c2edc12, never run. The two-GPU preset configs/minimax_h3/minimax_h3_tp.json, served as scripts/minimax_h3/server/start_server_ref2av.sh does: --model-variant ref2av loads transformer_ref/ (the partition sglang's --model-variant ref2va loads; LightX2V's base variant also accepts ref2av requests, which would be a different transformer), no startup --task, each request names task ref2av. The reference reaches it as image_path, the server-local path of the harness's prepared file (2048 px short edge, nearest 32, this request's marked variant); LightX2V's default reference_image_resize_mode 'diffusers' is that same rule, so it encodes the file unchanged (the 4-step reference LoRA preset's 'match' mode is not used). Kept from the preset: TP2 DiT, world-TP text encoder, resident DiT and text encoder, tile-parallel VAE decode, sgl-kernel RMSNorm, no feature caching. Deviations from the preset, all for the benchmark's lossless policy: attn_type flash_attn3 in place of sage_attn2 (int8-QK SageAttention, a different numeric class; FA3 is the fastest exact kernel on Hopper); use_compile true (harness default) with rope_type torch_real_rope, the pairing of upstream's compile preset configs/minimax_h3/minimax_h3_compile.json (an eager run should go back to minimax_h3_triton_rope), but warmup false: that preset's startup warmup compiles at 480x480x158 and 544x960x124, and under torch.compile(dynamic=None) the second shape recompiles every block shape-dynamic, so the case's shape would be served by that dynamic graph -- the harness warms at the measured shape instead; use_adaln_cache false (the preset's true is required only with cpu_offload): that cache serves the ~13B-parameter, timestep-only AdaLN projections from an offline artifact built for one schedule, while sglang runs the standard path in this benchmark (its --minimax-h3-adaln-cache-path is off too), and the projections it skips are a bandwidth-bound read of about 24 GiB of weights per step, split across TP ranks (est. 0.1-0.4% of a step); infer_steps 49 (preset: 29): LightX2V counts DiT evaluations on linspace(1, 0, infer_steps + 1), sglang's num_inference_steps 50 counts the points of linspace(1, 0, 50), so both run the same 49 forwards on the same grid, shifted 12 (video) / 3 (audio). size and num_frames come from each request ([768, 1344], 124). Weights: the repo's Diffusers-layout components (sglang reads the native FL2VA/ and Ref2VA/ partitions of the same repo and revision -- the same checkpoint, packaged twice by MiniMax); model_allow_patterns fetches only what LightX2V reads. vae_cpu_offload false (preset: true) on 141+ GB cards. vae_encode_parallel (tile-parallel encode of the reference) is left off as in every datacenter preset; it appears only in a 5090 FP8 config. First GPU round: the A/Bs listed for minimax_h3_t2va_5s. Needs LightX2V >= 9ea22feb (2026-09-10, --model-variant); the installer's default pin 7efd05f8 predates H3, so a round sets LIGHTX2V_INSTALL_SPEC to main."
+                        },
+                        "blackwell-tp2-fa2": {
+                            "description": "Datacenter Blackwell: the default command with FlashAttention 2 in place of the Hopper-only FA3.",
+                            "hardware": [
+                                "b200",
+                                "b300",
+                                "gb200",
+                                "gb300"
+                            ],
+                            "framework_ref": "lightx2v main 0c2edc12 (2026-10-05)",
+                            "upstream_recipe": {
+                                "repo": "ModelTC/LightX2V",
+                                "path": "configs/minimax_h3/minimax_h3_tp.json",
+                                "commit": "fabad30491",
+                                "commit_date": "2026-09-10",
+                                "section": "TP2 preset, served per scripts/minimax_h3/server/start_server_ref2av.sh with --model-variant ref2av"
+                            },
+                            "num_gpus": 2,
+                            "serve_args": "--model-variant ref2av",
+                            "lightx2v_config": {
+                                "attn_type": "flash_attn2"
+                            },
+                            "notes": "VALIDATION PENDING (2026-10-08). flash_attn3 is a Hopper-only kernel; FlashAttention 2 (source-built for sm_100) is what every LightX2V Blackwell profile here runs, the same exact-softmax class. Untested alternative: torch_sdpa (cuDNN / flash SDPA, what sglang resolves for H3 on B200). Otherwise the default profile; see its notes."
+                        }
+                    }
                 },
                 "comfyui": {
                     "num_gpus": 1,
@@ -4612,8 +5258,6 @@
                         },
                         "reference_image": true,
                         "compile": true,
-                        "reference_short_edge": 2048,
-                        "reference_multiple": 32,
                         "workflow_graph": {
                             "1": {
                                 "class_type": "UNETLoader",
@@ -4824,17 +5468,234 @@
                             "notes": "B200: --gpu-only keeps every model, text encoders included, stored and run on the card; a 183 GB B200 holds the largest graph here (MiniMax-H3: 62 GB DiT + 48 GB Qwen3-VL-32B + VAEs). Placement only, numerics unchanged. Measured 2026-09-25 on 1xB200, FLUX.1 eager, interleaved arms: default 5.94 / 5.77 / 5.79s against --gpu-only 5.56s and --gpu-only --disable-dynamic-vram 5.57s (Qwen-Image-2.1: 3.75 / 3.91 against 3.47 / 3.48) -- every --gpu-only arm below every default arm; disabling dynamic VRAM on top adds nothing, so the simpler flag is kept."
                         }
                     }
+                },
+                "fastvideo": {
+                    "num_gpus": 2,
+                    "output_audio": true,
+                    "extra_env": {
+                        "FASTVIDEO_MINIMAX_H3_EXACT_KERNELS": "all",
+                        "FASTVIDEO_H3_VAE_TILE_PARALLEL": "1",
+                        "FASTVIDEO_ULYSSES_A2A": "auto",
+                        "FASTVIDEO_MINIMAX_H3_FUSIONS": "0",
+                        "FASTVIDEO_MINIMAX_H3_FA4_PACKED_VARLEN": "0",
+                        "FASTVIDEO_H3_REF2VA_MEMO_ENTRIES": "0"
+                    },
+                    "command_profiles": {
+                        "default": {
+                            "description": "Hopper (H200): base H3 Ref2VA, Ulysses 2, DiT FSDP-sharded, text encoder and VAEs resident, regional DiT compile, FA3.",
+                            "framework_ref": "FastVideo main (2b164405c3d1 on 2026-10-07) installed `.[fasth3]` with uv: fastvideo-kernel 0.3.5 built from the same checkout, flash-attn-4 @14c37795, torch 2.12.0+cu130; FA3 from the prebuilt torch212-cu130 artifact",
+                            "upstream_recipe": {
+                                "repo": "hao-ai-lab/FastVideo",
+                                "path": "examples/inference/basic/basic_minimax_h3_ref2va.py",
+                                "commit": "c4ad4227c09a",
+                                "commit_date": "2026-08-21",
+                                "section": "main(): GeneratorConfig (cookbook recipe minimax-h3-ref2va)"
+                            },
+                            "num_gpus": 2,
+                            "serve_args": "--generator.engine.use_fsdp_inference true --generator.engine.parallelism.tp_size 1 --generator.engine.parallelism.sp_size 2 --generator.engine.offload.dit false --generator.engine.offload.dit_layerwise false --generator.engine.offload.text_encoder false --generator.engine.offload.image_encoder false --generator.engine.offload.vae false --generator.engine.offload.lazy_module_load false --generator.engine.compile.enabled false --generator.engine.compile.vae_enabled false --generator.pipeline.workload_type i2v --generator.pipeline.components.override_pipeline_cls_name MiniMaxH3Ref2VAModularPipeline --generator.pipeline.experimental.attention_backend FLASH_ATTN --generator.pipeline.experimental.inference_torch_compile true --generator.pipeline.experimental.h3_sequential_load false --generator.pipeline.experimental.vae_parallel_decode true --generator.pipeline.experimental.vae_parallel_decode_strategy gather --generator.pipeline.experimental.vae_parallel_encode true",
+                            "extra_env": {
+                                "FASTVIDEO_FA4": "0"
+                            },
+                            "notes": "Derived 2026-10-08 from FastVideo's Ref2VA recipe (SP = num_gpus, FSDP DiT, text encoder and VAE offloaded, eager DiT) for a resident server: no offload, `inference_torch_compile` (FastVideo's regional per-block compile, safe on FA2/FA3/FA4), VAE uncompiled so #1930's bitwise tile split runs. #1930/#1807's bit-identical switches are on (exact RoPE/AdaLN/SwiGLU kernels, VAE tile split, fused Ulysses all-to-all) and the output-changing ones off (FP32 round-once H3 fusions, FA4 packed varlen). The DiT stays FSDP-sharded on Hopper: replicated, the 66.3 GB DiT, the resident 66.7 GB Qwen3-VL and the 11 GB of VAEs come to 144 GB, more than a 141 GB H200 holds. FA3 is what FastVideo's FLASH_ATTN loads when FASTVIDEO_FA4=0 and flash_attn_interface imports; without it FastVideo falls back to SDPA silently. Steps: FastVideo counts sigma grid points as sglang does (scheduling_minimax_h3.py: linspace(1, 0, num_inference_steps)), so 50 runs 49 forwards, as on sglang; vLLM-Omni counts evaluations and runs 50 for the same field. The 12/3 shifts come from the checkpoint's scheduler configs: FastVideo rejects a flow_shift for H3. The reference arrives as the request's own image_reference data URI, already at the 2048px short edge (multiple of 32) that FastVideo's reference.py resolves, so FastVideo does not resize it again; the keyframe encode is split across the SP ranks (vae_parallel_encode plus the tile split), bitwise as #1930 states. VALIDATION PENDING (2026-10-08): check the log for 'Using FlashAttention-3 backend', that compile happens inside the harness warmups, and A/B against DIFFUSION_BENCH_DISABLE_TORCH_COMPILE=1 (eager, where the exact kernels take over)."
+                        },
+                        "blackwell-2gpu": {
+                            "description": "Datacenter Blackwell: base H3 Ref2VA, Ulysses 2, DiT replicated, everything resident, regional DiT compile, FA4.",
+                            "hardware": [
+                                "b200",
+                                "b300",
+                                "gb200",
+                                "gb300"
+                            ],
+                            "framework_ref": "FastVideo main (2b164405c3d1 on 2026-10-07) installed `.[fasth3]` with uv: fastvideo-kernel 0.3.5 built from the same checkout, flash-attn-4 @14c37795, torch 2.12.0+cu130; FA3 from the prebuilt torch212-cu130 artifact",
+                            "upstream_recipe": {
+                                "repo": "hao-ai-lab/FastVideo",
+                                "path": "examples/inference/basic/basic_minimax_h3_ref2va.py",
+                                "commit": "c4ad4227c09a",
+                                "commit_date": "2026-08-21",
+                                "section": "main(): GeneratorConfig (cookbook recipe minimax-h3-ref2va)"
+                            },
+                            "num_gpus": 2,
+                            "serve_args": "--generator.engine.use_fsdp_inference false --generator.engine.parallelism.tp_size 1 --generator.engine.parallelism.sp_size 2 --generator.engine.offload.dit false --generator.engine.offload.dit_layerwise false --generator.engine.offload.text_encoder false --generator.engine.offload.image_encoder false --generator.engine.offload.vae false --generator.engine.offload.lazy_module_load false --generator.engine.compile.enabled false --generator.engine.compile.vae_enabled false --generator.pipeline.workload_type i2v --generator.pipeline.components.override_pipeline_cls_name MiniMaxH3Ref2VAModularPipeline --generator.pipeline.experimental.attention_backend FLASH_ATTN --generator.pipeline.experimental.inference_torch_compile true --generator.pipeline.experimental.h3_sequential_load false --generator.pipeline.experimental.vae_parallel_decode true --generator.pipeline.experimental.vae_parallel_decode_strategy gather --generator.pipeline.experimental.vae_parallel_encode true",
+                            "extra_env": {
+                                "FASTVIDEO_FA4": "1"
+                            },
+                            "notes": "The default profile with the DiT replicated (a 183 GB B200 holds both 66 GB models and the 11 GB of VAEs, ~40 GB to spare; FastVideo's measured GB200 FastH3 layout replicates it) and FA4, which FastVideo never auto-selects (FASTVIDEO_FA4=1). VALIDATION PENDING (2026-10-08): check 'Using FlashAttention-4 backend' and the memory headroom on B200, and A/B against FSDP and against compile off."
+                        }
+                    }
+                }
+            },
+            "report_framework_statuses": {
+                "trtllm-visual": "unsupported",
+                "diffusers": "unsupported"
+            },
+            "report_framework_reasons": {
+                "trtllm-visual": "trtllm-visual's tracked scope in this harness is image cases; H3 is a video+audio model.",
+                "diffusers": "MiniMax-H3 is integrated as Modular Diffusers blocks only (no DiffusionPipeline), and only via an unmerged PR (huggingface/diffusers#14355 -- pip install git+.../diffusers.git@refs/pull/14355/head). Not a servable baseline path today."
+            }
+        },
+        {
+            "id": "minimax_h3_fasth3_v2_t2va_5s",
+            "model": "FastVideo/FastVideo-FastH3-8-Step-V2",
+            "task": "text-to-video",
+            "label": "FastH3 8-Step V2 T2V+A (distilled)",
+            "throughput": false,
+            "semantics": "Distilled checkpoint with trained VSA sparsity -- a lossy class under this benchmark's policy, compared as its own case because every framework serves the SAME checkpoint under the contract it declares in fastvideo_inference.json: eight DiT forwards on the rungs [999, 874, 749, 624, 500, 375, 250, 125], video/audio shift 10/3, guidance 1, 80% VSA sparsity at 64-token tiles. Not part of the lossless headline. This is the few-step, four-GPU regime where per-request fixed cost (text encode, VAE decode, MP4 encode) is a large share of latency, which the 50-step two-GPU H3 case cannot show.",
+            "prompt": "At night, while their owner sleeps in a bedroom, three cats march in loudly playing tiny brass instruments, then abruptly file out.",
+            "width": 1344,
+            "height": 768,
+            "num_frames": 124,
+            "seed": 1101,
+            "num_gpus": 4,
+            "fps": 24,
+            "num_inference_steps": 8,
+            "benchmark": {
+                "warmup": {
+                    "num_inference_steps": 8
+                }
+            },
+            "framework_request_extra": {
+                "sglang": {
+                    "task": "t2va",
+                    "conditions": [],
+                    "target": {
+                        "short_edge": 768,
+                        "aspect_ratio": "16:9",
+                        "duration_seconds": 5.0
+                    },
+                    "flow_shift": 10.0,
+                    "audio_flow_shift": 3.0,
+                    "num_frames": null,
+                    "fps": null,
+                    "num_inference_steps": 9
+                },
+                "vllm-omni": {
+                    "extra_params": {
+                        "task": "t2va",
+                        "duration": 5.0,
+                        "audio_flow_shift": 3.0,
+                        "aspect_ratio": "16:9",
+                        "preencode_mp4": true
+                    },
+                    "flow_shift": 10.0,
+                    "guidance_scale": 1.0
+                },
+                "fastvideo": {
+                    "task": "t2va",
+                    "num_inference_steps": 9,
+                    "guidance_scale": 1.0
+                }
+            },
+            "_note": "num_inference_steps counts model evaluations (8), as vLLM-Omni does; sglang counts sigma grid points, so its request carries 9 -- the same eight forwards. Both engines reject any other step count or shift for this checkpoint. Both engines pin revision 71a17d72c58c (2026-09-15 14:57): the next and current revision 3da2ddfe (15:05) removed provenance.json, which vLLM-Omni's V2 loader (#7610, merged 09-17) reads to find the base-H3 VAEs, so the current revision fails there with FileNotFoundError. The weights are identical across the two revisions. guidance_scale goes to vLLM-Omni only (its recipe sends guidance_scale=1); sglang's MiniMaxH3SamplingParams fixes it at 1.0 and rejects the field in a request (400). FastVideo counts sigma grid points like sglang (its docs: `--steps` 9 is nine points and eight forwards, and its denoiser rejects any other count for this checkpoint), so its request carries 9 too; it reads the rung ladder from fastvideo_inference.json and the 10/3 shifts from the scheduler configs, both present at 71a17d72. vLLM-Omni requests carry extra_params.preencode_mp4=true (2026-10-08): its documented, off-by-default overlap of MP4 encoding with the VAE decode (byte-identical frames), the counterpart of sglang's default streamed encode (#41819). Both engines run their best documented output path.",
+            "model_revision": "71a17d72c58ce3eeec418144de2a5a2090cb4c04",
+            "frameworks": {
+                "sglang": {
+                    "serve_args": "--model-type diffusion --warmup-mode server --ulysses-degree 4 --performance-mode speed --enable-torch-compile false --revision 71a17d72c58ce3eeec418144de2a5a2090cb4c04",
+                    "command_profiles": {
+                        "default": {
+                            "description": "sglang's FastH3 8-Step V2 path: the checkpoint's contract selects VSA-H3 at 0.8 for the transformer; Ulysses 4, resident (speed), eager.",
+                            "sglang_ref": "origin/main + sgl-project/sglang#41839 (FastH3 8-Step V2 support, open 2026-09-30)",
+                            "num_gpus": 4,
+                            "serve_args": "--model-type diffusion --warmup-mode server --ulysses-degree 4 --performance-mode speed --enable-torch-compile false --revision 71a17d72c58ce3eeec418144de2a5a2090cb4c04",
+                            "notes": "#41839's cookbook command is `sglang serve --model-path FastVideo/FastVideo-FastH3-8-Step-V2 --num-gpus 4`; the case adds the benchmark's standing sglang flags (server warmup, speed residency, compile off -- VSA-H3 rejects torch.compile anyway). `--model-variant` must not be passed: FastH3 rejects it. Validated 2026-09-30 on 4xH200 (sglang bd66ce3 + #41839 at 8362359): 11.28 s client median in each of three arms (server total 10.46-10.54 s: denoise 8.80 s, decode 1.27 s); with #41819's overlapped MP4 encode on top, 10.89 s. 4xGB300: 8.085/8.081 s (server 6.42-6.46 s: the serial save is ~1.6 s there); with #41819, 6.97 s."
+                        }
+                    }
+                },
+                "vllm-omni": {
+                    "num_gpus": 4,
+                    "serve_args": "--trust-remote-code --task-type fl2va --num-gpus 4 --usp 4 --ring 1 --vae-patch-parallel-size 4 --vae-parallel-mode tile --vae-use-tiling --diffusion-attention-backend FASTVIDEO_VSA --revision 71a17d72c58ce3eeec418144de2a5a2090cb4c04",
+                    "extra_env": {
+                        "VLLM_WORKER_MULTIPROC_METHOD": "spawn",
+                        "VLLM_OMNI_VIDEO_SYNC_TIMEOUT": "1800"
+                    },
+                    "command_profiles": {
+                        "default": {
+                            "description": "vLLM-Omni's FastH3 8-Step V2 recipe: USP 4, VAE tile patch parallel 4, FASTVIDEO_VSA (fastvideo-kernel, vllm-omni's `vsa` extra).",
+                            "framework_ref": "vllm-omni main 56763cd6c383 + vllm==0.30.0 + fastvideo-kernel==0.3.5 installed --no-deps (VLLM_OMNI_VSA_KERNEL_SPEC)",
+                            "upstream_recipe": {
+                                "repo": "vllm-project/vllm-omni",
+                                "path": "recipes/MiniMaxAI/MiniMax-H3.md",
+                                "commit": "7266fc613",
+                                "commit_date": "2026-09-28",
+                                "section": "FastH3 8-Step V2 full checkpoint"
+                            },
+                            "num_gpus": 4,
+                            "serve_args": "--trust-remote-code --task-type fl2va --num-gpus 4 --usp 4 --ring 1 --vae-patch-parallel-size 4 --vae-parallel-mode tile --vae-use-tiling --diffusion-attention-backend FASTVIDEO_VSA --revision 71a17d72c58ce3eeec418144de2a5a2090cb4c04",
+                            "notes": "The recipe's command minus host/port/served-model-name. It says not to pass --fastvideo-vsa-topk (the tile count is derived per request from the trained 80% policy). T2VA is served by the FL2VA partition. Validated 2026-09-30 on 4xH200: 12.06 s client median. The `vsa` extra's fastvideo-kernel 0.3.4 fails on H200 inside the request ('Error in tile TMA descriptor creation', then 'CUDA error: an illegal instruction was encountered'); 0.3.5 works, but its wheel declares torch==2.12.0, so a normal install downgrades vLLM 0.30's torch 2.13.0 and the server dies at startup with 'operator torchvision::nms does not exist'. Install it with --no-deps (scripts/install_comparison_frameworks.sh, VLLM_OMNI_VSA_KERNEL_SPEC). 4xGB300: 8.261/8.254 s; with extra_params.preencode_mp4 (its overlapped encode, off by default) 7.484/7.379 s. The V2 release's bundled vae/ and audio_vae/ are tensor-for-tensor the base-H3@9bfb6693 VAEs this loader fetches, so both engines decode with the same weights."
+                        }
+                    },
+                    "framework_ref": "vllm-omni main 56763cd6c383 + vllm==0.30.0 + fastvideo-kernel==0.3.5 installed --no-deps (VLLM_OMNI_VSA_KERNEL_SPEC)"
+                },
+                "fastvideo": {
+                    "num_gpus": 4,
+                    "output_audio": true,
+                    "extra_env": {
+                        "FASTVIDEO_MINIMAX_H3_EXACT_KERNELS": "all",
+                        "FASTVIDEO_H3_VAE_TILE_PARALLEL": "1",
+                        "FASTVIDEO_ULYSSES_A2A": "auto",
+                        "FASTVIDEO_MINIMAX_H3_FUSIONS": "0",
+                        "FASTVIDEO_MINIMAX_H3_FA4_PACKED_VARLEN": "0",
+                        "FASTVIDEO_H3_VSA_HEADS_FIRST_TILE": "1"
+                    },
+                    "command_profiles": {
+                        "default": {
+                            "description": "Hopper (H200): the checkpoint's trained VSA (0.8, 64-token tiles) on the ThunderKittens sm_90a kernel, Ulysses 4, DiT FSDP-sharded, text encoder and VAEs resident, eager with #1930's bit-exact kernels and heads-first VSA tiles.",
+                            "framework_ref": "FastVideo main (2b164405c3d1 on 2026-10-07) installed `.[fasth3]` with uv: fastvideo-kernel 0.3.5 built from the same checkout, flash-attn-4 @14c37795, torch 2.12.0+cu130; FA3 from the prebuilt torch212-cu130 artifact",
+                            "upstream_recipe": {
+                                "repo": "hao-ai-lab/FastVideo",
+                                "path": "examples/serving/openai_fasth3_8step.yaml",
+                                "commit": "7f03e03dc656",
+                                "commit_date": "2026-09-29",
+                                "section": "generator (OpenAI-compatible FastH3 8-Step V2 server)"
+                            },
+                            "num_gpus": 4,
+                            "serve_args": "--generator.revision 71a17d72c58ce3eeec418144de2a5a2090cb4c04 --generator.engine.use_fsdp_inference true --generator.engine.parallelism.tp_size 1 --generator.engine.parallelism.sp_size 4 --generator.engine.offload.dit false --generator.engine.offload.dit_layerwise false --generator.engine.offload.text_encoder false --generator.engine.offload.image_encoder false --generator.engine.offload.vae false --generator.engine.offload.lazy_module_load false --generator.engine.compile.enabled false --generator.engine.compile.vae_enabled false --generator.pipeline.workload_type t2v --generator.pipeline.experimental.attention_backend VIDEO_SPARSE_ATTN_H3 --generator.pipeline.experimental.VSA_sparsity 0.8 --generator.pipeline.experimental.VSA_tile_size 64 --generator.pipeline.experimental.inference_torch_compile false --generator.pipeline.experimental.h3_sequential_load false --generator.pipeline.experimental.vae_parallel_decode true --generator.pipeline.experimental.vae_parallel_decode_strategy gather",
+                            "extra_env": {
+                                "FASTVIDEO_FA4": "0",
+                                "FASTVIDEO_VSA_TK": "1",
+                                "FASTVIDEO_VSA_SM100A": "0"
+                            },
+                            "notes": "Derived 2026-10-08 from FastVideo's FastH3 V2 server config (SP4, VSA 0.8 at 64-token tiles, compile off) without its capacity switches (it offloads the text encoder and VAEs) and with #1930's lossless preset (basic_fasth3_omniref_pdd.py LOSSLESS_ACCEL_ENV at e1e25593) minus its reference memo, a cache this T2VA case cannot use. #1930/#1807's bit-identical switches are on (exact RoPE/AdaLN/SwiGLU kernels, VAE tile split, fused Ulysses all-to-all) and the output-changing ones off (FP32 round-once H3 fusions, FA4 packed varlen). The DiT is FSDP-sharded as in FastVideo's 4xH100 profile (basic_fasth3_h100.yaml): replicated, the 66.3 GB DiT, the resident 66.7 GB Qwen3-VL and the 11 GB of VAEs come to 144 GB, more than a 141 GB H200 holds. TK is the sm_90 route fastvideo-kernel takes by itself when built for 9.0a; FASTVIDEO_VSA_TK only makes it explicit. The request carries 9 sigma points = 8 forwards (case _note). VALIDATION PENDING (2026-10-08): check the log for 'FastH3 checkpoint schedule: 8 transformer forwards' and the VSA-H3 backend, and A/B against a replicated DiT with the text encoder offloaded (the config as published).",
+                            "policy_exception": "Route, not speed (FastVideo main 2b164405, 2026-10-07): VIDEO_SPARSE_ATTN_H3 compiles only on its sm_100a 64-token route, and fastvideo_args.py says 'other VSA routes degrade the transformer to eager with one warning', so on sm_90 the DiT runs eager whatever the switch says. Eager is also the path #1930's bit-exact kernels and heads-first tiles take."
+                        },
+                        "blackwell-4gpu": {
+                            "description": "Datacenter Blackwell: the sm_100a VSA kernel FastVideo measures on GB200, FA4, Ulysses 4, DiT replicated, everything resident, regional DiT compile on the compile-safe sm_100a tile-64 route.",
+                            "hardware": [
+                                "b200",
+                                "b300",
+                                "gb200",
+                                "gb300"
+                            ],
+                            "framework_ref": "FastVideo main (2b164405c3d1 on 2026-10-07) installed `.[fasth3]` with uv: fastvideo-kernel 0.3.5 built from the same checkout, flash-attn-4 @14c37795, torch 2.12.0+cu130; FA3 from the prebuilt torch212-cu130 artifact",
+                            "upstream_recipe": {
+                                "repo": "hao-ai-lab/FastVideo",
+                                "path": "examples/serving/openai_fasth3_8step.yaml",
+                                "commit": "7f03e03dc656",
+                                "commit_date": "2026-09-29",
+                                "section": "generator (OpenAI-compatible FastH3 8-Step V2 server)"
+                            },
+                            "num_gpus": 4,
+                            "serve_args": "--generator.revision 71a17d72c58ce3eeec418144de2a5a2090cb4c04 --generator.engine.use_fsdp_inference false --generator.engine.parallelism.tp_size 1 --generator.engine.parallelism.sp_size 4 --generator.engine.offload.dit false --generator.engine.offload.dit_layerwise false --generator.engine.offload.text_encoder false --generator.engine.offload.image_encoder false --generator.engine.offload.vae false --generator.engine.offload.lazy_module_load false --generator.engine.compile.enabled false --generator.engine.compile.vae_enabled false --generator.pipeline.workload_type t2v --generator.pipeline.experimental.attention_backend VIDEO_SPARSE_ATTN_H3 --generator.pipeline.experimental.VSA_sparsity 0.8 --generator.pipeline.experimental.VSA_tile_size 64 --generator.pipeline.experimental.inference_torch_compile true --generator.pipeline.experimental.h3_sequential_load false --generator.pipeline.experimental.vae_parallel_decode true --generator.pipeline.experimental.vae_parallel_decode_strategy gather",
+                            "extra_env": {
+                                "FASTVIDEO_FA4": "1",
+                                "FASTVIDEO_VSA_SM100A": "1",
+                                "FASTVIDEO_VSA_TK": "0"
+                            },
+                            "notes": "FastVideo's measured-fastest FastH3 layout on GB200 (basic_fasth3.py: replicated DiT, sm100a VSA, FA4, regional compile) at V2's trained sparsity, without its capacity switch (the text encoder stays resident: 66.3 + 66.7 + 11 GB of VAEs fit a 183 GB B200) and without the FP32 fusions of its `all` profile (#1930: they change ~95% of output pixels). V2's validated route is eager (cookbook: 'The compiled all profile has not been measured for this checkpoint'). VALIDATION PENDING (2026-10-08): A/B against DIFFUSION_BENCH_DISABLE_TORCH_COMPILE=1, where the exact kernels and heads-first tiles take over, and keep the faster; check the log for the sm100a VSA route and FlashAttention-4."
+                        }
+                    }
                 }
             },
             "report_framework_statuses": {
                 "lightx2v": "unsupported",
                 "trtllm-visual": "unsupported",
-                "diffusers": "unsupported"
+                "diffusers": "unsupported",
+                "comfyui": "no_profile"
             },
             "report_framework_reasons": {
-                "lightx2v": "No MiniMax-H3 pipeline in LightX2V as of 2026-08; a turbo LoRA effort for H3 was blocked by the model license's territory clause (excludes EU/UK/South Korea/US), not by missing engineering support.",
+                "lightx2v": "Checked 2026-10-08 against LightX2V main 0c2edc12 (2026-10-05): LightX2V cannot serve this checkpoint under its trained contract (fastvideo_inference.json). V2 is trained for VIDEO_SPARSE_ATTN_H3 at 0.8 sparsity on 64-token tiles, and LightX2V has no VSA backend (its sparse attentions -- Sparge, SVG, radial, NBHD, Sol-Attn, sparse Sage/FA4 -- are other methods; dense attention would run a different model). Its H3 scheduler builds only a uniform shifted grid from infer_steps, so the explicit rungs [999, 874, ..., 125] cannot be given (an 8-step grid starts at 1000). LightX2V's own few-step H3 paths (configs/minimax_h3/dmd/: 4- and 8-step LoRAs on the base checkpoint, mostly FP8/INT8) are a different distillation, not this checkpoint, and are not substituted.",
                 "trtllm-visual": "trtllm-visual's tracked scope in this harness is image cases; H3 is a video+audio model.",
-                "diffusers": "MiniMax-H3 is integrated as Modular Diffusers blocks only (no DiffusionPipeline), and only via an unmerged PR (huggingface/diffusers#14355 -- pip install git+.../diffusers.git@refs/pull/14355/head). Not a servable baseline path today."
+                "diffusers": "MiniMax-H3 is integrated as Modular Diffusers blocks only (no DiffusionPipeline), and only via an unmerged PR (huggingface/diffusers#14355 -- pip install git+.../diffusers.git@refs/pull/14355/head). Not a servable baseline path today.",
+                "comfyui": "No official ComfyUI workflow for the FastH3 8-Step V2 checkpoint and its VSA attention as of 2026-09-30."
             }
         }
     ]

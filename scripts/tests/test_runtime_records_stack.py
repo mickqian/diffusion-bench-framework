@@ -47,6 +47,8 @@ for fw, own in (
     ("vllm-omni", "vllm-omni"),
     ("lightx2v", "lightx2v"),
     ("trtllm-visual", "tensorrt-llm"),
+    # built from the FastVideo checkout, so its version says which kernel routes exist
+    ("fastvideo", "fastvideo-kernel"),
 ):
     check(f"{fw} still records {own}", f'"{own}"' in block)
 

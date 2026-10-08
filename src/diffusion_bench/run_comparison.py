@@ -24,8 +24,10 @@ import argparse
 import base64
 import copy
 import io
+import itertools
 import json
 import os
+import re
 import shlex
 import shutil
 import signal
@@ -35,13 +37,14 @@ import sys
 import tempfile
 import threading
 import time
+from collections.abc import Iterator
 from dataclasses import dataclass
 from datetime import datetime, timezone
 from pathlib import Path
 
 import requests
 
-from diffusion_bench import comfyui_client
+from diffusion_bench import comfyui_client, fastvideo_client
 
 # ---------------------------------------------------------------------------
 # Constants
@@ -182,8 +185,8 @@ class LatencyBreakdown:
 
 
 # Frameworks that need separate installation (conflict with sglang's deps)
-INSTALLABLE_FRAMEWORKS = {"vllm-omni", "lightx2v", "trtllm-visual", "comfyui"}
-FRAMEWORK_ORDER = ["sglang", "vllm-omni", "lightx2v", "trtllm-visual", "comfyui"]
+INSTALLABLE_FRAMEWORKS = {"vllm-omni", "lightx2v", "trtllm-visual", "comfyui", "fastvideo"}
+FRAMEWORK_ORDER = ["sglang", "vllm-omni", "lightx2v", "trtllm-visual", "comfyui", "fastvideo"]
 
 # Frameworks served through the generic, config-driven HTTP path (no bespoke
 # command builder / request sender). A framework opts in by declaring an
@@ -220,9 +223,10 @@ FRAMEWORK_PROFILE_RUNTIME_KEYS = SGLANG_PROFILE_RUNTIME_KEYS | {
     "comfyui",
 }
 
-# Cached reference images keyed by URL.
+# Downloaded reference images keyed by URL; per-request variant files keyed by
+# (URL, input variant).
 _cached_ref_images: dict[str, bytes] = {}
-_cached_ref_image_paths: dict[str, str] = {}
+_cached_ref_image_paths: dict[tuple[str, int], str] = {}
 
 
 def _truthy_env(name: str, default: bool) -> bool:
@@ -333,15 +337,21 @@ def _build_vllm_cmd(case: dict, fw_cfg: dict, port: int) -> list[str]:
     return cmd
 
 
-def _resolve_hf_model_path(model_id: str, *, required: bool = False) -> str:
-    """Resolve a HuggingFace model ID to a local cache path, or return as-is."""
+def _resolve_hf_model_path(
+    model_id: str, *, required: bool = False, allow_patterns: list[str] | None = None
+) -> str:
+    """Resolve a HuggingFace model ID to a local cache path, or return as-is.
+
+    `allow_patterns` fetches only the files a framework reads: MiniMax-H3 ships
+    two checkpoint layouts side by side (464 GiB), of which LightX2V reads one.
+    """
     if os.path.isdir(model_id):
         return model_id
     try:
         from huggingface_hub import snapshot_download
 
         cache_dir = os.environ.get(HF_CACHE_DIR_ENV) or None
-        path = snapshot_download(model_id, cache_dir=cache_dir)
+        path = snapshot_download(model_id, cache_dir=cache_dir, allow_patterns=allow_patterns)
         print(f"  Resolved {model_id} -> {path}")
         return path
     except Exception as exc:
@@ -524,24 +534,24 @@ def _build_lightx2v_cmd(case: dict, fw_cfg: dict, port: int) -> list[str]:
     Multi GPU:   torchrun --nproc_per_node=N -m lightx2v.server ...
 
     LightX2V requires a local model path and a config JSON with infer params.
+    MiniMax-H3 has no startup task: its serve_args pick the weights
+    (--model-variant fl2av|ref2av) and each request names its task.
     """
     model_cls = fw_cfg["model_cls"]
-    task = fw_cfg["lightx2v_task"]
     num_gpus = fw_cfg.get("num_gpus", case["num_gpus"])
     model_path = _server_model_path(case, fw_cfg)
     if not fw_cfg.get("_skip_model_path_resolution"):
-        model_path = _resolve_hf_model_path(model_path, required=True)
+        model_path = _resolve_hf_model_path(
+            model_path, required=True, allow_patterns=fw_cfg.get("model_allow_patterns")
+        )
     config_path = _write_lightx2v_config(
         case, fw_cfg, model_path, _server_model_path(case, fw_cfg)
     )
 
-    server_args = [
-        "--model_path",
-        model_path,
-        "--model_cls",
-        model_cls,
-        "--task",
-        task,
+    server_args = ["--model_path", model_path, "--model_cls", model_cls]
+    if "lightx2v_task" in fw_cfg:
+        server_args += ["--task", fw_cfg["lightx2v_task"]]
+    server_args += [
         "--config_json",
         config_path,
         "--host",
@@ -692,11 +702,12 @@ def _resolve_comfyui_model(source: str) -> str:
     return hf_hub_download(repo_id=repo, filename=filename)
 
 
-def _prepare_comfyui_workspace(case: dict, fw_cfg: dict, config: dict | None) -> None:
-    """Lay out the one case's models, input image and paths file ComfyUI starts against.
+def _prepare_comfyui_workspace(case: dict, fw_cfg: dict) -> None:
+    """Lay out the one case's models, directories and paths file ComfyUI starts against.
 
     Each case gets its own model tree of symlinks because the checkpoints do not
     have unique names: FLUX.1, Z-Image and FLUX.2 all ship a `vae/ae.safetensors`.
+    Reference images are written per request, by `_write_comfyui_reference`.
     """
     spec = fw_cfg["comfyui"]
     workspace = _comfyui_workspace(case)
@@ -709,39 +720,46 @@ def _prepare_comfyui_workspace(case: dict, fw_cfg: dict, config: dict | None) ->
         target.symlink_to(_resolve_comfyui_model(source))
     for sub in ("input", "output"):
         (workspace / sub).mkdir(parents=True, exist_ok=True)
-    # MiniMax-H3 Ref2VA takes its reference through request extras, not the
-    # harness's reference_image field, so the spec can ask for the image too.
-    if case.get("reference_image") or spec.get("reference_image"):
-        target = workspace / "input" / comfyui_client.REF_IMAGE_NAME
-        source = _get_ref_image_path(config or {}, case)
-        short_edge = spec.get("reference_short_edge")
-        if short_edge:
-            _resize_reference_to_short_edge(source, target, int(short_edge), int(spec.get("reference_multiple", 1)))
-        else:
-            shutil.copyfile(source, target)
     folders = sorted({Path(rel).parts[0] for rel in spec["models"]})
     lines = ["diffusion_bench:", f"  base_path: {models_dir}", "  is_default: true"]
     lines += [f"  {folder}: {folder}" for folder in folders]
     (workspace / "extra_model_paths.yaml").write_text("\n".join(lines) + "\n")
 
 
-def _resize_reference_to_short_edge(source: str, target: Path, short_edge: int, multiple: int) -> None:
-    """Hand ComfyUI the reference at the size the reference pipeline uses.
+def _write_comfyui_reference(case: dict, config: dict) -> None:
+    """Put this request's reference image where its graph loads it from."""
+    spec = case["_comfyui"]
+    # MiniMax-H3 Ref2VA takes its reference through request extras, not the
+    # harness's reference_image field, so the spec can ask for the image too.
+    if not (case.get("reference_image") or spec.get("reference_image")):
+        return
+    target = _comfyui_workspace(case) / "input" / comfyui_client.reference_name(case["input_variant"])
+    shutil.copyfile(_get_ref_image_path(config, case), target)
 
-    MiniMax-H3 Ref2VA resizes an image reference to a 2048px short edge, upscaling
-    if needed, LANCZOS, each side to the nearest multiple of 32 -- which is what
-    sglang and vLLM-Omni do. ComfyUI's node never upscales (its 'max' mode only
-    caps at 2048), so the 1024x704 test image entered its graph at 8x fewer
-    reference tokens than theirs. Resizing here with the same rule and running
-    the node in 'max' mode (a no-op scale at exactly 2048) gives it the same pixels.
+
+def _prepared_reference(data: bytes, case: dict) -> bytes:
+    """The reference at the size the case's reference pipeline encodes it, for every framework.
+
+    MiniMax-H3 Ref2VA resizes an image reference to a 2048px short edge, upscaling if needed,
+    LANCZOS, each side to the nearest multiple of 32 (diffusers' `reference_image_short_edge`,
+    sglang's reference_encoding.py). ComfyUI never upscales and vLLM-Omni stopped on 2026-09-28
+    (#8253), so a small test image reached them at ~8x fewer reference tokens; resized here, every
+    framework encodes the same pixels.
     """
+    short_edge = case.get("reference_short_edge")
+    if not short_edge:
+        return data
     from PIL import Image
 
-    with Image.open(source) as image:
+    multiple = int(case.get("reference_multiple", 1))
+    with Image.open(io.BytesIO(data)) as image:
         image = image.convert("RGB")
-        scale = short_edge / min(image.size)
+        scale = int(short_edge) / min(image.size)
         size = tuple(max(multiple, round(side * scale / multiple) * multiple) for side in image.size)
-        image.resize(size, Image.Resampling.LANCZOS).save(target)
+        resized = image.resize(size, Image.Resampling.LANCZOS)
+    buffer = io.BytesIO()
+    resized.save(buffer, format="PNG")
+    return buffer.getvalue()
 
 
 def _build_comfyui_cmd(case: dict, fw_cfg: dict, port: int) -> list[str]:
@@ -767,6 +785,42 @@ def _build_comfyui_cmd(case: dict, fw_cfg: dict, port: int) -> list[str]:
     return cmd
 
 
+def _fastvideo_workspace(case: dict) -> Path:
+    return Path(tempfile.gettempdir()) / "diffusion-bench-fastvideo" / case["id"]
+
+
+def _build_fastvideo_cmd(case: dict, fw_cfg: dict, port: int) -> list[str]:
+    """`fastvideo serve` on a stub config, every setting a dotted override (see fastvideo_client)."""
+    workspace = _fastvideo_workspace(case)
+    workspace.mkdir(parents=True, exist_ok=True)
+    stub = workspace / "serve.json"
+    stub.write_text(json.dumps(fastvideo_client.SERVE_STUB))
+    serve_args = fw_cfg.get("serve_args", "").strip().split()
+    owned = sorted(set(fastvideo_client.serve_overrides(serve_args)) & set(fastvideo_client.HARNESS_KEYS))
+    if owned:
+        raise ValueError(f"{case['id']}: fastvideo serve_args set {owned}, which the harness passes itself")
+    cmd = [
+        "fastvideo",
+        "serve",
+        "--config",
+        str(stub),
+        "--generator.model_path",
+        _server_model_path(case, fw_cfg),
+        "--generator.engine.num_gpus",
+        str(fw_cfg.get("num_gpus", case["num_gpus"])),
+        "--server.host",
+        DEFAULT_HOST,
+        "--server.port",
+        str(port),
+        "--server.output_dir",
+        str(workspace / "outputs"),
+        *serve_args,
+    ]
+    if _torch_compile_disabled():
+        cmd += fastvideo_client.COMPILE_OFF_ARGS
+    return cmd
+
+
 def _visible_gpus_env(env: dict[str, str], num_gpus: int) -> dict[str, str]:
     """Expose only the first `num_gpus` of the GPUs this process can see.
 
@@ -788,6 +842,7 @@ def build_server_cmd(framework: str, case: dict, fw_cfg: dict, port: int) -> lis
         "vllm-omni": _build_vllm_cmd,
         "lightx2v": _build_lightx2v_cmd,
         "comfyui": _build_comfyui_cmd,
+        "fastvideo": _build_fastvideo_cmd,
     }
     builder = builders.get(framework)
     if builder is None:
@@ -820,6 +875,36 @@ def _requested_framework_profile(framework: str, sglang_profile: str | None) -> 
     return _explicit_framework_profile(framework, sglang_profile) or "auto"
 
 
+HARDWARE_PROFILE_TOKENS = (
+    "gb300",
+    "gb200",
+    "b300",
+    "b200",
+    "h200",
+    "h100",
+    "a100",
+    "l40",
+    "l4",
+    "rtx5090",
+    "rtx4090",
+    "rtx3090",
+)
+# One left-to-right scan in which a token claims its span; the tuple lists each
+# token before any token it contains. `gb300` contains `b300`, so a substring test
+# made a GB300 box select B300-only profiles and a B300 box select `gb300-*` ones.
+# MIRRORED by config_guard.hardware_tokens.
+_HARDWARE_TOKEN_RE = re.compile(
+    "|".join(token.replace("rtx", "rtx ?") for token in HARDWARE_PROFILE_TOKENS)
+)
+
+
+def _hardware_tokens(text: str) -> set[str]:
+    return {
+        match.group(0).replace(" ", "")
+        for match in _HARDWARE_TOKEN_RE.finditer(text.lower())
+    }
+
+
 def _hardware_profile_candidates(hardware_metadata: dict | None) -> list[str]:
     metadata = hardware_metadata or {}
     values = [
@@ -829,25 +914,8 @@ def _hardware_profile_candidates(hardware_metadata: dict | None) -> list[str]:
         metadata.get("runner_labels"),
         *(metadata.get("gpus") or []),
     ]
-    text = " ".join(str(value).lower() for value in values if value)
-    candidates = []
-    for profile in (
-        "gb300",
-        "gb200",
-        "b300",
-        "b200",
-        "h200",
-        "h100",
-        "a100",
-        "l40",
-        "l4",
-        "rtx5090",
-        "rtx4090",
-        "rtx3090",
-    ):
-        if profile in text or profile.replace("rtx", "rtx ") in text:
-            candidates.append(profile)
-    return candidates
+    found = _hardware_tokens(" ".join(str(value) for value in values if value))
+    return [token for token in HARDWARE_PROFILE_TOKENS if token in found]
 
 
 def _profile_hardware_values(profile_cfg: dict) -> list[str]:
@@ -872,8 +940,10 @@ def _profile_matches_hardware(
 ) -> bool:
     if not candidates:
         return False
-    values = [profile_name.lower(), *_profile_hardware_values(profile_cfg)]
-    return any(candidate in value for candidate in candidates for value in values)
+    values = [profile_name, *_profile_hardware_values(profile_cfg)]
+    return any(
+        candidate in _hardware_tokens(value) for candidate in candidates for value in values
+    )
 
 
 def _select_command_profile(
@@ -962,6 +1032,9 @@ def _resolve_framework_config(
         "serve_args": resolved.get("serve_args", ""),
         "num_gpus": resolved.get("num_gpus"),
         "extra_env_keys": sorted((resolved.get("extra_env") or {}).keys()),
+        # Rows measured before 2026-09-30 lack this: every request repeated one
+        # prompt and reference image, which sglang's conditioning cache answered.
+        "request_inputs": REQUEST_INPUTS,
     }
     if framework == "sglang":
         metadata.update(
@@ -995,6 +1068,8 @@ HEALTH_ENDPOINTS = {
     "vllm-omni": "/health",
     "lightx2v": "/v1/service/status",
     "comfyui": comfyui_client.HEALTH_PATH,
+    # Served only after the model loads: uvicorn binds once FastVideo's startup returns.
+    "fastvideo": fastvideo_client.HEALTH_PATH,
 }
 
 
@@ -1086,8 +1161,62 @@ def kill_server(proc: subprocess.Popen) -> None:
 
 
 # ---------------------------------------------------------------------------
-# Reference image helpers
+# Per-request conditioning inputs
 # ---------------------------------------------------------------------------
+
+# sglang answers a prompt or reference image it has already encoded from an
+# exact, content-hashed conditioning cache, so repeating one request times that
+# cache while the competitors, which have none, run their encoders. Every
+# request a server sees therefore carries its own prompt tag and reference
+# patch; sampling params, seed and negative prompt stay the case's.
+REQUEST_INPUTS = "distinct-per-request"
+# Two-digit tags: a server sees <= 17 requests by default, 45 with the largest scripted throughput (32).
+MAX_REQUEST_INPUTS = 100
+# Side of the grey square each tag digit is drawn as, at level 8 + 24 * digit (#41689's).
+REF_PATCH_PX = 8
+
+
+def _request_case(case: dict, index: int) -> dict:
+    """`case` as request `index` to its server: same params, its own conditioning inputs.
+
+    Fixed-width digits keep the prompt's token count, and so every shape, the
+    same across requests (T5 varies by a token, but FLUX pads it to 512).
+    """
+    if not 0 <= index < MAX_REQUEST_INPUTS:
+        raise ValueError(
+            f"{case['id']}: request {index} to one server, but two-digit input tags "
+            f"cover {MAX_REQUEST_INPUTS}; widen the tag rather than repeat an input"
+        )
+    return {**case, "prompt": f"{case['prompt']} (take {index:02d})", "input_variant": index}
+
+
+def _mark_reference(image, variant: int):
+    """A copy of `image` carrying `variant` as grey squares at its centre, one per tag digit.
+
+    The centre, because Cosmos3 I2V resizes and then center-crops, which cuts a
+    corner away; each square spans several pixels after the servers' resizes.
+    """
+    marked = image.copy()
+    cx, cy = marked.width // 2, marked.height // 2
+    for column, digit in enumerate(divmod(variant, 10)):
+        level = 8 + 24 * digit
+        fill = tuple(255 if band == "A" else level for band in marked.getbands())
+        left = cx + (column - 1) * REF_PATCH_PX
+        marked.paste(fill, (left, cy - REF_PATCH_PX // 2, left + REF_PATCH_PX, cy + REF_PATCH_PX // 2))
+    return marked
+
+
+def _ref_image_variant(data: bytes, variant: int) -> bytes:
+    """The reference image as request `variant` sends it: marked, lossless, same size and mode."""
+    from PIL import Image
+
+    with Image.open(io.BytesIO(data)) as image:
+        marked = _mark_reference(image, variant)
+        # EXIF orientation and the ICC profile can change what a loader decodes
+        keep = {key: image.info[key] for key in ("exif", "icc_profile") if key in image.info}
+    buffer = io.BytesIO()
+    marked.save(buffer, format="PNG", **keep)
+    return buffer.getvalue()
 
 
 def _reference_image_url(config: dict, case: dict | None = None) -> str:
@@ -1096,7 +1225,7 @@ def _reference_image_url(config: dict, case: dict | None = None) -> str:
     return str(config.get("test_image_url", ""))
 
 
-def _get_ref_image_bytes(config: dict, case: dict | None = None) -> bytes:
+def _download_ref_image(config: dict, case: dict) -> bytes:
     """Download and cache a case-specific or shared test reference image."""
     url = _reference_image_url(config, case)
     if not url:
@@ -1110,23 +1239,28 @@ def _get_ref_image_bytes(config: dict, case: dict | None = None) -> bytes:
     return _cached_ref_images[url]
 
 
-def _get_ref_image_b64(config: dict, case: dict | None = None) -> str:
-    """Get reference image as base64 string."""
-    return base64.b64encode(_get_ref_image_bytes(config, case)).decode("utf-8")
-
-
-def _get_ref_image_path(config: dict, case: dict | None = None) -> str:
-    """Save reference image to a temp file and return path."""
-    url = _reference_image_url(config, case)
-    cached_path = _cached_ref_image_paths.get(url)
+def _get_ref_image_path(config: dict, case: dict) -> str:
+    """This request's reference image, written once to a temp file."""
+    key = (_reference_image_url(config, case), case.get("reference_short_edge"), case["input_variant"])
+    cached_path = _cached_ref_image_paths.get(key)
     if cached_path and os.path.exists(cached_path):
         return cached_path
-    data = _get_ref_image_bytes(config, case)
+    data = _ref_image_variant(_prepared_reference(_download_ref_image(config, case), case), case["input_variant"])
     fd, path = tempfile.mkstemp(suffix=".png")
     with os.fdopen(fd, "wb") as f:
         f.write(data)
-    _cached_ref_image_paths[url] = path
+    _cached_ref_image_paths[key] = path
     return path
+
+
+def _get_ref_image_bytes(config: dict, case: dict) -> bytes:
+    """This request's reference image."""
+    return Path(_get_ref_image_path(config, case)).read_bytes()
+
+
+def _get_ref_image_b64(config: dict, case: dict) -> str:
+    """This request's reference image as base64."""
+    return base64.b64encode(_get_ref_image_bytes(config, case)).decode("utf-8")
 
 
 def _deep_merge(base: dict, override: dict) -> dict:
@@ -1142,20 +1276,20 @@ def _deep_merge(base: dict, override: dict) -> dict:
 REF_IMAGE_TOKEN = "__TEST_IMAGE_URL__"
 
 
-def _substitute_ref_image(node, url: str):
+def _substitute_ref_image(node, uri: str):
     """Replace REF_IMAGE_TOKEN anywhere inside a request-extra tree.
 
     Some models take their reference image in a model-specific shape rather
     than the harness's common image field -- MiniMax-H3 Ref2VA wants it as a
     conditions[] entry with role=reference -- so the case declares the shape
-    and marks where the shared test image belongs.
+    and marks where the request's reference image belongs.
     """
     if isinstance(node, dict):
-        return {k: _substitute_ref_image(v, url) for k, v in node.items()}
+        return {k: _substitute_ref_image(v, uri) for k, v in node.items()}
     if isinstance(node, list):
-        return [_substitute_ref_image(v, url) for v in node]
+        return [_substitute_ref_image(v, uri) for v in node]
     if node == REF_IMAGE_TOKEN:
-        return url
+        return uri
     return node
 
 
@@ -1164,12 +1298,14 @@ def _request_extra(case: dict, framework: str, config: dict | None = None) -> di
     framework_extras = (case.get("framework_request_extra") or {}).get(framework, {})
     merged = _deep_merge(extras, framework_extras)
     if REF_IMAGE_TOKEN in json.dumps(merged):
-        url = _reference_image_url(config or {}, case)
-        if not url:
+        if not _reference_image_url(config or {}, case):
             raise RuntimeError(
                 f"{case['id']}: request extras use {REF_IMAGE_TOKEN} but no test_image_url is configured"
             )
-        merged = _substitute_ref_image(merged, url)
+        # Inline, like the multipart uploads: the request carries its own copy
+        # instead of a URL the server downloads inside the measured window.
+        uri = "data:image/png;base64," + _get_ref_image_b64(config or {}, case)
+        merged = _substitute_ref_image(merged, uri)
     return merged
 
 
@@ -1234,6 +1370,30 @@ def _read_perf_dump(perf_dump_path: str, timeout: float = 10.0) -> float | None:
             pass
         time.sleep(0.5)
     return None
+
+
+def _stage_breakdown(dump: dict, client_s: float, poll_interval_s: float | None) -> dict:
+    """Itemize one instrumented request: its stages, and the tail no stage covers.
+
+    The dump's stages stop before the output is saved/encoded, so save, transport
+    and any poll quantum all land in client_s - sum(stages). Empty when the dump
+    has no stages: a zero sum would publish the whole latency as tail.
+    """
+    stages = {s["name"]: s["duration_ms"] / 1000.0 for s in dump.get("steps") or []}
+    if not stages:
+        return {}
+    stage_sum = sum(stages.values())
+    tail = client_s - stage_sum
+    breakdown = {
+        "diagnostic_stages_s": {name: round(s, 3) for name, s in stages.items()},
+        "diagnostic_stage_sum_s": round(stage_sum, 3),
+        "diagnostic_client_latency_s": round(client_s, 3),
+        "unattributed_tail_s": round(tail, 3),
+        "unattributed_tail_frac": round(tail / client_s, 3),
+    }
+    if poll_interval_s is not None:
+        breakdown["poll_interval_s"] = poll_interval_s
+    return breakdown
 
 
 def send_image_request_sglang(
@@ -1592,8 +1752,11 @@ def send_request_vllm_omni(base_url: str, case: dict, config: dict) -> float:
 # whole with a 422 and no usable detail — which is how every lightx2v cell went
 # red on the first B200 matrix. Sizing/steps/fps/guidance now live ONLY in the
 # launch config (see `_write_lightx2v_config`); the request carries prompt,
-# seed, size and the reference image.
+# seed, size, the reference image and, for a multi-task runner (MiniMax-H3),
+# the task.
 LIGHTX2V_IMAGE_TASKS = ("text-to-image", "image-edit", "image-to-image")
+# Request tasks whose MP4 muxes the generated audio.
+LIGHTX2V_AV_TASKS = ("t2av", "i2av", "l2av", "fl2av", "ref2av")
 LIGHTX2V_POLL_INTERVAL_S = POLL_INTERVAL_S  # kept for readability at the call site
 
 
@@ -1608,9 +1771,22 @@ def _lightx2v_payload(case: dict, config: dict, is_image: bool) -> dict:
         payload["num_frames"] = case["num_frames"]
     if "negative_prompt" in case:
         payload["negative_prompt"] = case["negative_prompt"]
-    if case.get("reference_image"):
+    # This framework's extras only: the shared request_extra carries fields
+    # (qwen_image_21's output_format) the schema rejects.
+    payload.update(copy.deepcopy((case.get("framework_request_extra") or {}).get("lightx2v", {})))
+    # The vLLM-Omni opt-in: H3 Ref2VA conditions sglang through a conditions[]
+    # extra, so the case itself sets no reference_image.
+    fw_entry = (case.get("frameworks") or {}).get("lightx2v") or {}
+    if case.get("reference_image") or fw_entry.get("reference_image"):
         payload["image_path"] = _get_ref_image_path(config, case)
     return payload
+
+
+def _mp4_tracks(path: str) -> set[str]:
+    """Handler types ('vide', 'soun') of an MP4's tracks."""
+    # A track's hdlr box: version/flags and pre_defined (eight zero bytes), then the handler type.
+    with open(path, "rb") as f:
+        return {kind.decode() for kind in re.findall(rb"hdlr\x00{8}(vide|soun)", f.read())}
 
 
 def send_request_lightx2v(base_url: str, case: dict, config: dict) -> float:
@@ -1673,6 +1849,17 @@ def send_request_lightx2v(base_url: str, case: dict, config: dict) -> float:
             raise TimeoutError(f"LightX2V task timed out after {REQUEST_TIMEOUT}s")
 
     latency = time.time() - start
+    # Off the clock. LightX2V encodes only when a request names an output path,
+    # so the cell compares only if that MP4 exists, with the audio track sglang
+    # and vLLM-Omni always mux when the task generates audio.
+    saved = poll_data.get("save_result_path")
+    tracks = _mp4_tracks(saved) if saved and os.path.isfile(saved) else set()
+    expected = {"vide", "soun"} if payload.get("task") in LIGHTX2V_AV_TASKS else {"vide"}
+    if not expected <= tracks:
+        raise RuntimeError(
+            f"LightX2V completed without the output it was asked for: {saved!r} has "
+            f"tracks {sorted(tracks)}, expected {sorted(expected)}"
+        )
     print(f"  Generated in {latency:.2f}s (lightx2v)")
     return latency
 
@@ -1826,6 +2013,7 @@ def send_request_generic_http(
 
 def send_request_comfyui(base_url: str, case: dict, config: dict) -> float:
     """Render the case's workflow for one request and run it (see comfyui_client)."""
+    _write_comfyui_reference(case, config)
     graph = comfyui_client.build_graph(case, case["_comfyui"])
     latency, info = comfyui_client.run_prompt(
         base_url,
@@ -1836,6 +2024,57 @@ def send_request_comfyui(base_url: str, case: dict, config: dict) -> float:
     print(
         f"  Generated in {latency:.2f}s (comfyui, {len(info['cached_nodes'])} cached node(s): "
         f"{','.join(info['cached_nodes']) or '-'})"
+    )
+    return latency
+
+
+# ---------------------------------------------------------------------------
+# Request helpers — FastVideo
+# ---------------------------------------------------------------------------
+
+
+def _fastvideo_output_audio(case: dict) -> bool:
+    """Whether the case's FastVideo output must carry an audio track."""
+    return bool(((case.get("frameworks") or {}).get("fastvideo") or {}).get("output_audio"))
+
+
+def _fastvideo_payload(case: dict, config: dict) -> dict:
+    """The case's sampling fields, then its FastVideo request extras, which win."""
+    extra = {
+        key: case[key]
+        for key in ("seed", "guidance_scale", "guidance_scale_2", "true_cfg_scale", "negative_prompt")
+        if key in case
+    }
+    extra.update(_request_extra(case, "fastvideo", config))
+    return fastvideo_client.video_payload(
+        case["prompt"],
+        width=case["width"],
+        height=case["height"],
+        num_frames=case.get("num_frames"),
+        fps=case.get("fps"),
+        num_inference_steps=case.get("num_inference_steps"),
+        extra=extra,
+    )
+
+
+def send_request_fastvideo(base_url: str, case: dict, config: dict) -> float:
+    """One blocking POST /v1/videos/sync; the clock stops at the last MP4 byte."""
+    if case["task"] not in fastvideo_client.VIDEO_TASKS:
+        raise ValueError(f"FastVideo is benchmarked on video tasks only, not {case['task']!r}")
+    payload = _fastvideo_payload(case, config)
+    start = time.time()
+    resp = _post_drained(
+        f"{base_url}{fastvideo_client.SYNC_VIDEO_PATH}",
+        json=payload,
+        timeout=REQUEST_TIMEOUT,
+    )
+    latency = time.time() - start
+    if resp.status_code != 200:
+        raise RuntimeError(f"FastVideo HTTP {resp.status_code}: {resp.text[:500]}")
+    fastvideo_client.check_mp4(resp.content, audio=_fastvideo_output_audio(case))
+    print(
+        f"  Generated in {latency:.2f}s (fastvideo, server "
+        f"{resp.headers.get('X-Inference-Time-S', '?')}s, {len(resp.content)} MP4 bytes)"
     )
     return latency
 
@@ -1863,6 +2102,8 @@ def send_request(
         )
     elif framework == "comfyui":
         return LatencyBreakdown(client_s=send_request_comfyui(base_url, case, config))
+    elif framework == "fastvideo":
+        return LatencyBreakdown(client_s=send_request_fastvideo(base_url, case, config))
     elif framework in GENERIC_HTTP_FRAMEWORKS or (
         framework != "sglang"
         and ((case.get("frameworks") or {}).get(framework) or {}).get("http_server")
@@ -2076,6 +2317,9 @@ def _collect_framework_runtime_metadata() -> dict:
                 # the 1.2.x stable line; pin an rc that ships it.
                 "TRTLLM_INSTALL_SPEC", "tensorrt-llm==1.3.0rc18"
             ),
+            "fastvideo": os.environ.get(
+                "FASTVIDEO_INSTALL_SPEC", "https://github.com/hao-ai-lab/FastVideo.git@main"
+            ),
             "torch_cuda_arch_list": os.environ.get("TORCH_CUDA_ARCH_LIST", ""),
         },
         "launchers": {
@@ -2116,7 +2360,18 @@ def _collect_framework_runtime_metadata() -> dict:
             "safetensors",
             *SHARED_STACK,
         ],
+        "fastvideo": [
+            "fastvideo",
+            "fastvideo-kernel",
+            "flash-attn-4",
+            "nvidia-cutlass-dsl",
+            "flashinfer-python",
+            *SHARED_STACK,
+        ],
     }
+    # Source checkouts whose commit is their version: ComfyUI is not a package,
+    # and FastVideo's editable install reports a static one.
+    source_checkouts = {"comfyui": "ComfyUI", "fastvideo": "FastVideo"}
     for framework, packages in packages_by_framework.items():
         venv_path = _framework_venv_path(framework)
         framework_metadata = {"venv_path": str(venv_path)}
@@ -2134,12 +2389,11 @@ def _collect_framework_runtime_metadata() -> dict:
             except (FileNotFoundError, subprocess.TimeoutExpired):
                 pass
         site_packages = next(venv_path.glob("lib/python*/site-packages"), None)
-        # ComfyUI is a checkout, not a package: its version is the commit.
-        comfy_checkout = venv_path / "ComfyUI"
-        if (comfy_checkout / ".git").exists():
+        checkout_dir = source_checkouts.get(framework)
+        if checkout_dir and (venv_path / checkout_dir / ".git").exists():
             try:
                 ret = subprocess.run(
-                    ["git", "-C", str(comfy_checkout), "log", "-1", "--format=%H %cI"],
+                    ["git", "-C", str(venv_path / checkout_dir), "log", "-1", "--format=%H %cI"],
                     capture_output=True,
                     text=True,
                     timeout=10,
@@ -2248,8 +2502,13 @@ def _run_warmups(
     framework: str,
     config: dict | None,
     bench_cfg: dict,
+    inputs: Iterator[int],
 ) -> tuple[list[float], list[float]]:
-    """Warm the server; return (reduced-step latencies, measured-shape latencies)."""
+    """Warm the server; return (reduced-step latencies, measured-shape latencies).
+
+    Each warmup takes its own inputs too: one answered from the conditioning
+    cache would converge on the cache instead of the measured work.
+    """
     warmup_cfg = bench_cfg.get("warmup", {})
     warmup_requests = int(warmup_cfg.get("num_requests", 0) or 0)
     warmup_steps = warmup_cfg.get("num_inference_steps")
@@ -2273,7 +2532,9 @@ def _run_warmups(
     def _warm(target: dict, sink: list[float], label: str) -> bool:
         print(f"  Sending warmup request ({label})...")
         try:
-            sink.append(send_request(base_url, target, framework, config).client_s)
+            sink.append(
+                send_request(base_url, _request_case(target, next(inputs)), framework, config).client_s
+            )
             return True
         except Exception as e:
             print(f"  Warmup request {label} failed (non-fatal): {e}")
@@ -2365,6 +2626,8 @@ def run_single_request(
     log_dir: Path,
     config: dict | None = None,
     bench_cfg: dict | None = None,
+    *,
+    inputs: Iterator[int],
 ) -> dict:
     result = _base_result(case, framework, MODE_SINGLE_E2E)
 
@@ -2402,7 +2665,7 @@ def run_single_request(
     server_lats: list[float] = []
     for i in range(1, repeats + 1):
         print(f"  Sending measured single request ({i}/{repeats})...")
-        latency = send_request(base_url, case, framework, config)
+        latency = send_request(base_url, _request_case(case, next(inputs)), framework, config)
         client_lats.append(latency.client_s)
         if latency.server_s is not None:
             server_lats.append(latency.server_s)
@@ -2416,6 +2679,7 @@ def run_single_request(
     # Skipped when a whole extra request is too expensive to spend on an
     # annotation; the reason is recorded so its absence is not a mystery.
     perf_dump_note = None
+    breakdown: dict = {}
     if framework == "sglang":
         if median_client > PERF_DUMP_MAX_S:
             perf_dump_note = (
@@ -2430,10 +2694,26 @@ def run_single_request(
             print("  Sending one unmeasured request for the server-side breakdown...")
             try:
                 diag = send_request(
-                    base_url, case, framework, config, perf_dump_path=perf_dump_path
+                    base_url,
+                    _request_case(case, next(inputs)),
+                    framework,
+                    config,
+                    perf_dump_path=perf_dump_path,
                 )
                 if diag.server_s is not None:
                     server_lats.append(diag.server_s)
+                    # Stages and client clock of the SAME request, so the
+                    # difference is a decomposition, unlike server vs median.
+                    with open(perf_dump_path) as f:
+                        breakdown = _stage_breakdown(
+                            json.load(f), diag.client_s, POLL_INTERVAL_S if is_video else None
+                        )
+                    if breakdown:
+                        print(
+                            f"  Stages {breakdown['diagnostic_stage_sum_s']:.3f}s, unattributed "
+                            f"tail {breakdown['unattributed_tail_s']:.3f}s of "
+                            f"{breakdown['diagnostic_client_latency_s']:.3f}s client"
+                        )
             except Exception as e:
                 perf_dump_note = f"failed: {e}"
                 print(f"  Server-side perf dump {perf_dump_note}")
@@ -2460,6 +2740,7 @@ def run_single_request(
         )
     elif perf_dump_note:
         metrics["server_latency_note"] = perf_dump_note
+    metrics.update(breakdown)
     # Always keep the raw samples and how far apart they are. A median summarises
     # a distribution it does not describe, and on the short image cases the
     # difference is the whole story: sglang's repeats spread 45-63% on B200
@@ -2494,7 +2775,12 @@ def _bench_serving_task(task: str) -> str:
     }.get(task, task)
 
 
-def _bench_extra_body(case: dict, framework: str) -> dict:
+def _bench_extra_body(case: dict, framework: str, config: dict) -> dict:
+    if framework == "lightx2v":
+        # single_e2e's payload: the task API forbids every other field. bench_serving
+        # adds the prompt, reference path and output path per request.
+        payload = _lightx2v_payload(case, config, case["task"] in LIGHTX2V_IMAGE_TASKS)
+        return {key: value for key, value in payload.items() if key not in ("prompt", "image_path")}
     extra_body = {}
     for key in (
         "guidance_scale",
@@ -2505,8 +2791,29 @@ def _bench_extra_body(case: dict, framework: str) -> dict:
     ):
         if key in case:
             extra_body[key] = case[key]
-    extra_body = _deep_merge(extra_body, _request_extra(case, framework))
+    extra_body = _deep_merge(extra_body, _request_extra(case, framework, config))
     return extra_body
+
+
+# bench_serving's own warmups, passed explicitly so the harness numbers every
+# request it sends.
+BENCH_SERVING_WARMUPS = 1
+
+
+def _bench_request_inputs(case: dict, framework: str, config: dict) -> dict:
+    """What bench_serving sends for one request case (see datasets.FixedDataset)."""
+    if framework == "comfyui":
+        _write_comfyui_reference(case, config)
+    # The same opt-in as send_request_vllm_omni: MiniMax-H3 Ref2VA's reference is
+    # an upload there, and a request extra for sglang.
+    fw_entry = (case.get("frameworks") or {}).get(framework) or {}
+    upload = case.get("reference_image") or fw_entry.get("reference_image")
+    return {
+        "prompt": case["prompt"],
+        "extra_body": _bench_extra_body(case, framework, config),
+        "image_paths": [_get_ref_image_path(config, case)] if upload else None,
+        "input_variant": case["input_variant"],
+    }
 
 
 def run_throughput(
@@ -2516,6 +2823,7 @@ def run_throughput(
     config: dict | None,
     bench_cfg: dict,
     log_dir: Path,
+    inputs: Iterator[int],
 ) -> dict:
     result = _base_result(case, framework, MODE_THROUGHPUT)
     throughput_cfg = bench_cfg.get("throughput", {})
@@ -2534,14 +2842,14 @@ def run_throughput(
         base_url,
         "--dataset",
         "fixed",
-        "--prompt",
-        case["prompt"],
         "--model",
         case["model"],
         "--task",
         _bench_serving_task(case["task"]),
         "--num-prompts",
         str(num_requests),
+        "--warmup-requests",
+        str(BENCH_SERVING_WARMUPS),
         "--max-concurrency",
         str(max_concurrency),
         "--request-rate",
@@ -2555,11 +2863,15 @@ def run_throughput(
     for key in ("width", "height", "num_frames", "fps", "num_inference_steps"):
         if key in case:
             cmd.extend([f"--{key.replace('_', '-')}", str(case[key])])
-    extra_body = _bench_extra_body(case, framework)
-    if extra_body:
-        cmd.extend(["--extra-body", json.dumps(extra_body)])
-    if case.get("reference_image"):
-        cmd.extend(["--image-path", _get_ref_image_path(config or {}, case)])
+    # Its warmups first, continuing this server's numbering, so no throughput
+    # request repeats the inputs of any request before it.
+    request_inputs = [
+        _bench_request_inputs(_request_case(case, next(inputs)), framework, config or {})
+        for _ in range(BENCH_SERVING_WARMUPS + num_requests)
+    ]
+    inputs_path = log_dir / f"bench_serving_{case['id']}_{framework}_inputs.json"
+    inputs_path.write_text(json.dumps(request_inputs))
+    cmd.extend(["--request-inputs", str(inputs_path)])
     if framework == "comfyui":
         bundle_path = log_dir / f"comfyui_request_{case['id']}.json"
         bundle = {
@@ -2568,6 +2880,8 @@ def run_throughput(
         }
         bundle_path.write_text(json.dumps(bundle))
         cmd.extend(["--comfyui-request-json", str(bundle_path)])
+    if framework == "fastvideo" and _fastvideo_output_audio(case):
+        cmd.append("--expect-audio")
 
     print(
         f"  Running bench_serving throughput: requests={num_requests}, "
@@ -2671,7 +2985,7 @@ def run_case_framework(
         _preflight_framework_command(framework, fw_cfg, env)
         if framework == "comfyui":
             env = _visible_gpus_env(env, int(case.get("num_gpus") or 1))
-            _prepare_comfyui_workspace(case, fw_cfg, config)
+            _prepare_comfyui_workspace(case, fw_cfg)
         proc = subprocess.Popen(
             cmd,
             stdout=subprocess.PIPE,
@@ -2719,15 +3033,17 @@ def run_case_framework(
         bench_cfg = _merge_nested(
             _benchmark_config(config, case), fw_cfg.get("benchmark", {})
         )
+        # One numbering for everything this server is sent (see _request_case).
+        inputs = itertools.count()
         warmup_t0 = time.time()
         warmup_lats, warmup_steady = _run_warmups(
-            base_url, case, framework, config, bench_cfg
+            base_url, case, framework, config, bench_cfg, inputs
         )
         warmup_s = round(time.time() - warmup_t0, 2)
 
         if MODE_SINGLE_E2E in modes:
             single_result = run_single_request(
-                base_url, case, framework, log_dir, config, bench_cfg
+                base_url, case, framework, log_dir, config, bench_cfg, inputs=inputs
             )
             # Keep the warmup curve next to the measurement: it is the evidence
             # that the measured window opened at steady state, and when it did
@@ -2747,7 +3063,7 @@ def run_case_framework(
                     ]
         if MODE_THROUGHPUT in modes:
             throughput_result = run_throughput(
-                base_url, case, framework, config, bench_cfg, log_dir
+                base_url, case, framework, config, bench_cfg, log_dir, inputs
             )
 
     except Exception as e:
@@ -3033,10 +3349,12 @@ def run_comparison(
         "benchmark_framework_args": {
             "vllm-omni": _vllm_torch_compile_args(),
             "lightx2v": {"config": _lightx2v_torch_compile_config()},
+            "fastvideo": fastvideo_client.COMPILE_OFF_ARGS if _torch_compile_disabled() else [],
         },
         "torch_compile_disabled": _torch_compile_disabled(),
         "benchmark_modes": modes,
         "requested_sglang_profile": _requested_sglang_profile(sglang_profile),
+        "request_inputs": REQUEST_INPUTS,
     }
 
     for fw_name in FRAMEWORK_ORDER:

@@ -30,7 +30,7 @@ import numpy as np
 import requests
 from tqdm.asyncio import tqdm
 
-from diffusion_bench import comfyui_client
+from diffusion_bench import comfyui_client, fastvideo_client
 from diffusion_bench.datasets import (
     FixedDataset,
     RandomDataset,
@@ -517,25 +517,10 @@ async def async_request_lightx2v(
     output = RequestFuncOutput()
     output.start_time = time.perf_counter()
 
-    payload = dict(input.extra_body)
-    payload.update(
-        {
-            "prompt": input.prompt,
-            "infer_steps": input.num_inference_steps
-            or payload.pop("num_inference_steps", None)
-            or 50,
-        }
-    )
-    if input.num_frames:
-        payload["target_video_length"] = input.num_frames
-    if input.height:
-        payload["height"] = input.height
-    if input.width:
-        payload["width"] = input.width
-    if input.height and input.width:
-        payload["target_shape"] = [input.height, input.width]
-    if input.fps:
-        payload["fps"] = input.fps
+    # extra_body is run_comparison's single_e2e payload (size, frames, seed, task).
+    # The task API forbids any other field, and steps/fps come only from the launch
+    # config, so a warmup's reduced num_inference_steps cannot be sent either.
+    payload = {**input.extra_body, "prompt": input.prompt}
     if input.image_paths:
         payload["image_path"] = input.image_paths[0]
     suffix = ".mp4" if input.num_frames else ".png"
@@ -705,7 +690,8 @@ def make_comfyui_request_func(bundle_path: str, request_timeout: float):
 
     ComfyUI takes a workflow graph, not a payload, so the runner hands over the
     case and its resolved ComfyUI spec; each request renders its own graph with
-    a fresh nonce (see comfyui_client) and the request's steps and seed.
+    a fresh nonce (see comfyui_client), the request's steps and seed, and its
+    prompt and reference file from --request-inputs.
     """
     with open(bundle_path) as f:
         bundle = json.load(f)
@@ -719,6 +705,8 @@ def make_comfyui_request_func(bundle_path: str, request_timeout: float):
         output = RequestFuncOutput()
         output.start_time = time.perf_counter()
         case = dict(bundle["case"])
+        case["prompt"] = input.prompt
+        case["input_variant"] = input.input_variant
         if input.num_inference_steps:
             case["num_inference_steps"] = input.num_inference_steps
         if "seed" in input.extra_body:
@@ -743,6 +731,48 @@ def make_comfyui_request_func(bundle_path: str, request_timeout: float):
         return output
 
     return async_request_comfyui
+
+
+def make_fastvideo_request_func(expect_audio: bool):
+    """FastVideo's POST /v1/videos/sync, whose response body is the MP4 (see fastvideo_client)."""
+
+    async def async_request_fastvideo(
+        input: RequestFuncInput,
+        session: aiohttp.ClientSession,
+        pbar: Optional[tqdm] = None,
+    ) -> RequestFuncOutput:
+        output = RequestFuncOutput()
+        output.start_time = time.perf_counter()
+        payload = fastvideo_client.video_payload(
+            input.prompt,
+            width=input.width,
+            height=input.height,
+            num_frames=input.num_frames,
+            fps=input.fps,
+            num_inference_steps=input.num_inference_steps,
+            extra=input.extra_body,
+        )
+        try:
+            async with session.post(input.api_url, json=payload) as response:
+                body = await response.read()
+                status = response.status
+            output.latency = time.perf_counter() - output.start_time
+            if status == 200:
+                fastvideo_client.check_mp4(body, audio=expect_audio)
+                output.success = True
+                output.output_count = 1
+            else:
+                output.error = f"HTTP {status}: {body[:500].decode(errors='replace')}"
+        except Exception as e:  # noqa: BLE001 - a failed request is a recorded error
+            output.latency = time.perf_counter() - output.start_time
+            output.error = f"{type(e).__name__}: {e}"
+        if input.slo_ms is not None and output.success:
+            output.slo_achieved = (output.latency * 1000.0) <= input.slo_ms
+        if pbar:
+            pbar.update(1)
+        return output
+
+    return async_request_fastvideo
 
 
 async def benchmark(args):
@@ -819,15 +849,22 @@ async def benchmark(args):
             )
             request_func = async_request_image_sglang
     elif backend == "lightx2v":
-        api_url = f"{args.base_url}/v1/tasks/"
+        # POST /v1/tasks/ is deprecated and routes every request to video.
+        kind = "image" if task_name in ("text-to-image", "image-to-image", "image-edit") else "video"
+        api_url = f"{args.base_url}/v1/tasks/{kind}/"
         request_func = async_request_lightx2v
     elif backend == "comfyui":
-        if not args.comfyui_request_json:
-            raise ValueError("--backend comfyui needs --comfyui-request-json")
+        if not (args.comfyui_request_json and args.request_inputs):
+            raise ValueError("--backend comfyui needs --comfyui-request-json and --request-inputs")
         api_url = args.base_url
         request_func = make_comfyui_request_func(
             args.comfyui_request_json, args.request_timeout
         )
+    elif backend == "fastvideo":
+        if task_name not in fastvideo_client.VIDEO_TASKS:
+            raise ValueError(f"--backend fastvideo is benchmarked on video tasks only, not {task_name}")
+        api_url = f"{args.base_url}{fastvideo_client.SYNC_VIDEO_PATH}"
+        request_func = make_fastvideo_request_func(args.expect_audio)
     elif task_name in (
         "text-to-video",
         "image-to-video",
@@ -886,8 +923,9 @@ async def benchmark(args):
                 f"Running {args.warmup_requests} warmup request(s) with "
                 f"num_inference_steps={warmup_steps}..."
             )
-            for i in range(args.warmup_requests):
-                warm_req = requests_list[i % len(requests_list)]
+            # with --request-inputs a warmup shares no input with a measured request
+            warmup_list = dataset.get_warmup_requests(args.warmup_requests)
+            for i, warm_req in enumerate(warmup_list):
                 warm_req = replace(
                     warm_req,
                     num_inference_steps=warmup_steps,
@@ -1002,7 +1040,7 @@ def main() -> None:
         "--backend",
         type=str,
         default="sglang",
-        choices=["sglang", "vllm-omni", "lightx2v", "trtllm-visual", "comfyui"],
+        choices=["sglang", "vllm-omni", "lightx2v", "trtllm-visual", "comfyui", "fastvideo"],
         help="Serving backend API to benchmark.",
     )
     parser.add_argument(
@@ -1010,6 +1048,11 @@ def main() -> None:
         type=str,
         default=None,
         help="ComfyUI only: the case and its resolved ComfyUI spec, written by run_comparison.",
+    )
+    parser.add_argument(
+        "--expect-audio",
+        action="store_true",
+        help="FastVideo only: a request whose MP4 has no audio track fails.",
     )
     parser.add_argument(
         "--base-url",
@@ -1066,6 +1109,16 @@ def main() -> None:
         type=str,
         default=None,
         help="JSON request body fields shared by every fixed request.",
+    )
+    parser.add_argument(
+        "--request-inputs",
+        type=str,
+        default=None,
+        help=(
+            "Fixed dataset: JSON list of per-request inputs (prompt, extra_body, "
+            "image_paths, input_variant), warmups first; replaces --prompt, "
+            "--extra-body and --image-path."
+        ),
     )
     parser.add_argument(
         "--num-prompts", type=int, default=10, help="Number of prompts to benchmark."

@@ -55,14 +55,14 @@ def main() -> int:
             env = rc._framework_env("comfyui", rc._apply_benchmark_env(os.environ.copy()))
             env.update(fw_cfg.get("extra_env", {}))
             env = rc._visible_gpus_env(env, int(smoke_case.get("num_gpus") or 1))
-            rc._prepare_comfyui_workspace(smoke_case, fw_cfg, config)
+            rc._prepare_comfyui_workspace(smoke_case, fw_cfg)
             cmd = rc.build_server_cmd("comfyui", smoke_case, fw_cfg, port)
             with open(log_dir / f"smoke_{case['id']}_comfyui.log", "w") as log:
                 proc = subprocess.Popen(
                     cmd, stdout=log, stderr=subprocess.STDOUT, env=env, preexec_fn=os.setsid
                 )
                 rc.wait_for_health(base_url, "comfyui", timeout=600, proc=proc)
-                latency = rc.send_request_comfyui(base_url, smoke_case, config)
+                latency = rc.send_request_comfyui(base_url, rc._request_case(smoke_case, 0), config)
             detail = f"{latency:.1f}s incl. load, {args.steps} steps, {smoke_case.get('num_gpus')} GPU"
         except Exception as exc:  # noqa: BLE001 - every case reports, then the run fails
             status, detail = "FAIL", f"{type(exc).__name__}: {str(exc)[:600]}"

@@ -13,7 +13,7 @@ python3 scripts/build_benchmark_config.py
 
 The build assembles everything into `configs/comparison_configs.json` **and** the
 packaged copy `src/diffusion_bench/comparison_configs.json`, emits `MATRIX.md`,
-and **fails if any case does not classify all four in-scope frameworks** — so a
+and **fails if any case does not classify every in-scope framework** — so a
 framework (e.g. `trtllm-visual` on video) can never be silently dropped again.
 
 ## Layout
@@ -22,7 +22,7 @@ framework (e.g. `trtllm-visual` on video) can never be silently dropped again.
 configs/benchmark/
 ├── README.md            # this file
 ├── MATRIX.md            # auto-generated coverage grid (case × framework)
-├── frameworks.json      # the 4 in-scope frameworks + version policy + launch style
+├── frameworks.json      # the in-scope frameworks + version policy + launch style
 ├── workloads.json       # single_e2e / throughput / warmup → benchmark_defaults
 ├── meta.json            # top-level fields (_comment, test_image_url)
 └── cases/
@@ -33,7 +33,7 @@ configs/benchmark/
 
 ## Case file schema
 
-Every case file lists **all four frameworks explicitly**. Each framework carries a
+Every case file lists **every framework in frameworks.json explicitly**. Each framework carries a
 `status`; a `supported` framework also carries its best-known `command_profiles`.
 
 ```jsonc

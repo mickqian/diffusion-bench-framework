@@ -250,6 +250,10 @@
     "comfyui": {
       "status": "unsupported",
       "reason": "ComfyUI core has no Cosmos3: comfy/ldm/cosmos covers Cosmos Predict1 and Predict2 only (CosmosT2V/I2V, CosmosT2IPredict2/I2VPredict2 in comfy/supported_models.py) at master 88ab4a06, 2026-09-25."
+    },
+    "fastvideo": {
+      "status": "unsupported",
+      "reason": "FastVideo main (2b164405c3d1, 2026-10-07) has Cosmos Predict2/2.5 and GEN3C pipelines but no Cosmos3."
     }
   }
 }

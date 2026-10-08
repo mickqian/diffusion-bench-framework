@@ -21,7 +21,7 @@ import sys
 ROOT = pathlib.Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT / "scripts"))
 import build_benchmark_config as bbc  # noqa: E402
-from diffusion_bench.config_guard import profile_hardware_values  # noqa: E402
+from diffusion_bench.config_guard import hardware_tokens, profile_hardware_values  # noqa: E402
 
 fail = 0
 
@@ -43,9 +43,11 @@ for path in (ROOT / "configs" / "benchmark" / "cases").rglob("*.json"):
         for cfg in (fw.get("command_profiles") or {}).values():
             declared.update(profile_hardware_values(cfg))
 
+# By token, as the runtime matches: a substring test counted `gb300` as linted
+# because `b300` is, which is how GB200/GB300 profiles went unlinted.
 unlinted = sorted(
     hw for hw in declared
-    if not any(hw in linted or linted in hw for linted in bbc.POLICY_HARDWARE)
+    if not hardware_tokens(hw) or not hardware_tokens(hw) <= set(bbc.POLICY_HARDWARE)
 )
 check(
     "every hardware class with a declared profile is linted",

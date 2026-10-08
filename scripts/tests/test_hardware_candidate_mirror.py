@@ -22,7 +22,11 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT / "src"))
 
+from diffusion_bench.config_guard import PROFILE_RUNTIME_KEYS  # noqa: E402
 from diffusion_bench.config_guard import hardware_candidates as mirror  # noqa: E402
+from diffusion_bench.run_comparison import (  # noqa: E402
+    FRAMEWORK_PROFILE_RUNTIME_KEYS,
+)
 from diffusion_bench.run_comparison import (  # noqa: E402
     _hardware_profile_candidates as runtime,
 )
@@ -35,6 +39,9 @@ CASES = [
     {"gpu_config": "h100x4", "gpus": []},
     {"runner_labels": "gb200-cluster", "gpus": []},
     {"hardware_profile_override": "b300", "gpus": ["NVIDIA B300"]},
+    {"gpus": ["NVIDIA GB300, 284208 MiB, 580.95.05"] * 4},
+    {"gpus": ["NVIDIA GB200, 189471 MiB, 580.95.05"] * 4},
+    {"gpus": ["NVIDIA L40S, 46068 MiB, 550.54.15"]},
     {},
 ]
 
@@ -58,5 +65,18 @@ if blackwell != ["b200"]:
     fail = 1
 else:
     print("  ok   blackwell override on B200s resolves to ['b200']")
+
+# A token claims its span: GB300 is not also a B300, and an L40S is not an L4.
+for gpu, expected in (("NVIDIA GB300", ["gb300"]), ("NVIDIA GB200", ["gb200"]), ("NVIDIA L40S", ["l40"])):
+    got = runtime({"gpus": [gpu]})
+    ok = got == expected
+    fail |= not ok
+    print(f"  {'ok  ' if ok else 'FAIL'} {gpu} -> {got}, expected {expected}")
+
+# The builder resolves a profile against its framework entry through the mirror.
+ok = PROFILE_RUNTIME_KEYS == FRAMEWORK_PROFILE_RUNTIME_KEYS
+fail |= not ok
+print(f"  {'ok  ' if ok else 'FAIL'} profile runtime keys agree "
+      f"({sorted(PROFILE_RUNTIME_KEYS ^ FRAMEWORK_PROFILE_RUNTIME_KEYS)} differ)")
 
 sys.exit(fail)

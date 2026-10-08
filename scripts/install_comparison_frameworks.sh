@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-FRAMEWORK="${1:?usage: install_comparison_frameworks.sh <vllm-omni|lightx2v|trtllm-visual|comfyui>}"
+FRAMEWORK="${1:?usage: install_comparison_frameworks.sh <vllm-omni|lightx2v|trtllm-visual|comfyui|fastvideo>}"
 VENV_ROOT="${SGLANG_DIFFUSION_FRAMEWORK_VENV_ROOT:-/tmp/sglang-diffusion-framework-venvs}"
 VENV_PATH="${VENV_ROOT}/${FRAMEWORK}"
 PIP_TMPDIR="${SGLANG_DIFFUSION_PIP_TMPDIR:-${VENV_ROOT}/pip-tmp}"
@@ -14,12 +14,25 @@ mkdir -p "${PIP_TMPDIR}"
 export TMPDIR="${PIP_TMPDIR}"
 
 case "${FRAMEWORK}" in
-  vllm-omni|lightx2v|trtllm-visual|comfyui) ;;
+  vllm-omni|lightx2v|trtllm-visual|comfyui|fastvideo) ;;
   *)
     echo "Unknown comparison framework: ${FRAMEWORK}" >&2
     exit 1
     ;;
 esac
+
+# One FastVideo venv serves Hopper and Blackwell boxes (the venv root is shared
+# across devboxes): sm_90a builds the ThunderKittens VSA kernel, sm_100a/sm_103a
+# the MiniMax-H3 VSA forward. TK never builds on aarch64 (GB200/GB300 hosts).
+fastvideo_arch_list() {
+  if [[ -n "${TORCH_CUDA_ARCH_LIST:-}" ]]; then
+    echo "${TORCH_CUDA_ARCH_LIST}"
+  elif [[ "$(uname -m)" == "aarch64" ]]; then
+    echo "10.0a;10.3a"
+  else
+    echo "9.0a;10.0a;10.3a"
+  fi
+}
 
 write_desired_stamp() {
   local path="$1"
@@ -38,6 +51,7 @@ write_desired_stamp() {
         echo "vllm_omni_install_spec=${VLLM_OMNI_INSTALL_SPEC:-vllm-omni==0.18.0}"
         echo "vllm_omni_server_bin=${VLLM_OMNI_SERVER_BIN:-vllm}"
         echo "vllm_omni_required_help_args=${VLLM_OMNI_REQUIRED_HELP_ARGS:---omni}"
+        echo "vllm_omni_vsa_kernel_spec=${VLLM_OMNI_VSA_KERNEL_SPEC:-<unset>}"
         ;;
       lightx2v)
         echo "lightx2v_install_spec=${LIGHTX2V_INSTALL_SPEC:-git+https://github.com/ModelTC/LightX2V.git@7efd05f8e1425b83321fd4f1cef779ef6504076f}"
@@ -65,6 +79,14 @@ write_desired_stamp() {
         echo "comfyui_install_spec=${COMFYUI_INSTALL_SPEC:-https://github.com/comfyanonymous/ComfyUI.git@master}"
         echo "comfyui_torch_install_spec=${COMFYUI_TORCH_INSTALL_SPEC:-torch torchvision torchaudio}"
         echo "comfyui_torch_index_url=${COMFYUI_TORCH_INDEX_URL:-https://download.pytorch.org/whl/cu130}"
+        ;;
+      fastvideo)
+        echo "fastvideo_install_spec=${FASTVIDEO_INSTALL_SPEC:-https://github.com/hao-ai-lab/FastVideo.git@main}"
+        echo "fastvideo_install_extras=${FASTVIDEO_INSTALL_EXTRAS:-fasth3}"
+        echo "fastvideo_uv_torch_backend=${FASTVIDEO_UV_TORCH_BACKEND:-cu130}"
+        echo "fastvideo_install_fa3=${FASTVIDEO_INSTALL_FA3:-1}"
+        echo "fastvideo_fa3_hf_revision=${LIGHTX2V_FA3_HF_REVISION:-de87b9b5af06dd9984df595bef90b2eba44b181a}"
+        echo "torch_cuda_arch_list=$(fastvideo_arch_list)"
         ;;
     esac
   } > "${path}"
@@ -94,6 +116,14 @@ framework_health_check() {
       # --quick-test-for-ci imports every node (core + comfy_extras) and exits,
       # so a missing dependency of any model family fails here, not mid-round.
       ( cd "${VENV_PATH}/ComfyUI" && "${VENV_PATH}/bin/python3" main.py --quick-test-for-ci --cpu )
+      ;;
+    fastvideo)
+      [[ -d "${VENV_PATH}/FastVideo/.git" ]] || return 1
+      "${VENV_PATH}/bin/python3" -c 'import fastvideo, flash_attn.cute; from fastvideo.entrypoints.openai.api_server import create_app; from fastvideo_kernel.block_sparse_attn_256 import block_sparse_attn_256_bshd'
+      if [[ "${FASTVIDEO_INSTALL_FA3:-1}" == "1" ]]; then
+        "${VENV_PATH}/bin/python3" -c 'import flash_attn_interface'
+      fi
+      "${VENV_PATH}/bin/fastvideo" serve --help >/dev/null
       ;;
   esac
 }
@@ -153,6 +183,15 @@ case "${FRAMEWORK}" in
       fi
     else
       python3 -m pip install --upgrade --force-reinstall "${omni_spec}"
+    fi
+    # FASTVIDEO_VSA (FastH3) needs fastvideo-kernel. The `vsa` extra's 0.3.4 dies with "illegal
+    # instruction" on H200; 0.3.5 declares torch==2.12.0 and, resolved normally, downgrades vLLM's
+    # torch 2.13 so torchvision::nms vanishes (2026-09-30). --no-deps keeps the torch vLLM pinned.
+    if [[ -n "${VLLM_OMNI_VSA_KERNEL_SPEC:-}" ]]; then
+      torch_before="$(python3 -c 'import torch; print(torch.__version__)')"
+      python3 -m pip install --no-deps "${VLLM_OMNI_VSA_KERNEL_SPEC}"
+      python3 -c 'import fastvideo_kernel'
+      [[ "$(python3 -c 'import torch; print(torch.__version__)')" == "${torch_before}" ]]
     fi
     ;;
   lightx2v)
@@ -264,6 +303,60 @@ if cute_dir.exists():
     python3 -m pip install ${COMFYUI_TORCH_INSTALL_SPEC:-torch torchvision torchaudio} \
       --index-url "${COMFYUI_TORCH_INDEX_URL:-https://download.pytorch.org/whl/cu130}"
     python3 -m pip install --upgrade-strategy only-if-needed -r "${VENV_PATH}/ComfyUI/requirements.txt"
+    ;;
+  fastvideo)
+    # FastVideo's documented H3 install: `UV_TORCH_BACKEND=cu130 uv pip install -e ".[fasth3]"` in
+    # a checkout. uv is required, not preferred: its [tool.uv.sources] table builds fastvideo-kernel
+    # from the same checkout (the sm_100a VSA route, the fused Ulysses all-to-all) and pins
+    # flash-attn-4 to the revision its CuTe kernels need; pip ignores the table.
+    fv_spec="${FASTVIDEO_INSTALL_SPEC:-https://github.com/hao-ai-lab/FastVideo.git@main}"
+    fv_url="${fv_spec%@*}"
+    fv_ref="${fv_spec##*@}"
+    [[ "${fv_spec}" == *"@"* ]] || { fv_url="${fv_spec}"; fv_ref="main"; }
+    fv_src="${VENV_PATH}/FastVideo"
+    git clone -q --filter=blob:none "${fv_url}" "${fv_src}"
+    git -C "${fv_src}" checkout -q "${fv_ref}"
+    # The kernel build needs ThunderKittens and CUTLASS; the eval submodules are not needed.
+    git -C "${fv_src}" submodule update -q --init --depth 1 fastvideo-kernel/include/tk fastvideo-kernel/include/cutlass
+    echo "FastVideo source at $(git -C "${fv_src}" rev-parse --short=12 HEAD)"
+    # fastvideo-kernel compiles against the torch the backend's index resolves (FastVideo pins
+    # 2.12.0), so nvcc must be the same CUDA major; otherwise the build fails after the downloads.
+    export CUDA_HOME="${CUDA_HOME:-/usr/local/cuda}"
+    fv_backend="${FASTVIDEO_UV_TORCH_BACKEND:-cu130}"
+    fv_want="${fv_backend#cu}"
+    fv_have="$("${CUDA_HOME}/bin/nvcc" --version 2>/dev/null | sed -n 's/.*release \([0-9]*\)\..*/\1/p' || true)"
+    if [[ "${fv_have}" != "${fv_want%?}" ]]; then
+      echo "fastvideo: ${CUDA_HOME}/bin/nvcc is CUDA ${fv_have:-<missing>} but the torch index is ${fv_backend}; set CUDA_HOME or FASTVIDEO_UV_TORCH_BACKEND" >&2
+      exit 1
+    fi
+    TORCH_CUDA_ARCH_LIST="$(fastvideo_arch_list)"
+    export TORCH_CUDA_ARCH_LIST
+    [[ -z "${MAX_JOBS:-}" ]] || export CMAKE_BUILD_PARALLEL_LEVEL="${MAX_JOBS}"
+    python3 -m pip install --upgrade uv
+    ( cd "${fv_src}" && UV_TORCH_BACKEND="${fv_backend}" uv pip install -e ".[${FASTVIDEO_INSTALL_EXTRAS:-fasth3}]" )
+    # Dense H3 attention on Hopper: FastVideo's FLASH_ATTN loads FA3 when FASTVIDEO_FA4=0 and
+    # flash_attn_interface imports, and falls back to SDPA without a word otherwise. The prebuilt
+    # artifact LightX2V uses carries torch212-cu130 builds; Blackwell profiles use FA4 instead.
+    if [[ "${FASTVIDEO_INSTALL_FA3:-1}" == "1" ]]; then
+      python3 "$(dirname "$0")/install_lightx2v_fa3_from_hf.py"
+    fi
+    # Which kernel routes this build carries, for the record; a missing one falls back silently.
+    python3 - <<'PY'
+import importlib.metadata as metadata
+
+routes = {}
+try:
+    from fastvideo_kernel.block_sparse_attn import _get_sm90_ops
+    routes["tk_sm90a"] = all(_get_sm90_ops())
+except Exception as exc:  # noqa: BLE001 - a record, not a gate
+    routes["tk_sm90a"] = f"unknown ({type(exc).__name__})"
+try:
+    from fastvideo_kernel import block_sparse_attn_sm100a
+    routes["vsa_sm100a"] = bool(block_sparse_attn_sm100a._HAS_VSA_SM100A)
+except Exception as exc:  # noqa: BLE001
+    routes["vsa_sm100a"] = f"unknown ({type(exc).__name__})"
+print("fastvideo-kernel", metadata.version("fastvideo-kernel"), "torch", metadata.version("torch"), routes)
+PY
     ;;
   *)
     echo "Unknown comparison framework: ${FRAMEWORK}" >&2
