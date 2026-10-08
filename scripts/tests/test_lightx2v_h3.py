@@ -21,6 +21,7 @@ The request fields are LightX2V 0c2edc12's (2026-10-05): MiniMaxH3Runner's
 `supported_request_fields_by_task`, all of them VideoTaskRequest fields except
 return_result_tensor, which a request never sets.
 """
+import base64
 import contextlib
 import io
 import json
@@ -260,11 +261,14 @@ try:
                 body,
             )
             if task == "ref2av":
-                with Image.open(body["image_path"]) as reference:
+                head, _, b64 = body["image_path"].partition(",")
+                with Image.open(io.BytesIO(base64.b64decode(b64))) as reference:
                     check(
-                        f"{where}: the reference is the harness's prepared file (2048 px short edge)",
-                        body["image_path"] == rc._get_ref_image_path(cfg, request) and min(reference.size) == case["reference_short_edge"],
-                        f"{body['image_path']} {reference.size}",
+                        f"{where}: the reference arrives inline, prepared (2048 px short edge)",
+                        head == "data:image/png;base64"
+                        and b64 == rc._get_ref_image_b64(cfg, request)
+                        and min(reference.size) == case["reference_short_edge"],
+                        f"{head} {reference.size}",
                     )
 
             if case.get("throughput"):

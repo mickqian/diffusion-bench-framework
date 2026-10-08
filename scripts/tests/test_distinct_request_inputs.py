@@ -271,7 +271,7 @@ def fake_post(url, **kwargs):
     if kwargs.get("files"):
         _, (_, handle, _) = next(iter(kwargs["files"].items()))
         image = handle.getvalue()
-    elif body.get("image_path"):
+    elif body.get("image_path") and not str(body["image_path"]).startswith("data:"):
         image = Path(body["image_path"]).read_bytes()
     else:
         image = data_uri_bytes(body)

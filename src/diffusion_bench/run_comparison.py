@@ -32,6 +32,7 @@ import shlex
 import shutil
 import signal
 import statistics
+import struct
 import subprocess
 import sys
 import tempfile
@@ -89,7 +90,16 @@ KILL_REAP_TIMEOUT_S = 120
 # GETs. NOTE: video latencies measured after this change read up to one old
 # quantum LOWER than earlier published numbers -- the work did not get faster,
 # the ruler got finer.
-POLL_INTERVAL_S = 0.2
+# FastVideo's /v1/videos/sync answers at the last MP4 byte with no poll at all, so a
+# polled framework's quantum must be small next to it (2026-10-08: 0.2 s was ~2% of an 11 s case).
+POLL_INTERVAL_S = 0.02
+
+
+# One keep-alive connection for status polls. A fresh connection per 20 ms poll left
+# thousands of TIME_WAIT sockets on random ephemeral ports, and the next server to
+# bind one of them died on "Address already in use" (2026-10-08: vLLM-Omni on 51160
+# and 52180, each started right after an sglang arm).
+_POLL_SESSION = requests.Session()
 
 
 def _poll_get(url: str, deadline: float, timeout: int = 30):
@@ -108,7 +118,7 @@ def _poll_get(url: str, deadline: float, timeout: int = 30):
     last: Exception | None = None
     while time.time() < deadline:
         try:
-            resp = requests.get(url, timeout=timeout)
+            resp = _POLL_SESSION.get(url, timeout=timeout)
             resp.raise_for_status()
             return resp
         except (requests.Timeout, requests.ConnectionError) as exc:
@@ -1613,36 +1623,27 @@ def send_request_vllm_omni(base_url: str, case: dict, config: dict) -> float:
                 )
             }
 
+        # Omni's /v1/videos/sync (documented for benchmarks) awaits the generation and
+        # returns the MP4 bytes: no poll quantum and no poll traffic into the API
+        # process, which also hosts Omni's inline stage client.
         start = time.time()
         resp = _post_drained(
-            f"{base_url}/v1/videos",
+            f"{base_url}/v1/videos/sync",
             data=data,
             files=files,
             timeout=REQUEST_TIMEOUT,
         )
         resp.raise_for_status()
-        job = resp.json()
-        job_id = job.get("id")
-        if not job_id:
-            raise RuntimeError(f"vLLM-Omni video submit returned no id: {job}")
-        poll_url = f"{base_url}/v1/videos/{job_id}"
-        while True:
-            time.sleep(POLL_INTERVAL_S)
-            poll_resp = _poll_get(poll_url, start + REQUEST_TIMEOUT)
-            poll_resp.raise_for_status()
-            poll_data = poll_resp.json()
-            status = str(poll_data.get("status") or "").lower()
-            if status in ("completed", "succeeded", "success"):
-                break
-            if status in ("failed", "error", "cancelled", "canceled") or poll_data.get(
-                "error"
-            ):
-                raise RuntimeError(f"vLLM-Omni video generation failed: {poll_data}")
-            if time.time() - start > REQUEST_TIMEOUT:
-                raise TimeoutError(
-                    f"vLLM-Omni video timed out after {REQUEST_TIMEOUT}s"
-                )
         latency = time.time() - start
+        try:
+            tracks = fastvideo_client.mp4_handler_types(resp.content)
+        except (ValueError, struct.error):
+            tracks = set()
+        if "vide" not in tracks:
+            raise RuntimeError(
+                f"vLLM-Omni /v1/videos/sync answered {len(resp.content)} bytes "
+                f"without an MP4 video track (tracks: {sorted(tracks) or 'none'})"
+            )
         print(f"  Generated in {latency:.2f}s (vllm-omni)")
         return latency
 
@@ -1778,7 +1779,9 @@ def _lightx2v_payload(case: dict, config: dict, is_image: bool) -> dict:
     # extra, so the case itself sets no reference_image.
     fw_entry = (case.get("frameworks") or {}).get("lightx2v") or {}
     if case.get("reference_image") or fw_entry.get("reference_image"):
-        payload["image_path"] = _get_ref_image_path(config, case)
+        # Inline, as the other frameworks receive it: a server-local path skipped the
+        # upload and decode they pay inside the measured window.
+        payload["image_path"] = "data:image/png;base64," + _get_ref_image_b64(config, case)
     return payload
 
 
