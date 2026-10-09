@@ -38,6 +38,14 @@
       "parallel": "single GPU; the one multi-GPU path is the core MultiGPU CFG Split node, which runs CFG branches on separate cards",
       "workflows": "configs/benchmark/comfyui/<name>.json, API format; build_benchmark_config.py inlines them",
       "scope": "every case ComfyUI's core nodes support; classify the rest"
+    },
+    "fastvideo": {
+      "role": "competitor (FastVideo, Hao AI Lab -- the home engine of the FastH3 distillations)",
+      "version_policy": "FastVideo main HEAD; fastvideo-kernel built from the same checkout (its `fasth3` extra)",
+      "launch": "fastvideo serve --config <stub> --generator.* / --server.* overrides (every setting on the command line); video is POST /v1/videos/sync, which answers with the MP4",
+      "attention": "dense: FLASH_ATTN -> FA3 on Hopper, FA4 on Blackwell (FASTVIDEO_FA4=1); FastH3: the checkpoint's trained VIDEO_SPARSE_ATTN_H3 (ThunderKittens sm_90a / sm_100a kernel)",
+      "lossless": "on: resident components, regional DiT compile where FastVideo has a compile-safe route, bit-identical FASTVIDEO_MINIMAX_H3_EXACT_KERNELS / FASTVIDEO_H3_VSA_HEADS_FIRST_TILE / FASTVIDEO_H3_VAE_TILE_PARALLEL (#1930) and FASTVIDEO_ULYSSES_A2A=auto (#1807). off (they change the output): FASTVIDEO_MINIMAX_H3_FUSIONS, FASTVIDEO_MINIMAX_H3_FA4_PACKED_VARLEN, NVFP4/FP8, the TAEH3 decoder; also the reference memo (a cache)",
+      "scope": "MiniMax-H3 cases (T2V+A, Ref2V+A, FastH3 8-Step V2); classify the rest"
     }
   }
 }

@@ -8,15 +8,17 @@ a machine check.
 
 Selection semantics MIRROR ``run_comparison._select_command_profile`` (the
 runtime authority): a profile matches a hardware candidate when the candidate
-is a substring of the profile NAME or of any value in its ``hardware`` field;
-the first matching non-default profile in dict order wins, else ``default``.
+is one of the hardware tokens in the profile NAME or in any value of its
+``hardware`` field; the first matching non-default profile in dict order wins,
+else ``default``, else the first profile.
 If you change the runtime selection, change this mirror in the same commit.
 """
 
 from __future__ import annotations
 
-DEFAULT_PROFILE = "default"
+import re
 
+DEFAULT_PROFILE = "default"
 
 
 # MIRRORS ``run_comparison._hardware_profile_candidates``. The runtime does not
@@ -35,6 +37,16 @@ HARDWARE_TOKENS = (
     "gb300", "gb200", "b300", "b200", "h200", "h100", "a100",
     "l40", "l4", "rtx5090", "rtx4090", "rtx3090",
 )
+# One left-to-right scan in which a token claims its span; the tuple lists each
+# token before any token it contains (`gb300` before `b300`, `l40` before `l4`).
+# A substring test found both, so a GB300 box also derived `b300` and ran
+# B300-only profiles, and a B300 box matched profiles named `gb300-*`. A profile
+# now applies to a class only if it names that class.
+_HARDWARE_TOKEN_RE = re.compile("|".join(t.replace("rtx", "rtx ?") for t in HARDWARE_TOKENS))
+
+
+def hardware_tokens(text: str) -> set[str]:
+    return {m.group(0).replace(" ", "") for m in _HARDWARE_TOKEN_RE.finditer(text.lower())}
 
 
 def hardware_candidates(hardware_metadata: dict | None, override: str | None = None) -> list[str]:
@@ -47,12 +59,8 @@ def hardware_candidates(hardware_metadata: dict | None, override: str | None = N
         metadata.get("runner_labels"),
         *(metadata.get("gpus") or []),
     ]
-    text = " ".join(str(value).lower() for value in values if value)
-    return [
-        token
-        for token in HARDWARE_TOKENS
-        if token in text or token.replace("rtx", "rtx ") in text
-    ]
+    found = hardware_tokens(" ".join(str(value) for value in values if value))
+    return [token for token in HARDWARE_TOKENS if token in found]
 
 
 def profile_hardware_values(profile_cfg: dict) -> list[str]:
@@ -69,8 +77,8 @@ def profile_hardware_values(profile_cfg: dict) -> list[str]:
 
 
 def profile_matches_hardware(name: str, profile_cfg: dict, candidate: str) -> bool:
-    values = [name.lower(), *profile_hardware_values(profile_cfg)]
-    return any(candidate in value for value in values)
+    values = [name, *profile_hardware_values(profile_cfg)]
+    return any(candidate in hardware_tokens(value) for value in values)
 
 
 def select_profile(
@@ -94,7 +102,52 @@ def select_profile(
         return matches[0], profiles[matches[0]], matches
     if DEFAULT_PROFILE in profiles:
         return DEFAULT_PROFILE, profiles[DEFAULT_PROFILE], matches
+    if profiles:
+        first = next(iter(profiles))
+        return first, profiles[first], matches
     return None, None, matches
+
+
+# MIRRORS run_comparison.FRAMEWORK_PROFILE_RUNTIME_KEYS and _merge_nested: the
+# keys a selected profile overrides in its framework entry, dicts merged deeply.
+PROFILE_RUNTIME_KEYS = frozenset({
+    "serve_args", "num_gpus", "extra_env", "benchmark", "model", "model_path",
+    "lightx2v_config", "server_bin", "use_omni_arg", "required_help_args",
+    "http_server", "http_request", "comfyui",
+})
+
+
+def _merge_nested(base: dict, override: dict) -> dict:
+    merged = dict(base)
+    for key, value in override.items():
+        if isinstance(value, dict) and isinstance(merged.get(key), dict):
+            merged[key] = _merge_nested(merged[key], value)
+        else:
+            merged[key] = value
+    return merged
+
+
+def resolved_config(entry: dict, profile: dict | None) -> dict:
+    """The framework config the harness runs: `entry` overlaid by the selected profile."""
+    base = {key: value for key, value in entry.items() if key != "command_profiles"}
+    runtime = {key: value for key, value in (profile or {}).items() if key in PROFILE_RUNTIME_KEYS}
+    return _merge_nested(base, runtime)
+
+
+UPSTREAM_RECIPE_KEYS = ("repo", "path", "commit", "commit_date", "section")
+
+
+def upstream_recipe_problems(recipe) -> list[str]:
+    """Why `recipe` cannot be checked for drift by scripts/check_competitor_recipes.py."""
+    if not isinstance(recipe, dict):
+        return ["upstream_recipe must be an object"]
+    missing = [key for key in UPSTREAM_RECIPE_KEYS if not (isinstance(recipe.get(key), str) and recipe[key].strip())]
+    problems = [f"upstream_recipe.{key} missing" for key in missing]
+    if "commit" not in missing and not re.fullmatch(r"[0-9a-f]{7,40}", recipe["commit"]):
+        problems.append("upstream_recipe.commit must be a 7-40 character hex sha")
+    if "commit_date" not in missing and not re.fullmatch(r"20\d\d-\d\d-\d\d", recipe["commit_date"]):
+        problems.append("upstream_recipe.commit_date must be YYYY-MM-DD")
+    return problems
 
 
 def serve_args_missing_tokens(config_serve_args: str, server_command: str) -> list[str]:

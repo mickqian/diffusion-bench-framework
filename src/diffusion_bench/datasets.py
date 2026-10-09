@@ -31,6 +31,8 @@ class RequestFuncInput:
     request_id: str = field(default_factory=lambda: str(uuid.uuid4()))
     slo_ms: Optional[float] = None
     num_inference_steps: Optional[int] = None
+    # run_comparison's index of this request's conditioning inputs, if it set them
+    input_variant: Optional[int] = None
 
 
 @dataclass
@@ -66,6 +68,9 @@ class BaseDataset(ABC):
 
     def get_requests(self) -> List[RequestFuncInput]:
         return [self[i] for i in range(len(self))]
+
+    def get_warmup_requests(self, count: int) -> List[RequestFuncInput]:
+        return [self[i % len(self)] for i in range(count)]
 
 
 class VBenchDataset(BaseDataset):
@@ -285,17 +290,50 @@ class VBenchDataset(BaseDataset):
 
 
 class FixedDataset(BaseDataset):
+    """One request repeated, with per-request conditioning inputs when given.
+
+    `--request-inputs` (written by run_comparison) lists each request's prompt,
+    extra body, reference images and input variant, warmups first, so no
+    request repeats another's inputs. Without it every request is the same.
+    """
+
     def __init__(self, args, api_url: str = "", model: str = ""):
         super().__init__(args, api_url, model)
         self.num_prompts = args.num_prompts or 1
         self.extra_body = json.loads(args.extra_body) if args.extra_body else {}
+        self.request_inputs = None
+        if args.request_inputs:
+            with open(args.request_inputs) as f:
+                self.request_inputs = json.load(f)
+            expected = args.warmup_requests + self.num_prompts
+            if len(self.request_inputs) != expected:
+                raise ValueError(
+                    f"{args.request_inputs} lists {len(self.request_inputs)} requests, "
+                    f"expected {expected} ({args.warmup_requests} warmups first)"
+                )
 
     def __len__(self) -> int:
         return self.num_prompts
 
     def __getitem__(self, idx: int) -> RequestFuncInput:
+        return self._request(self.args.warmup_requests + idx)
+
+    def get_warmup_requests(self, count: int) -> List[RequestFuncInput]:
+        return [self._request(i) for i in range(count)]
+
+    def _request(self, position: int) -> RequestFuncInput:
+        inputs = (
+            self.request_inputs[position]
+            if self.request_inputs
+            else {
+                "prompt": self.args.prompt,
+                "extra_body": self.extra_body,
+                "image_paths": self.args.image_path,
+                "input_variant": None,
+            }
+        )
         return RequestFuncInput(
-            prompt=self.args.prompt,
+            prompt=inputs["prompt"],
             api_url=self.api_url,
             model=self.model,
             num_outputs_per_prompt=self.args.num_outputs_per_prompt,
@@ -304,8 +342,9 @@ class FixedDataset(BaseDataset):
             num_frames=self.args.num_frames,
             num_inference_steps=self.args.num_inference_steps,
             fps=self.args.fps,
-            extra_body=self.extra_body,
-            image_paths=self.args.image_path,
+            extra_body=inputs["extra_body"],
+            image_paths=inputs["image_paths"],
+            input_variant=inputs["input_variant"],
         )
 
 

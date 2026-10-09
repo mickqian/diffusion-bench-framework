@@ -26,7 +26,12 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "src"))
 
-from diffusion_bench.page_export import FRAMEWORK_LABELS, build_sections  # noqa: E402
+from diffusion_bench.page_export import (  # noqa: E402
+    FRAMEWORK_LABELS,
+    build_sections,
+    measured_frameworks,
+    thinnest_lead,
+)
 
 HISTORICAL = ROOT / "docs" / "data" / "historical-cross-framework.json"
 LATEST = ROOT / "docs" / "data" / "latest-cross-framework.json"
@@ -87,6 +92,17 @@ def _policy_block(merged: dict, args) -> dict:
             "runs its newest main/release line (no pinned snapshots)"
         ),
     }
+    # A row without it was measured before 2026-09-30, when every request of a
+    # case repeated one prompt and reference image and sglang's conditioning
+    # cache answered the repeats.
+    policy["request_inputs"] = " + ".join(
+        sorted(
+            {
+                (row.get("framework_metadata") or {}).get("request_inputs", "repeated")
+                for row in merged.get("results", []) + merged.get("throughput_results", [])
+            }
+        )
+    )
     revisions = merged.get("model_revisions") or {}
     if revisions:
         policy["model_revisions"] = {k: str(v)[:9] for k, v in sorted(revisions.items())}
@@ -107,12 +123,8 @@ def _headline_summary(section: dict, args) -> dict:
     wins: dict[str, int] = {}
     comparable = 0
     for row in rows:
-        measured = [
-            fw
-            for fw, cell in (row.get("cells") or {}).items()
-            if cell.get("status") == "ok" and cell.get("latency_s") is not None
-        ]
-        if len(measured) < 2:  # sglang on its own is not a comparison
+        # the same predicate ranks the thinnest-lead list
+        if len(measured_frameworks(row)) < 2:  # sglang on its own is not a comparison
             continue
         comparable += 1
         winner = row.get("winner")
@@ -196,6 +208,7 @@ def main() -> int:
         print("error: run produced no publishable sections", file=sys.stderr)
         return 1
 
+    leads = {sec["id"]: thinnest_lead(sec, merged, args.gpu) for sec in sections}
     for sec in sections:
         # Must use the same predicate as the status guard below. It counted
         # `client_latency_s`, a key build_sections does not emit, so it printed
@@ -209,6 +222,12 @@ def main() -> int:
             if "latency_s" in c or "qps" in c
         )
         print(f"{sec['id']}: {len(sec['rows'])} rows, {measured} measured cells")
+        for entry in leads[sec["id"]]:
+            print(
+                f"  thinnest lead: {entry['case_id']} "
+                f"{entry['fastest_competitor']['framework']}/sglang="
+                f"{entry.get('ratio_to_sglang', entry['sglang'].get('status'))}"
+            )
         if not measured:
             print(
                 f"  warning: {sec['id']} has no measured cells — it would "
@@ -277,6 +296,8 @@ def main() -> int:
         if single is not None:
             latest["rows"] = single["rows"]
             latest["summary"] = _headline_summary(single, args)
+        # Rebuilt per run like `rows`; the win count above cannot show where we are weakest.
+        latest["thinnest_lead"] = [entry for sec in sections for entry in leads[sec["id"]]]
         latest["updated_at"] = date_cls.today().isoformat()
         _dump(LATEST, latest)
         print(f"wrote {LATEST.relative_to(ROOT)}")

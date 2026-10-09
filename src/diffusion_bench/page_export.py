@@ -13,13 +13,14 @@ from typing import Any
 
 REPO_URL = "https://github.com/mickqian/diffusion-bench-framework"
 
-FRAMEWORK_ORDER = ("sglang", "vllm-omni", "lightx2v", "trtllm-visual", "comfyui")
+FRAMEWORK_ORDER = ("sglang", "vllm-omni", "lightx2v", "trtllm-visual", "comfyui", "fastvideo")
 FRAMEWORK_LABELS = {
     "sglang": "SGLang-Diffusion",
     "vllm-omni": "vLLM-Omni",
     "lightx2v": "LightX2V",
     "trtllm-visual": "TensorRT-LLM VisualGen",
     "comfyui": "ComfyUI",
+    "fastvideo": "FastVideo",
 }
 
 
@@ -229,6 +230,85 @@ def build_throughput_rows(merged: dict, config_cases: dict, case_order) -> tuple
     return rows, wins, comparable
 
 
+THINNEST_LEAD_CASES = 3
+# The cell value each mode compares; throughput's larger value is the better one.
+MODE_METRIC = {"single_e2e": "latency_s", "throughput": "qps"}
+# sglang single_e2e metrics measured on its diagnostic request, carried as-is.
+SGLANG_TAIL_FIELDS = (
+    "diagnostic_client_latency_s",
+    "diagnostic_stage_sum_s",
+    "unattributed_tail_s",
+    "unattributed_tail_frac",
+    "poll_interval_s",
+)
+
+
+def measured_frameworks(row: dict, metric: str = "latency_s") -> list[str]:
+    """Frameworks with a value in a page row; a row is comparable with two or more."""
+    return [
+        fw
+        for fw, cell in (row.get("cells") or {}).items()
+        if cell.get("status") == "ok" and cell.get(metric) is not None
+    ]
+
+
+def thinnest_lead(
+    section: dict, merged: dict, hardware: str, n: int = THINNEST_LEAD_CASES
+) -> list[dict]:
+    """The n comparable rows where sglang leads the fastest competitor by least.
+
+    Ranked on the page's own ratio_to_sglang. A comparable row sglang did not
+    measure has no lead at all and ranks first; ties keep case order.
+    """
+    mode = section["mode"]
+    metric = MODE_METRIC[mode]
+    tails = (
+        {
+            r["case_id"]: r.get("metrics") or {}
+            for r in merged.get("results") or []
+            if r.get("framework") == "sglang"
+        }
+        if mode == "single_e2e"
+        else {}
+    )
+    ranked = []
+    for row in section.get("rows") or []:
+        measured = measured_frameworks(row, metric)
+        if len(measured) < 2:
+            continue
+        cells = row["cells"]
+        pick = max if metric == "qps" else min
+        best = pick((fw for fw in measured if fw != "sglang"), key=lambda fw: cells[fw][metric])
+        ratio = cells[best].get("ratio_to_sglang") if "sglang" in measured else None
+        if "sglang" in measured:
+            tail = tails.get(row["case_id"]) or {}
+            sglang = {"gpus": cells["sglang"]["gpus"], metric: cells["sglang"][metric]}
+            sglang.update({k: tail[k] for k in SGLANG_TAIL_FIELDS if k in tail})
+        else:
+            sglang = {"status": cells["sglang"]["status"]}
+        entry = {
+            "mode": mode,
+            "metric": metric,
+            "case_id": row["case_id"],
+            "case": row["case"],
+            "hardware": hardware,
+            "sglang": sglang,
+            "fastest_competitor": {
+                "framework": best,
+                "gpus": cells[best]["gpus"],
+                metric: cells[best][metric],
+            },
+        }
+        if ratio is not None:
+            entry["ratio_to_sglang"] = ratio
+        # competitor/sglang: a thinner latency lead is a smaller ratio, a
+        # thinner throughput lead a larger one.
+        key = (0, 0.0) if ratio is None else (1, ratio if metric == "latency_s" else -ratio)
+        ranked.append((key, entry))
+    ranked.sort(key=lambda item: item[0])
+    return [entry for _, entry in ranked[:n]]
+
+
 def framework_versions(merged: dict) -> dict:
     """Resolved versions per framework, from what was ACTUALLY installed.
 
@@ -274,6 +354,15 @@ def framework_versions(merged: dict) -> dict:
         torch_entry = (comfy.get("packages") or {}).get("torch") or {}
         torch_ver = torch_entry.get("Version") if isinstance(torch_entry, dict) else None
         out["comfyui"] = f"ComfyUI @ {comfy['source_commit'][:9]}" + (f" + torch {torch_ver}" if torch_ver else "")
+    # FastVideo's editable install reports a static version, so its identity is
+    # the checkout commit, plus the kernel package built from it.
+    fastvideo = runtime.get("fastvideo") or {}
+    if fastvideo.get("source_commit"):
+        kernel = (fastvideo.get("packages") or {}).get("fastvideo-kernel") or {}
+        kernel_ver = kernel.get("Version") if isinstance(kernel, dict) else None
+        out["fastvideo"] = f"FastVideo @ {fastvideo['source_commit'][:9]}" + (
+            f" + fastvideo-kernel {kernel_ver}" if kernel_ver else ""
+        )
     return out
 
 

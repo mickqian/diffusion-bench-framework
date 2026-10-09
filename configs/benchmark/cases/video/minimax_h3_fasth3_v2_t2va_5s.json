@@ -1,0 +1,172 @@
+{
+  "id": "minimax_h3_fasth3_v2_t2va_5s",
+  "model": "FastVideo/FastVideo-FastH3-8-Step-V2",
+  "task": "text-to-video",
+  "label": "FastH3 8-Step V2 T2V+A (distilled)",
+  "throughput": false,
+  "semantics": "Distilled checkpoint with trained VSA sparsity -- a lossy class under this benchmark's policy, compared as its own case because every framework serves the SAME checkpoint under the contract it declares in fastvideo_inference.json: eight DiT forwards on the rungs [999, 874, 749, 624, 500, 375, 250, 125], video/audio shift 10/3, guidance 1, 80% VSA sparsity at 64-token tiles. Not part of the lossless headline. This is the few-step, four-GPU regime where per-request fixed cost (text encode, VAE decode, MP4 encode) is a large share of latency, which the 50-step two-GPU H3 case cannot show.",
+  "prompt": "At night, while their owner sleeps in a bedroom, three cats march in loudly playing tiny brass instruments, then abruptly file out.",
+  "width": 1344,
+  "height": 768,
+  "num_frames": 124,
+  "seed": 1101,
+  "num_gpus": 4,
+  "fps": 24,
+  "num_inference_steps": 8,
+  "benchmark": {
+    "warmup": {
+      "num_inference_steps": 8
+    }
+  },
+  "framework_request_extra": {
+    "sglang": {
+      "task": "t2va",
+      "conditions": [],
+      "target": {
+        "short_edge": 768,
+        "aspect_ratio": "16:9",
+        "duration_seconds": 5.0
+      },
+      "flow_shift": 10.0,
+      "audio_flow_shift": 3.0,
+      "num_frames": null,
+      "fps": null,
+      "num_inference_steps": 9
+    },
+    "vllm-omni": {
+      "extra_params": {
+        "task": "t2va",
+        "duration": 5.0,
+        "audio_flow_shift": 3.0,
+        "aspect_ratio": "16:9",
+        "preencode_mp4": true
+      },
+      "flow_shift": 10.0,
+      "guidance_scale": 1.0
+    },
+    "fastvideo": {
+      "task": "t2va",
+      "num_inference_steps": 9,
+      "guidance_scale": 1.0
+    }
+  },
+  "_note": "num_inference_steps counts model evaluations (8), as vLLM-Omni does; sglang counts sigma grid points, so its request carries 9 -- the same eight forwards. Both engines reject any other step count or shift for this checkpoint. Both engines pin revision 71a17d72c58c (2026-09-15 14:57): the next and current revision 3da2ddfe (15:05) removed provenance.json, which vLLM-Omni's V2 loader (#7610, merged 09-17) reads to find the base-H3 VAEs, so the current revision fails there with FileNotFoundError. The weights are identical across the two revisions. guidance_scale goes to vLLM-Omni only (its recipe sends guidance_scale=1); sglang's MiniMaxH3SamplingParams fixes it at 1.0 and rejects the field in a request (400). FastVideo counts sigma grid points like sglang (its docs: `--steps` 9 is nine points and eight forwards, and its denoiser rejects any other count for this checkpoint), so its request carries 9 too; it reads the rung ladder from fastvideo_inference.json and the 10/3 shifts from the scheduler configs, both present at 71a17d72. vLLM-Omni requests carry extra_params.preencode_mp4=true (2026-10-08): its documented, off-by-default overlap of MP4 encoding with the VAE decode (byte-identical frames), the counterpart of sglang's default streamed encode (#41819). Both engines run their best documented output path.",
+  "frameworks": {
+    "sglang": {
+      "status": "supported",
+      "serve_args": "--model-type diffusion --warmup-mode server --ulysses-degree 4 --performance-mode speed --enable-torch-compile false --revision 71a17d72c58ce3eeec418144de2a5a2090cb4c04",
+      "command_profiles": {
+        "default": {
+          "description": "sglang's FastH3 8-Step V2 path: the checkpoint's contract selects VSA-H3 at 0.8 for the transformer; Ulysses 4, resident (speed), eager.",
+          "sglang_ref": "origin/main + sgl-project/sglang#41839 (FastH3 8-Step V2 support, open 2026-09-30)",
+          "num_gpus": 4,
+          "serve_args": "--model-type diffusion --warmup-mode server --ulysses-degree 4 --performance-mode speed --enable-torch-compile false --revision 71a17d72c58ce3eeec418144de2a5a2090cb4c04",
+          "notes": "#41839's cookbook command is `sglang serve --model-path FastVideo/FastVideo-FastH3-8-Step-V2 --num-gpus 4`; the case adds the benchmark's standing sglang flags (server warmup, speed residency, compile off -- VSA-H3 rejects torch.compile anyway). `--model-variant` must not be passed: FastH3 rejects it. Validated 2026-09-30 on 4xH200 (sglang bd66ce3 + #41839 at 8362359): 11.28 s client median in each of three arms (server total 10.46-10.54 s: denoise 8.80 s, decode 1.27 s); with #41819's overlapped MP4 encode on top, 10.89 s. 4xGB300: 8.085/8.081 s (server 6.42-6.46 s: the serial save is ~1.6 s there); with #41819, 6.97 s."
+        }
+      }
+    },
+    "vllm-omni": {
+      "status": "supported",
+      "num_gpus": 4,
+      "serve_args": "--trust-remote-code --task-type fl2va --num-gpus 4 --usp 4 --ring 1 --vae-patch-parallel-size 4 --vae-parallel-mode tile --vae-use-tiling --diffusion-attention-backend FASTVIDEO_VSA --revision 71a17d72c58ce3eeec418144de2a5a2090cb4c04",
+      "extra_env": {
+        "VLLM_WORKER_MULTIPROC_METHOD": "spawn",
+        "VLLM_OMNI_VIDEO_SYNC_TIMEOUT": "1800"
+      },
+      "command_profiles": {
+        "default": {
+          "description": "vLLM-Omni's FastH3 8-Step V2 recipe: USP 4, VAE tile patch parallel 4, FASTVIDEO_VSA (fastvideo-kernel, vllm-omni's `vsa` extra).",
+          "framework_ref": "vllm-omni main 56763cd6c383 + vllm==0.30.0 + fastvideo-kernel==0.3.5 installed --no-deps (VLLM_OMNI_VSA_KERNEL_SPEC)",
+          "upstream_recipe": {
+            "repo": "vllm-project/vllm-omni",
+            "path": "recipes/MiniMaxAI/MiniMax-H3.md",
+            "commit": "7266fc613",
+            "commit_date": "2026-09-28",
+            "section": "FastH3 8-Step V2 full checkpoint"
+          },
+          "num_gpus": 4,
+          "serve_args": "--trust-remote-code --task-type fl2va --num-gpus 4 --usp 4 --ring 1 --vae-patch-parallel-size 4 --vae-parallel-mode tile --vae-use-tiling --diffusion-attention-backend FASTVIDEO_VSA --revision 71a17d72c58ce3eeec418144de2a5a2090cb4c04",
+          "notes": "The recipe's command minus host/port/served-model-name. It says not to pass --fastvideo-vsa-topk (the tile count is derived per request from the trained 80% policy). T2VA is served by the FL2VA partition. Validated 2026-09-30 on 4xH200: 12.06 s client median. The `vsa` extra's fastvideo-kernel 0.3.4 fails on H200 inside the request ('Error in tile TMA descriptor creation', then 'CUDA error: an illegal instruction was encountered'); 0.3.5 works, but its wheel declares torch==2.12.0, so a normal install downgrades vLLM 0.30's torch 2.13.0 and the server dies at startup with 'operator torchvision::nms does not exist'. Install it with --no-deps (scripts/install_comparison_frameworks.sh, VLLM_OMNI_VSA_KERNEL_SPEC). 4xGB300: 8.261/8.254 s; with extra_params.preencode_mp4 (its overlapped encode, off by default) 7.484/7.379 s. The V2 release's bundled vae/ and audio_vae/ are tensor-for-tensor the base-H3@9bfb6693 VAEs this loader fetches, so both engines decode with the same weights."
+        }
+      },
+      "framework_ref": "vllm-omni main 56763cd6c383 + vllm==0.30.0 + fastvideo-kernel==0.3.5 installed --no-deps (VLLM_OMNI_VSA_KERNEL_SPEC)"
+    },
+    "lightx2v": {
+      "status": "unsupported",
+      "reason": "Checked 2026-10-08 against LightX2V main 0c2edc12 (2026-10-05): LightX2V cannot serve this checkpoint under its trained contract (fastvideo_inference.json). V2 is trained for VIDEO_SPARSE_ATTN_H3 at 0.8 sparsity on 64-token tiles, and LightX2V has no VSA backend (its sparse attentions -- Sparge, SVG, radial, NBHD, Sol-Attn, sparse Sage/FA4 -- are other methods; dense attention would run a different model). Its H3 scheduler builds only a uniform shifted grid from infer_steps, so the explicit rungs [999, 874, ..., 125] cannot be given (an 8-step grid starts at 1000). LightX2V's own few-step H3 paths (configs/minimax_h3/dmd/: 4- and 8-step LoRAs on the base checkpoint, mostly FP8/INT8) are a different distillation, not this checkpoint, and are not substituted."
+    },
+    "trtllm-visual": {
+      "status": "unsupported",
+      "reason": "trtllm-visual's tracked scope in this harness is image cases; H3 is a video+audio model."
+    },
+    "diffusers": {
+      "status": "unsupported",
+      "reason": "MiniMax-H3 is integrated as Modular Diffusers blocks only (no DiffusionPipeline), and only via an unmerged PR (huggingface/diffusers#14355 -- pip install git+.../diffusers.git@refs/pull/14355/head). Not a servable baseline path today."
+    },
+    "comfyui": {
+      "status": "no_profile",
+      "reason": "No official ComfyUI workflow for the FastH3 8-Step V2 checkpoint and its VSA attention as of 2026-09-30."
+    },
+    "fastvideo": {
+      "status": "supported",
+      "num_gpus": 4,
+      "output_audio": true,
+      "extra_env": {
+        "FASTVIDEO_MINIMAX_H3_EXACT_KERNELS": "all",
+        "FASTVIDEO_H3_VAE_TILE_PARALLEL": "1",
+        "FASTVIDEO_ULYSSES_A2A": "auto",
+        "FASTVIDEO_MINIMAX_H3_FUSIONS": "0",
+        "FASTVIDEO_MINIMAX_H3_FA4_PACKED_VARLEN": "0",
+        "FASTVIDEO_H3_VSA_HEADS_FIRST_TILE": "1"
+      },
+      "command_profiles": {
+        "default": {
+          "description": "Hopper (H200): the checkpoint's trained VSA (0.8, 64-token tiles) on the ThunderKittens sm_90a kernel, Ulysses 4, DiT FSDP-sharded, text encoder and VAEs resident, eager with #1930's bit-exact kernels and heads-first VSA tiles.",
+          "framework_ref": "FastVideo main (2b164405c3d1 on 2026-10-07) installed `.[fasth3]` with uv: fastvideo-kernel 0.3.5 built from the same checkout, flash-attn-4 @14c37795, torch 2.12.0+cu130; FA3 from the prebuilt torch212-cu130 artifact",
+          "upstream_recipe": {
+            "repo": "hao-ai-lab/FastVideo",
+            "path": "examples/serving/openai_fasth3_8step.yaml",
+            "commit": "7f03e03dc656",
+            "commit_date": "2026-09-29",
+            "section": "generator (OpenAI-compatible FastH3 8-Step V2 server)"
+          },
+          "num_gpus": 4,
+          "serve_args": "--generator.revision 71a17d72c58ce3eeec418144de2a5a2090cb4c04 --generator.engine.use_fsdp_inference true --generator.engine.parallelism.tp_size 1 --generator.engine.parallelism.sp_size 4 --generator.engine.offload.dit false --generator.engine.offload.dit_layerwise false --generator.engine.offload.text_encoder false --generator.engine.offload.image_encoder false --generator.engine.offload.vae false --generator.engine.offload.lazy_module_load false --generator.engine.compile.enabled false --generator.engine.compile.vae_enabled false --generator.pipeline.workload_type t2v --generator.pipeline.experimental.attention_backend VIDEO_SPARSE_ATTN_H3 --generator.pipeline.experimental.VSA_sparsity 0.8 --generator.pipeline.experimental.VSA_tile_size 64 --generator.pipeline.experimental.inference_torch_compile false --generator.pipeline.experimental.h3_sequential_load false --generator.pipeline.experimental.vae_parallel_decode true --generator.pipeline.experimental.vae_parallel_decode_strategy gather",
+          "extra_env": {
+            "FASTVIDEO_FA4": "0",
+            "FASTVIDEO_VSA_TK": "1",
+            "FASTVIDEO_VSA_SM100A": "0"
+          },
+          "notes": "Derived 2026-10-08 from FastVideo's FastH3 V2 server config (SP4, VSA 0.8 at 64-token tiles, compile off) without its capacity switches (it offloads the text encoder and VAEs) and with #1930's lossless preset (basic_fasth3_omniref_pdd.py LOSSLESS_ACCEL_ENV at e1e25593) minus its reference memo, a cache this T2VA case cannot use. #1930/#1807's bit-identical switches are on (exact RoPE/AdaLN/SwiGLU kernels, VAE tile split, fused Ulysses all-to-all) and the output-changing ones off (FP32 round-once H3 fusions, FA4 packed varlen). The DiT is FSDP-sharded as in FastVideo's 4xH100 profile (basic_fasth3_h100.yaml): replicated, the 66.3 GB DiT, the resident 66.7 GB Qwen3-VL and the 11 GB of VAEs come to 144 GB, more than a 141 GB H200 holds. TK is the sm_90 route fastvideo-kernel takes by itself when built for 9.0a; FASTVIDEO_VSA_TK only makes it explicit. The request carries 9 sigma points = 8 forwards (case _note). VALIDATION PENDING (2026-10-08): check the log for 'FastH3 checkpoint schedule: 8 transformer forwards' and the VSA-H3 backend, and A/B against a replicated DiT with the text encoder offloaded (the config as published).",
+          "policy_exception": "Route, not speed (FastVideo main 2b164405, 2026-10-07): VIDEO_SPARSE_ATTN_H3 compiles only on its sm_100a 64-token route, and fastvideo_args.py says 'other VSA routes degrade the transformer to eager with one warning', so on sm_90 the DiT runs eager whatever the switch says. Eager is also the path #1930's bit-exact kernels and heads-first tiles take."
+        },
+        "blackwell-4gpu": {
+          "description": "Datacenter Blackwell: the sm_100a VSA kernel FastVideo measures on GB200, FA4, Ulysses 4, DiT replicated, everything resident, regional DiT compile on the compile-safe sm_100a tile-64 route.",
+          "hardware": [
+            "b200",
+            "b300",
+            "gb200",
+            "gb300"
+          ],
+          "framework_ref": "FastVideo main (2b164405c3d1 on 2026-10-07) installed `.[fasth3]` with uv: fastvideo-kernel 0.3.5 built from the same checkout, flash-attn-4 @14c37795, torch 2.12.0+cu130; FA3 from the prebuilt torch212-cu130 artifact",
+          "upstream_recipe": {
+            "repo": "hao-ai-lab/FastVideo",
+            "path": "examples/serving/openai_fasth3_8step.yaml",
+            "commit": "7f03e03dc656",
+            "commit_date": "2026-09-29",
+            "section": "generator (OpenAI-compatible FastH3 8-Step V2 server)"
+          },
+          "num_gpus": 4,
+          "serve_args": "--generator.revision 71a17d72c58ce3eeec418144de2a5a2090cb4c04 --generator.engine.use_fsdp_inference false --generator.engine.parallelism.tp_size 1 --generator.engine.parallelism.sp_size 4 --generator.engine.offload.dit false --generator.engine.offload.dit_layerwise false --generator.engine.offload.text_encoder false --generator.engine.offload.image_encoder false --generator.engine.offload.vae false --generator.engine.offload.lazy_module_load false --generator.engine.compile.enabled false --generator.engine.compile.vae_enabled false --generator.pipeline.workload_type t2v --generator.pipeline.experimental.attention_backend VIDEO_SPARSE_ATTN_H3 --generator.pipeline.experimental.VSA_sparsity 0.8 --generator.pipeline.experimental.VSA_tile_size 64 --generator.pipeline.experimental.inference_torch_compile true --generator.pipeline.experimental.h3_sequential_load false --generator.pipeline.experimental.vae_parallel_decode true --generator.pipeline.experimental.vae_parallel_decode_strategy gather",
+          "extra_env": {
+            "FASTVIDEO_FA4": "1",
+            "FASTVIDEO_VSA_SM100A": "1",
+            "FASTVIDEO_VSA_TK": "0"
+          },
+          "notes": "FastVideo's measured-fastest FastH3 layout on GB200 (basic_fasth3.py: replicated DiT, sm100a VSA, FA4, regional compile) at V2's trained sparsity, without its capacity switch (the text encoder stays resident: 66.3 + 66.7 + 11 GB of VAEs fit a 183 GB B200) and without the FP32 fusions of its `all` profile (#1930: they change ~95% of output pixels). V2's validated route is eager (cookbook: 'The compiled all profile has not been measured for this checkpoint'). VALIDATION PENDING (2026-10-08): A/B against DIFFUSION_BENCH_DISABLE_TORCH_COMPILE=1, where the exact kernels and heads-first tiles take over, and keep the faster; check the log for the sm100a VSA route and FlashAttention-4."
+        }
+      }
+    }
+  },
+  "model_revision": "71a17d72c58ce3eeec418144de2a5a2090cb4c04"
+}

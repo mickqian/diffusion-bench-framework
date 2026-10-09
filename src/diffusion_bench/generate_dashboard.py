@@ -19,6 +19,12 @@ import sys
 from datetime import datetime, timezone
 from pathlib import Path
 
+from diffusion_bench.page_export import (
+    build_single_e2e_rows,
+    build_throughput_rows,
+    thinnest_lead,
+)
+
 # ---------------------------------------------------------------------------
 # History fetching (from sgl-project/ci-data-diffusion via GitHub API)
 # ---------------------------------------------------------------------------
@@ -717,7 +723,8 @@ def _framework_sort_key(framework: str) -> tuple[int, str]:
         "lightx2v": 2,
         "trtllm-visual": 3,
         "comfyui": 4,
-        "diffusers": 5,
+        "fastvideo": 5,
+        "diffusers": 6,
     }
     return preferred.get(framework, 100), framework
 
@@ -728,6 +735,7 @@ def _framework_display_name(framework: str) -> str:
         "vllm-omni": "vLLM-Omni",
         "lightx2v": "LightX2V",
         "comfyui": "ComfyUI",
+        "fastvideo": "FastVideo",
     }.get(framework, framework)
 
 
@@ -1039,6 +1047,10 @@ def _framework_version(results: dict, manifest: dict, framework: str) -> str:
         commit = ((framework_runtime or {}).get("comfyui") or {}).get("source_commit")
         if commit:
             return f"master @ {_short_sha(commit)}"
+    elif framework == "fastvideo":
+        commit = ((framework_runtime or {}).get("fastvideo") or {}).get("source_commit")
+        if commit:
+            return f"main @ {_short_sha(commit)}"
     elif framework == "trtllm-visual":
         version = _package_version(framework_runtime, framework, "tensorrt-llm")
         if version:
@@ -1063,6 +1075,55 @@ def _report_data_modes(results: dict) -> str:
     return ", ".join(modes) if modes else "-"
 
 
+def _thinnest_lead_lines(results: dict, case_configs: dict[str, dict], hardware: str) -> list[str]:
+    """One table per mode, built from the page rows so it ranks what the page shows."""
+    lines: list[str] = []
+    for mode, key, build_rows, value, fmt in (
+        ("single_e2e", "results", build_single_e2e_rows, "single_e2e_s", _fmt_report_float),
+        ("throughput", "throughput_results", build_throughput_rows, "qps", _fmt_report_rps),
+    ):
+        if not results.get(key):
+            continue
+        rows, _, _ = build_rows(results, case_configs, list(case_configs))
+        columns = [
+            "case", "hardware", "sglang_gpus", f"sglang_{value}", "fastest_competitor",
+            "competitor_gpus", f"competitor_{value}", "competitor/SGLang-Diffusion",
+        ]
+        align = ["---", "---", "---:", "---:", "---", "---:", "---:", "---:"]
+        if mode == "single_e2e":
+            # all three from sglang's one diagnostic request: stage_sum + tail = client
+            columns += ["diagnostic_client_s", "stage_sum_s", "unattributed_tail_s"]
+            align += ["---:", "---:", "---:"]
+        lines += [
+            "",
+            f"### Thinnest lead - {mode}",
+            "",
+            "| " + " | ".join(columns) + " |",
+            "| " + " | ".join(align) + " |",
+        ]
+        for entry in thinnest_lead({"mode": mode, "rows": rows}, results, hardware):
+            sglang, rival, metric = entry["sglang"], entry["fastest_competitor"], entry["metric"]
+            ratio = entry.get("ratio_to_sglang")
+            cells = [
+                _md_cell(entry["case_id"]),
+                _md_cell(entry["hardware"]),
+                _md_cell(sglang.get("gpus")),
+                fmt(sglang[metric]) if metric in sglang else _md_cell(sglang["status"]),
+                _md_cell(_framework_display_name(rival["framework"])),
+                _md_cell(rival["gpus"]),
+                fmt(rival[metric]),
+                f"{ratio:.3f}x" if ratio is not None else "-",
+            ]
+            if mode == "single_e2e":
+                cells += [
+                    _fmt_report_float(sglang.get("diagnostic_client_latency_s")),
+                    _fmt_report_float(sglang.get("diagnostic_stage_sum_s")),
+                    _fmt_report_float(sglang.get("unattributed_tail_s")),
+                ]
+            lines.append("| " + " | ".join(cells) + " |")
+    return lines
+
+
 def build_issue_report_comment(results: dict) -> str:
     single_by_case = _group_results_by_case(results.get("results", []))
     throughput_by_case = _group_results_by_case(results.get("throughput_results", []))
@@ -1073,6 +1134,7 @@ def build_issue_report_comment(results: dict) -> str:
     manifest_path, manifest = _load_report_manifest(results)
     gpus = (results.get("hardware") or {}).get("gpus") or []
     gpu_model = "; ".join(sorted(set(gpus)))
+    hardware = f"{len(gpus)} x {gpu_model}" if gpus else "-"
     reproduce_script = manifest.get("reproduce_script") or results.get(
         "reproduce_script"
     )
@@ -1099,7 +1161,7 @@ def build_issue_report_comment(results: dict) -> str:
         f"| run_id | {_md_cell(results.get('run_id'))} |",
         f"| data | {_md_cell(_report_data_modes(results))} |",
         f"| bench_commit | {_md_cell(results.get('commit_sha'))} |",
-        f"| gpu | {_md_cell(f'{len(gpus)} x {gpu_model}' if gpus else '-')} |",
+        f"| gpu | {_md_cell(hardware)} |",
         f"| reproduce | {_md_cell('; '.join(reproduce_parts))} |",
         "",
         "| framework | version/ref |",
@@ -1111,6 +1173,7 @@ def build_issue_report_comment(results: dict) -> str:
         "",
         "Ratio columns are framework value divided by SGLang-Diffusion value for the same case.",
         "Statuses: `not_run` means configured but absent from this artifact; `unsupported` means unsupported by the tracked framework/version; `no_profile` means no validated aligned serving profile is tracked.",
+        *_thinnest_lead_lines(results, case_configs, hardware),
     ]
 
     for case_id in _ordered_case_ids(results):

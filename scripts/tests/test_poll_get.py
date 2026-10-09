@@ -49,6 +49,7 @@ def ok_get(url, timeout=None):
 
 real_get = requests.get
 requests.get = ok_get
+rc._POLL_SESSION.get = ok_get
 r = rc._poll_get("http://x/status", time.time() + 5)
 check("returns on first success", r.json()["status"] == "completed" and calls["n"] == 1)
 
@@ -64,6 +65,7 @@ def flaky_get(url, timeout=None):
 
 
 requests.get = flaky_get
+rc._POLL_SESSION.get = flaky_get
 t0 = time.time()
 r = rc._poll_get("http://x/status", time.time() + 30)
 check("survives a blip and returns", r.json()["status"] == "completed" and calls["n"] == 3)
@@ -79,6 +81,7 @@ def dead_get(url, timeout=None):
 
 
 requests.get = dead_get
+rc._POLL_SESSION.get = dead_get
 t0 = time.time()
 raised = None
 try:
@@ -101,6 +104,7 @@ def http_error_get(url, timeout=None):
 
 
 requests.get = http_error_get
+rc._POLL_SESSION.get = http_error_get
 raised = None
 try:
     rc._poll_get("http://x/status", time.time() + 5)
@@ -109,4 +113,5 @@ except requests.HTTPError as exc:
 check("surfaces an HTTP error immediately", raised is not None)
 
 requests.get = real_get
+rc._POLL_SESSION.get = real_get
 sys.exit(fail)

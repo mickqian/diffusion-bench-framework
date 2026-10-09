@@ -51,7 +51,8 @@ for skill in SKILLS:
 check("the skills reference this repo at all", checked > 0, f"{checked} path(s)")
 
 # The canonical-scripts table is the entry point for a round: it must still be
-# there and still name the runner, the tuner, the publisher and the tests.
+# there and still name the runner, the tuner, the publisher, the competitor
+# recipe check and the tests.
 bench = ROOT / ".claude" / "skills" / "diffusion-framework-benchmarking" / "SKILL.md"
 check("the benchmarking skill exists", bench.exists())
 if bench.exists():
@@ -62,6 +63,7 @@ if bench.exists():
         "scripts/upgrade_framework_stack.sh",
         "scripts/tune_sglang_serve_args.sh",
         "scripts/merge_and_publish_run.sh",
+        "scripts/check_competitor_recipes.py",
         "scripts/tests/run_all.sh",
     ):
         check(f"it still names {expected}", expected in text)

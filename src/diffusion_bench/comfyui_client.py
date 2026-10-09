@@ -6,15 +6,16 @@ outputs are listed in /history. Two properties of that design decide how it has
 to be measured:
 
 * ComfyUI caches every node's output keyed on the node's inputs and its
-  ancestors'. The harness sends the same prompt and seed on every request, so a
-  second identical graph is answered from cache -- the sampler never runs. A
-  benchmark request has to do the work a new generation does, so templates add
-  an undeclared ``__bench_nonce`` input to the node(s) that consume the request
-  (the text encoders). Undeclared inputs are part of the cache key but are not
-  passed to the node, so that node and everything downstream re-executes while
-  the model loaders stay cached, which is what a resident server does. Every
-  request is then checked: a sampler served from cache is a failure, not a
-  latency.
+  ancestors', so a second identical graph is answered from cache -- the sampler
+  never runs. A benchmark request has to do the work a new generation does, so
+  templates add an undeclared ``__bench_nonce`` input to the node(s) that
+  consume the request (the text encoders). Undeclared inputs are part of the
+  cache key but are not passed to the node, so that node and everything
+  downstream re-executes while the model loaders stay cached, which is what a
+  resident server does. Requests also differ in their prompt tag and reference
+  file, as for every framework (run_comparison._request_case); the nonce does
+  not depend on that. Every request is then checked: a sampler served from
+  cache is a failure, not a latency.
 * Completion is the ``executing`` message with ``node: null`` for the prompt.
   ``execution_success`` is sent earlier, before /history is written, so reading
   outputs right after it can race.
@@ -33,7 +34,6 @@ _PART_TOKEN = re.compile(r"\{\{(\w+)\}\}")
 
 NONCE_INPUT = "__bench_nonce"
 SAMPLER_CLASSES = {"KSampler", "KSamplerAdvanced", "SamplerCustom", "SamplerCustomAdvanced"}
-REF_IMAGE_NAME = "bench_reference.png"
 # Loaders whose output 0 is a diffusion MODEL (compile wraps it).
 MODEL_LOADERS = {"UNETLoader", "CheckpointLoaderSimple"}
 HEALTH_PATH = "/system_stats"
@@ -89,6 +89,11 @@ def build_graph(case: dict, spec: dict) -> dict:
     return with_compile(graph) if spec.get("compile") else graph
 
 
+def reference_name(variant: int) -> str:
+    """The input-directory file request `variant`'s graph loads its reference image from."""
+    return f"bench_reference_{variant:02d}.png"
+
+
 def workflow_params(case: dict, spec: dict) -> dict:
     """Placeholder values for one request of `case` under ComfyUI spec `spec`."""
     steps = int(case["num_inference_steps"])
@@ -111,7 +116,8 @@ def workflow_params(case: dict, spec: dict) -> dict:
         "guidance": case.get("guidance_scale"),
         "guidance_2": case.get("guidance_scale_2"),
         "true_cfg": case.get("true_cfg_scale"),
-        "ref_image": REF_IMAGE_NAME,
+        # a case rendered outside any request (the config build's check) has no variant
+        "ref_image": reference_name(case.get("input_variant", 0)),
         "filename_prefix": f"bench_{case['id']}",
     }
     params.update(spec.get("params") or {})

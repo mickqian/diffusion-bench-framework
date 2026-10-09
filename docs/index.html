@@ -84,6 +84,7 @@
         --bar-lightx2v: #b08968;
         --bar-trtllm: #7d8f69;
         --bar-comfyui: #8a6f9e;
+        --bar-fastvideo: #3f8f88;
         --bar-neutral: #c9c1b0;
         --glass-bg: rgba(250, 247, 240, 0.72);
         --glass-border: rgba(255, 255, 255, 0.55);
@@ -125,6 +126,7 @@
         --bar-lightx2v: #c89b76;
         --bar-trtllm: #93a87d;
         --bar-comfyui: #b19cc6;
+        --bar-fastvideo: #6cbab2;
         --bar-neutral: #6c6555;
         --glass-bg: rgba(28, 24, 18, 0.62);
         --glass-border: rgba(255, 255, 255, 0.1);
@@ -155,6 +157,7 @@
           --bar-lightx2v: #c89b76;
           --bar-trtllm: #93a87d;
           --bar-comfyui: #b19cc6;
+          --bar-fastvideo: #6cbab2;
           --bar-neutral: #6c6555;
           --glass-bg: rgba(28, 24, 18, 0.62);
           --glass-border: rgba(255, 255, 255, 0.1);
@@ -996,6 +999,10 @@
         background: var(--bar-comfyui);
       }
 
+      .legend .l-fastvideo::before {
+        background: var(--bar-fastvideo);
+      }
+
       .legend .l-neutral::before {
         background: var(--bar-neutral);
       }
@@ -1151,6 +1158,10 @@
 
       .bar-comfyui i {
         background: var(--bar-comfyui);
+      }
+
+      .bar-fastvideo i {
+        background: var(--bar-fastvideo);
       }
 
       .bar-neutral i {
@@ -3001,12 +3012,13 @@
         lightx2v: { label: "LightX2V", bar: "lightx2v" },
         "trtllm-visual": { label: "TensorRT-LLM VisualGen", bar: "trtllm" },
         comfyui: { label: "ComfyUI", bar: "comfyui" },
+        fastvideo: { label: "FastVideo", bar: "fastvideo" },
       };
       // Legacy two-framework latest schema → canonical framework keys, so older
       // committed data keeps rendering after the generic migration.
       const LEGACY_ROW_KEYS = { sglang_diffusion: "sglang", vllm_omni: "vllm-omni" };
       const LEGACY_FW_KEYS = { sglang_diffusion_now: "sglang", vllm_omni_now: "vllm-omni" };
-      const FRAMEWORK_RANK = ["sglang", "vllm-omni", "lightx2v", "trtllm-visual", "comfyui"];
+      const FRAMEWORK_RANK = ["sglang", "vllm-omni", "lightx2v", "trtllm-visual", "comfyui", "fastvideo"];
 
       let benchFrameworks = []; // per-framework render columns (chart bars, table cells, legend)
       let benchCols = []; // full sortable table columns: Case, GPUs, …frameworks, Fastest
@@ -3450,6 +3462,7 @@
         lightx2v: "LightX2V",
         "trtllm-visual": "TensorRT-LLM VisualGen",
         comfyui: "ComfyUI",
+        fastvideo: "FastVideo",
         sglang_reference: "SGLang baseline",
         vllm_omni_tp: "vLLM TP",
         vllm_omni_cfg: "vLLM CFG",
@@ -3727,6 +3740,7 @@
         if (key.includes("lightx2v")) return "lightx2v";
         if (key.includes("vllm")) return "vllm";
         if (key.includes("comfyui")) return "comfyui";
+        if (key.includes("fastvideo")) return "fastvideo";
         return "neutral";
       }
 
@@ -3755,7 +3769,7 @@
         }
         // Standard sections: derive the framework columns from the cells present
         // so any framework an upload includes (e.g. trtllm-visual) shows up.
-        const known = ["sglang", "vllm-omni", "lightx2v", "trtllm-visual", "comfyui"];
+        const known = ["sglang", "vllm-omni", "lightx2v", "trtllm-visual", "comfyui", "fastvideo"];
         const present = new Set();
         (section.rows || []).forEach((r) =>
           Object.keys(r.cells || {}).forEach((k) => present.add(k))
@@ -3951,10 +3965,10 @@
         return `<span class="bnx-sample" title="${cap}"><img src="${escapeHtml(sample.src)}" alt="${cap}" loading="lazy" decoding="async"><span class="bnx-sample-tag">SGLang</span></span>`;
       }
 
-      const BNX_ORDER = ["sglang", "vllm-omni", "lightx2v", "trtllm-visual", "comfyui"];
-      const BNX_SHORT = { "sglang": "SGLang", "vllm-omni": "vLLM-Omni", "lightx2v": "LightX2V", "trtllm-visual": "TRT-LLM", "comfyui": "ComfyUI" };
+      const BNX_ORDER = ["sglang", "vllm-omni", "lightx2v", "trtllm-visual", "comfyui", "fastvideo"];
+      const BNX_SHORT = { "sglang": "SGLang", "vllm-omni": "vLLM-Omni", "lightx2v": "LightX2V", "trtllm-visual": "TRT-LLM", "comfyui": "ComfyUI", "fastvideo": "FastVideo" };
       const BNX_VER = { "sglang": "native · FA3", "vllm-omni": "0.18.0", "lightx2v": "git 7efd05f8", "trtllm-visual": "1.3.0rc18" };
-      const BNX_COLOR = { "sglang": "var(--bar-sgl)", "vllm-omni": "var(--bar-vllm)", "lightx2v": "var(--bar-lightx2v)", "trtllm-visual": "var(--bar-trtllm)", "comfyui": "var(--bar-comfyui)" };
+      const BNX_COLOR = { "sglang": "var(--bar-sgl)", "vllm-omni": "var(--bar-vllm)", "lightx2v": "var(--bar-lightx2v)", "trtllm-visual": "var(--bar-trtllm)", "comfyui": "var(--bar-comfyui)", "fastvideo": "var(--bar-fastvideo)" };
       // metric per cell, mode-aware: throughput -> QPS (higher is better), else latency (lower is better)
       const bnxVal = (c, isTput) => {
         if (!c || c.status !== "ok") return null;
