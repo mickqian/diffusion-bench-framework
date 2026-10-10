@@ -95,6 +95,8 @@ check("respects the deadline (<10s for a 5s budget)", elapsed < 10)
 
 # 4. a real HTTP error is NOT swallowed as transient
 class BadResp(FakeResp):
+    text = '{"detail": "status store unavailable"}'
+
     def raise_for_status(self):
         raise requests.HTTPError("500 Server Error")
 
@@ -111,6 +113,7 @@ try:
 except requests.HTTPError as exc:
     raised = exc
 check("surfaces an HTTP error immediately", raised is not None)
+check("and keeps the server's error body", "status store unavailable" in str(raised))
 
 requests.get = real_get
 rc._POLL_SESSION.get = real_get
