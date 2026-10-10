@@ -50,7 +50,7 @@ VALID_STATUS = {"supported", "unsupported", "no_profile", "failed", "not_run", "
 # b200-* (minimax-h3), leaving them outside the compile policy. Each class is
 # resolved through config_guard.hardware_candidates, as the runtime resolves a
 # box's GPU names, so a GB300 box selects exactly what the lint checked.
-DATACENTER_HARDWARE = ("h100", "h200", "b200", "b300", "gb200", "gb300")
+DATACENTER_HARDWARE = ("h100", "h200", "b200", "b300", "gb200", "gb300", "mi355x", "mi350x", "mi300x")
 POLICY_HARDWARE = DATACENTER_HARDWARE + ("rtx5090", "rtx4090")
 # "Best lossless" policy: the selected sglang profile must run resident, and
 # must NOT enable torch.compile — sglang's explicitly-fused kernels now match or

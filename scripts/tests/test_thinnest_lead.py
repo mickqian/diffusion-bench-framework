@@ -135,7 +135,7 @@ check("qps compared, not latency", got[0]["metric"] == "qps" and got[0]["sglang"
 check("single_e2e tail never lands on a throughput row", "unattributed_tail_s" not in got[0]["sglang"])
 
 print("tracker issue table")
-REAL = ["qwen_image_2512_t2i_1024", "zimage_turbo_t2i_1024", "flux1_dev_t2i_1024",
+REAL = ["qwen_image_21_t2i_1024", "zimage_turbo_t2i_1024", "flux1_dev_t2i_1024",
         "ltx2.3_twostage_t2v_2gpus"]
 run = {
     "timestamp": "2026-09-30T00:00:00+00:00",

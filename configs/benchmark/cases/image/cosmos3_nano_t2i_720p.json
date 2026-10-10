@@ -37,7 +37,7 @@
           "description": "Cosmos3 Nano T2I profile for SGLang-Diffusion main 3d540563.",
           "sglang_ref": "sgl-project/sglang@3d540563916394115f9612f30601ae3fa97ada7c",
           "serve_args": "--model-type diffusion --warmup-mode server --attention-backend fa --tp-size 2 --dit-layerwise-offload false --performance-mode speed --enable-torch-compile false",
-          "notes": "Guardrails disabled for framework-only serving performance; no cache or torch compile path. Policy-aligned candidate (compile on, offload off) \u2014 NOT yet validated on H100; validate (incl. OOM risk) before publishing.",
+          "notes": "Guardrails disabled for framework-only serving performance; no cache or torch compile path. Policy-aligned candidate (compile on, offload off) — NOT yet validated on H100; validate (incl. OOM risk) before publishing.",
           "extra_env": {
             "SGLANG_DISABLE_COSMOS3_GUARDRAILS": "1"
           }
@@ -71,6 +71,16 @@
           "sglang_ref": "current-main",
           "serve_args": "--model-type diffusion --warmup-mode server --attention-backend fa --tp-size 2 --batching-max-size 4 --enable-batching-metrics",
           "notes": "Tensor-parallel across 2 GPUs plus batch-4 serving pressure; no cache, no torch compile."
+        },
+        "gb300-2gpu-cfg-parallel-compile": {
+          "description": "GB300: CFG-parallel with torch.compile, which beats eager here once the fused kernels stay in the graph.",
+          "hardware": [
+            "gb300"
+          ],
+          "sglang_ref": "main 3831e7e09 + sglang#43565 #43568 #43577 #43575 #43576 #43584 #43586 (GB300 rerun tree)",
+          "num_gpus": 2,
+          "serve_args": "--model-type diffusion --warmup-mode server --attention-backend torch_cudnn_sdpa --tp-size 1 --cfg-parallel-size 2 --dit-layerwise-offload false --performance-mode speed --enable-torch-compile true --offload-during-compile false",
+          "policy_exception": "2026-10-10 GB300 served A/B, NUMA-bound workers, 2 interleaved rounds: compile 0.884/0.876 s vs eager 0.933/0.939 s with sglang#43577 (compile was 1.424/1.435 s before it; outputs bit-identical to main). vLLM-Omni default 0.97-1.02 s."
         },
         "blackwell-2gpu-cfg-parallel": {
           "description": "Blackwell 2-GPU CFG-parallel + cuDNN-SDPA SGLang-Diffusion Cosmos3 T2I profile.",

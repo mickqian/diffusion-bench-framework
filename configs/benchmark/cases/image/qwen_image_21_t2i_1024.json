@@ -83,8 +83,67 @@
       }
     },
     "vllm-omni": {
-      "status": "unsupported",
-      "reason": "No Qwen-Image-2.1 serving path on main HEAD, which is the version policy's target for this framework. vllm-omni's docs/models/supported_models.md lists Qwen-Image, Qwen-Image-2512, Qwen-Image-Edit{,-2509,-2511} and Qwen-Image-Layered but not Qwen-Image-2.1, and a code search for QwenImage21 / Qwen-Image-2.1 across the repo returns nothing. Support lives only on vllm-project/vllm-omni#7759 ('[New model] Qwen-image-2.1 support', opened 2026-09-18, still OPEN as of 2026-09-21); recipes.vllm.ai/Qwen/Qwen-Image-2.1 documents `vllm serve Qwen/Qwen-Image-2.1 --omni` against that PR checkout and states support is not in a tagged release. Re-classify as soon as #7759 merges."
+      "status": "supported",
+      "num_gpus": 1,
+      "serve_args": "",
+      "command_profiles": {
+        "default": {
+          "description": "vLLM-Omni's documented Qwen-Image-2.1 server (`vllm serve Qwen/Qwen-Image-2.1 --omni`): regional torch.compile plus CUDA-graph decode, both on by default.",
+          "framework_ref": "vllm-omni main f69b1f2b19ce + vllm==0.31.0",
+          "upstream_recipe": {
+            "repo": "vllm-project/vllm-omni",
+            "path": "recipes/Qwen/Qwen-Image-2.1.md",
+            "commit": "f69b1f2b1",
+            "commit_date": "2026-10-10",
+            "section": "Online Serving"
+          },
+          "num_gpus": 1,
+          "serve_args": "",
+          "notes": "The recipe measured compile+graph 5.93 s against eager 8.28 s on one H200 at 50 steps. The harness drops --enforce-eager when compile is on, so the recipe's defaults stand. Main HEAD lists QwenImage21Pipeline (T2I + up to 4 condition images) since its 2026-10 recipe; the 2026-09 'unsupported' classification was stale. VALIDATION PENDING (2026-10-10 round): derived, not yet measured."
+        },
+        "rtx5090-cpu-offload": {
+          "description": "One 32 GB RTX 5090: vLLM-Omni's model-level CPU offload on its eager decode path, cuDNN attention.",
+          "hardware": [
+            "rtx5090"
+          ],
+          "framework_ref": "vllm-omni main f69b1f2b19ce + vllm==0.31.0",
+          "upstream_recipe": {
+            "repo": "vllm-project/vllm-omni",
+            "path": "recipes/Qwen/Qwen-Image-2.1.md",
+            "commit": "f69b1f2b1",
+            "commit_date": "2026-10-10",
+            "section": "Online Serving"
+          },
+          "serve_args": "--enable-cpu-offload --no-enable-cuda-graph-decode",
+          "extra_env": {
+            "DIFFUSION_ATTENTION_BACKEND": "CUDNN_ATTN"
+          },
+          "notes": "The recipe (recipes/Qwen/Qwen-Image-2.1.md @ f69b1f2b1, checked 2026-10-10) puts BF16 peak GPU memory at 36.9 GB, and the default resident command OOMed at its dummy run on a 32 GB RTX 5090 (rdxa-5090-pa, 2026-10-10). The recipe's low-memory path is model-level CPU offload, which swaps the DiT and the text encoder (mutual exclusion). With CUDA-graph decode on (the default) the DiT keeps its device storage for the captured graphs, and the first request OOMed moving the text encoder in (measured 2026-10-10). The recipe's eager offload path, --no-enable-cuda-graph-decode, frees that storage. cuDNN attention as in this case's Blackwell profile. Validated 2026-10-10 on rdxa-5090-pa (1x RTX 5090, 60 GB host, vllm-omni f69b1f2b1): t2i 14.71 s single_e2e, no OOM."
+        },
+        "blackwell-cudnn": {
+          "description": "Datacenter Blackwell: cuDNN attention, the vLLM-Omni backend that measured fastest for Qwen-Image on B200 (FLASH_ATTN is Hopper-only there).",
+          "hardware": [
+            "b200",
+            "gb200",
+            "b300",
+            "gb300"
+          ],
+          "framework_ref": "vllm-omni main f69b1f2b19ce + vllm==0.31.0",
+          "upstream_recipe": {
+            "repo": "vllm-project/vllm-omni",
+            "path": "recipes/Qwen/Qwen-Image-2.1.md",
+            "commit": "f69b1f2b1",
+            "commit_date": "2026-10-10",
+            "section": "Online Serving"
+          },
+          "num_gpus": 1,
+          "serve_args": "",
+          "extra_env": {
+            "DIFFUSION_ATTENTION_BACKEND": "CUDNN_ATTN"
+          },
+          "notes": "Carried from Qwen-Image-2512's B200 measurement (CUDNN_ATTN 2.741 s vs TRTLLM_ATTN 3.274 s; FLASH_ATTN refused on sm_100); re-check against the auto selection on the first Blackwell run. Main HEAD lists QwenImage21Pipeline (T2I + up to 4 condition images) since its 2026-10 recipe; the 2026-09 'unsupported' classification was stale. VALIDATION PENDING (2026-10-10 round): derived, not yet measured."
+        }
+      }
     },
     "lightx2v": {
       "status": "supported",

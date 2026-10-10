@@ -25,6 +25,10 @@
 #   DBF_HF_HOME=$STATE/hf-cache    DBF_HF_TOKEN_FILE=$STATE/.hftoken
 #   DBF_FRAMEWORKS=sglang          DBF_HARDWARE_PROFILE=h100
 #   DBF_CASE_TIMEOUT=3000         DBF_CONFIG=configs/comparison_configs.json
+#   DBF_SGLANG_PYTHONPATH=<sglang>/python   run an sglang source tree (e.g. main plus
+#     unmerged fixes, committed on a local branch so the result records its sha)
+#     instead of the installed one; it goes first on PYTHONPATH for the harness and
+#     the servers it starts.
 set -u
 
 TAG="${1:?tag}"; GPU_IDS="${2:?gpu ids, e.g. 0,1}"; readonly BASE_PORT="${3:?base port}"
@@ -40,6 +44,7 @@ CASE_TIMEOUT="${DBF_CASE_TIMEOUT:-3000}"
 TOKEN_FILE="${DBF_HF_TOKEN_FILE:-${STATE_DIR}/.hftoken}"
 # A variant config (e.g. an old competitor profile) A/Bs a command on the same box.
 CONFIG="${DBF_CONFIG:-configs/comparison_configs.json}"
+HARNESS_PYTHONPATH="${DBF_SGLANG_PYTHONPATH:+${DBF_SGLANG_PYTHONPATH}:}src"
 
 mkdir -p "$LOG_DIR"
 LOG="${LOG_DIR}/run_${TAG}.log"
@@ -64,23 +69,72 @@ export SGLANG_DIFFUSION_FRAMEWORK_VENV_ROOT="${DBF_VENV_ROOT:-${STATE_DIR}/fw-ve
 export DIFFUSION_BENCH_DISABLE_TORCH_COMPILE=0
 export PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True
 
+own_gpu_pids() {
+    if command -v nvidia-smi >/dev/null 2>&1; then
+        nvidia-smi --query-compute-apps=pid --format=csv,noheader -i "$GPU_IDS" 2>/dev/null
+        return
+    fi
+    # ROCm: amd-smi reports HOST pids, which name nothing (or the wrong process) inside
+    # a container. Take the container's own processes holding /dev/kfd and keep those
+    # launched with exactly our device list, which every server this runner starts inherits.
+    local p
+    for p in $(find /proc/[0-9]*/fd -lname /dev/kfd 2>/dev/null | cut -d/ -f3 | sort -u); do
+        tr '\0' '\n' < "/proc/$p/environ" 2>/dev/null | grep -qx "CUDA_VISIBLE_DEVICES=$GPU_IDS" && echo "$p"
+    done
+}
+
 kill_own_gpus() {
     # narrow kill: only PIDs on OUR devices; never a broad pkill on shared nodes
     local pids attempt
     for attempt in 1 2 3; do
-        pids=$(nvidia-smi --query-compute-apps=pid --format=csv,noheader -i "$GPU_IDS" 2>/dev/null | sort -u | tr '\n' ' ')
+        pids=$(own_gpu_pids | sort -u | tr '\n' ' ')
         [ -n "${pids// /}" ] || break
         kill -9 $pids 2>/dev/null
         sleep 4
     done
 }
 
+# Largest VRAM use (MiB) on our devices.
+gpu_used_mib() {
+    if command -v nvidia-smi >/dev/null 2>&1; then
+        nvidia-smi --query-gpu=memory.used --format=csv,noheader,nounits -i "$GPU_IDS" 2>/dev/null | sort -n | tail -1
+        return
+    fi
+    rocm-smi --showmeminfo vram --csv 2>/dev/null | awk -F, -v ids=",$GPU_IDS," '
+        $1 ~ /^card[0-9]+$/ && index(ids, "," substr($1, 5) ",") { mib = int($3 / 1048576); if (mib > max) max = mib }
+        END { print max + 0 }'
+}
+
+# A case starts on empty cards. Killing is not enough: after a GPU memory fault the
+# dying workers held ~250 GB per MI355X for over an hour (2026-10-10), and the cases
+# that ran on top of them crawled at 100 s/step or OOMed.
+wait_gpus_free() {
+    local waited=0 used
+    while :; do
+        used=$(gpu_used_mib)
+        (( ${used:-0} < 2048 )) && return 0
+        if (( waited >= 600 )); then
+            echo "GPUs $GPU_IDS still hold ${used} MiB after ${waited}s"
+            return 1
+        fi
+        (( waited == 0 )) && echo "waiting for GPUs $GPU_IDS to free (${used} MiB in use)"
+        kill_own_gpus
+        sleep 15
+        waited=$((waited + 15))
+    done
+}
+
 echo "=== RUN $TAG START $(date -u) cases=[${CASES[*]}] modes=[$MODES] gpus=$GPU_IDS ==="
-echo "=== repo=$REPO_DIR config=$CONFIG hw=$HW_PROFILE frameworks=$FRAMEWORKS venvs=$SGLANG_DIFFUSION_FRAMEWORK_VENV_ROOT hf=$HF_HOME ==="
+echo "=== repo=$REPO_DIR config=$CONFIG hw=$HW_PROFILE frameworks=$FRAMEWORKS venvs=$SGLANG_DIFFUSION_FRAMEWORK_VENV_ROOT hf=$HF_HOME sglang=${DBF_SGLANG_PYTHONPATH:-installed} ==="
 port="$BASE_PORT"
 for case_id in "${CASES[@]}"; do
     kill_own_gpus
-    CUDA_VISIBLE_DEVICES="$GPU_IDS" PYTHONPATH=src timeout "$CASE_TIMEOUT" \
+    if ! wait_gpus_free; then
+        echo "RESULT $case_id rc=CONTAMINATED: GPUs $GPU_IDS not free at case start, case not run"
+        port=$((port + 1))
+        continue
+    fi
+    CUDA_VISIBLE_DEVICES="$GPU_IDS" PYTHONPATH="$HARNESS_PYTHONPATH" timeout "$CASE_TIMEOUT" \
         python3 -m diffusion_bench.run_comparison \
         --config "$CONFIG" \
         --frameworks $FRAMEWORKS --case-ids "$case_id" --modes $MODES \

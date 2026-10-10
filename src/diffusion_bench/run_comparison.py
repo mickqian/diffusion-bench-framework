@@ -23,6 +23,7 @@ Usage:
 import argparse
 import base64
 import copy
+import csv
 import io
 import itertools
 import json
@@ -102,6 +103,17 @@ POLL_INTERVAL_S = 0.02
 _POLL_SESSION = requests.Session()
 
 
+def _raise_for_status(resp: requests.Response) -> None:
+    """raise_for_status keeping the server's error body: "400 Bad Request" alone names no cause."""
+    try:
+        resp.raise_for_status()
+    except requests.HTTPError as exc:
+        body = " ".join((resp.text or "").split())[:500]
+        if not body:
+            raise
+        raise requests.HTTPError(f"{exc} -- {body}", response=resp) from None
+
+
 def _poll_get(url: str, deadline: float, timeout: int = 30):
     """GET a job-status URL, tolerating transient failures.
 
@@ -119,7 +131,7 @@ def _poll_get(url: str, deadline: float, timeout: int = 30):
     while time.time() < deadline:
         try:
             resp = _POLL_SESSION.get(url, timeout=timeout)
-            resp.raise_for_status()
+            _raise_for_status(resp)
             return resp
         except (requests.Timeout, requests.ConnectionError) as exc:
             last = exc
@@ -329,12 +341,16 @@ def _build_vllm_cmd(case: dict, fw_cfg: dict, port: int) -> list[str]:
         cmd.append("--omni")
     if fw_cfg.get("serve_args", "").strip():
         cmd += fw_cfg["serve_args"].strip().split()
+    # vLLM-Omni's --usp/--ring are its Ulysses/ring degrees. Missing them here
+    # added TP2 on top of `--usp 2`, and a "2-GPU" cell ran on four (2026-10-10).
     parallel_args = {
         "--tensor-parallel-size",
         "--num-gpus",
         "--cfg-parallel-size",
         "--ulysses-degree",
         "--ring-degree",
+        "--usp",
+        "--ring",
         "--vae-patch-parallel-size",
     }
     has_parallel_arg = any(
@@ -834,8 +850,10 @@ def _build_fastvideo_cmd(case: dict, fw_cfg: dict, port: int) -> list[str]:
 def _visible_gpus_env(env: dict[str, str], num_gpus: int) -> dict[str, str]:
     """Expose only the first `num_gpus` of the GPUs this process can see.
 
-    ComfyUI takes no GPU-count flag: it runs on device 0, and its multi-GPU node
-    uses every device it can see. So the count is set through visibility.
+    Every framework gets exactly its cell's GPU count, so a command that asks for
+    more fails at startup instead of quietly using them: vLLM-Omni's
+    `--usp 2 --tensor-parallel-size 2` ran a "2-GPU" cell on four GPUs of a 4-GPU
+    pod (GB300, 2026-10-10). ComfyUI has no GPU-count flag at all.
     """
     visible = env.get("CUDA_VISIBLE_DEVICES")
     ids = [x for x in visible.split(",") if x.strip()] if visible else [str(i) for i in range(num_gpus)]
@@ -895,9 +913,14 @@ HARDWARE_PROFILE_TOKENS = (
     "a100",
     "l40",
     "l4",
+    "rtxpro6000",
     "rtx5090",
     "rtx4090",
     "rtx3090",
+    "mi355x",
+    "mi350x",
+    "mi325x",
+    "mi300x",
 )
 # One left-to-right scan in which a token claims its span; the tuple lists each
 # token before any token it contains. `gb300` contains `b300`, so a substring test
@@ -1244,7 +1267,7 @@ def _download_ref_image(config: dict, case: dict) -> bytes:
         return _cached_ref_images[url]
     print(f"  Downloading reference image from {url} ...")
     resp = requests.get(url, timeout=60)
-    resp.raise_for_status()
+    _raise_for_status(resp)
     _cached_ref_images[url] = resp.content
     return _cached_ref_images[url]
 
@@ -1421,7 +1444,7 @@ def send_image_request_sglang(
         timeout=REQUEST_TIMEOUT,
     )
     client_latency = time.time() - start
-    resp.raise_for_status()
+    _raise_for_status(resp)
     data = resp.json()
     if "data" not in data or len(data["data"]) == 0:
         raise RuntimeError(f"Image request returned no data: {data}")
@@ -1454,7 +1477,7 @@ def send_video_request_sglang(
         json=payload,
         timeout=REQUEST_TIMEOUT,
     )
-    resp.raise_for_status()
+    _raise_for_status(resp)
     job = resp.json()
     job_id = job.get("id")
     if not job_id:
@@ -1465,7 +1488,7 @@ def send_video_request_sglang(
     while True:
         time.sleep(POLL_INTERVAL_S)
         poll_resp = _poll_get(poll_url, start + REQUEST_TIMEOUT)
-        poll_resp.raise_for_status()
+        _raise_for_status(poll_resp)
         poll_data = poll_resp.json()
         status = poll_data.get("status")
         if status == "completed":
@@ -1543,7 +1566,7 @@ def send_image_conditioned_request_sglang(
 
     # For video endpoints, need to poll
     if task in ("image-to-video", "text-image-to-video"):
-        resp.raise_for_status()
+        _raise_for_status(resp)
         job = resp.json()
         job_id = job.get("id")
         if not job_id:
@@ -1552,7 +1575,7 @@ def send_image_conditioned_request_sglang(
         while True:
             time.sleep(POLL_INTERVAL_S)
             poll_resp = _poll_get(poll_url, start + REQUEST_TIMEOUT)
-            poll_resp.raise_for_status()
+            _raise_for_status(poll_resp)
             poll_data = poll_resp.json()
             status = poll_data.get("status")
             if status == "completed":
@@ -1562,7 +1585,7 @@ def send_image_conditioned_request_sglang(
             if time.time() - start > REQUEST_TIMEOUT:
                 raise TimeoutError(f"Timed out after {REQUEST_TIMEOUT}s")
     else:
-        resp.raise_for_status()
+        _raise_for_status(resp)
 
     client_latency = time.time() - start
 
@@ -1633,7 +1656,7 @@ def send_request_vllm_omni(base_url: str, case: dict, config: dict) -> float:
             files=files,
             timeout=REQUEST_TIMEOUT,
         )
-        resp.raise_for_status()
+        _raise_for_status(resp)
         latency = time.time() - start
         try:
             tracks = fastvideo_client.mp4_handler_types(resp.content)
@@ -1657,7 +1680,7 @@ def send_request_vllm_omni(base_url: str, case: dict, config: dict) -> float:
             timeout=REQUEST_TIMEOUT,
         )
         latency = time.time() - start
-        resp.raise_for_status()
+        _raise_for_status(resp)
         return latency
     if task in ("image-edit", "image-to-image"):
         files = {
@@ -1688,7 +1711,7 @@ def send_request_vllm_omni(base_url: str, case: dict, config: dict) -> float:
             timeout=REQUEST_TIMEOUT,
         )
         latency = time.time() - start
-        resp.raise_for_status()
+        _raise_for_status(resp)
         return latency
 
     extra_body = {
@@ -1734,7 +1757,7 @@ def send_request_vllm_omni(base_url: str, case: dict, config: dict) -> float:
         timeout=REQUEST_TIMEOUT,
     )
     latency = time.time() - start
-    resp.raise_for_status()
+    _raise_for_status(resp)
     data = resp.json()
     choices = data.get("choices", [])
     if not choices:
@@ -1812,7 +1835,7 @@ def send_request_lightx2v(base_url: str, case: dict, config: dict) -> float:
             json=payload,
             timeout=REQUEST_TIMEOUT,
         )
-        resp.raise_for_status()
+        _raise_for_status(resp)
         latency = time.time() - start
         if not resp.content:
             raise RuntimeError("LightX2V sync image request returned no content")
@@ -1829,7 +1852,7 @@ def send_request_lightx2v(base_url: str, case: dict, config: dict) -> float:
         json=payload,
         timeout=REQUEST_TIMEOUT,
     )
-    resp.raise_for_status()
+    _raise_for_status(resp)
     task_data = resp.json()
     task_id = task_data.get("task_id")
     if not task_id:
@@ -1839,7 +1862,7 @@ def send_request_lightx2v(base_url: str, case: dict, config: dict) -> float:
     while True:
         time.sleep(LIGHTX2V_POLL_INTERVAL_S)
         poll_resp = _poll_get(poll_url, start + REQUEST_TIMEOUT)
-        poll_resp.raise_for_status()
+        _raise_for_status(poll_resp)
         poll_data = poll_resp.json()
         status = (
             poll_data.get("task_status") or poll_data.get("status") or ""
@@ -1937,7 +1960,7 @@ def send_request_generic_http(
         resp = _post_drained(
             f"{base_url}{endpoint}", data=data, files=files, timeout=REQUEST_TIMEOUT
         )
-        resp.raise_for_status()
+        _raise_for_status(resp)
         job = resp.json()
         # Synchronous endpoints return the result directly; async returns a job id.
         job_id = job.get("id")
@@ -1949,7 +1972,7 @@ def send_request_generic_http(
         while True:
             time.sleep(POLL_INTERVAL_S)
             poll_resp = _poll_get(poll_url, start + REQUEST_TIMEOUT)
-            poll_resp.raise_for_status()
+            _raise_for_status(poll_resp)
             poll_data = poll_resp.json()
             status = str(poll_data.get("status") or "").lower()
             if status in ("completed", "succeeded", "success"):
@@ -1971,7 +1994,7 @@ def send_request_generic_http(
             f"{base_url}{endpoint}", json=payload, timeout=REQUEST_TIMEOUT
         )
         latency = time.time() - start
-        resp.raise_for_status()
+        _raise_for_status(resp)
         print(f"  Generated in {latency:.2f}s ({framework})")
         return latency
 
@@ -2002,7 +2025,7 @@ def send_request_generic_http(
             f"{base_url}{endpoint}", files=files, data=data, timeout=REQUEST_TIMEOUT
         )
         latency = time.time() - start
-        resp.raise_for_status()
+        _raise_for_status(resp)
         print(f"  Generated in {latency:.2f}s ({framework})")
         return latency
 
@@ -2226,7 +2249,36 @@ def _collect_hardware_metadata() -> dict:
             ]
     except (FileNotFoundError, subprocess.TimeoutExpired):
         pass
+    if "gpus" not in metadata:
+        rocm_gpus = _rocm_smi_gpus()
+        if rocm_gpus:
+            metadata["gpus"] = rocm_gpus
     return metadata
+
+
+def _rocm_smi_gpus() -> list[str]:
+    """AMD GPUs as nvidia-smi-shaped lines: '<name>, <MiB> MiB, <driver>'."""
+
+    def csv_rows(*flags: str) -> list[dict]:
+        try:
+            ret = subprocess.run(
+                ["rocm-smi", *flags, "--csv"], capture_output=True, text=True, timeout=15
+            )
+        except (FileNotFoundError, subprocess.TimeoutExpired):
+            return []
+        if ret.returncode != 0:
+            return []
+        return list(csv.DictReader(io.StringIO(ret.stdout.strip())))
+
+    names = {row["device"]: row.get("Card Series", "") for row in csv_rows("--showproductname")}
+    vram = {row["device"]: row.get("VRAM Total Memory (B)", "") for row in csv_rows("--showmeminfo", "vram")}
+    driver = next((row.get("Driver version", "") for row in csv_rows("--showdriverversion")), "")
+    gpus = []
+    for device, name in names.items():
+        total = vram.get(device, "")
+        mib = f"{int(total) // (1024 * 1024)} MiB" if total.isdigit() else "unknown MiB"
+        gpus.append(f"{name}, {mib}, {driver}")
+    return gpus
 
 
 def _collect_sglang_runtime_metadata() -> dict:
@@ -2986,8 +3038,8 @@ def run_case_framework(
         # drifted (upstream renamed a flag) must fail its own cells, not
         # abort the whole matrix and discard every framework already run.
         _preflight_framework_command(framework, fw_cfg, env)
+        env = _visible_gpus_env(env, int(fw_cfg.get("num_gpus") or case.get("num_gpus") or 1))
         if framework == "comfyui":
-            env = _visible_gpus_env(env, int(case.get("num_gpus") or 1))
             _prepare_comfyui_workspace(case, fw_cfg)
         proc = subprocess.Popen(
             cmd,
@@ -3166,7 +3218,32 @@ def _framework_env(fw_name: str, env: dict[str, str]) -> dict[str, str]:
     framework_env = dict(env)
     framework_env["VIRTUAL_ENV"] = str(venv_path)
     framework_env["PATH"] = f"{bin_path}:{framework_env.get('PATH', '')}"
+    _isolate_rocm_userspace(framework_env, Path(venv_path))
     return framework_env
+
+
+def _isolate_rocm_userspace(env: dict[str, str], venv_path: Path) -> None:
+    """Run a ROCm-built venv on the ROCm it was built against, not the host image's SDK.
+
+    sglang's ROCm images point ROCM_HOME, ROCM_PATH and LD_LIBRARY_PATH at their
+    own SDK (ROCm 10), and /opt/rocm links to it. vLLM's +rocm723 wheels link torch
+    against the system ROCm, so on that SDK its amdsmi fails to import (undefined
+    symbol amdsmi_set_gpu_clk_range) and, past that, the first H3 request faults
+    the GPU in hipBLASLt (MI355X, 2026-10-10). scripts/install_rocm_userspace.sh
+    unpacks the matching release into <venv>/rocm. Without it, the venv at least
+    loads its own amdsmi library.
+    """
+    rocm = venv_path / "rocm"
+    if (rocm / "lib").is_dir():
+        env["ROCM_HOME"] = env["ROCM_PATH"] = str(rocm)
+        env["LD_LIBRARY_PATH"] = str(rocm / "lib")
+        return
+    smi = next(venv_path.glob("lib/python3*/site-packages/amdsmi/libamd_smi.so"), None)
+    if smi is None:
+        return
+    env.pop("ROCM_HOME", None)
+    env.pop("ROCM_PATH", None)
+    env["LD_LIBRARY_PATH"] = str(smi.parent)
 
 
 def _preflight_framework_command(
