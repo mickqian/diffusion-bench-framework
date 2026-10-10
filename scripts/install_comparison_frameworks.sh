@@ -99,7 +99,8 @@ framework_health_check() {
   # the ROCm in <venv>/rocm, else on its own amdsmi library, never on the SDK a
   # ROCm host image points ROCM_HOME at.
   local smi
-  smi="$(compgen -G "${VENV_PATH}/lib/python3*/site-packages/amdsmi/libamd_smi.so" | head -1)"
+  # `|| true`: no match is the normal (CUDA) case, and under pipefail it would end the script.
+  smi="$(compgen -G "${VENV_PATH}/lib/python3*/site-packages/amdsmi/libamd_smi.so" | head -1 || true)"
   if [[ -d "${VENV_PATH}/rocm/lib" ]]; then
     export ROCM_HOME="${VENV_PATH}/rocm" ROCM_PATH="${VENV_PATH}/rocm"
     export LD_LIBRARY_PATH="${VENV_PATH}/rocm/lib"
