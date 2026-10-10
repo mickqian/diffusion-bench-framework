@@ -24,6 +24,9 @@
 #     source builds plus model downloads got both containers OOMKilled. Build
 #     one framework at a time with MAX_JOBS=12, and download with
 #     HF_HUB_DISABLE_XET=1 (the xet CDN answered 429 to parallel snapshots)
+#   * this box's LightX2V venvs stopped at the FA3 import (before b32615f made
+#     aarch64 skip FA3); their flash-attn 2 was kept and the installer's remaining
+#     steps were run verbatim, which is what LIGHTX2V_INSTALL_FA3=0 installs
 # Versions resolved 2026-10-10 ~05:30 UTC (same as the round's other boxes):
 #   sglang origin/main 3831e7e09 | vllm 0.31.0 + vllm-omni main f69b1f2b
 #   LightX2V main b6d38283 (torch 2.11) | ComfyUI master 0df64eb2
