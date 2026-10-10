@@ -2458,6 +2458,16 @@
                     "serve_args": "--model-type diffusion --warmup-mode server --enable-cfg-parallel --pipeline-class-name LTX2TwoStagePipeline",
                     "extra_env": {},
                     "command_profiles": {
+                        "gb300-cfg-parallel-compile": {
+                            "description": "GB300: CFG-parallel two-stage with torch.compile.",
+                            "hardware": [
+                                "gb300"
+                            ],
+                            "sglang_ref": "main 3831e7e09 + sglang#43565 #43568 #43577 #43575 #43576 #43584 #43586 (GB300 rerun tree)",
+                            "num_gpus": 2,
+                            "serve_args": "--model-type diffusion --warmup-mode server --enable-cfg-parallel --pipeline-class-name LTX2TwoStagePipeline --dit-layerwise-offload false --performance-mode speed --enable-torch-compile true --offload-during-compile false",
+                            "policy_exception": "2026-10-10 GB300 served, NUMA-bound workers (sglang#43565): compile 8.969/8.991 s vs eager 12.709/12.581 s on the same tree; vLLM-Omni default 12.76 s."
+                        },
                         "default": {
                             "description": "Best known SGLang command for the benchmark repo default profile.",
                             "sglang_ref": "current-main",
