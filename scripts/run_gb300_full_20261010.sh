@@ -20,6 +20,10 @@
 #     by video-input runners none of these cases use)
 #   * FastVideo with FASTVIDEO_INSTALL_FA3=0: the aarch64 FA3 artifact links
 #     libcudart.so.12, and FA3 is Hopper-only; Blackwell runs FA4 / sm100 VSA
+#   * each pod's memory.max is 626 GiB (the node has 942): two MAX_JOBS=32
+#     source builds plus model downloads got both containers OOMKilled. Build
+#     one framework at a time with MAX_JOBS=12, and download with
+#     HF_HUB_DISABLE_XET=1 (the xet CDN answered 429 to parallel snapshots)
 # Versions resolved 2026-10-10 ~05:30 UTC (same as the round's other boxes):
 #   sglang origin/main 3831e7e09 | vllm 0.31.0 + vllm-omni main f69b1f2b
 #   LightX2V main b6d38283 (torch 2.11) | ComfyUI master 0df64eb2
@@ -76,5 +80,12 @@ wan22_t2v_a14b_720p
 esac
 
 cd "${DBF_REPO_DIR}" || exit 1
+# An OOMKilled container restarts in place with its writable layer wiped, which
+# puts /sgl-workspace/sglang back on the image's commit without a word.
+sglang_pin="${SGLANG_PIN:-3831e7e0918052be50ef38b3ff62154573e213d7}"
+if [[ "$(git -C /sgl-workspace/sglang rev-parse HEAD)" != "${sglang_pin}" ]]; then
+  echo "sglang is at $(git -C /sgl-workspace/sglang rev-parse --short HEAD), not the round's ${sglang_pin:0:9}" >&2
+  exit 1
+fi
 echo "=== ${ROLE} | $(git log --oneline -1) | sglang $(git -C /sgl-workspace/sglang log --oneline -1) ==="
 exec bash "${DBF_REPO_DIR}/scripts/run_b200_cross_framework_20260912.sh"
