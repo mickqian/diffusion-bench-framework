@@ -3201,7 +3201,25 @@ def _framework_env(fw_name: str, env: dict[str, str]) -> dict[str, str]:
     framework_env = dict(env)
     framework_env["VIRTUAL_ENV"] = str(venv_path)
     framework_env["PATH"] = f"{bin_path}:{framework_env.get('PATH', '')}"
+    _isolate_rocm_userspace(framework_env, Path(venv_path))
     return framework_env
+
+
+def _isolate_rocm_userspace(env: dict[str, str], venv_path: Path) -> None:
+    """Run a ROCm-built venv on its own ROCm libraries, not the host image's SDK.
+
+    sglang's ROCm images point ROCM_HOME, ROCM_PATH and LD_LIBRARY_PATH at their
+    own SDK (ROCm 10). Inherited by a venv built from vLLM's +rocm723 wheels, they
+    make its amdsmi load that SDK's libamd_smi.so (undefined symbol
+    amdsmi_set_gpu_clk_range), so torch fails to import and vLLM-Omni's platform
+    detection fails with it. The venv's amdsmi ships the library it needs.
+    """
+    smi = next(venv_path.glob("lib/python3*/site-packages/amdsmi/libamd_smi.so"), None)
+    if smi is None:
+        return
+    env.pop("ROCM_HOME", None)
+    env.pop("ROCM_PATH", None)
+    env["LD_LIBRARY_PATH"] = str(smi.parent)
 
 
 def _preflight_framework_command(

@@ -95,6 +95,14 @@ write_desired_stamp() {
 
 framework_health_check() {
   [[ -x "${VENV_PATH}/bin/python3" ]] || return 1
+  # Same rule as run_comparison._isolate_rocm_userspace: a ROCm-built venv runs on
+  # its own amdsmi library, not the SDK a ROCm host image points ROCM_HOME at.
+  local smi
+  smi="$(compgen -G "${VENV_PATH}/lib/python3*/site-packages/amdsmi/libamd_smi.so" | head -1)"
+  if [[ -n "${smi}" ]]; then
+    unset ROCM_HOME ROCM_PATH
+    export LD_LIBRARY_PATH="$(dirname "${smi}")"
+  fi
   case "${FRAMEWORK}" in
     vllm-omni)
       "${VENV_PATH}/bin/python3" -c 'import importlib.metadata as m; import vllm, vllm_omni; m.version("vllm"); m.version("vllm-omni")'
