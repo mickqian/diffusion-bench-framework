@@ -480,7 +480,7 @@ offloaded on datacenter hardware without one (see KNOWN_COMPETITOR_VIOLATIONS).
 | qwen_image_21_edit_1024 | vllm-omni | mi350x | `default` |  |  | vllm-project/vllm-omni@f69b1f2b1 (2026-10-10) |  |  |
 | qwen_image_21_edit_1024 | vllm-omni | mi355x | `default` |  |  | vllm-project/vllm-omni@f69b1f2b1 (2026-10-10) |  |  |
 | qwen_image_21_edit_1024 | vllm-omni | rtx4090 | `default` |  |  | vllm-project/vllm-omni@f69b1f2b1 (2026-10-10) |  |  |
-| qwen_image_21_edit_1024 | vllm-omni | rtx5090 | `default` |  |  | vllm-project/vllm-omni@f69b1f2b1 (2026-10-10) |  |  |
+| qwen_image_21_edit_1024 | vllm-omni | rtx5090 | `rtx5090-cpu-offload` |  |  | vllm-project/vllm-omni@f69b1f2b1 (2026-10-10) | `--enable-cpu-offload` | `DIFFUSION_ATTENTION_BACKEND=CUDNN_ATTN` |
 | qwen_image_21_t2i_1024 | sglang | b200 | `b200-1gpu-resident-fa` |  |  |  | `--model-type diffusion --warmup-mode server --performance-mode speed --attention-backend fa` |  |
 | qwen_image_21_t2i_1024 | sglang | b300 | `b200-1gpu-resident-fa` |  |  |  | `--model-type diffusion --warmup-mode server --performance-mode speed --attention-backend fa` |  |
 | qwen_image_21_t2i_1024 | sglang | gb200 | `b200-1gpu-resident-fa` |  |  |  | `--model-type diffusion --warmup-mode server --performance-mode speed --attention-backend fa` |  |
@@ -502,7 +502,7 @@ offloaded on datacenter hardware without one (see KNOWN_COMPETITOR_VIOLATIONS).
 | qwen_image_21_t2i_1024 | vllm-omni | mi350x | `default` |  |  | vllm-project/vllm-omni@f69b1f2b1 (2026-10-10) |  |  |
 | qwen_image_21_t2i_1024 | vllm-omni | mi355x | `default` |  |  | vllm-project/vllm-omni@f69b1f2b1 (2026-10-10) |  |  |
 | qwen_image_21_t2i_1024 | vllm-omni | rtx4090 | `default` |  |  | vllm-project/vllm-omni@f69b1f2b1 (2026-10-10) |  |  |
-| qwen_image_21_t2i_1024 | vllm-omni | rtx5090 | `default` |  |  | vllm-project/vllm-omni@f69b1f2b1 (2026-10-10) |  |  |
+| qwen_image_21_t2i_1024 | vllm-omni | rtx5090 | `rtx5090-cpu-offload` |  |  | vllm-project/vllm-omni@f69b1f2b1 (2026-10-10) | `--enable-cpu-offload` | `DIFFUSION_ATTENTION_BACKEND=CUDNN_ATTN` |
 | qwen_image_21_t2i_1024 | lightx2v | b200 | `blackwell-1gpu-fa2` |  |  |  |  | `{"resolution":1024,"vae_scale_factor":16,"attn_type":"flash_attn2","rope_type":"flashinfer_rope","rms_norm_type":"fp32_variance","layer_norm_type":"Triton","modulate_type":"triton","fused_qk_rms_norm":true,"fused_block_ops":true,"fused_block_min_tokens":1024,"enable_cfg":false,"sample_guide_scale":1.0,"warmup":true}` |
 | qwen_image_21_t2i_1024 | lightx2v | b300 | `blackwell-1gpu-fa2` |  |  |  |  | `{"resolution":1024,"vae_scale_factor":16,"attn_type":"flash_attn2","rope_type":"flashinfer_rope","rms_norm_type":"fp32_variance","layer_norm_type":"Triton","modulate_type":"triton","fused_qk_rms_norm":true,"fused_block_ops":true,"fused_block_min_tokens":1024,"enable_cfg":false,"sample_guide_scale":1.0,"warmup":true}` |
 | qwen_image_21_t2i_1024 | lightx2v | gb200 | `blackwell-1gpu-fa2` |  |  |  |  | `{"resolution":1024,"vae_scale_factor":16,"attn_type":"flash_attn2","rope_type":"flashinfer_rope","rms_norm_type":"fp32_variance","layer_norm_type":"Triton","modulate_type":"triton","fused_qk_rms_norm":true,"fused_block_ops":true,"fused_block_min_tokens":1024,"enable_cfg":false,"sample_guide_scale":1.0,"warmup":true}` |

@@ -101,6 +101,25 @@
           "serve_args": "",
           "notes": "The recipe measured compile+graph 5.93 s against eager 8.28 s on one H200 at 50 steps. The harness drops --enforce-eager when compile is on, so the recipe's defaults stand. Main HEAD lists QwenImage21Pipeline (T2I + up to 4 condition images) since its 2026-10 recipe; the 2026-09 'unsupported' classification was stale. VALIDATION PENDING (2026-10-10 round): derived, not yet measured."
         },
+        "rtx5090-cpu-offload": {
+          "description": "One 32 GB RTX 5090: vLLM-Omni's model-level CPU offload with its default CUDA-graph decode, cuDNN attention.",
+          "hardware": [
+            "rtx5090"
+          ],
+          "framework_ref": "vllm-omni main f69b1f2b19ce + vllm==0.31.0",
+          "upstream_recipe": {
+            "repo": "vllm-project/vllm-omni",
+            "path": "recipes/Qwen/Qwen-Image-2.1.md",
+            "commit": "f69b1f2b1",
+            "commit_date": "2026-10-10",
+            "section": "Online Serving"
+          },
+          "serve_args": "--enable-cpu-offload",
+          "extra_env": {
+            "DIFFUSION_ATTENTION_BACKEND": "CUDNN_ATTN"
+          },
+          "notes": "The recipe (recipes/Qwen/Qwen-Image-2.1.md @ f69b1f2b1, checked 2026-10-10) puts BF16 peak GPU memory at 36.9 GB, and the default resident command OOMed at its dummy run on a 32 GB RTX 5090 (rdxa-5090-pa, 2026-10-10). The recipe's low-memory path is model-level CPU offload: with CUDA-graph decode on (the default) the DiT stays on the device and the rest moves off, the counterpart of sglang's rtx5090 profile (DiT resident, text encoder offloaded). cuDNN attention as in this case's Blackwell profile and the H3 RTX 5090 recipe. VALIDATION PENDING (2026-10-10 round)."
+        },
         "blackwell-cudnn": {
           "description": "Datacenter Blackwell: cuDNN attention, the vLLM-Omni backend that measured fastest for Qwen-Image on B200 (FLASH_ATTN is Hopper-only there).",
           "hardware": [
