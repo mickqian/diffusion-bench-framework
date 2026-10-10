@@ -69,9 +69,10 @@
           "num_gpus": 4,
           "serve_args": "--model-type diffusion --warmup-mode server --model-variant fl2va --ulysses-degree 4 --encoder-parallel auto --performance-mode speed --attention-backend aiter --enable-torch-compile false",
           "extra_env": {
-            "SGLANG_USE_AITER": "1"
+            "SGLANG_USE_AITER": "1",
+            "MINIMAX_H3_VAE_DECODER_FUSED_NORM": "0"
           },
-          "notes": "Derived 2026-10-10: this case's default command plus the cookbook builder's mi300x/mi355x backend flags. VALIDATION PENDING (2026-10-10 round): derived, not yet measured on this hardware.",
+          "notes": "Derived 2026-10-10: this case's default command plus the cookbook builder's mi300x/mi355x backend flags. VALIDATION PENDING (2026-10-10 round): derived, not yet measured on this hardware. MINIMAX_H3_VAE_DECODER_FUSED_NORM=0 (2026-10-10, MI355X, sglang 3831e7e09): the VAE decoder's fused scale-add RMSNorm Triton kernels (#41906) use PTX inline asm (mul.rn.f32, constraint 'f') from sglang/kernels/numerics.py; on ROCm they fail to compile and decode to an all-NaN video. The flag keeps the eager norm path, which computes the same values.",
           "policy_exception": "Same correctness exception as the default profile (checked 2026-08-07): MiniMax-H3's torch.compile path changes numerical output per the sglang cookbook, so it is excluded regardless of hardware."
         }
       }

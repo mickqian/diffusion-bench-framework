@@ -14,6 +14,10 @@
 #     does not inherit the sglang image's PIP_CONSTRAINT torch pin
 #   * GPU cleanup between cases finds this runner's processes by /dev/kfd and
 #     their CUDA_VISIBLE_DEVICES (amd-smi reports host pids, useless in the pod)
+#   * sglang H3 runs with MINIMAX_H3_VAE_DECODER_FUSED_NORM=0: the fused VAE norm
+#     kernels use PTX inline asm and decode to NaN on ROCm (see the profile notes)
+#   * box prerequisite: `apt-get install -y libgl1 libglib2.0-0`. The ROCm image
+#     has no libGL.so.1, and vLLM-Omni's cv2 import fails without it
 #
 # Box: rx devbox h3bench-mi355x (8x MI355X, mi355x-amd-slurm), image
 # lmsysorg/sglang:v0.5.21-rocm10-mi35x with /sgl-workspace/sglang moved to
