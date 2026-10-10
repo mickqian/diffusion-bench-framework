@@ -8,6 +8,9 @@
 #       'cfg=--tp-size 1 --cfg-parallel-size 2' \
 #       'cfg_cudnn=--tp-size 1 --cfg-parallel-size 2 --attention-backend torch_cudnn_sdpa'
 #
+# A token of the form ENV:NAME=value is set as an environment variable for that arm
+# only (e.g. 'noipc=ENV:SGLANG_DIFFUSION_IPC_A2A=false') instead of being served.
+#
 # Extra args APPEND to the selected profile's, so a repeated flag relies on
 # argparse last-wins (`--tp-size 2 ... --tp-size 1`). That is why every arm
 # echoes the command it actually served with, IN FULL: a truncated echo defeats
@@ -38,8 +41,12 @@ export DBF_STATE_DIR="${DBF_STATE_DIR:-/personal/bench0912}"
 export DBF_REPO_DIR="${DBF_REPO_DIR:-/scratch/dbf2}"
 export DBF_LOG_DIR="${DBF_LOG_DIR:-${DBF_STATE_DIR}/logs}"
 export DBF_HF_HOME="${DBF_HF_HOME:-/cluster-storage/models}"
+# Same cache layout as devbox_run_cases.sh: HF_HOME, and the hub under it. Pointing
+# the hub cache at DBF_HF_HOME itself sent a GB300 tune to re-download LTX-2 into a
+# second copy beside the runner's (2026-10-10).
 export HF_HOME="${DBF_HF_HOME}"
-export HUGGINGFACE_HUB_CACHE="${DBF_HF_HOME}"
+export HF_HUB_CACHE="${HF_HOME}/hub"
+export HUGGINGFACE_HUB_CACHE="${HF_HUB_CACHE}"
 export SGLANG_DIFFUSION_FRAMEWORK_VENV_ROOT="${DBF_VENV_ROOT:-${DBF_STATE_DIR}/fw-venvs}"
 export SGLANG_DIFFUSION_SKIP_FRAMEWORK_INSTALL=1
 export DIFFUSION_BENCH_DISABLE_TORCH_COMPILE=0
@@ -53,14 +60,22 @@ source "${DBF_REPO_DIR:-/scratch/dbf2}/scripts/gpu_job_lock.sh"
 gpu_lock_acquire
 cd "${DBF_REPO_DIR}"
 
-run_arm() {  # run_arm <tag> <extra serve args>
-  local tag="$1" extra="$2"
+run_arm() {  # run_arm <tag> <extra serve args, with optional ENV:NAME=value tokens>
+  local tag="$1" spec="$2" extra="" token
+  local -a arm_env=()
+  for token in $spec; do
+    if [[ "$token" == ENV:*=* ]]; then
+      arm_env+=("${token#ENV:}")
+    else
+      extra+="${extra:+ }$token"
+    fi
+  done
   # Clear the cards first: a server left behind by a previous arm both holds
   # memory and contends for the GPU, which silently taxes the next arm.
   nvidia-smi --query-compute-apps=pid --format=csv,noheader -i "${GPUS}" 2>/dev/null \
     | sort -u | xargs -r kill -9 2>/dev/null
   sleep 5
-  DIFFUSION_BENCH_SGLANG_EXTRA_SERVE_ARGS="$extra" CUDA_VISIBLE_DEVICES="${GPUS}" PYTHONPATH=src \
+  env "${arm_env[@]}" DIFFUSION_BENCH_SGLANG_EXTRA_SERVE_ARGS="$extra" CUDA_VISIBLE_DEVICES="${GPUS}" PYTHONPATH=src \
     timeout "${TUNE_CASE_TIMEOUT:-2400}" python3 -m diffusion_bench.run_comparison \
     --config configs/comparison_configs.json --frameworks sglang --case-ids "${CASE_ID}" \
     --modes single_e2e --hardware-profile "${HW}" --port "${PORT}" \
@@ -85,6 +100,7 @@ if m.get("native_fallback_components"):
 PY
   # In full: the point of echoing it is to check the last-wins assumption.
   echo "     cmd: $(grep -ao 'sglang serve .*' "${DBF_LOG_DIR}/tune_${tag}.runlog" 2>/dev/null | head -1)"
+  [[ ${#arm_env[@]} -gt 0 ]] && echo "     env: ${arm_env[*]}"
   PORT=$((PORT + 2))
 }
 
