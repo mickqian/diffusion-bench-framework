@@ -341,12 +341,16 @@ def _build_vllm_cmd(case: dict, fw_cfg: dict, port: int) -> list[str]:
         cmd.append("--omni")
     if fw_cfg.get("serve_args", "").strip():
         cmd += fw_cfg["serve_args"].strip().split()
+    # vLLM-Omni's --usp/--ring are its Ulysses/ring degrees. Missing them here
+    # added TP2 on top of `--usp 2`, and a "2-GPU" cell ran on four (2026-10-10).
     parallel_args = {
         "--tensor-parallel-size",
         "--num-gpus",
         "--cfg-parallel-size",
         "--ulysses-degree",
         "--ring-degree",
+        "--usp",
+        "--ring",
         "--vae-patch-parallel-size",
     }
     has_parallel_arg = any(
@@ -846,8 +850,10 @@ def _build_fastvideo_cmd(case: dict, fw_cfg: dict, port: int) -> list[str]:
 def _visible_gpus_env(env: dict[str, str], num_gpus: int) -> dict[str, str]:
     """Expose only the first `num_gpus` of the GPUs this process can see.
 
-    ComfyUI takes no GPU-count flag: it runs on device 0, and its multi-GPU node
-    uses every device it can see. So the count is set through visibility.
+    Every framework gets exactly its cell's GPU count, so a command that asks for
+    more fails at startup instead of quietly using them: vLLM-Omni's
+    `--usp 2 --tensor-parallel-size 2` ran a "2-GPU" cell on four GPUs of a 4-GPU
+    pod (GB300, 2026-10-10). ComfyUI has no GPU-count flag at all.
     """
     visible = env.get("CUDA_VISIBLE_DEVICES")
     ids = [x for x in visible.split(",") if x.strip()] if visible else [str(i) for i in range(num_gpus)]
@@ -3032,8 +3038,8 @@ def run_case_framework(
         # drifted (upstream renamed a flag) must fail its own cells, not
         # abort the whole matrix and discard every framework already run.
         _preflight_framework_command(framework, fw_cfg, env)
+        env = _visible_gpus_env(env, int(fw_cfg.get("num_gpus") or case.get("num_gpus") or 1))
         if framework == "comfyui":
-            env = _visible_gpus_env(env, int(case.get("num_gpus") or 1))
             _prepare_comfyui_workspace(case, fw_cfg)
         proc = subprocess.Popen(
             cmd,
