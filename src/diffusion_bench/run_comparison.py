@@ -103,6 +103,17 @@ POLL_INTERVAL_S = 0.02
 _POLL_SESSION = requests.Session()
 
 
+def _raise_for_status(resp: requests.Response) -> None:
+    """raise_for_status keeping the server's error body: "400 Bad Request" alone names no cause."""
+    try:
+        resp.raise_for_status()
+    except requests.HTTPError as exc:
+        body = " ".join((resp.text or "").split())[:500]
+        if not body:
+            raise
+        raise requests.HTTPError(f"{exc} -- {body}", response=resp) from None
+
+
 def _poll_get(url: str, deadline: float, timeout: int = 30):
     """GET a job-status URL, tolerating transient failures.
 
@@ -120,7 +131,7 @@ def _poll_get(url: str, deadline: float, timeout: int = 30):
     while time.time() < deadline:
         try:
             resp = _POLL_SESSION.get(url, timeout=timeout)
-            resp.raise_for_status()
+            _raise_for_status(resp)
             return resp
         except (requests.Timeout, requests.ConnectionError) as exc:
             last = exc
@@ -1250,7 +1261,7 @@ def _download_ref_image(config: dict, case: dict) -> bytes:
         return _cached_ref_images[url]
     print(f"  Downloading reference image from {url} ...")
     resp = requests.get(url, timeout=60)
-    resp.raise_for_status()
+    _raise_for_status(resp)
     _cached_ref_images[url] = resp.content
     return _cached_ref_images[url]
 
@@ -1427,7 +1438,7 @@ def send_image_request_sglang(
         timeout=REQUEST_TIMEOUT,
     )
     client_latency = time.time() - start
-    resp.raise_for_status()
+    _raise_for_status(resp)
     data = resp.json()
     if "data" not in data or len(data["data"]) == 0:
         raise RuntimeError(f"Image request returned no data: {data}")
@@ -1460,7 +1471,7 @@ def send_video_request_sglang(
         json=payload,
         timeout=REQUEST_TIMEOUT,
     )
-    resp.raise_for_status()
+    _raise_for_status(resp)
     job = resp.json()
     job_id = job.get("id")
     if not job_id:
@@ -1471,7 +1482,7 @@ def send_video_request_sglang(
     while True:
         time.sleep(POLL_INTERVAL_S)
         poll_resp = _poll_get(poll_url, start + REQUEST_TIMEOUT)
-        poll_resp.raise_for_status()
+        _raise_for_status(poll_resp)
         poll_data = poll_resp.json()
         status = poll_data.get("status")
         if status == "completed":
@@ -1549,7 +1560,7 @@ def send_image_conditioned_request_sglang(
 
     # For video endpoints, need to poll
     if task in ("image-to-video", "text-image-to-video"):
-        resp.raise_for_status()
+        _raise_for_status(resp)
         job = resp.json()
         job_id = job.get("id")
         if not job_id:
@@ -1558,7 +1569,7 @@ def send_image_conditioned_request_sglang(
         while True:
             time.sleep(POLL_INTERVAL_S)
             poll_resp = _poll_get(poll_url, start + REQUEST_TIMEOUT)
-            poll_resp.raise_for_status()
+            _raise_for_status(poll_resp)
             poll_data = poll_resp.json()
             status = poll_data.get("status")
             if status == "completed":
@@ -1568,7 +1579,7 @@ def send_image_conditioned_request_sglang(
             if time.time() - start > REQUEST_TIMEOUT:
                 raise TimeoutError(f"Timed out after {REQUEST_TIMEOUT}s")
     else:
-        resp.raise_for_status()
+        _raise_for_status(resp)
 
     client_latency = time.time() - start
 
@@ -1639,7 +1650,7 @@ def send_request_vllm_omni(base_url: str, case: dict, config: dict) -> float:
             files=files,
             timeout=REQUEST_TIMEOUT,
         )
-        resp.raise_for_status()
+        _raise_for_status(resp)
         latency = time.time() - start
         try:
             tracks = fastvideo_client.mp4_handler_types(resp.content)
@@ -1663,7 +1674,7 @@ def send_request_vllm_omni(base_url: str, case: dict, config: dict) -> float:
             timeout=REQUEST_TIMEOUT,
         )
         latency = time.time() - start
-        resp.raise_for_status()
+        _raise_for_status(resp)
         return latency
     if task in ("image-edit", "image-to-image"):
         files = {
@@ -1694,7 +1705,7 @@ def send_request_vllm_omni(base_url: str, case: dict, config: dict) -> float:
             timeout=REQUEST_TIMEOUT,
         )
         latency = time.time() - start
-        resp.raise_for_status()
+        _raise_for_status(resp)
         return latency
 
     extra_body = {
@@ -1740,7 +1751,7 @@ def send_request_vllm_omni(base_url: str, case: dict, config: dict) -> float:
         timeout=REQUEST_TIMEOUT,
     )
     latency = time.time() - start
-    resp.raise_for_status()
+    _raise_for_status(resp)
     data = resp.json()
     choices = data.get("choices", [])
     if not choices:
@@ -1818,7 +1829,7 @@ def send_request_lightx2v(base_url: str, case: dict, config: dict) -> float:
             json=payload,
             timeout=REQUEST_TIMEOUT,
         )
-        resp.raise_for_status()
+        _raise_for_status(resp)
         latency = time.time() - start
         if not resp.content:
             raise RuntimeError("LightX2V sync image request returned no content")
@@ -1835,7 +1846,7 @@ def send_request_lightx2v(base_url: str, case: dict, config: dict) -> float:
         json=payload,
         timeout=REQUEST_TIMEOUT,
     )
-    resp.raise_for_status()
+    _raise_for_status(resp)
     task_data = resp.json()
     task_id = task_data.get("task_id")
     if not task_id:
@@ -1845,7 +1856,7 @@ def send_request_lightx2v(base_url: str, case: dict, config: dict) -> float:
     while True:
         time.sleep(LIGHTX2V_POLL_INTERVAL_S)
         poll_resp = _poll_get(poll_url, start + REQUEST_TIMEOUT)
-        poll_resp.raise_for_status()
+        _raise_for_status(poll_resp)
         poll_data = poll_resp.json()
         status = (
             poll_data.get("task_status") or poll_data.get("status") or ""
@@ -1943,7 +1954,7 @@ def send_request_generic_http(
         resp = _post_drained(
             f"{base_url}{endpoint}", data=data, files=files, timeout=REQUEST_TIMEOUT
         )
-        resp.raise_for_status()
+        _raise_for_status(resp)
         job = resp.json()
         # Synchronous endpoints return the result directly; async returns a job id.
         job_id = job.get("id")
@@ -1955,7 +1966,7 @@ def send_request_generic_http(
         while True:
             time.sleep(POLL_INTERVAL_S)
             poll_resp = _poll_get(poll_url, start + REQUEST_TIMEOUT)
-            poll_resp.raise_for_status()
+            _raise_for_status(poll_resp)
             poll_data = poll_resp.json()
             status = str(poll_data.get("status") or "").lower()
             if status in ("completed", "succeeded", "success"):
@@ -1977,7 +1988,7 @@ def send_request_generic_http(
             f"{base_url}{endpoint}", json=payload, timeout=REQUEST_TIMEOUT
         )
         latency = time.time() - start
-        resp.raise_for_status()
+        _raise_for_status(resp)
         print(f"  Generated in {latency:.2f}s ({framework})")
         return latency
 
@@ -2008,7 +2019,7 @@ def send_request_generic_http(
             f"{base_url}{endpoint}", files=files, data=data, timeout=REQUEST_TIMEOUT
         )
         latency = time.time() - start
-        resp.raise_for_status()
+        _raise_for_status(resp)
         print(f"  Generated in {latency:.2f}s ({framework})")
         return latency
 
