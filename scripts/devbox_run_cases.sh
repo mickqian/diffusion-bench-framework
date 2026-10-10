@@ -89,11 +89,46 @@ kill_own_gpus() {
     done
 }
 
+# Largest VRAM use (MiB) on our devices.
+gpu_used_mib() {
+    if command -v nvidia-smi >/dev/null 2>&1; then
+        nvidia-smi --query-gpu=memory.used --format=csv,noheader,nounits -i "$GPU_IDS" 2>/dev/null | sort -n | tail -1
+        return
+    fi
+    rocm-smi --showmeminfo vram --csv 2>/dev/null | awk -F, -v ids=",$GPU_IDS," '
+        $1 ~ /^card[0-9]+$/ && index(ids, "," substr($1, 5) ",") { mib = int($3 / 1048576); if (mib > max) max = mib }
+        END { print max + 0 }'
+}
+
+# A case starts on empty cards. Killing is not enough: after a GPU memory fault the
+# dying workers held ~250 GB per MI355X for over an hour (2026-10-10), and the cases
+# that ran on top of them crawled at 100 s/step or OOMed.
+wait_gpus_free() {
+    local waited=0 used
+    while :; do
+        used=$(gpu_used_mib)
+        (( ${used:-0} < 2048 )) && return 0
+        if (( waited >= 600 )); then
+            echo "GPUs $GPU_IDS still hold ${used} MiB after ${waited}s"
+            return 1
+        fi
+        (( waited == 0 )) && echo "waiting for GPUs $GPU_IDS to free (${used} MiB in use)"
+        kill_own_gpus
+        sleep 15
+        waited=$((waited + 15))
+    done
+}
+
 echo "=== RUN $TAG START $(date -u) cases=[${CASES[*]}] modes=[$MODES] gpus=$GPU_IDS ==="
 echo "=== repo=$REPO_DIR config=$CONFIG hw=$HW_PROFILE frameworks=$FRAMEWORKS venvs=$SGLANG_DIFFUSION_FRAMEWORK_VENV_ROOT hf=$HF_HOME ==="
 port="$BASE_PORT"
 for case_id in "${CASES[@]}"; do
     kill_own_gpus
+    if ! wait_gpus_free; then
+        echo "RESULT $case_id rc=CONTAMINATED: GPUs $GPU_IDS not free at case start, case not run"
+        port=$((port + 1))
+        continue
+    fi
     CUDA_VISIBLE_DEVICES="$GPU_IDS" PYTHONPATH=src timeout "$CASE_TIMEOUT" \
         python3 -m diffusion_bench.run_comparison \
         --config "$CONFIG" \
