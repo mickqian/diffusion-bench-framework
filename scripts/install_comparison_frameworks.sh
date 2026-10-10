@@ -56,6 +56,7 @@ write_desired_stamp() {
         ;;
       lightx2v)
         echo "lightx2v_install_spec=${LIGHTX2V_INSTALL_SPEC:-git+https://github.com/ModelTC/LightX2V.git@7efd05f8e1425b83321fd4f1cef779ef6504076f}"
+        echo "lightx2v_skip_deps=${LIGHTX2V_SKIP_DEPS-$([[ "$(uname -m)" == aarch64 ]] && echo decord || true)}"
         echo "lightx2v_transformers_install_spec=${LIGHTX2V_TRANSFORMERS_INSTALL_SPEC:-<unset: latest, as LightX2V itself declares>}"
         echo "lightx2v_safetensors_install_spec=${LIGHTX2V_SAFETENSORS_INSTALL_SPEC:-safetensors>=0.8.0rc0}"
         echo "lightx2v_flash_attn_install_spec=${LIGHTX2V_FLASH_ATTN_INSTALL_SPEC:-flash-attn==2.8.3}"
@@ -231,7 +232,28 @@ case "${FRAMEWORK}" in
     fi
     ;;
   lightx2v)
-    python3 -m pip install --upgrade --force-reinstall "${LIGHTX2V_INSTALL_SPEC:-git+https://github.com/ModelTC/LightX2V.git@7efd05f8e1425b83321fd4f1cef779ef6504076f}"
+    lx2v_spec="${LIGHTX2V_INSTALL_SPEC:-git+https://github.com/ModelTC/LightX2V.git@7efd05f8e1425b83321fd4f1cef779ef6504076f}"
+    # decord has no aarch64 wheel (GB200/GB300 hosts), so a plain install fails to
+    # resolve. LightX2V imports it lazily, only for VACE/s2v/animate/InfiniteTalk
+    # video inputs: install without it there, and every other dependency as declared.
+    lx2v_skip="${LIGHTX2V_SKIP_DEPS-$([[ "$(uname -m)" == aarch64 ]] && echo decord || true)}"
+    if [[ -n "${lx2v_skip}" ]]; then
+      python3 -m pip install --upgrade --force-reinstall --no-deps "${lx2v_spec}"
+      mapfile -t lx2v_deps < <(LX2V_SKIP="${lx2v_skip}" python3 - <<'PY'
+import importlib.metadata as m, os, re
+skip = set(os.environ["LX2V_SKIP"].split())
+for req in m.requires("lightx2v") or []:
+    if "extra ==" in req:
+        continue
+    if re.match(r"[A-Za-z0-9_.-]+", req).group(0).lower() not in skip:
+        print(req.split(";")[0].strip())
+PY
+)
+      echo "lightx2v: installing without ${lx2v_skip}"
+      python3 -m pip install "${lx2v_deps[@]}"
+    else
+      python3 -m pip install --upgrade --force-reinstall "${lx2v_spec}"
+    fi
     # LightX2V pins neither transformers nor diffusers, so "LightX2V latest" is
     # whatever pip resolves today. Our own `transformers<5` pin (added
     # 2026-05-13 for an LTX model-resolution problem) broke that: transformers
