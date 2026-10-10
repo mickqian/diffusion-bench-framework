@@ -75,7 +75,8 @@ run_arm() {  # run_arm <tag> <extra serve args, with optional ENV:NAME=value tok
   nvidia-smi --query-compute-apps=pid --format=csv,noheader -i "${GPUS}" 2>/dev/null \
     | sort -u | xargs -r kill -9 2>/dev/null
   sleep 5
-  env "${arm_env[@]}" DIFFUSION_BENCH_SGLANG_EXTRA_SERVE_ARGS="$extra" CUDA_VISIBLE_DEVICES="${GPUS}" PYTHONPATH=src \
+  # The arm's ENV: tokens go last so they override these (PYTHONPATH included).
+  env DIFFUSION_BENCH_SGLANG_EXTRA_SERVE_ARGS="$extra" CUDA_VISIBLE_DEVICES="${GPUS}" PYTHONPATH=src "${arm_env[@]}" \
     timeout "${TUNE_CASE_TIMEOUT:-2400}" python3 -m diffusion_bench.run_comparison \
     --config configs/comparison_configs.json --frameworks sglang --case-ids "${CASE_ID}" \
     --modes single_e2e --hardware-profile "${HW}" --port "${PORT}" \
