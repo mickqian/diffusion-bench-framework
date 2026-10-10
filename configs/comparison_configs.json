@@ -1245,6 +1245,16 @@
                             "serve_args": "--model-type diffusion --warmup-mode server --ulysses-degree 2 --performance-mode speed",
                             "notes": "The 1-GPU case's notes record that sglang's cookbook verifies b200-2-tp and b200-2-ulysses for this model. VALIDATION PENDING (2026-10-10 round): derived, not yet measured."
                         },
+                        "gb300-2gpu-tp2": {
+                            "description": "GB300: TP2, the fastest measured layout on this box.",
+                            "hardware": [
+                                "gb300"
+                            ],
+                            "sglang_ref": "main 3831e7e09 + sglang#43565 #43568 #43577 #43575 #43576 #43584 #43586 (GB300 rerun tree)",
+                            "num_gpus": 2,
+                            "serve_args": "--model-type diffusion --warmup-mode server --ulysses-degree 1 --tp-size 2 --performance-mode speed --attention-backend fa",
+                            "notes": "2026-10-10 GB300 served, NUMA-bound workers (sglang#43565), median of 5 x2 rounds: TP2 eager 1.728/1.731 s vs Ulysses-2 eager 2.778/2.776 s vs Ulysses-2 compile 1.918 s (sglang#43586); vLLM-Omni --usp 2 on 2 GPUs 3.21 s default / 2.85-2.98 s eager."
+                        },
                         "b200-2gpu-ulysses-fa": {
                             "description": "Blackwell: Ulysses-2 with FlashAttention, as the 1-GPU B200 profile pins fa.",
                             "hardware": [
@@ -3146,6 +3156,16 @@
                             "sglang_ref": "current-main",
                             "serve_args": "--model-type diffusion --warmup-mode server --attention-backend fa --tp-size 2 --batching-max-size 4 --enable-batching-metrics",
                             "notes": "Tensor-parallel across 2 GPUs plus batch-4 serving pressure; no cache, no torch compile."
+                        },
+                        "gb300-2gpu-cfg-parallel-compile": {
+                            "description": "GB300: CFG-parallel with torch.compile, which beats eager here once the fused kernels stay in the graph.",
+                            "hardware": [
+                                "gb300"
+                            ],
+                            "sglang_ref": "main 3831e7e09 + sglang#43565 #43568 #43577 #43575 #43576 #43584 #43586 (GB300 rerun tree)",
+                            "num_gpus": 2,
+                            "serve_args": "--model-type diffusion --warmup-mode server --attention-backend torch_cudnn_sdpa --tp-size 1 --cfg-parallel-size 2 --dit-layerwise-offload false --performance-mode speed --enable-torch-compile true --offload-during-compile false",
+                            "policy_exception": "2026-10-10 GB300 served A/B, NUMA-bound workers, 2 interleaved rounds: compile 0.884/0.876 s vs eager 0.933/0.939 s with sglang#43577 (compile was 1.424/1.435 s before it; outputs bit-identical to main). vLLM-Omni default 0.97-1.02 s."
                         },
                         "blackwell-2gpu-cfg-parallel": {
                             "description": "Blackwell 2-GPU CFG-parallel + cuDNN-SDPA SGLang-Diffusion Cosmos3 T2I profile.",
