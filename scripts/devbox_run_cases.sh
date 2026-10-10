@@ -25,6 +25,10 @@
 #   DBF_HF_HOME=$STATE/hf-cache    DBF_HF_TOKEN_FILE=$STATE/.hftoken
 #   DBF_FRAMEWORKS=sglang          DBF_HARDWARE_PROFILE=h100
 #   DBF_CASE_TIMEOUT=3000         DBF_CONFIG=configs/comparison_configs.json
+#   DBF_SGLANG_PYTHONPATH=<sglang>/python   run an sglang source tree (e.g. main plus
+#     unmerged fixes, committed on a local branch so the result records its sha)
+#     instead of the installed one; it goes first on PYTHONPATH for the harness and
+#     the servers it starts.
 set -u
 
 TAG="${1:?tag}"; GPU_IDS="${2:?gpu ids, e.g. 0,1}"; readonly BASE_PORT="${3:?base port}"
@@ -40,6 +44,7 @@ CASE_TIMEOUT="${DBF_CASE_TIMEOUT:-3000}"
 TOKEN_FILE="${DBF_HF_TOKEN_FILE:-${STATE_DIR}/.hftoken}"
 # A variant config (e.g. an old competitor profile) A/Bs a command on the same box.
 CONFIG="${DBF_CONFIG:-configs/comparison_configs.json}"
+HARNESS_PYTHONPATH="${DBF_SGLANG_PYTHONPATH:+${DBF_SGLANG_PYTHONPATH}:}src"
 
 mkdir -p "$LOG_DIR"
 LOG="${LOG_DIR}/run_${TAG}.log"
@@ -120,7 +125,7 @@ wait_gpus_free() {
 }
 
 echo "=== RUN $TAG START $(date -u) cases=[${CASES[*]}] modes=[$MODES] gpus=$GPU_IDS ==="
-echo "=== repo=$REPO_DIR config=$CONFIG hw=$HW_PROFILE frameworks=$FRAMEWORKS venvs=$SGLANG_DIFFUSION_FRAMEWORK_VENV_ROOT hf=$HF_HOME ==="
+echo "=== repo=$REPO_DIR config=$CONFIG hw=$HW_PROFILE frameworks=$FRAMEWORKS venvs=$SGLANG_DIFFUSION_FRAMEWORK_VENV_ROOT hf=$HF_HOME sglang=${DBF_SGLANG_PYTHONPATH:-installed} ==="
 port="$BASE_PORT"
 for case_id in "${CASES[@]}"; do
     kill_own_gpus
@@ -129,7 +134,7 @@ for case_id in "${CASES[@]}"; do
         port=$((port + 1))
         continue
     fi
-    CUDA_VISIBLE_DEVICES="$GPU_IDS" PYTHONPATH=src timeout "$CASE_TIMEOUT" \
+    CUDA_VISIBLE_DEVICES="$GPU_IDS" PYTHONPATH="$HARNESS_PYTHONPATH" timeout "$CASE_TIMEOUT" \
         python3 -m diffusion_bench.run_comparison \
         --config "$CONFIG" \
         --frameworks $FRAMEWORKS --case-ids "$case_id" --modes $MODES \
