@@ -78,7 +78,7 @@
           "vae/minimax_h3_video_vae_fp16.safetensors": "Comfy-Org/MiniMax-H3:vae/minimax_h3_video_vae_fp16.safetensors",
           "vae/minimax_h3_audio_vae_fp32.safetensors": "Comfy-Org/MiniMax-H3:vae/minimax_h3_audio_vae_fp32.safetensors"
         },
-        "compile": true
+        "compile": false
       },
       "command_profiles": {
         "default": {
@@ -86,7 +86,8 @@
           "framework_ref": "ComfyUI master HEAD",
           "num_gpus": 1,
           "serve_args": "--fast-disk --cache-none",
-          "notes": "Same graph and weights as minimax_h3_t2va_5s's ComfyUI default (bf16 DiT, bf16 Qwen3-VL-32B, fp16 video VAE; BasicGuider, shift 12/3). The cookbook found ComfyUI's default launch OOM-killed during load on a 60 GB host (55.6 GB anonymous memory) and measured it with --fast-disk --cache-none (docs/cookbook/diffusion/MiniMax/MiniMax-H3.mdx, section 'RTX 5090 single card, physical desktop' (sglang main 3831e7e09, checked 2026-10-10)). Compile stays on per the harness policy. VALIDATION PENDING (2026-10-10 round, rdxa-5090-pa)."
+          "notes": "Same graph and weights as minimax_h3_t2va_5s's ComfyUI default (bf16 DiT, bf16 Qwen3-VL-32B, fp16 video VAE; BasicGuider, shift 12/3). The cookbook found ComfyUI's default launch OOM-killed during load on a 60 GB host (55.6 GB anonymous memory) and measured it with --fast-disk --cache-none (docs/cookbook/diffusion/MiniMax/MiniMax-H3.mdx, section 'RTX 5090 single card, physical desktop' (sglang main 3831e7e09, checked 2026-10-10)). Compile is off; see policy_exception. VALIDATION PENDING (2026-10-10 round, rdxa-5090-pa).",
+          "policy_exception": "Compile broken, not a speed choice (2026-10-10, ComfyUI 0df64eb2 on torch 2.14.1+cu130, 1x RTX 5090, rdxa-5090-pa): with TorchCompileModel in front of the MiniMax-H3 DiT, --fast-disk's dynamic loading (comfy/model_prefetch.py -> comfy_aimdo malloc_graph.record) runs inside the dynamo trace, where the current stream is a generic torch.Stream with no cuda_stream, and the first request fails in SamplerCustomAdvanced. --fast-disk cannot be dropped on a 60 GB host (the cookbook found the default launch OOM-killed at load), so this cell runs eager."
         }
       }
     }

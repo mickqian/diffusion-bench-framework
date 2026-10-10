@@ -349,17 +349,17 @@ offloaded on datacenter hardware without one (see KNOWN_COMPETITOR_VIOLATIONS).
 | minimax_h3_t2va_480p_1gpu | sglang | mi355x | `default` | yes |  |  | `--model-type diffusion --warmup-mode server --model-variant fl2va --performance-mode memory --layerwise-offload-components dit,text_encoder,vae --dit-layerwise-resident-layers 14 --layerwise-resident-layers video_vae=36 --warmup-resolutions 864x480 --warmup-num-frames 124 --enable-torch-compile false` |  |
 | minimax_h3_t2va_480p_1gpu | sglang | rtx4090 | `default` | yes |  |  | `--model-type diffusion --warmup-mode server --model-variant fl2va --performance-mode memory --layerwise-offload-components dit,text_encoder,vae --dit-layerwise-resident-layers 14 --layerwise-resident-layers video_vae=36 --warmup-resolutions 864x480 --warmup-num-frames 124 --enable-torch-compile false` |  |
 | minimax_h3_t2va_480p_1gpu | sglang | rtx5090 | `default` | yes |  |  | `--model-type diffusion --warmup-mode server --model-variant fl2va --performance-mode memory --layerwise-offload-components dit,text_encoder,vae --dit-layerwise-resident-layers 14 --layerwise-resident-layers video_vae=36 --warmup-resolutions 864x480 --warmup-num-frames 124 --enable-torch-compile false` |  |
-| minimax_h3_t2va_480p_1gpu | comfyui | b200 | `default` |  |  |  | `--fast-disk --cache-none` | `workflow=minimax_h3_t2va.json compile=true` |
-| minimax_h3_t2va_480p_1gpu | comfyui | b300 | `default` |  |  |  | `--fast-disk --cache-none` | `workflow=minimax_h3_t2va.json compile=true` |
-| minimax_h3_t2va_480p_1gpu | comfyui | gb200 | `default` |  |  |  | `--fast-disk --cache-none` | `workflow=minimax_h3_t2va.json compile=true` |
-| minimax_h3_t2va_480p_1gpu | comfyui | gb300 | `default` |  |  |  | `--fast-disk --cache-none` | `workflow=minimax_h3_t2va.json compile=true` |
-| minimax_h3_t2va_480p_1gpu | comfyui | h100 | `default` |  |  |  | `--fast-disk --cache-none` | `workflow=minimax_h3_t2va.json compile=true` |
-| minimax_h3_t2va_480p_1gpu | comfyui | h200 | `default` |  |  |  | `--fast-disk --cache-none` | `workflow=minimax_h3_t2va.json compile=true` |
-| minimax_h3_t2va_480p_1gpu | comfyui | mi300x | `default` |  |  |  | `--fast-disk --cache-none` | `workflow=minimax_h3_t2va.json compile=true` |
-| minimax_h3_t2va_480p_1gpu | comfyui | mi350x | `default` |  |  |  | `--fast-disk --cache-none` | `workflow=minimax_h3_t2va.json compile=true` |
-| minimax_h3_t2va_480p_1gpu | comfyui | mi355x | `default` |  |  |  | `--fast-disk --cache-none` | `workflow=minimax_h3_t2va.json compile=true` |
-| minimax_h3_t2va_480p_1gpu | comfyui | rtx4090 | `default` |  |  |  | `--fast-disk --cache-none` | `workflow=minimax_h3_t2va.json compile=true` |
-| minimax_h3_t2va_480p_1gpu | comfyui | rtx5090 | `default` |  |  |  | `--fast-disk --cache-none` | `workflow=minimax_h3_t2va.json compile=true` |
+| minimax_h3_t2va_480p_1gpu | comfyui | b200 | `default` | yes |  |  | `--fast-disk --cache-none` | `workflow=minimax_h3_t2va.json compile=false` |
+| minimax_h3_t2va_480p_1gpu | comfyui | b300 | `default` | yes |  |  | `--fast-disk --cache-none` | `workflow=minimax_h3_t2va.json compile=false` |
+| minimax_h3_t2va_480p_1gpu | comfyui | gb200 | `default` | yes |  |  | `--fast-disk --cache-none` | `workflow=minimax_h3_t2va.json compile=false` |
+| minimax_h3_t2va_480p_1gpu | comfyui | gb300 | `default` | yes |  |  | `--fast-disk --cache-none` | `workflow=minimax_h3_t2va.json compile=false` |
+| minimax_h3_t2va_480p_1gpu | comfyui | h100 | `default` | yes |  |  | `--fast-disk --cache-none` | `workflow=minimax_h3_t2va.json compile=false` |
+| minimax_h3_t2va_480p_1gpu | comfyui | h200 | `default` | yes |  |  | `--fast-disk --cache-none` | `workflow=minimax_h3_t2va.json compile=false` |
+| minimax_h3_t2va_480p_1gpu | comfyui | mi300x | `default` | yes |  |  | `--fast-disk --cache-none` | `workflow=minimax_h3_t2va.json compile=false` |
+| minimax_h3_t2va_480p_1gpu | comfyui | mi350x | `default` | yes |  |  | `--fast-disk --cache-none` | `workflow=minimax_h3_t2va.json compile=false` |
+| minimax_h3_t2va_480p_1gpu | comfyui | mi355x | `default` | yes |  |  | `--fast-disk --cache-none` | `workflow=minimax_h3_t2va.json compile=false` |
+| minimax_h3_t2va_480p_1gpu | comfyui | rtx4090 | `default` | yes |  |  | `--fast-disk --cache-none` | `workflow=minimax_h3_t2va.json compile=false` |
+| minimax_h3_t2va_480p_1gpu | comfyui | rtx5090 | `default` | yes |  |  | `--fast-disk --cache-none` | `workflow=minimax_h3_t2va.json compile=false` |
 | minimax_h3_t2va_5s | sglang | b200 | `b200-2gpu` | yes |  |  | `--model-type diffusion --warmup-mode server --model-variant fl2va --ulysses-degree 2 --performance-mode speed --enable-torch-compile false` |  |
 | minimax_h3_t2va_5s | sglang | b300 | `b200-2gpu` | yes |  |  | `--model-type diffusion --warmup-mode server --model-variant fl2va --ulysses-degree 2 --performance-mode speed --enable-torch-compile false` |  |
 | minimax_h3_t2va_5s | sglang | gb200 | `default` | yes |  |  | `--model-type diffusion --warmup-mode server --model-variant fl2va --ulysses-degree 2 --performance-mode speed --enable-torch-compile false` |  |
