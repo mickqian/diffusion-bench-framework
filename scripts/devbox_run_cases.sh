@@ -64,11 +64,25 @@ export SGLANG_DIFFUSION_FRAMEWORK_VENV_ROOT="${DBF_VENV_ROOT:-${STATE_DIR}/fw-ve
 export DIFFUSION_BENCH_DISABLE_TORCH_COMPILE=0
 export PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True
 
+own_gpu_pids() {
+    if command -v nvidia-smi >/dev/null 2>&1; then
+        nvidia-smi --query-compute-apps=pid --format=csv,noheader -i "$GPU_IDS" 2>/dev/null
+        return
+    fi
+    # ROCm: amd-smi reports HOST pids, which name nothing (or the wrong process) inside
+    # a container. Take the container's own processes holding /dev/kfd and keep those
+    # launched with exactly our device list, which every server this runner starts inherits.
+    local p
+    for p in $(find /proc/[0-9]*/fd -lname /dev/kfd 2>/dev/null | cut -d/ -f3 | sort -u); do
+        tr '\0' '\n' < "/proc/$p/environ" 2>/dev/null | grep -qx "CUDA_VISIBLE_DEVICES=$GPU_IDS" && echo "$p"
+    done
+}
+
 kill_own_gpus() {
     # narrow kill: only PIDs on OUR devices; never a broad pkill on shared nodes
     local pids attempt
     for attempt in 1 2 3; do
-        pids=$(nvidia-smi --query-compute-apps=pid --format=csv,noheader -i "$GPU_IDS" 2>/dev/null | sort -u | tr '\n' ' ')
+        pids=$(own_gpu_pids | sort -u | tr '\n' ' ')
         [ -n "${pids// /}" ] || break
         kill -9 $pids 2>/dev/null
         sleep 4
