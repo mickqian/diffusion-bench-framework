@@ -15,6 +15,11 @@
 #
 # Each pod: image lmsysorg/sglang:latest (aarch64), /sgl-workspace/sglang moved
 # to the pin; framework venvs, HF cache and logs on node-local /scratch/gb300.
+# aarch64 install notes (scripts/install_comparison_frameworks.sh):
+#   * LightX2V installs without decord (no aarch64 wheel; imported lazily, only
+#     by video-input runners none of these cases use)
+#   * FastVideo with FASTVIDEO_INSTALL_FA3=0: the aarch64 FA3 artifact links
+#     libcudart.so.12, and FA3 is Hopper-only; Blackwell runs FA4 / sm100 VSA
 # Versions resolved 2026-10-10 ~05:30 UTC (same as the round's other boxes):
 #   sglang origin/main 3831e7e09 | vllm 0.31.0 + vllm-omni main f69b1f2b
 #   LightX2V main b6d38283 (torch 2.11) | ComfyUI master 0df64eb2
