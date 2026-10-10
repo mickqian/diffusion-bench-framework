@@ -8,6 +8,11 @@ PIP_TMPDIR="${SGLANG_DIFFUSION_PIP_TMPDIR:-${VENV_ROOT}/pip-tmp}"
 STAMP_PATH="${VENV_PATH}/.diffusion-bench-install-stamp"
 STAMP_VERSION="20260610-v1"
 FORCE_REINSTALL="${FORCE_FRAMEWORK_REINSTALL:-${SGLANG_DIFFUSION_FORCE_FRAMEWORK_REINSTALL:-0}}"
+# FA3 is Hopper-only, and its prebuilt aarch64 artifact links libcudart.so.12 (2026-10-10),
+# so it neither imports nor matters on the aarch64 hosts here (GB200/GB300, Blackwell).
+fa3_default="$([[ "$(uname -m)" == aarch64 ]] && echo 0 || echo 1)"
+LIGHTX2V_INSTALL_FA3="${LIGHTX2V_INSTALL_FA3:-${fa3_default}}"
+FASTVIDEO_INSTALL_FA3="${FASTVIDEO_INSTALL_FA3:-${fa3_default}}"
 
 mkdir -p "${VENV_ROOT}"
 mkdir -p "${PIP_TMPDIR}"
@@ -64,6 +69,7 @@ write_desired_stamp() {
         echo "lightx2v_fa3_hf_repo=${LIGHTX2V_FA3_HF_REPO:-varunneal/flash-attention-3}"
         echo "lightx2v_fa3_hf_revision=${LIGHTX2V_FA3_HF_REVISION:-de87b9b5af06dd9984df595bef90b2eba44b181a}"
         echo "lightx2v_fa3_hf_subdir=${LIGHTX2V_FA3_HF_SUBDIR:-auto}"
+        echo "lightx2v_install_fa3=${LIGHTX2V_INSTALL_FA3}"
         echo "lightx2v_sageattention_install_spec=${LIGHTX2V_SAGEATTENTION_INSTALL_SPEC:-sageattention==1.0.6}"
         echo "lightx2v_flashinfer_install_spec=${LIGHTX2V_FLASHINFER_INSTALL_SPEC:-flashinfer-python==0.6.11}"
         echo "lightx2v_hf_xet_install_spec=${LIGHTX2V_HF_XET_INSTALL_SPEC:-hf-xet}"
@@ -86,7 +92,7 @@ write_desired_stamp() {
         echo "fastvideo_install_spec=${FASTVIDEO_INSTALL_SPEC:-https://github.com/hao-ai-lab/FastVideo.git@main}"
         echo "fastvideo_install_extras=${FASTVIDEO_INSTALL_EXTRAS:-fasth3}"
         echo "fastvideo_uv_torch_backend=${FASTVIDEO_UV_TORCH_BACKEND:-cu130}"
-        echo "fastvideo_install_fa3=${FASTVIDEO_INSTALL_FA3:-1}"
+        echo "fastvideo_install_fa3=${FASTVIDEO_INSTALL_FA3}"
         echo "fastvideo_fa3_hf_revision=${LIGHTX2V_FA3_HF_REVISION:-de87b9b5af06dd9984df595bef90b2eba44b181a}"
         echo "torch_cuda_arch_list=$(fastvideo_arch_list)"
         ;;
@@ -120,7 +126,10 @@ framework_health_check() {
       done
       ;;
     lightx2v)
-      "${VENV_PATH}/bin/python3" -c 'import importlib.util; assert importlib.util.find_spec("lightx2v"); import lightx2v.server.main; import flash_attn_interface; assert hasattr(flash_attn_interface, "flash_attn_func")'
+      "${VENV_PATH}/bin/python3" -c 'import importlib.util; assert importlib.util.find_spec("lightx2v"); import lightx2v.server.main; import flash_attn'
+      if [[ "${LIGHTX2V_INSTALL_FA3}" == "1" ]]; then
+        "${VENV_PATH}/bin/python3" -c 'import flash_attn_interface; assert hasattr(flash_attn_interface, "flash_attn_func")'
+      fi
       ;;
     trtllm-visual)
       "${VENV_PATH}/bin/python3" -c 'import importlib.util; assert importlib.util.find_spec("tensorrt_llm")'
@@ -135,7 +144,7 @@ framework_health_check() {
     fastvideo)
       [[ -d "${VENV_PATH}/FastVideo/.git" ]] || return 1
       "${VENV_PATH}/bin/python3" -c 'import fastvideo, flash_attn.cute; from fastvideo.entrypoints.openai.api_server import create_app; from fastvideo_kernel.block_sparse_attn_256 import block_sparse_attn_256_bshd'
-      if [[ "${FASTVIDEO_INSTALL_FA3:-1}" == "1" ]]; then
+      if [[ "${FASTVIDEO_INSTALL_FA3}" == "1" ]]; then
         "${VENV_PATH}/bin/python3" -c 'import flash_attn_interface'
       fi
       "${VENV_PATH}/bin/fastvideo" serve --help >/dev/null
@@ -287,7 +296,9 @@ PY
     export MAX_JOBS
     export TORCH_CUDA_ARCH_LIST="${TORCH_CUDA_ARCH_LIST:-9.0}"
     python3 -m pip install --upgrade --no-cache-dir --no-build-isolation --no-deps --no-binary flash-attn "${LIGHTX2V_FLASH_ATTN_INSTALL_SPEC:-flash-attn==2.8.3}"
-    if [[ -n "${LIGHTX2V_FLASH_ATTN3_INSTALL_SPEC:-}" ]]; then
+    if [[ "${LIGHTX2V_INSTALL_FA3}" != "1" ]]; then
+      echo "lightx2v: FA3 skipped (LIGHTX2V_INSTALL_FA3=${LIGHTX2V_INSTALL_FA3})"
+    elif [[ -n "${LIGHTX2V_FLASH_ATTN3_INSTALL_SPEC:-}" ]]; then
       python3 -m pip install --upgrade --no-build-isolation --no-deps "${LIGHTX2V_FLASH_ATTN3_INSTALL_SPEC}"
     else
       python3 -m pip install --upgrade --upgrade-strategy only-if-needed "${LIGHTX2V_HF_XET_INSTALL_SPEC:-hf-xet}"
@@ -395,7 +406,7 @@ if cute_dir.exists():
     # Dense H3 attention on Hopper: FastVideo's FLASH_ATTN loads FA3 when FASTVIDEO_FA4=0 and
     # flash_attn_interface imports, and falls back to SDPA without a word otherwise. The prebuilt
     # artifact LightX2V uses carries torch212-cu130 builds; Blackwell profiles use FA4 instead.
-    if [[ "${FASTVIDEO_INSTALL_FA3:-1}" == "1" ]]; then
+    if [[ "${FASTVIDEO_INSTALL_FA3}" == "1" ]]; then
       python3 "$(dirname "$0")/install_lightx2v_fa3_from_hf.py"
     fi
     # Which kernel routes this build carries, for the record; a missing one falls back silently.
