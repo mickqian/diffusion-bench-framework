@@ -168,6 +168,10 @@ case "${FRAMEWORK}" in
     omni_rocm=0
     [[ "${VLLM_OMNI_TARGET_DEVICE:-}" == rocm ]] && omni_rocm=1
     if (( omni_rocm )); then
+      # sglang's ROCm images export PIP_CONSTRAINT pinning the IMAGE's torch
+      # (/etc/sglang/constraints/torch-rocm.txt, torch==2.11.0+rocm10.0.0); inherited by this
+      # venv it makes the +rocm vLLM wheel, which needs its own torch, ResolutionImpossible.
+      unset PIP_CONSTRAINT
       python3 -m pip install --upgrade --force-reinstall "${VLLM_INSTALL_SPEC:?ROCm needs an explicit +rocm VLLM_INSTALL_SPEC}" \
         --extra-index-url "${VLLM_ROCM_EXTRA_INDEX_URL:?ROCm needs VLLM_ROCM_EXTRA_INDEX_URL}"
     else
