@@ -52,7 +52,7 @@ write_desired_stamp() {
         echo "vllm_omni_server_bin=${VLLM_OMNI_SERVER_BIN:-vllm}"
         echo "vllm_omni_required_help_args=${VLLM_OMNI_REQUIRED_HELP_ARGS:---omni}"
         echo "vllm_omni_vsa_kernel_spec=${VLLM_OMNI_VSA_KERNEL_SPEC:-<unset>}"
-        echo "vllm_omni_target_device=${VLLM_OMNI_TARGET_DEVICE:-cuda} vllm_rocm_extra_index_url=${VLLM_ROCM_EXTRA_INDEX_URL:-<unset>}"
+        echo "vllm_omni_target_device=${VLLM_OMNI_TARGET_DEVICE:-cuda} vllm_rocm_extra_index_url=${VLLM_ROCM_EXTRA_INDEX_URL:-<unset>} vllm_rocm_userspace_release=${VLLM_ROCM_USERSPACE_RELEASE:-<unset>}"
         ;;
       lightx2v)
         echo "lightx2v_install_spec=${LIGHTX2V_INSTALL_SPEC:-git+https://github.com/ModelTC/LightX2V.git@7efd05f8e1425b83321fd4f1cef779ef6504076f}"
@@ -96,10 +96,14 @@ write_desired_stamp() {
 framework_health_check() {
   [[ -x "${VENV_PATH}/bin/python3" ]] || return 1
   # Same rule as run_comparison._isolate_rocm_userspace: a ROCm-built venv runs on
-  # its own amdsmi library, not the SDK a ROCm host image points ROCM_HOME at.
+  # the ROCm in <venv>/rocm, else on its own amdsmi library, never on the SDK a
+  # ROCm host image points ROCM_HOME at.
   local smi
   smi="$(compgen -G "${VENV_PATH}/lib/python3*/site-packages/amdsmi/libamd_smi.so" | head -1)"
-  if [[ -n "${smi}" ]]; then
+  if [[ -d "${VENV_PATH}/rocm/lib" ]]; then
+    export ROCM_HOME="${VENV_PATH}/rocm" ROCM_PATH="${VENV_PATH}/rocm"
+    export LD_LIBRARY_PATH="${VENV_PATH}/rocm/lib"
+  elif [[ -n "${smi}" ]]; then
     unset ROCM_HOME ROCM_PATH
     export LD_LIBRARY_PATH="$(dirname "${smi}")"
   fi
@@ -182,6 +186,11 @@ case "${FRAMEWORK}" in
       unset PIP_CONSTRAINT
       python3 -m pip install --upgrade --force-reinstall "${VLLM_INSTALL_SPEC:?ROCm needs an explicit +rocm VLLM_INSTALL_SPEC}" \
         --extra-index-url "${VLLM_ROCM_EXTRA_INDEX_URL:?ROCm needs VLLM_ROCM_EXTRA_INDEX_URL}"
+      # That torch links the system ROCm, which on a sglang ROCm image is a newer release
+      # than the wheel's (ROCm 10 vs 7.2.3): give the venv its own copy of the right one.
+      if [[ -n "${VLLM_ROCM_USERSPACE_RELEASE:-}" ]]; then
+        bash "$(dirname "${BASH_SOURCE[0]}")/install_rocm_userspace.sh" "${VLLM_ROCM_USERSPACE_RELEASE}" "${VENV_PATH}/rocm"
+      fi
     else
       python3 -m pip install --upgrade --force-reinstall "${VLLM_INSTALL_SPEC:-vllm==0.18.0}"
     fi

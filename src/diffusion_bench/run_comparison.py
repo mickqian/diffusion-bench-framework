@@ -3206,14 +3206,21 @@ def _framework_env(fw_name: str, env: dict[str, str]) -> dict[str, str]:
 
 
 def _isolate_rocm_userspace(env: dict[str, str], venv_path: Path) -> None:
-    """Run a ROCm-built venv on its own ROCm libraries, not the host image's SDK.
+    """Run a ROCm-built venv on the ROCm it was built against, not the host image's SDK.
 
     sglang's ROCm images point ROCM_HOME, ROCM_PATH and LD_LIBRARY_PATH at their
-    own SDK (ROCm 10). Inherited by a venv built from vLLM's +rocm723 wheels, they
-    make its amdsmi load that SDK's libamd_smi.so (undefined symbol
-    amdsmi_set_gpu_clk_range), so torch fails to import and vLLM-Omni's platform
-    detection fails with it. The venv's amdsmi ships the library it needs.
+    own SDK (ROCm 10), and /opt/rocm links to it. vLLM's +rocm723 wheels link torch
+    against the system ROCm, so on that SDK its amdsmi fails to import (undefined
+    symbol amdsmi_set_gpu_clk_range) and, past that, the first H3 request faults
+    the GPU in hipBLASLt (MI355X, 2026-10-10). scripts/install_rocm_userspace.sh
+    unpacks the matching release into <venv>/rocm. Without it, the venv at least
+    loads its own amdsmi library.
     """
+    rocm = venv_path / "rocm"
+    if (rocm / "lib").is_dir():
+        env["ROCM_HOME"] = env["ROCM_PATH"] = str(rocm)
+        env["LD_LIBRARY_PATH"] = str(rocm / "lib")
+        return
     smi = next(venv_path.glob("lib/python3*/site-packages/amdsmi/libamd_smi.so"), None)
     if smi is None:
         return

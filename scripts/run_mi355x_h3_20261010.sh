@@ -18,6 +18,10 @@
 #     kernels use PTX inline asm and decode to NaN on ROCm (see the profile notes)
 #   * box prerequisite: `apt-get install -y libgl1 libglib2.0-0`. The ROCm image
 #     has no libGL.so.1, and vLLM-Omni's cv2 import fails without it
+#   * vLLM-Omni runs on its own ROCm 7.2.3 in <venv>/rocm (install with
+#     VLLM_ROCM_USERSPACE_RELEASE=7.2.3, or scripts/install_rocm_userspace.sh).
+#     Its torch links the system ROCm, and on this image that is ROCm 10: the first
+#     run faulted the GPU in hipBLASLt on its first H3 request
 #
 # Box: rx devbox h3bench-mi355x (8x MI355X, mi355x-amd-slurm), image
 # lmsysorg/sglang:v0.5.21-rocm10-mi35x with /sgl-workspace/sglang moved to
