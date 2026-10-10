@@ -52,6 +52,7 @@ write_desired_stamp() {
         echo "vllm_omni_server_bin=${VLLM_OMNI_SERVER_BIN:-vllm}"
         echo "vllm_omni_required_help_args=${VLLM_OMNI_REQUIRED_HELP_ARGS:---omni}"
         echo "vllm_omni_vsa_kernel_spec=${VLLM_OMNI_VSA_KERNEL_SPEC:-<unset>}"
+        echo "vllm_omni_target_device=${VLLM_OMNI_TARGET_DEVICE:-cuda} vllm_rocm_extra_index_url=${VLLM_ROCM_EXTRA_INDEX_URL:-<unset>}"
         ;;
       lightx2v)
         echo "lightx2v_install_spec=${LIGHTX2V_INSTALL_SPEC:-git+https://github.com/ModelTC/LightX2V.git@7efd05f8e1425b83321fd4f1cef779ef6504076f}"
@@ -160,7 +161,18 @@ case "${FRAMEWORK}" in
     # vLLM 0.29.0), while omni's transformers 5.x caps it at <=0.23.0, so pip
     # reported ResolutionImpossible and the nightly went red. Left to resolve,
     # uv picks tokenizers 0.22.2 and both are satisfied.
-    python3 -m pip install --upgrade --force-reinstall "${VLLM_INSTALL_SPEC:-vllm==0.18.0}"
+    # ROCm (recipes/MiniMaxAI/MiniMax-H3.md "AMD ROCm"): vLLM comes from its ROCm wheel index
+    # (e.g. VLLM_INSTALL_SPEC=vllm==0.31.0+rocm723 with
+    # VLLM_ROCM_EXTRA_INDEX_URL=https://wheels.vllm.ai/rocm/0.31.0/rocm723) and omni builds with
+    # VLLM_OMNI_TARGET_DEVICE=rocm and no build isolation, so it compiles against that torch.
+    omni_rocm=0
+    [[ "${VLLM_OMNI_TARGET_DEVICE:-}" == rocm ]] && omni_rocm=1
+    if (( omni_rocm )); then
+      python3 -m pip install --upgrade --force-reinstall "${VLLM_INSTALL_SPEC:?ROCm needs an explicit +rocm VLLM_INSTALL_SPEC}" \
+        --extra-index-url "${VLLM_ROCM_EXTRA_INDEX_URL:?ROCm needs VLLM_ROCM_EXTRA_INDEX_URL}"
+    else
+      python3 -m pip install --upgrade --force-reinstall "${VLLM_INSTALL_SPEC:-vllm==0.18.0}"
+    fi
     omni_spec="${VLLM_OMNI_INSTALL_SPEC:-vllm-omni==0.18.0}"
     if [[ "${omni_spec}" == git+* ]]; then
       omni_src="${VENV_PATH}/src/vllm-omni"
@@ -176,7 +188,9 @@ case "${FRAMEWORK}" in
         || git clone -q "${omni_url}" "${omni_src}"
       ( cd "${omni_src}" && git checkout -q "${omni_ref}" 2>/dev/null || true )
       echo "vllm-omni source at $(cd "${omni_src}" && git rev-parse --short=12 HEAD)"
-      if command -v uv >/dev/null 2>&1; then
+      if (( omni_rocm )); then
+        VLLM_OMNI_TARGET_DEVICE=rocm python3 -m pip install -e "${omni_src}" --no-build-isolation
+      elif command -v uv >/dev/null 2>&1; then
         VIRTUAL_ENV="${VENV_PATH}" uv pip install -e "${omni_src}"
       else
         python3 -m pip install -e "${omni_src}"
