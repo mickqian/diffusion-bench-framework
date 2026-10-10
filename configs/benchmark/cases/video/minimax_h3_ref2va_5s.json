@@ -91,6 +91,22 @@
           "serve_args": "--model-type diffusion --warmup-mode server --model-variant ref2va --ulysses-degree 2 --performance-mode speed --enable-torch-compile false",
           "notes": "Ref2VA partition: the reference image arrives as a conditions[] entry with role=reference (see configs/sample/minimax_h3.py), which is what selects the ref2va checkpoint. Same parallelism as the t2va profile; added 2026-08-26 to cover the second H3 serving mode for single-request latency.",
           "policy_exception": "Same correctness exception as the default profile (checked 2026-08-07): MiniMax-H3's torch.compile path changes numerical output per the sglang cookbook, so it is excluded regardless of hardware."
+        },
+        "mi355x-2gpu": {
+          "description": "AMD Instinct (gfx950/gfx942), fully resident: 288 GB per MI355X holds the model on each rank; AITER attention, the cookbook's AMD backend policy.",
+          "hardware": [
+            "mi355x",
+            "mi350x",
+            "mi300x"
+          ],
+          "sglang_ref": "current-main",
+          "num_gpus": 2,
+          "serve_args": "--model-type diffusion --warmup-mode server --model-variant ref2va --ulysses-degree 2 --performance-mode speed --attention-backend aiter --enable-torch-compile false",
+          "extra_env": {
+            "SGLANG_USE_AITER": "1"
+          },
+          "notes": "Derived 2026-10-10 from docs/cookbook/diffusion/MiniMax/MiniMax-H3.mdx (sglang main 3831e7e09): its config builder applies `--attention-backend aiter` + SGLANG_USE_AITER=1 on mi300x/mi355x and keeps weights resident off the consumer tier; the topology is the datacenter Ulysses-2 command this case uses on B200. VALIDATION PENDING (2026-10-10 round): derived, not yet measured on this hardware.",
+          "policy_exception": "Same correctness exception as the default profile (checked 2026-08-07): MiniMax-H3's torch.compile path changes numerical output per the sglang cookbook, so it is excluded regardless of hardware."
         }
       }
     },
@@ -110,8 +126,8 @@
           "upstream_recipe": {
             "repo": "vllm-project/vllm-omni",
             "path": "recipes/MiniMaxAI/MiniMax-H3.md",
-            "commit": "7266fc613",
-            "commit_date": "2026-09-28",
+            "commit": "f69b1f2b1",
+            "commit_date": "2026-10-10",
             "section": "Two 24/32 GB GPUs: TP2 distributed layerwise offload"
           },
           "num_gpus": 2,
@@ -130,8 +146,8 @@
           "upstream_recipe": {
             "repo": "vllm-project/vllm-omni",
             "path": "recipes/MiniMaxAI/MiniMax-H3.md",
-            "commit": "7266fc613",
-            "commit_date": "2026-09-28",
+            "commit": "f69b1f2b1",
+            "commit_date": "2026-10-10",
             "section": "Two 24/32 GB GPUs: TP2 distributed layerwise offload"
           },
           "num_gpus": 2,
@@ -144,11 +160,22 @@
             "rtx5090",
             "rtx4090"
           ],
-          "framework_ref": "vllm-omni recipes/MiniMaxAI/MiniMax-H3.md (2-GPU section) + --enforce-eager; git main 0.26.1.dev50+gcfa6d66ed + vllm==0.26.0",
+          "framework_ref": "vllm-omni main f69b1f2b19ce + vllm==0.31.0 (CUDA) / vllm==0.31.0+rocm723 (ROCm)",
           "num_gpus": 2,
-          "serve_args": "--trust-remote-code --tensor-parallel-size 2 --enforce-eager --enable-distributed-layerwise-offload --dlo-no-use-allgather --dlo-resident-layers 20 --diffusion-attention-backend CUDNN_ATTN",
-          "notes": "The recipe scopes this command to 'Two 24/32 GB GPUs ... two PCIe consumer GPUs'; 'cuDNN attention is selected explicitly for the RTX consumer path; the server stays eager'. On RTX 5090 it failed at startup on 0.26.1.dev45 (2026-08-07, see `consumer-dlo-compile-20260807`); not re-validated since.",
-          "policy_exception": "Capacity, not speed (2026-08-07): the model does not fit 2x32 GB resident; offload and eager are the upstream recipe for this memory class."
+          "serve_args": "--trust-remote-code --task-type ref2va --num-gpus 2 --tensor-parallel-size 2 --usp 1 --ring 1 --text-encoder-tp-size 2 --vae-patch-parallel-size 2 --vae-parallel-mode tile --vae-use-tiling --enable-distributed-layerwise-offload --dlo-no-use-allgather --dlo-resident-layers 20 --enforce-eager --diffusion-attention-backend CUDNN_ATTN",
+          "notes": "Re-derived 2026-10-10: the recipe's two-GPU command verbatim (it now adds text-encoder TP2 and VAE patch parallel 2 to the DLO command this profile carried since 2026-08-07, and SM120 offloads AdaLN projection weights by default). Upstream validated it on 2x RTX 5090 at this exact shape (1344x768, 124 f, 50 steps: 8 min 38 s, ~22.6 GiB/GPU, vllm-omni ae6577ea). The 2026-08-07 startup failure was on 0.26.1.dev45. VALIDATION PENDING (2026-10-10 round): derived, not yet measured on this hardware.",
+          "policy_exception": "Capacity, not speed (2026-08-07): the model does not fit 2x32 GB resident; offload and eager are the upstream recipe for this memory class.",
+          "upstream_recipe": {
+            "repo": "vllm-project/vllm-omni",
+            "path": "recipes/MiniMaxAI/MiniMax-H3.md",
+            "commit": "f69b1f2b1",
+            "commit_date": "2026-10-10",
+            "section": "Two 24/32 GB GPUs: TP2 distributed layerwise offload"
+          },
+          "extra_env": {
+            "VLLM_WORKER_MULTIPROC_METHOD": "spawn",
+            "VLLM_OMNI_VIDEO_SYNC_TIMEOUT": "14400"
+          }
         },
         "h100-2gpu-dlo": {
           "description": "H100 80 GB: the resident configuration cannot fit (one 62 GB DiT plus the 51.5 GB text encoder on rank 0), so this keeps the consumer TP2 + distributed layerwise offload command the case carried before 2026-09-30.",
@@ -167,8 +194,8 @@
           "upstream_recipe": {
             "repo": "vllm-project/vllm-omni",
             "path": "recipes/MiniMaxAI/MiniMax-H3.md",
-            "commit": "7266fc613",
-            "commit_date": "2026-09-28",
+            "commit": "f69b1f2b1",
+            "commit_date": "2026-10-10",
             "section": "Four GPUs: throughput-oriented combined service"
           },
           "num_gpus": 2,
@@ -188,6 +215,29 @@
           "num_gpus": 2,
           "serve_args": "--trust-remote-code --tensor-parallel-size 2 --enable-distributed-layerwise-offload --dlo-no-use-allgather --dlo-resident-layers 20 --diffusion-attention-backend CUDNN_ATTN",
           "notes": "Requires ffmpeg/ffprobe on PATH for MP4 muxing. The request also needs `aspect_ratio` inside extra_params (the recipe's own T2VA example omits it and 422s with 'RuntimeError: t2va requires an explicit aspect_ratio' as written). CONFIRMED HARDWARE-INDEPENDENT 2026-08-07: re-ran this exact profile on 2xB200 (sm100, datacenter Blackwell) -- it segfaults with the identical signature as on RTX 5090 (native segfault, Python trace through torch Dynamo's custom_eval_frame), 1 step into denoising. Same bug on two unrelated GPU architectures rules out a consumer-GPU/SM120 quirk; this is a real vLLM-Omni MiniMax-H3 stability bug in the compiled path, not something fixable from the benchmark harness. Use the enforce-eager / b200-2gpu profile instead."
+        },
+        "rocm-2gpu": {
+          "description": "AMD ROCm: the recipe's ROCm four-GPU command (USP, text-encoder TP, VAE patch parallel tile, FLASH_ATTN -> AITER packed varlen) at two GPUs, resident.",
+          "hardware": [
+            "mi355x",
+            "mi350x",
+            "mi300x"
+          ],
+          "framework_ref": "vllm-omni main f69b1f2b19ce + vllm==0.31.0 (CUDA) / vllm==0.31.0+rocm723 (ROCm)",
+          "upstream_recipe": {
+            "repo": "vllm-project/vllm-omni",
+            "path": "recipes/MiniMaxAI/MiniMax-H3.md",
+            "commit": "f69b1f2b1",
+            "commit_date": "2026-10-10",
+            "section": "ROCm four GPUs"
+          },
+          "num_gpus": 2,
+          "serve_args": "--trust-remote-code --task-type ref2va --num-gpus 2 --usp 2 --ring 1 --text-encoder-tp-size 2 --vae-patch-parallel-size 2 --vae-parallel-mode tile --vae-use-tiling --diffusion-attention-backend FLASH_ATTN",
+          "extra_env": {
+            "VLLM_WORKER_MULTIPROC_METHOD": "spawn",
+            "VLLM_OMNI_VIDEO_SYNC_TIMEOUT": "1800"
+          },
+          "notes": "Derived 2026-10-10: the recipe's 'ROCm four GPUs' command scaled to num_gpus=2 the way the CUDA profiles scale its four-GPU section; no CPU offload at 288 GB/GPU. The recipe notes text-encoder TP was validated on gfx942 only. VALIDATION PENDING (2026-10-10 round): derived, not yet measured on this hardware."
         }
       },
       "reason": "Empirically validated 2026-08-07, first on minimax-h3-5090-2gpu-v4 (2x RTX 5090) then on 2xB200: the default (compiled) profile segfaults identically on both GPU classes 1 step into denoising (see command_profiles.default.notes) -- a confirmed hardware-independent vLLM-Omni bug, despite the recipe's own claim that torch.compile is 'not enabled by default on consumer paths.' --enforce-eager avoids that segfault, but on RTX 5090 it fails differently at startup (a diffusion worker process dies before completing its init handshake, surfaced as EOFError) and never completes a request on that GPU class. On 2xB200 the identical --enforce-eager command works cleanly and completes a correct generation -- see command_profiles.b200-2gpu for the validated numbers and the sglang comparison on the same hardware. Net: vLLM-Omni H3 support is real but fragile below the B200 class tested here; RTX 5090 has no working profile for this case in either variant."

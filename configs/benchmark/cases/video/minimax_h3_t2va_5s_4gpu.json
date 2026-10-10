@@ -57,6 +57,22 @@
           "serve_args": "--model-type diffusion --warmup-mode server --model-variant fl2va --ulysses-degree 4 --encoder-parallel auto --performance-mode speed --enable-torch-compile false",
           "notes": "docs/cookbook/diffusion/MiniMax/MiniMax-H3.mdx, '4xH200 resident' (checked 2026-10-08): pure Ulysses4 is the faster measured topology on H200, not just a capacity default.",
           "policy_exception": "Correctness exception, not a speed tradeoff: MiniMax-H3's torch.compile path changes numerical output per the sglang cookbook (docs/cookbook/diffusion/MiniMax/MiniMax-H3.mdx, checked 2026-08-07) -- compile is not enabled by any recommended lossless preset for this model and must not be used to generate consistency ground truth. --enable-torch-compile stays false in every profile for this case until upstream fixes the numerics."
+        },
+        "mi355x-4gpu": {
+          "description": "AMD Instinct, Ulysses-4 resident with AITER attention (the cookbook's AMD backend policy).",
+          "hardware": [
+            "mi355x",
+            "mi350x",
+            "mi300x"
+          ],
+          "sglang_ref": "current-main",
+          "num_gpus": 4,
+          "serve_args": "--model-type diffusion --warmup-mode server --model-variant fl2va --ulysses-degree 4 --encoder-parallel auto --performance-mode speed --attention-backend aiter --enable-torch-compile false",
+          "extra_env": {
+            "SGLANG_USE_AITER": "1"
+          },
+          "notes": "Derived 2026-10-10: this case's default command plus the cookbook builder's mi300x/mi355x backend flags. VALIDATION PENDING (2026-10-10 round): derived, not yet measured on this hardware.",
+          "policy_exception": "Same correctness exception as the default profile (checked 2026-08-07): MiniMax-H3's torch.compile path changes numerical output per the sglang cookbook, so it is excluded regardless of hardware."
         }
       }
     },
@@ -75,13 +91,36 @@
           "upstream_recipe": {
             "repo": "vllm-project/vllm-omni",
             "path": "recipes/MiniMaxAI/MiniMax-H3.md",
-            "commit": "b65f97bc4",
-            "commit_date": "2026-10-04",
+            "commit": "f69b1f2b1",
+            "commit_date": "2026-10-10",
             "section": "Four GPUs: throughput-oriented combined service"
           },
           "num_gpus": 4,
           "serve_args": "--trust-remote-code --task-type fl2va --num-gpus 4 --usp 4 --ring 1 --vae-patch-parallel-size 4 --vae-parallel-mode tile --vae-use-tiling",
           "notes": "The recipe's own four-GPU command, unscaled. VALIDATION PENDING (2026-10-08): attention backend and TP/USP split to be measured per hardware, as on two GPUs."
+        },
+        "rocm-4gpu": {
+          "description": "AMD ROCm: the recipe's 'ROCm four GPUs' command verbatim.",
+          "hardware": [
+            "mi355x",
+            "mi350x",
+            "mi300x"
+          ],
+          "framework_ref": "vllm-omni main f69b1f2b19ce + vllm==0.31.0 (CUDA) / vllm==0.31.0+rocm723 (ROCm)",
+          "upstream_recipe": {
+            "repo": "vllm-project/vllm-omni",
+            "path": "recipes/MiniMaxAI/MiniMax-H3.md",
+            "commit": "f69b1f2b1",
+            "commit_date": "2026-10-10",
+            "section": "ROCm four GPUs"
+          },
+          "num_gpus": 4,
+          "serve_args": "--trust-remote-code --task-type fl2va --num-gpus 4 --usp 4 --ring 1 --text-encoder-tp-size 4 --vae-patch-parallel-size 4 --vae-parallel-mode tile --vae-use-tiling --diffusion-attention-backend FLASH_ATTN",
+          "extra_env": {
+            "VLLM_WORKER_MULTIPROC_METHOD": "spawn",
+            "VLLM_OMNI_VIDEO_SYNC_TIMEOUT": "1800"
+          },
+          "notes": "The recipe's ROCm four-GPU command; its evidence table measured it on 4x MI300X (T2VA 1344x768 209 f 50 steps, 267.4 s client E2E). VALIDATION PENDING (2026-10-10 round): derived, not yet measured on this hardware."
         }
       },
       "reason": "Empirically validated 2026-08-07, first on minimax-h3-5090-2gpu-v4 (2x RTX 5090) then on 2xB200: the default (compiled) profile segfaults identically on both GPU classes 1 step into denoising (see command_profiles.default.notes) -- a confirmed hardware-independent vLLM-Omni bug, despite the recipe's own claim that torch.compile is 'not enabled by default on consumer paths.' --enforce-eager avoids that segfault, but on RTX 5090 it fails differently at startup (a diffusion worker process dies before completing its init handshake, surfaced as EOFError) and never completes a request on that GPU class. On 2xB200 the identical --enforce-eager command works cleanly and completes a correct generation -- see command_profiles.b200-2gpu for the validated numbers and the sglang comparison on the same hardware. Net: vLLM-Omni H3 support is real but fragile below the B200 class tested here; RTX 5090 has no working profile for this case in either variant."

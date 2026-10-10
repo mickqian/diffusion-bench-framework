@@ -1,0 +1,118 @@
+{
+  "id": "qwen_image_21_t2i_1024_2gpu",
+  "model": "Qwen/Qwen-Image-2.1",
+  "task": "text-to-image",
+  "label": "Qwen-Image-2.1 T2I 1024 (2 GPU)",
+  "prompt": "A warehouse robot folds a blue cloth on a clean workbench.",
+  "width": 1024,
+  "height": 1024,
+  "seed": 42,
+  "num_gpus": 2,
+  "num_inference_steps": 40,
+  "guidance_scale": 1.0,
+  "request_extra": {
+    "output_format": "png"
+  },
+  "framework_request_extra": {
+    "sglang": {
+      "generator_device": "cpu"
+    }
+  },
+  "notes": "Replaces the two-GPU Qwen-Image-2512 rows (retired 2026-10-10). guidance_scale 1.0 means no CFG, so CFG parallelism has nothing to split; the multi-GPU choice is sequence vs tensor parallelism, which this repo has measured to be model-dependent (2512: Ulysses won by 4.7%; flux1/zimage: TP won). Pick sglang's profile with scripts/tune_sglang_serve_args.sh on the first B200/H200 box before publishing. VALIDATION PENDING (2026-10-10 round): derived, not yet measured.",
+  "frameworks": {
+    "sglang": {
+      "status": "supported",
+      "serve_args": "--model-type diffusion --warmup-mode server --ulysses-degree 2 --performance-mode speed",
+      "extra_env": {},
+      "command_profiles": {
+        "default": {
+          "description": "Ulysses-2, resident (the cookbook's b200-2-ulysses topology).",
+          "sglang_ref": "current-main",
+          "num_gpus": 2,
+          "serve_args": "--model-type diffusion --warmup-mode server --ulysses-degree 2 --performance-mode speed",
+          "notes": "The 1-GPU case's notes record that sglang's cookbook verifies b200-2-tp and b200-2-ulysses for this model. VALIDATION PENDING (2026-10-10 round): derived, not yet measured."
+        },
+        "b200-2gpu-ulysses-fa": {
+          "description": "Blackwell: Ulysses-2 with FlashAttention, as the 1-GPU B200 profile pins fa.",
+          "hardware": [
+            "b200",
+            "gb200",
+            "b300",
+            "gb300"
+          ],
+          "sglang_ref": "current-main",
+          "num_gpus": 2,
+          "serve_args": "--model-type diffusion --warmup-mode server --ulysses-degree 2 --performance-mode speed --attention-backend fa",
+          "notes": "VALIDATION PENDING (2026-10-10 round): derived, not yet measured."
+        },
+        "tp2-candidate": {
+          "description": "TP2 alternative for the tuning A/B (cookbook b200-2-tp). Never selected: no hardware tag.",
+          "sglang_ref": "current-main",
+          "num_gpus": 2,
+          "serve_args": "--model-type diffusion --warmup-mode server --tp-size 2 --performance-mode speed",
+          "notes": "Kept so the tuning script can interleave it against the Ulysses default. VALIDATION PENDING (2026-10-10 round): derived, not yet measured."
+        }
+      }
+    },
+    "vllm-omni": {
+      "status": "supported",
+      "num_gpus": 2,
+      "serve_args": "",
+      "command_profiles": {
+        "default": {
+          "description": "vLLM-Omni's documented Qwen-Image-2.1 server (`vllm serve Qwen/Qwen-Image-2.1 --omni`): regional torch.compile plus CUDA-graph decode, both on by default.",
+          "framework_ref": "vllm-omni main f69b1f2b19ce + vllm==0.31.0",
+          "upstream_recipe": {
+            "repo": "vllm-project/vllm-omni",
+            "path": "recipes/Qwen/Qwen-Image-2.1.md",
+            "commit": "f69b1f2b1",
+            "commit_date": "2026-10-10",
+            "section": "Online Serving"
+          },
+          "num_gpus": 2,
+          "serve_args": "--usp 2",
+          "notes": "The recipe measured compile+graph 5.93 s against eager 8.28 s on one H200 at 50 steps. The harness drops --enforce-eager when compile is on, so the recipe's defaults stand. Two GPUs as Ulysses-2: the recipe documents that TP/SP/ring fall back to eager decode (no CUDA graph), so this may not beat its own one-GPU number; the comparison holds the GPU count fixed. VALIDATION PENDING (2026-10-10 round): derived, not yet measured."
+        },
+        "blackwell-cudnn": {
+          "description": "Datacenter Blackwell: cuDNN attention, the vLLM-Omni backend that measured fastest for Qwen-Image on B200 (FLASH_ATTN is Hopper-only there).",
+          "hardware": [
+            "b200",
+            "gb200",
+            "b300",
+            "gb300"
+          ],
+          "framework_ref": "vllm-omni main f69b1f2b19ce + vllm==0.31.0",
+          "upstream_recipe": {
+            "repo": "vllm-project/vllm-omni",
+            "path": "recipes/Qwen/Qwen-Image-2.1.md",
+            "commit": "f69b1f2b1",
+            "commit_date": "2026-10-10",
+            "section": "Online Serving"
+          },
+          "num_gpus": 2,
+          "serve_args": "--usp 2",
+          "extra_env": {
+            "DIFFUSION_ATTENTION_BACKEND": "CUDNN_ATTN"
+          },
+          "notes": "Carried from Qwen-Image-2512's B200 measurement (CUDNN_ATTN 2.741 s vs TRTLLM_ATTN 3.274 s; FLASH_ATTN refused on sm_100); re-check against the auto selection on the first Blackwell run. Two GPUs as Ulysses-2: the recipe documents that TP/SP/ring fall back to eager decode (no CUDA graph), so this may not beat its own one-GPU number; the comparison holds the GPU count fixed. VALIDATION PENDING (2026-10-10 round): derived, not yet measured."
+        }
+      }
+    },
+    "lightx2v": {
+      "status": "no_profile",
+      "reason": "No validated two-GPU LightX2V command for Qwen-Image-2.1 yet (its upstream configs for this model are single-GPU) (2026-10-10)."
+    },
+    "trtllm-visual": {
+      "status": "unsupported",
+      "reason": "TensorRT-LLM VisualGen carries a Qwen-Image pipeline (tensorrt_llm/_torch/visual_gen/models/qwen_image/) but nothing for the 2.1 architecture: a code search for QwenImage21 / Qwen-Image-2.1 over NVIDIA/TensorRT-LLM returns no hits, and the model is absent from pipeline_registry.py. Qwen-Image-2.1 is a distinct architecture (QwenImage21Pipeline / QwenImage21Transformer2DModel / AutoencoderKLQwenImage21 / Qwen3-VL encoder), so the existing Qwen-Image pipeline does not cover it."
+    },
+    "comfyui": {
+      "status": "not_run",
+      "reason": "ComfyUI's only multi-GPU path splits CFG branches, and this case runs without CFG, so a two-GPU cell would be its one-GPU cell."
+    },
+    "fastvideo": {
+      "status": "unsupported",
+      "reason": "No Qwen-Image pipeline in FastVideo main (2b164405c3d1, 2026-10-07)."
+    }
+  }
+}

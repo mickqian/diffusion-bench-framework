@@ -7,10 +7,9 @@ Scope matrix (has a command profile), NOT run-results. `profile`=configured to r
 |---|---|---|---|---|---|---|---|
 | flux1_dev_t2i_1024 | text-to-image | profile | profile | n/a | profile | profile | no-cmd |
 | flux2_dev_t2i_1024 | text-to-image | profile | profile | profile | profile | profile | no-cmd |
-| qwen_image_2512_t2i_1024 | text-to-image | profile | profile | n/a | profile | profile | n/a |
-| qwen_image_2512_t2i_1024_truecfg | text-to-image | profile | profile | n/a | n/a | profile | n/a |
-| qwen_image_edit_2511 | image-edit | profile | profile | n/a | TODO | profile | n/a |
-| qwen_image_21_t2i_1024 | text-to-image | profile | n/a | profile | n/a | profile | n/a |
+| qwen_image_21_t2i_1024 | text-to-image | profile | profile | profile | n/a | profile | n/a |
+| qwen_image_21_t2i_1024_2gpu | text-to-image | profile | profile | no-cmd | n/a | TODO | n/a |
+| qwen_image_21_edit_1024 | image-edit | profile | profile | no-cmd | n/a | no-cmd | n/a |
 | zimage_turbo_t2i_1024 | text-to-image | profile | profile | profile | TODO | profile | no-cmd |
 | ideogram4_t2i_1024_2gpu_tp | text-to-image | profile | n/a | n/a | n/a | profile | n/a |
 | wan22_t2v_a14b_720p | text-to-video | profile | profile | profile | TODO | profile | no-cmd |

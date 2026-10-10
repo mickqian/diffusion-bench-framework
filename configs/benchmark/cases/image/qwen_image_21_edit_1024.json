@@ -1,0 +1,147 @@
+{
+  "id": "qwen_image_21_edit_1024",
+  "model": "Qwen/Qwen-Image-2.1",
+  "task": "image-edit",
+  "label": "Qwen-Image-2.1 edit 1024 (1 GPU, one reference)",
+  "prompt": "Make the cat wear a red hat",
+  "reference_image": true,
+  "width": 1024,
+  "height": 1024,
+  "seed": 42,
+  "num_gpus": 1,
+  "num_inference_steps": 40,
+  "guidance_scale": 1.0,
+  "request_extra": {
+    "output_format": "png"
+  },
+  "framework_request_extra": {
+    "sglang": {
+      "generator_device": "cpu"
+    }
+  },
+  "notes": "Replaces qwen_image_edit_2511 (retired with Qwen-Image gen 1, 2026-10-10). Qwen-Image-2.1 serves editing through the same pipeline as generation: the reference image is encoded with the prompt by its Qwen3-VL encoder. ONE GPU, like qwen_image_21_t2i_1024, so the same hardware range can run it. output_format=png is required: the checkpoint emits RGBA. VALIDATION PENDING (2026-10-10 round): derived, not yet measured.",
+  "frameworks": {
+    "sglang": {
+      "status": "supported",
+      "serve_args": "--model-type diffusion --warmup-mode server --performance-mode speed",
+      "extra_env": {},
+      "command_profiles": {
+        "default": {
+          "description": "Resident pipeline on one high-memory datacenter GPU.",
+          "sglang_ref": "current-main",
+          "serve_args": "--model-type diffusion --warmup-mode server --performance-mode speed",
+          "notes": "Mirrors the cookbook picker's own defaultSelection (h200, 1 node, 1 GPU, tp=ulysses=ring=1, resident, native precision, eager, batching off). Source: docs/src/snippets/configs/Qwen/qwen-image-2.1.jsx, verifiedRecipes entry `h200-1-resident`. Consumer cards cannot use this profile -- the picker disables resident placement on RTX 5090/4090 with 'the full resident pipeline exceeds one consumer GPU's memory'."
+        },
+        "h200-1gpu-resident": {
+          "description": "H200 resident, platform attention (FlashAttention on Hopper, no flag needed).",
+          "hardware": [
+            "h200",
+            "h100"
+          ],
+          "sglang_ref": "sglang 6ad78f22 (2026-09-21)",
+          "serve_args": "--model-type diffusion --warmup-mode server --performance-mode speed",
+          "notes": "Cookbook verifiedRecipes `h200-1-resident` (default: true), attentions [fa, sdpa]. The picker's 'Automatic' attention emits NO flag on H200 because the runtime already selects FlashAttention there; only B200 gets an explicit --attention-backend fa. VALIDATED 2026-09-21 on a 1x H200 devbox (sglang 6ad78f22): p50 4.519s over 3 repeats after warmup [4.51, 4.52, 4.52], 0.1034 s/step x 40 = 4.14s of the 4.52s, 39.6 GB after load settling to 32.7 GB steady out of 140 GB."
+        },
+        "b200-1gpu-resident-fa": {
+          "description": "B200 resident with an explicit FlashAttention backend.",
+          "hardware": [
+            "b200",
+            "gb200",
+            "b300",
+            "gb300"
+          ],
+          "sglang_ref": "sglang 6ad78f22 (2026-09-21)",
+          "serve_args": "--model-type diffusion --warmup-mode server --performance-mode speed --attention-backend fa",
+          "notes": "Cookbook verifiedRecipes `b200-1-resident` (default: true). --attention-backend fa is NOT decoration: the picker's 'Automatic' option emits it for b200 and for no other card, so dropping it changes the kernel this cell measures. VALIDATED 2026-09-21 on a 1x B200 devbox (sglang 6ad78f22): p50 2.454s over 3 repeats after warmup [2.45, 2.46, 2.45], 0.0537 s/step x 40 = 2.15s of the 2.45s, 39.7 GB after load settling to 32.8 GB steady out of 183 GB. 1.84x the H200 on the same command shape, and the per-step gap (0.0537 vs 0.1034) carries essentially all of it."
+        },
+        "rtx5090-1gpu-encoder-layerwise-offload": {
+          "description": "RTX 5090 32GB: DiT and VAE resident, Qwen3-VL encoder streamed layerwise.",
+          "hardware": [
+            "rtx5090"
+          ],
+          "sglang_ref": "sglang 6ad78f22 (2026-09-21)",
+          "serve_args": "--model-type diffusion --warmup-mode server --performance-mode manual --component-residency dit=resident text_encoder=layerwise-offload vae=resident --warmup-resolutions 1024x1024",
+          "policy_exception": "Offload is not a tuning choice on this card, it is the only way the model runs: a 30.9 GiB checkpoint on 32 GB. The cookbook's picker DISABLES resident placement on RTX 5090 outright ('the full resident pipeline exceeds one consumer GPU's memory. Select CPU offload.'), so there is no resident arm to compare against. This recipe offloads the least it can: only the Qwen3-VL encoder streams, the DiT and VAE stay resident. Measured 2026-09-21 on a 1x RTX 5090 devbox at p50 14.082s using 17.0 GB steady.",
+          "notes": "NOT the cookbook's RTX 5090 recipe -- this is the cookbook's RTX 4090 recipe, measured here to be substantially faster on the 5090 as well. A/B on ONE box (bench-5090-qi21, sglang 6ad78f22, same card, same Torch SDPA, same 40 steps / seed 42 / CFG 1 / PNG; only component placement differs, which does not change numerics): cookbook `--dit-layerwise-offload true` p50 19.946s [19.97, 19.95, 19.95], 0.4674 s/step, 19.3 GB steady, vs this recipe p50 14.082s [14.14, 14.08, 14.08], 0.3166 s/step, 17.0 GB steady. 1.42x faster on LESS steady memory, with 0.1% scatter on each arm and no overlap between them. Cause: the cookbook's 5090 branch streams the DiT itself through every one of the 40 steps, while this one keeps the DiT on the card and streams only the encoder, which runs once per request. Peak during load is higher (24.9 GB vs 19.3 GB) and still well inside 32 GB. Upstream's picker gates the DiT-resident branch on `hw === 'rtx4090'`; on this evidence it should cover the RTX 5090 too -- see `consumer-dit-layerwise-offload-reference` for the arm this replaced."
+        },
+        "rtx4090-1gpu-encoder-layerwise-offload": {
+          "description": "RTX 4090 24GB: DiT and VAE resident, Qwen3-VL encoder streamed layerwise.",
+          "hardware": [
+            "rtx4090"
+          ],
+          "sglang_ref": "sglang 6ad78f22 (2026-09-21)",
+          "serve_args": "--model-type diffusion --warmup-mode server --performance-mode manual --component-residency dit=resident text_encoder=layerwise-offload vae=resident --warmup-resolutions 1024x1024",
+          "notes": "Cookbook verifiedRecipes `rtx4090-1-offload` (default: true), attentions [fa, sdpa]. This is the picker's NARROW 4090 branch, which it emits only at 1 GPU + FlashAttention + native precision + eager + text/edit mode + n=1 + batching off; this case sits exactly inside that box, so the narrow recipe is what applies. Outside it the picker degrades to `--dit-layerwise-offload true --text-encoder-cpu-offload true`, which is a different measurement -- do not substitute one for the other. VALIDATED 2026-09-21 on a 1x RTX 4090 devbox (sglang 6ad78f22): p50 19.309s over 3 repeats after warmup [19.20, 19.31, 19.32], 0.4353 s/step x 40 = 17.41s of the 19.31s, 20.6 GB after load settling to 16.6 GB steady out of 24 GB. Note the 24 GB card lands FASTER than the 32 GB RTX 5090 (19.309s vs 19.946s) and on less memory, because this recipe keeps the DiT on the card and streams only the encoder, while the 5090 recipe streams the DiT itself every step.",
+          "policy_exception": "Offload is not a tuning choice on this card, it is the only way the model runs: a 30.9 GiB checkpoint on 24 GB. The cookbook's picker DISABLES resident placement on RTX 4090 outright ('the full resident pipeline exceeds one consumer GPU's memory. Select CPU offload.'), so there is no resident arm to compare against -- a resident server cannot start here. This recipe offloads the least it can: only the Qwen3-VL encoder streams, the DiT and VAE stay resident. Measured 2026-09-21 on a 1x RTX 4090 devbox at p50 19.309s using 16.6 GB steady."
+        },
+        "consumer-dit-layerwise-offload-reference": {
+          "description": "REFERENCE ONLY, never selected (no `hardware`, and the name carries no hardware token). The cookbook's own RTX 5090 recipe, kept for the A/B it lost.",
+          "sglang_ref": "sglang 6ad78f22 (2026-09-21)",
+          "serve_args": "--model-type diffusion --warmup-mode server --performance-mode manual --dit-layerwise-offload true",
+          "notes": "Cookbook verifiedRecipes `rtx5090-1-offload`, which upstream marks `unverified: true` -- the ONLY recipe in that table carrying the flag, i.e. the one topology the cookbook itself had not re-tested against the updated checkpoint. Re-tested here 2026-09-21 on a 1x RTX 5090 devbox (sglang 6ad78f2): it works -- healthy, p50 19.946s over 3 repeats after warmup [19.97, 19.95, 19.95], 0.4674 s/step x 40 = 18.70s of the 19.95s, 19333 MiB of 32 GB, 2.43 MB RGBA PNG -- but it is 1.42x SLOWER than the 4090 recipe on the same card, so `rtx5090-1gpu-encoder-layerwise-offload` is what this repo runs. Kept here so the losing arm of that A/B stays on the record. No explicit attention flag in either arm: sm120 is in the cookbook's sm12Hardware list, so the runtime picks SDPA itself.",
+          "policy_exception": "Offload is not a tuning choice on this card, it is the only way the model runs. The checkpoint is 30.9 GiB and the card has 32 GB, so the cookbook's picker DISABLES resident placement on RTX 5090 outright ('the full resident pipeline exceeds one consumer GPU's memory. Select CPU offload.'). Measured 2026-09-21 on a 1x RTX 5090 devbox (sglang 6ad78f2): the offload recipe serves at p50 19.946s using 19333 MiB of 32 GB. There is no resident arm to compare against because a resident server cannot start here."
+        }
+      }
+    },
+    "vllm-omni": {
+      "status": "supported",
+      "num_gpus": 1,
+      "serve_args": "",
+      "command_profiles": {
+        "default": {
+          "description": "vLLM-Omni's documented Qwen-Image-2.1 server (`vllm serve Qwen/Qwen-Image-2.1 --omni`): regional torch.compile plus CUDA-graph decode, both on by default.",
+          "framework_ref": "vllm-omni main f69b1f2b19ce + vllm==0.31.0",
+          "upstream_recipe": {
+            "repo": "vllm-project/vllm-omni",
+            "path": "recipes/Qwen/Qwen-Image-2.1.md",
+            "commit": "f69b1f2b1",
+            "commit_date": "2026-10-10",
+            "section": "Online Serving"
+          },
+          "num_gpus": 1,
+          "serve_args": "",
+          "notes": "The recipe measured compile+graph 5.93 s against eager 8.28 s on one H200 at 50 steps. The harness drops --enforce-eager when compile is on, so the recipe's defaults stand. Image-conditioned requests go through the same QwenImage21Pipeline as text-to-image. VALIDATION PENDING (2026-10-10 round): derived, not yet measured."
+        },
+        "blackwell-cudnn": {
+          "description": "Datacenter Blackwell: cuDNN attention, the vLLM-Omni backend that measured fastest for Qwen-Image on B200 (FLASH_ATTN is Hopper-only there).",
+          "hardware": [
+            "b200",
+            "gb200",
+            "b300",
+            "gb300"
+          ],
+          "framework_ref": "vllm-omni main f69b1f2b19ce + vllm==0.31.0",
+          "upstream_recipe": {
+            "repo": "vllm-project/vllm-omni",
+            "path": "recipes/Qwen/Qwen-Image-2.1.md",
+            "commit": "f69b1f2b1",
+            "commit_date": "2026-10-10",
+            "section": "Online Serving"
+          },
+          "num_gpus": 1,
+          "serve_args": "",
+          "extra_env": {
+            "DIFFUSION_ATTENTION_BACKEND": "CUDNN_ATTN"
+          },
+          "notes": "Carried from Qwen-Image-2512's B200 measurement (CUDNN_ATTN 2.741 s vs TRTLLM_ATTN 3.274 s; FLASH_ATTN refused on sm_100); re-check against the auto selection on the first Blackwell run. Image-conditioned requests go through the same QwenImage21Pipeline as text-to-image. VALIDATION PENDING (2026-10-10 round): derived, not yet measured."
+        }
+      }
+    },
+    "lightx2v": {
+      "status": "no_profile",
+      "reason": "LightX2V's Qwen-Image-2.1 integration is validated in this harness for t2i only (lightx2v_task t2i); its image-conditioned path has no validated profile yet (2026-10-10)."
+    },
+    "trtllm-visual": {
+      "status": "unsupported",
+      "reason": "TensorRT-LLM VisualGen carries a Qwen-Image pipeline (tensorrt_llm/_torch/visual_gen/models/qwen_image/) but nothing for the 2.1 architecture: a code search for QwenImage21 / Qwen-Image-2.1 over NVIDIA/TensorRT-LLM returns no hits, and the model is absent from pipeline_registry.py. Qwen-Image-2.1 is a distinct architecture (QwenImage21Pipeline / QwenImage21Transformer2DModel / AutoencoderKLQwenImage21 / Qwen3-VL encoder), so the existing Qwen-Image pipeline does not cover it."
+    },
+    "comfyui": {
+      "status": "no_profile",
+      "reason": "The harness's Qwen-Image-2.1 graph is the official t2i template; an edit graph wiring the reference into its images.image_1 input has not been built and validated yet (2026-10-10)."
+    },
+    "fastvideo": {
+      "status": "unsupported",
+      "reason": "No Qwen-Image pipeline in FastVideo main (2b164405c3d1, 2026-10-07)."
+    }
+  }
+}

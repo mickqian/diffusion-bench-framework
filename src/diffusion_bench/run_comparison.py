@@ -23,6 +23,7 @@ Usage:
 import argparse
 import base64
 import copy
+import csv
 import io
 import itertools
 import json
@@ -895,9 +896,14 @@ HARDWARE_PROFILE_TOKENS = (
     "a100",
     "l40",
     "l4",
+    "rtxpro6000",
     "rtx5090",
     "rtx4090",
     "rtx3090",
+    "mi355x",
+    "mi350x",
+    "mi325x",
+    "mi300x",
 )
 # One left-to-right scan in which a token claims its span; the tuple lists each
 # token before any token it contains. `gb300` contains `b300`, so a substring test
@@ -2226,7 +2232,36 @@ def _collect_hardware_metadata() -> dict:
             ]
     except (FileNotFoundError, subprocess.TimeoutExpired):
         pass
+    if "gpus" not in metadata:
+        rocm_gpus = _rocm_smi_gpus()
+        if rocm_gpus:
+            metadata["gpus"] = rocm_gpus
     return metadata
+
+
+def _rocm_smi_gpus() -> list[str]:
+    """AMD GPUs as nvidia-smi-shaped lines: '<name>, <MiB> MiB, <driver>'."""
+
+    def csv_rows(*flags: str) -> list[dict]:
+        try:
+            ret = subprocess.run(
+                ["rocm-smi", *flags, "--csv"], capture_output=True, text=True, timeout=15
+            )
+        except (FileNotFoundError, subprocess.TimeoutExpired):
+            return []
+        if ret.returncode != 0:
+            return []
+        return list(csv.DictReader(io.StringIO(ret.stdout.strip())))
+
+    names = {row["device"]: row.get("Card Series", "") for row in csv_rows("--showproductname")}
+    vram = {row["device"]: row.get("VRAM Total Memory (B)", "") for row in csv_rows("--showmeminfo", "vram")}
+    driver = next((row.get("Driver version", "") for row in csv_rows("--showdriverversion")), "")
+    gpus = []
+    for device, name in names.items():
+        total = vram.get(device, "")
+        mib = f"{int(total) // (1024 * 1024)} MiB" if total.isdigit() else "unknown MiB"
+        gpus.append(f"{name}, {mib}, {driver}")
+    return gpus
 
 
 def _collect_sglang_runtime_metadata() -> dict:
