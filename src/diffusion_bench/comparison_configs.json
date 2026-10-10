@@ -5532,7 +5532,7 @@
                     "audio_flow_shift": 3.0,
                     "num_frames": null,
                     "fps": null,
-                    "num_inference_steps": 9
+                    "num_inference_steps": 8
                 },
                 "vllm-omni": {
                     "extra_params": {
@@ -5551,7 +5551,7 @@
                     "guidance_scale": 1.0
                 }
             },
-            "_note": "num_inference_steps counts model evaluations (8), as vLLM-Omni does; sglang counts sigma grid points, so its request carries 9 -- the same eight forwards. Both engines reject any other step count or shift for this checkpoint. Both engines pin revision 71a17d72c58c (2026-09-15 14:57): the next and current revision 3da2ddfe (15:05) removed provenance.json, which vLLM-Omni's V2 loader (#7610, merged 09-17) reads to find the base-H3 VAEs, so the current revision fails there with FileNotFoundError. The weights are identical across the two revisions. guidance_scale goes to vLLM-Omni only (its recipe sends guidance_scale=1); sglang's MiniMaxH3SamplingParams fixes it at 1.0 and rejects the field in a request (400). FastVideo counts sigma grid points like sglang (its docs: `--steps` 9 is nine points and eight forwards, and its denoiser rejects any other count for this checkpoint), so its request carries 9 too; it reads the rung ladder from fastvideo_inference.json and the 10/3 shifts from the scheduler configs, both present at 71a17d72. vLLM-Omni requests carry extra_params.preencode_mp4=true (2026-10-08): its documented, off-by-default overlap of MP4 encoding with the VAE decode (byte-identical frames), the counterpart of sglang's default streamed encode (#41819). Both engines run their best documented output path.",
+            "_note": "num_inference_steps counts model evaluations (8), as vLLM-Omni does, and so does sglang since its native FastH3 V2 support (#37662: a request with 9 is rejected with 'distilled for exactly eight inference steps (nine sigma grid points, eight DiT forwards)'), so its request carries 8 -- the same eight forwards. Both engines reject any other step count or shift for this checkpoint. Both engines pin revision 71a17d72c58c (2026-09-15 14:57): the next and current revision 3da2ddfe (15:05) removed provenance.json, which vLLM-Omni's V2 loader (#7610, merged 09-17) reads to find the base-H3 VAEs, so the current revision fails there with FileNotFoundError. The weights are identical across the two revisions. guidance_scale goes to vLLM-Omni only (its recipe sends guidance_scale=1); sglang's MiniMaxH3SamplingParams fixes it at 1.0 and rejects the field in a request (400). FastVideo counts sigma grid points like sglang (its docs: `--steps` 9 is nine points and eight forwards, and its denoiser rejects any other count for this checkpoint), so its request carries 9 too; it reads the rung ladder from fastvideo_inference.json and the 10/3 shifts from the scheduler configs, both present at 71a17d72. vLLM-Omni requests carry extra_params.preencode_mp4=true (2026-10-08): its documented, off-by-default overlap of MP4 encoding with the VAE decode (byte-identical frames), the counterpart of sglang's default streamed encode (#41819). Both engines run their best documented output path.",
             "model_revision": "71a17d72c58ce3eeec418144de2a5a2090cb4c04",
             "frameworks": {
                 "sglang": {
