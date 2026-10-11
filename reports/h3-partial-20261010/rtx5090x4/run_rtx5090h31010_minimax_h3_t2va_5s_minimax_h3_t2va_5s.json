@@ -1,0 +1,355 @@
+{
+  "timestamp": "2026-10-10T06:07:45.087143+00:00",
+  "commit_sha": "334f8f0ff853d362e25a5a31427274fe54ad3466",
+  "run_id": "local",
+  "hardware": {
+    "runner_labels": null,
+    "gpu_config": null,
+    "gpus": [
+      "NVIDIA GeForce RTX 5090, 32607 MiB, 580.105.08",
+      "NVIDIA GeForce RTX 5090, 32607 MiB, 580.105.08",
+      "NVIDIA GeForce RTX 5090, 32607 MiB, 580.105.08",
+      "NVIDIA GeForce RTX 5090, 32607 MiB, 580.105.08"
+    ],
+    "hardware_profile_override": "rtx5090"
+  },
+  "sglang_runtime": {
+    "package_version": "0.5.21",
+    "module_path": "/sgl-workspace/sglang/python/sglang/__init__.py",
+    "git_root": "/sgl-workspace/sglang",
+    "git_commit": "3831e7e0918052be50ef38b3ff62154573e213d7"
+  },
+  "framework_runtime": {
+    "venv_root": "/scratch/h3bench/fw-venvs",
+    "install_specs": {
+      "vllm": "vllm==0.18.0",
+      "vllm_omni": "vllm-omni==0.18.0",
+      "lightx2v": "git+https://github.com/ModelTC/LightX2V.git@7efd05f8e1425b83321fd4f1cef779ef6504076f",
+      "lightx2v_flash_attn": "flash-attn==2.8.3",
+      "lightx2v_flash_attn3": "",
+      "lightx2v_fa3_hf_repo": "varunneal/flash-attention-3",
+      "lightx2v_fa3_hf_revision": "de87b9b5af06dd9984df595bef90b2eba44b181a",
+      "lightx2v_fa3_hf_subdir": "build/torch28-cxx11-cu128-x86_64-linux/flash_attention_3",
+      "lightx2v_flashinfer": "flashinfer-python==0.6.11",
+      "trtllm": "tensorrt-llm==1.3.0rc18",
+      "fastvideo": "https://github.com/hao-ai-lab/FastVideo.git@main",
+      "torch_cuda_arch_list": ""
+    },
+    "launchers": {
+      "vllm_omni_server_bin": "vllm",
+      "vllm_omni_required_help_args": "--omni",
+      "trtllm_visual_server_bin": "trtllm-serve"
+    },
+    "vllm-omni": {
+      "venv_path": "/scratch/h3bench/fw-venvs/vllm-omni",
+      "packages": {
+        "vllm": {
+          "Name": "vllm",
+          "Version": "0.31.0",
+          "Home-page": "https://github.com/vllm-project/vllm",
+          "Location": "/scratch/h3bench/fw-venvs/vllm-omni/lib/python3.12/site-packages"
+        },
+        "vllm-omni": {
+          "Name": "vllm-omni",
+          "Version": "0.31.0rc2.dev98+gf69b1f2b1",
+          "Home-page": "https://github.com/vllm-project/vllm-omni",
+          "Location": "/scratch/h3bench/fw-venvs/vllm-omni/lib/python3.12/site-packages"
+        },
+        "torch": {
+          "Name": "torch",
+          "Version": "2.13.0",
+          "Home-page": "https://pytorch.org",
+          "Location": "/scratch/h3bench/fw-venvs/vllm-omni/lib/python3.12/site-packages"
+        },
+        "transformers": {
+          "Name": "transformers",
+          "Version": "5.14.1",
+          "Home-page": "https://github.com/huggingface/transformers",
+          "Location": "/scratch/h3bench/fw-venvs/vllm-omni/lib/python3.12/site-packages"
+        },
+        "diffusers": {
+          "Name": "diffusers",
+          "Version": "0.40.0",
+          "Home-page": "https://github.com/huggingface/diffusers",
+          "Location": "/scratch/h3bench/fw-venvs/vllm-omni/lib/python3.12/site-packages"
+        },
+        "huggingface_hub": {
+          "Name": "huggingface_hub",
+          "Version": "1.33.0",
+          "Home-page": "https://github.com/huggingface/huggingface_hub",
+          "Location": "/scratch/h3bench/fw-venvs/vllm-omni/lib/python3.12/site-packages"
+        }
+      },
+      "direct_urls": {
+        "vllm_omni-0.31.0rc2.dev98+gf69b1f2b1.dist-info": {
+          "url": "file:///scratch/h3bench/fw-venvs/vllm-omni/src/vllm-omni",
+          "dir_info": {
+            "editable": true
+          }
+        }
+      }
+    },
+    "lightx2v": {
+      "venv_path": "/scratch/h3bench/fw-venvs/lightx2v",
+      "packages": {
+        "lightx2v": {
+          "Name": "lightx2v",
+          "Version": "0.5.0",
+          "Home-page": "https://github.com/ModelTC/LightX2V",
+          "Location": "/scratch/h3bench/fw-venvs/lightx2v/lib/python3.12/site-packages"
+        },
+        "torch": {
+          "Name": "torch",
+          "Version": "2.11.0",
+          "Home-page": "https://pytorch.org",
+          "Location": "/scratch/h3bench/fw-venvs/lightx2v/lib/python3.12/site-packages"
+        },
+        "transformers": {
+          "Name": "transformers",
+          "Version": "5.19.0",
+          "Home-page": "https://github.com/huggingface/transformers",
+          "Location": "/scratch/h3bench/fw-venvs/lightx2v/lib/python3.12/site-packages"
+        },
+        "diffusers": {
+          "Name": "diffusers",
+          "Version": "0.41.0",
+          "Home-page": "https://github.com/huggingface/diffusers",
+          "Location": "/scratch/h3bench/fw-venvs/lightx2v/lib/python3.12/site-packages"
+        },
+        "huggingface_hub": {
+          "Name": "huggingface_hub",
+          "Version": "1.33.0",
+          "Home-page": "https://github.com/huggingface/huggingface_hub",
+          "Location": "/scratch/h3bench/fw-venvs/lightx2v/lib/python3.12/site-packages"
+        }
+      },
+      "direct_urls": {
+        "lightx2v-0.5.0.dist-info": {
+          "url": "https://github.com/ModelTC/LightX2V.git",
+          "vcs_info": {
+            "commit_id": "b6d38283cb8176303f9155e639bcd496553d3402",
+            "requested_revision": "b6d38283cb8176303f9155e639bcd496553d3402",
+            "vcs": "git"
+          }
+        }
+      }
+    },
+    "trtllm-visual": {
+      "venv_path": "/scratch/h3bench/fw-venvs/trtllm-visual"
+    },
+    "comfyui": {
+      "venv_path": "/scratch/h3bench/fw-venvs/comfyui",
+      "packages": {
+        "torchvision": {
+          "Name": "torchvision",
+          "Version": "0.29.1+cu130",
+          "Home-page": "https://github.com/pytorch/vision",
+          "Location": "/scratch/h3bench/fw-venvs/comfyui/lib/python3.12/site-packages"
+        },
+        "torchaudio": {
+          "Name": "torchaudio",
+          "Version": "2.11.0+cu130",
+          "Home-page": "https://github.com/pytorch/audio",
+          "Location": "/scratch/h3bench/fw-venvs/comfyui/lib/python3.12/site-packages"
+        },
+        "comfy-kitchen": {
+          "Name": "comfy-kitchen",
+          "Version": "0.2.37",
+          "Home-page": "https://github.com/Comfy-Org/comfy-kitchen",
+          "Location": "/scratch/h3bench/fw-venvs/comfyui/lib/python3.12/site-packages"
+        },
+        "comfy-aimdo": {
+          "Name": "comfy-aimdo",
+          "Version": "0.5.6",
+          "Home-page": "",
+          "Location": "/scratch/h3bench/fw-venvs/comfyui/lib/python3.12/site-packages"
+        },
+        "comfyui_frontend_package": {
+          "Name": "comfyui_frontend_package",
+          "Version": "1.55.14",
+          "Home-page": "",
+          "Location": "/scratch/h3bench/fw-venvs/comfyui/lib/python3.12/site-packages"
+        },
+        "safetensors": {
+          "Name": "safetensors",
+          "Version": "0.8.0",
+          "Home-page": "https://github.com/huggingface/safetensors",
+          "Location": "/scratch/h3bench/fw-venvs/comfyui/lib/python3.12/site-packages"
+        },
+        "torch": {
+          "Name": "torch",
+          "Version": "2.14.1+cu130",
+          "Home-page": "https://pytorch.org",
+          "Location": "/scratch/h3bench/fw-venvs/comfyui/lib/python3.12/site-packages"
+        },
+        "transformers": {
+          "Name": "transformers",
+          "Version": "5.19.0",
+          "Home-page": "https://github.com/huggingface/transformers",
+          "Location": "/scratch/h3bench/fw-venvs/comfyui/lib/python3.12/site-packages"
+        },
+        "huggingface_hub": {
+          "Name": "huggingface_hub",
+          "Version": "2.2.0",
+          "Home-page": "https://github.com/huggingface/huggingface_hub",
+          "Location": "/scratch/h3bench/fw-venvs/comfyui/lib/python3.12/site-packages"
+        }
+      },
+      "source_commit": "0df64eb242b7c5759c3e86afd5d1846d923b1033",
+      "source_commit_date": "2026-10-09T19:55:48-07:00"
+    },
+    "fastvideo": {
+      "venv_path": "/scratch/h3bench/fw-venvs/fastvideo"
+    }
+  },
+  "benchmark_env": {},
+  "benchmark_framework_args": {
+    "vllm-omni": [],
+    "lightx2v": {
+      "config": {
+        "use_compile": true
+      }
+    },
+    "fastvideo": []
+  },
+  "torch_compile_disabled": false,
+  "benchmark_modes": [
+    "single_e2e",
+    "throughput"
+  ],
+  "requested_sglang_profile": "auto",
+  "request_inputs": "distinct-per-request",
+  "results": [
+    {
+      "case_id": "minimax_h3_t2va_5s",
+      "framework": "sglang",
+      "mode": "single_e2e",
+      "model": "MiniMaxAI/MiniMax-H3",
+      "task": "text-to-video",
+      "width": 1344,
+      "height": 768,
+      "num_frames": 124,
+      "fps": 24,
+      "num_inference_steps": 50,
+      "guidance_scale": null,
+      "guidance_scale_2": null,
+      "true_cfg_scale": null,
+      "negative_prompt_set": false,
+      "num_gpus": 2,
+      "latency_s": 553.483,
+      "error": null,
+      "framework_metadata": {
+        "profile": "rtx5090-2gpu",
+        "profile_request": "auto",
+        "profile_source": "hardware",
+        "framework_ref": null,
+        "hardware": [
+          "rtx5090"
+        ],
+        "hardware_candidates": [
+          "rtx5090"
+        ],
+        "description": "2x RTX 5090 (32 GB) layerwise-offload recipe -- the lightweight, broadly-runnable topology for this case.",
+        "notes": "Matches docs/cookbook/diffusion/MiniMax/MiniMax-H3.mdx's verified 2xRTX5090/32GB/377GiB-host recipe as-is. The recorded numbers below (612.65s/556.79s/23366MB) were captured 2026-08-07 on minimax-h3-5090-2gpu-v4 from a run that used --dit-offload-prefetch-size 0 instead of 1, chosen at the time because prefetch-size 1 had intermittently deadlocked at 'Loading MiniMaxH3DiTModel ... Run:ai Model Streamer' on a minority of launches. That deadlock's real cause turned out to be unrelated to prefetch-size -- LayerwiseOffloadManager.__init__ clamps prefetch_size to min(max(1, prefetch_size), num_layers), so 0 and 1 are runtime-identical, and the 0-vs-1 correlation was coincidence (page-cache warmth carried over across attempts). The actual root cause: runai_model_streamer issues an unconditional torch.distributed collective (new_group + all_gather_object) inside find_local_ranks() on the first stream_files() call per component per rank, regardless of the is_distributed argument sglang passes (always False here); any per-rank divergence in layerwise-offload load order or timing can call that ad-hoc group out of lockstep and hang. Fixed at the sglang layer in sgl-project/sglang#33969 (monkeypatches find_local_ranks to skip the collective) -- serve_args here now uses the cookbook's prefetch-size 1 since 0 was never actually load-bearing; re-validate this cell once that PR lands to confirm the hang no longer reproduces even under adversarial per-rank timing. Client wall 612.65s, server-reported inference_time_s 556.79, peak_memory_mb 23366 (well under the 32 GB budget). --performance-mode speed excluded: H3's compile path changes numerics, and speed mode's residency assumption does not fit 32 GB without the layerwise knobs above. Single-GPU (num_gpus=1, tp_size=1) at this exact shape (1344x768, 124 frames) OOMs even at resident-layers=20 -- TP2's per-rank activation footprint (measured ~13 GB/rank at 100% util during a real denoise) roughly doubles unsharded on 1 GPU, on top of a 32 GB card already near its edge per the cookbook's own 2-GPU peak (~31.7 GiB/rank); the case is 2-GPU-only until that's independently reworked.",
+        "install_specs": null,
+        "server_bin": null,
+        "use_omni_arg": null,
+        "required_help_args": null,
+        "serve_args": "--model-type diffusion --warmup-mode server --model-variant fl2va --tp-size 2 --ulysses-degree 1 --performance-mode memory --layerwise-offload-components dit,text_encoder,vae --dit-offload-prefetch-size 1 --dit-layerwise-resident-layers 20 --enable-torch-compile false",
+        "num_gpus": 2,
+        "extra_env_keys": [],
+        "request_inputs": "distinct-per-request",
+        "sglang_profile": "rtx5090-2gpu",
+        "sglang_profile_request": "auto",
+        "sglang_profile_source": "hardware",
+        "sglang_ref": "7f069277c4 (2026-08-04 checkout)"
+      },
+      "server_command": "sglang serve --model-path MiniMaxAI/MiniMax-H3 --port 47001 --host 127.0.0.1 --backend sglang --num-gpus 2 --model-type diffusion --warmup-mode server --model-variant fl2va --tp-size 2 --ulysses-degree 1 --performance-mode memory --layerwise-offload-components dit,text_encoder,vae --dit-offload-prefetch-size 1 --dit-layerwise-resident-layers 20 --enable-torch-compile false",
+      "metrics": {
+        "client_latency_s": 553.483,
+        "client_latency_min_s": 551.142,
+        "client_latency_max_s": 555.824,
+        "measured_repeats": 2,
+        "server_latency_note": "skipped: one extra 553s request is too much to spend on an annotation (limit 120s)",
+        "latency_samples_s": [
+          551.142,
+          555.824
+        ],
+        "latency_spread_pct": 0.8,
+        "warmup_latencies_s": [
+          119.312,
+          51.321,
+          62.922
+        ],
+        "server_startup_s": 448.98,
+        "warmup_s": 233.56
+      }
+    }
+  ],
+  "throughput_results": [
+    {
+      "case_id": "minimax_h3_t2va_5s",
+      "framework": "sglang",
+      "mode": "throughput",
+      "model": "MiniMaxAI/MiniMax-H3",
+      "task": "text-to-video",
+      "width": 1344,
+      "height": 768,
+      "num_frames": 124,
+      "fps": 24,
+      "num_inference_steps": 50,
+      "guidance_scale": null,
+      "guidance_scale_2": null,
+      "true_cfg_scale": null,
+      "negative_prompt_set": false,
+      "num_gpus": 2,
+      "latency_s": 1099.915,
+      "error": null,
+      "framework_metadata": {
+        "profile": "rtx5090-2gpu",
+        "profile_request": "auto",
+        "profile_source": "hardware",
+        "framework_ref": null,
+        "hardware": [
+          "rtx5090"
+        ],
+        "hardware_candidates": [
+          "rtx5090"
+        ],
+        "description": "2x RTX 5090 (32 GB) layerwise-offload recipe -- the lightweight, broadly-runnable topology for this case.",
+        "notes": "Matches docs/cookbook/diffusion/MiniMax/MiniMax-H3.mdx's verified 2xRTX5090/32GB/377GiB-host recipe as-is. The recorded numbers below (612.65s/556.79s/23366MB) were captured 2026-08-07 on minimax-h3-5090-2gpu-v4 from a run that used --dit-offload-prefetch-size 0 instead of 1, chosen at the time because prefetch-size 1 had intermittently deadlocked at 'Loading MiniMaxH3DiTModel ... Run:ai Model Streamer' on a minority of launches. That deadlock's real cause turned out to be unrelated to prefetch-size -- LayerwiseOffloadManager.__init__ clamps prefetch_size to min(max(1, prefetch_size), num_layers), so 0 and 1 are runtime-identical, and the 0-vs-1 correlation was coincidence (page-cache warmth carried over across attempts). The actual root cause: runai_model_streamer issues an unconditional torch.distributed collective (new_group + all_gather_object) inside find_local_ranks() on the first stream_files() call per component per rank, regardless of the is_distributed argument sglang passes (always False here); any per-rank divergence in layerwise-offload load order or timing can call that ad-hoc group out of lockstep and hang. Fixed at the sglang layer in sgl-project/sglang#33969 (monkeypatches find_local_ranks to skip the collective) -- serve_args here now uses the cookbook's prefetch-size 1 since 0 was never actually load-bearing; re-validate this cell once that PR lands to confirm the hang no longer reproduces even under adversarial per-rank timing. Client wall 612.65s, server-reported inference_time_s 556.79, peak_memory_mb 23366 (well under the 32 GB budget). --performance-mode speed excluded: H3's compile path changes numerics, and speed mode's residency assumption does not fit 32 GB without the layerwise knobs above. Single-GPU (num_gpus=1, tp_size=1) at this exact shape (1344x768, 124 frames) OOMs even at resident-layers=20 -- TP2's per-rank activation footprint (measured ~13 GB/rank at 100% util during a real denoise) roughly doubles unsharded on 1 GPU, on top of a 32 GB card already near its edge per the cookbook's own 2-GPU peak (~31.7 GiB/rank); the case is 2-GPU-only until that's independently reworked.",
+        "install_specs": null,
+        "server_bin": null,
+        "use_omni_arg": null,
+        "required_help_args": null,
+        "serve_args": "--model-type diffusion --warmup-mode server --model-variant fl2va --tp-size 2 --ulysses-degree 1 --performance-mode memory --layerwise-offload-components dit,text_encoder,vae --dit-offload-prefetch-size 1 --dit-layerwise-resident-layers 20 --enable-torch-compile false",
+        "num_gpus": 2,
+        "extra_env_keys": [],
+        "request_inputs": "distinct-per-request",
+        "sglang_profile": "rtx5090-2gpu",
+        "sglang_profile_request": "auto",
+        "sglang_profile_source": "hardware",
+        "sglang_ref": "7f069277c4 (2026-08-04 checkout)"
+      },
+      "server_command": "sglang serve --model-path MiniMaxAI/MiniMax-H3 --port 47001 --host 127.0.0.1 --backend sglang --num-gpus 2 --model-type diffusion --warmup-mode server --model-variant fl2va --tp-size 2 --ulysses-degree 1 --performance-mode memory --layerwise-offload-components dit,text_encoder,vae --dit-offload-prefetch-size 1 --dit-layerwise-resident-layers 20 --enable-torch-compile false",
+      "metrics": {
+        "duration_s": 2199.829,
+        "num_requests": 4,
+        "completed_requests": 4,
+        "failed_requests": 0,
+        "max_concurrency": 2,
+        "throughput_rps": 0.0018,
+        "output_throughput_ops": 0.0018,
+        "latency_mean_s": 962.588,
+        "latency_p50_s": 1099.915,
+        "latency_p90_s": 1100.718,
+        "latency_p95_s": 1100.87,
+        "latency_p99_s": 1100.992,
+        "errors": [],
+        "server_startup_s": 448.98,
+        "warmup_s": 233.56
+      }
+    }
+  ],
+  "partial": true
+}

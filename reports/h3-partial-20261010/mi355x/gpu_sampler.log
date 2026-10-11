@@ -1,0 +1,280 @@
+=== 09:13:16 card0=0G card1=0G card2=0G card3=0G card4=0G card5=0G card6=0G card7=0G =0G 
+=== 09:13:46 card0=0G card1=0G card2=0G card3=0G card4=7G card5=7G card6=0G card7=0G =0G 
+GPU: 4         NAME: N/A         PID: 1698884             VRAM_MEM: 7.1 GB 
+GPU: 5         NAME: N/A         PID: 1698885             VRAM_MEM: 7.1 GB 
+=== 09:14:17 card0=0G card1=0G card2=0G card3=0G card4=48G card5=46G card6=0G card7=0G =0G 
+GPU: 4         NAME: N/A         PID: 1698884             VRAM_MEM: 7.1 GB 
+GPU: 5         NAME: N/A         PID: 1698885             VRAM_MEM: 7.1 GB 
+=== 09:14:47 card0=0G card1=0G card2=0G card3=0G card4=96G card5=97G card6=0G card7=0G =0G 
+GPU: 4         NAME: N/A         PID: 1698884             VRAM_MEM: 7.1 GB 
+GPU: 5         NAME: N/A         PID: 1698885             VRAM_MEM: 7.1 GB 
+=== 09:15:18 card0=0G card1=0G card2=0G card3=0G card4=102G card5=102G card6=0G card7=0G =0G 
+GPU: 4         NAME: N/A         PID: 1698884             VRAM_MEM: 8.2 GB 
+GPU: 5         NAME: N/A         PID: 1698885             VRAM_MEM: 8.2 GB 
+=== 09:15:48 card0=0G card1=0G card2=0G card3=0G card4=107G card5=107G card6=0G card7=0G =0G 
+GPU: 4         NAME: N/A         PID: 1698884             VRAM_MEM: 8.5 GB 
+GPU: 5         NAME: N/A         PID: 1698885             VRAM_MEM: 8.5 GB 
+=== 09:16:19 card0=0G card1=0G card2=0G card3=0G card4=107G card5=107G card6=0G card7=0G =0G 
+GPU: 4         NAME: N/A         PID: 1698884             VRAM_MEM: 8.5 GB 
+GPU: 5         NAME: N/A         PID: 1698885             VRAM_MEM: 8.5 GB 
+=== 09:16:49 card0=0G card1=0G card2=0G card3=0G card4=107G card5=107G card6=0G card7=0G =0G 
+GPU: 4         NAME: N/A         PID: 1698884             VRAM_MEM: 8.5 GB 
+GPU: 5         NAME: N/A         PID: 1698885             VRAM_MEM: 8.5 GB 
+=== 09:17:20 card0=0G card1=0G card2=0G card3=0G card4=107G card5=107G card6=0G card7=0G =0G 
+GPU: 4         NAME: N/A         PID: 1698884             VRAM_MEM: 8.5 GB 
+GPU: 5         NAME: N/A         PID: 1698885             VRAM_MEM: 8.5 GB 
+=== 09:17:50 card0=0G card1=0G card2=0G card3=0G card4=107G card5=107G card6=0G card7=0G =0G 
+GPU: 4         NAME: N/A         PID: 1698884             VRAM_MEM: 8.5 GB 
+GPU: 5         NAME: N/A         PID: 1698885             VRAM_MEM: 8.5 GB 
+=== 09:18:21 card0=0G card1=0G card2=0G card3=0G card4=107G card5=107G card6=0G card7=0G =0G 
+GPU: 4         NAME: N/A         PID: 1698884             VRAM_MEM: 8.5 GB 
+GPU: 5         NAME: N/A         PID: 1698885             VRAM_MEM: 8.5 GB 
+=== 09:18:51 card0=0G card1=0G card2=0G card3=0G card4=107G card5=107G card6=0G card7=0G =0G 
+GPU: 4         NAME: N/A         PID: 1698884             VRAM_MEM: 8.5 GB 
+GPU: 5         NAME: N/A         PID: 1698885             VRAM_MEM: 8.5 GB 
+=== 09:19:22 card0=0G card1=0G card2=0G card3=0G card4=107G card5=107G card6=0G card7=0G =0G 
+GPU: 4         NAME: N/A         PID: 1698884             VRAM_MEM: 8.5 GB 
+GPU: 5         NAME: N/A         PID: 1698885             VRAM_MEM: 8.5 GB 
+=== 09:19:52 card0=0G card1=0G card2=0G card3=0G card4=104G card5=107G card6=0G card7=0G =0G 
+GPU: 4         NAME: N/A         PID: 1698884             VRAM_MEM: 8.7 GB 
+GPU: 5         NAME: N/A         PID: 1698885             VRAM_MEM: 8.5 GB 
+=== 09:20:22 card0=0G card1=0G card2=0G card3=0G card4=108G card5=109G card6=0G card7=0G =0G 
+GPU: 4         NAME: N/A         PID: 1698884             VRAM_MEM: 9.4 GB 
+GPU: 5         NAME: N/A         PID: 1698885             VRAM_MEM: 9.9 GB 
+=== 09:20:53 card0=0G card1=0G card2=0G card3=0G card4=109G card5=110G card6=0G card7=0G =0G 
+GPU: 4         NAME: N/A         PID: 1698884             VRAM_MEM: 10.4 GB 
+GPU: 5         NAME: N/A         PID: 1698885             VRAM_MEM: 10.9 GB 
+=== 09:21:24 card0=0G card1=0G card2=0G card3=0G card4=109G card5=110G card6=0G card7=0G =0G 
+GPU: 4         NAME: N/A         PID: 1698884             VRAM_MEM: 10.4 GB 
+GPU: 5         NAME: N/A         PID: 1698885             VRAM_MEM: 10.9 GB 
+=== 09:21:54 card0=0G card1=0G card2=0G card3=0G card4=109G card5=110G card6=0G card7=0G =0G 
+GPU: 4         NAME: N/A         PID: 1698884             VRAM_MEM: 10.4 GB 
+GPU: 5         NAME: N/A         PID: 1698885             VRAM_MEM: 10.9 GB 
+=== 09:22:24 card0=0G card1=0G card2=0G card3=0G card4=109G card5=110G card6=0G card7=0G =0G 
+GPU: 4         NAME: N/A         PID: 1698884             VRAM_MEM: 10.4 GB 
+GPU: 5         NAME: N/A         PID: 1698885             VRAM_MEM: 10.9 GB 
+=== 09:22:55 card0=0G card1=0G card2=0G card3=0G card4=109G card5=110G card6=0G card7=0G =0G 
+GPU: 4         NAME: N/A         PID: 1698884             VRAM_MEM: 10.4 GB 
+GPU: 5         NAME: N/A         PID: 1698885             VRAM_MEM: 10.9 GB 
+=== 09:23:25 card0=0G card1=0G card2=0G card3=0G card4=109G card5=110G card6=0G card7=0G =0G 
+GPU: 4         NAME: N/A         PID: 1698884             VRAM_MEM: 10.4 GB 
+GPU: 5         NAME: N/A         PID: 1698885             VRAM_MEM: 10.9 GB 
+=== 09:23:56 card0=0G card1=0G card2=0G card3=0G card4=109G card5=110G card6=0G card7=0G =0G 
+GPU: 4         NAME: N/A         PID: 1698884             VRAM_MEM: 10.4 GB 
+GPU: 5         NAME: N/A         PID: 1698885             VRAM_MEM: 10.9 GB 
+=== 09:24:26 card0=0G card1=0G card2=0G card3=0G card4=109G card5=110G card6=0G card7=0G =0G 
+GPU: 4         NAME: N/A         PID: 1698884             VRAM_MEM: 10.4 GB 
+GPU: 5         NAME: N/A         PID: 1698885             VRAM_MEM: 10.9 GB 
+=== 09:24:57 card0=0G card1=0G card2=0G card3=0G card4=109G card5=110G card6=0G card7=0G =0G 
+GPU: 4         NAME: N/A         PID: 1698884             VRAM_MEM: 10.4 GB 
+GPU: 5         NAME: N/A         PID: 1698885             VRAM_MEM: 10.9 GB 
+=== 09:25:27 card0=0G card1=0G card2=0G card3=0G card4=109G card5=110G card6=0G card7=0G =0G 
+GPU: 4         NAME: N/A         PID: 1698884             VRAM_MEM: 10.4 GB 
+GPU: 5         NAME: N/A         PID: 1698885             VRAM_MEM: 10.9 GB 
+=== 09:25:57 card0=0G card1=0G card2=0G card3=0G card4=109G card5=110G card6=0G card7=0G =0G 
+GPU: 4         NAME: N/A         PID: 1698884             VRAM_MEM: 10.4 GB 
+GPU: 5         NAME: N/A         PID: 1698885             VRAM_MEM: 10.9 GB 
+=== 09:26:28 card0=0G card1=0G card2=0G card3=0G card4=109G card5=110G card6=0G card7=0G =0G 
+GPU: 4         NAME: N/A         PID: 1698884             VRAM_MEM: 10.4 GB 
+GPU: 5         NAME: N/A         PID: 1698885             VRAM_MEM: 10.9 GB 
+=== 09:26:58 card0=0G card1=0G card2=0G card3=0G card4=109G card5=110G card6=0G card7=0G =0G 
+GPU: 4         NAME: N/A         PID: 1698884             VRAM_MEM: 10.4 GB 
+GPU: 5         NAME: N/A         PID: 1698885             VRAM_MEM: 10.9 GB 
+=== 09:27:29 card0=0G card1=0G card2=0G card3=0G card4=109G card5=110G card6=0G card7=0G =0G 
+GPU: 4         NAME: N/A         PID: 1698884             VRAM_MEM: 10.4 GB 
+GPU: 5         NAME: N/A         PID: 1698885             VRAM_MEM: 10.9 GB 
+=== 09:27:59 card0=0G card1=0G card2=0G card3=0G card4=110G card5=106G card6=0G card7=0G =0G 
+GPU: 4         NAME: N/A         PID: 1698884             VRAM_MEM: 10.6 GB 
+GPU: 5         NAME: N/A         PID: 1698885             VRAM_MEM: 10.9 GB 
+=== 09:28:30 card0=0G card1=0G card2=0G card3=0G card4=110G card5=109G card6=0G card7=0G =0G 
+GPU: 4         NAME: N/A         PID: 1698884             VRAM_MEM: 10.6 GB 
+GPU: 5         NAME: N/A         PID: 1698885             VRAM_MEM: 10.9 GB 
+=== 09:29:00 card0=0G card1=0G card2=0G card3=0G card4=110G card5=109G card6=0G card7=0G =0G 
+GPU: 4         NAME: N/A         PID: 1698884             VRAM_MEM: 10.6 GB 
+GPU: 5         NAME: N/A         PID: 1698885             VRAM_MEM: 10.9 GB 
+=== 09:29:31 card0=0G card1=0G card2=0G card3=0G card4=110G card5=109G card6=0G card7=0G =0G 
+GPU: 4         NAME: N/A         PID: 1698884             VRAM_MEM: 10.6 GB 
+GPU: 5         NAME: N/A         PID: 1698885             VRAM_MEM: 10.9 GB 
+=== 09:30:01 card0=0G card1=0G card2=0G card3=0G card4=110G card5=109G card6=0G card7=0G =0G 
+GPU: 4         NAME: N/A         PID: 1698884             VRAM_MEM: 10.6 GB 
+GPU: 5         NAME: N/A         PID: 1698885             VRAM_MEM: 10.9 GB 
+=== 09:30:32 card0=0G card1=0G card2=0G card3=0G card4=110G card5=109G card6=0G card7=0G =0G 
+GPU: 4         NAME: N/A         PID: 1698884             VRAM_MEM: 10.6 GB 
+GPU: 5         NAME: N/A         PID: 1698885             VRAM_MEM: 10.9 GB 
+=== 09:31:02 card0=0G card1=0G card2=0G card3=0G card4=110G card5=109G card6=0G card7=0G =0G 
+GPU: 4         NAME: N/A         PID: 1698884             VRAM_MEM: 10.6 GB 
+GPU: 5         NAME: N/A         PID: 1698885             VRAM_MEM: 10.9 GB 
+=== 09:31:33 card0=0G card1=0G card2=0G card3=0G card4=110G card5=109G card6=0G card7=0G =0G 
+GPU: 4         NAME: N/A         PID: 1698884             VRAM_MEM: 10.6 GB 
+GPU: 5         NAME: N/A         PID: 1698885             VRAM_MEM: 10.9 GB 
+=== 09:32:03 card0=0G card1=0G card2=0G card3=0G card4=110G card5=109G card6=0G card7=0G =0G 
+GPU: 4         NAME: N/A         PID: 1698884             VRAM_MEM: 10.6 GB 
+GPU: 5         NAME: N/A         PID: 1698885             VRAM_MEM: 10.9 GB 
+=== 09:32:34 card0=0G card1=0G card2=0G card3=0G card4=110G card5=109G card6=0G card7=0G =0G 
+GPU: 4         NAME: N/A         PID: 1698884             VRAM_MEM: 10.6 GB 
+GPU: 5         NAME: N/A         PID: 1698885             VRAM_MEM: 10.9 GB 
+=== 09:33:04 card0=0G card1=0G card2=0G card3=0G card4=110G card5=109G card6=0G card7=0G =0G 
+GPU: 4         NAME: N/A         PID: 1698884             VRAM_MEM: 10.6 GB 
+GPU: 5         NAME: N/A         PID: 1698885             VRAM_MEM: 10.9 GB 
+=== 09:33:35 card0=0G card1=0G card2=0G card3=0G card4=110G card5=109G card6=0G card7=0G =0G 
+GPU: 4         NAME: N/A         PID: 1698884             VRAM_MEM: 10.6 GB 
+GPU: 5         NAME: N/A         PID: 1698885             VRAM_MEM: 10.9 GB 
+=== 09:34:05 card0=0G card1=0G card2=0G card3=0G card4=110G card5=109G card6=0G card7=0G =0G 
+GPU: 4         NAME: N/A         PID: 1698884             VRAM_MEM: 10.6 GB 
+GPU: 5         NAME: N/A         PID: 1698885             VRAM_MEM: 10.9 GB 
+=== 09:34:36 card0=0G card1=0G card2=0G card3=0G card4=110G card5=110G card6=0G card7=0G =0G 
+GPU: 4         NAME: N/A         PID: 1698884             VRAM_MEM: 10.6 GB 
+GPU: 5         NAME: N/A         PID: 1698885             VRAM_MEM: 10.9 GB 
+=== 09:35:06 card0=0G card1=0G card2=0G card3=0G card4=110G card5=106G card6=0G card7=0G =0G 
+GPU: 4         NAME: N/A         PID: 1698884             VRAM_MEM: 10.6 GB 
+GPU: 5         NAME: N/A         PID: 1698885             VRAM_MEM: 10.9 GB 
+=== 09:35:37 card0=0G card1=0G card2=0G card3=0G card4=110G card5=109G card6=0G card7=0G =0G 
+GPU: 4         NAME: N/A         PID: 1698884             VRAM_MEM: 10.6 GB 
+GPU: 5         NAME: N/A         PID: 1698885             VRAM_MEM: 10.9 GB 
+=== 09:36:07 card0=0G card1=0G card2=0G card3=0G card4=110G card5=109G card6=0G card7=0G =0G 
+GPU: 4         NAME: N/A         PID: 1698884             VRAM_MEM: 10.6 GB 
+GPU: 5         NAME: N/A         PID: 1698885             VRAM_MEM: 10.9 GB 
+=== 09:36:38 card0=0G card1=0G card2=0G card3=0G card4=110G card5=109G card6=0G card7=0G =0G 
+GPU: 4         NAME: N/A         PID: 1698884             VRAM_MEM: 10.6 GB 
+GPU: 5         NAME: N/A         PID: 1698885             VRAM_MEM: 10.9 GB 
+=== 09:37:08 card0=0G card1=0G card2=0G card3=0G card4=110G card5=109G card6=0G card7=0G =0G 
+GPU: 4         NAME: N/A         PID: 1698884             VRAM_MEM: 10.6 GB 
+GPU: 5         NAME: N/A         PID: 1698885             VRAM_MEM: 10.9 GB 
+=== 09:37:39 card0=0G card1=0G card2=0G card3=0G card4=110G card5=109G card6=0G card7=0G =0G 
+GPU: 4         NAME: N/A         PID: 1698884             VRAM_MEM: 10.6 GB 
+GPU: 5         NAME: N/A         PID: 1698885             VRAM_MEM: 10.9 GB 
+=== 09:38:09 card0=0G card1=0G card2=0G card3=0G card4=110G card5=109G card6=0G card7=0G =0G 
+GPU: 4         NAME: N/A         PID: 1698884             VRAM_MEM: 10.6 GB 
+GPU: 5         NAME: N/A         PID: 1698885             VRAM_MEM: 10.9 GB 
+=== 09:38:40 card0=0G card1=0G card2=0G card3=0G card4=110G card5=109G card6=0G card7=0G =0G 
+GPU: 4         NAME: N/A         PID: 1698884             VRAM_MEM: 10.6 GB 
+GPU: 5         NAME: N/A         PID: 1698885             VRAM_MEM: 10.9 GB 
+=== 09:39:10 card0=0G card1=0G card2=0G card3=0G card4=110G card5=109G card6=0G card7=0G =0G 
+GPU: 4         NAME: N/A         PID: 1698884             VRAM_MEM: 10.6 GB 
+GPU: 5         NAME: N/A         PID: 1698885             VRAM_MEM: 10.9 GB 
+=== 09:39:41 card0=0G card1=0G card2=0G card3=0G card4=110G card5=109G card6=0G card7=0G =0G 
+GPU: 4         NAME: N/A         PID: 1698884             VRAM_MEM: 10.6 GB 
+GPU: 5         NAME: N/A         PID: 1698885             VRAM_MEM: 10.9 GB 
+=== 09:40:11 card0=0G card1=0G card2=0G card3=0G card4=110G card5=109G card6=0G card7=0G =0G 
+GPU: 4         NAME: N/A         PID: 1698884             VRAM_MEM: 10.6 GB 
+GPU: 5         NAME: N/A         PID: 1698885             VRAM_MEM: 10.9 GB 
+=== 09:40:42 card0=0G card1=0G card2=0G card3=0G card4=110G card5=109G card6=0G card7=0G =0G 
+GPU: 4         NAME: N/A         PID: 1698884             VRAM_MEM: 10.6 GB 
+GPU: 5         NAME: N/A         PID: 1698885             VRAM_MEM: 10.9 GB 
+=== 09:41:12 card0=0G card1=0G card2=0G card3=0G card4=110G card5=109G card6=0G card7=0G =0G 
+GPU: 4         NAME: N/A         PID: 1698884             VRAM_MEM: 10.6 GB 
+GPU: 5         NAME: N/A         PID: 1698885             VRAM_MEM: 10.9 GB 
+=== 09:41:42 card0=0G card1=0G card2=0G card3=0G card4=110G card5=110G card6=0G card7=0G =0G 
+GPU: 4         NAME: N/A         PID: 1698884             VRAM_MEM: 10.6 GB 
+GPU: 5         NAME: N/A         PID: 1698885             VRAM_MEM: 10.9 GB 
+=== 09:42:13 card0=0G card1=0G card2=0G card3=0G card4=110G card5=110G card6=0G card7=0G =0G 
+GPU: 4         NAME: N/A         PID: 1698884             VRAM_MEM: 10.6 GB 
+GPU: 5         NAME: N/A         PID: 1698885             VRAM_MEM: 10.9 GB 
+=== 09:42:43 card0=0G card1=0G card2=0G card3=0G card4=110G card5=110G card6=0G card7=0G =0G 
+GPU: 4         NAME: N/A         PID: 1698884             VRAM_MEM: 10.6 GB 
+GPU: 5         NAME: N/A         PID: 1698885             VRAM_MEM: 10.9 GB 
+=== 09:43:14 card0=0G card1=0G card2=0G card3=0G card4=0G card5=0G card6=0G card7=0G =0G 
+=== 09:43:44 card0=0G card1=0G card2=0G card3=0G card4=0G card5=0G card6=0G card7=0G =0G 
+=== 09:44:15 card0=0G card1=0G card2=0G card3=0G card4=1G card5=1G card6=0G card7=0G =0G 
+GPU: 4         NAME: N/A         PID: 1853475             VRAM_MEM: 987.3 MB 
+GPU: 5         NAME: N/A         PID: 1853476             VRAM_MEM: 987.3 MB 
+=== 09:44:45 card0=0G card1=0G card2=0G card3=0G card4=0G card5=0G card6=0G card7=0G =0G 
+=== 09:45:15 card0=0G card1=0G card2=0G card3=0G card4=0G card5=0G card6=3G card7=3G =0G 
+GPU: 6         NAME: N/A         PID: 1858527             VRAM_MEM: 3.2 GB 
+GPU: 7         NAME: N/A         PID: 1858528             VRAM_MEM: 3.2 GB
+=== 09:45:46 card0=0G card1=0G card2=0G card3=0G card4=0G card5=0G card6=0G card7=0G =0G 
+=== 09:46:16 card0=0G card1=0G card2=0G card3=0G card4=0G card5=0G card6=0G card7=0G =0G 
+=== 09:46:47 card0=0G card1=0G card2=0G card3=0G card4=0G card5=0G card6=0G card7=0G =0G 
+=== 09:47:17 card0=0G card1=0G card2=0G card3=0G card4=0G card5=0G card6=0G card7=0G =0G 
+=== 09:47:48 card0=0G card1=0G card2=0G card3=0G card4=0G card5=0G card6=0G card7=0G =0G 
+=== 09:48:18 card0=0G card1=0G card2=0G card3=0G card4=0G card5=0G card6=0G card7=0G =0G 
+=== 09:48:48 card0=0G card1=0G card2=0G card3=0G card4=0G card5=0G card6=0G card7=0G =0G 
+=== 09:49:19 card0=0G card1=0G card2=0G card3=0G card4=0G card5=0G card6=0G card7=0G =0G 
+=== 09:49:49 card0=0G card1=0G card2=0G card3=0G card4=0G card5=0G card6=0G card7=0G =0G 
+=== 09:50:19 card0=0G card1=0G card2=0G card3=0G card4=0G card5=0G card6=0G card7=0G =0G 
+=== 09:50:50 card0=0G card1=0G card2=0G card3=0G card4=0G card5=0G card6=0G card7=0G =0G 
+=== 09:51:20 card0=0G card1=0G card2=0G card3=0G card4=0G card5=0G card6=0G card7=0G =0G 
+=== 09:51:51 card0=0G card1=0G card2=0G card3=0G card4=0G card5=0G card6=0G card7=0G =0G 
+=== 09:52:21 card0=0G card1=0G card2=0G card3=0G card4=0G card5=0G card6=0G card7=0G =0G 
+=== 09:52:51 card0=0G card1=0G card2=0G card3=0G card4=0G card5=0G card6=0G card7=0G =0G 
+=== 09:53:22 card0=0G card1=0G card2=0G card3=0G card4=0G card5=0G card6=0G card7=0G =0G 
+=== 09:53:52 card0=0G card1=0G card2=0G card3=0G card4=0G card5=0G card6=0G card7=0G =0G 
+=== 09:54:23 card0=0G card1=0G card2=0G card3=0G card4=0G card5=0G card6=0G card7=0G =0G 
+=== 09:54:53 card0=0G card1=0G card2=0G card3=0G card4=0G card5=0G card6=0G card7=0G =0G 
+=== 09:55:23 card0=0G card1=0G card2=0G card3=0G card4=0G card5=0G card6=0G card7=0G =0G 
+=== 09:55:54 card0=0G card1=0G card2=0G card3=0G card4=0G card5=0G card6=0G card7=0G =0G 
+=== 09:56:24 card0=0G card1=0G card2=0G card3=0G card4=0G card5=0G card6=0G card7=0G =0G 
+=== 09:56:55 card0=0G card1=0G card2=0G card3=0G card4=0G card5=0G card6=0G card7=0G =0G 
+=== 09:57:25 card0=0G card1=0G card2=0G card3=0G card4=0G card5=0G card6=0G card7=0G =0G 
+=== 09:57:56 card0=0G card1=0G card2=0G card3=0G card4=0G card5=0G card6=0G card7=0G =0G 
+=== 09:58:26 card0=0G card1=0G card2=0G card3=0G card4=0G card5=0G card6=0G card7=0G =0G 
+=== 09:58:56 card0=0G card1=0G card2=0G card3=0G card4=0G card5=0G card6=0G card7=0G =0G 
+=== 09:59:27 card0=0G card1=0G card2=0G card3=0G card4=0G card5=0G card6=0G card7=0G =0G 
+=== 09:59:57 card0=0G card1=0G card2=0G card3=0G card4=0G card5=0G card6=0G card7=0G =0G 
+=== 10:00:27 card0=0G card1=0G card2=0G card3=0G card4=0G card5=0G card6=0G card7=0G =0G 
+=== 10:00:58 card0=0G card1=0G card2=0G card3=0G card4=0G card5=0G card6=0G card7=0G =0G 
+=== 10:01:28 card0=0G card1=0G card2=0G card3=0G card4=0G card5=0G card6=0G card7=0G =0G 
+=== 10:01:58 card0=0G card1=0G card2=0G card3=0G card4=0G card5=0G card6=0G card7=0G =0G 
+=== 10:02:29 card0=0G card1=0G card2=0G card3=0G card4=0G card5=0G card6=0G card7=0G =0G 
+=== 10:02:59 card0=0G card1=0G card2=0G card3=0G card4=0G card5=0G card6=0G card7=0G =0G 
+=== 10:03:30 card0=0G card1=0G card2=0G card3=0G card4=0G card5=0G card6=0G card7=0G =0G 
+=== 10:04:00 card0=0G card1=0G card2=0G card3=0G card4=0G card5=0G card6=0G card7=0G =0G 
+=== 10:04:31 card0=0G card1=0G card2=0G card3=0G card4=0G card5=0G card6=0G card7=0G =0G 
+=== 10:05:01 card0=0G card1=0G card2=0G card3=0G card4=0G card5=0G card6=0G card7=0G =0G 
+=== 10:05:31 card0=0G card1=0G card2=0G card3=0G card4=0G card5=0G card6=0G card7=0G =0G 
+=== 10:06:02 card0=0G card1=0G card2=0G card3=0G card4=0G card5=0G card6=0G card7=0G =0G 
+=== 10:06:32 card0=0G card1=0G card2=0G card3=0G card4=0G card5=0G card6=0G card7=0G =0G 
+=== 10:07:02 card0=0G card1=0G card2=0G card3=0G card4=0G card5=0G card6=0G card7=0G =0G 
+=== 10:07:33 card0=0G card1=0G card2=0G card3=0G card4=0G card5=0G card6=0G card7=0G =0G 
+=== 10:08:03 card0=0G card1=0G card2=0G card3=0G card4=0G card5=0G card6=0G card7=0G =0G 
+=== 10:08:33 card0=0G card1=0G card2=0G card3=0G card4=0G card5=0G card6=0G card7=0G =0G 
+=== 10:09:04 card0=0G card1=0G card2=0G card3=0G card4=0G card5=0G card6=0G card7=0G =0G 
+=== 10:09:34 card0=0G card1=0G card2=0G card3=0G card4=0G card5=0G card6=0G card7=0G =0G 
+=== 10:10:05 card0=0G card1=0G card2=0G card3=0G card4=0G card5=0G card6=0G card7=0G =0G 
+=== 10:10:35 card0=0G card1=0G card2=0G card3=0G card4=0G card5=0G card6=0G card7=0G =0G 
+=== 10:11:05 card0=0G card1=0G card2=0G card3=0G card4=0G card5=0G card6=0G card7=0G =0G 
+=== 10:11:36 card0=0G card1=0G card2=0G card3=0G card4=0G card5=0G card6=0G card7=0G =0G 
+=== 10:12:06 card0=0G card1=0G card2=0G card3=0G card4=0G card5=0G card6=0G card7=0G =0G 
+=== 10:12:36 card0=0G card1=0G card2=0G card3=0G card4=0G card5=0G card6=0G card7=0G =0G 
+=== 10:13:07 card0=0G card1=0G card2=0G card3=0G card4=0G card5=0G card6=0G card7=0G =0G 
+=== 10:13:37 card0=0G card1=0G card2=0G card3=0G card4=0G card5=0G card6=0G card7=0G =0G 
+=== 10:14:08 card0=0G card1=0G card2=0G card3=0G card4=0G card5=0G card6=0G card7=0G =0G 
+=== 10:14:38 card0=0G card1=0G card2=0G card3=0G card4=0G card5=0G card6=0G card7=0G =0G 
+=== 10:15:08 card0=0G card1=0G card2=0G card3=0G card4=0G card5=0G card6=0G card7=0G =0G 
+=== 10:15:39 card0=0G card1=0G card2=0G card3=0G card4=0G card5=0G card6=0G card7=0G =0G 
+=== 10:16:09 card0=0G card1=0G card2=0G card3=0G card4=0G card5=0G card6=0G card7=0G =0G 
+=== 10:16:40 card0=0G card1=0G card2=0G card3=0G card4=0G card5=0G card6=0G card7=0G =0G 
+=== 10:17:10 card0=0G card1=0G card2=0G card3=0G card4=0G card5=0G card6=0G card7=0G =0G 
+=== 10:17:41 card0=0G card1=0G card2=0G card3=0G card4=0G card5=0G card6=0G card7=0G =0G 
+=== 10:18:11 card0=0G card1=0G card2=0G card3=0G card4=0G card5=0G card6=0G card7=0G =0G 
+=== 10:18:41 card0=0G card1=0G card2=0G card3=0G card4=0G card5=0G card6=0G card7=0G =0G 
+=== 10:19:12 card0=0G card1=0G card2=0G card3=0G card4=0G card5=0G card6=0G card7=0G =0G 
+=== 10:19:42 card0=0G card1=0G card2=0G card3=0G card4=0G card5=0G card6=0G card7=0G =0G 
+=== 10:20:12 card0=0G card1=0G card2=0G card3=0G card4=0G card5=0G card6=0G card7=0G =0G 
+=== 10:20:42 card0=0G card1=0G card2=0G card3=0G card4=0G card5=0G card6=0G card7=0G =0G 
+=== 10:21:13 card0=0G card1=0G card2=0G card3=0G card4=0G card5=0G card6=0G card7=0G =0G 
+=== 10:21:43 card0=0G card1=0G card2=0G card3=0G card4=0G card5=0G card6=0G card7=0G =0G 
+=== 10:22:14 card0=0G card1=0G card2=0G card3=0G card4=0G card5=0G card6=0G card7=0G =0G 
+=== 10:22:44 card0=0G card1=0G card2=0G card3=0G card4=0G card5=0G card6=0G card7=0G =0G 
+=== 10:23:14 card0=0G card1=0G card2=0G card3=0G card4=0G card5=0G card6=0G card7=0G =0G 
+=== 10:23:45 card0=0G card1=0G card2=0G card3=0G card4=0G card5=0G card6=0G card7=0G =0G 
+=== 10:24:15 card0=0G card1=0G card2=0G card3=0G card4=0G card5=0G card6=0G card7=0G =0G 
+=== 10:24:45 card0=0G card1=0G card2=0G card3=0G card4=0G card5=0G card6=0G card7=0G =0G 
+=== 10:25:16 card0=0G card1=0G card2=0G card3=0G card4=0G card5=0G card6=0G card7=0G =0G 
+=== 10:25:46 card0=0G card1=0G card2=0G card3=0G card4=0G card5=0G card6=0G card7=0G =0G 
+=== 10:26:17 card0=0G card1=0G card2=0G card3=0G card4=0G card5=0G card6=0G card7=0G =0G 
+=== 10:26:47 card0=0G card1=0G card2=0G card3=0G card4=0G card5=0G card6=0G card7=0G =0G 
+=== 10:27:17 card0=0G card1=0G card2=0G card3=0G card4=0G card5=0G card6=0G card7=0G =0G 
+=== 10:27:48 card0=0G card1=0G card2=0G card3=0G card4=0G card5=0G card6=0G card7=0G =0G 
+=== 10:28:18 card0=0G card1=0G card2=0G card3=0G card4=0G card5=0G card6=0G card7=0G =0G 
+=== 10:28:48 card0=0G card1=0G card2=0G card3=0G card4=0G card5=0G card6=0G card7=0G =0G 
+=== 10:29:19 card0=0G card1=0G card2=0G card3=0G card4=0G card5=0G card6=0G card7=0G =0G 
+=== 10:29:49 card0=0G card1=0G card2=0G card3=0G card4=0G card5=0G card6=0G card7=0G =0G 
+=== 10:30:20 card0=0G card1=0G card2=0G card3=0G card4=0G card5=0G card6=0G card7=0G =0G 
+=== 10:30:50 card0=0G card1=0G card2=0G card3=0G card4=0G card5=0G card6=0G card7=0G =0G 
+=== 10:31:21 card0=0G card1=0G card2=0G card3=0G card4=0G card5=0G card6=0G card7=0G =0G 
+=== 10:31:51 card0=0G card1=0G card2=0G card3=0G card4=0G card5=0G card6=0G card7=0G =0G 
+=== 10:32:21 card0=0G card1=0G card2=0G card3=0G card4=0G card5=0G card6=0G card7=0G =0G 
+=== 10:32:52 card0=0G card1=0G card2=0G card3=0G card4=0G card5=0G card6=0G card7=0G =0G 
+=== 10:33:22 card0=0G card1=0G card2=0G card3=0G card4=0G card5=0G card6=0G card7=0G =0G 
+=== 10:33:52 card0=0G card1=0G card2=0G card3=0G card4=0G card5=0G card6=0G card7=0G =0G 
