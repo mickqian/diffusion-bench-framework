@@ -45,6 +45,16 @@ TOKEN_FILE="${DBF_HF_TOKEN_FILE:-${STATE_DIR}/.hftoken}"
 # A variant config (e.g. an old competitor profile) A/Bs a command on the same box.
 CONFIG="${DBF_CONFIG:-configs/comparison_configs.json}"
 HARNESS_PYTHONPATH="${DBF_SGLANG_PYTHONPATH:+${DBF_SGLANG_PYTHONPATH}:}src"
+if [ -n "${DBF_SGLANG_PYTHONPATH:-}" ]; then
+    # A missing tree does not fail the import: Python falls back to the installed
+    # sglang, and every result records that sha instead (2026-10-11).
+    tree="$(realpath "$DBF_SGLANG_PYTHONPATH" 2>/dev/null)"
+    resolved="$(PYTHONPATH="$DBF_SGLANG_PYTHONPATH" python3 -c 'import os, sglang; print(os.path.realpath(sglang.__file__))' 2>/dev/null)"
+    if [ -z "$tree" ] || [[ "$resolved" != "$tree"/* ]]; then
+        echo "DBF_SGLANG_PYTHONPATH=$DBF_SGLANG_PYTHONPATH does not provide sglang (imports ${resolved:-nothing})" >&2
+        exit 2
+    fi
+fi
 
 mkdir -p "$LOG_DIR"
 LOG="${LOG_DIR}/run_${TAG}.log"
