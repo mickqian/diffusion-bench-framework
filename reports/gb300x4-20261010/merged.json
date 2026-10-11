@@ -1,6 +1,6 @@
 {
-  "timestamp": "2026-10-11T04:20:25.524049+00:00",
-  "commit_sha": "27ac7cf5d7d973658a7fde02187c20c45a01237a",
+  "timestamp": "2026-10-11T16:14:07.006509+00:00",
+  "commit_sha": "41c50b0aa808caddb422be1922f6ad088dcf3ee7",
   "run_id": "gb300x4-20261010",
   "hardware": {
     "runner_labels": null,
@@ -15,12 +15,12 @@
   },
   "sglang_runtime": {
     "package_version": "0.5.21",
-    "module_path": "/scratch/gb300/sgl-main1011/python/sglang/__init__.py",
-    "git_root": "/scratch/gb300/sgl-main1011",
+    "module_path": "/scratch/gb/sgl-main/python/sglang/__init__.py",
+    "git_root": "/scratch/gb/sgl-main",
     "git_commit": "6576e50cd5e5817b10e12245104603eb1b0d8a4f"
   },
   "framework_runtime": {
-    "venv_root": "/scratch/gb300/fw-venvs",
+    "venv_root": "/scratch/gb/fw-venvs",
     "install_specs": {
       "vllm": "vllm==0.18.0",
       "vllm_omni": "vllm-omni==0.18.0",
@@ -41,7 +41,7 @@
       "trtllm_visual_server_bin": "trtllm-serve"
     },
     "vllm-omni": {
-      "venv_path": "/scratch/gb300/fw-venvs/vllm-omni",
+      "venv_path": "/scratch/gb/fw-venvs/vllm-omni",
       "packages": {
         "vllm": {
           "Name": "vllm",
@@ -90,7 +90,7 @@
       }
     },
     "lightx2v": {
-      "venv_path": "/scratch/gb300/fw-venvs/lightx2v",
+      "venv_path": "/scratch/gb/fw-venvs/lightx2v",
       "packages": {
         "lightx2v": {
           "Name": "lightx2v",
@@ -147,7 +147,7 @@
       }
     },
     "trtllm-visual": {
-      "venv_path": "/scratch/gb300/fw-venvs/trtllm-visual",
+      "venv_path": "/scratch/gb/fw-venvs/trtllm-visual",
       "packages": {
         "tensorrt_llm": {
           "Name": "tensorrt_llm",
@@ -182,7 +182,7 @@
       }
     },
     "comfyui": {
-      "venv_path": "/scratch/gb300/fw-venvs/comfyui",
+      "venv_path": "/scratch/gb/fw-venvs/comfyui",
       "packages": {
         "torchvision": {
           "Name": "torchvision",
@@ -243,7 +243,7 @@
       "source_commit_date": "2026-10-09T19:55:48-07:00"
     },
     "fastvideo": {
-      "venv_path": "/scratch/gb300/fw-venvs/fastvideo",
+      "venv_path": "/scratch/gb/fw-venvs/fastvideo",
       "packages": {
         "fastvideo": {
           "Name": "fastvideo",
@@ -669,6 +669,18 @@
       "run_id": "local",
       "commit_sha": "0466d3cc97a5c93f0114aeff640de568e334610a",
       "timestamp": "2026-10-11T04:09:57.970264+00:00"
+    },
+    {
+      "path": "reports/gb300x4-20261010/raw/run_gb300fh3vsa1011r1_minimax_h3_fasth3_v2_t2va_5s.json",
+      "run_id": "local",
+      "commit_sha": "41c50b0aa808caddb422be1922f6ad088dcf3ee7",
+      "timestamp": "2026-10-11T15:59:43.579232+00:00"
+    },
+    {
+      "path": "reports/gb300x4-20261010/raw/run_gb300fh3vsa1011r2_minimax_h3_fasth3_v2_t2va_5s.json",
+      "run_id": "local",
+      "commit_sha": "41c50b0aa808caddb422be1922f6ad088dcf3ee7",
+      "timestamp": "2026-10-11T16:09:27.631197+00:00"
     }
   ],
   "results": [
@@ -4765,7 +4777,7 @@
       "true_cfg_scale": null,
       "negative_prompt_set": false,
       "num_gpus": 4,
-      "latency_s": 6.436,
+      "latency_s": 5.478,
       "error": null,
       "framework_metadata": {
         "profile": "default",
@@ -4776,59 +4788,59 @@
         "hardware_candidates": [
           "gb300"
         ],
-        "description": "sglang's FastH3 8-Step V2 path: the checkpoint's contract selects VSA-H3 at 0.8 for the transformer; Ulysses 4, resident (speed), eager.",
-        "notes": "#41839's cookbook command is `sglang serve --model-path FastVideo/FastVideo-FastH3-8-Step-V2 --num-gpus 4`; the case adds the benchmark's standing sglang flags (server warmup, speed residency, compile off -- VSA-H3 rejects torch.compile anyway). `--model-variant` must not be passed: FastH3 rejects it. Validated 2026-09-30 on 4xH200 (sglang bd66ce3 + #41839 at 8362359): 11.28 s client median in each of three arms (server total 10.46-10.54 s: denoise 8.80 s, decode 1.27 s); with #41819's overlapped MP4 encode on top, 10.89 s. 4xGB300: 8.085/8.081 s (server 6.42-6.46 s: the serial save is ~1.6 s there); with #41819, 6.97 s.",
+        "description": "sglang's FastH3 8-Step V2 path: VSA-H3 at the checkpoint's 0.8 for the transformer, selected explicitly; Ulysses 4, resident (speed), eager.",
+        "notes": "Since sgl-project/sglang#37662 (merged 2026-10-08) VSA-H3 runs only when selected for the transformer, as the cookbook's 4xGB300 command does; without it the DiT resolves to dense FA and skips the trained to_gate_compress branch. #41839, which this profile was written against, selected VSA-H3 itself, so from 2026-10-08 the profile silently measured dense attention while vLLM-Omni ran VSA. 4xH200, main 6576e50cd5, two interleaved rounds: dense FA 12.64/12.65 s (denoise 10.85 s) -> VSA-H3 10.01/9.99 s (denoise 8.23 s); vLLM-Omni --enforce-eager 10.95/11.00 s. Bisected first: the 09-30 tree (bd66ce3 + #41839 at 8362359) runs denoise 8.74 s and #37662's merge commit 10.54 s, both eight DiT forwards per request. The case adds the benchmark's standing sglang flags (server warmup, speed residency, compile off -- VSA-H3 rejects torch.compile). `--model-variant` must not be passed: FastH3 rejects it. Earlier: 2026-09-30 4xH200 with #41839 11.28 s; 4xGB300 8.085/8.081 s, 6.97 s with #41819.",
         "install_specs": null,
         "server_bin": null,
         "use_omni_arg": null,
         "required_help_args": null,
-        "serve_args": "--model-type diffusion --warmup-mode server --ulysses-degree 4 --performance-mode speed --enable-torch-compile false --revision 71a17d72c58ce3eeec418144de2a5a2090cb4c04",
+        "serve_args": "--model-type diffusion --warmup-mode server --ulysses-degree 4 --component-attention-backends transformer=video_sparse_attn_h3 --performance-mode speed --enable-torch-compile false --revision 71a17d72c58ce3eeec418144de2a5a2090cb4c04",
         "num_gpus": 4,
         "extra_env_keys": [],
         "request_inputs": "distinct-per-request",
         "sglang_profile": "default",
         "sglang_profile_request": "auto",
         "sglang_profile_source": "default",
-        "sglang_ref": "origin/main + sgl-project/sglang#41839 (FastH3 8-Step V2 support, open 2026-09-30)"
+        "sglang_ref": "origin/main 6576e50cd5 (FastH3 V2 support merged as sgl-project/sglang#37662)"
       },
-      "server_command": "sglang serve --model-path FastVideo/FastVideo-FastH3-8-Step-V2 --port 49513 --host 127.0.0.1 --backend sglang --num-gpus 4 --model-type diffusion --warmup-mode server --ulysses-degree 4 --performance-mode speed --enable-torch-compile false --revision 71a17d72c58ce3eeec418144de2a5a2090cb4c04",
+      "server_command": "sglang serve --model-path FastVideo/FastVideo-FastH3-8-Step-V2 --port 61620 --host 127.0.0.1 --backend sglang --num-gpus 4 --model-type diffusion --warmup-mode server --ulysses-degree 4 --component-attention-backends transformer=video_sparse_attn_h3 --performance-mode speed --enable-torch-compile false --revision 71a17d72c58ce3eeec418144de2a5a2090cb4c04",
       "metrics": {
-        "client_latency_s": 6.436,
-        "client_latency_min_s": 6.424,
-        "client_latency_max_s": 6.447,
+        "client_latency_s": 5.478,
+        "client_latency_min_s": 5.478,
+        "client_latency_max_s": 5.478,
         "measured_repeats": 2,
-        "server_latency_s": 6.426,
+        "server_latency_s": 5.392,
         "server_latency_source": "separate instrumented request, not one of the measured repeats",
         "diagnostic_stages_s": {
           "InputValidationStage": 0.0,
           "MiniMaxH3PartitionAdmissionStage": 0.0,
-          "MiniMaxH3TextEncodingStage": 0.104,
+          "MiniMaxH3TextEncodingStage": 0.095,
           "MiniMaxH3VisualEncodingStage": 0.0,
           "MiniMaxH3AudioEncodingStage": 0.0,
-          "MiniMaxH3LatentPreparationStage": 0.028,
+          "MiniMaxH3LatentPreparationStage": 0.026,
           "MiniMaxH3TimestepPreparationStage": 0.0,
-          "MiniMaxH3DenoisingStage": 4.128,
-          "MiniMaxH3DecodingStage": 1.527
+          "MiniMaxH3DenoisingStage": 3.506,
+          "MiniMaxH3DecodingStage": 1.573
         },
-        "diagnostic_stage_sum_s": 5.788,
-        "diagnostic_client_latency_s": 6.464,
-        "unattributed_tail_s": 0.677,
-        "unattributed_tail_frac": 0.105,
+        "diagnostic_stage_sum_s": 5.201,
+        "diagnostic_client_latency_s": 5.477,
+        "unattributed_tail_s": 0.276,
+        "unattributed_tail_frac": 0.05,
         "poll_interval_s": 0.02,
         "latency_samples_s": [
-          6.424,
-          6.447
+          5.478,
+          5.478
         ],
-        "latency_spread_pct": 0.4,
+        "latency_spread_pct": 0.0,
         "warmup_latencies_s": [
-          6.694,
-          6.54,
-          6.435
+          5.388,
+          5.462,
+          5.474
         ],
-        "server_startup_s": 76.07,
-        "warmup_s": 19.67
+        "server_startup_s": 70.06,
+        "warmup_s": 16.32
       },
-      "source_result": "reports/gb300x4-20261010/raw/run_gb300vid1011main_minimax_h3_fasth3_v2_t2va_5s_minimax_h3_fasth3_v2_t2va_5s.json"
+      "source_result": "reports/gb300x4-20261010/raw/run_gb300fh3vsa1011r2_minimax_h3_fasth3_v2_t2va_5s.json"
     },
     {
       "case_id": "minimax_h3_fasth3_v2_t2va_5s",

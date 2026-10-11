@@ -1,6 +1,6 @@
 {
   "id": "historical-cross-framework-20260610",
-  "updated_at": "2026-10-11",
+  "updated_at": "2026-10-12",
   "frameworks": {
     "sglang": "SGLang-Diffusion",
     "vllm-omni": "vLLM-Omni",
@@ -472,8 +472,7 @@
               "reason": "No compatible vLLM-Omni LTX2.3 serving profile is configured."
             },
             "lightx2v": {
-              "status": "failed",
-              "reason": "OOM on H100 80GB: LTX-2.3 22B two-stage 121-frame t2av peak exceeds 80GB even with every lossless lever (seq_p_size=2 activation sharding + block cpu_offload + Gemma/VAE offload + exact flash_attn3). Upstream profiles target H200 141GB. THIS VERDICT IS H100-SPECIFIC AND IS BEING APPLIED GLOBALLY -- `status` has no per-hardware form, so the cell is skipped everywhere, including the 4xB200 box (183359 MiB/GPU, ~179GB) where the stated constraint does not hold and upstream's own H200 target is exceeded. Retest on Blackwell before trusting the classification; if it runs, `status` needs a per-hardware form before this can be flipped, or H100 runs will spend ~40 min per attempt re-discovering the OOM. command_profiles below are the best-attempted lossless config, kept for provenance."
+              "status": "not_run"
             },
             "trtllm-visual": {
               "status": "not_run",
@@ -803,7 +802,7 @@
               "gpus": 4,
               "profile": "default",
               "status": "ok",
-              "latency_s": 6.436,
+              "latency_s": 5.478,
               "ratio_to_sglang": 1.0
             },
             "vllm-omni": {
@@ -811,7 +810,7 @@
               "profile": "default",
               "status": "ok",
               "latency_s": 7.439,
-              "ratio_to_sglang": 1.156
+              "ratio_to_sglang": 1.358
             },
             "lightx2v": {
               "status": "unsupported",
@@ -830,18 +829,18 @@
               "profile": "blackwell-4gpu",
               "status": "ok",
               "latency_s": 7.17,
-              "ratio_to_sglang": 1.114
+              "ratio_to_sglang": 1.309
             }
           },
           "winner": "sglang",
-          "winner_speedup": "1.11x"
+          "winner_speedup": "1.31x"
         }
       ],
       "reproduce": "scripts/run_gb300_full_20261010.sh",
       "reproduce_link": {
         "path": "scripts/run_gb300_full_20261010.sh",
-        "ref": "27ac7cf5d",
-        "url": "https://github.com/mickqian/diffusion-bench-framework/blob/27ac7cf5d7d973658a7fde02187c20c45a01237a/scripts/run_gb300_full_20261010.sh"
+        "ref": "41c50b0aa",
+        "url": "https://github.com/mickqian/diffusion-bench-framework/blob/41c50b0aa808caddb422be1922f6ad088dcf3ee7/scripts/run_gb300_full_20261010.sh"
       }
     },
     {
@@ -985,8 +984,8 @@
       "reproduce": "scripts/run_gb300_full_20261010.sh",
       "reproduce_link": {
         "path": "scripts/run_gb300_full_20261010.sh",
-        "ref": "27ac7cf5d",
-        "url": "https://github.com/mickqian/diffusion-bench-framework/blob/27ac7cf5d7d973658a7fde02187c20c45a01237a/scripts/run_gb300_full_20261010.sh"
+        "ref": "41c50b0aa",
+        "url": "https://github.com/mickqian/diffusion-bench-framework/blob/41c50b0aa808caddb422be1922f6ad088dcf3ee7/scripts/run_gb300_full_20261010.sh"
       }
     },
     {

@@ -62,15 +62,16 @@ no validated profile (per-cell reasons in [issue.md](issue.md)).
 | `minimax_h3_t2va_5s` | **57.46 (2)** | 60.95 (2) | 141.04 (2) | — | 283.48 (1) | 61.15 (2) |
 | `minimax_h3_t2va_5s_4gpu` | **31.76 (4)** | 34.08 (4) | 73.29 (4) | — | — | 34.08 (4) |
 | `minimax_h3_ref2va_5s` | **88.36 (2)** | 91.91 (2) | 229.21 (2) | — | 479.48 (1) | 90.46 (2) |
-| `minimax_h3_fasth3_v2_t2va_5s` | **6.44 (4)** † | 7.44 (4) | — | — | — | 7.17 (4) |
+| `minimax_h3_fasth3_v2_t2va_5s` | **5.48 (4)** † | 7.44 (4) | — | — | — | 7.17 (4) |
 
 `~` LightX2V Z-Image: the first repeat ran 1.01 s and the other four 1.50 s;
 the median is published with its samples listed.
 
-† sglang ran FastH3 with dense FlashAttention, not the checkpoint's VSA-H3,
-which the other two frameworks ran: the profile did not select VSA-H3 (fixed
-in harness bb560dc, see the H200 section). Dense attention is the heavier
-path, and sglang still led; the VSA-H3 cell has not been rerun on GB300.
+† Re-run on 2026-10-11 with VSA-H3 selected for the transformer, as the
+other two frameworks run it (5.47 / 5.48 s in two rounds,
+[evidence/gb300_fasth3_vsa_1011.log](evidence/gb300_fasth3_vsa_1011.log)). The
+first published row, 6.44 s, ran dense FlashAttention: the profile did not
+select VSA-H3 (harness bb560dc, see the H200 section).
 
 ## Eager against eager
 
@@ -98,7 +99,7 @@ two frameworks were run interleaved, twice
 | `minimax_h3_t2va_5s` | 57.56 / 57.54 | 60.16 / 60.27 | 1.05× (interleaved) |
 | `minimax_h3_t2va_5s_4gpu` | 31.76 | 33.96 | 1.07× |
 | `minimax_h3_ref2va_5s` | 88.31 / 88.39 | 91.18 / 90.94 | 1.03× (interleaved) |
-| `minimax_h3_fasth3_v2_t2va_5s` | 6.44 † | 7.35 | 1.14× |
+| `minimax_h3_fasth3_v2_t2va_5s` | 5.48 † | 7.35 | 1.34× |
 
 vLLM-Omni has no ideogram4 or LTX-2.3 path. Its compile pays off on the heavy
 DiTs (Qwen-Image-2.1 1-GPU and edit, FLUX.2, Cosmos3, LTX-2, Wan2.2). It costs

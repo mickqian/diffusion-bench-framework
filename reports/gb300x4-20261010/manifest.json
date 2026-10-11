@@ -88,13 +88,16 @@
       "raw/run_gb300vid1011main_minimax_h3_ref2va_5s_minimax_h3_ref2va_5s.json",
       "raw/run_gb300vid1011main_minimax_h3_t2va_5s_4gpu_minimax_h3_t2va_5s_4gpu.json",
       "raw/run_gb300vid1011main_minimax_h3_t2va_5s_minimax_h3_t2va_5s.json",
-      "raw/run_gb300vid1011main_wan22_t2v_a14b_720p_wan22_t2v_a14b_720p.json"
+      "raw/run_gb300vid1011main_wan22_t2v_a14b_720p_wan22_t2v_a14b_720p.json",
+      "raw/run_gb300fh3vsa1011r1_minimax_h3_fasth3_v2_t2va_5s.json",
+      "raw/run_gb300fh3vsa1011r2_minimax_h3_fasth3_v2_t2va_5s.json"
     ],
     "replaced": {
       "sglang (every case)": "gb300img1011main / gb300vid1011main (main 6576e50cd5, 2026-10-11) replace every earlier sglang cell. The first pass ran main 3831e7e09 and lost cells to placement and compile-path bugs: unbound diffusion workers drifted to the other Grace socket (sglang#43565), and compile graph-broke or crashed. The *fix / *sfix / *f3fix passes measured 3831e7e09 plus the then-open fixes. Once all of them had merged, the column was re-run on main.",
       "qwen_image_21_t2i_1024_2gpu (vllm-omni)": "gb300img1010vfix replaces a main-pass cell that ran on four GPUs (TP2 on top of --usp, before harness 4cac45e): 3.496 s there, 3.081 s on its two GPUs.",
       "minimax_h3_fasth3_v2_t2va_5s (every framework)": "gb300vid1010fix replaces the main pass, where sglang rejected the request with 400 and vLLM-Omni returned 500. vLLM-Omni and FastVideo come from gb300vid1010fix; sglang comes from gb300vid1010f3fix, after harness 1d771ec sends it 8 steps: sglang's native FastH3-V2 support counts DiT forwards and rejects 9. All three run the same eight forwards (vLLM-Omni is sent 8, FastVideo 9 sigma points).",
-      "cosmos3_nano_t2v_720p_189f (sglang)": "gb300img1010b (explicit speed mode, 23.06 s) is itself superseded by gb300img1010fix (22.98 s)."
+      "cosmos3_nano_t2v_720p_189f (sglang)": "gb300img1010b (explicit speed mode, 23.06 s) is itself superseded by gb300img1010fix (22.98 s).",
+      "minimax_h3_fasth3_v2_t2va_5s (sglang, VSA-H3)": "gb300fh3vsa1011r1/r2 (main 6576e50cd5, 2026-10-11, a fresh gb300-tml-k8s pod) replace gb300vid1011main, which ran dense FA: the profile did not select VSA-H3, which sglang runs only when selected since sgl-project/sglang#37662 (harness bb560dc). 6.44 s dense -> 5.47 / 5.48 s VSA-H3. sgl-project/sglang#43690 has since made VSA-H3 the default."
     }
   },
   "files": {
@@ -105,6 +108,7 @@
     "evidence/eager_main_rank1.log": "sglang main eager against vLLM-Omni --enforce-eager, interleaved twice, MiniMax-H3 t2va and ref2va (the two leads under 5%)",
     "evidence/eager_main_rank0.log": "sglang main eager for the two cells published compiled (Cosmos3 T2I, LTX-2)",
     "evidence/h200-eager/": "the same eager-vs-eager check on H200 (sglang main 6576e50cd5, vLLM-Omni f69b1f2b1 on vLLM 0.31.0): 2-GPU cases on a 2xH200 box, 4-GPU cases and reruns on a 4xH200 box; vLLM-Omni runner JSONs per case and round, and the run logs with the sglang arms (h200_eager_summary.log, h200_eager2.log, h200_flux2.log, h200x4_eager.log, h200_rounds_x2/x4/x4f.log)",
-    "evidence/h200-eager/fasth3/": "why sglang FastH3 trailed on H200: NUMA / Ulysses-pipeline A/B (fh3_ab.log), the bisect over sglang trees (fh3_bisect*.log, bis9c_*.json), dense FA against VSA-H3 on main (fh3_vsa.log, tune_fh3*.json), and the one-call VSA kernel timing (vsa_bench.py, vsa_kernel_microbench.log), and the 4xH200 validation of sgl-project/sglang#43690 (fh3_default_sglang43690.log)"
+    "evidence/h200-eager/fasth3/": "why sglang FastH3 trailed on H200: NUMA / Ulysses-pipeline A/B (fh3_ab.log), the bisect over sglang trees (fh3_bisect*.log, bis9c_*.json), dense FA against VSA-H3 on main (fh3_vsa.log, tune_fh3*.json), and the one-call VSA kernel timing (vsa_bench.py, vsa_kernel_microbench.log), and the 4xH200 validation of sgl-project/sglang#43690 (fh3_default_sglang43690.log)",
+    "evidence/gb300_fasth3_vsa_1011.log": "the FastH3 VSA-H3 rerun on 4xGB300 (two runner rounds, attention backend per round) and its script (gb300_fasth3_vsa_1011.sh)"
   }
 }
