@@ -47,6 +47,7 @@ from pathlib import Path
 import requests
 
 from diffusion_bench import comfyui_client, fastvideo_client
+from diffusion_bench.config_guard import apply_hardware_statuses
 
 # ---------------------------------------------------------------------------
 # Constants
@@ -3400,6 +3401,15 @@ def run_comparison(
     hardware_metadata = _collect_hardware_metadata()
     if hardware_profile:
         hardware_metadata["hardware_profile_override"] = hardware_profile
+
+    # Resolve `status_by_hardware` once, here, against this box: a framework
+    # classified unsupported/failed for THIS hardware leaves `case["frameworks"]`
+    # and is never attempted, while the same cell stays runnable elsewhere.
+    config, status_notes = apply_hardware_statuses(
+        config, _hardware_profile_candidates(hardware_metadata)
+    )
+    for note in status_notes:
+        print(f"  {note}")
 
     log_dir = Path("comparison-logs")
     log_dir.mkdir(exist_ok=True)

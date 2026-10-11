@@ -22,7 +22,9 @@ import sys
 sys.path.insert(0, os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "src"))
 from diffusion_bench import comfyui_client, fastvideo_client  # noqa: E402
 from diffusion_bench.config_guard import (  # noqa: E402
+    HARDWARE_TOKENS,
     hardware_candidates,
+    resolve_status,
     resolved_config,
     select_profile,
     upstream_recipe_problems,
@@ -52,6 +54,15 @@ VALID_STATUS = {"supported", "unsupported", "no_profile", "failed", "not_run", "
 # box's GPU names, so a GB300 box selects exactly what the lint checked.
 DATACENTER_HARDWARE = ("h100", "h200", "b200", "b300", "gb200", "gb300", "mi355x", "mi350x", "mi300x")
 POLICY_HARDWARE = DATACENTER_HARDWARE + ("rtx5090", "rtx4090")
+# One hardware vocabulary, not two: POLICY_HARDWARE, `command_profiles[*].hardware`
+# and `status_by_hardware` keys all name tokens the RUNTIME derives from the GPU
+# names. A token outside that set can never match anything at run time.
+_UNKNOWN_POLICY_HW = sorted(set(POLICY_HARDWARE) - set(HARDWARE_TOKENS))
+if _UNKNOWN_POLICY_HW:
+    raise SystemExit(
+        f"POLICY_HARDWARE names tokens the runtime never derives: {_UNKNOWN_POLICY_HW} "
+        f"(known: {', '.join(HARDWARE_TOKENS)})"
+    )
 # "Best lossless" policy: the selected sglang profile must run resident, and
 # must NOT enable torch.compile — sglang's explicitly-fused kernels now match or
 # beat compiler fusion on most diffusion models, so compile-on is the slower
@@ -222,14 +233,18 @@ def _competitor_findings(fw: str, cfg: dict) -> list[str]:
     return found
 
 
-def _lint_competitor_policy(cid: str, fw: str, body: dict) -> list[tuple[tuple | None, str]]:
+def _lint_competitor_policy(cid: str, fw: str, entry: dict) -> list[tuple[tuple | None, str]]:
     """(cell, error) per selected profile that runs eager or offloaded on
     datacenter hardware without dated evidence. `cell` is (case, fw, profile),
     or None for an error KNOWN_COMPETITOR_VIOLATIONS may not excuse."""
+    body = {k: v for k, v in entry.items() if k not in ("status", "status_by_hardware")}
     profiles = body.get("command_profiles") or {}
     groups = {}  # profile -> (source, findings, classes, datacenter classes)
     for hw in POLICY_HARDWARE:
-        name, prof, matches = select_profile(profiles, hardware_candidates(None, override=hw))
+        candidates = hardware_candidates(None, override=hw)
+        if resolve_status(entry, candidates)[0] not in ("", "supported"):
+            continue  # classified away on this hardware: no command to police
+        name, prof, matches = select_profile(profiles, candidates)
         name, source = (name, prof) if prof is not None else ("inline", body)
         cfg = resolved_config(body, prof)
         if name not in groups:
@@ -274,13 +289,52 @@ def _lint_upstream_recipes(cid: str, fw: str, body: dict) -> list[str]:
     return errs
 
 
-def _lint_sglang_policy(cid: str, body: dict) -> list[str]:
+def _lint_status_by_hardware(cid: str, fw: str, by_hardware) -> list[str]:
+    """`status_by_hardware` splits "cannot run this case" from "could not run it
+    on that box".
+
+    LTX-2.3's lightx2v cell was `failed` for an H100 80GB OOM, and the single
+    global status then skipped it on a 179GB-per-GPU B200 too. Keys must be
+    tokens the RUNTIME derives from the GPU names, so an invented one ("hopper",
+    "80gb") cannot sit in the config never matching anything.
+    """
     errs = []
-    profiles = body.get("command_profiles") or {}
+    if not isinstance(by_hardware, dict):
+        return [f"{cid}/{fw}: status_by_hardware must be an object keyed by hardware token"]
+    for hw, override in by_hardware.items():
+        if hw not in HARDWARE_TOKENS:
+            errs.append(
+                f"{cid}/{fw}: status_by_hardware key {hw!r} is not a hardware token "
+                f"the runtime derives (allowed: {', '.join(HARDWARE_TOKENS)})"
+            )
+            continue
+        status = (override or {}).get("status") if isinstance(override, dict) else None
+        if status not in VALID_STATUS:
+            errs.append(
+                f"{cid}/{fw}: status_by_hardware[{hw!r}] has bad status {status!r} "
+                f"(allowed: {sorted(VALID_STATUS)})"
+            )
+            continue
+        if status != "supported" and not str(override.get("reason") or "").strip():
+            errs.append(
+                f"{cid}/{fw}: status_by_hardware[{hw!r}] is {status!r} with no "
+                f"`reason` — say what failed on that hardware"
+            )
+    return errs
+
+
+def _lint_sglang_policy(cid: str, entry: dict) -> list[str]:
+    errs = []
+    profiles = entry.get("command_profiles") or {}
     if not profiles:
         return errs
     for hw in POLICY_HARDWARE:
-        name, prof, matches = select_profile(profiles, hardware_candidates(None, override=hw))
+        candidates = hardware_candidates(None, override=hw)
+        if resolve_status(entry, candidates)[0] != "supported":
+            continue  # nothing runs there, so there is no command to police
+        name, prof, matches = select_profile(profiles, candidates)
+        if prof is None:
+            continue
         SELECTED_ROWS.append(
             (cid, "sglang", hw, name, prof.get("serve_args", ""),
              "yes" if prof.get("policy_exception") else "", matches, _recipe_label(prof), "")
@@ -400,14 +454,29 @@ def build():
         missing = [fw for fw in in_scope if fw not in fw_src]
         if missing:
             errors.append(f"{cid}: frameworks not classified (silently dropped): {missing}")
-        frameworks, statuses, reasons = {}, {}, {}
+        frameworks, statuses, reasons, by_hardware = {}, {}, {}, {}
         for fw, entry in fw_src.items():
             status = entry.get("status")
             if status not in VALID_STATUS:
                 errors.append(f"{cid}/{fw}: bad status {status!r} (allowed: {sorted(VALID_STATUS)})")
                 continue
-            if status == "supported":
-                body = {k: v for k, v in entry.items() if k != "status"}
+            hw_overrides = entry.get("status_by_hardware") or {}
+            hw_errors = _lint_status_by_hardware(cid, fw, hw_overrides)
+            errors.extend(hw_errors)
+            if hw_errors:
+                continue
+            # The command body is published whenever SOME hardware is supported;
+            # `apply_hardware_statuses` then drops it again on the hardware where
+            # it is not. Statuses stay the case's baseline, which the same
+            # resolution overrides per hardware — so the classification is still
+            # total (every framework carries a verdict on every box), just no
+            # longer global.
+            if status == "supported" or any(
+                (o or {}).get("status") == "supported" for o in hw_overrides.values()
+            ):
+                body = {
+                    k: v for k, v in entry.items() if k not in ("status", "status_by_hardware")
+                }
                 if not (body.get("command_profiles") or body.get("serve_args") is not None):
                     errors.append(f"{cid}/{fw}: status=supported but no command_profiles/serve_args")
                 for _pn, _pf in (body.get("command_profiles") or {"": body}).items():
@@ -417,16 +486,18 @@ def build():
                 errors.extend(_lint_model_override(cid, c.get("model"), fw, body))
                 errors.extend(_lint_upstream_recipes(cid, fw, body))
                 if fw == "sglang":
-                    policy_errors.extend(_lint_sglang_policy(cid, body))
+                    policy_errors.extend(_lint_sglang_policy(cid, entry))
                 else:
-                    competitor_errors.extend(_lint_competitor_policy(cid, fw, body))
+                    competitor_errors.extend(_lint_competitor_policy(cid, fw, entry))
                 if fw == "comfyui":
                     errors.extend(_inline_comfyui(cid, c, body))
                 frameworks[fw] = body
-            else:
+            if status != "supported":
                 statuses[fw] = status
                 if entry.get("reason"):
                     reasons[fw] = entry["reason"]
+            if hw_overrides:
+                by_hardware[fw] = hw_overrides
 
         out = {k: v for k, v in c.items() if k != "frameworks"}
         out["frameworks"] = frameworks
@@ -434,6 +505,8 @@ def build():
             out["report_framework_statuses"] = statuses
         if reasons:
             out["report_framework_reasons"] = reasons
+        if by_hardware:
+            out["framework_status_by_hardware"] = by_hardware
         cases_by_id[cid] = out
 
     unknown_order = [cid for cid in order if cid not in cases_by_id]
@@ -457,6 +530,7 @@ def build():
         f"{'/'.join(cell)}: listed in KNOWN_COMPETITOR_VIOLATIONS but no longer "
         f"violates -- delete the entry"
         for cell in sorted(KNOWN_COMPETITOR_VIOLATIONS - {cell for cell, _ in competitor_errors})
+        if cell[0] in cases_by_id  # a case outside this build cannot have stopped violating
     ]
     if os.environ.get(STRICT_COMPETITOR_POLICY_ENV) == "1":
         policy_errors += known
@@ -520,14 +594,27 @@ def _write_matrix(ordered, in_scope):
     lines = ["# Benchmark coverage matrix", "",
              "Auto-generated by `scripts/build_benchmark_config.py` — do not edit by hand.",
              "Scope matrix (has a command profile), NOT run-results. `profile`=configured to run · `TODO`=not_run · `no-cmd`=no_profile · `n/a`=unsupported · `FAIL`/`BAD`=failed/invalid.",
+             "A trailing `(h100: FAIL)` is a `status_by_hardware` override: the cell reads differently on that hardware.",
              "", "| case | task | " + " | ".join(in_scope) + " |",
              "|---|---|" + "|".join(["---"] * len(in_scope)) + "|"]
     for c in ordered:
         statuses = c.get("report_framework_statuses", {})
+        by_hardware = c.get("framework_status_by_hardware", {})
         row = [c["id"], c.get("task", "")]
         for fw in in_scope:
-            st = "supported" if fw in c.get("frameworks", {}) else statuses.get(fw, "not_run")
-            row.append(sym.get(st, st))
+            # Baseline first: a framework can carry a command body (because some
+            # hardware is supported) while its baseline verdict is something else.
+            st = statuses.get(fw) or (
+                "supported" if fw in c.get("frameworks", {}) else "not_run"
+            )
+            cell = sym.get(st, st)
+            overrides = by_hardware.get(fw) or {}
+            if overrides:
+                cell += " (" + ", ".join(
+                    f"{hw}: {sym.get(o.get('status'), o.get('status'))}"
+                    for hw, o in sorted(overrides.items())
+                ) + ")"
+            row.append(cell)
         lines.append("| " + " | ".join(row) + " |")
     path = os.path.join(BENCH, "MATRIX.md")
     with open(path, "w") as f:

@@ -3077,21 +3077,135 @@
                             "notes": "Use this only when official switching semantics are more important than latency."
                         }
                     }
+                },
+                "lightx2v": {
+                    "model": "Lightricks/LTX-2.3",
+                    "model_path": "Lightricks/LTX-2",
+                    "model_cls": "ltx2",
+                    "lightx2v_task": "t2av",
+                    "num_gpus": 1,
+                    "serve_args": "",
+                    "extra_env": {
+                        "DTYPE": "BF16",
+                        "SENSITIVE_LAYER_DTYPE": "None",
+                        "PROFILING_DEBUG_LEVEL": "0"
+                    },
+                    "lightx2v_config": {
+                        "sample_guide_scale": 3.0,
+                        "attn_type": "flash_attn3",
+                        "sample_shift": [
+                            2.05,
+                            0.95
+                        ],
+                        "enable_cfg": true,
+                        "cpu_offload": false,
+                        "num_channels_latents": 128,
+                        "audio_fps": 24000,
+                        "audio_mel_bins": 16,
+                        "double_precision_rope": true,
+                        "use_tiling_vae": false,
+                        "dit_original_ckpt": "Lightricks/LTX-2.3/ltx-2.3-22b-dev.safetensors",
+                        "caption_proj_before_connector": true,
+                        "cross_attention_adaln": true,
+                        "apply_gated_attention": true,
+                        "mm_guider": {
+                            "enabled": true,
+                            "video": {
+                                "cfg_scale": 3.0,
+                                "stg_scale": 1.0,
+                                "stg_blocks": [
+                                    28
+                                ],
+                                "modality_scale": 3.0,
+                                "rescale_scale": 0.7,
+                                "skip_step": 0
+                            },
+                            "audio": {
+                                "cfg_scale": 7.0,
+                                "stg_scale": 1.0,
+                                "stg_blocks": [
+                                    28
+                                ],
+                                "modality_scale": 3.0,
+                                "rescale_scale": 0.7,
+                                "skip_step": 0
+                            }
+                        }
+                    },
+                    "command_profiles": {
+                        "default": {
+                            "description": "LightX2V upstream LTX-2.3 t2av path for the LTX-2.3 121-frame case.",
+                            "framework_ref": "lightx2v-7efd05f8-ltx2.3+t2av",
+                            "num_gpus": 1,
+                            "serve_args": "",
+                            "notes": "Uses upstream LTX-2.3 audio-video runner. CFG parallel is not enabled because upstream mm_guider and cfg_parallel are not compatible. Also what Blackwell selects: no B200 profile has been validated for this case yet, so the fallback is the upstream single-GPU path."
+                        },
+                        "h200-2gpu-tp": {
+                            "description": "H200 same-GPU LightX2V LTX-2.3 t2av tensor-parallel command/config.",
+                            "hardware": [
+                                "h200"
+                            ],
+                            "framework_ref": "lightx2v-7efd05f8-ltx2.3+t2av+h200+tensor_parallel",
+                            "num_gpus": 2,
+                            "serve_args": "",
+                            "lightx2v_config": {
+                                "parallel": {
+                                    "tensor_p_size": 2
+                                }
+                            },
+                            "notes": "Use tensor parallelism for same-GPU comparison because upstream mm_guider raises when combined with cfg_parallel."
+                        },
+                        "h200-1gpu": {
+                            "description": "H200 LightX2V LTX-2.3 t2av command/config.",
+                            "hardware": [
+                                "h200"
+                            ],
+                            "framework_ref": "lightx2v-7efd05f8-ltx2.3+t2av+h200",
+                            "num_gpus": 1,
+                            "serve_args": "",
+                            "notes": "Single-GPU profile follows current upstream LTX-2.3 scripts; no cache, torch compile, or quantized model path."
+                        },
+                        "h100-2gpu-sp": {
+                            "description": "H100 LightX2V LTX-2.3 t2av: lossless flash_attn3 + sequence parallelism (seq_p_size=2) to shard the 121-frame video activations across 2 GPUs. TP shards weights but the OOM is activation-bound, so SP is the right lever.",
+                            "hardware": [
+                                "h100"
+                            ],
+                            "num_gpus": 2,
+                            "framework_ref": "lightx2v-7efd05f8-ltx2.3+t2av+h100+seqp2+flash",
+                            "serve_args": "",
+                            "lightx2v_config": {
+                                "parallel": {
+                                    "seq_p_size": 2
+                                },
+                                "cpu_offload": true,
+                                "offload_granularity": "block",
+                                "gemma_cpu_offload": true,
+                                "vae_cpu_offload": true
+                            },
+                            "notes": "Best-attempted lossless H100 config (seq_p_size=2 + block cpu_offload + Gemma/VAE offload + flash_attn3). Still OOMs at a later stage on 80GB — LTX-2.3 t2av needs H200. Kept for provenance; result is OOM on H100."
+                        }
+                    }
                 }
             },
             "report_framework_statuses": {
                 "vllm-omni": "no_profile",
-                "lightx2v": "failed",
                 "trtllm-visual": "not_run",
                 "comfyui": "no_profile",
                 "fastvideo": "no_profile"
             },
             "report_framework_reasons": {
                 "vllm-omni": "No compatible vLLM-Omni LTX2.3 serving profile is configured.",
-                "lightx2v": "OOM on H100 80GB: LTX-2.3 22B two-stage 121-frame t2av peak exceeds 80GB even with every lossless lever (seq_p_size=2 activation sharding + block cpu_offload + Gemma/VAE offload + exact flash_attn3). Upstream profiles target H200 141GB. THIS VERDICT IS H100-SPECIFIC AND IS BEING APPLIED GLOBALLY -- `status` has no per-hardware form, so the cell is skipped everywhere, including the 4xB200 box (183359 MiB/GPU, ~179GB) where the stated constraint does not hold and upstream's own H200 target is exceeded. Retest on Blackwell before trusting the classification; if it runs, `status` needs a per-hardware form before this can be flipped, or H100 runs will spend ~40 min per attempt re-discovering the OOM. command_profiles below are the best-attempted lossless config, kept for provenance.",
                 "trtllm-visual": "Not yet classified. Confirm framework support and add a validated command profile, or mark unsupported.",
                 "comfyui": "ComfyUI loads LTX-2.3, but no official workflow reproduces this case: sglang runs LTX-2.3's multimodal guidance in stage 1 (video CFG 3 + STG 1.0 on block 28 + modality 3, audio CFG 7 + STG + modality -- up to four DiT passes per step, LTX23SamplingParams), while ComfyUI's LTX-2.3 T2V template (and the LTX-2.5 one) is the distilled-LoRA fast path at cfg 1. A graph built from LTXVSpatioTemporalGuidance / LTXVModalityGuidance / LTXVDualCFGGuider could match it but has no upstream reference and is not validated.",
                 "fastvideo": "FastVideo main (2b164405c3d1, 2026-10-07) registers LTX-2.3, but this harness integrates FastVideo for MiniMax-H3 only (2026-10-08); no command validated."
+            },
+            "framework_status_by_hardware": {
+                "lightx2v": {
+                    "h100": {
+                        "status": "failed",
+                        "reason": "OOM on H100 80GB: LTX-2.3 22B two-stage 121-frame t2av peak exceeds 80GB even with every lossless lever (seq_p_size=2 activation sharding + block cpu_offload + Gemma/VAE offload + exact flash_attn3). Upstream profiles target H200 141GB. command_profiles carry the best-attempted lossless H100 config for provenance."
+                    }
+                }
             }
         },
         {

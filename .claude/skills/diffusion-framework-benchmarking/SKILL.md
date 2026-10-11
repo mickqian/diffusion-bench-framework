@@ -584,6 +584,8 @@ Classify every failed or missing cell:
 
 If the failure is SGLang, treat it as a bug or bad profile and fix before finalizing the report. If the failure is another framework, verify the official docs/scripts before marking unsupported.
 
+**A verdict that is really the box's belongs to the box.** `status` is global and drops the framework on EVERY hardware, so an OOM-on-80GB classified globally silently removes a competitor from a Blackwell matrix for a constraint that expired with the machine. Scope it with the case file's `status_by_hardware` (`{"h100": {"status": "failed", "reason": "..."}}`) — see the `diffusion-case-onboarding` SKILL for the schema. Ask which one you mean before writing a `failed`/`unsupported`: "this framework cannot run this case" is global; "it could not run it on this box" is per-hardware. Re-examine old global verdicts whenever the run moves to a bigger box — that is exactly when a stale one goes unnoticed.
+
 ## Reports And Images
 
 Formal reports use the fixed tracker issue, not ad hoc issues. For this repo, keep `mickqian/diffusion-bench-framework#1` as the canonical tracker and maintain one latest data-only formal report comment there.

@@ -59,7 +59,13 @@
       "reason": "No compatible vLLM-Omni LTX2.3 serving profile is configured."
     },
     "lightx2v": {
-      "status": "failed",
+      "status": "supported",
+      "status_by_hardware": {
+        "h100": {
+          "status": "failed",
+          "reason": "OOM on H100 80GB: LTX-2.3 22B two-stage 121-frame t2av peak exceeds 80GB even with every lossless lever (seq_p_size=2 activation sharding + block cpu_offload + Gemma/VAE offload + exact flash_attn3). Upstream profiles target H200 141GB. command_profiles carry the best-attempted lossless H100 config for provenance."
+        }
+      },
       "model": "Lightricks/LTX-2.3",
       "model_path": "Lightricks/LTX-2",
       "model_cls": "ltx2",
@@ -119,7 +125,7 @@
           "framework_ref": "lightx2v-7efd05f8-ltx2.3+t2av",
           "num_gpus": 1,
           "serve_args": "",
-          "notes": "Uses upstream LTX-2.3 audio-video runner. CFG parallel is not enabled because upstream mm_guider and cfg_parallel are not compatible."
+          "notes": "Uses upstream LTX-2.3 audio-video runner. CFG parallel is not enabled because upstream mm_guider and cfg_parallel are not compatible. Also what Blackwell selects: no B200 profile has been validated for this case yet, so the fallback is the upstream single-GPU path."
         },
         "h200-2gpu-tp": {
           "description": "H200 same-GPU LightX2V LTX-2.3 t2av tensor-parallel command/config.",
@@ -163,10 +169,9 @@
             "gemma_cpu_offload": true,
             "vae_cpu_offload": true
           },
-          "notes": "Best-attempted lossless H100 config (seq_p_size=2 + block cpu_offload + Gemma/VAE offload + flash_attn3). Still OOMs at a later stage on 80GB \u2014 LTX-2.3 t2av needs H200. Kept for provenance; result is OOM on H100."
+          "notes": "Best-attempted lossless H100 config (seq_p_size=2 + block cpu_offload + Gemma/VAE offload + flash_attn3). Still OOMs at a later stage on 80GB — LTX-2.3 t2av needs H200. Kept for provenance; result is OOM on H100."
         }
-      },
-      "reason": "OOM on H100 80GB: LTX-2.3 22B two-stage 121-frame t2av peak exceeds 80GB even with every lossless lever (seq_p_size=2 activation sharding + block cpu_offload + Gemma/VAE offload + exact flash_attn3). Upstream profiles target H200 141GB. THIS VERDICT IS H100-SPECIFIC AND IS BEING APPLIED GLOBALLY -- `status` has no per-hardware form, so the cell is skipped everywhere, including the 4xB200 box (183359 MiB/GPU, ~179GB) where the stated constraint does not hold and upstream's own H200 target is exceeded. Retest on Blackwell before trusting the classification; if it runs, `status` needs a per-hardware form before this can be flipped, or H100 runs will spend ~40 min per attempt re-discovering the OOM. command_profiles below are the best-attempted lossless config, kept for provenance."
+      }
     },
     "trtllm-visual": {
       "status": "not_run",

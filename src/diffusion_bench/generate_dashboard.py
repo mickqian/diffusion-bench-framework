@@ -24,6 +24,7 @@ from diffusion_bench.page_export import (
     build_throughput_rows,
     thinnest_lead,
 )
+from diffusion_bench.config_guard import apply_hardware_statuses, hardware_candidates
 
 # ---------------------------------------------------------------------------
 # History fetching (from sgl-project/ci-data-diffusion via GitHub API)
@@ -739,7 +740,7 @@ def _framework_display_name(framework: str) -> str:
     }.get(framework, framework)
 
 
-def _load_report_case_configs() -> dict[str, dict]:
+def _load_report_case_configs(hardware_metadata: dict | None = None) -> dict[str, dict]:
     candidates = [
         Path.cwd() / "configs" / "comparison_configs.json",
         Path(__file__).with_name("comparison_configs.json"),
@@ -748,6 +749,12 @@ def _load_report_case_configs() -> dict[str, dict]:
         if not path.exists():
             continue
         data = json.loads(path.read_text())
+        # Resolve per-hardware classifications against the run's own hardware, so
+        # a cell the runner skipped by classification reports as that status with
+        # its reason rather than a bare `not_run`.
+        data, _ = apply_hardware_statuses(
+            data, hardware_candidates(hardware_metadata)
+        )
         return {case["id"]: case for case in data.get("cases", [])}
     return {}
 
@@ -1129,7 +1136,7 @@ def build_issue_report_comment(results: dict) -> str:
     throughput_by_case = _group_results_by_case(results.get("throughput_results", []))
     include_single = bool(single_by_case)
     include_throughput = bool(throughput_by_case)
-    case_configs = _load_report_case_configs()
+    case_configs = _load_report_case_configs(results.get("hardware"))
     report_frameworks = _report_frameworks(case_configs)
     manifest_path, manifest = _load_report_manifest(results)
     gpus = (results.get("hardware") or {}).get("gpus") or []

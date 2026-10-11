@@ -55,6 +55,37 @@ Statuses: `supported` (has a validated command), `unsupported` (no serving path)
 errored/OOM — keep the reason), `not_run` (in scope, not yet run), `invalid`
 (comparison would not be apples-to-apples).
 
+## Per-hardware status
+
+`status` is one global verdict, which conflates "this framework cannot run this
+case" with "it could not run it on the box we tried". When only the second is
+true, scope it with `status_by_hardware` — the entry for the first matching
+hardware wins, and `status` applies everywhere else:
+
+```jsonc
+"lightx2v": {
+  "status": "supported",
+  "status_by_hardware": {
+    "h100": { "status": "failed", "reason": "OOM on H100 80GB: ..." }
+  },
+  "command_profiles": { ... }
+}
+```
+
+The command body is published as soon as *some* hardware is `supported`;
+`config_guard.apply_hardware_statuses` then resolves it per box — the runner
+never attempts a cell classified away on that hardware, and the report still
+shows the classification with its reason rather than a bare `not_run`. Both
+directions work: a `supported` override also promotes a cell whose baseline is
+`unsupported`/`no_profile`.
+
+Keys are the hardware tokens the RUNTIME derives from the GPU names
+(`config_guard.HARDWARE_TOKENS`) — the same vocabulary `command_profiles[*].hardware`
+matches against, so `h100`/`h200`/`b200`, never `hopper` or `80gb`. The build
+rejects an unknown key, an invalid status, and a non-`supported` verdict with no
+`reason`. Origin: LTX-2.3 two-stage marked lightx2v `failed` for an 80GB OOM, and
+the global status then skipped the cell on a 179GB-per-GPU B200 too.
+
 ## Command-profile rule
 
 A profile's `serve_args` must be a **specific command validated on the target
