@@ -3128,6 +3128,16 @@
                         "SGLANG_DISABLE_COSMOS3_GUARDRAILS": "1"
                     },
                     "command_profiles": {
+                        "h200-2gpu-cfg-parallel-fa": {
+                            "description": "H200 2-GPU CFG-parallel sglang Cosmos3 image profile with FlashAttention.",
+                            "hardware": [
+                                "h200"
+                            ],
+                            "num_gpus": 2,
+                            "sglang_ref": "main 6576e50cd5",
+                            "serve_args": "--model-type diffusion --warmup-mode server --attention-backend fa --tp-size 1 --cfg-parallel-size 2 --enable-torch-compile false",
+                            "notes": "Measured 2026-10-11 on 4xH200 (cards 0,1), sglang main 6576e50cd5 eager, two interleaved rounds against h200-2gpu-tp-fa: 1.726 -> 0.944 s and 1.704 -> 0.946 s. With TP2 sglang lost to vLLM-Omni eager (1.304/1.306 s, profile h200-2gpu-cfg-flash); with CFG parallelism it is 1.38x ahead. The same switch as blackwell-2gpu-cfg-parallel: the two CFG branches run on one GPU each instead of every layer all-reducing."
+                        },
                         "default": {
                             "description": "Cosmos3 Nano T2I profile for SGLang-Diffusion main 3d540563.",
                             "sglang_ref": "sgl-project/sglang@3d540563916394115f9612f30601ae3fa97ada7c",
@@ -3224,7 +3234,7 @@
                             "num_gpus": 2,
                             "framework_ref": "vllm-omni f69b1f2b1 + vllm==0.31.0",
                             "serve_args": "--num-gpus 2 --cfg-parallel-size 2 --model-class-name Cosmos3OmniDiffusersPipeline --stage-init-timeout 900 --init-timeout 1800 --no-guardrails --diffusion-attention-backend FLASH_ATTN --cache-backend none",
-                            "notes": "Replaces h200-2gpu-cfg, whose --stage-configs-path current vLLM rejects ('unrecognized arguments', 2026-10-11 on 2xH200). Same layout and guardrails-off as that stage config, spelled with the flags the H200 video profiles and blackwell-cudnn use; FLASH_ATTN is the Hopper exact kernel. VALIDATION PENDING (2026-10-11, 2xH200)."
+                            "notes": "Replaces h200-2gpu-cfg, whose --stage-configs-path current vLLM rejects ('unrecognized arguments', 2026-10-11 on 2xH200). Same layout and guardrails-off as that stage config, spelled with the flags the H200 video profiles and blackwell-cudnn use; FLASH_ATTN is the Hopper exact kernel. Validated 2026-10-11 on 4xH200 (cards 0,1), --enforce-eager: 1.304/1.306 s in two rounds."
                         },
                         "blackwell-cudnn": {
                             "description": "Blackwell vLLM-Omni profile for cosmos3_nano_t2i_720p using cuDNN attention.",
