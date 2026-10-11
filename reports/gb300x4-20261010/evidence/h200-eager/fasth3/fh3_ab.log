@@ -1,0 +1,43 @@
+	[4mGPU0	GPU1	GPU2	GPU3	NIC0	NIC1	NIC2	NIC3	NIC4	NIC5	NIC6	NIC7	CPU Affinity	NUMA Affinity	GPU NUMA ID[0m
+GPU0	 X 	NV18	NV18	NV18	PIX	NODE	NODE	NODE	SYS	SYS	SYS	SYS	2-47,96-143	0		N/A
+GPU1	NV18	 X 	NV18	NV18	NODE	PIX	NODE	NODE	SYS	SYS	SYS	SYS	2-47,96-143	0		N/A
+GPU2	NV18	NV18	 X 	NV18	NODE	NODE	PIX	NODE	SYS	SYS	SYS	SYS	2-47,96-143	0		N/A
+GPU3	NV18	NV18	NV18	 X 	NODE	NODE	NODE	PIX	SYS	SYS	SYS	SYS	2-47,96-143	0		N/A
+NIC0	PIX	NODE	NODE	NODE	 X 	NODE	NODE	NODE	SYS	SYS	SYS	SYS				
+NIC1	NODE	PIX	NODE	NODE	NODE	 X 	NODE	NODE	SYS	SYS	SYS	SYS				
+NIC2	NODE	NODE	PIX	NODE	NODE	NODE	 X 	NODE	SYS	SYS	SYS	SYS				
+CPU(s):                                  192
+Socket(s):                               2
+CPU(s) scaling MHz:                      30%
+NUMA node(s):                            2
+NUMA node0 CPU(s):                       0-47,96-143
+NUMA node1 CPU(s):                       48-95,144-191
+TUNE fh3main_1: median=12.613 samples=[12.583, 12.644] spread=0.5% server=12.654 err=None
+     cmd: sglang serve --model-path FastVideo/FastVideo-FastH3-8-Step-V2 --port 60001 --host 127.0.0.1 --backend sglang --num-gpus 4 --model-type diffusion --warmup-mode server --ulysses-degree 4 --performance-mode speed --enable-torch-compile false --revision 71a17d72c58ce3eeec418144de2a5a2090cb4c04 --enable-torch-compile false
+TUNE fh3nonuma_1: median=12.697 samples=[12.65, 12.744] spread=0.7% server=12.592 err=None
+     cmd: sglang serve --model-path FastVideo/FastVideo-FastH3-8-Step-V2 --port 60003 --host 127.0.0.1 --backend sglang --num-gpus 4 --model-type diffusion --warmup-mode server --ulysses-degree 4 --performance-mode speed --enable-torch-compile false --revision 71a17d72c58ce3eeec418144de2a5a2090cb4c04 --enable-torch-compile false
+TUNE fh3seq_1: median=13.017 samples=[13.033, 13.0] spread=0.3% server=13.012 err=None
+     cmd: sglang serve --model-path FastVideo/FastVideo-FastH3-8-Step-V2 --port 60005 --host 127.0.0.1 --backend sglang --num-gpus 4 --model-type diffusion --warmup-mode server --ulysses-degree 4 --performance-mode speed --enable-torch-compile false --revision 71a17d72c58ce3eeec418144de2a5a2090cb4c04 --enable-torch-compile false
+TUNE fh3main_2: median=12.626 samples=[12.634, 12.619] spread=0.1% server=12.581 err=None
+     cmd: sglang serve --model-path FastVideo/FastVideo-FastH3-8-Step-V2 --port 60007 --host 127.0.0.1 --backend sglang --num-gpus 4 --model-type diffusion --warmup-mode server --ulysses-degree 4 --performance-mode speed --enable-torch-compile false --revision 71a17d72c58ce3eeec418144de2a5a2090cb4c04 --enable-torch-compile false
+TUNE fh3nonuma_2: median=None samples=None spread=None% server=None err=Server at http://127.0.0.1:60009/health did not start within 2400s
+     cmd: sglang serve --model-path FastVideo/FastVideo-FastH3-8-Step-V2 --port 60009 --host 127.0.0.1 --backend sglang --num-gpus 4 --model-type diffusion --warmup-mode server --ulysses-degree 4 --performance-mode speed --enable-torch-compile false --revision 71a17d72c58ce3eeec418144de2a5a2090cb4c04 --enable-torch-compile false
+TUNE fh3seq_2: median=13.052 samples=[13.011, 13.093] spread=0.6% server=13.059 err=None
+     cmd: sglang serve --model-path FastVideo/FastVideo-FastH3-8-Step-V2 --port 60011 --host 127.0.0.1 --backend sglang --num-gpus 4 --model-type diffusion --warmup-mode server --ulysses-degree 4 --performance-mode speed --enable-torch-compile false --revision 71a17d72c58ce3eeec418144de2a5a2090cb4c04 --enable-torch-compile false
+STAGES tune_fh3main_1.json 12.613 12.654 {'TextEncodingStage': 0.054, 'LatentPreparationStage': 0.014, 'DenoisingStage': 10.909, 'DecodingStage': 1.253}
+STAGES tune_fh3main_2.json 12.626 12.581 {'TextEncodingStage': 0.053, 'LatentPreparationStage': 0.014, 'DenoisingStage': 10.857, 'DecodingStage': 1.234}
+STAGES tune_fh3nonuma_1.json 12.697 12.592 {'TextEncodingStage': 0.056, 'LatentPreparationStage': 0.015, 'DenoisingStage': 10.856, 'DecodingStage': 1.244}
+STAGES tune_fh3nonuma_2.json None None {}
+STAGES tune_fh3seq_1.json 13.017 13.012 {'TextEncodingStage': 0.054, 'LatentPreparationStage': 0.015, 'DenoisingStage': 10.357, 'DecodingStage': 1.255}
+STAGES tune_fh3seq_2.json 13.052 13.059 {'TextEncodingStage': 0.056, 'LatentPreparationStage': 0.014, 'DenoisingStage': 10.405, 'DecodingStage': 1.245}
+      1   [server] [10-11 09:12:57] GPU 0 worker bound to NUMA node 0
+      1   [server] [10-11 09:12:57] GPU 1 worker bound to NUMA node 0
+      1   [server] [10-11 09:12:57] GPU 2 worker bound to NUMA node 0
+      1   [server] [10-11 09:12:57] GPU 3 worker bound to NUMA node 0
+      1   [server] [10-11 09:18:42] GPU 0 worker bound to NUMA node 0
+      1   [server] [10-11 09:18:42] GPU 1 worker bound to NUMA node 0
+      1   [server] [10-11 09:18:42] GPU 2 worker bound to NUMA node 0
+      1   [server] [10-11 09:18:42] GPU 3 worker bound to NUMA node 0
+      1   [server] [10-11 09:21:34] GPU 0 worker bound to NUMA node 0
+      1   [server] [10-11 09:21:34] GPU 1 worker bound to NUMA node 0
+=== FH3_DONE 2026-10-11T10:07:20+00:00

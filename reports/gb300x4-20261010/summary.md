@@ -62,10 +62,15 @@ no validated profile (per-cell reasons in [issue.md](issue.md)).
 | `minimax_h3_t2va_5s` | **57.46 (2)** | 60.95 (2) | 141.04 (2) | — | 283.48 (1) | 61.15 (2) |
 | `minimax_h3_t2va_5s_4gpu` | **31.76 (4)** | 34.08 (4) | 73.29 (4) | — | — | 34.08 (4) |
 | `minimax_h3_ref2va_5s` | **88.36 (2)** | 91.91 (2) | 229.21 (2) | — | 479.48 (1) | 90.46 (2) |
-| `minimax_h3_fasth3_v2_t2va_5s` | **6.44 (4)** | 7.44 (4) | — | — | — | 7.17 (4) |
+| `minimax_h3_fasth3_v2_t2va_5s` | **6.44 (4)** † | 7.44 (4) | — | — | — | 7.17 (4) |
 
 `~` LightX2V Z-Image: the first repeat ran 1.01 s and the other four 1.50 s;
 the median is published with its samples listed.
+
+† sglang ran FastH3 with dense FlashAttention, not the checkpoint's VSA-H3,
+which the other two frameworks ran: the profile did not select VSA-H3 (fixed
+in harness bb560dc, see the H200 section). Dense attention is the heavier
+path, and sglang still led; the VSA-H3 cell has not been rerun on GB300.
 
 ## Eager against eager
 
@@ -93,24 +98,56 @@ two frameworks were run interleaved, twice
 | `minimax_h3_t2va_5s` | 57.56 / 57.54 | 60.16 / 60.27 | 1.05× (interleaved) |
 | `minimax_h3_t2va_5s_4gpu` | 31.76 | 33.96 | 1.07× |
 | `minimax_h3_ref2va_5s` | 88.31 / 88.39 | 91.18 / 90.94 | 1.03× (interleaved) |
-| `minimax_h3_fasth3_v2_t2va_5s` | 6.44 | 7.35 | 1.14× |
+| `minimax_h3_fasth3_v2_t2va_5s` | 6.44 † | 7.35 | 1.14× |
 
 vLLM-Omni has no ideogram4 or LTX-2.3 path. Its compile pays off on the heavy
 DiTs (Qwen-Image-2.1 1-GPU and edit, FLUX.2, Cosmos3, LTX-2, Wan2.2). It costs
 14% on FLUX.1 (4.64 s eager, 5.31 s compiled). On Qwen-Image-2.1 2-GPU, Z-Image
 and the MiniMax-H3 cases it is within 3% of its eager run.
 
-The same check ran on an idle 2xH200 box (sglang main `6576e50cd5` and vLLM-Omni
-`f69b1f2b1` on vLLM 0.31.0, as above, each case run interleaved once,
-[evidence/h200-eager/](evidence/h200-eager/)). FLUX is gated and that box has
-no token, and no 4-GPU H200 was free, so the H200 check covers four cases:
+The same check ran on H200: the 2-GPU cases on a 2xH200 box, the 4-GPU cases
+and three reruns on a 4xH200 box (sglang main `6576e50cd5`, vLLM-Omni
+`f69b1f2b1` on vLLM 0.31.0, as above; [evidence/h200-eager/](evidence/h200-eager/)).
+Each case ran sglang then vLLM-Omni once; where the lead was under 5%, or a
+profile changed, they ran interleaved again, and every round is listed.
 
-| case (H200) | sglang eager (s) | vLLM-Omni eager (s) | sglang faster by |
-|---|---:|---:|---:|
-| `qwen_image_21_t2i_1024` | 4.49 | 6.22 | 1.39× |
-| `qwen_image_21_edit_1024` | 5.40 | 6.92 | 1.28× |
-| `qwen_image_21_t2i_1024_2gpu` (Ulysses 2) | 2.75 | 3.70 | 1.34× |
-| `zimage_turbo_t2i_1024` | 0.58 | 0.80 | 1.38× |
+| case (H200) | GPUs | sglang eager (s) | vLLM-Omni eager (s) | sglang faster by |
+|---|---:|---:|---:|---:|
+| `flux1_dev_t2i_1024` | 2 | 4.05 | 6.16 | 1.52× |
+| `flux2_dev_t2i_1024` | 2 | 12.65 | 19.06 | 1.51× |
+| `qwen_image_21_t2i_1024` | 1 | 4.49 | 6.22 | 1.39× |
+| `qwen_image_21_t2i_1024_2gpu` | 2 | 2.75 | 3.70 | 1.34× |
+| `qwen_image_21_edit_1024` | 1 | 5.40 | 6.92 | 1.28× |
+| `zimage_turbo_t2i_1024` | 2 | 0.58 | 0.80 | 1.38× |
+| `cosmos3_nano_t2i_720p` (CFG parallel) | 2 | 0.94 / 0.95 | 1.30 / 1.31 | 1.38× |
+| `cosmos3_nano_t2v_720p_189f` | 4 | 51.71 | 66.01 | 1.28× |
+| `cosmos3_nano_i2v_720p_189f` | 4 | 52.05 | 66.35 | 1.27× |
+| `ltx2_twostage_t2v` | 2 | 10.13 | 35.28 | 3.48× |
+| `wan22_t2v_a14b_720p` | 4 | 205.54 | 264.59 | 1.29× |
+| `minimax_h3_t2va_5s` | 2 | 142.99 / 143.45 / 143.34 | 146.37 / 146.48 / 146.57 | 1.02× |
+| `minimax_h3_t2va_5s_4gpu` | 4 | 71.97 / 72.05 / 72.08 | 75.09 / 75.22 / 75.21 | 1.04× |
+| `minimax_h3_ref2va_5s` | 2 | 222.73 / 222.79 / 222.77 | 227.14 / 227.24 / 226.98 | 1.02× |
+| `minimax_h3_fasth3_v2_t2va_5s` (VSA-H3) | 4 | 10.03 / 10.06 | 11.06 / 10.98 | 1.10× |
+
+Two H200 cells needed profile fixes before sglang led:
+
+- **Cosmos3 T2I.** The H200 sglang profile ran TP2: 1.73 / 1.70 s against
+  vLLM-Omni's 1.30 / 1.31 s in the same rounds. One CFG branch per GPU runs
+  0.94 / 0.95 s; the H200 profile now does that (harness d87c471). vLLM-Omni's
+  H200 profile passed `--stage-configs-path`, which vLLM 0.31 rejects; it now
+  uses the flags its video profiles use (6ef1787).
+- **FastH3-8-Step-V2.** sglang ran dense FlashAttention, not the checkpoint's
+  VSA-H3. Since sgl-project/sglang#37662, VSA-H3 runs only when selected with
+  `--component-attention-backends transformer=video_sparse_attn_h3`, as the
+  cookbook's command does. The profile was written against #41839, which
+  selected it itself, so from 2026-10-08 sglang measured dense attention
+  (without the trained compression gate) while vLLM-Omni ran VSA: 12.64 /
+  12.65 s dense, 10.01 / 9.99 s with VSA-H3 (harness bb560dc). Bisected first:
+  the 2026-09-30 tree denoises in 8.74 s and #37662's merge commit in 10.54 s,
+  both with eight DiT forwards per request, so no step was added
+  ([evidence/h200-eager/fasth3/](evidence/h200-eager/fasth3/)). vLLM-Omni's
+  fastvideo-kernel 0.3.5 has no sm_90 kernel and runs FastVideo's Triton one,
+  which is slower than sglang's on one VSA call (5.26 against 4.38 ms).
 
 ## Throughput
 

@@ -1,0 +1,13 @@
+BIS 4f320fb85 TUNE bis_4f320fb85_1: median=None samples=None spread=None% server=None err=400 Client Error: Bad Request for url: http://127.0.0.1:61011/v1/video
+BIS 4f320fb85 STAGES denoise=None decode=None client=None
+BIS 1203eb918 TUNE bis_1203eb918_1: median=None samples=None spread=None% server=None err=400 Client Error: Bad Request for url: http://127.0.0.1:61021/v1/video
+BIS 1203eb918 STAGES denoise=None decode=None client=None
+BIS bd7c7971b TUNE bis_bd7c7971b_1: median=None samples=None spread=None% server=None err=400 Client Error: Bad Request for url: http://127.0.0.1:61031/v1/video
+BIS bd7c7971b STAGES denoise=None decode=None client=None
+BIS 72657f7ca TUNE bis_72657f7ca_1: median=12.604 samples=[12.628, 12.581] spread=0.4% server=12.591 err=None
+BIS 72657f7ca STAGES denoise=10.853 decode=1.247 client=12.604
+BIS b931b2c8b TUNE bis_b931b2c8b_1: median=12.638 samples=[12.62, 12.656] spread=0.3% server=12.607 err=None
+BIS b931b2c8b STAGES denoise=10.876 decode=1.24 client=12.638
+BIS 6576e50cd TUNE bis_6576e50cd_1: median=12.66 samples=[12.66, 12.66] spread=0.0% server=12.671 err=None
+BIS 6576e50cd STAGES denoise=10.914 decode=1.253 client=12.66
+=== BIS_DONE 2026-10-11T10:23:05+00:00

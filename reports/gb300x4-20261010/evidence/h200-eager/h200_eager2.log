@@ -1,0 +1,23 @@
+H2E dbf f5fff06 GB300 report: the eager-vs-eager check on 2xH200 as 
+H2E sglang /scratch/h200eager/sgl-main/python/sglang/__init__.py True
+H2E hf token loaded
+H2E vllm 0.31.0 vllm-omni 0.31.0rc2.dev98+gf69b1f2b1
+H2E flux1_dev_t2i_1024 TUNE sgl_eager_1: median=4.05 samples=[4.05, 4.043, 4.054, 4.049, 4.052] spread=0.3% server=3.961 err=None
+H2E flux1_dev_t2i_1024      cmd: sglang serve --model-path black-forest-labs/FLUX.1-dev --port 56021 --host 127.0.0.1 --backend sglang --num-gpus 2 --model-type diffusion --warmup-mode server --dit-layerwise-offload false --tp-size 2 --enable-torch-compile false --enable-torch-compile false
+H2E flux1_dev_t2i_1024 VEAGER median=6.156 samples=[6.136, 6.163, 6.158, 6.154, 6.156] eager=True err=None
+H2E flux2_dev_t2i_1024 TUNE sgl_eager_1: median=None samples=None spread=None% server=None err=sglang server exited before health check passed (exit 1)
+H2E flux2_dev_t2i_1024      cmd: sglang serve --model-path black-forest-labs/FLUX.2-dev --port 56041 --host 127.0.0.1 --backend sglang --num-gpus 2 --model-type diffusion --warmup-mode server --dit-layerwise-offload false --tp-size 2 --enable-torch-compile false --enable-torch-compile false
+H2E flux2_dev_t2i_1024 VEAGER median=None samples=None eager=True err=vllm-omni server exited before health check passed (exit 1)
+H2E cosmos3_nano_t2i_720p TUNE sgl_eager_1: median=1.717 samples=[1.709, 1.708, 1.717, 1.717, 1.739] spread=1.8% server=1.599 err=None
+H2E cosmos3_nano_t2i_720p      cmd: sglang serve --model-path nvidia/Cosmos3-Nano --port 56061 --host 127.0.0.1 --backend sglang --num-gpus 2 --model-type diffusion --warmup-mode server --attention-backend fa --tp-size 2 --enable-torch-compile false
+H2E cosmos3_nano_t2i_720p VEAGER median=None samples=None eager=True err=vllm-omni server exited before health check passed (exit 2)
+H2E ltx2_twostage_t2v TUNE sgl_eager_1: median=10.131 samples=[10.213, 10.05] spread=1.6% server=8.055 err=None
+H2E ltx2_twostage_t2v      cmd: sglang serve --model-path Lightricks/LTX-2 --port 56081 --host 127.0.0.1 --backend sglang --num-gpus 2 --model-type diffusion --warmup-mode server --enable-cfg-parallel --pipeline-class-name LTX2TwoStagePipeline --ltx2-two-stage-device-mode resident --enable-torch-compile false
+H2E ltx2_twostage_t2v VEAGER median=35.281 samples=[35.356, 35.207] eager=True err=None
+H2E minimax_h3_t2va_5s TUNE sgl_eager_1: median=142.985 samples=[142.79, 143.181] spread=0.3% server=None err=None
+H2E minimax_h3_t2va_5s      cmd: sglang serve --model-path MiniMaxAI/MiniMax-H3 --port 56101 --host 127.0.0.1 --backend sglang --num-gpus 2 --model-type diffusion --warmup-mode server --model-variant fl2va --ulysses-degree 2 --performance-mode speed --enable-torch-compile false --enable-torch-compile false
+H2E minimax_h3_t2va_5s VEAGER median=146.367 samples=[146.379, 146.355] eager=True err=None
+H2E minimax_h3_ref2va_5s TUNE sgl_eager_1: median=222.726 samples=[222.461, 222.992] spread=0.2% server=None err=None
+H2E minimax_h3_ref2va_5s      cmd: sglang serve --model-path MiniMaxAI/MiniMax-H3 --port 56121 --host 127.0.0.1 --backend sglang --num-gpus 2 --model-type diffusion --warmup-mode server --model-variant ref2va --ulysses-degree 2 --performance-mode speed --enable-torch-compile false --enable-torch-compile false
+H2E minimax_h3_ref2va_5s VEAGER median=227.142 samples=[227.164, 227.12] eager=True err=None
+=== H2E_DONE 2026-10-11T07:54:00+00:00

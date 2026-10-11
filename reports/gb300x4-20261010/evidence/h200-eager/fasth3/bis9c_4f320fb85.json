@@ -1,0 +1,212 @@
+{
+  "timestamp": "2026-10-11T10:50:58.888541+00:00",
+  "commit_sha": "6ef17879741631c7472122a16067744a8e021810",
+  "run_id": "local",
+  "hardware": {
+    "runner_labels": null,
+    "gpu_config": null,
+    "gpus": [
+      "NVIDIA H200, 143771 MiB, 595.71.05",
+      "NVIDIA H200, 143771 MiB, 595.71.05",
+      "NVIDIA H200, 143771 MiB, 595.71.05",
+      "NVIDIA H200, 143771 MiB, 595.71.05"
+    ],
+    "hardware_profile_override": "h200"
+  },
+  "sglang_runtime": {
+    "package_version": "0.5.21",
+    "module_path": "/scratch/h200eager/sgl-4f320fb85/python/sglang/__init__.py",
+    "git_root": "/scratch/h200eager/sgl-4f320fb85",
+    "git_commit": "4f320fb85af058625a1ea7f97fbee9e6043e3eda"
+  },
+  "framework_runtime": {
+    "venv_root": "/scratch/h200eager/fw-venvs",
+    "install_specs": {
+      "vllm": "vllm==0.18.0",
+      "vllm_omni": "vllm-omni==0.18.0",
+      "lightx2v": "git+https://github.com/ModelTC/LightX2V.git@7efd05f8e1425b83321fd4f1cef779ef6504076f",
+      "lightx2v_flash_attn": "flash-attn==2.8.3",
+      "lightx2v_flash_attn3": "",
+      "lightx2v_fa3_hf_repo": "varunneal/flash-attention-3",
+      "lightx2v_fa3_hf_revision": "de87b9b5af06dd9984df595bef90b2eba44b181a",
+      "lightx2v_fa3_hf_subdir": "build/torch28-cxx11-cu128-x86_64-linux/flash_attention_3",
+      "lightx2v_flashinfer": "flashinfer-python==0.6.11",
+      "trtllm": "tensorrt-llm==1.3.0rc18",
+      "fastvideo": "https://github.com/hao-ai-lab/FastVideo.git@main",
+      "torch_cuda_arch_list": ""
+    },
+    "launchers": {
+      "vllm_omni_server_bin": "vllm",
+      "vllm_omni_required_help_args": "--omni",
+      "trtllm_visual_server_bin": "trtllm-serve"
+    },
+    "vllm-omni": {
+      "venv_path": "/scratch/h200eager/fw-venvs/vllm-omni",
+      "packages": {
+        "vllm": {
+          "Name": "vllm",
+          "Version": "0.31.0",
+          "Home-page": "https://github.com/vllm-project/vllm",
+          "Location": "/scratch/h200eager/fw-venvs/vllm-omni/lib/python3.12/site-packages"
+        },
+        "vllm-omni": {
+          "Name": "vllm-omni",
+          "Version": "0.31.0rc2.dev98+gf69b1f2b1",
+          "Home-page": "https://github.com/vllm-project/vllm-omni",
+          "Location": "/scratch/h200eager/fw-venvs/vllm-omni/lib/python3.12/site-packages"
+        },
+        "torch": {
+          "Name": "torch",
+          "Version": "2.13.0",
+          "Home-page": "https://pytorch.org",
+          "Location": "/scratch/h200eager/fw-venvs/vllm-omni/lib/python3.12/site-packages"
+        },
+        "transformers": {
+          "Name": "transformers",
+          "Version": "5.14.1",
+          "Home-page": "https://github.com/huggingface/transformers",
+          "Location": "/scratch/h200eager/fw-venvs/vllm-omni/lib/python3.12/site-packages"
+        },
+        "diffusers": {
+          "Name": "diffusers",
+          "Version": "0.40.0",
+          "Home-page": "https://github.com/huggingface/diffusers",
+          "Location": "/scratch/h200eager/fw-venvs/vllm-omni/lib/python3.12/site-packages"
+        },
+        "huggingface_hub": {
+          "Name": "huggingface_hub",
+          "Version": "1.33.0",
+          "Home-page": "https://github.com/huggingface/huggingface_hub",
+          "Location": "/scratch/h200eager/fw-venvs/vllm-omni/lib/python3.12/site-packages"
+        }
+      },
+      "direct_urls": {
+        "vllm_omni-0.31.0rc2.dev98+gf69b1f2b1.dist-info": {
+          "url": "file:///scratch/h200eager/fw-venvs/vllm-omni/src/vllm-omni",
+          "dir_info": {
+            "editable": true
+          }
+        }
+      }
+    },
+    "lightx2v": {
+      "venv_path": "/scratch/h200eager/fw-venvs/lightx2v"
+    },
+    "trtllm-visual": {
+      "venv_path": "/scratch/h200eager/fw-venvs/trtllm-visual"
+    },
+    "comfyui": {
+      "venv_path": "/scratch/h200eager/fw-venvs/comfyui"
+    },
+    "fastvideo": {
+      "venv_path": "/scratch/h200eager/fw-venvs/fastvideo"
+    }
+  },
+  "benchmark_env": {},
+  "benchmark_framework_args": {
+    "vllm-omni": [],
+    "lightx2v": {
+      "config": {
+        "use_compile": true
+      }
+    },
+    "fastvideo": []
+  },
+  "torch_compile_disabled": false,
+  "benchmark_modes": [
+    "single_e2e"
+  ],
+  "requested_sglang_profile": "auto",
+  "request_inputs": "distinct-per-request",
+  "results": [
+    {
+      "case_id": "minimax_h3_fasth3_v2_t2va_5s",
+      "framework": "sglang",
+      "mode": "single_e2e",
+      "model": "FastVideo/FastVideo-FastH3-8-Step-V2",
+      "task": "text-to-video",
+      "width": 1344,
+      "height": 768,
+      "num_frames": 124,
+      "fps": 24,
+      "num_inference_steps": 8,
+      "guidance_scale": null,
+      "guidance_scale_2": null,
+      "true_cfg_scale": null,
+      "negative_prompt_set": false,
+      "num_gpus": 4,
+      "latency_s": 13.111,
+      "error": null,
+      "framework_metadata": {
+        "profile": "default",
+        "profile_request": "auto",
+        "profile_source": "default",
+        "framework_ref": null,
+        "hardware": null,
+        "hardware_candidates": [
+          "h200"
+        ],
+        "description": "sglang's FastH3 8-Step V2 path: the checkpoint's contract selects VSA-H3 at 0.8 for the transformer; Ulysses 4, resident (speed), eager.",
+        "notes": "#41839's cookbook command is `sglang serve --model-path FastVideo/FastVideo-FastH3-8-Step-V2 --num-gpus 4`; the case adds the benchmark's standing sglang flags (server warmup, speed residency, compile off -- VSA-H3 rejects torch.compile anyway). `--model-variant` must not be passed: FastH3 rejects it. Validated 2026-09-30 on 4xH200 (sglang bd66ce3 + #41839 at 8362359): 11.28 s client median in each of three arms (server total 10.46-10.54 s: denoise 8.80 s, decode 1.27 s); with #41819's overlapped MP4 encode on top, 10.89 s. 4xGB300: 8.085/8.081 s (server 6.42-6.46 s: the serial save is ~1.6 s there); with #41819, 6.97 s.",
+        "install_specs": null,
+        "server_bin": null,
+        "use_omni_arg": null,
+        "required_help_args": null,
+        "serve_args": "--model-type diffusion --warmup-mode server --ulysses-degree 4 --performance-mode speed --enable-torch-compile false --revision 71a17d72c58ce3eeec418144de2a5a2090cb4c04",
+        "num_gpus": 4,
+        "extra_env_keys": [],
+        "request_inputs": "distinct-per-request",
+        "sglang_profile": "default",
+        "sglang_profile_request": "auto",
+        "sglang_profile_source": "default",
+        "sglang_ref": "origin/main + sgl-project/sglang#41839 (FastH3 8-Step V2 support, open 2026-09-30)"
+      },
+      "server_command": "sglang serve --model-path FastVideo/FastVideo-FastH3-8-Step-V2 --port 64031 --host 127.0.0.1 --backend sglang --num-gpus 4 --model-type diffusion --warmup-mode server --ulysses-degree 4 --performance-mode speed --enable-torch-compile false --revision 71a17d72c58ce3eeec418144de2a5a2090cb4c04",
+      "metrics": {
+        "client_latency_s": 13.111,
+        "client_latency_min_s": 13.092,
+        "client_latency_max_s": 13.131,
+        "measured_repeats": 2,
+        "server_latency_s": 13.1,
+        "server_latency_source": "separate instrumented request, not one of the measured repeats",
+        "diagnostic_stages_s": {
+          "InputValidationStage": 0.0,
+          "MiniMaxH3PartitionAdmissionStage": 0.0,
+          "MiniMaxH3TextEncodingStage": 0.056,
+          "MiniMaxH3VisualEncodingStage": 0.0,
+          "MiniMaxH3AudioEncodingStage": 0.0,
+          "MiniMaxH3LatentPreparationStage": 0.018,
+          "MiniMaxH3TimestepPreparationStage": 0.0,
+          "MiniMaxH3DenoisingStage": 10.541,
+          "MiniMaxH3DecodingStage": 1.243
+        },
+        "diagnostic_stage_sum_s": 11.858,
+        "diagnostic_client_latency_s": 13.128,
+        "unattributed_tail_s": 1.27,
+        "unattributed_tail_frac": 0.097,
+        "poll_interval_s": 0.02,
+        "latency_samples_s": [
+          13.092,
+          13.131
+        ],
+        "latency_spread_pct": 0.3,
+        "warmup_latencies_s": [
+          13.108,
+          13.144,
+          13.122
+        ],
+        "warmup_steady_latencies_s": [
+          13.105,
+          13.186
+        ],
+        "server_startup_s": 68.08,
+        "warmup_s": 65.67
+      }
+    }
+  ],
+  "throughput_results": [],
+  "partial": false,
+  "model_revisions": {
+    "FastVideo/FastVideo-FastH3-8-Step-V2": "3da2ddfe1954d9cda4c05b643dc0f26007a655c5"
+  }
+}

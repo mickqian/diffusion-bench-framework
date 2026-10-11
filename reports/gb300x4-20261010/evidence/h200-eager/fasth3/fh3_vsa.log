@@ -1,0 +1,15 @@
+TUNE fh3fa_1: median=12.641 samples=[12.658, 12.624] spread=0.3% server=12.582 err=None
+     cmd: sglang serve --model-path FastVideo/FastVideo-FastH3-8-Step-V2 --port 65001 --host 127.0.0.1 --backend sglang --num-gpus 4 --model-type diffusion --warmup-mode server --ulysses-degree 4 --performance-mode speed --enable-torch-compile false --revision 71a17d72c58ce3eeec418144de2a5a2090cb4c04 --enable-torch-compile false
+TUNE fh3vsa_1: median=10.008 samples=[10.02, 9.996] spread=0.2% server=10.007 err=None
+     cmd: sglang serve --model-path FastVideo/FastVideo-FastH3-8-Step-V2 --port 65003 --host 127.0.0.1 --backend sglang --num-gpus 4 --model-type diffusion --warmup-mode server --ulysses-degree 4 --performance-mode speed --enable-torch-compile false --revision 71a17d72c58ce3eeec418144de2a5a2090cb4c04 --enable-torch-compile false --component-attention-backends transformer=video_sparse_attn_h3
+TUNE fh3fa_2: median=12.652 samples=[12.644, 12.659] spread=0.1% server=12.574 err=None
+     cmd: sglang serve --model-path FastVideo/FastVideo-FastH3-8-Step-V2 --port 65005 --host 127.0.0.1 --backend sglang --num-gpus 4 --model-type diffusion --warmup-mode server --ulysses-degree 4 --performance-mode speed --enable-torch-compile false --revision 71a17d72c58ce3eeec418144de2a5a2090cb4c04 --enable-torch-compile false
+TUNE fh3vsa_2: median=9.993 samples=[9.989, 9.996] spread=0.1% server=10.051 err=None
+     cmd: sglang serve --model-path FastVideo/FastVideo-FastH3-8-Step-V2 --port 65007 --host 127.0.0.1 --backend sglang --num-gpus 4 --model-type diffusion --warmup-mode server --ulysses-degree 4 --performance-mode speed --enable-torch-compile false --revision 71a17d72c58ce3eeec418144de2a5a2090cb4c04 --enable-torch-compile false --component-attention-backends transformer=video_sparse_attn_h3
+STAGES tune_fh3fa_1.json 12.641 10.853 1.236
+STAGES tune_fh3fa_2.json 12.652 10.85 1.232
+STAGES tune_fh3vsa_1.json 10.008 8.225 1.323
+STAGES tune_fh3vsa_2.json 9.993 8.249 1.342
+tune_fh3fa_1.runlog:       1   [server] [10-11 10:55:37] Using fa attention backend 
+tune_fh3vsa_1.runlog:       1   [server] [10-11 10:57:43] Using video_sparse_attn_h3 attention backend       1   [server] [10-11 10:58:28] Using fa attention backend       1   [server] Warmup requests:   0%|          | 0/1 [00:00<?, ?req/s][10-11 10:58:30] Using video_sparse_attn_h3 attention backend 
+=== FH3VSA_DONE 2026-10-11T11:05:23+00:00

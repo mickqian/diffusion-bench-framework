@@ -1,0 +1,8 @@
+H2E dbf f5fff06 GB300 report: the eager-vs-eager check on 2xH200 as 
+H2E sglang /scratch/h200eager/sgl-main/python/sglang/__init__.py True
+H2E hf token loaded
+H2E vllm 0.31.0 vllm-omni 0.31.0rc2.dev98+gf69b1f2b1
+H2E flux2_dev_t2i_1024 TUNE sgl_eager_1: median=12.645 samples=[12.661, 12.64, 12.645, 12.639, 12.647] spread=0.2% server=12.632 err=None
+H2E flux2_dev_t2i_1024      cmd: sglang serve --model-path black-forest-labs/FLUX.2-dev --port 57021 --host 127.0.0.1 --backend sglang --num-gpus 2 --model-type diffusion --warmup-mode server --dit-layerwise-offload false --tp-size 2 --enable-torch-compile false --enable-torch-compile false
+H2E flux2_dev_t2i_1024 VEAGER median=19.057 samples=[19.074, 19.046, 19.057, 18.973, 19.08] eager=True err=None
+=== H2EF_DONE 2026-10-11T08:02:36+00:00

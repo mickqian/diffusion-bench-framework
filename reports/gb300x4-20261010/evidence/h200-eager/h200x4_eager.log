@@ -1,0 +1,21 @@
+H2E dbf f5fff06 GB300 report: the eager-vs-eager check on 2xH200 as 
+H2E sglang /scratch/h200eager/sgl-main/python/sglang/__init__.py True
+H2E hf token loaded
+H2E install rc=0 stamp=/scratch/h200eager/fw-venvs/vllm-omni/.diffusion-bench-install-stamp
+H2E vllm 0.31.0 vllm-omni 0.31.0rc2.dev98+gf69b1f2b1
+H2E cosmos3_nano_t2v_720p_189f TUNE sgl_eager_1: median=51.71 samples=[51.723, 51.696] spread=0.1% server=50.718 err=None
+H2E cosmos3_nano_t2v_720p_189f      cmd: sglang serve --model-path nvidia/Cosmos3-Nano --port 58021 --host 127.0.0.1 --backend sglang --num-gpus 4 --model-type diffusion --warmup-mode server --attention-backend fa --cfg-parallel-size 2 --ulysses-degree 2 --enable-torch-compile false
+H2E cosmos3_nano_t2v_720p_189f VEAGER median=66.009 samples=[65.856, 66.162] eager=True err=None
+H2E cosmos3_nano_i2v_720p_189f TUNE sgl_eager_1: median=52.052 samples=[52.07, 52.035] spread=0.1% server=51.202 err=None
+H2E cosmos3_nano_i2v_720p_189f      cmd: sglang serve --model-path nvidia/Cosmos3-Nano --port 58041 --host 127.0.0.1 --backend sglang --num-gpus 4 --model-type diffusion --warmup-mode server --attention-backend fa --cfg-parallel-size 2 --ulysses-degree 2 --enable-torch-compile false
+H2E cosmos3_nano_i2v_720p_189f VEAGER median=66.353 samples=[66.159, 66.546] eager=True err=None
+H2E minimax_h3_t2va_5s_4gpu TUNE sgl_eager_1: median=71.971 samples=[71.855, 72.087] spread=0.3% server=71.714 err=None
+H2E minimax_h3_t2va_5s_4gpu      cmd: sglang serve --model-path MiniMaxAI/MiniMax-H3 --port 58061 --host 127.0.0.1 --backend sglang --num-gpus 4 --model-type diffusion --warmup-mode server --model-variant fl2va --ulysses-degree 4 --encoder-parallel auto --performance-mode speed --enable-torch-compile false --enable-torch-compile false
+H2E minimax_h3_t2va_5s_4gpu VEAGER median=75.088 samples=[75.188, 74.989] eager=True err=None
+H2E minimax_h3_fasth3_v2_t2va_5s TUNE sgl_eager_1: median=12.662 samples=[12.64, 12.684] spread=0.4% server=12.575 err=None
+H2E minimax_h3_fasth3_v2_t2va_5s      cmd: sglang serve --model-path FastVideo/FastVideo-FastH3-8-Step-V2 --port 58081 --host 127.0.0.1 --backend sglang --num-gpus 4 --model-type diffusion --warmup-mode server --ulysses-degree 4 --performance-mode speed --enable-torch-compile false --revision 71a17d72c58ce3eeec418144de2a5a2090cb4c04 --enable-torch-compile false
+H2E minimax_h3_fasth3_v2_t2va_5s VEAGER median=None samples=None eager=True err=500 Server Error: Internal Server Error for url: http://127.0.0.1:58091/v1/videos/sync -- {"error":{"message":"Video gen
+H2E wan22_t2v_a14b_720p TUNE sgl_eager_1: median=205.539 samples=[205.478, 205.599] spread=0.1% server=None err=None
+H2E wan22_t2v_a14b_720p      cmd: sglang serve --model-path Wan-AI/Wan2.2-T2V-A14B-Diffusers --port 58101 --host 127.0.0.1 --backend sglang --num-gpus 4 --model-type diffusion --warmup-mode server --enable-cfg-parallel --ulysses-degree 2 --dit-cpu-offload false --pin-cpu-memory --dit-layerwise-offload false --performance-mode speed --enable-torch-compile false --enable-torch-compile false
+H2E wan22_t2v_a14b_720p VEAGER median=264.592 samples=[264.461, 264.722] eager=True err=None
+=== H2E_DONE 2026-10-11T08:05:50+00:00
