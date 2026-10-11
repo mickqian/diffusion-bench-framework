@@ -67,6 +67,39 @@ no validated profile (per-cell reasons in [issue.md](issue.md)).
 `~` LightX2V Z-Image: the first repeat ran 1.01 s and the other four 1.50 s;
 the median is published with its samples listed.
 
+## Eager against eager
+
+sglang main `6576e50cd5` with torch.compile off against vLLM-Omni with
+`--enforce-eager`, same box, same commands otherwise. The sglang column is the
+published row where that row is eager. Cosmos3 T2I and LTX-2 publish compiled
+rows, so their eager runs were measured separately. vLLM-Omni runs are in
+[evidence/vllm-eager/](evidence/vllm-eager/). Where the lead is under 5%, the
+two frameworks were run interleaved, twice
+([evidence/eager_main_rank1.log](evidence/eager_main_rank1.log)).
+
+| case | sglang eager (s) | vLLM-Omni eager (s) | sglang faster by |
+|---|---:|---:|---:|
+| `flux1_dev_t2i_1024` | 4.00 | 4.64 (NUMA-pinned 4.49) | 1.16× (1.12× pinned) |
+| `flux2_dev_t2i_1024` | 5.13 | 10.25 | 2.00× |
+| `qwen_image_21_t2i_1024` | 2.00 | 3.25 | 1.62× |
+| `qwen_image_21_t2i_1024_2gpu` | 1.67 | 3.01 | 1.80× |
+| `qwen_image_21_edit_1024` | 2.43 | 3.73 | 1.53× |
+| `zimage_turbo_t2i_1024` | 0.52 | 0.73 | 1.42× |
+| `cosmos3_nano_t2i_720p` | 0.98 | 1.64 | 1.68× |
+| `cosmos3_nano_t2v_720p_189f` | 22.46 | 29.03 | 1.29× |
+| `cosmos3_nano_i2v_720p_189f` | 22.63 | 29.23 | 1.29× |
+| `ltx2_twostage_t2v` | 12.14 | 18.59 | 1.53× |
+| `wan22_t2v_a14b_720p` | 87.03 | 122.76 | 1.41× |
+| `minimax_h3_t2va_5s` | 57.56 / 57.54 | 60.16 / 60.27 | 1.05× (interleaved) |
+| `minimax_h3_t2va_5s_4gpu` | 31.76 | 33.96 | 1.07× |
+| `minimax_h3_ref2va_5s` | 88.31 / 88.39 | 91.18 / 90.94 | 1.03× (interleaved) |
+| `minimax_h3_fasth3_v2_t2va_5s` | 6.44 | 7.35 | 1.14× |
+
+vLLM-Omni has no ideogram4 or LTX-2.3 path. Its compile pays off on the heavy
+DiTs (Qwen-Image-2.1 1-GPU and edit, FLUX.2, Cosmos3, LTX-2, Wan2.2). It costs
+14% on FLUX.1 (4.64 s eager, 5.31 s compiled). On Qwen-Image-2.1 2-GPU, Z-Image
+and the MiniMax-H3 cases it is within 3% of its eager run.
+
 ## Throughput
 
 Four requests at concurrency 2, one representative image and one video case.

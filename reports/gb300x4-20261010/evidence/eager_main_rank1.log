@@ -1,0 +1,13 @@
+EM minimax_h3_t2va_5s TUNE sgl_eager_r1_1: median=57.559 samples=[57.552, 57.566] spread=0.0% server=57.567 err=None
+EM minimax_h3_t2va_5s r1 VEAGER dbf=0466d3c Record the coreweave no-signal pods and th
+EM minimax_h3_t2va_5s r1 VEAGER minimax_h3_t2va_5s: median=60.158 samples=[60.134, 60.182] gpus=2 err=None
+EM minimax_h3_t2va_5s TUNE sgl_eager_r2_1: median=57.537 samples=[57.547, 57.526] spread=0.0% server=57.563 err=None
+EM minimax_h3_t2va_5s r2 VEAGER dbf=0466d3c Record the coreweave no-signal pods and th
+EM minimax_h3_t2va_5s r2 VEAGER minimax_h3_t2va_5s: median=60.268 samples=[60.263, 60.274] gpus=2 err=None
+EM minimax_h3_ref2va_5s TUNE sgl_eager_r1_1: median=88.314 samples=[88.219, 88.408] spread=0.2% server=88.243 err=None
+EM minimax_h3_ref2va_5s r1 VEAGER dbf=0466d3c Record the coreweave no-signal pods and th
+EM minimax_h3_ref2va_5s r1 VEAGER minimax_h3_ref2va_5s: median=91.179 samples=[91.196, 91.161] gpus=2 err=None
+EM minimax_h3_ref2va_5s TUNE sgl_eager_r2_1: median=88.392 samples=[88.326, 88.458] spread=0.1% server=88.328 err=None
+EM minimax_h3_ref2va_5s r2 VEAGER dbf=0466d3c Record the coreweave no-signal pods and th
+EM minimax_h3_ref2va_5s r2 VEAGER minimax_h3_ref2va_5s: median=90.944 samples=[90.921, 90.968] gpus=2 err=None
+=== EM_DONE 2026-10-11T05:19:16+00:00

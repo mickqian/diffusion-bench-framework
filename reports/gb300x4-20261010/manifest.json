@@ -101,7 +101,8 @@
     "raw/": "original runner output; exactly the merge inputs above",
     "merged.json": "merged artifact the Pages data was published from",
     "issue.md": "data-only tracker report with per-cell statuses and reasons",
-    "dashboard.md": "generated comparison table",
-    "evidence/vllm-eager/": "vLLM-Omni --enforce-eager on every case it supports (16 runner JSONs incl. FLUX.1 NUMA-pinned), for the eager-vs-eager check in summary.md"
+    "evidence/vllm-eager/": "vLLM-Omni --enforce-eager on every case it supports (16 runner JSONs incl. FLUX.1 NUMA-pinned), for the eager-vs-eager check in summary.md",
+    "evidence/eager_main_rank1.log": "sglang main eager against vLLM-Omni --enforce-eager, interleaved twice, MiniMax-H3 t2va and ref2va (the two leads under 5%)",
+    "evidence/eager_main_rank0.log": "sglang main eager for the two cells published compiled (Cosmos3 T2I, LTX-2)"
   }
 }
