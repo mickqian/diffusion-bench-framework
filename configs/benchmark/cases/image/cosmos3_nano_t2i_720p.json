@@ -122,6 +122,16 @@
       "serve_args": "--stage-configs-path configs/vllm_omni_cosmos3_h200_2gpu_cfg_guardrails_off.yaml --stage-init-timeout 900 --init-timeout 1800",
       "extra_env": {},
       "command_profiles": {
+        "h200-2gpu-cfg-flash": {
+          "description": "H200 2-GPU CFG-parallel vLLM-Omni Cosmos3 image profile on current flags.",
+          "hardware": [
+            "h200"
+          ],
+          "num_gpus": 2,
+          "framework_ref": "vllm-omni f69b1f2b1 + vllm==0.31.0",
+          "serve_args": "--num-gpus 2 --cfg-parallel-size 2 --model-class-name Cosmos3OmniDiffusersPipeline --stage-init-timeout 900 --init-timeout 1800 --no-guardrails --diffusion-attention-backend FLASH_ATTN --cache-backend none",
+          "notes": "Replaces h200-2gpu-cfg, whose --stage-configs-path current vLLM rejects ('unrecognized arguments', 2026-10-11 on 2xH200). Same layout and guardrails-off as that stage config, spelled with the flags the H200 video profiles and blackwell-cudnn use; FLASH_ATTN is the Hopper exact kernel. VALIDATION PENDING (2026-10-11, 2xH200)."
+        },
         "blackwell-cudnn": {
           "description": "Blackwell vLLM-Omni profile for cosmos3_nano_t2i_720p using cuDNN attention.",
           "hardware": [

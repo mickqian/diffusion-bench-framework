@@ -104,7 +104,6 @@ _LIGHTX2V_OFFLOAD_KEYS = ("lazy_load", "unload_modules")
 # Delete an entry when its cell is re-derived or justified: the list only shrinks.
 KNOWN_COMPETITOR_VIOLATIONS = {
     ("cosmos3_nano_t2i_720p", "vllm-omni", "default"),
-    ("cosmos3_nano_t2i_720p", "vllm-omni", "h200-2gpu-cfg"),
     ("ltx2_twostage_t2v", "lightx2v", "h100-1gpu"),
 }
 STRICT_COMPETITOR_POLICY_ENV = "DIFFUSION_BENCH_STRICT_COMPETITOR_POLICY"
