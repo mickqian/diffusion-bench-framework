@@ -100,6 +100,18 @@ DiTs (Qwen-Image-2.1 1-GPU and edit, FLUX.2, Cosmos3, LTX-2, Wan2.2). It costs
 14% on FLUX.1 (4.64 s eager, 5.31 s compiled). On Qwen-Image-2.1 2-GPU, Z-Image
 and the MiniMax-H3 cases it is within 3% of its eager run.
 
+The same check ran on an idle 2xH200 box (sglang main `6576e50cd5` and vLLM-Omni
+`f69b1f2b1` on vLLM 0.31.0, as above, each case run interleaved once,
+[evidence/h200-eager/](evidence/h200-eager/)). FLUX is gated and that box has
+no token, and no 4-GPU H200 was free, so the H200 check covers four cases:
+
+| case (H200) | sglang eager (s) | vLLM-Omni eager (s) | sglang faster by |
+|---|---:|---:|---:|
+| `qwen_image_21_t2i_1024` | 4.49 | 6.22 | 1.39× |
+| `qwen_image_21_edit_1024` | 5.40 | 6.92 | 1.28× |
+| `qwen_image_21_t2i_1024_2gpu` (Ulysses 2) | 2.75 | 3.70 | 1.34× |
+| `zimage_turbo_t2i_1024` | 0.58 | 0.80 | 1.38× |
+
 ## Throughput
 
 Four requests at concurrency 2, one representative image and one video case.

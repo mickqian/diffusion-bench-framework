@@ -103,6 +103,7 @@
     "issue.md": "data-only tracker report with per-cell statuses and reasons",
     "evidence/vllm-eager/": "vLLM-Omni --enforce-eager on every case it supports (16 runner JSONs incl. FLUX.1 NUMA-pinned), for the eager-vs-eager check in summary.md",
     "evidence/eager_main_rank1.log": "sglang main eager against vLLM-Omni --enforce-eager, interleaved twice, MiniMax-H3 t2va and ref2va (the two leads under 5%)",
-    "evidence/eager_main_rank0.log": "sglang main eager for the two cells published compiled (Cosmos3 T2I, LTX-2)"
+    "evidence/eager_main_rank0.log": "sglang main eager for the two cells published compiled (Cosmos3 T2I, LTX-2)",
+    "evidence/h200-eager/": "the same eager-vs-eager check on a 2xH200 box (sglang main 6576e50cd5, vLLM-Omni f69b1f2b1 on vLLM 0.31.0): four vLLM-Omni runner JSONs and the run log with the sglang arms"
   }
 }
