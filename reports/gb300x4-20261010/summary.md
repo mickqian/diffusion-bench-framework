@@ -200,10 +200,13 @@ Four requests at concurrency 2, one representative image and one video case.
 - **FastH3-8-Step-V2**: sglang's native support counts DiT forwards and
   rejects 9 steps with 400. Harness 1d771ec sends it 8. vLLM-Omni is sent 8 and
   FastVideo 9 sigma points: the same eight forwards everywhere.
-- **Not here**: the single-RTX-5090 desktop cells (Qwen-2.1 t2i/edit, H3 480p)
-  are still on that host, which dropped off the network before they were
-  copied. The MI355X and 4x5090 H3 attempts produced sglang-only cells. They are
-  in [../h3-partial-20261010/](../h3-partial-20261010/).
+- **The single-RTX-5090 desktop** (Qwen-2.1 t2i/edit, H3 480p) is in
+  [../rtx5090-desktop-20261011/](../rtx5090-desktop-20261011/): sglang main
+  `6576e50cd5` leads every cell there too (1.04× over ComfyUI on Qwen t2i,
+  interleaved; 1.20× / 1.17× over vLLM-Omni eager). The host had dropped off
+  the network when ComfyUI's H3 run exhausted its RAM and the OOM killer took
+  `tailscaled`. The MI355X and 4x5090 H3 attempts produced sglang-only cells.
+  They are in [../h3-partial-20261010/](../h3-partial-20261010/).
 
 ## Reproduce
 

@@ -1,0 +1,371 @@
+{
+  "timestamp": "2026-10-10T08:30:34.248617+00:00",
+  "commit_sha": "fe69ed68021ccdf510f96fcc8d5845b5882a1c0c",
+  "run_id": "local",
+  "hardware": {
+    "runner_labels": null,
+    "gpu_config": null,
+    "gpus": [
+      "NVIDIA GeForce RTX 5090, 32607 MiB, 595.99.02"
+    ],
+    "hardware_profile_override": "rtx5090"
+  },
+  "sglang_runtime": {
+    "package_version": "0.0.0.dev0",
+    "module_path": "/home/rdxa/h3bench/sglang/python/sglang/__init__.py"
+  },
+  "framework_runtime": {
+    "venv_root": "/home/rdxa/h3bench/fw-venvs",
+    "install_specs": {
+      "vllm": "vllm==0.18.0",
+      "vllm_omni": "vllm-omni==0.18.0",
+      "lightx2v": "git+https://github.com/ModelTC/LightX2V.git@7efd05f8e1425b83321fd4f1cef779ef6504076f",
+      "lightx2v_flash_attn": "flash-attn==2.8.3",
+      "lightx2v_flash_attn3": "",
+      "lightx2v_fa3_hf_repo": "varunneal/flash-attention-3",
+      "lightx2v_fa3_hf_revision": "de87b9b5af06dd9984df595bef90b2eba44b181a",
+      "lightx2v_fa3_hf_subdir": "build/torch28-cxx11-cu128-x86_64-linux/flash_attention_3",
+      "lightx2v_flashinfer": "flashinfer-python==0.6.11",
+      "trtllm": "tensorrt-llm==1.3.0rc18",
+      "fastvideo": "https://github.com/hao-ai-lab/FastVideo.git@main",
+      "torch_cuda_arch_list": ""
+    },
+    "launchers": {
+      "vllm_omni_server_bin": "vllm",
+      "vllm_omni_required_help_args": "--omni",
+      "trtllm_visual_server_bin": "trtllm-serve"
+    },
+    "vllm-omni": {
+      "venv_path": "/home/rdxa/h3bench/fw-venvs/vllm-omni",
+      "packages": {
+        "vllm": {
+          "Name": "vllm",
+          "Version": "0.31.0",
+          "Home-page": "https://github.com/vllm-project/vllm",
+          "Location": "/home/rdxa/h3bench/fw-venvs/vllm-omni/lib/python3.12/site-packages"
+        },
+        "vllm-omni": {
+          "Name": "vllm-omni",
+          "Version": "0.31.0rc2.dev98+gf69b1f2b1",
+          "Home-page": "https://github.com/vllm-project/vllm-omni",
+          "Location": "/home/rdxa/h3bench/fw-venvs/vllm-omni/lib/python3.12/site-packages"
+        },
+        "torch": {
+          "Name": "torch",
+          "Version": "2.13.0",
+          "Home-page": "https://pytorch.org",
+          "Location": "/home/rdxa/h3bench/fw-venvs/vllm-omni/lib/python3.12/site-packages"
+        },
+        "transformers": {
+          "Name": "transformers",
+          "Version": "5.14.1",
+          "Home-page": "https://github.com/huggingface/transformers",
+          "Location": "/home/rdxa/h3bench/fw-venvs/vllm-omni/lib/python3.12/site-packages"
+        },
+        "diffusers": {
+          "Name": "diffusers",
+          "Version": "0.40.0",
+          "Home-page": "https://github.com/huggingface/diffusers",
+          "Location": "/home/rdxa/h3bench/fw-venvs/vllm-omni/lib/python3.12/site-packages"
+        },
+        "huggingface_hub": {
+          "Name": "huggingface_hub",
+          "Version": "1.33.0",
+          "Home-page": "https://github.com/huggingface/huggingface_hub",
+          "Location": "/home/rdxa/h3bench/fw-venvs/vllm-omni/lib/python3.12/site-packages"
+        }
+      },
+      "direct_urls": {
+        "vllm_omni-0.31.0rc2.dev98+gf69b1f2b1.dist-info": {
+          "url": "file:///home/rdxa/h3bench/fw-venvs/vllm-omni/src/vllm-omni",
+          "dir_info": {
+            "editable": true
+          }
+        }
+      }
+    },
+    "lightx2v": {
+      "venv_path": "/home/rdxa/h3bench/fw-venvs/lightx2v",
+      "packages": {
+        "lightx2v": {
+          "Name": "lightx2v",
+          "Version": "0.5.0",
+          "Home-page": "https://github.com/ModelTC/LightX2V",
+          "Location": "/home/rdxa/h3bench/fw-venvs/lightx2v/lib/python3.12/site-packages"
+        },
+        "flash_attn": {
+          "Name": "flash_attn",
+          "Version": "2.8.3",
+          "Home-page": "https://github.com/Dao-AILab/flash-attention",
+          "Location": "/home/rdxa/h3bench/fw-venvs/lightx2v/lib/python3.12/site-packages"
+        },
+        "flashinfer-python": {
+          "Name": "flashinfer-python",
+          "Version": "0.6.11",
+          "Home-page": "https://github.com/flashinfer-ai/flashinfer",
+          "Location": "/home/rdxa/h3bench/fw-venvs/lightx2v/lib/python3.12/site-packages"
+        },
+        "torch": {
+          "Name": "torch",
+          "Version": "2.11.0",
+          "Home-page": "https://pytorch.org",
+          "Location": "/home/rdxa/h3bench/fw-venvs/lightx2v/lib/python3.12/site-packages"
+        },
+        "transformers": {
+          "Name": "transformers",
+          "Version": "5.19.0",
+          "Home-page": "https://github.com/huggingface/transformers",
+          "Location": "/home/rdxa/h3bench/fw-venvs/lightx2v/lib/python3.12/site-packages"
+        },
+        "diffusers": {
+          "Name": "diffusers",
+          "Version": "0.41.0",
+          "Home-page": "https://github.com/huggingface/diffusers",
+          "Location": "/home/rdxa/h3bench/fw-venvs/lightx2v/lib/python3.12/site-packages"
+        },
+        "huggingface_hub": {
+          "Name": "huggingface_hub",
+          "Version": "1.33.0",
+          "Home-page": "https://github.com/huggingface/huggingface_hub",
+          "Location": "/home/rdxa/h3bench/fw-venvs/lightx2v/lib/python3.12/site-packages"
+        }
+      },
+      "direct_urls": {
+        "lightx2v-0.5.0.dist-info": {
+          "url": "https://github.com/ModelTC/LightX2V.git",
+          "vcs_info": {
+            "commit_id": "b6d38283cb8176303f9155e639bcd496553d3402",
+            "requested_revision": "b6d38283cb8176303f9155e639bcd496553d3402",
+            "vcs": "git"
+          }
+        }
+      }
+    },
+    "trtllm-visual": {
+      "venv_path": "/home/rdxa/h3bench/fw-venvs/trtllm-visual"
+    },
+    "comfyui": {
+      "venv_path": "/home/rdxa/h3bench/fw-venvs/comfyui",
+      "packages": {
+        "torchvision": {
+          "Name": "torchvision",
+          "Version": "0.29.1+cu130",
+          "Home-page": "https://github.com/pytorch/vision",
+          "Location": "/home/rdxa/h3bench/fw-venvs/comfyui/lib/python3.12/site-packages"
+        },
+        "torchaudio": {
+          "Name": "torchaudio",
+          "Version": "2.11.0+cu130",
+          "Home-page": "https://github.com/pytorch/audio",
+          "Location": "/home/rdxa/h3bench/fw-venvs/comfyui/lib/python3.12/site-packages"
+        },
+        "comfy-kitchen": {
+          "Name": "comfy-kitchen",
+          "Version": "0.2.37",
+          "Home-page": "https://github.com/Comfy-Org/comfy-kitchen",
+          "Location": "/home/rdxa/h3bench/fw-venvs/comfyui/lib/python3.12/site-packages"
+        },
+        "comfy-aimdo": {
+          "Name": "comfy-aimdo",
+          "Version": "0.5.6",
+          "Home-page": "",
+          "Location": "/home/rdxa/h3bench/fw-venvs/comfyui/lib/python3.12/site-packages"
+        },
+        "comfyui_frontend_package": {
+          "Name": "comfyui_frontend_package",
+          "Version": "1.55.14",
+          "Home-page": "",
+          "Location": "/home/rdxa/h3bench/fw-venvs/comfyui/lib/python3.12/site-packages"
+        },
+        "safetensors": {
+          "Name": "safetensors",
+          "Version": "0.8.0",
+          "Home-page": "https://github.com/huggingface/safetensors",
+          "Location": "/home/rdxa/h3bench/fw-venvs/comfyui/lib/python3.12/site-packages"
+        },
+        "torch": {
+          "Name": "torch",
+          "Version": "2.14.1+cu130",
+          "Home-page": "https://pytorch.org",
+          "Location": "/home/rdxa/h3bench/fw-venvs/comfyui/lib/python3.12/site-packages"
+        },
+        "transformers": {
+          "Name": "transformers",
+          "Version": "5.19.0",
+          "Home-page": "https://github.com/huggingface/transformers",
+          "Location": "/home/rdxa/h3bench/fw-venvs/comfyui/lib/python3.12/site-packages"
+        },
+        "huggingface_hub": {
+          "Name": "huggingface_hub",
+          "Version": "2.2.0",
+          "Home-page": "https://github.com/huggingface/huggingface_hub",
+          "Location": "/home/rdxa/h3bench/fw-venvs/comfyui/lib/python3.12/site-packages"
+        }
+      },
+      "source_commit": "0df64eb242b7c5759c3e86afd5d1846d923b1033",
+      "source_commit_date": "2026-10-09T19:55:48-07:00"
+    },
+    "fastvideo": {
+      "venv_path": "/home/rdxa/h3bench/fw-venvs/fastvideo"
+    }
+  },
+  "benchmark_env": {},
+  "benchmark_framework_args": {
+    "vllm-omni": [],
+    "lightx2v": {
+      "config": {
+        "use_compile": true
+      }
+    },
+    "fastvideo": []
+  },
+  "torch_compile_disabled": false,
+  "benchmark_modes": [
+    "single_e2e",
+    "throughput"
+  ],
+  "requested_sglang_profile": "auto",
+  "request_inputs": "distinct-per-request",
+  "results": [
+    {
+      "case_id": "minimax_h3_t2va_480p_1gpu",
+      "framework": "sglang",
+      "mode": "single_e2e",
+      "model": "MiniMaxAI/MiniMax-H3",
+      "task": "text-to-video",
+      "width": 864,
+      "height": 480,
+      "num_frames": 124,
+      "fps": 24,
+      "num_inference_steps": 20,
+      "guidance_scale": null,
+      "guidance_scale_2": null,
+      "true_cfg_scale": null,
+      "negative_prompt_set": false,
+      "num_gpus": 1,
+      "latency_s": 103.221,
+      "error": null,
+      "framework_metadata": {
+        "profile": "default",
+        "profile_request": "auto",
+        "profile_source": "default",
+        "framework_ref": null,
+        "hardware": null,
+        "hardware_candidates": [
+          "rtx5090"
+        ],
+        "description": "One 32 GB GPU on a 60 GB host: DiT, text encoder and video VAE layerwise-offloaded, 14 DiT blocks and 36 video-VAE blocks resident.",
+        "notes": "The cookbook's '32 GB VRAM + 60 GB host, lossless' command, verbatim (docs/cookbook/diffusion/MiniMax/MiniMax-H3.mdx, section 'RTX 5090 single card, physical desktop' (sglang main 3831e7e09, checked 2026-10-10)). It reports 112.2 s per request against ComfyUI --fast-disk --cache-none at 140.9-145.9 s on an RTX 5090, Ryzen 9 9950X, 60 GB RAM, PCIe 5.0 NVMe. VALIDATION PENDING (2026-10-10 round, rdxa-5090-pa).",
+        "install_specs": null,
+        "server_bin": null,
+        "use_omni_arg": null,
+        "required_help_args": null,
+        "serve_args": "--model-type diffusion --warmup-mode server --model-variant fl2va --performance-mode memory --layerwise-offload-components dit,text_encoder,vae --dit-layerwise-resident-layers 14 --layerwise-resident-layers video_vae=36 --warmup-resolutions 864x480 --warmup-num-frames 124 --enable-torch-compile false",
+        "num_gpus": 1,
+        "extra_env_keys": [
+          "PYTORCH_CUDA_ALLOC_CONF"
+        ],
+        "request_inputs": "distinct-per-request",
+        "sglang_profile": "default",
+        "sglang_profile_request": "auto",
+        "sglang_profile_source": "default",
+        "sglang_ref": "current-main"
+      },
+      "server_command": "sglang serve --model-path MiniMaxAI/MiniMax-H3 --port 48101 --host 127.0.0.1 --backend sglang --model-type diffusion --warmup-mode server --model-variant fl2va --performance-mode memory --layerwise-offload-components dit,text_encoder,vae --dit-layerwise-resident-layers 14 --layerwise-resident-layers video_vae=36 --warmup-resolutions 864x480 --warmup-num-frames 124 --enable-torch-compile false",
+      "metrics": {
+        "client_latency_s": 103.221,
+        "client_latency_min_s": 103.151,
+        "client_latency_max_s": 103.291,
+        "measured_repeats": 2,
+        "server_latency_s": 103.334,
+        "server_latency_source": "separate instrumented request, not one of the measured repeats",
+        "diagnostic_stages_s": {
+          "InputValidationStage": 0.0,
+          "MiniMaxH3PartitionAdmissionStage": 0.0,
+          "MiniMaxH3TextEncodingStage": 4.167,
+          "MiniMaxH3VisualEncodingStage": 0.0,
+          "MiniMaxH3AudioEncodingStage": 0.0,
+          "MiniMaxH3LatentPreparationStage": 0.004,
+          "MiniMaxH3TimestepPreparationStage": 0.0,
+          "MiniMaxH3DenoisingStage": 92.027,
+          "MiniMaxH3DecodingStage": 6.2
+        },
+        "diagnostic_stage_sum_s": 102.398,
+        "diagnostic_client_latency_s": 103.365,
+        "unattributed_tail_s": 0.967,
+        "unattributed_tail_frac": 0.009,
+        "poll_interval_s": 0.02,
+        "latency_samples_s": [
+          103.151,
+          103.291
+        ],
+        "latency_spread_pct": 0.1,
+        "warmup_latencies_s": [
+          26.422,
+          26.109,
+          26.148
+        ],
+        "server_startup_s": 116.39,
+        "warmup_s": 78.68
+      }
+    },
+    {
+      "case_id": "minimax_h3_t2va_480p_1gpu",
+      "framework": "comfyui",
+      "mode": "single_e2e",
+      "model": "MiniMaxAI/MiniMax-H3",
+      "task": "text-to-video",
+      "width": 864,
+      "height": 480,
+      "num_frames": 124,
+      "fps": 24,
+      "num_inference_steps": 20,
+      "guidance_scale": null,
+      "guidance_scale_2": null,
+      "true_cfg_scale": null,
+      "negative_prompt_set": false,
+      "num_gpus": 1,
+      "latency_s": null,
+      "error": "ComfyUI execution failed in node 11 (SamplerCustomAdvanced): AttributeError: 'torch.Stream' object has no attribute 'cuda_stream'\n",
+      "framework_metadata": {
+        "profile": "default",
+        "profile_request": "auto",
+        "profile_source": "default",
+        "framework_ref": "ComfyUI master HEAD",
+        "hardware": null,
+        "hardware_candidates": [
+          "rtx5090"
+        ],
+        "description": "ComfyUI master, the official H3 T2VA workflow at full precision, disk-backed weight loading for a 60 GB host.",
+        "notes": "Same graph and weights as minimax_h3_t2va_5s's ComfyUI default (bf16 DiT, bf16 Qwen3-VL-32B, fp16 video VAE; BasicGuider, shift 12/3). The cookbook found ComfyUI's default launch OOM-killed during load on a 60 GB host (55.6 GB anonymous memory) and measured it with --fast-disk --cache-none (docs/cookbook/diffusion/MiniMax/MiniMax-H3.mdx, section 'RTX 5090 single card, physical desktop' (sglang main 3831e7e09, checked 2026-10-10)). Compile stays on per the harness policy. VALIDATION PENDING (2026-10-10 round, rdxa-5090-pa).",
+        "install_specs": null,
+        "server_bin": null,
+        "use_omni_arg": null,
+        "required_help_args": null,
+        "serve_args": "--fast-disk --cache-none",
+        "num_gpus": 1,
+        "extra_env_keys": [],
+        "request_inputs": "distinct-per-request",
+        "comfyui_workflow": "minimax_h3_t2va.json",
+        "comfyui_models": {
+          "diffusion_models/minimax_h3_fl2va_bf16.safetensors": "Comfy-Org/MiniMax-H3:diffusion_models/minimax_h3_fl2va_bf16.safetensors",
+          "text_encoders/qwen3vl_32b_minimax_h3_bf16.safetensors": "Comfy-Org/MiniMax-H3:text_encoders/qwen3vl_32b_minimax_h3_bf16.safetensors",
+          "vae/minimax_h3_video_vae_fp16.safetensors": "Comfy-Org/MiniMax-H3:vae/minimax_h3_video_vae_fp16.safetensors",
+          "vae/minimax_h3_audio_vae_fp32.safetensors": "Comfy-Org/MiniMax-H3:vae/minimax_h3_audio_vae_fp32.safetensors"
+        },
+        "comfyui_params": null,
+        "comfyui_compile": true
+      },
+      "server_command": "python3 /home/rdxa/h3bench/fw-venvs/comfyui/ComfyUI/main.py --listen 127.0.0.1 --port 48101 --disable-auto-launch --extra-model-paths-config /home/rdxa/h3bench/comfy-ws/minimax_h3_t2va_480p_1gpu/extra_model_paths.yaml --input-directory /home/rdxa/h3bench/comfy-ws/minimax_h3_t2va_480p_1gpu/input --output-directory /home/rdxa/h3bench/comfy-ws/minimax_h3_t2va_480p_1gpu/output --fast-disk --cache-none",
+      "metrics": {
+        "server_startup_s": 6.58,
+        "warmup_s": 514.12
+      }
+    }
+  ],
+  "throughput_results": [],
+  "partial": false,
+  "model_revisions": {
+    "MiniMaxAI/MiniMax-H3": "42ed227ee7df40d41602854ae760620d6eb651fe"
+  }
+}

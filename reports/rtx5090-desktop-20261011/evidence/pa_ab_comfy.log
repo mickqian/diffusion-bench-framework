@@ -1,0 +1,9 @@
+PA r1 sglang RESULT qwen_image_21_t2i_1024 rc=0   [server] Warmup requests:   0%
+PA r1 comfyui RESULT qwen_image_21_t2i_1024 rc=0 
+PA r2 sglang RESULT qwen_image_21_t2i_1024 rc=0   [server] Warmup requests:   0%
+PA r2 comfyui RESULT qwen_image_21_t2i_1024 rc=0 
+PA pa5090ab1011comfy1_qwen_ comfyui median=13.823 samples=[13.79, 13.816, 13.823, 13.829, 13.843] err=None
+PA pa5090ab1011comfy2_qwen_ comfyui median=13.827 samples=[13.79, 13.815, 13.827, 13.838, 13.85] err=None
+PA pa5090ab1011sgl1_qwen_im sglang median=13.285 samples=[13.23, 13.261, 13.285, 13.297, 13.304] err=None
+PA pa5090ab1011sgl2_qwen_im sglang median=13.298 samples=[13.252, 13.283, 13.298, 13.312, 13.348] err=None
+=== PA_AB_DONE 2026-10-11T08:46:52-07:00
