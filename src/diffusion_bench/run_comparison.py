@@ -1083,18 +1083,35 @@ HEALTH_ENDPOINTS = {
 }
 
 
+# sglang moves to another port when the requested one is taken (unless
+# --strict-ports), so the client polls a port nobody serves until the health
+# timeout: 40 minutes for a FastH3 arm on 4xH200 (2026-10-11).
+_PORT_MOVED_RE = re.compile(r"Port (\d+) was unavailable, using port (\d+) instead")
+
+
+def _moved_http_port(line: str, port: int) -> str | None:
+    """The startup error for a server log line that moves the HTTP port, else None."""
+    m = _PORT_MOVED_RE.search(line)
+    if m is None or int(m.group(1)) != port:
+        return None  # an internal (scheduler/master) port may move freely
+    return f"server could not bind port {port} and listens on {m.group(2)} instead"
+
+
 def wait_for_health(
     base_url: str,
     framework: str = "sglang",
     timeout: int = HEALTH_TIMEOUT,
     proc: subprocess.Popen | None = None,
     health_path: str | None = None,
+    startup_errors: list[str] | None = None,
 ) -> None:
     """Poll health endpoint until 200, then verify model is loaded.
 
     ``health_path`` lets a generic, config-driven framework override the probe
     path (from its ``http_server.health_path``); otherwise the per-framework
     default is used, falling back to ``/health`` for OpenAI-compatible servers.
+    ``startup_errors`` is filled from the server log; the first entry fails the
+    wait at once.
     """
     endpoint = health_path or HEALTH_ENDPOINTS.get(framework, "/health")
     health_url = f"{base_url}{endpoint}"
@@ -1106,6 +1123,8 @@ def wait_for_health(
                 f"{framework} server exited before health check passed "
                 f"(exit {proc.returncode})"
             )
+        if startup_errors:
+            raise RuntimeError(f"{framework} {startup_errors[0]}")
         try:
             resp = requests.get(health_url, timeout=2)
             if resp.status_code == 200:
@@ -2976,6 +2995,7 @@ def run_case_framework(
     log_thread = None
     native_fallbacks: list[str] = []
     checkpoint_errors: list[str] = []
+    startup_errors: list[str] = []
 
     proc = None
     startup_t0 = time.time()
@@ -3015,6 +3035,9 @@ def run_case_framework(
                     # reported error can name it.
                     if "FileNotFoundError" in line or "No such file or directory" in line:
                         checkpoint_errors.append(line.strip()[:300])
+                    moved = _moved_http_port(line, port)
+                    if moved:
+                        startup_errors.append(moved)
             except ValueError:
                 pass  # pipe closed
 
@@ -3028,6 +3051,7 @@ def run_case_framework(
             framework,
             proc=proc,
             health_path=(fw_cfg.get("http_server") or {}).get("health_path"),
+            startup_errors=startup_errors,
         )
         # Time-to-ready (process start -> health pass) captures the cold-start
         # cost, which for compile-on serving includes graph compilation. The
