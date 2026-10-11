@@ -5575,14 +5575,14 @@
             "model_revision": "71a17d72c58ce3eeec418144de2a5a2090cb4c04",
             "frameworks": {
                 "sglang": {
-                    "serve_args": "--model-type diffusion --warmup-mode server --ulysses-degree 4 --performance-mode speed --enable-torch-compile false --revision 71a17d72c58ce3eeec418144de2a5a2090cb4c04",
+                    "serve_args": "--model-type diffusion --warmup-mode server --ulysses-degree 4 --component-attention-backends transformer=video_sparse_attn_h3 --performance-mode speed --enable-torch-compile false --revision 71a17d72c58ce3eeec418144de2a5a2090cb4c04",
                     "command_profiles": {
                         "default": {
-                            "description": "sglang's FastH3 8-Step V2 path: the checkpoint's contract selects VSA-H3 at 0.8 for the transformer; Ulysses 4, resident (speed), eager.",
-                            "sglang_ref": "origin/main + sgl-project/sglang#41839 (FastH3 8-Step V2 support, open 2026-09-30)",
+                            "description": "sglang's FastH3 8-Step V2 path: VSA-H3 at the checkpoint's 0.8 for the transformer, selected explicitly; Ulysses 4, resident (speed), eager.",
+                            "sglang_ref": "origin/main 6576e50cd5 (FastH3 V2 support merged as sgl-project/sglang#37662)",
                             "num_gpus": 4,
-                            "serve_args": "--model-type diffusion --warmup-mode server --ulysses-degree 4 --performance-mode speed --enable-torch-compile false --revision 71a17d72c58ce3eeec418144de2a5a2090cb4c04",
-                            "notes": "#41839's cookbook command is `sglang serve --model-path FastVideo/FastVideo-FastH3-8-Step-V2 --num-gpus 4`; the case adds the benchmark's standing sglang flags (server warmup, speed residency, compile off -- VSA-H3 rejects torch.compile anyway). `--model-variant` must not be passed: FastH3 rejects it. Validated 2026-09-30 on 4xH200 (sglang bd66ce3 + #41839 at 8362359): 11.28 s client median in each of three arms (server total 10.46-10.54 s: denoise 8.80 s, decode 1.27 s); with #41819's overlapped MP4 encode on top, 10.89 s. 4xGB300: 8.085/8.081 s (server 6.42-6.46 s: the serial save is ~1.6 s there); with #41819, 6.97 s."
+                            "serve_args": "--model-type diffusion --warmup-mode server --ulysses-degree 4 --component-attention-backends transformer=video_sparse_attn_h3 --performance-mode speed --enable-torch-compile false --revision 71a17d72c58ce3eeec418144de2a5a2090cb4c04",
+                            "notes": "Since sgl-project/sglang#37662 (merged 2026-10-08) VSA-H3 runs only when selected for the transformer, as the cookbook's 4xGB300 command does; without it the DiT resolves to dense FA and skips the trained to_gate_compress branch. #41839, which this profile was written against, selected VSA-H3 itself, so from 2026-10-08 the profile silently measured dense attention while vLLM-Omni ran VSA. 4xH200, main 6576e50cd5, two interleaved rounds: dense FA 12.64/12.65 s (denoise 10.85 s) -> VSA-H3 10.01/9.99 s (denoise 8.23 s); vLLM-Omni --enforce-eager 10.95/11.00 s. Bisected first: the 09-30 tree (bd66ce3 + #41839 at 8362359) runs denoise 8.74 s and #37662's merge commit 10.54 s, both eight DiT forwards per request. The case adds the benchmark's standing sglang flags (server warmup, speed residency, compile off -- VSA-H3 rejects torch.compile). `--model-variant` must not be passed: FastH3 rejects it. Earlier: 2026-09-30 4xH200 with #41839 11.28 s; 4xGB300 8.085/8.081 s, 6.97 s with #41819."
                         }
                     }
                 },
