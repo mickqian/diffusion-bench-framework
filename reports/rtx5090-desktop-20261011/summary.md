@@ -63,12 +63,14 @@ default compiled path; with `--enforce-eager` it runs 15.89 s (t2i) and 18.47 s
 - ComfyUI and LightX2V: the case profiles' rtx5090 commands, recorded per cell
   in [merged.json](merged.json).
 
-## Not published to the Pages data
+## Published to the history, not as the latest run
 
-`scripts/publish_bench_run.py` points `latest-cross-framework.json` at the run
-it publishes, which would replace the GB300 round as the headline. The merge
-itself ran with the publish gates (no command drift, no partial sources, no
-native fallbacks): [merged.json](merged.json), [issue.md](issue.md).
+The run is in `docs/data/historical-cross-framework.json` as
+`rtx5090-desktop-20261011`. It went in with `--keep-latest`
+(mickqian/diffusion-bench-framework#12), so `latest-cross-framework.json`
+stays on the 4xGB300 round. The merge ran with the publish gates (no command
+drift, no partial sources, no native fallbacks): [merged.json](merged.json),
+[issue.md](issue.md).
 
 ## Reproduce
 
@@ -81,7 +83,7 @@ vLLM-Omni eager, with a memory watchdog) and
 DBF_REPORT_DIR=reports/rtx5090-desktop-20261011 scripts/merge_and_publish_run.sh \
   "<raw/run_pa5090qwen1010_*> <qwen1010b> <qwen1010c> <h31010b> <main1011> <ab1011comfy1> <ab1011sgl1> <ab1011comfy2> <ab1011sgl2>" \
   rtx5090-desktop-20261011 '1x RTX 5090 desktop' '1x NVIDIA GeForce RTX 5090 32GB (desktop, 60 GB RAM)' \
-  scripts/run_rtx5090_pa_20261010.sh
+  scripts/run_rtx5090_pa_20261010.sh --live --keep-latest
 ```
 
 Later files win per (case, framework), so the sglang row is the last
