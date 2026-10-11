@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Merge a finished run's per-case JSONs, gate it, and publish.
 #
-#   scripts/merge_and_publish_run.sh <results-glob> <run-id> <label> <gpu> <reproduce> [--live] [--note K=V ...]
+#   scripts/merge_and_publish_run.sh <results-glob> <run-id> <label> <gpu> <reproduce> [--live] [--keep-latest] [--note K=V ...]
 #
 #   scripts/merge_and_publish_run.sh \
 #       'tmp/pull/run_b200final0913_*.json' b200x4-final-20260913 \
@@ -33,13 +33,14 @@ REPRODUCE="${5:?repo-relative path of the script that produced this run}"
 shift 5
 
 LIVE=0
-# Expanded below as ${NOTES[@]+"${NOTES[@]}"}: under `set -u` an empty array is an
+# Expanded below as ${PUBLISH_ARGS[@]+"${PUBLISH_ARGS[@]}"}: under `set -u` an empty array is an
 # unbound variable in bash < 4.4, and macOS still ships 3.2.
-NOTES=()
+PUBLISH_ARGS=()
 while [ "$#" -gt 0 ]; do
   case "$1" in
     --live) LIVE=1; shift ;;
-    --note) NOTES+=(--note "$2"); shift 2 ;;
+    --keep-latest) PUBLISH_ARGS+=(--keep-latest); shift ;;
+    --note) PUBLISH_ARGS+=(--note "$2"); shift 2 ;;
     *) echo "unknown argument: $1" >&2; exit 2 ;;
   esac
 done
@@ -103,5 +104,5 @@ PYTHONPATH=src "${PY_BIN}" scripts/publish_bench_run.py \
   --label "${LABEL}" \
   --gpu "${GPU}" \
   --reproduce "${REPRODUCE}" \
-  ${NOTES[@]+"${NOTES[@]}"} \
+  ${PUBLISH_ARGS[@]+"${PUBLISH_ARGS[@]}"} \
   $([ "${LIVE}" = 1 ] || echo --dry-run)
