@@ -1,0 +1,359 @@
+{
+  "timestamp": "2026-10-11T03:58:41.016460+00:00",
+  "commit_sha": "0466d3cc97a5c93f0114aeff640de568e334610a",
+  "run_id": "local",
+  "hardware": {
+    "runner_labels": null,
+    "gpu_config": null,
+    "gpus": [
+      "NVIDIA GB300, 284208 MiB, 580.159.04",
+      "NVIDIA GB300, 284208 MiB, 580.159.04",
+      "NVIDIA GB300, 284208 MiB, 580.159.04",
+      "NVIDIA GB300, 284208 MiB, 580.159.04"
+    ],
+    "hardware_profile_override": "gb300"
+  },
+  "sglang_runtime": {
+    "package_version": "0.5.21",
+    "module_path": "/scratch/gb300/sgl-main1011/python/sglang/__init__.py",
+    "git_root": "/scratch/gb300/sgl-main1011",
+    "git_commit": "6576e50cd5e5817b10e12245104603eb1b0d8a4f"
+  },
+  "framework_runtime": {
+    "venv_root": "/scratch/gb300/fw-venvs",
+    "install_specs": {
+      "vllm": "vllm==0.18.0",
+      "vllm_omni": "vllm-omni==0.18.0",
+      "lightx2v": "git+https://github.com/ModelTC/LightX2V.git@7efd05f8e1425b83321fd4f1cef779ef6504076f",
+      "lightx2v_flash_attn": "flash-attn==2.8.3",
+      "lightx2v_flash_attn3": "",
+      "lightx2v_fa3_hf_repo": "varunneal/flash-attention-3",
+      "lightx2v_fa3_hf_revision": "de87b9b5af06dd9984df595bef90b2eba44b181a",
+      "lightx2v_fa3_hf_subdir": "build/torch28-cxx11-cu128-x86_64-linux/flash_attention_3",
+      "lightx2v_flashinfer": "flashinfer-python==0.6.11",
+      "trtllm": "tensorrt-llm==1.3.0rc18",
+      "fastvideo": "https://github.com/hao-ai-lab/FastVideo.git@main",
+      "torch_cuda_arch_list": ""
+    },
+    "launchers": {
+      "vllm_omni_server_bin": "vllm",
+      "vllm_omni_required_help_args": "--omni",
+      "trtllm_visual_server_bin": "trtllm-serve"
+    },
+    "vllm-omni": {
+      "venv_path": "/scratch/gb300/fw-venvs/vllm-omni",
+      "packages": {
+        "vllm": {
+          "Name": "vllm",
+          "Version": "0.31.0",
+          "Home-page": "https://github.com/vllm-project/vllm",
+          "Location": "/scratch/gb300/fw-venvs/vllm-omni/lib/python3.12/site-packages"
+        },
+        "vllm-omni": {
+          "Name": "vllm-omni",
+          "Version": "0.31.0rc2.dev98+gf69b1f2b1",
+          "Home-page": "https://github.com/vllm-project/vllm-omni",
+          "Location": "/scratch/gb300/fw-venvs/vllm-omni/lib/python3.12/site-packages"
+        },
+        "torch": {
+          "Name": "torch",
+          "Version": "2.13.0",
+          "Home-page": "https://pytorch.org",
+          "Location": "/scratch/gb300/fw-venvs/vllm-omni/lib/python3.12/site-packages"
+        },
+        "transformers": {
+          "Name": "transformers",
+          "Version": "5.14.1",
+          "Home-page": "https://github.com/huggingface/transformers",
+          "Location": "/scratch/gb300/fw-venvs/vllm-omni/lib/python3.12/site-packages"
+        },
+        "diffusers": {
+          "Name": "diffusers",
+          "Version": "0.40.0",
+          "Home-page": "https://github.com/huggingface/diffusers",
+          "Location": "/scratch/gb300/fw-venvs/vllm-omni/lib/python3.12/site-packages"
+        },
+        "huggingface_hub": {
+          "Name": "huggingface_hub",
+          "Version": "1.33.0",
+          "Home-page": "https://github.com/huggingface/huggingface_hub",
+          "Location": "/scratch/gb300/fw-venvs/vllm-omni/lib/python3.12/site-packages"
+        }
+      },
+      "direct_urls": {
+        "vllm_omni-0.31.0rc2.dev98+gf69b1f2b1.dist-info": {
+          "url": "file:///scratch/gb300/fw-venvs/vllm-omni/src/vllm-omni",
+          "dir_info": {
+            "editable": true
+          }
+        }
+      }
+    },
+    "lightx2v": {
+      "venv_path": "/scratch/gb300/fw-venvs/lightx2v",
+      "packages": {
+        "lightx2v": {
+          "Name": "lightx2v",
+          "Version": "0.5.0",
+          "Home-page": "https://github.com/ModelTC/LightX2V",
+          "Location": "/scratch/gb300/fw-venvs/lightx2v/lib/python3.12/site-packages"
+        },
+        "flash_attn": {
+          "Name": "flash_attn",
+          "Version": "2.8.3",
+          "Home-page": "https://github.com/Dao-AILab/flash-attention",
+          "Location": "/scratch/gb300/fw-venvs/lightx2v/lib/python3.12/site-packages"
+        },
+        "flashinfer-python": {
+          "Name": "flashinfer-python",
+          "Version": "0.6.11",
+          "Home-page": "https://github.com/flashinfer-ai/flashinfer",
+          "Location": "/scratch/gb300/fw-venvs/lightx2v/lib/python3.12/site-packages"
+        },
+        "torch": {
+          "Name": "torch",
+          "Version": "2.11.0",
+          "Home-page": "https://pytorch.org",
+          "Location": "/scratch/gb300/fw-venvs/lightx2v/lib/python3.12/site-packages"
+        },
+        "transformers": {
+          "Name": "transformers",
+          "Version": "5.19.0",
+          "Home-page": "https://github.com/huggingface/transformers",
+          "Location": "/scratch/gb300/fw-venvs/lightx2v/lib/python3.12/site-packages"
+        },
+        "diffusers": {
+          "Name": "diffusers",
+          "Version": "0.41.0",
+          "Home-page": "https://github.com/huggingface/diffusers",
+          "Location": "/scratch/gb300/fw-venvs/lightx2v/lib/python3.12/site-packages"
+        },
+        "huggingface_hub": {
+          "Name": "huggingface_hub",
+          "Version": "1.33.0",
+          "Home-page": "https://github.com/huggingface/huggingface_hub",
+          "Location": "/scratch/gb300/fw-venvs/lightx2v/lib/python3.12/site-packages"
+        }
+      },
+      "direct_urls": {
+        "lightx2v-0.5.0.dist-info": {
+          "url": "https://github.com/ModelTC/LightX2V.git",
+          "vcs_info": {
+            "commit_id": "b6d38283cb8176303f9155e639bcd496553d3402",
+            "requested_revision": "b6d38283cb8176303f9155e639bcd496553d3402",
+            "vcs": "git"
+          }
+        }
+      }
+    },
+    "trtllm-visual": {
+      "venv_path": "/scratch/gb300/fw-venvs/trtllm-visual",
+      "packages": {
+        "tensorrt_llm": {
+          "Name": "tensorrt_llm",
+          "Version": "1.3.0rc29",
+          "Home-page": "https://github.com/NVIDIA/TensorRT-LLM",
+          "Location": "/scratch/gb300/fw-venvs/trtllm-visual/lib/python3.12/site-packages"
+        },
+        "torch": {
+          "Name": "torch",
+          "Version": "2.14.0",
+          "Home-page": "https://pytorch.org",
+          "Location": "/scratch/gb300/fw-venvs/trtllm-visual/lib/python3.12/site-packages"
+        },
+        "transformers": {
+          "Name": "transformers",
+          "Version": "5.5.4",
+          "Home-page": "https://github.com/huggingface/transformers",
+          "Location": "/scratch/gb300/fw-venvs/trtllm-visual/lib/python3.12/site-packages"
+        },
+        "diffusers": {
+          "Name": "diffusers",
+          "Version": "0.40.0",
+          "Home-page": "https://github.com/huggingface/diffusers",
+          "Location": "/scratch/gb300/fw-venvs/trtllm-visual/lib/python3.12/site-packages"
+        },
+        "huggingface_hub": {
+          "Name": "huggingface_hub",
+          "Version": "1.33.0",
+          "Home-page": "https://github.com/huggingface/huggingface_hub",
+          "Location": "/scratch/gb300/fw-venvs/trtllm-visual/lib/python3.12/site-packages"
+        }
+      }
+    },
+    "comfyui": {
+      "venv_path": "/scratch/gb300/fw-venvs/comfyui",
+      "packages": {
+        "torchvision": {
+          "Name": "torchvision",
+          "Version": "0.29.1+cu130",
+          "Home-page": "https://github.com/pytorch/vision",
+          "Location": "/scratch/gb300/fw-venvs/comfyui/lib/python3.12/site-packages"
+        },
+        "torchaudio": {
+          "Name": "torchaudio",
+          "Version": "2.11.0+cu130",
+          "Home-page": "https://github.com/pytorch/audio",
+          "Location": "/scratch/gb300/fw-venvs/comfyui/lib/python3.12/site-packages"
+        },
+        "comfy-kitchen": {
+          "Name": "comfy-kitchen",
+          "Version": "0.2.37",
+          "Home-page": "https://github.com/Comfy-Org/comfy-kitchen",
+          "Location": "/scratch/gb300/fw-venvs/comfyui/lib/python3.12/site-packages"
+        },
+        "comfy-aimdo": {
+          "Name": "comfy-aimdo",
+          "Version": "0.5.6",
+          "Home-page": "",
+          "Location": "/scratch/gb300/fw-venvs/comfyui/lib/python3.12/site-packages"
+        },
+        "comfyui_frontend_package": {
+          "Name": "comfyui_frontend_package",
+          "Version": "1.55.14",
+          "Home-page": "",
+          "Location": "/scratch/gb300/fw-venvs/comfyui/lib/python3.12/site-packages"
+        },
+        "safetensors": {
+          "Name": "safetensors",
+          "Version": "0.8.0",
+          "Home-page": "https://github.com/huggingface/safetensors",
+          "Location": "/scratch/gb300/fw-venvs/comfyui/lib/python3.12/site-packages"
+        },
+        "torch": {
+          "Name": "torch",
+          "Version": "2.14.1+cu130",
+          "Home-page": "https://pytorch.org",
+          "Location": "/scratch/gb300/fw-venvs/comfyui/lib/python3.12/site-packages"
+        },
+        "transformers": {
+          "Name": "transformers",
+          "Version": "5.19.0",
+          "Home-page": "https://github.com/huggingface/transformers",
+          "Location": "/scratch/gb300/fw-venvs/comfyui/lib/python3.12/site-packages"
+        },
+        "huggingface_hub": {
+          "Name": "huggingface_hub",
+          "Version": "2.2.0",
+          "Home-page": "https://github.com/huggingface/huggingface_hub",
+          "Location": "/scratch/gb300/fw-venvs/comfyui/lib/python3.12/site-packages"
+        }
+      },
+      "source_commit": "0df64eb242b7c5759c3e86afd5d1846d923b1033",
+      "source_commit_date": "2026-10-09T19:55:48-07:00"
+    },
+    "fastvideo": {
+      "venv_path": "/scratch/gb300/fw-venvs/fastvideo"
+    }
+  },
+  "benchmark_env": {},
+  "benchmark_framework_args": {
+    "vllm-omni": [],
+    "lightx2v": {
+      "config": {
+        "use_compile": true
+      }
+    },
+    "fastvideo": []
+  },
+  "torch_compile_disabled": false,
+  "benchmark_modes": [
+    "single_e2e",
+    "throughput"
+  ],
+  "requested_sglang_profile": "auto",
+  "request_inputs": "distinct-per-request",
+  "results": [
+    {
+      "case_id": "cosmos3_nano_t2v_720p_189f",
+      "framework": "sglang",
+      "mode": "single_e2e",
+      "model": "nvidia/Cosmos3-Nano",
+      "task": "text-to-video",
+      "width": 1280,
+      "height": 720,
+      "num_frames": 189,
+      "fps": 24,
+      "num_inference_steps": 35,
+      "guidance_scale": 6.0,
+      "guidance_scale_2": null,
+      "true_cfg_scale": null,
+      "negative_prompt_set": true,
+      "num_gpus": 4,
+      "latency_s": 22.465,
+      "error": null,
+      "framework_metadata": {
+        "profile": "gb-4gpu-cfg-ulysses-speed",
+        "profile_request": "auto",
+        "profile_source": "hardware",
+        "framework_ref": null,
+        "hardware": [
+          "gb300",
+          "gb200"
+        ],
+        "hardware_candidates": [
+          "gb300"
+        ],
+        "description": "GB200/GB300: the 4-GPU CFG-parallel + Ulysses-2 command, fully resident in explicit speed mode.",
+        "notes": "2026-10-10, 4x GB300, sglang 3831e7e09: under the default performance_mode=auto, server warmup runs the auto residency probe (1024x1024x81f); after it, gpu_worker._release_warmup_pool drops the IPC/Ulysses all-to-all staging buffers and calls torch.cuda.empty_cache(), which raised RuntimeError 'std::get: wrong index for variant' / 'bad optional access' on some ranks. The ranks diverged and the next ALLTOALL hung until the NCCL watchdog took the server down (health check never passed in 2400 s). Explicit speed mode skips the probe (auto_residency_args_skip_reason) and places what auto chooses on a 288 GB GPU anyway: every component resident. Same command as this model's I2V default. VALIDATION PENDING (2026-10-10 round).",
+        "install_specs": null,
+        "server_bin": null,
+        "use_omni_arg": null,
+        "required_help_args": null,
+        "serve_args": "--model-type diffusion --warmup-mode server --attention-backend fa --cfg-parallel-size 2 --ulysses-degree 2 --dit-layerwise-offload false --performance-mode speed --enable-torch-compile false",
+        "num_gpus": 4,
+        "extra_env_keys": [
+          "SGLANG_DISABLE_COSMOS3_GUARDRAILS"
+        ],
+        "request_inputs": "distinct-per-request",
+        "sglang_profile": "gb-4gpu-cfg-ulysses-speed",
+        "sglang_profile_request": "auto",
+        "sglang_profile_source": "hardware",
+        "sglang_ref": "current-main"
+      },
+      "server_command": "sglang serve --model-path nvidia/Cosmos3-Nano --port 49029 --host 127.0.0.1 --backend sglang --num-gpus 4 --model-type diffusion --warmup-mode server --attention-backend fa --cfg-parallel-size 2 --ulysses-degree 2 --dit-layerwise-offload false --performance-mode speed --enable-torch-compile false",
+      "metrics": {
+        "client_latency_s": 22.465,
+        "client_latency_min_s": 22.462,
+        "client_latency_max_s": 22.468,
+        "measured_repeats": 2,
+        "server_latency_s": 20.453,
+        "server_latency_source": "separate instrumented request, not one of the measured repeats",
+        "diagnostic_stages_s": {
+          "Cosmos3ImagePreprocessStage": 0.0,
+          "Cosmos3TokenizationStage": 0.002,
+          "Cosmos3LatentPreparationStage": 0.0,
+          "Cosmos3TimestepPreparationStage": 0.0,
+          "Cosmos3DenoisingStage": 17.683,
+          "Cosmos3DecodingStage": 2.015
+        },
+        "diagnostic_stage_sum_s": 19.701,
+        "diagnostic_client_latency_s": 22.467,
+        "unattributed_tail_s": 2.766,
+        "unattributed_tail_frac": 0.123,
+        "poll_interval_s": 0.02,
+        "latency_samples_s": [
+          22.462,
+          22.468
+        ],
+        "latency_spread_pct": 0.0,
+        "warmup_latencies_s": [
+          6.504,
+          5.635,
+          5.739
+        ],
+        "warmup_steady_latencies_s": [
+          22.395,
+          22.451
+        ],
+        "server_startup_s": 62.06,
+        "warmup_s": 62.73
+      }
+    }
+  ],
+  "throughput_results": [],
+  "partial": false,
+  "model_revisions": {
+    "nvidia/Cosmos3-Nano": "e59a53c25979a090fa8706c9acc0c254a6e89b92"
+  }
+}
