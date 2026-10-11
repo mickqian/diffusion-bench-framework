@@ -142,7 +142,9 @@ Two H200 cells needed profile fixes before sglang led:
   cookbook's command does. The profile was written against #41839, which
   selected it itself, so from 2026-10-08 sglang measured dense attention
   (without the trained compression gate) while vLLM-Omni ran VSA: 12.64 /
-  12.65 s dense, 10.01 / 9.99 s with VSA-H3 (harness bb560dc). Bisected first:
+  12.65 s dense, 10.01 / 9.99 s with VSA-H3 (harness bb560dc).
+  sgl-project/sglang#43690 makes VSA-H3 FastH3's default on SM90 / SM100 /
+  SM103; its output matches the explicit flag bit for bit. Bisected first:
   the 2026-09-30 tree denoises in 8.74 s and #37662's merge commit in 10.54 s,
   both with eight DiT forwards per request, so no step was added
   ([evidence/h200-eager/fasth3/](evidence/h200-eager/fasth3/)). vLLM-Omni's

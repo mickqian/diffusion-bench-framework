@@ -105,6 +105,6 @@
     "evidence/eager_main_rank1.log": "sglang main eager against vLLM-Omni --enforce-eager, interleaved twice, MiniMax-H3 t2va and ref2va (the two leads under 5%)",
     "evidence/eager_main_rank0.log": "sglang main eager for the two cells published compiled (Cosmos3 T2I, LTX-2)",
     "evidence/h200-eager/": "the same eager-vs-eager check on H200 (sglang main 6576e50cd5, vLLM-Omni f69b1f2b1 on vLLM 0.31.0): 2-GPU cases on a 2xH200 box, 4-GPU cases and reruns on a 4xH200 box; vLLM-Omni runner JSONs per case and round, and the run logs with the sglang arms (h200_eager_summary.log, h200_eager2.log, h200_flux2.log, h200x4_eager.log, h200_rounds_x2/x4/x4f.log)",
-    "evidence/h200-eager/fasth3/": "why sglang FastH3 trailed on H200: NUMA / Ulysses-pipeline A/B (fh3_ab.log), the bisect over sglang trees (fh3_bisect*.log, bis9c_*.json), dense FA against VSA-H3 on main (fh3_vsa.log, tune_fh3*.json), and the one-call VSA kernel timing (vsa_bench.py, vsa_kernel_microbench.log)"
+    "evidence/h200-eager/fasth3/": "why sglang FastH3 trailed on H200: NUMA / Ulysses-pipeline A/B (fh3_ab.log), the bisect over sglang trees (fh3_bisect*.log, bis9c_*.json), dense FA against VSA-H3 on main (fh3_vsa.log, tune_fh3*.json), and the one-call VSA kernel timing (vsa_bench.py, vsa_kernel_microbench.log), and the 4xH200 validation of sgl-project/sglang#43690 (fh3_default_sglang43690.log)"
   }
 }

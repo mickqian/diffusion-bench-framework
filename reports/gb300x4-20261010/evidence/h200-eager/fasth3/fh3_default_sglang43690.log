@@ -1,0 +1,30 @@
+FD hf token loaded
+FD trees ok: base 53295c6972 [kvevents] fix missing topics in replay / pr 0adbe9f487 [diffusion] fix: select VSA-H3 for FastH3 when no
+FD UNIT pr: 
+FD UNIT pr: -- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+FD UNIT pr: 14 passed, 225 deselected, 16 warnings, 3 subtests passed in 16.49s
+FD UNIT pr: [rank0]:[W1011 12:00:13.738487259 ProcessGroupNCCL.cpp:1624] Warning: WARNING: destroy_process_group() was not called before program exit, which can leak resources. For more info, please see https://pytorch.org/docs/stable/distributed.html#shutdown (function operator())
+FD UNIT base (expect fail): =========================== short test summary info ============================
+FD UNIT base (expect fail): FAILED sglang/multimodal_gen/test/unit/test_server_args_pr.py::TestServerArgsPathExpansion::test_fasth3_selects_vsa_h3_for_the_transformer
+FD UNIT base (expect fail): 1 failed, 1 passed, 231 deselected, 16 warnings, 3 subtests passed in 3.76s
+FD TUNE mainDefault_1: median=12.656 samples=[12.649, 12.664] spread=0.1% server=12.602 err=None
+FD      cmd: sglang serve --model-path FastVideo/FastVideo-FastH3-8-Step-V2 --port 61101 --host 127.0.0.1 --backend sglang --num-gpus 4 --model-type diffusion --warmup-mode server --ulysses-degree 4 --performance-mode speed --enable-torch-compile false --revision 71a17d72c58ce3eeec418144de2a5a2090cb4c04 --enable-torch-compile false
+FD TUNE prDefault_1: median=10.064 samples=[10.083, 10.045] spread=0.4% server=10.042 err=None
+FD      cmd: sglang serve --model-path FastVideo/FastVideo-FastH3-8-Step-V2 --port 61103 --host 127.0.0.1 --backend sglang --num-gpus 4 --model-type diffusion --warmup-mode server --ulysses-degree 4 --performance-mode speed --enable-torch-compile false --revision 71a17d72c58ce3eeec418144de2a5a2090cb4c04 --enable-torch-compile false
+FD TUNE prFa_1: median=12.646 samples=[12.625, 12.667] spread=0.3% server=12.6 err=None
+FD      cmd: sglang serve --model-path FastVideo/FastVideo-FastH3-8-Step-V2 --port 61105 --host 127.0.0.1 --backend sglang --num-gpus 4 --model-type diffusion --warmup-mode server --ulysses-degree 4 --performance-mode speed --enable-torch-compile false --revision 71a17d72c58ce3eeec418144de2a5a2090cb4c04 --enable-torch-compile false --component-attention-backends transformer=fa
+FD TUNE mainVsa_1: median=10.053 samples=[10.051, 10.055] spread=0.0% server=10.004 err=None
+FD      cmd: sglang serve --model-path FastVideo/FastVideo-FastH3-8-Step-V2 --port 61107 --host 127.0.0.1 --backend sglang --num-gpus 4 --model-type diffusion --warmup-mode server --ulysses-degree 4 --performance-mode speed --enable-torch-compile false --revision 71a17d72c58ce3eeec418144de2a5a2090cb4c04 --enable-torch-compile false --component-attention-backends transformer=video_sparse_attn_h3
+FD TUNE mainDefault_2: median=12.639 samples=[12.665, 12.614] spread=0.4% server=12.598 err=None
+FD      cmd: sglang serve --model-path FastVideo/FastVideo-FastH3-8-Step-V2 --port 61109 --host 127.0.0.1 --backend sglang --num-gpus 4 --model-type diffusion --warmup-mode server --ulysses-degree 4 --performance-mode speed --enable-torch-compile false --revision 71a17d72c58ce3eeec418144de2a5a2090cb4c04 --enable-torch-compile false
+FD TUNE prDefault_2: median=10.027 samples=[9.999, 10.056] spread=0.6% server=10.048 err=None
+FD      cmd: sglang serve --model-path FastVideo/FastVideo-FastH3-8-Step-V2 --port 61111 --host 127.0.0.1 --backend sglang --num-gpus 4 --model-type diffusion --warmup-mode server --ulysses-degree 4 --performance-mode speed --enable-torch-compile false --revision 71a17d72c58ce3eeec418144de2a5a2090cb4c04 --enable-torch-compile false
+FD TUNE prFa_2: median=12.706 samples=[12.665, 12.746] spread=0.6% server=12.592 err=None
+FD      cmd: sglang serve --model-path FastVideo/FastVideo-FastH3-8-Step-V2 --port 61113 --host 127.0.0.1 --backend sglang --num-gpus 4 --model-type diffusion --warmup-mode server --ulysses-degree 4 --performance-mode speed --enable-torch-compile false --revision 71a17d72c58ce3eeec418144de2a5a2090cb4c04 --enable-torch-compile false --component-attention-backends transformer=fa
+FD TUNE mainVsa_2: median=9.994 samples=[9.996, 9.991] spread=0.0% server=10.053 err=None
+FD      cmd: sglang serve --model-path FastVideo/FastVideo-FastH3-8-Step-V2 --port 61115 --host 127.0.0.1 --backend sglang --num-gpus 4 --model-type diffusion --warmup-mode server --ulysses-degree 4 --performance-mode speed --enable-torch-compile false --revision 71a17d72c58ce3eeec418144de2a5a2090cb4c04 --enable-torch-compile false --component-attention-backends transformer=video_sparse_attn_h3
+FD mainDefault backend:       1 Using fa attention backend;
+FD prDefault backend:       1 Automatically set video_sparse_attn_h3 for the FastH3 transformer, the attention it was distilled with; --component-attention-backends transformer=fa selects dense attention;      1 Using fa attention backend;      2 Using video_sparse_attn_h3 attention backend;
+FD prFa backend:       2 Using fa attention backend;
+FD mainVsa backend:       1 Using fa attention backend;      2 Using video_sparse_attn_h3 attention backend;
+=== FD_DONE 2026-10-11T12:25:06+00:00
