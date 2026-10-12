@@ -1,6 +1,6 @@
 {
-  "timestamp": "2026-10-12T02:23:14.913349+00:00",
-  "commit_sha": "1fd654aa648cc7c78f55f50b2ae87bf01eba87d1",
+  "timestamp": "2026-10-12T04:35:10.120746+00:00",
+  "commit_sha": "8b4f4413b67f425f89a1ac738d79b327b07a90d7",
   "run_id": "gb300x4-20261010",
   "hardware": {
     "runner_labels": null,
@@ -15,12 +15,12 @@
   },
   "sglang_runtime": {
     "package_version": "0.5.21",
-    "module_path": "/scratch/gb/sgl-main/python/sglang/__init__.py",
-    "git_root": "/scratch/gb/sgl-main",
-    "git_commit": "6576e50cd5e5817b10e12245104603eb1b0d8a4f"
+    "module_path": "/sgl-workspace/sglang/python/sglang/__init__.py",
+    "git_root": "/sgl-workspace/sglang",
+    "git_commit": "e00930c5489053f26d86b179cee0d087f846acbb"
   },
   "framework_runtime": {
-    "venv_root": "/scratch/gb/fw-venvs",
+    "venv_root": "/scratch/r/fw-venvs",
     "install_specs": {
       "vllm": "vllm==0.18.0",
       "vllm_omni": "vllm-omni==0.18.0",
@@ -41,7 +41,7 @@
       "trtllm_visual_server_bin": "trtllm-serve"
     },
     "vllm-omni": {
-      "venv_path": "/scratch/gb/fw-venvs/vllm-omni",
+      "venv_path": "/scratch/r/fw-venvs/vllm-omni",
       "packages": {
         "vllm": {
           "Name": "vllm",
@@ -90,13 +90,13 @@
       }
     },
     "lightx2v": {
-      "venv_path": "/scratch/gb/fw-venvs/lightx2v",
+      "venv_path": "/scratch/r/fw-venvs/lightx2v",
       "packages": {
         "lightx2v": {
           "Name": "lightx2v",
           "Version": "0.5.0",
           "Home-page": "https://github.com/ModelTC/LightX2V",
-          "Location": "/scratch/gb300/fw-venvs/lightx2v/lib/python3.12/site-packages"
+          "Location": "/scratch/r/fw-venvs/lightx2v/lib/python3.12/site-packages"
         },
         "flash_attn": {
           "Name": "flash_attn",
@@ -108,31 +108,31 @@
           "Name": "flashinfer-python",
           "Version": "0.6.11",
           "Home-page": "https://github.com/flashinfer-ai/flashinfer",
-          "Location": "/scratch/gb300/fw-venvs/lightx2v/lib/python3.12/site-packages"
+          "Location": "/scratch/r/fw-venvs/lightx2v/lib/python3.12/site-packages"
         },
         "torch": {
           "Name": "torch",
-          "Version": "2.11.0",
+          "Version": "2.14.1",
           "Home-page": "https://pytorch.org",
-          "Location": "/scratch/gb300/fw-venvs/lightx2v/lib/python3.12/site-packages"
+          "Location": "/scratch/r/fw-venvs/lightx2v/lib/python3.12/site-packages"
         },
         "transformers": {
           "Name": "transformers",
           "Version": "5.19.0",
           "Home-page": "https://github.com/huggingface/transformers",
-          "Location": "/scratch/gb300/fw-venvs/lightx2v/lib/python3.12/site-packages"
+          "Location": "/scratch/r/fw-venvs/lightx2v/lib/python3.12/site-packages"
         },
         "diffusers": {
           "Name": "diffusers",
           "Version": "0.41.0",
           "Home-page": "https://github.com/huggingface/diffusers",
-          "Location": "/scratch/gb300/fw-venvs/lightx2v/lib/python3.12/site-packages"
+          "Location": "/scratch/r/fw-venvs/lightx2v/lib/python3.12/site-packages"
         },
         "huggingface_hub": {
           "Name": "huggingface_hub",
           "Version": "1.33.0",
           "Home-page": "https://github.com/huggingface/huggingface_hub",
-          "Location": "/scratch/gb300/fw-venvs/lightx2v/lib/python3.12/site-packages"
+          "Location": "/scratch/r/fw-venvs/lightx2v/lib/python3.12/site-packages"
         }
       },
       "direct_urls": {
@@ -147,7 +147,7 @@
       }
     },
     "trtllm-visual": {
-      "venv_path": "/scratch/gb/fw-venvs/trtllm-visual",
+      "venv_path": "/scratch/r/fw-venvs/trtllm-visual",
       "packages": {
         "tensorrt_llm": {
           "Name": "tensorrt_llm",
@@ -182,7 +182,7 @@
       }
     },
     "comfyui": {
-      "venv_path": "/scratch/gb/fw-venvs/comfyui",
+      "venv_path": "/scratch/r/fw-venvs/comfyui",
       "packages": {
         "torchvision": {
           "Name": "torchvision",
@@ -243,7 +243,7 @@
       "source_commit_date": "2026-10-09T19:55:48-07:00"
     },
     "fastvideo": {
-      "venv_path": "/scratch/gb/fw-venvs/fastvideo",
+      "venv_path": "/scratch/r/fw-venvs/fastvideo",
       "packages": {
         "fastvideo": {
           "Name": "fastvideo",
@@ -681,6 +681,60 @@
       "run_id": "local",
       "commit_sha": "41c50b0aa808caddb422be1922f6ad088dcf3ee7",
       "timestamp": "2026-10-11T16:09:27.631197+00:00"
+    },
+    {
+      "path": "reports/round-20261010/raw/run_rf2lx2_minimax_h3_t2va_5s.json",
+      "run_id": "local",
+      "commit_sha": "8b4f4413b67f425f89a1ac738d79b327b07a90d7",
+      "timestamp": "2026-10-12T03:41:27.546318+00:00"
+    },
+    {
+      "path": "reports/round-20261010/raw/run_rf2lx2_minimax_h3_ref2va_5s.json",
+      "run_id": "local",
+      "commit_sha": "8b4f4413b67f425f89a1ac738d79b327b07a90d7",
+      "timestamp": "2026-10-12T03:47:35.935367+00:00"
+    },
+    {
+      "path": "reports/round-20261010/raw/run_rf2lx4_minimax_h3_t2va_5s_4gpu.json",
+      "run_id": "local",
+      "commit_sha": "8b4f4413b67f425f89a1ac738d79b327b07a90d7",
+      "timestamp": "2026-10-12T03:55:54.919338+00:00"
+    },
+    {
+      "path": "reports/round-20261010/raw/run_rf3sgl1_minimax_h3_t2va_5s_4gpu.json",
+      "run_id": "local",
+      "commit_sha": "8b4f4413b67f425f89a1ac738d79b327b07a90d7",
+      "timestamp": "2026-10-12T04:03:38.114638+00:00"
+    },
+    {
+      "path": "reports/round-20261010/raw/run_rf3lx1_minimax_h3_t2va_5s_4gpu.json",
+      "run_id": "local",
+      "commit_sha": "8b4f4413b67f425f89a1ac738d79b327b07a90d7",
+      "timestamp": "2026-10-12T04:08:05.798249+00:00"
+    },
+    {
+      "path": "reports/round-20261010/raw/run_rf3sgl2_minimax_h3_t2va_5s_4gpu.json",
+      "run_id": "local",
+      "commit_sha": "8b4f4413b67f425f89a1ac738d79b327b07a90d7",
+      "timestamp": "2026-10-12T04:12:56.827193+00:00"
+    },
+    {
+      "path": "reports/round-20261010/raw/run_rf3lx2_minimax_h3_t2va_5s_4gpu.json",
+      "run_id": "local",
+      "commit_sha": "8b4f4413b67f425f89a1ac738d79b327b07a90d7",
+      "timestamp": "2026-10-12T04:17:25.026906+00:00"
+    },
+    {
+      "path": "reports/round-20261010/raw/run_rf2sglf1_flux1_dev_t2i_1024.json",
+      "run_id": "local",
+      "commit_sha": "8b4f4413b67f425f89a1ac738d79b327b07a90d7",
+      "timestamp": "2026-10-12T04:00:19.812791+00:00"
+    },
+    {
+      "path": "reports/round-20261010/raw/run_rf4lxtp_minimax_h3_t2va_5s.json",
+      "run_id": "local",
+      "commit_sha": "8b4f4413b67f425f89a1ac738d79b327b07a90d7",
+      "timestamp": "2026-10-12T04:24:12.130988+00:00"
     }
   ],
   "results": [
@@ -700,73 +754,74 @@
       "true_cfg_scale": null,
       "negative_prompt_set": false,
       "num_gpus": 2,
-      "latency_s": 3.998,
+      "latency_s": 2.786,
       "error": null,
       "framework_metadata": {
-        "profile": "blackwell-2gpu-tp-eager",
+        "profile": "gb300-2gpu-tp-compile",
         "profile_request": "auto",
         "profile_source": "hardware",
         "framework_ref": null,
         "hardware": [
-          "b200",
-          "gb200",
-          "b300",
           "gb300"
         ],
         "hardware_candidates": [
           "gb300"
         ],
-        "description": "Blackwell 2-GPU TP legacy-compatible FLUX compile profile.",
-        "notes": "Use for SGLang commits before --performance-mode speed existed; TP remains explicit. Measured on 2xB200 (sglang 0.5.19, ABAB interleaved x4, 2026-09-12): this profile and blackwell-2gpu-tp-speed-eager are indistinguishable -- paired diffs +1.6/+7.6/+1.2/-5.8%, mean +1.15% with mixed signs, against within-arm spreads of 6.6% and 7.9%. So the 'legacy' label is about which flags existed, NOT about speed: --performance-mode speed buys nothing measurable here, and the two profiles are left in this order deliberately. Do not re-run this comparison without a reason; two pairs alone look like a +4.6% win and are noise.",
+        "description": "GB300 2-GPU TP2 sglang FLUX.1 with torch.compile.",
+        "notes": null,
         "install_specs": null,
         "server_bin": null,
         "use_omni_arg": null,
         "required_help_args": null,
-        "serve_args": "--model-type diffusion --warmup-mode server --dit-layerwise-offload false --tp-size 2 --enable-torch-compile false",
+        "serve_args": "--model-type diffusion --warmup-mode server --dit-layerwise-offload false --tp-size 2 --enable-torch-compile true",
         "num_gpus": 2,
         "extra_env_keys": [],
         "request_inputs": "distinct-per-request",
-        "sglang_profile": "blackwell-2gpu-tp-eager",
+        "sglang_profile": "gb300-2gpu-tp-compile",
         "sglang_profile_request": "auto",
         "sglang_profile_source": "hardware",
-        "sglang_ref": "legacy-compatible"
+        "sglang_ref": "main 6576e50cd5"
       },
-      "server_command": "sglang serve --model-path black-forest-labs/FLUX.1-dev --port 49037 --host 127.0.0.1 --backend sglang --num-gpus 2 --model-type diffusion --warmup-mode server --dit-layerwise-offload false --tp-size 2 --enable-torch-compile false",
+      "server_command": "sglang serve --model-path black-forest-labs/FLUX.1-dev --port 62031 --host 127.0.0.1 --backend sglang --num-gpus 2 --model-type diffusion --warmup-mode server --dit-layerwise-offload false --tp-size 2 --enable-torch-compile true",
       "metrics": {
-        "client_latency_s": 3.998,
-        "client_latency_min_s": 3.881,
-        "client_latency_max_s": 4.039,
+        "client_latency_s": 2.786,
+        "client_latency_min_s": 2.744,
+        "client_latency_max_s": 2.82,
         "measured_repeats": 5,
-        "server_latency_s": 3.813,
+        "server_latency_s": 2.77,
         "server_latency_source": "separate instrumented request, not one of the measured repeats",
         "diagnostic_stages_s": {
           "InputValidationStage": 0.0,
-          "TextEncodingStage": 0.052,
+          "TextEncodingStage": 0.062,
           "LatentPreparationStage": 0.0,
           "TimestepPreparationStage": 0.0,
-          "DenoisingStage": 3.746,
-          "DecodingStage": 0.011
+          "DenoisingStage": 2.666,
+          "DecodingStage": 0.023
         },
-        "diagnostic_stage_sum_s": 3.81,
-        "diagnostic_client_latency_s": 3.891,
-        "unattributed_tail_s": 0.081,
-        "unattributed_tail_frac": 0.021,
+        "diagnostic_stage_sum_s": 2.751,
+        "diagnostic_client_latency_s": 2.787,
+        "unattributed_tail_s": 0.036,
+        "unattributed_tail_frac": 0.013,
         "latency_samples_s": [
-          3.998,
-          4.039,
-          3.881,
-          4.005,
-          3.97
+          2.82,
+          2.786,
+          2.784,
+          2.801,
+          2.744
         ],
-        "latency_spread_pct": 4.1,
+        "latency_spread_pct": 2.8,
         "warmup_latencies_s": [
-          4.02,
-          3.895
+          0.43,
+          0.293
         ],
-        "server_startup_s": 44.04,
-        "warmup_s": 7.92
+        "warmup_steady_latencies_s": [
+          2.792,
+          2.794
+        ],
+        "server_startup_s": 82.07,
+        "warmup_s": 6.31
       },
-      "source_result": "reports/round-20261010/raw/run_gb300img1011main_flux1_dev_t2i_1024_flux1_dev_t2i_1024.json"
+      "source_result": "reports/round-20261010/raw/run_rf2sglf1_flux1_dev_t2i_1024.json"
     },
     {
       "case_id": "flux1_dev_t2i_1024",
@@ -3841,13 +3896,13 @@
       "true_cfg_scale": null,
       "negative_prompt_set": false,
       "num_gpus": 2,
-      "latency_s": 141.04,
+      "latency_s": 64.09,
       "error": null,
       "framework_metadata": {
-        "profile": "blackwell-tp2-fa2",
+        "profile": "blackwell-sp2-sdpa",
         "profile_request": "auto",
         "profile_source": "hardware",
-        "framework_ref": "lightx2v main 0c2edc12 (2026-10-05)",
+        "framework_ref": "lightx2v main b6d38283 (2026-10-09)",
         "hardware": [
           "b200",
           "b300",
@@ -3857,8 +3912,8 @@
         "hardware_candidates": [
           "gb300"
         ],
-        "description": "Datacenter Blackwell: the default command with FlashAttention 2 in place of the Hopper-only FA3.",
-        "notes": "VALIDATION PENDING (2026-10-08). flash_attn3 is a Hopper-only kernel; FlashAttention 2 (source-built for sm_100) is what every LightX2V Blackwell profile here runs, the same exact-softmax class. Untested alternative: torch_sdpa (cuDNN / flash SDPA, what sglang resolves for H3 on B200). Otherwise the default profile; see its notes.",
+        "description": null,
+        "notes": "Replaces blackwell-tp2-fa2: FlashAttention 2 on Blackwell is the slow exact kernel, and that profile was never validated (its notes said so); it published 141.04 s on minimax_h3_t2va_5s (4xGB300, 2026-10-10) against sglang's 57.46 s. LightX2V's MiniMax-H3 attention is single-segment (transformer_infer.py builds cu_seqlens = (0, seq_len)), so torch_sdpa -- cuDNN SDPA on sm_100/sm_103 -- computes the same attention. flash_attn4 also takes single-segment input, but the installer removes flash_attn.cute (no cutlass-dsl satisfies it). Probed 2026-10-12 on a 2xGB300 gb300-tml pod (LightX2V b6d38283, torch 2.14.1), minimax_h3_t2va_5s: torch_sdpa TP2 68.90 s, torch_sdpa Ulysses2 67.32 s, sglang main on the same pod 62.52 s. VALIDATION on a whole-node 4xGB300 pending.",
         "install_specs": null,
         "server_bin": null,
         "use_omni_arg": null,
@@ -3897,24 +3952,25 @@
           "warmup"
         ]
       },
-      "server_command": "torchrun --nproc_per_node=2 -m lightx2v.server --model_path /scratch/gb300/hf/hub/models--MiniMaxAI--MiniMax-H3/snapshots/42ed227ee7df40d41602854ae760620d6eb651fe --model_cls minimax_h3 --config_json /tmp/lightx2v_config_minimax_h3_t2va_5s.json --host 127.0.0.1 --port 49501 --model-variant fl2av",
+      "server_command": "torchrun --nproc_per_node=2 -m lightx2v.server --model_path /scratch/r/hf/hub/models--MiniMaxAI--MiniMax-H3/snapshots/42ed227ee7df40d41602854ae760620d6eb651fe --model_cls minimax_h3 --config_json /tmp/lightx2v_config_minimax_h3_t2va_5s.json --host 127.0.0.1 --port 62011 --model-variant fl2av",
       "metrics": {
-        "client_latency_s": 141.04,
-        "client_latency_min_s": 140.777,
-        "client_latency_max_s": 141.302,
+        "client_latency_s": 64.09,
+        "client_latency_min_s": 64.039,
+        "client_latency_max_s": 64.141,
         "measured_repeats": 2,
         "latency_samples_s": [
-          141.302,
-          140.777
+          64.039,
+          64.141
         ],
-        "latency_spread_pct": 0.4,
+        "latency_spread_pct": 0.2,
         "warmup_latencies_s": [
-          183.453
+          106.447,
+          65.721
         ],
-        "server_startup_s": 54.07,
-        "warmup_s": 183.45
+        "server_startup_s": 42.06,
+        "warmup_s": 172.17
       },
-      "source_result": "reports/round-20261010/raw/run_gb300vid1010b_minimax_h3_t2va_5s_minimax_h3_t2va_5s.json"
+      "source_result": "reports/round-20261010/raw/run_rf2lx2_minimax_h3_t2va_5s.json"
     },
     {
       "case_id": "minimax_h3_t2va_5s",
@@ -4079,7 +4135,7 @@
       "true_cfg_scale": null,
       "negative_prompt_set": false,
       "num_gpus": 4,
-      "latency_s": 31.762,
+      "latency_s": 29.714,
       "error": null,
       "framework_metadata": {
         "profile": "default",
@@ -4105,48 +4161,48 @@
         "sglang_profile_source": "default",
         "sglang_ref": "origin/main"
       },
-      "server_command": "sglang serve --model-path MiniMaxAI/MiniMax-H3 --port 49509 --host 127.0.0.1 --backend sglang --num-gpus 4 --model-type diffusion --warmup-mode server --model-variant fl2va --ulysses-degree 4 --encoder-parallel auto --performance-mode speed --enable-torch-compile false",
+      "server_command": "sglang serve --model-path MiniMaxAI/MiniMax-H3 --port 62120 --host 127.0.0.1 --backend sglang --num-gpus 4 --model-type diffusion --warmup-mode server --model-variant fl2va --ulysses-degree 4 --encoder-parallel auto --performance-mode speed --enable-torch-compile false",
       "metrics": {
-        "client_latency_s": 31.762,
-        "client_latency_min_s": 31.745,
-        "client_latency_max_s": 31.78,
+        "client_latency_s": 29.714,
+        "client_latency_min_s": 29.712,
+        "client_latency_max_s": 29.717,
         "measured_repeats": 2,
-        "server_latency_s": 31.729,
+        "server_latency_s": 29.663,
         "server_latency_source": "separate instrumented request, not one of the measured repeats",
         "diagnostic_stages_s": {
           "InputValidationStage": 0.0,
           "MiniMaxH3PartitionAdmissionStage": 0.0,
-          "MiniMaxH3TextEncodingStage": 0.099,
+          "MiniMaxH3TextEncodingStage": 0.1,
           "MiniMaxH3VisualEncodingStage": 0.0,
           "MiniMaxH3AudioEncodingStage": 0.0,
-          "MiniMaxH3LatentPreparationStage": 0.027,
+          "MiniMaxH3LatentPreparationStage": 0.028,
           "MiniMaxH3TimestepPreparationStage": 0.0,
-          "MiniMaxH3DenoisingStage": 29.337,
-          "MiniMaxH3DecodingStage": 1.622
+          "MiniMaxH3DenoisingStage": 27.335,
+          "MiniMaxH3DecodingStage": 1.608
         },
-        "diagnostic_stage_sum_s": 31.085,
-        "diagnostic_client_latency_s": 31.752,
-        "unattributed_tail_s": 0.666,
+        "diagnostic_stage_sum_s": 29.07,
+        "diagnostic_client_latency_s": 29.683,
+        "unattributed_tail_s": 0.613,
         "unattributed_tail_frac": 0.021,
         "poll_interval_s": 0.02,
         "latency_samples_s": [
-          31.745,
-          31.78
+          29.717,
+          29.712
         ],
-        "latency_spread_pct": 0.1,
+        "latency_spread_pct": 0.0,
         "warmup_latencies_s": [
-          3.678,
-          3.542,
-          3.576
+          4.214,
+          3.416,
+          3.417
         ],
         "warmup_steady_latencies_s": [
-          31.595,
-          31.702
+          29.604,
+          29.699
         ],
-        "server_startup_s": 74.07,
-        "warmup_s": 74.09
+        "server_startup_s": 86.09,
+        "warmup_s": 70.35
       },
-      "source_result": "reports/round-20261010/raw/run_gb300vid1011main_minimax_h3_t2va_5s_4gpu_minimax_h3_t2va_5s_4gpu.json"
+      "source_result": "reports/round-20261010/raw/run_rf3sgl2_minimax_h3_t2va_5s_4gpu.json"
     },
     {
       "case_id": "minimax_h3_t2va_5s_4gpu",
@@ -4226,13 +4282,13 @@
       "true_cfg_scale": null,
       "negative_prompt_set": false,
       "num_gpus": 4,
-      "latency_s": 73.292,
+      "latency_s": 32.536,
       "error": null,
       "framework_metadata": {
-        "profile": "blackwell-sp4-fa2",
+        "profile": "blackwell-sp4-sdpa",
         "profile_request": "auto",
         "profile_source": "hardware",
-        "framework_ref": "lightx2v main 0c2edc12 (2026-10-05)",
+        "framework_ref": "lightx2v main b6d38283 (2026-10-09)",
         "hardware": [
           "b200",
           "b300",
@@ -4242,8 +4298,8 @@
         "hardware_candidates": [
           "gb300"
         ],
-        "description": "Datacenter Blackwell: the default command with FlashAttention 2 in place of the Hopper-only FA3.",
-        "notes": "VALIDATION PENDING (2026-10-08). flash_attn3 is a Hopper-only kernel; FlashAttention 2 (source-built for sm_100) is what every LightX2V Blackwell profile here runs, the same exact-softmax class. Untested alternative: torch_sdpa (cuDNN / flash SDPA, what sglang resolves for H3 on B200). Otherwise the default profile; see its notes.",
+        "description": null,
+        "notes": "Replaces blackwell-sp4-fa2: FlashAttention 2 on Blackwell is the slow exact kernel, and that profile was never validated (its notes said so); it published 141.04 s on minimax_h3_t2va_5s (4xGB300, 2026-10-10) against sglang's 57.46 s. LightX2V's MiniMax-H3 attention is single-segment (transformer_infer.py builds cu_seqlens = (0, seq_len)), so torch_sdpa -- cuDNN SDPA on sm_100/sm_103 -- computes the same attention. flash_attn4 also takes single-segment input, but the installer removes flash_attn.cute (no cutlass-dsl satisfies it). Probed 2026-10-12 on a 2xGB300 gb300-tml pod (LightX2V b6d38283, torch 2.14.1), minimax_h3_t2va_5s: torch_sdpa TP2 68.90 s, torch_sdpa Ulysses2 67.32 s, sglang main on the same pod 62.52 s. VALIDATION on a whole-node 4xGB300 pending.",
         "install_specs": null,
         "server_bin": null,
         "use_omni_arg": null,
@@ -4282,25 +4338,26 @@
           "warmup"
         ]
       },
-      "server_command": "torchrun --nproc_per_node=4 -m lightx2v.server --model_path /scratch/gb300/hf/hub/models--MiniMaxAI--MiniMax-H3/snapshots/42ed227ee7df40d41602854ae760620d6eb651fe --model_cls minimax_h3 --config_json /tmp/lightx2v_config_minimax_h3_t2va_5s_4gpu.json --host 127.0.0.1 --port 49505 --model-variant fl2av",
+      "server_command": "torchrun --nproc_per_node=4 -m lightx2v.server --model_path /scratch/r/hf/hub/models--MiniMaxAI--MiniMax-H3/snapshots/42ed227ee7df40d41602854ae760620d6eb651fe --model_cls minimax_h3 --config_json /tmp/lightx2v_config_minimax_h3_t2va_5s_4gpu.json --host 127.0.0.1 --port 62125 --model-variant fl2av",
       "metrics": {
-        "client_latency_s": 73.292,
-        "client_latency_min_s": 73.214,
-        "client_latency_max_s": 73.37,
+        "client_latency_s": 32.536,
+        "client_latency_min_s": 32.386,
+        "client_latency_max_s": 32.686,
         "measured_repeats": 2,
         "latency_samples_s": [
-          73.214,
-          73.37
+          32.386,
+          32.686
         ],
-        "latency_spread_pct": 0.2,
+        "latency_spread_pct": 0.9,
         "warmup_latencies_s": [
-          115.952,
-          73.268
+          38.552,
+          32.181,
+          32.304
         ],
-        "server_startup_s": 70.07,
-        "warmup_s": 189.22
+        "server_startup_s": 50.06,
+        "warmup_s": 103.04
       },
-      "source_result": "reports/round-20261010/raw/run_gb300vid1010fix_minimax_h3_t2va_5s_4gpu_minimax_h3_t2va_5s_4gpu.json"
+      "source_result": "reports/round-20261010/raw/run_rf3lx2_minimax_h3_t2va_5s_4gpu.json"
     },
     {
       "case_id": "minimax_h3_t2va_5s_4gpu",
@@ -4541,13 +4598,13 @@
       "true_cfg_scale": null,
       "negative_prompt_set": false,
       "num_gpus": 2,
-      "latency_s": 229.212,
+      "latency_s": 98.466,
       "error": null,
       "framework_metadata": {
-        "profile": "blackwell-tp2-fa2",
+        "profile": "blackwell-sp2-sdpa",
         "profile_request": "auto",
         "profile_source": "hardware",
-        "framework_ref": "lightx2v main 0c2edc12 (2026-10-05)",
+        "framework_ref": "lightx2v main b6d38283 (2026-10-09)",
         "hardware": [
           "b200",
           "b300",
@@ -4557,8 +4614,8 @@
         "hardware_candidates": [
           "gb300"
         ],
-        "description": "Datacenter Blackwell: the default command with FlashAttention 2 in place of the Hopper-only FA3.",
-        "notes": "VALIDATION PENDING (2026-10-08). flash_attn3 is a Hopper-only kernel; FlashAttention 2 (source-built for sm_100) is what every LightX2V Blackwell profile here runs, the same exact-softmax class. Untested alternative: torch_sdpa (cuDNN / flash SDPA, what sglang resolves for H3 on B200). Otherwise the default profile; see its notes.",
+        "description": null,
+        "notes": "Replaces blackwell-tp2-fa2: FlashAttention 2 on Blackwell is the slow exact kernel, and that profile was never validated (its notes said so); it published 141.04 s on minimax_h3_t2va_5s (4xGB300, 2026-10-10) against sglang's 57.46 s. LightX2V's MiniMax-H3 attention is single-segment (transformer_infer.py builds cu_seqlens = (0, seq_len)), so torch_sdpa -- cuDNN SDPA on sm_100/sm_103 -- computes the same attention. flash_attn4 also takes single-segment input, but the installer removes flash_attn.cute (no cutlass-dsl satisfies it). Probed 2026-10-12 on a 2xGB300 gb300-tml pod (LightX2V b6d38283, torch 2.14.1), minimax_h3_t2va_5s: torch_sdpa TP2 68.90 s, torch_sdpa Ulysses2 67.32 s, sglang main on the same pod 62.52 s. VALIDATION on a whole-node 4xGB300 pending.",
         "install_specs": null,
         "server_bin": null,
         "use_omni_arg": null,
@@ -4597,24 +4654,25 @@
           "warmup"
         ]
       },
-      "server_command": "torchrun --nproc_per_node=2 -m lightx2v.server --model_path /scratch/gb300/hf/hub/models--MiniMaxAI--MiniMax-H3/snapshots/42ed227ee7df40d41602854ae760620d6eb651fe --model_cls minimax_h3 --config_json /tmp/lightx2v_config_minimax_h3_ref2va_5s.json --host 127.0.0.1 --port 49501 --model-variant ref2av",
+      "server_command": "torchrun --nproc_per_node=2 -m lightx2v.server --model_path /scratch/r/hf/hub/models--MiniMaxAI--MiniMax-H3/snapshots/42ed227ee7df40d41602854ae760620d6eb651fe --model_cls minimax_h3 --config_json /tmp/lightx2v_config_minimax_h3_ref2va_5s.json --host 127.0.0.1 --port 62012 --model-variant ref2av",
       "metrics": {
-        "client_latency_s": 229.212,
-        "client_latency_min_s": 229.182,
-        "client_latency_max_s": 229.243,
+        "client_latency_s": 98.466,
+        "client_latency_min_s": 98.274,
+        "client_latency_max_s": 98.657,
         "measured_repeats": 2,
         "latency_samples_s": [
-          229.182,
-          229.243
+          98.657,
+          98.274
         ],
-        "latency_spread_pct": 0.0,
+        "latency_spread_pct": 0.4,
         "warmup_latencies_s": [
-          279.147
+          114.025,
+          98.399
         ],
-        "server_startup_s": 54.08,
-        "warmup_s": 279.15
+        "server_startup_s": 54.06,
+        "warmup_s": 217.73
       },
-      "source_result": "reports/round-20261010/raw/run_gb300vid1010fix_minimax_h3_ref2va_5s_minimax_h3_ref2va_5s.json"
+      "source_result": "reports/round-20261010/raw/run_rf2lx2_minimax_h3_ref2va_5s.json"
     },
     {
       "case_id": "minimax_h3_ref2va_5s",
@@ -4996,56 +5054,53 @@
       "true_cfg_scale": null,
       "negative_prompt_set": false,
       "num_gpus": 2,
-      "latency_s": 7.889,
+      "latency_s": 5.538,
       "error": null,
       "framework_metadata": {
-        "profile": "blackwell-2gpu-tp-eager",
+        "profile": "gb300-2gpu-tp-compile",
         "profile_request": "auto",
         "profile_source": "hardware",
         "framework_ref": null,
         "hardware": [
-          "b200",
-          "gb200",
-          "b300",
           "gb300"
         ],
         "hardware_candidates": [
           "gb300"
         ],
-        "description": "Blackwell 2-GPU TP legacy-compatible FLUX compile profile.",
-        "notes": "Use for SGLang commits before --performance-mode speed existed; TP remains explicit. Measured on 2xB200 (sglang 0.5.19, ABAB interleaved x4, 2026-09-12): this profile and blackwell-2gpu-tp-speed-eager are indistinguishable -- paired diffs +1.6/+7.6/+1.2/-5.8%, mean +1.15% with mixed signs, against within-arm spreads of 6.6% and 7.9%. So the 'legacy' label is about which flags existed, NOT about speed: --performance-mode speed buys nothing measurable here, and the two profiles are left in this order deliberately. Do not re-run this comparison without a reason; two pairs alone look like a +4.6% win and are noise.",
+        "description": "GB300 2-GPU TP2 sglang FLUX.1 with torch.compile.",
+        "notes": null,
         "install_specs": null,
         "server_bin": null,
         "use_omni_arg": null,
         "required_help_args": null,
-        "serve_args": "--model-type diffusion --warmup-mode server --dit-layerwise-offload false --tp-size 2 --enable-torch-compile false",
+        "serve_args": "--model-type diffusion --warmup-mode server --dit-layerwise-offload false --tp-size 2 --enable-torch-compile true",
         "num_gpus": 2,
         "extra_env_keys": [],
         "request_inputs": "distinct-per-request",
-        "sglang_profile": "blackwell-2gpu-tp-eager",
+        "sglang_profile": "gb300-2gpu-tp-compile",
         "sglang_profile_request": "auto",
         "sglang_profile_source": "hardware",
-        "sglang_ref": "legacy-compatible"
+        "sglang_ref": "main 6576e50cd5"
       },
-      "server_command": "sglang serve --model-path black-forest-labs/FLUX.1-dev --port 49037 --host 127.0.0.1 --backend sglang --num-gpus 2 --model-type diffusion --warmup-mode server --dit-layerwise-offload false --tp-size 2 --enable-torch-compile false",
+      "server_command": "sglang serve --model-path black-forest-labs/FLUX.1-dev --port 62031 --host 127.0.0.1 --backend sglang --num-gpus 2 --model-type diffusion --warmup-mode server --dit-layerwise-offload false --tp-size 2 --enable-torch-compile true",
       "metrics": {
-        "duration_s": 15.777,
+        "duration_s": 11.088,
         "num_requests": 4,
         "completed_requests": 4,
         "failed_requests": 0,
         "max_concurrency": 2,
-        "throughput_rps": 0.2535,
-        "output_throughput_ops": 0.2535,
-        "latency_mean_s": 6.923,
-        "latency_p50_s": 7.889,
-        "latency_p90_s": 7.953,
-        "latency_p95_s": 7.956,
-        "latency_p99_s": 7.958,
+        "throughput_rps": 0.3607,
+        "output_throughput_ops": 0.3607,
+        "latency_mean_s": 4.848,
+        "latency_p50_s": 5.538,
+        "latency_p90_s": 5.558,
+        "latency_p95_s": 5.559,
+        "latency_p99_s": 5.561,
         "errors": [],
-        "server_startup_s": 44.04,
-        "warmup_s": 7.92
+        "server_startup_s": 82.07,
+        "warmup_s": 6.31
       },
-      "source_result": "reports/round-20261010/raw/run_gb300img1011main_flux1_dev_t2i_1024_flux1_dev_t2i_1024.json"
+      "source_result": "reports/round-20261010/raw/run_rf2sglf1_flux1_dev_t2i_1024.json"
     },
     {
       "case_id": "flux1_dev_t2i_1024",
@@ -5386,13 +5441,13 @@
       "true_cfg_scale": null,
       "negative_prompt_set": false,
       "num_gpus": 2,
-      "latency_s": 281.811,
+      "latency_s": 125.41,
       "error": null,
       "framework_metadata": {
-        "profile": "blackwell-tp2-fa2",
+        "profile": "blackwell-sp2-sdpa",
         "profile_request": "auto",
         "profile_source": "hardware",
-        "framework_ref": "lightx2v main 0c2edc12 (2026-10-05)",
+        "framework_ref": "lightx2v main b6d38283 (2026-10-09)",
         "hardware": [
           "b200",
           "b300",
@@ -5402,8 +5457,8 @@
         "hardware_candidates": [
           "gb300"
         ],
-        "description": "Datacenter Blackwell: the default command with FlashAttention 2 in place of the Hopper-only FA3.",
-        "notes": "VALIDATION PENDING (2026-10-08). flash_attn3 is a Hopper-only kernel; FlashAttention 2 (source-built for sm_100) is what every LightX2V Blackwell profile here runs, the same exact-softmax class. Untested alternative: torch_sdpa (cuDNN / flash SDPA, what sglang resolves for H3 on B200). Otherwise the default profile; see its notes.",
+        "description": null,
+        "notes": "Replaces blackwell-tp2-fa2: FlashAttention 2 on Blackwell is the slow exact kernel, and that profile was never validated (its notes said so); it published 141.04 s on minimax_h3_t2va_5s (4xGB300, 2026-10-10) against sglang's 57.46 s. LightX2V's MiniMax-H3 attention is single-segment (transformer_infer.py builds cu_seqlens = (0, seq_len)), so torch_sdpa -- cuDNN SDPA on sm_100/sm_103 -- computes the same attention. flash_attn4 also takes single-segment input, but the installer removes flash_attn.cute (no cutlass-dsl satisfies it). Probed 2026-10-12 on a 2xGB300 gb300-tml pod (LightX2V b6d38283, torch 2.14.1), minimax_h3_t2va_5s: torch_sdpa TP2 68.90 s, torch_sdpa Ulysses2 67.32 s, sglang main on the same pod 62.52 s. VALIDATION on a whole-node 4xGB300 pending.",
         "install_specs": null,
         "server_bin": null,
         "use_omni_arg": null,
@@ -5442,25 +5497,25 @@
           "warmup"
         ]
       },
-      "server_command": "torchrun --nproc_per_node=2 -m lightx2v.server --model_path /scratch/gb300/hf/hub/models--MiniMaxAI--MiniMax-H3/snapshots/42ed227ee7df40d41602854ae760620d6eb651fe --model_cls minimax_h3 --config_json /tmp/lightx2v_config_minimax_h3_t2va_5s.json --host 127.0.0.1 --port 49501 --model-variant fl2av",
+      "server_command": "torchrun --nproc_per_node=2 -m lightx2v.server --model_path /scratch/r/hf/hub/models--MiniMaxAI--MiniMax-H3/snapshots/42ed227ee7df40d41602854ae760620d6eb651fe --model_cls minimax_h3 --config_json /tmp/lightx2v_config_minimax_h3_t2va_5s.json --host 127.0.0.1 --port 62201 --model-variant fl2av",
       "metrics": {
-        "duration_s": 564.567,
+        "duration_s": 252.806,
         "num_requests": 4,
         "completed_requests": 4,
         "failed_requests": 0,
         "max_concurrency": 2,
-        "throughput_rps": 0.0071,
-        "output_throughput_ops": 0.0071,
-        "latency_mean_s": 246.946,
-        "latency_p50_s": 281.811,
-        "latency_p90_s": 282.47,
-        "latency_p95_s": 282.61,
-        "latency_p99_s": 282.722,
+        "throughput_rps": 0.0158,
+        "output_throughput_ops": 0.0158,
+        "latency_mean_s": 110.36,
+        "latency_p50_s": 125.41,
+        "latency_p90_s": 126.801,
+        "latency_p95_s": 127.099,
+        "latency_p99_s": 127.337,
         "errors": [],
-        "server_startup_s": 54.07,
-        "warmup_s": 183.45
+        "server_startup_s": 56.07,
+        "warmup_s": 129.55
       },
-      "source_result": "reports/round-20261010/raw/run_gb300vid1010b_minimax_h3_t2va_5s_minimax_h3_t2va_5s.json"
+      "source_result": "reports/round-20261010/raw/run_rf4lxtp_minimax_h3_t2va_5s.json"
     },
     {
       "case_id": "minimax_h3_t2va_5s",

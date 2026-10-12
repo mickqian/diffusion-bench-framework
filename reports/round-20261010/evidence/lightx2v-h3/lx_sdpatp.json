@@ -1,0 +1,219 @@
+{
+  "timestamp": "2026-10-12T02:36:35.250296+00:00",
+  "commit_sha": "ec5fd3a17b3fcabdbb92659e058c9b866b33cb07",
+  "run_id": "local",
+  "hardware": {
+    "runner_labels": null,
+    "gpu_config": null,
+    "gpus": [
+      "NVIDIA GB300, 284208 MiB, 580.159.04",
+      "NVIDIA GB300, 284208 MiB, 580.159.04"
+    ],
+    "hardware_profile_override": "gb300"
+  },
+  "sglang_runtime": {
+    "package_version": "0.5.21",
+    "module_path": "/sgl-workspace/sglang/python/sglang/__init__.py",
+    "git_root": "/sgl-workspace/sglang",
+    "git_commit": "e00930c5489053f26d86b179cee0d087f846acbb"
+  },
+  "framework_runtime": {
+    "venv_root": "/scratch/lx/fw-venvs",
+    "install_specs": {
+      "vllm": "vllm==0.18.0",
+      "vllm_omni": "vllm-omni==0.18.0",
+      "lightx2v": "git+https://github.com/ModelTC/LightX2V.git@7efd05f8e1425b83321fd4f1cef779ef6504076f",
+      "lightx2v_flash_attn": "flash-attn==2.8.3",
+      "lightx2v_flash_attn3": "",
+      "lightx2v_fa3_hf_repo": "varunneal/flash-attention-3",
+      "lightx2v_fa3_hf_revision": "de87b9b5af06dd9984df595bef90b2eba44b181a",
+      "lightx2v_fa3_hf_subdir": "build/torch28-cxx11-cu128-x86_64-linux/flash_attention_3",
+      "lightx2v_flashinfer": "flashinfer-python==0.6.11",
+      "trtllm": "tensorrt-llm==1.3.0rc18",
+      "fastvideo": "https://github.com/hao-ai-lab/FastVideo.git@main",
+      "torch_cuda_arch_list": ""
+    },
+    "launchers": {
+      "vllm_omni_server_bin": "vllm",
+      "vllm_omni_required_help_args": "--omni",
+      "trtllm_visual_server_bin": "trtllm-serve"
+    },
+    "vllm-omni": {
+      "venv_path": "/scratch/lx/fw-venvs/vllm-omni"
+    },
+    "lightx2v": {
+      "venv_path": "/scratch/lx/fw-venvs/lightx2v",
+      "packages": {
+        "lightx2v": {
+          "Name": "lightx2v",
+          "Version": "0.5.0",
+          "Home-page": "https://github.com/ModelTC/LightX2V",
+          "Location": "/scratch/lx/fw-venvs/lightx2v/lib/python3.12/site-packages"
+        },
+        "flashinfer-python": {
+          "Name": "flashinfer-python",
+          "Version": "0.6.11",
+          "Home-page": "https://github.com/flashinfer-ai/flashinfer",
+          "Location": "/scratch/lx/fw-venvs/lightx2v/lib/python3.12/site-packages"
+        },
+        "torch": {
+          "Name": "torch",
+          "Version": "2.14.1",
+          "Home-page": "https://pytorch.org",
+          "Location": "/scratch/lx/fw-venvs/lightx2v/lib/python3.12/site-packages"
+        },
+        "transformers": {
+          "Name": "transformers",
+          "Version": "5.19.0",
+          "Home-page": "https://github.com/huggingface/transformers",
+          "Location": "/scratch/lx/fw-venvs/lightx2v/lib/python3.12/site-packages"
+        },
+        "diffusers": {
+          "Name": "diffusers",
+          "Version": "0.41.0",
+          "Home-page": "https://github.com/huggingface/diffusers",
+          "Location": "/scratch/lx/fw-venvs/lightx2v/lib/python3.12/site-packages"
+        },
+        "huggingface_hub": {
+          "Name": "huggingface_hub",
+          "Version": "1.33.0",
+          "Home-page": "https://github.com/huggingface/huggingface_hub",
+          "Location": "/scratch/lx/fw-venvs/lightx2v/lib/python3.12/site-packages"
+        }
+      },
+      "direct_urls": {
+        "lightx2v-0.5.0.dist-info": {
+          "url": "https://github.com/ModelTC/LightX2V.git",
+          "vcs_info": {
+            "commit_id": "b6d38283cb8176303f9155e639bcd496553d3402",
+            "requested_revision": "b6d38283cb8176303f9155e639bcd496553d3402",
+            "vcs": "git"
+          }
+        }
+      }
+    },
+    "trtllm-visual": {
+      "venv_path": "/scratch/lx/fw-venvs/trtllm-visual"
+    },
+    "comfyui": {
+      "venv_path": "/scratch/lx/fw-venvs/comfyui"
+    },
+    "fastvideo": {
+      "venv_path": "/scratch/lx/fw-venvs/fastvideo"
+    }
+  },
+  "benchmark_env": {},
+  "benchmark_framework_args": {
+    "vllm-omni": [],
+    "lightx2v": {
+      "config": {
+        "use_compile": true
+      }
+    },
+    "fastvideo": []
+  },
+  "torch_compile_disabled": false,
+  "benchmark_modes": [
+    "single_e2e"
+  ],
+  "requested_sglang_profile": "auto",
+  "request_inputs": "distinct-per-request",
+  "results": [
+    {
+      "case_id": "minimax_h3_t2va_5s",
+      "framework": "lightx2v",
+      "mode": "single_e2e",
+      "model": "MiniMaxAI/MiniMax-H3",
+      "task": "text-to-video",
+      "width": 1344,
+      "height": 768,
+      "num_frames": 124,
+      "fps": 24,
+      "num_inference_steps": 50,
+      "guidance_scale": null,
+      "guidance_scale_2": null,
+      "true_cfg_scale": null,
+      "negative_prompt_set": false,
+      "num_gpus": 2,
+      "latency_s": 68.897,
+      "error": null,
+      "framework_metadata": {
+        "profile": "blackwell-tp2-fa2",
+        "profile_request": "auto",
+        "profile_source": "hardware",
+        "framework_ref": "lightx2v main 0c2edc12 (2026-10-05)",
+        "hardware": [
+          "b200",
+          "b300",
+          "gb200",
+          "gb300"
+        ],
+        "hardware_candidates": [
+          "gb300"
+        ],
+        "description": "Datacenter Blackwell: the default command with FlashAttention 2 in place of the Hopper-only FA3.",
+        "notes": "VALIDATION PENDING (2026-10-08). flash_attn3 is a Hopper-only kernel; FlashAttention 2 (source-built for sm_100) is what every LightX2V Blackwell profile here runs, the same exact-softmax class. Untested alternative: torch_sdpa (cuDNN / flash SDPA, what sglang resolves for H3 on B200). Otherwise the default profile; see its notes.",
+        "install_specs": null,
+        "server_bin": null,
+        "use_omni_arg": null,
+        "required_help_args": null,
+        "serve_args": "--model-variant fl2av",
+        "num_gpus": 2,
+        "extra_env_keys": [
+          "DTYPE",
+          "PROFILING_DEBUG_LEVEL",
+          "PYTORCH_ALLOC_CONF",
+          "PYTORCH_CUDA_ALLOC_CONF",
+          "SENSITIVE_LAYER_DTYPE",
+          "TOKENIZERS_PARALLELISM"
+        ],
+        "request_inputs": "distinct-per-request",
+        "lightx2v_config_keys": [
+          "attn_type",
+          "audio_flow_shift",
+          "audio_sampling_rate",
+          "cpu_offload",
+          "enable_cfg",
+          "feature_caching",
+          "infer_steps",
+          "lazy_load",
+          "parallel",
+          "rms_type",
+          "rope_type",
+          "text_encoder_cpu_offload",
+          "text_encoder_tensor_parallel",
+          "unload_modules",
+          "use_adaln_cache",
+          "vae_cpu_offload",
+          "vae_decode_parallel",
+          "vae_spatial_scale_factor",
+          "video_flow_shift",
+          "warmup"
+        ]
+      },
+      "server_command": "torchrun --nproc_per_node=2 -m lightx2v.server --model_path /scratch/lx/hf/hub/models--MiniMaxAI--MiniMax-H3/snapshots/42ed227ee7df40d41602854ae760620d6eb651fe --model_cls minimax_h3 --config_json /tmp/lightx2v_config_minimax_h3_t2va_5s.json --host 127.0.0.1 --port 62611 --model-variant fl2av",
+      "metrics": {
+        "client_latency_s": 68.897,
+        "client_latency_min_s": 68.852,
+        "client_latency_max_s": 68.942,
+        "measured_repeats": 2,
+        "latency_samples_s": [
+          68.942,
+          68.852
+        ],
+        "latency_spread_pct": 0.1,
+        "warmup_latencies_s": [
+          111.783,
+          69.753
+        ],
+        "server_startup_s": 36.07,
+        "warmup_s": 181.54
+      }
+    }
+  ],
+  "throughput_results": [],
+  "partial": false,
+  "model_revisions": {
+    "MiniMaxAI/MiniMax-H3": "42ed227ee7df40d41602854ae760620d6eb651fe"
+  }
+}

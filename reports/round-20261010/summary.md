@@ -49,7 +49,7 @@ no validated profile (per-cell reasons in [issue.md](issue.md)).
 
 | case | SGLang-Diffusion | vLLM-Omni | LightX2V | TRT-LLM VisualGen | ComfyUI | FastVideo |
 |---|---:|---:|---:|---:|---:|---:|
-| `flux1_dev_t2i_1024` · 2 GPUs | 4.00 (2) | 5.31 (2) | — | **3.10 (2)** | 4.41 (1) | — |
+| `flux1_dev_t2i_1024` · 2 GPUs | **2.79 (2)** ‡ | 5.31 (2) | — | 3.10 (2) | 4.41 (1) | — |
 | `flux2_dev_t2i_1024` · 2 GPUs | **5.13 (2)** | 8.37 (2) | 14.54 (2) | 9.29 (2) | 12.38 (1) | — |
 | `qwen_image_21_t2i_1024` · 1 GPU | **2.00 (1)** | 2.15 (1) | 3.01 (1) | — | 3.22 (1) | — |
 | `qwen_image_21_t2i_1024_2gpu` · 2 GPUs | **1.67 (2)** | 3.08 (2) | — | — | — | — |
@@ -62,9 +62,9 @@ no validated profile (per-cell reasons in [issue.md](issue.md)).
 | `cosmos3_nano_t2i_720p` · 2 GPUs | **0.90 (2)** | 0.94 (2) | — | — | — | — |
 | `cosmos3_nano_t2v_720p_189f` · 4 GPUs | **22.46 (4)** | 26.05 (4) | — | — | — | — |
 | `cosmos3_nano_i2v_720p_189f` · 4 GPUs | **22.63 (4)** | 26.39 (4) | — | — | — | — |
-| `minimax_h3_t2va_5s` · 2 GPUs | **57.46 (2)** | 60.95 (2) | 141.04 (2) | — | 283.48 (1) | 61.15 (2) |
-| `minimax_h3_t2va_5s_4gpu` · 4 GPUs | **31.76 (4)** | 34.08 (4) | 73.29 (4) | — | — | 34.08 (4) |
-| `minimax_h3_ref2va_5s` · 2 GPUs | **88.36 (2)** | 91.91 (2) | 229.21 (2) | — | 479.48 (1) | 90.46 (2) |
+| `minimax_h3_t2va_5s` · 2 GPUs | **57.46 (2)** | 60.95 (2) | 64.09 (2) § | — | 283.48 (1) | 61.15 (2) |
+| `minimax_h3_t2va_5s_4gpu` · 4 GPUs | **29.71 (4)** § | 34.08 (4) | 32.54 (4) § | — | — | 34.08 (4) |
+| `minimax_h3_ref2va_5s` · 2 GPUs | **88.36 (2)** | 91.91 (2) | 98.47 (2) § | — | 479.48 (1) | 90.46 (2) |
 | `minimax_h3_fasth3_v2_t2va_5s` · 4 GPUs | **5.48 (4)** † | 7.44 (4) | — | — | — | 7.17 (4) |
 
 `~` LightX2V Z-Image: the first repeat ran 1.01 s and the other four 1.50 s;
@@ -76,12 +76,32 @@ other two frameworks run it (5.47 / 5.48 s in two rounds,
 first published row, 6.44 s, ran dense FlashAttention: the profile did not
 select VSA-H3 (harness bb560dc, see the H200 section).
 
+‡ Compiled (`--enable-torch-compile true`, profile `gb300-2gpu-tp-compile`,
+with a `policy_exception`). Re-run 2026-10-12 on a whole-node 4x GB300 pod:
+2.79 s single (2.65–2.92 s in two interleaved rounds against eager 3.92–3.96 s)
+and 0.361 QPS. The first published row was eager, 4.00 s and 0.254 QPS, and
+lost to TRT-LLM VisualGen (3.10 s, 0.331 QPS). That was the only cell sglang
+did not lead.
+
+§ LightX2V's MiniMax-H3 cells first ran FlashAttention 2 with TP2: 141.04 s
+(t2va), 73.29 s (4-GPU) and 229.21 s (ref2va). Those profiles had never been
+validated, and FA2 is the slow exact kernel on Blackwell. LightX2V's H3
+attention is single-segment, so torch_sdpa (cuDNN) computes the same attention.
+Re-run 2026-10-12 with torch_sdpa and Ulysses SP (SP2 / SP4) on a whole-node
+4x GB300 pod (LightX2V b6d38283, torch 2.14.1): 64.09 s, 32.54 s, 98.47 s. On
+that pod sglang ran H3 t2va in 57.10 s against the published 57.46 s, so the
+pods are comparable. The 4-GPU pair was interleaved twice on that pod (sglang
+29.74 / 29.71 s, LightX2V 32.64 / 32.54 s), and both its rows come from there;
+the vLLM-Omni and FastVideo rows are from the round's pod. Evidence:
+[evidence/lightx2v-h3/](evidence/lightx2v-h3/) (the 2xGB300 probe) and
+[evidence/gb300_fix_1012_r_fix2.log](evidence/gb300_fix_1012_r_fix2.log).
+
 ## 4x GB300: eager against eager
 
 sglang main `6576e50cd5` with torch.compile off against vLLM-Omni with
 `--enforce-eager`, same box, same commands otherwise. The sglang column is the
-published row where that row is eager. Cosmos3 T2I and LTX-2 publish compiled
-rows, so their eager runs were measured separately. vLLM-Omni runs are in
+published row where that row is eager. FLUX.1, Cosmos3 T2I and LTX-2 publish
+compiled rows, so their eager runs were measured separately. vLLM-Omni runs are in
 [evidence/vllm-eager/](evidence/vllm-eager/). Where the lead is under 5%, the
 two frameworks were run interleaved, twice
 ([evidence/eager_main_rank1.log](evidence/eager_main_rank1.log)).
@@ -100,7 +120,7 @@ two frameworks were run interleaved, twice
 | `ltx2_twostage_t2v` · 2 GPUs | 12.14 | 18.59 | 1.53× |
 | `wan22_t2v_a14b_720p` · 4 GPUs | 87.03 | 122.76 | 1.41× |
 | `minimax_h3_t2va_5s` · 2 GPUs | 57.56 / 57.54 | 60.16 / 60.27 | 1.05× (interleaved) |
-| `minimax_h3_t2va_5s_4gpu` · 4 GPUs | 31.76 | 33.96 | 1.07× |
+| `minimax_h3_t2va_5s_4gpu` · 4 GPUs | 29.71 | 33.96 | 1.14× |
 | `minimax_h3_ref2va_5s` · 2 GPUs | 88.31 / 88.39 | 91.18 / 90.94 | 1.03× (interleaved) |
 | `minimax_h3_fasth3_v2_t2va_5s` · 4 GPUs | 5.48 † | 7.35 | 1.34× |
 
@@ -277,26 +297,25 @@ Four requests at concurrency 2, one representative image and one video case.
 
 | case | framework | GPUs | done/requests | QPS | p50 (s) | p95 (s) |
 |---|---|---:|---:|---:|---:|---:|
-| `flux1_dev_t2i_1024` | SGLang-Diffusion | 2 | 4/4 | 0.2535 | 7.89 | 7.96 |
+| `flux1_dev_t2i_1024` | SGLang-Diffusion ‡ | 2 | 4/4 | 0.3607 | 5.54 | 5.56 |
 | `flux1_dev_t2i_1024` | vLLM-Omni | 2 | 4/4 | 0.1909 | 10.40 | 10.52 |
 | `flux1_dev_t2i_1024` | TRT-LLM VisualGen | 2 | 4/4 | 0.3312 | 5.97 | 6.08 |
 | `flux1_dev_t2i_1024` | ComfyUI | 1 | 4/4 | 0.1940 | 10.27 | 10.34 |
 | `minimax_h3_t2va_5s` | SGLang-Diffusion | 2 | 4/4 | 0.0173 | 114.83 | 115.35 |
 | `minimax_h3_t2va_5s` | vLLM-Omni | 2 | 4/4 | 0.0164 | 122.30 | 122.31 |
-| `minimax_h3_t2va_5s` | LightX2V | 2 | 4/4 | 0.0071 | 281.81 | 282.61 |
+| `minimax_h3_t2va_5s` | LightX2V § | 2 | 4/4 | 0.0158 | 125.41 | 127.10 |
 | `minimax_h3_t2va_5s` | ComfyUI | 1 | 4/4 | 0.0035 | 566.77 | 567.04 |
 | `minimax_h3_t2va_5s` | FastVideo | 2 | 4/4 | 0.0163 | 122.32 | 122.43 |
 
 ## Notes
 
-- **sglang leads every cell except FLUX.1, where TRT-LLM VisualGen leads**
-  (3.10 against 4.00 s single, 0.33 against 0.25 QPS). sglang's FLUX.1 row is
-  TP2 eager. With breakable CUDA graphs sglang measured 1.88 s on this box,
-  before the NUMA fix. BCG is kept out of the table because a graph captured at
-  concurrency 1 is not production-realistic. sglang is ahead of vLLM-Omni in
-  every cell.
-- **The sglang rows are eager** except Cosmos3 T2I and LTX-2 (compiled
-  CFG-parallel); vLLM-Omni runs its default, compiled. Measured afterwards with
+- **sglang leads every cell.** FLUX.1 was the exception until its sglang row
+  was re-run compiled (‡): 2.79 s and 0.361 QPS against TRT-LLM VisualGen's
+  3.10 s and 0.331 QPS. With breakable CUDA graphs sglang measured 1.88 s on
+  this box, which stays out of the table because a graph captured at
+  concurrency 1 is not production-realistic.
+- **The sglang rows are eager** except FLUX.1 (compiled TP2), Cosmos3 T2I and
+  LTX-2 (compiled CFG-parallel); vLLM-Omni runs its default, compiled. Measured afterwards with
   torch.compile on (rerun tree plus sgl-project/sglang#43601 and #43602,
   `--offload-during-compile false` except FLUX.1): FLUX.1 TP2 2.59 s, Qwen-2.1
   2-GPU 1.50 s, Z-Image 0.57 s, FLUX.2 5.23 s, Qwen-2.1 1-GPU 2.10 s, edit 2.50

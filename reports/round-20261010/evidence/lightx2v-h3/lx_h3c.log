@@ -1,0 +1,49 @@
+Fetching 111 files:   0%|          | 0/111 [00:00<?, ?it/s]Fetching 111 files:   6%|▋         | 7/111 [00:00<00:01, 68.55it/s]Fetching 111 files:  24%|██▍       | 27/111 [00:00<00:00, 143.04it/s]Fetching 111 files:  53%|█████▎    | 59/111 [00:00<00:00, 214.81it/s]Fetching 111 files:  60%|██████    | 67/111 [00:20<00:00, 214.81it/s]Fetching 111 files:  61%|██████▏   | 68/111 [00:25<00:25,  1.70it/s] Fetching 111 files:  62%|██████▏   | 69/111 [00:29<00:28,  1.48it/s]Fetching 111 files:  74%|███████▍  | 82/111 [00:38<00:19,  1.45it/s]Fetching 111 files:  77%|███████▋  | 85/111 [00:50<00:17,  1.45it/s]Fetching 111 files:  77%|███████▋  | 86/111 [00:54<00:28,  1.14s/it]Fetching 111 files:  78%|███████▊  | 87/111 [00:59<00:32,  1.33s/it]Fetching 111 files:  78%|███████▊  | 87/111 [01:10<00:32,  1.33s/it]Fetching 111 files:  79%|███████▉  | 88/111 [02:22<02:30,  6.54s/it]Fetching 111 files:  80%|████████  | 89/111 [02:31<02:28,  6.76s/it]Fetching 111 files:  84%|████████▍ | 93/111 [02:48<01:46,  5.92s/it]Fetching 111 files:  85%|████████▍ | 94/111 [02:52<01:37,  5.73s/it]Fetching 111 files:  87%|████████▋ | 97/111 [03:05<01:14,  5.29s/it]Fetching 111 files:  89%|████████▉ | 99/111 [03:05<00:49,  4.16s/it]Fetching 111 files:  91%|█████████ | 101/111 [03:05<00:31,  3.18s/it]Fetching 111 files:  93%|█████████▎| 103/111 [03:13<00:26,  3.35s/it]Fetching 111 files:  95%|█████████▍| 105/111 [03:18<00:18,  3.15s/it]Fetching 111 files:  95%|█████████▌| 106/111 [03:22<00:16,  3.21s/it]Fetching 111 files:  96%|█████████▋| 107/111 [03:26<00:13,  3.34s/it]Fetching 111 files:  97%|█████████▋| 108/111 [03:30<00:10,  3.57s/it]Fetching 111 files:  97%|█████████▋| 108/111 [04:55<00:08,  2.73s/it]
+Traceback (most recent call last):
+  File "<stdin>", line 2, in <module>
+  File "/scratch/lx/fw-venvs/lightx2v/lib/python3.12/site-packages/huggingface_hub/utils/_validators.py", line 89, in _inner_fn
+    return fn(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^
+  File "/scratch/lx/fw-venvs/lightx2v/lib/python3.12/site-packages/huggingface_hub/utils/_http.py", line 266, in _inner
+    return fn(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^
+  File "/scratch/lx/fw-venvs/lightx2v/lib/python3.12/site-packages/huggingface_hub/_snapshot_download.py", line 532, in snapshot_download
+    hf_thread_map(
+  File "/scratch/lx/fw-venvs/lightx2v/lib/python3.12/site-packages/huggingface_hub/utils/tqdm.py", line 441, in hf_thread_map
+    results[future_to_index[future]] = future.result()
+                                       ^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/concurrent/futures/_base.py", line 449, in result
+    return self.__get_result()
+           ^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/concurrent/futures/_base.py", line 401, in __get_result
+    raise self._exception
+  File "/usr/lib/python3.12/concurrent/futures/thread.py", line 58, in run
+    result = self.fn(*self.args, **self.kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/scratch/lx/fw-venvs/lightx2v/lib/python3.12/site-packages/huggingface_hub/_snapshot_download.py", line 512, in _inner_hf_hub_download
+    hf_hub_download(  # type: ignore
+  File "/scratch/lx/fw-venvs/lightx2v/lib/python3.12/site-packages/huggingface_hub/utils/_validators.py", line 89, in _inner_fn
+    return fn(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^
+  File "/scratch/lx/fw-venvs/lightx2v/lib/python3.12/site-packages/huggingface_hub/utils/_http.py", line 266, in _inner
+    return fn(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^
+  File "/scratch/lx/fw-venvs/lightx2v/lib/python3.12/site-packages/huggingface_hub/file_download.py", line 1047, in hf_hub_download
+    return _hf_hub_download_to_cache_dir(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/scratch/lx/fw-venvs/lightx2v/lib/python3.12/site-packages/huggingface_hub/file_download.py", line 1285, in _hf_hub_download_to_cache_dir
+    _download_to_tmp_and_move(
+  File "/scratch/lx/fw-venvs/lightx2v/lib/python3.12/site-packages/huggingface_hub/file_download.py", line 2016, in _download_to_tmp_and_move
+    xet_get(
+  File "/scratch/lx/fw-venvs/lightx2v/lib/python3.12/site-packages/huggingface_hub/file_download.py", line 589, in xet_get
+    with session.new_file_download_group(
+RuntimeError: Task error: File reconstruction error: CAS Client Error: Request error: HTTP status client error (429 Too Many Requests), domain: https://us.gcp.cdn.hf.co/xorbs/default/95ee04f13daa406f9d6d935528378e4cc94217cce45b6c149567a6589aa2091f
+LX download retry 1
+Fetching 111 files:   0%|          | 0/111 [00:00<?, ?it/s]Fetching 111 files: 100%|██████████| 111/111 [00:12<00:00,  8.56it/s]Fetching 111 files: 100%|██████████| 111/111 [00:12<00:00,  8.55it/s]
+LX snapshot /scratch/lx/hf/hub/models--MiniMaxAI--MiniMax-H3/snapshots/42ed227ee7df40d41602854ae760620d6eb651fe
+LX sdpatp no result (FileNotFoundError)
+
+LX sdpasp no result (FileNotFoundError)
+
+LX sglang-control TUNE h3ctl_1: median=62.522 samples=[62.577, 62.468] spread=0.2% server=62.966 err=None
+=== LXC_DONE 2026-10-12T02:27:19+00:00

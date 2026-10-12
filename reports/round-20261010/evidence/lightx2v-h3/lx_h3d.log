@@ -1,0 +1,7 @@
+LX snapshot complete (local_files_only)
+LX stale partial blobs: 8
+LX sdpatp median=68.897 samples=[68.942, 68.852] warmups=[111.783, 69.753] err=None
+LX sdpatp cfg: "attn_type": "torch_sdpa" "tensor_p_size": 2 
+LX sdpasp median=67.322 samples=[68.04, 66.605] warmups=[78.692, 68.745] err=None
+LX sdpasp cfg: "attn_type": "torch_sdpa" "seq_p_size": 2 
+=== LXD_DONE 2026-10-12T02:48:59+00:00

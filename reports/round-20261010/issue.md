@@ -1,16 +1,16 @@
-## Diffusion Benchmark Data - 2026-10-12T02:23:14.913349+00:00
+## Diffusion Benchmark Data - 2026-10-12T04:35:10.120746+00:00
 
 | item | value |
 | --- | --- |
 | run_id | gb300x4-20261010 |
 | data | single_e2e, throughput |
-| bench_commit | 1fd654aa648cc7c78f55f50b2ae87bf01eba87d1 |
+| bench_commit | 8b4f4413b67f425f89a1ac738d79b327b07a90d7 |
 | gpu | 4 x NVIDIA GB300, 284208 MiB, 580.159.04 |
-| reproduce | scripts/generate_h200_report_artifacts.sh; inputs: run_gb300img1010_cosmos3_nano_i2v_720p_189f_cosmos3_nano_i2v_720p_189f.json, run_gb300img1010_cosmos3_nano_t2i_720p_cosmos3_nano_t2i_720p.json, run_gb300img1010_cosmos3_nano_t2v_720p_189f_cosmos3_nano_t2v_720p_189f.json, run_gb300img1010_flux1_dev_t2i_1024_flux1_dev_t2i_1024.json, run_gb300img1010_flux2_dev_t2i_1024_flux2_dev_t2i_1024.json, run_gb300img1010_ideogram4_t2i_1024_2gpu_tp_ideogram4_t2i_1024_2gpu_tp.json, run_gb300img1010_ltx2.3_twostage_t2v_2gpus_ltx2.3_twostage_t2v_2gpus.json, run_gb300img1010_ltx2_twostage_t2v_ltx2_twostage_t2v.json, run_gb300img1010_qwen_image_21_edit_1024_qwen_image_21_edit_1024.json, run_gb300img1010_qwen_image_21_t2i_1024_2gpu_qwen_image_21_t2i_1024_2gpu.json, run_gb300img1010_qwen_image_21_t2i_1024_qwen_image_21_t2i_1024.json, run_gb300img1010_zimage_turbo_t2i_1024_zimage_turbo_t2i_1024.json, run_gb300img1010b_cosmos3_nano_t2v_720p_189f_cosmos3_nano_t2v_720p_189f.json, run_gb300img1010fix_cosmos3_nano_i2v_720p_189f_cosmos3_nano_i2v_720p_189f.json, run_gb300img1010fix_cosmos3_nano_t2i_720p_cosmos3_nano_t2i_720p.json, run_gb300img1010fix_cosmos3_nano_t2v_720p_189f_cosmos3_nano_t2v_720p_189f.json, run_gb300img1010fix_flux1_dev_t2i_1024_flux1_dev_t2i_1024.json, run_gb300img1010fix_flux2_dev_t2i_1024_flux2_dev_t2i_1024.json, run_gb300img1010fix_ideogram4_t2i_1024_2gpu_tp_ideogram4_t2i_1024_2gpu_tp.json, run_gb300img1010fix_ltx2.3_twostage_t2v_2gpus_ltx2.3_twostage_t2v_2gpus.json, run_gb300img1010fix_ltx2_twostage_t2v_ltx2_twostage_t2v.json, run_gb300img1010fix_qwen_image_21_edit_1024_qwen_image_21_edit_1024.json, run_gb300img1010fix_qwen_image_21_t2i_1024_2gpu_qwen_image_21_t2i_1024_2gpu.json, run_gb300img1010fix_qwen_image_21_t2i_1024_qwen_image_21_t2i_1024.json, run_gb300img1010fix_zimage_turbo_t2i_1024_zimage_turbo_t2i_1024.json, run_gb300img1010vfix_qwen_image_21_t2i_1024_2gpu_qwen_image_21_t2i_1024_2gpu.json, run_gb300vid1010_minimax_h3_fasth3_v2_t2va_5s_minimax_h3_fasth3_v2_t2va_5s.json, run_gb300vid1010_wan22_t2v_a14b_720p_wan22_t2v_a14b_720p.json, run_gb300vid1010b_minimax_h3_t2va_5s_minimax_h3_t2va_5s.json, run_gb300vid1010fix_minimax_h3_fasth3_v2_t2va_5s_minimax_h3_fasth3_v2_t2va_5s.json, run_gb300vid1010fix_minimax_h3_ref2va_5s_minimax_h3_ref2va_5s.json, run_gb300vid1010fix_minimax_h3_t2va_5s_4gpu_minimax_h3_t2va_5s_4gpu.json, run_gb300vid1010sfix_minimax_h3_t2va_5s_minimax_h3_t2va_5s.json, run_gb300vid1010sfix_wan22_t2v_a14b_720p_wan22_t2v_a14b_720p.json, run_gb300vid1010f3fix_minimax_h3_fasth3_v2_t2va_5s_minimax_h3_fasth3_v2_t2va_5s.json, run_gb300img1011main_cosmos3_nano_i2v_720p_189f_cosmos3_nano_i2v_720p_189f.json, run_gb300img1011main_cosmos3_nano_t2i_720p_cosmos3_nano_t2i_720p.json, run_gb300img1011main_cosmos3_nano_t2v_720p_189f_cosmos3_nano_t2v_720p_189f.json, run_gb300img1011main_flux1_dev_t2i_1024_flux1_dev_t2i_1024.json, run_gb300img1011main_flux2_dev_t2i_1024_flux2_dev_t2i_1024.json, run_gb300img1011main_ideogram4_t2i_1024_2gpu_tp_ideogram4_t2i_1024_2gpu_tp.json, run_gb300img1011main_ltx2.3_twostage_t2v_2gpus_ltx2.3_twostage_t2v_2gpus.json, run_gb300img1011main_ltx2_twostage_t2v_ltx2_twostage_t2v.json, run_gb300img1011main_qwen_image_21_edit_1024_qwen_image_21_edit_1024.json, run_gb300img1011main_qwen_image_21_t2i_1024_2gpu_qwen_image_21_t2i_1024_2gpu.json, run_gb300img1011main_qwen_image_21_t2i_1024_qwen_image_21_t2i_1024.json, run_gb300img1011main_zimage_turbo_t2i_1024_zimage_turbo_t2i_1024.json, run_gb300vid1011main_minimax_h3_fasth3_v2_t2va_5s_minimax_h3_fasth3_v2_t2va_5s.json, run_gb300vid1011main_minimax_h3_ref2va_5s_minimax_h3_ref2va_5s.json, run_gb300vid1011main_minimax_h3_t2va_5s_4gpu_minimax_h3_t2va_5s_4gpu.json, run_gb300vid1011main_minimax_h3_t2va_5s_minimax_h3_t2va_5s.json, run_gb300vid1011main_wan22_t2v_a14b_720p_wan22_t2v_a14b_720p.json, run_gb300fh3vsa1011r1_minimax_h3_fasth3_v2_t2va_5s.json, run_gb300fh3vsa1011r2_minimax_h3_fasth3_v2_t2va_5s.json |
+| reproduce | scripts/generate_h200_report_artifacts.sh; inputs: run_gb300img1010_cosmos3_nano_i2v_720p_189f_cosmos3_nano_i2v_720p_189f.json, run_gb300img1010_cosmos3_nano_t2i_720p_cosmos3_nano_t2i_720p.json, run_gb300img1010_cosmos3_nano_t2v_720p_189f_cosmos3_nano_t2v_720p_189f.json, run_gb300img1010_flux1_dev_t2i_1024_flux1_dev_t2i_1024.json, run_gb300img1010_flux2_dev_t2i_1024_flux2_dev_t2i_1024.json, run_gb300img1010_ideogram4_t2i_1024_2gpu_tp_ideogram4_t2i_1024_2gpu_tp.json, run_gb300img1010_ltx2.3_twostage_t2v_2gpus_ltx2.3_twostage_t2v_2gpus.json, run_gb300img1010_ltx2_twostage_t2v_ltx2_twostage_t2v.json, run_gb300img1010_qwen_image_21_edit_1024_qwen_image_21_edit_1024.json, run_gb300img1010_qwen_image_21_t2i_1024_2gpu_qwen_image_21_t2i_1024_2gpu.json, run_gb300img1010_qwen_image_21_t2i_1024_qwen_image_21_t2i_1024.json, run_gb300img1010_zimage_turbo_t2i_1024_zimage_turbo_t2i_1024.json, run_gb300img1010b_cosmos3_nano_t2v_720p_189f_cosmos3_nano_t2v_720p_189f.json, run_gb300img1010fix_cosmos3_nano_i2v_720p_189f_cosmos3_nano_i2v_720p_189f.json, run_gb300img1010fix_cosmos3_nano_t2i_720p_cosmos3_nano_t2i_720p.json, run_gb300img1010fix_cosmos3_nano_t2v_720p_189f_cosmos3_nano_t2v_720p_189f.json, run_gb300img1010fix_flux1_dev_t2i_1024_flux1_dev_t2i_1024.json, run_gb300img1010fix_flux2_dev_t2i_1024_flux2_dev_t2i_1024.json, run_gb300img1010fix_ideogram4_t2i_1024_2gpu_tp_ideogram4_t2i_1024_2gpu_tp.json, run_gb300img1010fix_ltx2.3_twostage_t2v_2gpus_ltx2.3_twostage_t2v_2gpus.json, run_gb300img1010fix_ltx2_twostage_t2v_ltx2_twostage_t2v.json, run_gb300img1010fix_qwen_image_21_edit_1024_qwen_image_21_edit_1024.json, run_gb300img1010fix_qwen_image_21_t2i_1024_2gpu_qwen_image_21_t2i_1024_2gpu.json, run_gb300img1010fix_qwen_image_21_t2i_1024_qwen_image_21_t2i_1024.json, run_gb300img1010fix_zimage_turbo_t2i_1024_zimage_turbo_t2i_1024.json, run_gb300img1010vfix_qwen_image_21_t2i_1024_2gpu_qwen_image_21_t2i_1024_2gpu.json, run_gb300vid1010_minimax_h3_fasth3_v2_t2va_5s_minimax_h3_fasth3_v2_t2va_5s.json, run_gb300vid1010_wan22_t2v_a14b_720p_wan22_t2v_a14b_720p.json, run_gb300vid1010b_minimax_h3_t2va_5s_minimax_h3_t2va_5s.json, run_gb300vid1010fix_minimax_h3_fasth3_v2_t2va_5s_minimax_h3_fasth3_v2_t2va_5s.json, run_gb300vid1010fix_minimax_h3_ref2va_5s_minimax_h3_ref2va_5s.json, run_gb300vid1010fix_minimax_h3_t2va_5s_4gpu_minimax_h3_t2va_5s_4gpu.json, run_gb300vid1010sfix_minimax_h3_t2va_5s_minimax_h3_t2va_5s.json, run_gb300vid1010sfix_wan22_t2v_a14b_720p_wan22_t2v_a14b_720p.json, run_gb300vid1010f3fix_minimax_h3_fasth3_v2_t2va_5s_minimax_h3_fasth3_v2_t2va_5s.json, run_gb300img1011main_cosmos3_nano_i2v_720p_189f_cosmos3_nano_i2v_720p_189f.json, run_gb300img1011main_cosmos3_nano_t2i_720p_cosmos3_nano_t2i_720p.json, run_gb300img1011main_cosmos3_nano_t2v_720p_189f_cosmos3_nano_t2v_720p_189f.json, run_gb300img1011main_flux1_dev_t2i_1024_flux1_dev_t2i_1024.json, run_gb300img1011main_flux2_dev_t2i_1024_flux2_dev_t2i_1024.json, run_gb300img1011main_ideogram4_t2i_1024_2gpu_tp_ideogram4_t2i_1024_2gpu_tp.json, run_gb300img1011main_ltx2.3_twostage_t2v_2gpus_ltx2.3_twostage_t2v_2gpus.json, run_gb300img1011main_ltx2_twostage_t2v_ltx2_twostage_t2v.json, run_gb300img1011main_qwen_image_21_edit_1024_qwen_image_21_edit_1024.json, run_gb300img1011main_qwen_image_21_t2i_1024_2gpu_qwen_image_21_t2i_1024_2gpu.json, run_gb300img1011main_qwen_image_21_t2i_1024_qwen_image_21_t2i_1024.json, run_gb300img1011main_zimage_turbo_t2i_1024_zimage_turbo_t2i_1024.json, run_gb300vid1011main_minimax_h3_fasth3_v2_t2va_5s_minimax_h3_fasth3_v2_t2va_5s.json, run_gb300vid1011main_minimax_h3_ref2va_5s_minimax_h3_ref2va_5s.json, run_gb300vid1011main_minimax_h3_t2va_5s_4gpu_minimax_h3_t2va_5s_4gpu.json, run_gb300vid1011main_minimax_h3_t2va_5s_minimax_h3_t2va_5s.json, run_gb300vid1011main_wan22_t2v_a14b_720p_wan22_t2v_a14b_720p.json, run_gb300fh3vsa1011r1_minimax_h3_fasth3_v2_t2va_5s.json, run_gb300fh3vsa1011r2_minimax_h3_fasth3_v2_t2va_5s.json, run_rf2lx2_minimax_h3_t2va_5s.json, run_rf2lx2_minimax_h3_ref2va_5s.json, run_rf2lx4_minimax_h3_t2va_5s_4gpu.json, run_rf3sgl1_minimax_h3_t2va_5s_4gpu.json, run_rf3lx1_minimax_h3_t2va_5s_4gpu.json, run_rf3sgl2_minimax_h3_t2va_5s_4gpu.json, run_rf3lx2_minimax_h3_t2va_5s_4gpu.json, run_rf2sglf1_flux1_dev_t2i_1024.json, run_rf4lxtp_minimax_h3_t2va_5s.json |
 
 | framework | version/ref |
 | --- | --- |
-| SGLang-Diffusion | 0.5.21 (6576e50) |
+| SGLang-Diffusion | 0.5.21 (e00930c) |
 | vLLM-Omni | vllm-omni 0.31.0rc2.dev98+gf69b1f2b1; vllm 0.31.0 |
 | LightX2V | 0.5.0 (b6d3828) |
 | trtllm-visual | 1.3.0rc29 |
@@ -24,16 +24,16 @@ Statuses: `not_run` means configured but absent from this artifact; `unsupported
 
 | case | hardware | sglang_gpus | sglang_single_e2e_s | fastest_competitor | competitor_gpus | competitor_single_e2e_s | competitor/SGLang-Diffusion | diagnostic_client_s | stage_sum_s | unattributed_tail_s |
 | --- | --- | ---: | ---: | --- | ---: | ---: | ---: | ---: | ---: | ---: |
-| flux1_dev_t2i_1024 | 4 x NVIDIA GB300, 284208 MiB, 580.159.04 | 2 | 3.998 | trtllm-visual | 2 | 3.104 | 0.776x | 3.891 | 3.810 | 0.081 |
 | minimax_h3_ref2va_5s | 4 x NVIDIA GB300, 284208 MiB, 580.159.04 | 2 | 88.362 | FastVideo | 2 | 90.460 | 1.024x | 88.521 | 87.280 | 1.241 |
 | cosmos3_nano_t2i_720p | 4 x NVIDIA GB300, 284208 MiB, 580.159.04 | 2 | 0.896 | vLLM-Omni | 2 | 0.935 | 1.044x | 0.913 | 0.830 | 0.083 |
+| minimax_h3_t2va_5s | 4 x NVIDIA GB300, 284208 MiB, 580.159.04 | 2 | 57.460 | vLLM-Omni | 2 | 60.947 | 1.061x | 57.477 | 56.777 | 0.699 |
 
 ### Thinnest lead - throughput
 
 | case | hardware | sglang_gpus | sglang_qps | fastest_competitor | competitor_gpus | competitor_qps | competitor/SGLang-Diffusion |
 | --- | --- | ---: | ---: | --- | ---: | ---: | ---: |
-| flux1_dev_t2i_1024 | 4 x NVIDIA GB300, 284208 MiB, 580.159.04 | 2 | 0.2535 | trtllm-visual | 2 | 0.3312 | 1.307x |
 | minimax_h3_t2va_5s | 4 x NVIDIA GB300, 284208 MiB, 580.159.04 | 2 | 0.0173 | vLLM-Omni | 2 | 0.0164 | 0.948x |
+| flux1_dev_t2i_1024 | 4 x NVIDIA GB300, 284208 MiB, 580.159.04 | 2 | 0.3607 | trtllm-visual | 2 | 0.3312 | 0.918x |
 
 ### flux1_dev_t2i_1024
 
@@ -43,11 +43,11 @@ Statuses: `not_run` means configured but absent from this artifact; `unsupported
 
 | framework | profile | gpus | single_e2e_s | single/SGLang-Diffusion | single_status | done/reqs | concurrency | p50_s | p50/SGLang-Diffusion | p95_s | p99_s | qps | qps/SGLang-Diffusion | throughput_status | reason |
 | --- | --- | ---: | ---: | ---: | --- | --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | --- | --- |
-| SGLang-Diffusion | blackwell-2gpu-tp-eager | 2 | 3.998 | 1.000x | ok | 4/4 | 2 | 7.889 | 1.000x | 7.956 | 7.958 | 0.2535 | 1.000x | ok | - |
-| vLLM-Omni | blackwell-2gpu-tp-eager | 2 | 5.307 | 1.327x | ok | 4/4 | 2 | 10.396 | 1.318x | 10.522 | 10.538 | 0.1909 | 0.753x | ok | - |
+| SGLang-Diffusion | gb300-2gpu-tp-compile | 2 | 2.786 | 1.000x | ok | 4/4 | 2 | 5.538 | 1.000x | 5.559 | 5.561 | 0.3607 | 1.000x | ok | - |
+| vLLM-Omni | blackwell-2gpu-tp-eager | 2 | 5.307 | 1.905x | ok | 4/4 | 2 | 10.396 | 1.877x | 10.522 | 10.538 | 0.1909 | 0.529x | ok | - |
 | LightX2V | - | - | - | - | unsupported | - | - | - | - | - | - | - | - | unsupported | Tracked LightX2V version has no FLUX.1 serving path; FLUX coverage starts at FLUX.2. |
-| trtllm-visual | default | 2 | 3.104 | 0.776x | ok | 4/4 | 2 | 5.969 | 0.757x | 6.084 | 6.099 | 0.3312 | 1.307x | ok | - |
-| ComfyUI | blackwell-gpuonly | 1 | 4.410 | 1.103x | ok | 4/4 | 2 | 10.268 | 1.302x | 10.338 | 10.348 | 0.1940 | 0.765x | ok | - |
+| trtllm-visual | default | 2 | 3.104 | 1.114x | ok | 4/4 | 2 | 5.969 | 1.078x | 6.084 | 6.099 | 0.3312 | 0.918x | ok | - |
+| ComfyUI | blackwell-gpuonly | 1 | 4.410 | 1.583x | ok | 4/4 | 2 | 10.268 | 1.854x | 10.338 | 10.348 | 0.1940 | 0.538x | ok | - |
 | FastVideo | - | - | - | - | no_profile | - | - | - | - | - | - | - | - | no_profile | FastVideo main (2b164405c3d1, 2026-10-07) registers FLUX.1-dev, but this harness integrates FastVideo for MiniMax-H3 only (2026-10-08); no command validated. |
 
 ### flux2_dev_t2i_1024
@@ -240,7 +240,7 @@ Statuses: `not_run` means configured but absent from this artifact; `unsupported
 | --- | --- | ---: | ---: | ---: | --- | --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | --- | --- |
 | SGLang-Diffusion | default | 2 | 57.460 | 1.000x | ok | 4/4 | 2 | 114.833 | 1.000x | 115.352 | 115.357 | 0.0173 | 1.000x | ok | - |
 | vLLM-Omni | blackwell-2gpu | 2 | 60.947 | 1.061x | ok | 4/4 | 2 | 122.297 | 1.065x | 122.315 | 122.316 | 0.0164 | 0.948x | ok | - |
-| LightX2V | blackwell-tp2-fa2 | 2 | 141.040 | 2.455x | ok | 4/4 | 2 | 281.811 | 2.454x | 282.610 | 282.722 | 0.0071 | 0.410x | ok | - |
+| LightX2V | blackwell-sp2-sdpa | 2 | 64.090 | 1.115x | ok | 4/4 | 2 | 125.410 | 1.092x | 127.099 | 127.337 | 0.0158 | 0.913x | ok | - |
 | trtllm-visual | - | - | - | - | unsupported | - | - | - | - | - | - | - | - | unsupported | trtllm-visual's tracked scope in this harness is image cases; H3 is a video+audio model. |
 | ComfyUI | blackwell-gpuonly | 1 | 283.481 | 4.934x | ok | 4/4 | 2 | 566.772 | 4.936x | 567.043 | 567.070 | 0.0035 | 0.202x | ok | - |
 | FastVideo | blackwell-2gpu | 2 | 61.148 | 1.064x | ok | 4/4 | 2 | 122.319 | 1.065x | 122.428 | 122.439 | 0.0163 | 0.942x | ok | - |
@@ -253,12 +253,12 @@ Statuses: `not_run` means configured but absent from this artifact; `unsupported
 
 | framework | profile | gpus | single_e2e_s | single/SGLang-Diffusion | single_status | done/reqs | concurrency | p50_s | p50/SGLang-Diffusion | p95_s | p99_s | qps | qps/SGLang-Diffusion | throughput_status | reason |
 | --- | --- | ---: | ---: | ---: | --- | --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | --- | --- |
-| SGLang-Diffusion | default | 4 | 31.762 | 1.000x | ok | - | - | - | - | - | - | - | - | not_run | - |
-| vLLM-Omni | default | 4 | 34.078 | 1.073x | ok | - | - | - | - | - | - | - | - | not_run | - |
-| LightX2V | blackwell-sp4-fa2 | 4 | 73.292 | 2.308x | ok | - | - | - | - | - | - | - | - | not_run | - |
+| SGLang-Diffusion | default | 4 | 29.714 | 1.000x | ok | - | - | - | - | - | - | - | - | not_run | - |
+| vLLM-Omni | default | 4 | 34.078 | 1.147x | ok | - | - | - | - | - | - | - | - | not_run | - |
+| LightX2V | blackwell-sp4-sdpa | 4 | 32.536 | 1.095x | ok | - | - | - | - | - | - | - | - | not_run | - |
 | trtllm-visual | - | - | - | - | unsupported | - | - | - | - | - | - | - | - | unsupported | trtllm-visual's tracked scope in this harness is image cases; H3 is a video+audio model. |
 | ComfyUI | - | - | - | - | not_run | - | - | - | - | - | - | - | - | not_run | ComfyUI has no sequence or tensor parallelism (its one multi-GPU path splits CFG branches, and H3 runs without CFG), so a four-GPU cell would be its one-GPU number; that number is in minimax_h3_t2va_5s. |
-| FastVideo | blackwell-4gpu | 4 | 34.077 | 1.073x | ok | - | - | - | - | - | - | - | - | not_run | - |
+| FastVideo | blackwell-4gpu | 4 | 34.077 | 1.147x | ok | - | - | - | - | - | - | - | - | not_run | - |
 
 ### minimax_h3_ref2va_5s
 
@@ -270,7 +270,7 @@ Statuses: `not_run` means configured but absent from this artifact; `unsupported
 | --- | --- | ---: | ---: | ---: | --- | --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | --- | --- |
 | SGLang-Diffusion | default | 2 | 88.362 | 1.000x | ok | - | - | - | - | - | - | - | - | not_run | - |
 | vLLM-Omni | blackwell-2gpu | 2 | 91.910 | 1.040x | ok | - | - | - | - | - | - | - | - | not_run | - |
-| LightX2V | blackwell-tp2-fa2 | 2 | 229.212 | 2.594x | ok | - | - | - | - | - | - | - | - | not_run | - |
+| LightX2V | blackwell-sp2-sdpa | 2 | 98.466 | 1.114x | ok | - | - | - | - | - | - | - | - | not_run | - |
 | trtllm-visual | - | - | - | - | unsupported | - | - | - | - | - | - | - | - | unsupported | trtllm-visual's tracked scope in this harness is image cases; H3 is a video+audio model. |
 | ComfyUI | blackwell-gpuonly | 1 | 479.477 | 5.426x | ok | - | - | - | - | - | - | - | - | not_run | - |
 | FastVideo | blackwell-2gpu | 2 | 90.460 | 1.024x | ok | - | - | - | - | - | - | - | - | not_run | - |

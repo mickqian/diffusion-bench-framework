@@ -1,0 +1,22 @@
+RF hf token loaded
+RF dbf 78e2631 LightX2V MiniMax-H3 on Blackwell: torch_sdpa with Ulysses, not
+RF lightx2v install rc=0 stamp=/scratch/r/fw-venvs/lightx2v/.diffusion-bench-install-stamp
+RF lightx2v 0.5.0 torch 2.14.1+cu130
+RF h3 download rc=0 /scratch/r/hf/hub/models--MiniMaxAI--MiniMax-H3/snapshots/42ed227ee7df40d41602854ae760620d6eb651fe
+RF flux1 download rc=0 /scratch/r/hf/hub/models--black-forest-labs--FLUX.1-dev/snapshots/3de623fc3c33e44ffbe2bad470d0f45bccf2eb21
+bash: dbf/scripts/devbox_run_cases.sh: No such file or directory
+RF calibration no result (FileNotFoundError)
+bash: dbf/scripts/devbox_run_cases.sh: No such file or directory
+RF lightx2v no result (FileNotFoundError)
+RF lightx2v no result (FileNotFoundError)
+bash: dbf/scripts/devbox_run_cases.sh: No such file or directory
+RF lightx2v no result (FileNotFoundError)
+grep: /tmp/lightx2v_config_minimax_h3_*.json: No such file or directory
+RF flux1 TUNE rfeager_1: median=3.961 samples=[3.988, 3.985, 3.926, 3.961, 3.955] spread=1.6% server=3.951 err=None
+RF flux1 TUNE rfcompile_1: median=2.915 samples=[3.0, 2.949, 2.915, 2.909, 2.906] spread=3.2% server=2.914 err=None
+RF flux1 TUNE rfcompileNoOfc_1: median=2.948 samples=[2.994, 2.904, 2.87, 2.949, 2.948] spread=4.3% server=2.839 err=None
+RF flux1 TUNE rfeager_2: median=3.921 samples=[4.0, 3.938, 3.921, 3.921, 3.885] spread=3.0% server=3.871 err=None
+RF flux1 TUNE rfcompile_2: median=2.654 samples=[2.654, 2.659, 2.648, 2.646, 2.667] spread=0.8% server=2.68 err=None
+RF flux1 TUNE rfcompileNoOfc_2: median=2.986 samples=[2.986, 2.971, 3.062, 2.984, 2.989] spread=3.1% server=2.94 err=None
+RF numa:       1 GPU 0 worker bound to NUMA node 0;      1 GPU 1 worker bound to NUMA node 0;
+=== RF_DONE 2026-10-12T03:28:35+00:00

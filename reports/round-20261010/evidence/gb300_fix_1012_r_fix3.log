@@ -1,0 +1,5 @@
+RF3 r1 sglang median=29.739 samples=[29.721, 29.757] err=None
+RF3 r1 lightx2v median=32.641 samples=[32.691, 32.591] err=None
+RF3 r2 sglang median=29.714 samples=[29.717, 29.712] err=None
+RF3 r2 lightx2v median=32.536 samples=[32.386, 32.686] err=None
+=== RF3_DONE 2026-10-12T04:21:31+00:00

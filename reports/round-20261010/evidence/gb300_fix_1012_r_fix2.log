@@ -1,0 +1,12 @@
+RF2 dbf 8b4f441 flux1_dev_t2i_1024: torch.compile for sglang on GB300
+RF2 calibration minimax_h3_t2va_5s sglang single_e2e median=57.104 qps=None samples=[57.088, 57.12] err=None
+RF2 lightx2v minimax_h3_t2va_5s lightx2v single_e2e median=64.09 qps=None samples=[64.039, 64.141] err=None
+RF2 lightx2v minimax_h3_ref2va_5s lightx2v single_e2e median=98.466 qps=None samples=[98.657, 98.274] err=None
+RF2 lightx2v minimax_h3_t2va_5s_4gpu lightx2v single_e2e median=32.669 qps=None samples=[32.633, 32.704] err=None
+RF2 lightx2v cfg       3 "attn_type": "torch_sdpa"
+RF2 lightx2v cfg       2 "seq_p_size": 2
+RF2 lightx2v cfg       1 "seq_p_size": 4
+RF2 lightx2v cfg       2 "tensor_p_size": 1
+RF2 flux1 flux1_dev_t2i_1024 sglang single_e2e median=2.786 qps=None samples=[2.82, 2.786, 2.784, 2.801, 2.744] err=None
+RF2 flux1 flux1_dev_t2i_1024 sglang throughput median=5.538 qps=0.3607 samples=None err=None
+=== RF2_DONE 2026-10-12T04:02:38+00:00
