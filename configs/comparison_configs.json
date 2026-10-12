@@ -36,6 +36,16 @@
                     "serve_args": "--model-type diffusion --warmup-mode server --dit-layerwise-offload false --tp-size 2",
                     "extra_env": {},
                     "command_profiles": {
+                        "gb300-2gpu-tp-compile": {
+                            "description": "GB300 2-GPU TP2 sglang FLUX.1 with torch.compile.",
+                            "hardware": [
+                                "gb300"
+                            ],
+                            "sglang_ref": "main 6576e50cd5",
+                            "num_gpus": 2,
+                            "serve_args": "--model-type diffusion --warmup-mode server --dit-layerwise-offload false --tp-size 2 --enable-torch-compile true",
+                            "policy_exception": "2026-10-12 whole-node 4xGB300 (gb300-tml, NUMA-bound workers), sglang main 6576e50cd5, two interleaved rounds: compile 2.915/2.654 s vs eager 3.961/3.921 s (the published eager row was 4.00 s on the round's pod); --offload-during-compile false 2.948/2.986 s, no gain. The compiled DiT keeps sgl-project/sglang#43602's in-graph TP all-reduce. TRT-LLM VisualGen, which requires torch.compile, ran 3.10 s in the round."
+                        },
                         "default": {
                             "description": "Best known SGLang command for the benchmark repo default profile.",
                             "sglang_ref": "current-main",
