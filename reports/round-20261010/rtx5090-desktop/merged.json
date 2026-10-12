@@ -1,6 +1,6 @@
 {
-  "timestamp": "2026-10-11T16:19:54.097208+00:00",
-  "commit_sha": "d20d8a5957e6a4434a639a23591e8712144110e5",
+  "timestamp": "2026-10-12T02:23:15.118660+00:00",
+  "commit_sha": "1fd654aa648cc7c78f55f50b2ae87bf01eba87d1",
   "run_id": "rtx5090-desktop-20261011",
   "hardware": {
     "runner_labels": null,
@@ -231,85 +231,85 @@
   "reproduce_script": "scripts/generate_h200_report_artifacts.sh",
   "source_results": [
     {
-      "path": "reports/rtx5090-desktop-20261011/raw/run_pa5090qwen1010_qwen_image_21_edit_1024_qwen_image_21_edit_1024.json",
+      "path": "reports/round-20261010/rtx5090-desktop/raw/run_pa5090qwen1010_qwen_image_21_edit_1024_qwen_image_21_edit_1024.json",
       "run_id": "local",
       "commit_sha": "efe1c27647d4693e160c7123ce6faa15d18ed9ed",
       "timestamp": "2026-10-10T08:08:49.579474+00:00"
     },
     {
-      "path": "reports/rtx5090-desktop-20261011/raw/run_pa5090qwen1010_qwen_image_21_t2i_1024_qwen_image_21_t2i_1024.json",
+      "path": "reports/round-20261010/rtx5090-desktop/raw/run_pa5090qwen1010_qwen_image_21_t2i_1024_qwen_image_21_t2i_1024.json",
       "run_id": "local",
       "commit_sha": "efe1c27647d4693e160c7123ce6faa15d18ed9ed",
       "timestamp": "2026-10-10T08:02:25.600612+00:00"
     },
     {
-      "path": "reports/rtx5090-desktop-20261011/raw/run_pa5090qwen1010b_qwen_image_21_edit_1024_qwen_image_21_edit_1024.json",
+      "path": "reports/round-20261010/rtx5090-desktop/raw/run_pa5090qwen1010b_qwen_image_21_edit_1024_qwen_image_21_edit_1024.json",
       "run_id": "local",
       "commit_sha": "b5476014c3176424d7b38931eafdb3d28a482781",
       "timestamp": "2026-10-10T08:20:15.384372+00:00"
     },
     {
-      "path": "reports/rtx5090-desktop-20261011/raw/run_pa5090qwen1010b_qwen_image_21_t2i_1024_qwen_image_21_t2i_1024.json",
+      "path": "reports/round-20261010/rtx5090-desktop/raw/run_pa5090qwen1010b_qwen_image_21_t2i_1024_qwen_image_21_t2i_1024.json",
       "run_id": "local",
       "commit_sha": "b5476014c3176424d7b38931eafdb3d28a482781",
       "timestamp": "2026-10-10T08:17:19.788922+00:00"
     },
     {
-      "path": "reports/rtx5090-desktop-20261011/raw/run_pa5090qwen1010c_qwen_image_21_edit_1024_qwen_image_21_edit_1024.json",
+      "path": "reports/round-20261010/rtx5090-desktop/raw/run_pa5090qwen1010c_qwen_image_21_edit_1024_qwen_image_21_edit_1024.json",
       "run_id": "local",
       "commit_sha": "fe69ed68021ccdf510f96fcc8d5845b5882a1c0c",
       "timestamp": "2026-10-10T08:26:01.239894+00:00"
     },
     {
-      "path": "reports/rtx5090-desktop-20261011/raw/run_pa5090qwen1010c_qwen_image_21_t2i_1024_qwen_image_21_t2i_1024.json",
+      "path": "reports/round-20261010/rtx5090-desktop/raw/run_pa5090qwen1010c_qwen_image_21_t2i_1024_qwen_image_21_t2i_1024.json",
       "run_id": "local",
       "commit_sha": "fe69ed68021ccdf510f96fcc8d5845b5882a1c0c",
       "timestamp": "2026-10-10T08:23:18.715252+00:00"
     },
     {
-      "path": "reports/rtx5090-desktop-20261011/raw/run_pa5090h31010b_minimax_h3_t2va_480p_1gpu_minimax_h3_t2va_480p_1gpu.json",
+      "path": "reports/round-20261010/rtx5090-desktop/raw/run_pa5090h31010b_minimax_h3_t2va_480p_1gpu_minimax_h3_t2va_480p_1gpu.json",
       "run_id": "local",
       "commit_sha": "fe69ed68021ccdf510f96fcc8d5845b5882a1c0c",
       "timestamp": "2026-10-10T08:30:34.248617+00:00"
     },
     {
-      "path": "reports/rtx5090-desktop-20261011/raw/run_pa5090main1011_minimax_h3_t2va_480p_1gpu_minimax_h3_t2va_480p_1gpu.json",
+      "path": "reports/round-20261010/rtx5090-desktop/raw/run_pa5090main1011_minimax_h3_t2va_480p_1gpu_minimax_h3_t2va_480p_1gpu.json",
       "run_id": "local",
       "commit_sha": "bbe4d62ae749f46c2be28d1a0e12458173a195eb",
       "timestamp": "2026-10-11T15:16:44.743463+00:00"
     },
     {
-      "path": "reports/rtx5090-desktop-20261011/raw/run_pa5090main1011_qwen_image_21_edit_1024_qwen_image_21_edit_1024.json",
+      "path": "reports/round-20261010/rtx5090-desktop/raw/run_pa5090main1011_qwen_image_21_edit_1024_qwen_image_21_edit_1024.json",
       "run_id": "local",
       "commit_sha": "bbe4d62ae749f46c2be28d1a0e12458173a195eb",
       "timestamp": "2026-10-11T15:13:47.922554+00:00"
     },
     {
-      "path": "reports/rtx5090-desktop-20261011/raw/run_pa5090main1011_qwen_image_21_t2i_1024_qwen_image_21_t2i_1024.json",
+      "path": "reports/round-20261010/rtx5090-desktop/raw/run_pa5090main1011_qwen_image_21_t2i_1024_qwen_image_21_t2i_1024.json",
       "run_id": "local",
       "commit_sha": "bbe4d62ae749f46c2be28d1a0e12458173a195eb",
       "timestamp": "2026-10-11T15:11:05.010083+00:00"
     },
     {
-      "path": "reports/rtx5090-desktop-20261011/raw/run_pa5090ab1011comfy1_qwen_image_21_t2i_1024_qwen_image_21_t2i_1024.json",
+      "path": "reports/round-20261010/rtx5090-desktop/raw/run_pa5090ab1011comfy1_qwen_image_21_t2i_1024_qwen_image_21_t2i_1024.json",
       "run_id": "local",
       "commit_sha": "bbe4d62ae749f46c2be28d1a0e12458173a195eb",
       "timestamp": "2026-10-11T15:39:55.213523+00:00"
     },
     {
-      "path": "reports/rtx5090-desktop-20261011/raw/run_pa5090ab1011sgl1_qwen_image_21_t2i_1024_qwen_image_21_t2i_1024.json",
+      "path": "reports/round-20261010/rtx5090-desktop/raw/run_pa5090ab1011sgl1_qwen_image_21_t2i_1024_qwen_image_21_t2i_1024.json",
       "run_id": "local",
       "commit_sha": "bbe4d62ae749f46c2be28d1a0e12458173a195eb",
       "timestamp": "2026-10-11T15:37:20.805023+00:00"
     },
     {
-      "path": "reports/rtx5090-desktop-20261011/raw/run_pa5090ab1011comfy2_qwen_image_21_t2i_1024_qwen_image_21_t2i_1024.json",
+      "path": "reports/round-20261010/rtx5090-desktop/raw/run_pa5090ab1011comfy2_qwen_image_21_t2i_1024_qwen_image_21_t2i_1024.json",
       "run_id": "local",
       "commit_sha": "bbe4d62ae749f46c2be28d1a0e12458173a195eb",
       "timestamp": "2026-10-11T15:44:42.602796+00:00"
     },
     {
-      "path": "reports/rtx5090-desktop-20261011/raw/run_pa5090ab1011sgl2_qwen_image_21_t2i_1024_qwen_image_21_t2i_1024.json",
+      "path": "reports/round-20261010/rtx5090-desktop/raw/run_pa5090ab1011sgl2_qwen_image_21_t2i_1024_qwen_image_21_t2i_1024.json",
       "run_id": "local",
       "commit_sha": "bbe4d62ae749f46c2be28d1a0e12458173a195eb",
       "timestamp": "2026-10-11T15:42:09.682199+00:00"
@@ -399,7 +399,7 @@
         "server_startup_s": 24.04,
         "warmup_s": 29.62
       },
-      "source_result": "reports/rtx5090-desktop-20261011/raw/run_pa5090ab1011sgl2_qwen_image_21_t2i_1024_qwen_image_21_t2i_1024.json"
+      "source_result": "reports/round-20261010/rtx5090-desktop/raw/run_pa5090ab1011sgl2_qwen_image_21_t2i_1024_qwen_image_21_t2i_1024.json"
     },
     {
       "case_id": "qwen_image_21_t2i_1024",
@@ -468,7 +468,7 @@
         "server_startup_s": 30.05,
         "warmup_s": 36.99
       },
-      "source_result": "reports/rtx5090-desktop-20261011/raw/run_pa5090qwen1010c_qwen_image_21_t2i_1024_qwen_image_21_t2i_1024.json"
+      "source_result": "reports/round-20261010/rtx5090-desktop/raw/run_pa5090qwen1010c_qwen_image_21_t2i_1024_qwen_image_21_t2i_1024.json"
     },
     {
       "case_id": "qwen_image_21_t2i_1024",
@@ -547,7 +547,7 @@
         "server_startup_s": 38.1,
         "warmup_s": 28.06
       },
-      "source_result": "reports/rtx5090-desktop-20261011/raw/run_pa5090qwen1010_qwen_image_21_t2i_1024_qwen_image_21_t2i_1024.json"
+      "source_result": "reports/round-20261010/rtx5090-desktop/raw/run_pa5090qwen1010_qwen_image_21_t2i_1024_qwen_image_21_t2i_1024.json"
     },
     {
       "case_id": "qwen_image_21_t2i_1024",
@@ -620,7 +620,7 @@
         "server_startup_s": 4.34,
         "warmup_s": 36.68
       },
-      "source_result": "reports/rtx5090-desktop-20261011/raw/run_pa5090ab1011comfy2_qwen_image_21_t2i_1024_qwen_image_21_t2i_1024.json"
+      "source_result": "reports/round-20261010/rtx5090-desktop/raw/run_pa5090ab1011comfy2_qwen_image_21_t2i_1024_qwen_image_21_t2i_1024.json"
     },
     {
       "case_id": "qwen_image_21_edit_1024",
@@ -705,7 +705,7 @@
         "server_startup_s": 22.03,
         "warmup_s": 37.21
       },
-      "source_result": "reports/rtx5090-desktop-20261011/raw/run_pa5090main1011_qwen_image_21_edit_1024_qwen_image_21_edit_1024.json"
+      "source_result": "reports/round-20261010/rtx5090-desktop/raw/run_pa5090main1011_qwen_image_21_edit_1024_qwen_image_21_edit_1024.json"
     },
     {
       "case_id": "qwen_image_21_edit_1024",
@@ -774,7 +774,7 @@
         "server_startup_s": 60.1,
         "warmup_s": 50.02
       },
-      "source_result": "reports/rtx5090-desktop-20261011/raw/run_pa5090qwen1010c_qwen_image_21_edit_1024_qwen_image_21_edit_1024.json"
+      "source_result": "reports/round-20261010/rtx5090-desktop/raw/run_pa5090qwen1010c_qwen_image_21_edit_1024_qwen_image_21_edit_1024.json"
     },
     {
       "case_id": "minimax_h3_t2va_480p_1gpu",
@@ -857,7 +857,7 @@
         "server_startup_s": 100.43,
         "warmup_s": 78.88
       },
-      "source_result": "reports/rtx5090-desktop-20261011/raw/run_pa5090main1011_minimax_h3_t2va_480p_1gpu_minimax_h3_t2va_480p_1gpu.json"
+      "source_result": "reports/round-20261010/rtx5090-desktop/raw/run_pa5090main1011_minimax_h3_t2va_480p_1gpu_minimax_h3_t2va_480p_1gpu.json"
     },
     {
       "case_id": "minimax_h3_t2va_480p_1gpu",
@@ -911,7 +911,7 @@
         "server_startup_s": 6.58,
         "warmup_s": 514.12
       },
-      "source_result": "reports/rtx5090-desktop-20261011/raw/run_pa5090h31010b_minimax_h3_t2va_480p_1gpu_minimax_h3_t2va_480p_1gpu.json"
+      "source_result": "reports/round-20261010/rtx5090-desktop/raw/run_pa5090h31010b_minimax_h3_t2va_480p_1gpu_minimax_h3_t2va_480p_1gpu.json"
     }
   ],
   "throughput_results": []

@@ -414,7 +414,10 @@ def build_sections(
         config, hardware_candidates(merged.get("hardware"))
     )
     config_cases = {c["id"]: c for c in resolved_config["cases"]}
-    case_order = [c["id"] for c in config["cases"]]
+    # Only the cases this run attempted: a one-GPU desktop run listed every
+    # datacenter case as a row of n/a.
+    attempted = {r["case_id"] for r in merged.get("results", []) + merged.get("throughput_results", [])}
+    case_order = [c["id"] for c in config["cases"] if c["id"] in attempted]
     versions = framework_versions(merged)
     sections = []
 

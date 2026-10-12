@@ -1,10 +1,10 @@
-## Diffusion Benchmark Data - 2026-10-11T16:19:54.097208+00:00
+## Diffusion Benchmark Data - 2026-10-12T02:23:15.118660+00:00
 
 | item | value |
 | --- | --- |
 | run_id | rtx5090-desktop-20261011 |
 | data | single_e2e |
-| bench_commit | d20d8a5957e6a4434a639a23591e8712144110e5 |
+| bench_commit | 1fd654aa648cc7c78f55f50b2ae87bf01eba87d1 |
 | gpu | 1 x NVIDIA GeForce RTX 5090, 32607 MiB, 595.99.02 |
 | reproduce | scripts/generate_h200_report_artifacts.sh; inputs: run_pa5090qwen1010_qwen_image_21_edit_1024_qwen_image_21_edit_1024.json, run_pa5090qwen1010_qwen_image_21_t2i_1024_qwen_image_21_t2i_1024.json, run_pa5090qwen1010b_qwen_image_21_edit_1024_qwen_image_21_edit_1024.json, run_pa5090qwen1010b_qwen_image_21_t2i_1024_qwen_image_21_t2i_1024.json, run_pa5090qwen1010c_qwen_image_21_edit_1024_qwen_image_21_edit_1024.json, run_pa5090qwen1010c_qwen_image_21_t2i_1024_qwen_image_21_t2i_1024.json, run_pa5090h31010b_minimax_h3_t2va_480p_1gpu_minimax_h3_t2va_480p_1gpu.json, run_pa5090main1011_minimax_h3_t2va_480p_1gpu_minimax_h3_t2va_480p_1gpu.json, run_pa5090main1011_qwen_image_21_edit_1024_qwen_image_21_edit_1024.json, run_pa5090main1011_qwen_image_21_t2i_1024_qwen_image_21_t2i_1024.json, run_pa5090ab1011comfy1_qwen_image_21_t2i_1024_qwen_image_21_t2i_1024.json, run_pa5090ab1011sgl1_qwen_image_21_t2i_1024_qwen_image_21_t2i_1024.json, run_pa5090ab1011comfy2_qwen_image_21_t2i_1024_qwen_image_21_t2i_1024.json, run_pa5090ab1011sgl2_qwen_image_21_t2i_1024_qwen_image_21_t2i_1024.json |
 

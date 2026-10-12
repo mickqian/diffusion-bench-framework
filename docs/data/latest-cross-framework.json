@@ -2,7 +2,7 @@
   "id": "gb300x4-20261010",
   "title": "4xGB300 cross-framework (latest-vs-latest)",
   "updated_at": "2026-10-12",
-  "source_report": "reports/gb300x4-20261010/",
+  "source_report": "reports/round-20261010/",
   "source_script": "configs/benchmark/ (explicit matrix) + scripts/build_benchmark_config.py",
   "hardware": {
     "label": "4x NVIDIA GB300 288GB"
@@ -49,7 +49,7 @@
     "fastvideo": "FastVideo"
   },
   "summary": {
-    "cases": 18,
+    "cases": 17,
     "comparable_rows": 16,
     "sglang_diffusion_wins": 15,
     "other_wins": 1,
@@ -57,12 +57,12 @@
       "trtllm-visual": 1,
       "sglang": 15
     },
-    "note": "Steady-state single-request latency on 4x NVIDIA GB300 288GB, best lossless config per framework. SGLang-Diffusion fastest in 15/16 comparable cases across 18 cases. Throughput is reported separately."
+    "note": "Steady-state single-request latency on 4x NVIDIA GB300 288GB, best lossless config per framework. SGLang-Diffusion fastest in 15/16 comparable cases across 17 cases. Throughput is reported separately."
   },
   "rows": [
     {
       "case_id": "flux1_dev_t2i_1024",
-      "case": "FLUX.1-dev T2I",
+      "case": "FLUX.1-dev T2I · 2 GPUs",
       "details": "1024x1024 · 50 steps · cfg 3.5",
       "gpus": "2 GPU",
       "mode": "single_e2e",
@@ -109,7 +109,7 @@
     },
     {
       "case_id": "flux2_dev_t2i_1024",
-      "case": "FLUX.2-dev T2I",
+      "case": "FLUX.2-dev T2I · 2 GPUs",
       "details": "1024x1024 · 50 steps · cfg 4",
       "gpus": "2 GPU",
       "mode": "single_e2e",
@@ -159,7 +159,7 @@
     },
     {
       "case_id": "qwen_image_21_t2i_1024",
-      "case": "Qwen-Image-2.1 T2I 1024 (1 GPU)",
+      "case": "Qwen-Image-2.1 T2I 1024 · 1 GPU",
       "details": "1024x1024 · 40 steps · cfg 1",
       "gpus": "1 GPU",
       "mode": "single_e2e",
@@ -206,7 +206,7 @@
     },
     {
       "case_id": "qwen_image_21_t2i_1024_2gpu",
-      "case": "Qwen-Image-2.1 T2I 1024 (2 GPU)",
+      "case": "Qwen-Image-2.1 T2I 1024 · 2 GPUs",
       "details": "1024x1024 · 40 steps · cfg 1",
       "gpus": "2 GPU",
       "mode": "single_e2e",
@@ -247,7 +247,7 @@
     },
     {
       "case_id": "qwen_image_21_edit_1024",
-      "case": "Qwen-Image-2.1 edit 1024 (1 GPU, one reference)",
+      "case": "Qwen-Image-2.1 edit 1024 (one reference) · 1 GPU",
       "details": "1024x1024 · 40 steps · cfg 1",
       "gpus": "1 GPU",
       "mode": "single_e2e",
@@ -288,7 +288,7 @@
     },
     {
       "case_id": "zimage_turbo_t2i_1024",
-      "case": "Z-Image-Turbo T2I",
+      "case": "Z-Image-Turbo T2I · 2 GPUs",
       "details": "1024x1024 · 9 steps · cfg 0",
       "gpus": "2 GPU",
       "mode": "single_e2e",
@@ -335,7 +335,7 @@
     },
     {
       "case_id": "ideogram4_t2i_1024_2gpu_tp",
-      "case": "Ideogram-4 (FP8) T2I",
+      "case": "Ideogram-4 (FP8) T2I · 2 GPUs",
       "details": "1024x1024 · 20 steps · cfg ?",
       "gpus": "2 GPU",
       "mode": "single_e2e",
@@ -376,7 +376,7 @@
     },
     {
       "case_id": "wan22_t2v_a14b_720p",
-      "case": "Wan2.2 T2V A14B 720p",
+      "case": "Wan2.2 T2V A14B 720p · 4 GPUs",
       "details": "1280x720x81f · 40 steps · cfg 4",
       "gpus": "4 GPU",
       "mode": "single_e2e",
@@ -423,7 +423,7 @@
     },
     {
       "case_id": "ltx2_twostage_t2v",
-      "case": "LTX-2 two-stage T2V",
+      "case": "LTX-2 two-stage T2V · 2 GPUs",
       "details": "768x512x121f · 40 steps · cfg 4",
       "gpus": "2 GPU",
       "mode": "single_e2e",
@@ -470,7 +470,7 @@
     },
     {
       "case_id": "ltx2.3_twostage_t2v_2gpus",
-      "case": "LTX-2.3 two-stage T2V",
+      "case": "LTX-2.3 two-stage T2V · 2 GPUs",
       "details": "768x512x121f · 30 steps · cfg 3",
       "gpus": "2 GPU",
       "mode": "single_e2e",
@@ -506,7 +506,7 @@
     },
     {
       "case_id": "cosmos3_nano_t2i_720p",
-      "case": "Cosmos3-Nano T2I 720p",
+      "case": "Cosmos3-Nano T2I 720p · 2 GPUs",
       "details": "1280x720 · 35 steps · cfg 6",
       "gpus": "2 GPU",
       "mode": "single_e2e",
@@ -547,7 +547,7 @@
     },
     {
       "case_id": "cosmos3_nano_t2v_720p_189f",
-      "case": "Cosmos3-Nano T2V 720p",
+      "case": "Cosmos3-Nano T2V 720p · 4 GPUs",
       "details": "1280x720x189f · 35 steps · cfg 6",
       "gpus": "4 GPU",
       "mode": "single_e2e",
@@ -588,7 +588,7 @@
     },
     {
       "case_id": "cosmos3_nano_i2v_720p_189f",
-      "case": "Cosmos3-Nano I2V 720p",
+      "case": "Cosmos3-Nano I2V 720p · 4 GPUs",
       "details": "1280x720x189f · 35 steps · cfg 6",
       "gpus": "4 GPU",
       "mode": "single_e2e",
@@ -629,7 +629,7 @@
     },
     {
       "case_id": "minimax_h3_t2va_5s",
-      "case": "MiniMax-H3 T2V+A",
+      "case": "MiniMax-H3 T2V+A · 2 GPUs",
       "details": "1344x768x124f · 50 steps · cfg ?",
       "gpus": "2 GPU",
       "mode": "single_e2e",
@@ -679,7 +679,7 @@
     },
     {
       "case_id": "minimax_h3_t2va_5s_4gpu",
-      "case": "MiniMax-H3 T2V+A (4 GPU)",
+      "case": "MiniMax-H3 T2V+A · 4 GPUs",
       "details": "1344x768x124f · 50 steps · cfg ?",
       "gpus": "4 GPU",
       "mode": "single_e2e",
@@ -725,40 +725,8 @@
       "winner_speedup": "1.07x"
     },
     {
-      "case_id": "minimax_h3_t2va_480p_1gpu",
-      "case": "MiniMax-H3 T2V+A 480p, 1x 32 GB consumer GPU",
-      "details": "864x480x124f · 20 steps · cfg ?",
-      "gpus": "1 GPU",
-      "mode": "single_e2e",
-      "cells": {
-        "sglang": {
-          "status": "not_run"
-        },
-        "vllm-omni": {
-          "status": "no_profile",
-          "reason": "MiniMax-H3 holds about 108 GB of weights (61.73 GB DiT + 46.18 GB text encoder, per the sglang cookbook) and this case's host has 60 GB of RAM. vLLM-Omni's MiniMax-H3 recipe documents no single-32 GB-GPU command, and its offload keeps the streamed weights in host RAM, which cannot hold them here. Not attempted in the 2026-10-10 round."
-        },
-        "lightx2v": {
-          "status": "no_profile",
-          "reason": "MiniMax-H3 holds about 108 GB of weights (61.73 GB DiT + 46.18 GB text encoder, per the sglang cookbook) and this case's host has 60 GB of RAM. LightX2V documents no single-32 GB-GPU command, and its offload keeps the streamed weights in host RAM, which cannot hold them here. Not attempted in the 2026-10-10 round."
-        },
-        "trtllm-visual": {
-          "status": "unsupported",
-          "reason": "trtllm-visual's tracked scope in this harness is image cases; H3 is a video+audio model."
-        },
-        "comfyui": {
-          "status": "not_run"
-        },
-        "fastvideo": {
-          "status": "no_profile",
-          "reason": "MiniMax-H3 holds about 108 GB of weights (61.73 GB DiT + 46.18 GB text encoder, per the sglang cookbook) and this case's host has 60 GB of RAM. FastVideo documents no single-32 GB-GPU command, and its offload keeps the streamed weights in host RAM, which cannot hold them here. Not attempted in the 2026-10-10 round."
-        }
-      },
-      "winner": "n/a"
-    },
-    {
       "case_id": "minimax_h3_ref2va_5s",
-      "case": "MiniMax-H3 Ref2V+A",
+      "case": "MiniMax-H3 Ref2V+A · 2 GPUs",
       "details": "1344x768x124f · 50 steps · cfg ?",
       "gpus": "2 GPU",
       "mode": "single_e2e",
@@ -808,7 +776,7 @@
     },
     {
       "case_id": "minimax_h3_fasth3_v2_t2va_5s",
-      "case": "FastH3 8-Step V2 T2V+A (distilled)",
+      "case": "FastH3 8-Step V2 T2V+A (distilled) · 4 GPUs",
       "details": "1344x768x124f · 8 steps · cfg ?",
       "gpus": "4 GPU",
       "mode": "single_e2e",
@@ -876,7 +844,7 @@
       "rows": [
         {
           "case_id": "flux1_dev_t2i_1024",
-          "case": "FLUX.1-dev T2I",
+          "case": "FLUX.1-dev T2I · 2 GPUs",
           "details": "1024x1024 · 50 steps · cfg 3.5",
           "gpus": "2 GPU",
           "mode": "single_e2e",
@@ -923,7 +891,7 @@
         },
         {
           "case_id": "flux2_dev_t2i_1024",
-          "case": "FLUX.2-dev T2I",
+          "case": "FLUX.2-dev T2I · 2 GPUs",
           "details": "1024x1024 · 50 steps · cfg 4",
           "gpus": "2 GPU",
           "mode": "single_e2e",
@@ -973,7 +941,7 @@
         },
         {
           "case_id": "qwen_image_21_t2i_1024",
-          "case": "Qwen-Image-2.1 T2I 1024 (1 GPU)",
+          "case": "Qwen-Image-2.1 T2I 1024 · 1 GPU",
           "details": "1024x1024 · 40 steps · cfg 1",
           "gpus": "1 GPU",
           "mode": "single_e2e",
@@ -1020,7 +988,7 @@
         },
         {
           "case_id": "qwen_image_21_t2i_1024_2gpu",
-          "case": "Qwen-Image-2.1 T2I 1024 (2 GPU)",
+          "case": "Qwen-Image-2.1 T2I 1024 · 2 GPUs",
           "details": "1024x1024 · 40 steps · cfg 1",
           "gpus": "2 GPU",
           "mode": "single_e2e",
@@ -1061,7 +1029,7 @@
         },
         {
           "case_id": "qwen_image_21_edit_1024",
-          "case": "Qwen-Image-2.1 edit 1024 (1 GPU, one reference)",
+          "case": "Qwen-Image-2.1 edit 1024 (one reference) · 1 GPU",
           "details": "1024x1024 · 40 steps · cfg 1",
           "gpus": "1 GPU",
           "mode": "single_e2e",
@@ -1102,7 +1070,7 @@
         },
         {
           "case_id": "zimage_turbo_t2i_1024",
-          "case": "Z-Image-Turbo T2I",
+          "case": "Z-Image-Turbo T2I · 2 GPUs",
           "details": "1024x1024 · 9 steps · cfg 0",
           "gpus": "2 GPU",
           "mode": "single_e2e",
@@ -1149,7 +1117,7 @@
         },
         {
           "case_id": "ideogram4_t2i_1024_2gpu_tp",
-          "case": "Ideogram-4 (FP8) T2I",
+          "case": "Ideogram-4 (FP8) T2I · 2 GPUs",
           "details": "1024x1024 · 20 steps · cfg ?",
           "gpus": "2 GPU",
           "mode": "single_e2e",
@@ -1190,7 +1158,7 @@
         },
         {
           "case_id": "wan22_t2v_a14b_720p",
-          "case": "Wan2.2 T2V A14B 720p",
+          "case": "Wan2.2 T2V A14B 720p · 4 GPUs",
           "details": "1280x720x81f · 40 steps · cfg 4",
           "gpus": "4 GPU",
           "mode": "single_e2e",
@@ -1237,7 +1205,7 @@
         },
         {
           "case_id": "ltx2_twostage_t2v",
-          "case": "LTX-2 two-stage T2V",
+          "case": "LTX-2 two-stage T2V · 2 GPUs",
           "details": "768x512x121f · 40 steps · cfg 4",
           "gpus": "2 GPU",
           "mode": "single_e2e",
@@ -1284,7 +1252,7 @@
         },
         {
           "case_id": "ltx2.3_twostage_t2v_2gpus",
-          "case": "LTX-2.3 two-stage T2V",
+          "case": "LTX-2.3 two-stage T2V · 2 GPUs",
           "details": "768x512x121f · 30 steps · cfg 3",
           "gpus": "2 GPU",
           "mode": "single_e2e",
@@ -1320,7 +1288,7 @@
         },
         {
           "case_id": "cosmos3_nano_t2i_720p",
-          "case": "Cosmos3-Nano T2I 720p",
+          "case": "Cosmos3-Nano T2I 720p · 2 GPUs",
           "details": "1280x720 · 35 steps · cfg 6",
           "gpus": "2 GPU",
           "mode": "single_e2e",
@@ -1361,7 +1329,7 @@
         },
         {
           "case_id": "cosmos3_nano_t2v_720p_189f",
-          "case": "Cosmos3-Nano T2V 720p",
+          "case": "Cosmos3-Nano T2V 720p · 4 GPUs",
           "details": "1280x720x189f · 35 steps · cfg 6",
           "gpus": "4 GPU",
           "mode": "single_e2e",
@@ -1402,7 +1370,7 @@
         },
         {
           "case_id": "cosmos3_nano_i2v_720p_189f",
-          "case": "Cosmos3-Nano I2V 720p",
+          "case": "Cosmos3-Nano I2V 720p · 4 GPUs",
           "details": "1280x720x189f · 35 steps · cfg 6",
           "gpus": "4 GPU",
           "mode": "single_e2e",
@@ -1443,7 +1411,7 @@
         },
         {
           "case_id": "minimax_h3_t2va_5s",
-          "case": "MiniMax-H3 T2V+A",
+          "case": "MiniMax-H3 T2V+A · 2 GPUs",
           "details": "1344x768x124f · 50 steps · cfg ?",
           "gpus": "2 GPU",
           "mode": "single_e2e",
@@ -1493,7 +1461,7 @@
         },
         {
           "case_id": "minimax_h3_t2va_5s_4gpu",
-          "case": "MiniMax-H3 T2V+A (4 GPU)",
+          "case": "MiniMax-H3 T2V+A · 4 GPUs",
           "details": "1344x768x124f · 50 steps · cfg ?",
           "gpus": "4 GPU",
           "mode": "single_e2e",
@@ -1539,40 +1507,8 @@
           "winner_speedup": "1.07x"
         },
         {
-          "case_id": "minimax_h3_t2va_480p_1gpu",
-          "case": "MiniMax-H3 T2V+A 480p, 1x 32 GB consumer GPU",
-          "details": "864x480x124f · 20 steps · cfg ?",
-          "gpus": "1 GPU",
-          "mode": "single_e2e",
-          "cells": {
-            "sglang": {
-              "status": "not_run"
-            },
-            "vllm-omni": {
-              "status": "no_profile",
-              "reason": "MiniMax-H3 holds about 108 GB of weights (61.73 GB DiT + 46.18 GB text encoder, per the sglang cookbook) and this case's host has 60 GB of RAM. vLLM-Omni's MiniMax-H3 recipe documents no single-32 GB-GPU command, and its offload keeps the streamed weights in host RAM, which cannot hold them here. Not attempted in the 2026-10-10 round."
-            },
-            "lightx2v": {
-              "status": "no_profile",
-              "reason": "MiniMax-H3 holds about 108 GB of weights (61.73 GB DiT + 46.18 GB text encoder, per the sglang cookbook) and this case's host has 60 GB of RAM. LightX2V documents no single-32 GB-GPU command, and its offload keeps the streamed weights in host RAM, which cannot hold them here. Not attempted in the 2026-10-10 round."
-            },
-            "trtllm-visual": {
-              "status": "unsupported",
-              "reason": "trtllm-visual's tracked scope in this harness is image cases; H3 is a video+audio model."
-            },
-            "comfyui": {
-              "status": "not_run"
-            },
-            "fastvideo": {
-              "status": "no_profile",
-              "reason": "MiniMax-H3 holds about 108 GB of weights (61.73 GB DiT + 46.18 GB text encoder, per the sglang cookbook) and this case's host has 60 GB of RAM. FastVideo documents no single-32 GB-GPU command, and its offload keeps the streamed weights in host RAM, which cannot hold them here. Not attempted in the 2026-10-10 round."
-            }
-          },
-          "winner": "n/a"
-        },
-        {
           "case_id": "minimax_h3_ref2va_5s",
-          "case": "MiniMax-H3 Ref2V+A",
+          "case": "MiniMax-H3 Ref2V+A · 2 GPUs",
           "details": "1344x768x124f · 50 steps · cfg ?",
           "gpus": "2 GPU",
           "mode": "single_e2e",
@@ -1622,7 +1558,7 @@
         },
         {
           "case_id": "minimax_h3_fasth3_v2_t2va_5s",
-          "case": "FastH3 8-Step V2 T2V+A (distilled)",
+          "case": "FastH3 8-Step V2 T2V+A (distilled) · 4 GPUs",
           "details": "1344x768x124f · 8 steps · cfg ?",
           "gpus": "4 GPU",
           "mode": "single_e2e",
@@ -1668,9 +1604,11 @@
       "reproduce": "scripts/run_gb300_full_20261010.sh",
       "reproduce_link": {
         "path": "scripts/run_gb300_full_20261010.sh",
-        "ref": "41c50b0aa",
-        "url": "https://github.com/mickqian/diffusion-bench-framework/blob/41c50b0aa808caddb422be1922f6ad088dcf3ee7/scripts/run_gb300_full_20261010.sh"
-      }
+        "ref": "1fd654aa6",
+        "url": "https://github.com/mickqian/diffusion-bench-framework/blob/1fd654aa648cc7c78f55f50b2ae87bf01eba87d1/scripts/run_gb300_full_20261010.sh"
+      },
+      "round": "round-20261010",
+      "round_label": "Round 2026-10-10"
     },
     {
       "id": "gb300x4-20261010_throughput",
@@ -1696,7 +1634,7 @@
       "rows": [
         {
           "case_id": "flux1_dev_t2i_1024",
-          "case": "FLUX.1-dev T2I",
+          "case": "FLUX.1-dev T2I · 2 GPUs",
           "details": "1024x1024 · 50 steps · cfg 3.5",
           "gpus": "2 GPU",
           "mode": "throughput",
@@ -1751,7 +1689,7 @@
         },
         {
           "case_id": "minimax_h3_t2va_5s",
-          "case": "MiniMax-H3 T2V+A",
+          "case": "MiniMax-H3 T2V+A · 2 GPUs",
           "details": "1344x768x124f · 50 steps · cfg ?",
           "gpus": "2 GPU",
           "mode": "throughput",
@@ -1813,9 +1751,11 @@
       "reproduce": "scripts/run_gb300_full_20261010.sh",
       "reproduce_link": {
         "path": "scripts/run_gb300_full_20261010.sh",
-        "ref": "41c50b0aa",
-        "url": "https://github.com/mickqian/diffusion-bench-framework/blob/41c50b0aa808caddb422be1922f6ad088dcf3ee7/scripts/run_gb300_full_20261010.sh"
-      }
+        "ref": "1fd654aa6",
+        "url": "https://github.com/mickqian/diffusion-bench-framework/blob/1fd654aa648cc7c78f55f50b2ae87bf01eba87d1/scripts/run_gb300_full_20261010.sh"
+      },
+      "round": "round-20261010",
+      "round_label": "Round 2026-10-10"
     }
   ],
   "thinnest_lead": [
@@ -1823,7 +1763,7 @@
       "mode": "single_e2e",
       "metric": "latency_s",
       "case_id": "flux1_dev_t2i_1024",
-      "case": "FLUX.1-dev T2I",
+      "case": "FLUX.1-dev T2I · 2 GPUs",
       "hardware": "4x NVIDIA GB300 288GB",
       "sglang": {
         "gpus": 2,
@@ -1844,7 +1784,7 @@
       "mode": "single_e2e",
       "metric": "latency_s",
       "case_id": "minimax_h3_ref2va_5s",
-      "case": "MiniMax-H3 Ref2V+A",
+      "case": "MiniMax-H3 Ref2V+A · 2 GPUs",
       "hardware": "4x NVIDIA GB300 288GB",
       "sglang": {
         "gpus": 2,
@@ -1866,7 +1806,7 @@
       "mode": "single_e2e",
       "metric": "latency_s",
       "case_id": "cosmos3_nano_t2i_720p",
-      "case": "Cosmos3-Nano T2I 720p",
+      "case": "Cosmos3-Nano T2I 720p · 2 GPUs",
       "hardware": "4x NVIDIA GB300 288GB",
       "sglang": {
         "gpus": 2,
@@ -1887,7 +1827,7 @@
       "mode": "throughput",
       "metric": "qps",
       "case_id": "flux1_dev_t2i_1024",
-      "case": "FLUX.1-dev T2I",
+      "case": "FLUX.1-dev T2I · 2 GPUs",
       "hardware": "4x NVIDIA GB300 288GB",
       "sglang": {
         "gpus": 2,
@@ -1904,7 +1844,7 @@
       "mode": "throughput",
       "metric": "qps",
       "case_id": "minimax_h3_t2va_5s",
-      "case": "MiniMax-H3 T2V+A",
+      "case": "MiniMax-H3 T2V+A · 2 GPUs",
       "hardware": "4x NVIDIA GB300 288GB",
       "sglang": {
         "gpus": 2,

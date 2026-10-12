@@ -1,6 +1,6 @@
 {
-  "timestamp": "2026-10-11T16:14:07.006509+00:00",
-  "commit_sha": "41c50b0aa808caddb422be1922f6ad088dcf3ee7",
+  "timestamp": "2026-10-12T02:23:14.913349+00:00",
+  "commit_sha": "1fd654aa648cc7c78f55f50b2ae87bf01eba87d1",
   "run_id": "gb300x4-20261010",
   "hardware": {
     "runner_labels": null,
@@ -359,325 +359,325 @@
   "reproduce_script": "scripts/generate_h200_report_artifacts.sh",
   "source_results": [
     {
-      "path": "reports/gb300x4-20261010/raw/run_gb300img1010_cosmos3_nano_i2v_720p_189f_cosmos3_nano_i2v_720p_189f.json",
+      "path": "reports/round-20261010/raw/run_gb300img1010_cosmos3_nano_i2v_720p_189f_cosmos3_nano_i2v_720p_189f.json",
       "run_id": "local",
       "commit_sha": "b32615f6fac9345d509b5a8932f34ebbd65d4c6f",
       "timestamp": "2026-10-10T10:44:17.500090+00:00"
     },
     {
-      "path": "reports/gb300x4-20261010/raw/run_gb300img1010_cosmos3_nano_t2i_720p_cosmos3_nano_t2i_720p.json",
+      "path": "reports/round-20261010/raw/run_gb300img1010_cosmos3_nano_t2i_720p_cosmos3_nano_t2i_720p.json",
       "run_id": "local",
       "commit_sha": "b32615f6fac9345d509b5a8932f34ebbd65d4c6f",
       "timestamp": "2026-10-10T09:26:51.379673+00:00"
     },
     {
-      "path": "reports/gb300x4-20261010/raw/run_gb300img1010_cosmos3_nano_t2v_720p_189f_cosmos3_nano_t2v_720p_189f.json",
+      "path": "reports/round-20261010/raw/run_gb300img1010_cosmos3_nano_t2v_720p_189f_cosmos3_nano_t2v_720p_189f.json",
       "run_id": "local",
       "commit_sha": "b32615f6fac9345d509b5a8932f34ebbd65d4c6f",
       "timestamp": "2026-10-10T09:59:45.431411+00:00"
     },
     {
-      "path": "reports/gb300x4-20261010/raw/run_gb300img1010_flux1_dev_t2i_1024_flux1_dev_t2i_1024.json",
+      "path": "reports/round-20261010/raw/run_gb300img1010_flux1_dev_t2i_1024_flux1_dev_t2i_1024.json",
       "run_id": "local",
       "commit_sha": "c467130c4a858a7334d111b81bf0a006ba730b3c",
       "timestamp": "2026-10-10T10:51:38.256967+00:00"
     },
     {
-      "path": "reports/gb300x4-20261010/raw/run_gb300img1010_flux2_dev_t2i_1024_flux2_dev_t2i_1024.json",
+      "path": "reports/round-20261010/raw/run_gb300img1010_flux2_dev_t2i_1024_flux2_dev_t2i_1024.json",
       "run_id": "local",
       "commit_sha": "c467130c4a858a7334d111b81bf0a006ba730b3c",
       "timestamp": "2026-10-10T11:01:17.455638+00:00"
     },
     {
-      "path": "reports/gb300x4-20261010/raw/run_gb300img1010_ideogram4_t2i_1024_2gpu_tp_ideogram4_t2i_1024_2gpu_tp.json",
+      "path": "reports/round-20261010/raw/run_gb300img1010_ideogram4_t2i_1024_2gpu_tp_ideogram4_t2i_1024_2gpu_tp.json",
       "run_id": "local",
       "commit_sha": "c467130c4a858a7334d111b81bf0a006ba730b3c",
       "timestamp": "2026-10-10T11:16:48.817264+00:00"
     },
     {
-      "path": "reports/gb300x4-20261010/raw/run_gb300img1010_ltx2.3_twostage_t2v_2gpus_ltx2.3_twostage_t2v_2gpus.json",
+      "path": "reports/round-20261010/raw/run_gb300img1010_ltx2.3_twostage_t2v_2gpus_ltx2.3_twostage_t2v_2gpus.json",
       "run_id": "local",
       "commit_sha": "b32615f6fac9345d509b5a8932f34ebbd65d4c6f",
       "timestamp": "2026-10-10T09:54:26.918751+00:00"
     },
     {
-      "path": "reports/gb300x4-20261010/raw/run_gb300img1010_ltx2_twostage_t2v_ltx2_twostage_t2v.json",
+      "path": "reports/round-20261010/raw/run_gb300img1010_ltx2_twostage_t2v_ltx2_twostage_t2v.json",
       "run_id": "local",
       "commit_sha": "b32615f6fac9345d509b5a8932f34ebbd65d4c6f",
       "timestamp": "2026-10-10T09:30:40.458998+00:00"
     },
     {
-      "path": "reports/gb300x4-20261010/raw/run_gb300img1010_qwen_image_21_edit_1024_qwen_image_21_edit_1024.json",
+      "path": "reports/round-20261010/raw/run_gb300img1010_qwen_image_21_edit_1024_qwen_image_21_edit_1024.json",
       "run_id": "local",
       "commit_sha": "b32615f6fac9345d509b5a8932f34ebbd65d4c6f",
       "timestamp": "2026-10-10T09:17:05.757976+00:00"
     },
     {
-      "path": "reports/gb300x4-20261010/raw/run_gb300img1010_qwen_image_21_t2i_1024_2gpu_qwen_image_21_t2i_1024_2gpu.json",
+      "path": "reports/round-20261010/raw/run_gb300img1010_qwen_image_21_t2i_1024_2gpu_qwen_image_21_t2i_1024_2gpu.json",
       "run_id": "local",
       "commit_sha": "b32615f6fac9345d509b5a8932f34ebbd65d4c6f",
       "timestamp": "2026-10-10T09:12:30.168341+00:00"
     },
     {
-      "path": "reports/gb300x4-20261010/raw/run_gb300img1010_qwen_image_21_t2i_1024_qwen_image_21_t2i_1024.json",
+      "path": "reports/round-20261010/raw/run_gb300img1010_qwen_image_21_t2i_1024_qwen_image_21_t2i_1024.json",
       "run_id": "local",
       "commit_sha": "b32615f6fac9345d509b5a8932f34ebbd65d4c6f",
       "timestamp": "2026-10-10T09:04:11.885097+00:00"
     },
     {
-      "path": "reports/gb300x4-20261010/raw/run_gb300img1010_zimage_turbo_t2i_1024_zimage_turbo_t2i_1024.json",
+      "path": "reports/round-20261010/raw/run_gb300img1010_zimage_turbo_t2i_1024_zimage_turbo_t2i_1024.json",
       "run_id": "local",
       "commit_sha": "b32615f6fac9345d509b5a8932f34ebbd65d4c6f",
       "timestamp": "2026-10-10T09:19:51.005000+00:00"
     },
     {
-      "path": "reports/gb300x4-20261010/raw/run_gb300img1010b_cosmos3_nano_t2v_720p_189f_cosmos3_nano_t2v_720p_189f.json",
+      "path": "reports/round-20261010/raw/run_gb300img1010b_cosmos3_nano_t2v_720p_189f_cosmos3_nano_t2v_720p_189f.json",
       "run_id": "local",
       "commit_sha": "c467130c4a858a7334d111b81bf0a006ba730b3c",
       "timestamp": "2026-10-10T11:20:54.945571+00:00"
     },
     {
-      "path": "reports/gb300x4-20261010/raw/run_gb300img1010fix_cosmos3_nano_i2v_720p_189f_cosmos3_nano_i2v_720p_189f.json",
+      "path": "reports/round-20261010/raw/run_gb300img1010fix_cosmos3_nano_i2v_720p_189f_cosmos3_nano_i2v_720p_189f.json",
       "run_id": "local",
       "commit_sha": "45e55dd141d909cbfabfe1f550745f7f3dc2f047",
       "timestamp": "2026-10-10T17:06:07.637276+00:00"
     },
     {
-      "path": "reports/gb300x4-20261010/raw/run_gb300img1010fix_cosmos3_nano_t2i_720p_cosmos3_nano_t2i_720p.json",
+      "path": "reports/round-20261010/raw/run_gb300img1010fix_cosmos3_nano_t2i_720p_cosmos3_nano_t2i_720p.json",
       "run_id": "local",
       "commit_sha": "45e55dd141d909cbfabfe1f550745f7f3dc2f047",
       "timestamp": "2026-10-10T16:55:01.099844+00:00"
     },
     {
-      "path": "reports/gb300x4-20261010/raw/run_gb300img1010fix_cosmos3_nano_t2v_720p_189f_cosmos3_nano_t2v_720p_189f.json",
+      "path": "reports/round-20261010/raw/run_gb300img1010fix_cosmos3_nano_t2v_720p_189f_cosmos3_nano_t2v_720p_189f.json",
       "run_id": "local",
       "commit_sha": "45e55dd141d909cbfabfe1f550745f7f3dc2f047",
       "timestamp": "2026-10-10T17:02:40.973367+00:00"
     },
     {
-      "path": "reports/gb300x4-20261010/raw/run_gb300img1010fix_flux1_dev_t2i_1024_flux1_dev_t2i_1024.json",
+      "path": "reports/round-20261010/raw/run_gb300img1010fix_flux1_dev_t2i_1024_flux1_dev_t2i_1024.json",
       "run_id": "local",
       "commit_sha": "45e55dd141d909cbfabfe1f550745f7f3dc2f047",
       "timestamp": "2026-10-10T17:09:43.466629+00:00"
     },
     {
-      "path": "reports/gb300x4-20261010/raw/run_gb300img1010fix_flux2_dev_t2i_1024_flux2_dev_t2i_1024.json",
+      "path": "reports/round-20261010/raw/run_gb300img1010fix_flux2_dev_t2i_1024_flux2_dev_t2i_1024.json",
       "run_id": "local",
       "commit_sha": "45e55dd141d909cbfabfe1f550745f7f3dc2f047",
       "timestamp": "2026-10-10T17:11:40.094936+00:00"
     },
     {
-      "path": "reports/gb300x4-20261010/raw/run_gb300img1010fix_ideogram4_t2i_1024_2gpu_tp_ideogram4_t2i_1024_2gpu_tp.json",
+      "path": "reports/round-20261010/raw/run_gb300img1010fix_ideogram4_t2i_1024_2gpu_tp_ideogram4_t2i_1024_2gpu_tp.json",
       "run_id": "local",
       "commit_sha": "45e55dd141d909cbfabfe1f550745f7f3dc2f047",
       "timestamp": "2026-10-10T17:13:29.167655+00:00"
     },
     {
-      "path": "reports/gb300x4-20261010/raw/run_gb300img1010fix_ltx2.3_twostage_t2v_2gpus_ltx2.3_twostage_t2v_2gpus.json",
+      "path": "reports/round-20261010/raw/run_gb300img1010fix_ltx2.3_twostage_t2v_2gpus_ltx2.3_twostage_t2v_2gpus.json",
       "run_id": "local",
       "commit_sha": "45e55dd141d909cbfabfe1f550745f7f3dc2f047",
       "timestamp": "2026-10-10T16:59:40.615686+00:00"
     },
     {
-      "path": "reports/gb300x4-20261010/raw/run_gb300img1010fix_ltx2_twostage_t2v_ltx2_twostage_t2v.json",
+      "path": "reports/round-20261010/raw/run_gb300img1010fix_ltx2_twostage_t2v_ltx2_twostage_t2v.json",
       "run_id": "local",
       "commit_sha": "45e55dd141d909cbfabfe1f550745f7f3dc2f047",
       "timestamp": "2026-10-10T16:56:27.270128+00:00"
     },
     {
-      "path": "reports/gb300x4-20261010/raw/run_gb300img1010fix_qwen_image_21_edit_1024_qwen_image_21_edit_1024.json",
+      "path": "reports/round-20261010/raw/run_gb300img1010fix_qwen_image_21_edit_1024_qwen_image_21_edit_1024.json",
       "run_id": "local",
       "commit_sha": "45e55dd141d909cbfabfe1f550745f7f3dc2f047",
       "timestamp": "2026-10-10T16:52:29.095622+00:00"
     },
     {
-      "path": "reports/gb300x4-20261010/raw/run_gb300img1010fix_qwen_image_21_t2i_1024_2gpu_qwen_image_21_t2i_1024_2gpu.json",
+      "path": "reports/round-20261010/raw/run_gb300img1010fix_qwen_image_21_t2i_1024_2gpu_qwen_image_21_t2i_1024_2gpu.json",
       "run_id": "local",
       "commit_sha": "45e55dd141d909cbfabfe1f550745f7f3dc2f047",
       "timestamp": "2026-10-10T16:51:05.912722+00:00"
     },
     {
-      "path": "reports/gb300x4-20261010/raw/run_gb300img1010fix_qwen_image_21_t2i_1024_qwen_image_21_t2i_1024.json",
+      "path": "reports/round-20261010/raw/run_gb300img1010fix_qwen_image_21_t2i_1024_qwen_image_21_t2i_1024.json",
       "run_id": "local",
       "commit_sha": "45e55dd141d909cbfabfe1f550745f7f3dc2f047",
       "timestamp": "2026-10-10T16:49:38.884965+00:00"
     },
     {
-      "path": "reports/gb300x4-20261010/raw/run_gb300img1010fix_zimage_turbo_t2i_1024_zimage_turbo_t2i_1024.json",
+      "path": "reports/round-20261010/raw/run_gb300img1010fix_zimage_turbo_t2i_1024_zimage_turbo_t2i_1024.json",
       "run_id": "local",
       "commit_sha": "45e55dd141d909cbfabfe1f550745f7f3dc2f047",
       "timestamp": "2026-10-10T16:53:53.825729+00:00"
     },
     {
-      "path": "reports/gb300x4-20261010/raw/run_gb300img1010vfix_qwen_image_21_t2i_1024_2gpu_qwen_image_21_t2i_1024_2gpu.json",
+      "path": "reports/round-20261010/raw/run_gb300img1010vfix_qwen_image_21_t2i_1024_2gpu_qwen_image_21_t2i_1024_2gpu.json",
       "run_id": "local",
       "commit_sha": "45e55dd141d909cbfabfe1f550745f7f3dc2f047",
       "timestamp": "2026-10-10T17:14:55.765809+00:00"
     },
     {
-      "path": "reports/gb300x4-20261010/raw/run_gb300vid1010_minimax_h3_fasth3_v2_t2va_5s_minimax_h3_fasth3_v2_t2va_5s.json",
+      "path": "reports/round-20261010/raw/run_gb300vid1010_minimax_h3_fasth3_v2_t2va_5s_minimax_h3_fasth3_v2_t2va_5s.json",
       "run_id": "local",
       "commit_sha": "b32615f6fac9345d509b5a8932f34ebbd65d4c6f",
       "timestamp": "2026-10-10T09:05:47.731473+00:00"
     },
     {
-      "path": "reports/gb300x4-20261010/raw/run_gb300vid1010_wan22_t2v_a14b_720p_wan22_t2v_a14b_720p.json",
+      "path": "reports/round-20261010/raw/run_gb300vid1010_wan22_t2v_a14b_720p_wan22_t2v_a14b_720p.json",
       "run_id": "local",
       "commit_sha": "b32615f6fac9345d509b5a8932f34ebbd65d4c6f",
       "timestamp": "2026-10-10T09:13:49.437204+00:00"
     },
     {
-      "path": "reports/gb300x4-20261010/raw/run_gb300vid1010b_minimax_h3_t2va_5s_minimax_h3_t2va_5s.json",
+      "path": "reports/round-20261010/raw/run_gb300vid1010b_minimax_h3_t2va_5s_minimax_h3_t2va_5s.json",
       "run_id": "local",
       "commit_sha": "7d7fa3d09331ef9ff806ddeab24d47a3eb098010",
       "timestamp": "2026-10-10T10:05:50.099155+00:00"
     },
     {
-      "path": "reports/gb300x4-20261010/raw/run_gb300vid1010fix_minimax_h3_fasth3_v2_t2va_5s_minimax_h3_fasth3_v2_t2va_5s.json",
+      "path": "reports/round-20261010/raw/run_gb300vid1010fix_minimax_h3_fasth3_v2_t2va_5s_minimax_h3_fasth3_v2_t2va_5s.json",
       "run_id": "local",
       "commit_sha": "45e55dd141d909cbfabfe1f550745f7f3dc2f047",
       "timestamp": "2026-10-10T18:11:10.475702+00:00"
     },
     {
-      "path": "reports/gb300x4-20261010/raw/run_gb300vid1010fix_minimax_h3_ref2va_5s_minimax_h3_ref2va_5s.json",
+      "path": "reports/round-20261010/raw/run_gb300vid1010fix_minimax_h3_ref2va_5s_minimax_h3_ref2va_5s.json",
       "run_id": "local",
       "commit_sha": "45e55dd141d909cbfabfe1f550745f7f3dc2f047",
       "timestamp": "2026-10-10T16:49:37.244209+00:00"
     },
     {
-      "path": "reports/gb300x4-20261010/raw/run_gb300vid1010fix_minimax_h3_t2va_5s_4gpu_minimax_h3_t2va_5s_4gpu.json",
+      "path": "reports/round-20261010/raw/run_gb300vid1010fix_minimax_h3_t2va_5s_4gpu_minimax_h3_t2va_5s_4gpu.json",
       "run_id": "local",
       "commit_sha": "45e55dd141d909cbfabfe1f550745f7f3dc2f047",
       "timestamp": "2026-10-10T17:47:16.611633+00:00"
     },
     {
-      "path": "reports/gb300x4-20261010/raw/run_gb300vid1010sfix_minimax_h3_t2va_5s_minimax_h3_t2va_5s.json",
+      "path": "reports/round-20261010/raw/run_gb300vid1010sfix_minimax_h3_t2va_5s_minimax_h3_t2va_5s.json",
       "run_id": "local",
       "commit_sha": "45e55dd141d909cbfabfe1f550745f7f3dc2f047",
       "timestamp": "2026-10-10T18:19:14.984242+00:00"
     },
     {
-      "path": "reports/gb300x4-20261010/raw/run_gb300vid1010sfix_wan22_t2v_a14b_720p_wan22_t2v_a14b_720p.json",
+      "path": "reports/round-20261010/raw/run_gb300vid1010sfix_wan22_t2v_a14b_720p_wan22_t2v_a14b_720p.json",
       "run_id": "local",
       "commit_sha": "45e55dd141d909cbfabfe1f550745f7f3dc2f047",
       "timestamp": "2026-10-10T18:30:15.509279+00:00"
     },
     {
-      "path": "reports/gb300x4-20261010/raw/run_gb300vid1010f3fix_minimax_h3_fasth3_v2_t2va_5s_minimax_h3_fasth3_v2_t2va_5s.json",
+      "path": "reports/round-20261010/raw/run_gb300vid1010f3fix_minimax_h3_fasth3_v2_t2va_5s_minimax_h3_fasth3_v2_t2va_5s.json",
       "run_id": "local",
       "commit_sha": "1d771ecb0d5300a262f9d91f78fa6ec4153cb181",
       "timestamp": "2026-10-10T18:38:36.314311+00:00"
     },
     {
-      "path": "reports/gb300x4-20261010/raw/run_gb300img1011main_cosmos3_nano_i2v_720p_189f_cosmos3_nano_i2v_720p_189f.json",
+      "path": "reports/round-20261010/raw/run_gb300img1011main_cosmos3_nano_i2v_720p_189f_cosmos3_nano_i2v_720p_189f.json",
       "run_id": "local",
       "commit_sha": "0466d3cc97a5c93f0114aeff640de568e334610a",
       "timestamp": "2026-10-11T04:02:17.845660+00:00"
     },
     {
-      "path": "reports/gb300x4-20261010/raw/run_gb300img1011main_cosmos3_nano_t2i_720p_cosmos3_nano_t2i_720p.json",
+      "path": "reports/round-20261010/raw/run_gb300img1011main_cosmos3_nano_t2i_720p_cosmos3_nano_t2i_720p.json",
       "run_id": "local",
       "commit_sha": "0466d3cc97a5c93f0114aeff640de568e334610a",
       "timestamp": "2026-10-11T03:50:32.249853+00:00"
     },
     {
-      "path": "reports/gb300x4-20261010/raw/run_gb300img1011main_cosmos3_nano_t2v_720p_189f_cosmos3_nano_t2v_720p_189f.json",
+      "path": "reports/round-20261010/raw/run_gb300img1011main_cosmos3_nano_t2v_720p_189f_cosmos3_nano_t2v_720p_189f.json",
       "run_id": "local",
       "commit_sha": "0466d3cc97a5c93f0114aeff640de568e334610a",
       "timestamp": "2026-10-11T03:58:41.016460+00:00"
     },
     {
-      "path": "reports/gb300x4-20261010/raw/run_gb300img1011main_flux1_dev_t2i_1024_flux1_dev_t2i_1024.json",
+      "path": "reports/round-20261010/raw/run_gb300img1011main_flux1_dev_t2i_1024_flux1_dev_t2i_1024.json",
       "run_id": "local",
       "commit_sha": "0466d3cc97a5c93f0114aeff640de568e334610a",
       "timestamp": "2026-10-11T04:05:54.760421+00:00"
     },
     {
-      "path": "reports/gb300x4-20261010/raw/run_gb300img1011main_flux2_dev_t2i_1024_flux2_dev_t2i_1024.json",
+      "path": "reports/round-20261010/raw/run_gb300img1011main_flux2_dev_t2i_1024_flux2_dev_t2i_1024.json",
       "run_id": "local",
       "commit_sha": "0466d3cc97a5c93f0114aeff640de568e334610a",
       "timestamp": "2026-10-11T04:07:50.754268+00:00"
     },
     {
-      "path": "reports/gb300x4-20261010/raw/run_gb300img1011main_ideogram4_t2i_1024_2gpu_tp_ideogram4_t2i_1024_2gpu_tp.json",
+      "path": "reports/round-20261010/raw/run_gb300img1011main_ideogram4_t2i_1024_2gpu_tp_ideogram4_t2i_1024_2gpu_tp.json",
       "run_id": "local",
       "commit_sha": "0466d3cc97a5c93f0114aeff640de568e334610a",
       "timestamp": "2026-10-11T04:09:41.630545+00:00"
     },
     {
-      "path": "reports/gb300x4-20261010/raw/run_gb300img1011main_ltx2.3_twostage_t2v_2gpus_ltx2.3_twostage_t2v_2gpus.json",
+      "path": "reports/round-20261010/raw/run_gb300img1011main_ltx2.3_twostage_t2v_2gpus_ltx2.3_twostage_t2v_2gpus.json",
       "run_id": "local",
       "commit_sha": "0466d3cc97a5c93f0114aeff640de568e334610a",
       "timestamp": "2026-10-11T03:55:45.770243+00:00"
     },
     {
-      "path": "reports/gb300x4-20261010/raw/run_gb300img1011main_ltx2_twostage_t2v_ltx2_twostage_t2v.json",
+      "path": "reports/round-20261010/raw/run_gb300img1011main_ltx2_twostage_t2v_ltx2_twostage_t2v.json",
       "run_id": "local",
       "commit_sha": "0466d3cc97a5c93f0114aeff640de568e334610a",
       "timestamp": "2026-10-11T03:52:04.446329+00:00"
     },
     {
-      "path": "reports/gb300x4-20261010/raw/run_gb300img1011main_qwen_image_21_edit_1024_qwen_image_21_edit_1024.json",
+      "path": "reports/round-20261010/raw/run_gb300img1011main_qwen_image_21_edit_1024_qwen_image_21_edit_1024.json",
       "run_id": "local",
       "commit_sha": "0466d3cc97a5c93f0114aeff640de568e334610a",
       "timestamp": "2026-10-11T03:47:47.809262+00:00"
     },
     {
-      "path": "reports/gb300x4-20261010/raw/run_gb300img1011main_qwen_image_21_t2i_1024_2gpu_qwen_image_21_t2i_1024_2gpu.json",
+      "path": "reports/round-20261010/raw/run_gb300img1011main_qwen_image_21_t2i_1024_2gpu_qwen_image_21_t2i_1024_2gpu.json",
       "run_id": "local",
       "commit_sha": "0466d3cc97a5c93f0114aeff640de568e334610a",
       "timestamp": "2026-10-11T03:46:17.893743+00:00"
     },
     {
-      "path": "reports/gb300x4-20261010/raw/run_gb300img1011main_qwen_image_21_t2i_1024_qwen_image_21_t2i_1024.json",
+      "path": "reports/round-20261010/raw/run_gb300img1011main_qwen_image_21_t2i_1024_qwen_image_21_t2i_1024.json",
       "run_id": "local",
       "commit_sha": "0466d3cc97a5c93f0114aeff640de568e334610a",
       "timestamp": "2026-10-11T03:44:48.338364+00:00"
     },
     {
-      "path": "reports/gb300x4-20261010/raw/run_gb300img1011main_zimage_turbo_t2i_1024_zimage_turbo_t2i_1024.json",
+      "path": "reports/round-20261010/raw/run_gb300img1011main_zimage_turbo_t2i_1024_zimage_turbo_t2i_1024.json",
       "run_id": "local",
       "commit_sha": "0466d3cc97a5c93f0114aeff640de568e334610a",
       "timestamp": "2026-10-11T03:49:19.801973+00:00"
     },
     {
-      "path": "reports/gb300x4-20261010/raw/run_gb300vid1011main_minimax_h3_fasth3_v2_t2va_5s_minimax_h3_fasth3_v2_t2va_5s.json",
+      "path": "reports/round-20261010/raw/run_gb300vid1011main_minimax_h3_fasth3_v2_t2va_5s_minimax_h3_fasth3_v2_t2va_5s.json",
       "run_id": "local",
       "commit_sha": "0466d3cc97a5c93f0114aeff640de568e334610a",
       "timestamp": "2026-10-11T04:07:39.331145+00:00"
     },
     {
-      "path": "reports/gb300x4-20261010/raw/run_gb300vid1011main_minimax_h3_ref2va_5s_minimax_h3_ref2va_5s.json",
+      "path": "reports/round-20261010/raw/run_gb300vid1011main_minimax_h3_ref2va_5s_minimax_h3_ref2va_5s.json",
       "run_id": "local",
       "commit_sha": "0466d3cc97a5c93f0114aeff640de568e334610a",
       "timestamp": "2026-10-11T03:56:35.627491+00:00"
     },
     {
-      "path": "reports/gb300x4-20261010/raw/run_gb300vid1011main_minimax_h3_t2va_5s_4gpu_minimax_h3_t2va_5s_4gpu.json",
+      "path": "reports/round-20261010/raw/run_gb300vid1011main_minimax_h3_t2va_5s_4gpu_minimax_h3_t2va_5s_4gpu.json",
       "run_id": "local",
       "commit_sha": "0466d3cc97a5c93f0114aeff640de568e334610a",
       "timestamp": "2026-10-11T04:03:12.316008+00:00"
     },
     {
-      "path": "reports/gb300x4-20261010/raw/run_gb300vid1011main_minimax_h3_t2va_5s_minimax_h3_t2va_5s.json",
+      "path": "reports/round-20261010/raw/run_gb300vid1011main_minimax_h3_t2va_5s_minimax_h3_t2va_5s.json",
       "run_id": "local",
       "commit_sha": "0466d3cc97a5c93f0114aeff640de568e334610a",
       "timestamp": "2026-10-11T03:45:50.023966+00:00"
     },
     {
-      "path": "reports/gb300x4-20261010/raw/run_gb300vid1011main_wan22_t2v_a14b_720p_wan22_t2v_a14b_720p.json",
+      "path": "reports/round-20261010/raw/run_gb300vid1011main_wan22_t2v_a14b_720p_wan22_t2v_a14b_720p.json",
       "run_id": "local",
       "commit_sha": "0466d3cc97a5c93f0114aeff640de568e334610a",
       "timestamp": "2026-10-11T04:09:57.970264+00:00"
     },
     {
-      "path": "reports/gb300x4-20261010/raw/run_gb300fh3vsa1011r1_minimax_h3_fasth3_v2_t2va_5s.json",
+      "path": "reports/round-20261010/raw/run_gb300fh3vsa1011r1_minimax_h3_fasth3_v2_t2va_5s.json",
       "run_id": "local",
       "commit_sha": "41c50b0aa808caddb422be1922f6ad088dcf3ee7",
       "timestamp": "2026-10-11T15:59:43.579232+00:00"
     },
     {
-      "path": "reports/gb300x4-20261010/raw/run_gb300fh3vsa1011r2_minimax_h3_fasth3_v2_t2va_5s.json",
+      "path": "reports/round-20261010/raw/run_gb300fh3vsa1011r2_minimax_h3_fasth3_v2_t2va_5s.json",
       "run_id": "local",
       "commit_sha": "41c50b0aa808caddb422be1922f6ad088dcf3ee7",
       "timestamp": "2026-10-11T16:09:27.631197+00:00"
@@ -766,7 +766,7 @@
         "server_startup_s": 44.04,
         "warmup_s": 7.92
       },
-      "source_result": "reports/gb300x4-20261010/raw/run_gb300img1011main_flux1_dev_t2i_1024_flux1_dev_t2i_1024.json"
+      "source_result": "reports/round-20261010/raw/run_gb300img1011main_flux1_dev_t2i_1024_flux1_dev_t2i_1024.json"
     },
     {
       "case_id": "flux1_dev_t2i_1024",
@@ -834,7 +834,7 @@
         "server_startup_s": 56.04,
         "warmup_s": 10.82
       },
-      "source_result": "reports/gb300x4-20261010/raw/run_gb300img1010_flux1_dev_t2i_1024_flux1_dev_t2i_1024.json"
+      "source_result": "reports/round-20261010/raw/run_gb300img1010_flux1_dev_t2i_1024_flux1_dev_t2i_1024.json"
     },
     {
       "case_id": "flux1_dev_t2i_1024",
@@ -899,7 +899,7 @@
         "server_startup_s": 68.05,
         "warmup_s": 7.14
       },
-      "source_result": "reports/gb300x4-20261010/raw/run_gb300img1010_flux1_dev_t2i_1024_flux1_dev_t2i_1024.json"
+      "source_result": "reports/round-20261010/raw/run_gb300img1010_flux1_dev_t2i_1024_flux1_dev_t2i_1024.json"
     },
     {
       "case_id": "flux1_dev_t2i_1024",
@@ -980,7 +980,7 @@
         "server_startup_s": 17.55,
         "warmup_s": 75.93
       },
-      "source_result": "reports/gb300x4-20261010/raw/run_gb300img1010_flux1_dev_t2i_1024_flux1_dev_t2i_1024.json"
+      "source_result": "reports/round-20261010/raw/run_gb300img1010_flux1_dev_t2i_1024_flux1_dev_t2i_1024.json"
     },
     {
       "case_id": "flux2_dev_t2i_1024",
@@ -1065,7 +1065,7 @@
         "server_startup_s": 46.05,
         "warmup_s": 10.33
       },
-      "source_result": "reports/gb300x4-20261010/raw/run_gb300img1011main_flux2_dev_t2i_1024_flux2_dev_t2i_1024.json"
+      "source_result": "reports/round-20261010/raw/run_gb300img1011main_flux2_dev_t2i_1024_flux2_dev_t2i_1024.json"
     },
     {
       "case_id": "flux2_dev_t2i_1024",
@@ -1133,7 +1133,7 @@
         "server_startup_s": 82.05,
         "warmup_s": 16.77
       },
-      "source_result": "reports/gb300x4-20261010/raw/run_gb300img1010_flux2_dev_t2i_1024_flux2_dev_t2i_1024.json"
+      "source_result": "reports/round-20261010/raw/run_gb300img1010_flux2_dev_t2i_1024_flux2_dev_t2i_1024.json"
     },
     {
       "case_id": "flux2_dev_t2i_1024",
@@ -1212,7 +1212,7 @@
         "server_startup_s": 30.06,
         "warmup_s": 86.01
       },
-      "source_result": "reports/gb300x4-20261010/raw/run_gb300img1010_flux2_dev_t2i_1024_flux2_dev_t2i_1024.json"
+      "source_result": "reports/round-20261010/raw/run_gb300img1010_flux2_dev_t2i_1024_flux2_dev_t2i_1024.json"
     },
     {
       "case_id": "flux2_dev_t2i_1024",
@@ -1277,7 +1277,7 @@
         "server_startup_s": 86.06,
         "warmup_s": 20.31
       },
-      "source_result": "reports/gb300x4-20261010/raw/run_gb300img1010_flux2_dev_t2i_1024_flux2_dev_t2i_1024.json"
+      "source_result": "reports/round-20261010/raw/run_gb300img1010_flux2_dev_t2i_1024_flux2_dev_t2i_1024.json"
     },
     {
       "case_id": "flux2_dev_t2i_1024",
@@ -1355,7 +1355,7 @@
         "server_startup_s": 42.13,
         "warmup_s": 110.28
       },
-      "source_result": "reports/gb300x4-20261010/raw/run_gb300img1010_flux2_dev_t2i_1024_flux2_dev_t2i_1024.json"
+      "source_result": "reports/round-20261010/raw/run_gb300img1010_flux2_dev_t2i_1024_flux2_dev_t2i_1024.json"
     },
     {
       "case_id": "qwen_image_21_t2i_1024",
@@ -1443,7 +1443,7 @@
         "server_startup_s": 48.07,
         "warmup_s": 4.73
       },
-      "source_result": "reports/gb300x4-20261010/raw/run_gb300img1011main_qwen_image_21_t2i_1024_qwen_image_21_t2i_1024.json"
+      "source_result": "reports/round-20261010/raw/run_gb300img1011main_qwen_image_21_t2i_1024_qwen_image_21_t2i_1024.json"
     },
     {
       "case_id": "qwen_image_21_t2i_1024",
@@ -1515,7 +1515,7 @@
         "server_startup_s": 44.05,
         "warmup_s": 6.44
       },
-      "source_result": "reports/gb300x4-20261010/raw/run_gb300img1010_qwen_image_21_t2i_1024_qwen_image_21_t2i_1024.json"
+      "source_result": "reports/round-20261010/raw/run_gb300img1010_qwen_image_21_t2i_1024_qwen_image_21_t2i_1024.json"
     },
     {
       "case_id": "qwen_image_21_t2i_1024",
@@ -1597,7 +1597,7 @@
         "server_startup_s": 80.11,
         "warmup_s": 9.53
       },
-      "source_result": "reports/gb300x4-20261010/raw/run_gb300img1010_qwen_image_21_t2i_1024_qwen_image_21_t2i_1024.json"
+      "source_result": "reports/round-20261010/raw/run_gb300img1010_qwen_image_21_t2i_1024_qwen_image_21_t2i_1024.json"
     },
     {
       "case_id": "qwen_image_21_t2i_1024",
@@ -1675,7 +1675,7 @@
         "server_startup_s": 59.55,
         "warmup_s": 58.69
       },
-      "source_result": "reports/gb300x4-20261010/raw/run_gb300img1010_qwen_image_21_t2i_1024_qwen_image_21_t2i_1024.json"
+      "source_result": "reports/round-20261010/raw/run_gb300img1010_qwen_image_21_t2i_1024_qwen_image_21_t2i_1024.json"
     },
     {
       "case_id": "qwen_image_21_t2i_1024_2gpu",
@@ -1760,7 +1760,7 @@
         "server_startup_s": 52.06,
         "warmup_s": 4.19
       },
-      "source_result": "reports/gb300x4-20261010/raw/run_gb300img1011main_qwen_image_21_t2i_1024_2gpu_qwen_image_21_t2i_1024_2gpu.json"
+      "source_result": "reports/round-20261010/raw/run_gb300img1011main_qwen_image_21_t2i_1024_2gpu_qwen_image_21_t2i_1024_2gpu.json"
     },
     {
       "case_id": "qwen_image_21_t2i_1024_2gpu",
@@ -1832,7 +1832,7 @@
         "server_startup_s": 80.06,
         "warmup_s": 7.71
       },
-      "source_result": "reports/gb300x4-20261010/raw/run_gb300img1010vfix_qwen_image_21_t2i_1024_2gpu_qwen_image_21_t2i_1024_2gpu.json"
+      "source_result": "reports/round-20261010/raw/run_gb300img1010vfix_qwen_image_21_t2i_1024_2gpu_qwen_image_21_t2i_1024_2gpu.json"
     },
     {
       "case_id": "qwen_image_21_edit_1024",
@@ -1920,7 +1920,7 @@
         "server_startup_s": 44.04,
         "warmup_s": 7.53
       },
-      "source_result": "reports/gb300x4-20261010/raw/run_gb300img1011main_qwen_image_21_edit_1024_qwen_image_21_edit_1024.json"
+      "source_result": "reports/round-20261010/raw/run_gb300img1011main_qwen_image_21_edit_1024_qwen_image_21_edit_1024.json"
     },
     {
       "case_id": "qwen_image_21_edit_1024",
@@ -1992,7 +1992,7 @@
         "server_startup_s": 34.04,
         "warmup_s": 15.18
       },
-      "source_result": "reports/gb300x4-20261010/raw/run_gb300img1010_qwen_image_21_edit_1024_qwen_image_21_edit_1024.json"
+      "source_result": "reports/round-20261010/raw/run_gb300img1010_qwen_image_21_edit_1024_qwen_image_21_edit_1024.json"
     },
     {
       "case_id": "zimage_turbo_t2i_1024",
@@ -2075,7 +2075,7 @@
         "server_startup_s": 44.05,
         "warmup_s": 1.54
       },
-      "source_result": "reports/gb300x4-20261010/raw/run_gb300img1011main_zimage_turbo_t2i_1024_zimage_turbo_t2i_1024.json"
+      "source_result": "reports/round-20261010/raw/run_gb300img1011main_zimage_turbo_t2i_1024_zimage_turbo_t2i_1024.json"
     },
     {
       "case_id": "zimage_turbo_t2i_1024",
@@ -2147,7 +2147,7 @@
         "server_startup_s": 50.04,
         "warmup_s": 2.25
       },
-      "source_result": "reports/gb300x4-20261010/raw/run_gb300img1010_zimage_turbo_t2i_1024_zimage_turbo_t2i_1024.json"
+      "source_result": "reports/round-20261010/raw/run_gb300img1010_zimage_turbo_t2i_1024_zimage_turbo_t2i_1024.json"
     },
     {
       "case_id": "zimage_turbo_t2i_1024",
@@ -2223,7 +2223,7 @@
         "server_startup_s": 22.05,
         "warmup_s": 47.7
       },
-      "source_result": "reports/gb300x4-20261010/raw/run_gb300img1010_zimage_turbo_t2i_1024_zimage_turbo_t2i_1024.json"
+      "source_result": "reports/round-20261010/raw/run_gb300img1010_zimage_turbo_t2i_1024_zimage_turbo_t2i_1024.json"
     },
     {
       "case_id": "zimage_turbo_t2i_1024",
@@ -2301,7 +2301,7 @@
         "server_startup_s": 29.88,
         "warmup_s": 66.11
       },
-      "source_result": "reports/gb300x4-20261010/raw/run_gb300img1010_zimage_turbo_t2i_1024_zimage_turbo_t2i_1024.json"
+      "source_result": "reports/round-20261010/raw/run_gb300img1010_zimage_turbo_t2i_1024_zimage_turbo_t2i_1024.json"
     },
     {
       "case_id": "ideogram4_t2i_1024_2gpu_tp",
@@ -2379,7 +2379,7 @@
         "server_startup_s": 44.04,
         "warmup_s": 5.21
       },
-      "source_result": "reports/gb300x4-20261010/raw/run_gb300img1011main_ideogram4_t2i_1024_2gpu_tp_ideogram4_t2i_1024_2gpu_tp.json"
+      "source_result": "reports/round-20261010/raw/run_gb300img1011main_ideogram4_t2i_1024_2gpu_tp_ideogram4_t2i_1024_2gpu_tp.json"
     },
     {
       "case_id": "ideogram4_t2i_1024_2gpu_tp",
@@ -2458,7 +2458,7 @@
         "server_startup_s": 19.63,
         "warmup_s": 28.71
       },
-      "source_result": "reports/gb300x4-20261010/raw/run_gb300img1010_ideogram4_t2i_1024_2gpu_tp_ideogram4_t2i_1024_2gpu_tp.json"
+      "source_result": "reports/round-20261010/raw/run_gb300img1010_ideogram4_t2i_1024_2gpu_tp_ideogram4_t2i_1024_2gpu_tp.json"
     },
     {
       "case_id": "wan22_t2v_a14b_720p",
@@ -2539,7 +2539,7 @@
         "server_startup_s": 70.08,
         "warmup_s": 111.53
       },
-      "source_result": "reports/gb300x4-20261010/raw/run_gb300vid1011main_wan22_t2v_a14b_720p_wan22_t2v_a14b_720p.json"
+      "source_result": "reports/round-20261010/raw/run_gb300vid1011main_wan22_t2v_a14b_720p_wan22_t2v_a14b_720p.json"
     },
     {
       "case_id": "wan22_t2v_a14b_720p",
@@ -2605,7 +2605,7 @@
         "server_startup_s": 70.05,
         "warmup_s": 33.82
       },
-      "source_result": "reports/gb300x4-20261010/raw/run_gb300vid1010_wan22_t2v_a14b_720p_wan22_t2v_a14b_720p.json"
+      "source_result": "reports/round-20261010/raw/run_gb300vid1010_wan22_t2v_a14b_720p_wan22_t2v_a14b_720p.json"
     },
     {
       "case_id": "wan22_t2v_a14b_720p",
@@ -2682,7 +2682,7 @@
         "server_startup_s": 62.08,
         "warmup_s": 304.6
       },
-      "source_result": "reports/gb300x4-20261010/raw/run_gb300vid1010_wan22_t2v_a14b_720p_wan22_t2v_a14b_720p.json"
+      "source_result": "reports/round-20261010/raw/run_gb300vid1010_wan22_t2v_a14b_720p_wan22_t2v_a14b_720p.json"
     },
     {
       "case_id": "wan22_t2v_a14b_720p",
@@ -2758,7 +2758,7 @@
         "server_startup_s": 98.36,
         "warmup_s": 203.11
       },
-      "source_result": "reports/gb300x4-20261010/raw/run_gb300vid1010_wan22_t2v_a14b_720p_wan22_t2v_a14b_720p.json"
+      "source_result": "reports/round-20261010/raw/run_gb300vid1010_wan22_t2v_a14b_720p_wan22_t2v_a14b_720p.json"
     },
     {
       "case_id": "ltx2_twostage_t2v",
@@ -2851,7 +2851,7 @@
         "server_startup_s": 116.17,
         "warmup_s": 53.44
       },
-      "source_result": "reports/gb300x4-20261010/raw/run_gb300img1011main_ltx2_twostage_t2v_ltx2_twostage_t2v.json"
+      "source_result": "reports/round-20261010/raw/run_gb300img1011main_ltx2_twostage_t2v_ltx2_twostage_t2v.json"
     },
     {
       "case_id": "ltx2_twostage_t2v",
@@ -2921,7 +2921,7 @@
         "server_startup_s": 44.03,
         "warmup_s": 95.18
       },
-      "source_result": "reports/gb300x4-20261010/raw/run_gb300img1010_ltx2_twostage_t2v_ltx2_twostage_t2v.json"
+      "source_result": "reports/round-20261010/raw/run_gb300img1010_ltx2_twostage_t2v_ltx2_twostage_t2v.json"
     },
     {
       "case_id": "ltx2_twostage_t2v",
@@ -3002,7 +3002,7 @@
         "server_startup_s": 28.05,
         "warmup_s": 131.21
       },
-      "source_result": "reports/gb300x4-20261010/raw/run_gb300img1010_ltx2_twostage_t2v_ltx2_twostage_t2v.json"
+      "source_result": "reports/round-20261010/raw/run_gb300img1010_ltx2_twostage_t2v_ltx2_twostage_t2v.json"
     },
     {
       "case_id": "ltx2_twostage_t2v",
@@ -3078,7 +3078,7 @@
         "server_startup_s": 35.51,
         "warmup_s": 89.17
       },
-      "source_result": "reports/gb300x4-20261010/raw/run_gb300img1010_ltx2_twostage_t2v_ltx2_twostage_t2v.json"
+      "source_result": "reports/round-20261010/raw/run_gb300img1010_ltx2_twostage_t2v_ltx2_twostage_t2v.json"
     },
     {
       "case_id": "ltx2.3_twostage_t2v_2gpus",
@@ -3169,7 +3169,7 @@
         "server_startup_s": 86.07,
         "warmup_s": 32.45
       },
-      "source_result": "reports/gb300x4-20261010/raw/run_gb300img1011main_ltx2.3_twostage_t2v_2gpus_ltx2.3_twostage_t2v_2gpus.json"
+      "source_result": "reports/round-20261010/raw/run_gb300img1011main_ltx2.3_twostage_t2v_2gpus_ltx2.3_twostage_t2v_2gpus.json"
     },
     {
       "case_id": "cosmos3_nano_t2i_720p",
@@ -3258,7 +3258,7 @@
         "server_startup_s": 56.08,
         "warmup_s": 6.49
       },
-      "source_result": "reports/gb300x4-20261010/raw/run_gb300img1011main_cosmos3_nano_t2i_720p_cosmos3_nano_t2i_720p.json"
+      "source_result": "reports/round-20261010/raw/run_gb300img1011main_cosmos3_nano_t2i_720p_cosmos3_nano_t2i_720p.json"
     },
     {
       "case_id": "cosmos3_nano_t2i_720p",
@@ -3340,7 +3340,7 @@
         "server_startup_s": 60.36,
         "warmup_s": 22.38
       },
-      "source_result": "reports/gb300x4-20261010/raw/run_gb300img1010_cosmos3_nano_t2i_720p_cosmos3_nano_t2i_720p.json"
+      "source_result": "reports/round-20261010/raw/run_gb300img1010_cosmos3_nano_t2i_720p_cosmos3_nano_t2i_720p.json"
     },
     {
       "case_id": "cosmos3_nano_t2v_720p_189f",
@@ -3427,7 +3427,7 @@
         "server_startup_s": 62.06,
         "warmup_s": 62.73
       },
-      "source_result": "reports/gb300x4-20261010/raw/run_gb300img1011main_cosmos3_nano_t2v_720p_189f_cosmos3_nano_t2v_720p_189f.json"
+      "source_result": "reports/round-20261010/raw/run_gb300img1011main_cosmos3_nano_t2v_720p_189f_cosmos3_nano_t2v_720p_189f.json"
     },
     {
       "case_id": "cosmos3_nano_t2v_720p_189f",
@@ -3507,7 +3507,7 @@
         "server_startup_s": 85.57,
         "warmup_s": 84.58
       },
-      "source_result": "reports/gb300x4-20261010/raw/run_gb300img1010_cosmos3_nano_t2v_720p_189f_cosmos3_nano_t2v_720p_189f.json"
+      "source_result": "reports/round-20261010/raw/run_gb300img1010_cosmos3_nano_t2v_720p_189f_cosmos3_nano_t2v_720p_189f.json"
     },
     {
       "case_id": "cosmos3_nano_i2v_720p_189f",
@@ -3591,7 +3591,7 @@
         "server_startup_s": 52.06,
         "warmup_s": 69.55
       },
-      "source_result": "reports/gb300x4-20261010/raw/run_gb300img1011main_cosmos3_nano_i2v_720p_189f_cosmos3_nano_i2v_720p_189f.json"
+      "source_result": "reports/round-20261010/raw/run_gb300img1011main_cosmos3_nano_i2v_720p_189f_cosmos3_nano_i2v_720p_189f.json"
     },
     {
       "case_id": "cosmos3_nano_i2v_720p_189f",
@@ -3671,7 +3671,7 @@
         "server_startup_s": 62.02,
         "warmup_s": 78.67
       },
-      "source_result": "reports/gb300x4-20261010/raw/run_gb300img1010_cosmos3_nano_i2v_720p_189f_cosmos3_nano_i2v_720p_189f.json"
+      "source_result": "reports/round-20261010/raw/run_gb300img1010_cosmos3_nano_i2v_720p_189f_cosmos3_nano_i2v_720p_189f.json"
     },
     {
       "case_id": "minimax_h3_t2va_5s",
@@ -3756,7 +3756,7 @@
         "server_startup_s": 78.1,
         "warmup_s": 132.97
       },
-      "source_result": "reports/gb300x4-20261010/raw/run_gb300vid1011main_minimax_h3_t2va_5s_minimax_h3_t2va_5s.json"
+      "source_result": "reports/round-20261010/raw/run_gb300vid1011main_minimax_h3_t2va_5s_minimax_h3_t2va_5s.json"
     },
     {
       "case_id": "minimax_h3_t2va_5s",
@@ -3823,7 +3823,7 @@
         "server_startup_s": 58.05,
         "warmup_s": 227.39
       },
-      "source_result": "reports/gb300x4-20261010/raw/run_gb300vid1010b_minimax_h3_t2va_5s_minimax_h3_t2va_5s.json"
+      "source_result": "reports/round-20261010/raw/run_gb300vid1010b_minimax_h3_t2va_5s_minimax_h3_t2va_5s.json"
     },
     {
       "case_id": "minimax_h3_t2va_5s",
@@ -3914,7 +3914,7 @@
         "server_startup_s": 54.07,
         "warmup_s": 183.45
       },
-      "source_result": "reports/gb300x4-20261010/raw/run_gb300vid1010b_minimax_h3_t2va_5s_minimax_h3_t2va_5s.json"
+      "source_result": "reports/round-20261010/raw/run_gb300vid1010b_minimax_h3_t2va_5s_minimax_h3_t2va_5s.json"
     },
     {
       "case_id": "minimax_h3_t2va_5s",
@@ -3987,7 +3987,7 @@
         "server_startup_s": 154.89,
         "warmup_s": 152.2
       },
-      "source_result": "reports/gb300x4-20261010/raw/run_gb300vid1010b_minimax_h3_t2va_5s_minimax_h3_t2va_5s.json"
+      "source_result": "reports/round-20261010/raw/run_gb300vid1010b_minimax_h3_t2va_5s_minimax_h3_t2va_5s.json"
     },
     {
       "case_id": "minimax_h3_t2va_5s",
@@ -4061,7 +4061,7 @@
         "server_startup_s": 72.08,
         "warmup_s": 128.33
       },
-      "source_result": "reports/gb300x4-20261010/raw/run_gb300vid1010b_minimax_h3_t2va_5s_minimax_h3_t2va_5s.json"
+      "source_result": "reports/round-20261010/raw/run_gb300vid1010b_minimax_h3_t2va_5s_minimax_h3_t2va_5s.json"
     },
     {
       "case_id": "minimax_h3_t2va_5s_4gpu",
@@ -4146,7 +4146,7 @@
         "server_startup_s": 74.07,
         "warmup_s": 74.09
       },
-      "source_result": "reports/gb300x4-20261010/raw/run_gb300vid1011main_minimax_h3_t2va_5s_4gpu_minimax_h3_t2va_5s_4gpu.json"
+      "source_result": "reports/round-20261010/raw/run_gb300vid1011main_minimax_h3_t2va_5s_4gpu_minimax_h3_t2va_5s_4gpu.json"
     },
     {
       "case_id": "minimax_h3_t2va_5s_4gpu",
@@ -4208,7 +4208,7 @@
         "server_startup_s": 70.05,
         "warmup_s": 256.47
       },
-      "source_result": "reports/gb300x4-20261010/raw/run_gb300vid1010fix_minimax_h3_t2va_5s_4gpu_minimax_h3_t2va_5s_4gpu.json"
+      "source_result": "reports/round-20261010/raw/run_gb300vid1010fix_minimax_h3_t2va_5s_4gpu_minimax_h3_t2va_5s_4gpu.json"
     },
     {
       "case_id": "minimax_h3_t2va_5s_4gpu",
@@ -4300,7 +4300,7 @@
         "server_startup_s": 70.07,
         "warmup_s": 189.22
       },
-      "source_result": "reports/gb300x4-20261010/raw/run_gb300vid1010fix_minimax_h3_t2va_5s_4gpu_minimax_h3_t2va_5s_4gpu.json"
+      "source_result": "reports/round-20261010/raw/run_gb300vid1010fix_minimax_h3_t2va_5s_4gpu_minimax_h3_t2va_5s_4gpu.json"
     },
     {
       "case_id": "minimax_h3_t2va_5s_4gpu",
@@ -4375,7 +4375,7 @@
         "server_startup_s": 76.07,
         "warmup_s": 128.17
       },
-      "source_result": "reports/gb300x4-20261010/raw/run_gb300vid1010fix_minimax_h3_t2va_5s_4gpu_minimax_h3_t2va_5s_4gpu.json"
+      "source_result": "reports/round-20261010/raw/run_gb300vid1010fix_minimax_h3_t2va_5s_4gpu_minimax_h3_t2va_5s_4gpu.json"
     },
     {
       "case_id": "minimax_h3_ref2va_5s",
@@ -4456,7 +4456,7 @@
         "server_startup_s": 64.08,
         "warmup_s": 35.76
       },
-      "source_result": "reports/gb300x4-20261010/raw/run_gb300vid1011main_minimax_h3_ref2va_5s_minimax_h3_ref2va_5s.json"
+      "source_result": "reports/round-20261010/raw/run_gb300vid1011main_minimax_h3_ref2va_5s_minimax_h3_ref2va_5s.json"
     },
     {
       "case_id": "minimax_h3_ref2va_5s",
@@ -4523,7 +4523,7 @@
         "server_startup_s": 58.07,
         "warmup_s": 312.15
       },
-      "source_result": "reports/gb300x4-20261010/raw/run_gb300vid1010fix_minimax_h3_ref2va_5s_minimax_h3_ref2va_5s.json"
+      "source_result": "reports/round-20261010/raw/run_gb300vid1010fix_minimax_h3_ref2va_5s_minimax_h3_ref2va_5s.json"
     },
     {
       "case_id": "minimax_h3_ref2va_5s",
@@ -4614,7 +4614,7 @@
         "server_startup_s": 54.08,
         "warmup_s": 279.15
       },
-      "source_result": "reports/gb300x4-20261010/raw/run_gb300vid1010fix_minimax_h3_ref2va_5s_minimax_h3_ref2va_5s.json"
+      "source_result": "reports/round-20261010/raw/run_gb300vid1010fix_minimax_h3_ref2va_5s_minimax_h3_ref2va_5s.json"
     },
     {
       "case_id": "minimax_h3_ref2va_5s",
@@ -4687,7 +4687,7 @@
         "server_startup_s": 98.27,
         "warmup_s": 226.21
       },
-      "source_result": "reports/gb300x4-20261010/raw/run_gb300vid1010fix_minimax_h3_ref2va_5s_minimax_h3_ref2va_5s.json"
+      "source_result": "reports/round-20261010/raw/run_gb300vid1010fix_minimax_h3_ref2va_5s_minimax_h3_ref2va_5s.json"
     },
     {
       "case_id": "minimax_h3_ref2va_5s",
@@ -4759,7 +4759,7 @@
         "server_startup_s": 68.08,
         "warmup_s": 94.1
       },
-      "source_result": "reports/gb300x4-20261010/raw/run_gb300vid1010fix_minimax_h3_ref2va_5s_minimax_h3_ref2va_5s.json"
+      "source_result": "reports/round-20261010/raw/run_gb300vid1010fix_minimax_h3_ref2va_5s_minimax_h3_ref2va_5s.json"
     },
     {
       "case_id": "minimax_h3_fasth3_v2_t2va_5s",
@@ -4840,7 +4840,7 @@
         "server_startup_s": 70.06,
         "warmup_s": 16.32
       },
-      "source_result": "reports/gb300x4-20261010/raw/run_gb300fh3vsa1011r2_minimax_h3_fasth3_v2_t2va_5s.json"
+      "source_result": "reports/round-20261010/raw/run_gb300fh3vsa1011r2_minimax_h3_fasth3_v2_t2va_5s.json"
     },
     {
       "case_id": "minimax_h3_fasth3_v2_t2va_5s",
@@ -4902,7 +4902,7 @@
         "server_startup_s": 68.05,
         "warmup_s": 82.52
       },
-      "source_result": "reports/gb300x4-20261010/raw/run_gb300vid1010fix_minimax_h3_fasth3_v2_t2va_5s_minimax_h3_fasth3_v2_t2va_5s.json"
+      "source_result": "reports/round-20261010/raw/run_gb300vid1010fix_minimax_h3_fasth3_v2_t2va_5s_minimax_h3_fasth3_v2_t2va_5s.json"
     },
     {
       "case_id": "minimax_h3_fasth3_v2_t2va_5s",
@@ -4976,7 +4976,7 @@
         "server_startup_s": 62.06,
         "warmup_s": 61.57
       },
-      "source_result": "reports/gb300x4-20261010/raw/run_gb300vid1010fix_minimax_h3_fasth3_v2_t2va_5s_minimax_h3_fasth3_v2_t2va_5s.json"
+      "source_result": "reports/round-20261010/raw/run_gb300vid1010fix_minimax_h3_fasth3_v2_t2va_5s_minimax_h3_fasth3_v2_t2va_5s.json"
     }
   ],
   "throughput_results": [
@@ -5045,7 +5045,7 @@
         "server_startup_s": 44.04,
         "warmup_s": 7.92
       },
-      "source_result": "reports/gb300x4-20261010/raw/run_gb300img1011main_flux1_dev_t2i_1024_flux1_dev_t2i_1024.json"
+      "source_result": "reports/round-20261010/raw/run_gb300img1011main_flux1_dev_t2i_1024_flux1_dev_t2i_1024.json"
     },
     {
       "case_id": "flux1_dev_t2i_1024",
@@ -5110,7 +5110,7 @@
         "server_startup_s": 56.04,
         "warmup_s": 10.82
       },
-      "source_result": "reports/gb300x4-20261010/raw/run_gb300img1010_flux1_dev_t2i_1024_flux1_dev_t2i_1024.json"
+      "source_result": "reports/round-20261010/raw/run_gb300img1010_flux1_dev_t2i_1024_flux1_dev_t2i_1024.json"
     },
     {
       "case_id": "flux1_dev_t2i_1024",
@@ -5168,7 +5168,7 @@
         "server_startup_s": 68.05,
         "warmup_s": 7.14
       },
-      "source_result": "reports/gb300x4-20261010/raw/run_gb300img1010_flux1_dev_t2i_1024_flux1_dev_t2i_1024.json"
+      "source_result": "reports/round-20261010/raw/run_gb300img1010_flux1_dev_t2i_1024_flux1_dev_t2i_1024.json"
     },
     {
       "case_id": "flux1_dev_t2i_1024",
@@ -5240,7 +5240,7 @@
         "server_startup_s": 17.55,
         "warmup_s": 75.93
       },
-      "source_result": "reports/gb300x4-20261010/raw/run_gb300img1010_flux1_dev_t2i_1024_flux1_dev_t2i_1024.json"
+      "source_result": "reports/round-20261010/raw/run_gb300img1010_flux1_dev_t2i_1024_flux1_dev_t2i_1024.json"
     },
     {
       "case_id": "minimax_h3_t2va_5s",
@@ -5302,7 +5302,7 @@
         "server_startup_s": 78.1,
         "warmup_s": 132.97
       },
-      "source_result": "reports/gb300x4-20261010/raw/run_gb300vid1011main_minimax_h3_t2va_5s_minimax_h3_t2va_5s.json"
+      "source_result": "reports/round-20261010/raw/run_gb300vid1011main_minimax_h3_t2va_5s_minimax_h3_t2va_5s.json"
     },
     {
       "case_id": "minimax_h3_t2va_5s",
@@ -5368,7 +5368,7 @@
         "server_startup_s": 58.05,
         "warmup_s": 227.39
       },
-      "source_result": "reports/gb300x4-20261010/raw/run_gb300vid1010b_minimax_h3_t2va_5s_minimax_h3_t2va_5s.json"
+      "source_result": "reports/round-20261010/raw/run_gb300vid1010b_minimax_h3_t2va_5s_minimax_h3_t2va_5s.json"
     },
     {
       "case_id": "minimax_h3_t2va_5s",
@@ -5460,7 +5460,7 @@
         "server_startup_s": 54.07,
         "warmup_s": 183.45
       },
-      "source_result": "reports/gb300x4-20261010/raw/run_gb300vid1010b_minimax_h3_t2va_5s_minimax_h3_t2va_5s.json"
+      "source_result": "reports/round-20261010/raw/run_gb300vid1010b_minimax_h3_t2va_5s_minimax_h3_t2va_5s.json"
     },
     {
       "case_id": "minimax_h3_t2va_5s",
@@ -5532,7 +5532,7 @@
         "server_startup_s": 154.89,
         "warmup_s": 152.2
       },
-      "source_result": "reports/gb300x4-20261010/raw/run_gb300vid1010b_minimax_h3_t2va_5s_minimax_h3_t2va_5s.json"
+      "source_result": "reports/round-20261010/raw/run_gb300vid1010b_minimax_h3_t2va_5s_minimax_h3_t2va_5s.json"
     },
     {
       "case_id": "minimax_h3_t2va_5s",
@@ -5602,7 +5602,7 @@
         "server_startup_s": 72.08,
         "warmup_s": 128.33
       },
-      "source_result": "reports/gb300x4-20261010/raw/run_gb300vid1010b_minimax_h3_t2va_5s_minimax_h3_t2va_5s.json"
+      "source_result": "reports/round-20261010/raw/run_gb300vid1010b_minimax_h3_t2va_5s_minimax_h3_t2va_5s.json"
     }
   ]
 }
