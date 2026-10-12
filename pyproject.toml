@@ -17,6 +17,7 @@ dependencies = [
   "requests",
   "safetensors",
   "tqdm",
+  "websocket-client",
 ]
 
 [project.scripts]

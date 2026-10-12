@@ -1,0 +1,95 @@
+{
+  "id": "minimax_h3_t2va_480p_1gpu",
+  "model": "MiniMaxAI/MiniMax-H3",
+  "task": "text-to-video",
+  "label": "MiniMax-H3 T2V+A 480p, 1x 32 GB consumer GPU",
+  "throughput": false,
+  "prompt": "At night, while their owner sleeps in a bedroom, three cats march in loudly playing tiny brass instruments, then abruptly file out.",
+  "width": 864,
+  "height": 480,
+  "num_frames": 124,
+  "seed": 1101,
+  "num_gpus": 1,
+  "fps": 24,
+  "num_inference_steps": 20,
+  "framework_request_extra": {
+    "sglang": {
+      "task": "t2va",
+      "conditions": [],
+      "target": {
+        "short_edge": 480,
+        "aspect_ratio": "16:9",
+        "duration_seconds": 5.0
+      },
+      "flow_shift": 12.0,
+      "audio_flow_shift": 3.0,
+      "num_frames": null,
+      "fps": null
+    }
+  },
+  "_note": "The consumer tier: one RTX 5090 (32 GB) on a 60 GB desktop host, the machine class the sglang cookbook measured on a physical desktop (docs/cookbook/diffusion/MiniMax/MiniMax-H3.mdx, section 'RTX 5090 single card, physical desktop' (sglang main 3831e7e09, checked 2026-10-10)). Workload is that comparison's: FL2VA T2VA, 864x480, 124 frames, 20 steps, no CFG, sigma shift 12/3. Every engine streams weights from disk, so the drive and host RAM are part of the measurement. Record them with the result. Single-request only: a request takes about two minutes, and neither engine batches on this card.",
+  "frameworks": {
+    "sglang": {
+      "status": "supported",
+      "serve_args": "--model-type diffusion --warmup-mode server --model-variant fl2va --enable-torch-compile false",
+      "command_profiles": {
+        "default": {
+          "description": "One 32 GB GPU on a 60 GB host: DiT, text encoder and video VAE layerwise-offloaded, 14 DiT blocks and 36 video-VAE blocks resident.",
+          "sglang_ref": "current-main",
+          "num_gpus": 1,
+          "serve_args": "--model-type diffusion --warmup-mode server --model-variant fl2va --performance-mode memory --layerwise-offload-components dit,text_encoder,vae --dit-layerwise-resident-layers 14 --layerwise-resident-layers video_vae=36 --warmup-resolutions 864x480 --warmup-num-frames 124 --enable-torch-compile false",
+          "extra_env": {
+            "PYTORCH_CUDA_ALLOC_CONF": "expandable_segments:True"
+          },
+          "notes": "The cookbook's '32 GB VRAM + 60 GB host, lossless' command, verbatim (docs/cookbook/diffusion/MiniMax/MiniMax-H3.mdx, section 'RTX 5090 single card, physical desktop' (sglang main 3831e7e09, checked 2026-10-10)). It reports 112.2 s per request against ComfyUI --fast-disk --cache-none at 140.9-145.9 s on an RTX 5090, Ryzen 9 9950X, 60 GB RAM, PCIe 5.0 NVMe. VALIDATION PENDING (2026-10-10 round, rdxa-5090-pa).",
+          "policy_exception": "Correctness exception, not a speed tradeoff: MiniMax-H3's torch.compile path changes numerical output per the sglang cookbook (docs/cookbook/diffusion/MiniMax/MiniMax-H3.mdx, checked 2026-08-07) -- compile is not enabled by any recommended lossless preset for this model and must not be used to generate consistency ground truth. --enable-torch-compile stays false in every profile for this case until upstream fixes the numerics."
+        }
+      }
+    },
+    "vllm-omni": {
+      "status": "no_profile",
+      "reason": "MiniMax-H3 holds about 108 GB of weights (61.73 GB DiT + 46.18 GB text encoder, per the sglang cookbook) and this case's host has 60 GB of RAM. vLLM-Omni's MiniMax-H3 recipe documents no single-32 GB-GPU command, and its offload keeps the streamed weights in host RAM, which cannot hold them here. Not attempted in the 2026-10-10 round."
+    },
+    "lightx2v": {
+      "status": "no_profile",
+      "reason": "MiniMax-H3 holds about 108 GB of weights (61.73 GB DiT + 46.18 GB text encoder, per the sglang cookbook) and this case's host has 60 GB of RAM. LightX2V documents no single-32 GB-GPU command, and its offload keeps the streamed weights in host RAM, which cannot hold them here. Not attempted in the 2026-10-10 round."
+    },
+    "fastvideo": {
+      "status": "no_profile",
+      "reason": "MiniMax-H3 holds about 108 GB of weights (61.73 GB DiT + 46.18 GB text encoder, per the sglang cookbook) and this case's host has 60 GB of RAM. FastVideo documents no single-32 GB-GPU command, and its offload keeps the streamed weights in host RAM, which cannot hold them here. Not attempted in the 2026-10-10 round."
+    },
+    "trtllm-visual": {
+      "status": "unsupported",
+      "reason": "trtllm-visual's tracked scope in this harness is image cases; H3 is a video+audio model."
+    },
+    "diffusers": {
+      "status": "unsupported",
+      "reason": "MiniMax-H3 is integrated as Modular Diffusers blocks only (no DiffusionPipeline), and only via an unmerged PR (huggingface/diffusers#14355 -- pip install git+.../diffusers.git@refs/pull/14355/head). Not a servable baseline path today."
+    },
+    "comfyui": {
+      "status": "supported",
+      "num_gpus": 1,
+      "serve_args": "--fast-disk --cache-none",
+      "comfyui": {
+        "workflow": "minimax_h3_t2va.json",
+        "models": {
+          "diffusion_models/minimax_h3_fl2va_bf16.safetensors": "Comfy-Org/MiniMax-H3:diffusion_models/minimax_h3_fl2va_bf16.safetensors",
+          "text_encoders/qwen3vl_32b_minimax_h3_bf16.safetensors": "Comfy-Org/MiniMax-H3:text_encoders/qwen3vl_32b_minimax_h3_bf16.safetensors",
+          "vae/minimax_h3_video_vae_fp16.safetensors": "Comfy-Org/MiniMax-H3:vae/minimax_h3_video_vae_fp16.safetensors",
+          "vae/minimax_h3_audio_vae_fp32.safetensors": "Comfy-Org/MiniMax-H3:vae/minimax_h3_audio_vae_fp32.safetensors"
+        },
+        "compile": false
+      },
+      "command_profiles": {
+        "default": {
+          "description": "ComfyUI master, the official H3 T2VA workflow at full precision, disk-backed weight loading for a 60 GB host.",
+          "framework_ref": "ComfyUI master HEAD",
+          "num_gpus": 1,
+          "serve_args": "--fast-disk --cache-none",
+          "notes": "Same graph and weights as minimax_h3_t2va_5s's ComfyUI default (bf16 DiT, bf16 Qwen3-VL-32B, fp16 video VAE; BasicGuider, shift 12/3). The cookbook found ComfyUI's default launch OOM-killed during load on a 60 GB host (55.6 GB anonymous memory) and measured it with --fast-disk --cache-none (docs/cookbook/diffusion/MiniMax/MiniMax-H3.mdx, section 'RTX 5090 single card, physical desktop' (sglang main 3831e7e09, checked 2026-10-10)). Compile is off; see policy_exception. VALIDATION PENDING (2026-10-10 round, rdxa-5090-pa).",
+          "policy_exception": "Compile broken, not a speed choice (2026-10-10, ComfyUI 0df64eb2 on torch 2.14.1+cu130, 1x RTX 5090, rdxa-5090-pa): with TorchCompileModel in front of the MiniMax-H3 DiT, --fast-disk's dynamic loading (comfy/model_prefetch.py -> comfy_aimdo malloc_graph.record) runs inside the dynamo trace, where the current stream is a generic torch.Stream with no cuda_stream, and the first request fails in SamplerCustomAdvanced. --fast-disk cannot be dropped on a 60 GB host (the cookbook found the default launch OOM-killed at load), so this cell runs eager."
+        }
+      }
+    }
+  }
+}

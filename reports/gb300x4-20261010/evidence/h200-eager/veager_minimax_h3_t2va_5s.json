@@ -1,0 +1,200 @@
+{
+  "timestamp": "2026-10-11T07:06:32.793660+00:00",
+  "commit_sha": "f5fff068bbbab1f745f4eb284756a1a5dd0c24ee",
+  "run_id": "local",
+  "hardware": {
+    "runner_labels": null,
+    "gpu_config": null,
+    "gpus": [
+      "NVIDIA H200, 143771 MiB, 595.71.05",
+      "NVIDIA H200, 143771 MiB, 595.71.05"
+    ],
+    "hardware_profile_override": "h200"
+  },
+  "sglang_runtime": {
+    "package_version": "0.0.0.dev3+g73607033c",
+    "module_path": "/scratch/sglang/python/sglang/__init__.py",
+    "git_root": "/scratch/sglang",
+    "git_commit": "73607033c21ddf3c02a4293976dc289c7339b6d1"
+  },
+  "framework_runtime": {
+    "venv_root": "/scratch/h200eager/fw-venvs",
+    "install_specs": {
+      "vllm": "vllm==0.31.0",
+      "vllm_omni": "git+https://github.com/vllm-project/vllm-omni.git@f69b1f2b1",
+      "lightx2v": "git+https://github.com/ModelTC/LightX2V.git@7efd05f8e1425b83321fd4f1cef779ef6504076f",
+      "lightx2v_flash_attn": "flash-attn==2.8.3",
+      "lightx2v_flash_attn3": "",
+      "lightx2v_fa3_hf_repo": "varunneal/flash-attention-3",
+      "lightx2v_fa3_hf_revision": "de87b9b5af06dd9984df595bef90b2eba44b181a",
+      "lightx2v_fa3_hf_subdir": "build/torch28-cxx11-cu128-x86_64-linux/flash_attention_3",
+      "lightx2v_flashinfer": "flashinfer-python==0.6.11",
+      "trtllm": "tensorrt-llm==1.3.0rc18",
+      "fastvideo": "https://github.com/hao-ai-lab/FastVideo.git@main",
+      "torch_cuda_arch_list": ""
+    },
+    "launchers": {
+      "vllm_omni_server_bin": "vllm",
+      "vllm_omni_required_help_args": "--omni",
+      "trtllm_visual_server_bin": "trtllm-serve"
+    },
+    "vllm-omni": {
+      "venv_path": "/scratch/h200eager/fw-venvs/vllm-omni",
+      "packages": {
+        "vllm": {
+          "Name": "vllm",
+          "Version": "0.31.0",
+          "Home-page": "https://github.com/vllm-project/vllm",
+          "Location": "/scratch/h200eager/fw-venvs/vllm-omni/lib/python3.12/site-packages"
+        },
+        "vllm-omni": {
+          "Name": "vllm-omni",
+          "Version": "0.31.0rc2.dev98+gf69b1f2b1",
+          "Home-page": "https://github.com/vllm-project/vllm-omni",
+          "Location": "/scratch/h200eager/fw-venvs/vllm-omni/lib/python3.12/site-packages"
+        },
+        "torch": {
+          "Name": "torch",
+          "Version": "2.13.0",
+          "Home-page": "https://pytorch.org",
+          "Location": "/scratch/h200eager/fw-venvs/vllm-omni/lib/python3.12/site-packages"
+        },
+        "transformers": {
+          "Name": "transformers",
+          "Version": "5.14.1",
+          "Home-page": "https://github.com/huggingface/transformers",
+          "Location": "/scratch/h200eager/fw-venvs/vllm-omni/lib/python3.12/site-packages"
+        },
+        "diffusers": {
+          "Name": "diffusers",
+          "Version": "0.40.0",
+          "Home-page": "https://github.com/huggingface/diffusers",
+          "Location": "/scratch/h200eager/fw-venvs/vllm-omni/lib/python3.12/site-packages"
+        },
+        "huggingface_hub": {
+          "Name": "huggingface_hub",
+          "Version": "1.33.0",
+          "Home-page": "https://github.com/huggingface/huggingface_hub",
+          "Location": "/scratch/h200eager/fw-venvs/vllm-omni/lib/python3.12/site-packages"
+        }
+      },
+      "direct_urls": {
+        "vllm_omni-0.31.0rc2.dev98+gf69b1f2b1.dist-info": {
+          "url": "file:///scratch/h200eager/fw-venvs/vllm-omni/src/vllm-omni",
+          "dir_info": {
+            "editable": true
+          }
+        }
+      }
+    },
+    "lightx2v": {
+      "venv_path": "/scratch/h200eager/fw-venvs/lightx2v"
+    },
+    "trtllm-visual": {
+      "venv_path": "/scratch/h200eager/fw-venvs/trtllm-visual"
+    },
+    "comfyui": {
+      "venv_path": "/scratch/h200eager/fw-venvs/comfyui"
+    },
+    "fastvideo": {
+      "venv_path": "/scratch/h200eager/fw-venvs/fastvideo"
+    }
+  },
+  "benchmark_env": {
+    "TORCH_COMPILE_DISABLE": "1"
+  },
+  "benchmark_framework_args": {
+    "vllm-omni": [
+      "--enforce-eager",
+      "--compilation-config",
+      "{\"mode\":0}"
+    ],
+    "lightx2v": {
+      "config": {
+        "use_compile": false
+      }
+    },
+    "fastvideo": [
+      "--generator.pipeline.experimental.inference_torch_compile",
+      "false",
+      "--generator.engine.compile.enabled",
+      "false",
+      "--generator.engine.compile.vae_enabled",
+      "false"
+    ]
+  },
+  "torch_compile_disabled": true,
+  "benchmark_modes": [
+    "single_e2e"
+  ],
+  "requested_sglang_profile": "auto",
+  "request_inputs": "distinct-per-request",
+  "results": [
+    {
+      "case_id": "minimax_h3_t2va_5s",
+      "framework": "vllm-omni",
+      "mode": "single_e2e",
+      "model": "MiniMaxAI/MiniMax-H3",
+      "task": "text-to-video",
+      "width": 1344,
+      "height": 768,
+      "num_frames": 124,
+      "fps": 24,
+      "num_inference_steps": 50,
+      "guidance_scale": null,
+      "guidance_scale_2": null,
+      "true_cfg_scale": null,
+      "negative_prompt_set": false,
+      "num_gpus": 2,
+      "latency_s": 146.367,
+      "error": null,
+      "framework_metadata": {
+        "profile": "default",
+        "profile_request": "auto",
+        "profile_source": "default",
+        "framework_ref": "vllm-omni main 56763cd6c383 + vllm==0.30.0",
+        "hardware": null,
+        "hardware_candidates": [
+          "h200"
+        ],
+        "description": "vLLM-Omni's fastest measured MiniMax-H3 command on datacenter GPUs: TP2, text-encoder TP2, native tiled VAE patch parallelism 2, resident, compiled, Omni's default attention for the hardware.",
+        "notes": "Measured 2026-09-30, 50-step T2V+A, same box and build per hardware (vllm-omni main 56763cd, vllm 0.30.0), client median of 2 after warmup. 2xB200: this command with --diffusion-attention-backend CUDNN_ATTN 73.55 s; the recipe's high-memory section scaled to two GPUs (USP2, TRTLLM_ATTN) 79.43/79.30 s; the consumer command every published round ran (TP2 + distributed layerwise offload + eager + cuDNN) 78.38 s; sglang 72.36/72.27 s. 2xH200: this command (Omni's default FLASH_ATTN) 148.95 s; USP2 resident 151.23 s; the consumer command 168.67 s; sglang 145.54/145.34 s. The command is the recipe's two-GPU section without its capacity switches (--enable-distributed-layerwise-offload, --dlo-*, --enforce-eager): a 143-183 GB card holds TP2-sharded weights, and the policy runs competitors compiled.",
+        "install_specs": null,
+        "server_bin": null,
+        "use_omni_arg": null,
+        "required_help_args": null,
+        "serve_args": "--trust-remote-code --task-type fl2va --num-gpus 2 --tensor-parallel-size 2 --usp 1 --ring 1 --text-encoder-tp-size 2 --vae-patch-parallel-size 2 --vae-parallel-mode tile --vae-use-tiling",
+        "num_gpus": 2,
+        "extra_env_keys": [
+          "VLLM_OMNI_VIDEO_SYNC_TIMEOUT",
+          "VLLM_WORKER_MULTIPROC_METHOD"
+        ],
+        "request_inputs": "distinct-per-request"
+      },
+      "server_command": "vllm serve MiniMaxAI/MiniMax-H3 --port 56111 --host 127.0.0.1 --omni --trust-remote-code --task-type fl2va --num-gpus 2 --tensor-parallel-size 2 --usp 1 --ring 1 --text-encoder-tp-size 2 --vae-patch-parallel-size 2 --vae-parallel-mode tile --vae-use-tiling --enforce-eager --compilation-config '{\"mode\":0}'",
+      "metrics": {
+        "client_latency_s": 146.367,
+        "client_latency_min_s": 146.355,
+        "client_latency_max_s": 146.379,
+        "measured_repeats": 2,
+        "latency_samples_s": [
+          146.379,
+          146.355
+        ],
+        "latency_spread_pct": 0.0,
+        "warmup_latencies_s": [
+          149.878,
+          146.0,
+          146.333
+        ],
+        "server_startup_s": 72.06,
+        "warmup_s": 442.21
+      }
+    }
+  ],
+  "throughput_results": [],
+  "partial": false,
+  "model_revisions": {
+    "MiniMaxAI/MiniMax-H3": "42ed227ee7df40d41602854ae760620d6eb651fe"
+  }
+}

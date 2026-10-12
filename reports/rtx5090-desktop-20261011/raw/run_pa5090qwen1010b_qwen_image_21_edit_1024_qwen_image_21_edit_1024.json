@@ -1,0 +1,284 @@
+{
+  "timestamp": "2026-10-10T08:20:15.384372+00:00",
+  "commit_sha": "b5476014c3176424d7b38931eafdb3d28a482781",
+  "run_id": "local",
+  "hardware": {
+    "runner_labels": null,
+    "gpu_config": null,
+    "gpus": [
+      "NVIDIA GeForce RTX 5090, 32607 MiB, 595.99.02"
+    ],
+    "hardware_profile_override": "rtx5090"
+  },
+  "sglang_runtime": {
+    "package_version": "0.0.0.dev0",
+    "module_path": "/home/rdxa/h3bench/sglang/python/sglang/__init__.py"
+  },
+  "framework_runtime": {
+    "venv_root": "/home/rdxa/h3bench/fw-venvs",
+    "install_specs": {
+      "vllm": "vllm==0.18.0",
+      "vllm_omni": "vllm-omni==0.18.0",
+      "lightx2v": "git+https://github.com/ModelTC/LightX2V.git@7efd05f8e1425b83321fd4f1cef779ef6504076f",
+      "lightx2v_flash_attn": "flash-attn==2.8.3",
+      "lightx2v_flash_attn3": "",
+      "lightx2v_fa3_hf_repo": "varunneal/flash-attention-3",
+      "lightx2v_fa3_hf_revision": "de87b9b5af06dd9984df595bef90b2eba44b181a",
+      "lightx2v_fa3_hf_subdir": "build/torch28-cxx11-cu128-x86_64-linux/flash_attention_3",
+      "lightx2v_flashinfer": "flashinfer-python==0.6.11",
+      "trtllm": "tensorrt-llm==1.3.0rc18",
+      "fastvideo": "https://github.com/hao-ai-lab/FastVideo.git@main",
+      "torch_cuda_arch_list": ""
+    },
+    "launchers": {
+      "vllm_omni_server_bin": "vllm",
+      "vllm_omni_required_help_args": "--omni",
+      "trtllm_visual_server_bin": "trtllm-serve"
+    },
+    "vllm-omni": {
+      "venv_path": "/home/rdxa/h3bench/fw-venvs/vllm-omni",
+      "packages": {
+        "vllm": {
+          "Name": "vllm",
+          "Version": "0.31.0",
+          "Home-page": "https://github.com/vllm-project/vllm",
+          "Location": "/home/rdxa/h3bench/fw-venvs/vllm-omni/lib/python3.12/site-packages"
+        },
+        "vllm-omni": {
+          "Name": "vllm-omni",
+          "Version": "0.31.0rc2.dev98+gf69b1f2b1",
+          "Home-page": "https://github.com/vllm-project/vllm-omni",
+          "Location": "/home/rdxa/h3bench/fw-venvs/vllm-omni/lib/python3.12/site-packages"
+        },
+        "torch": {
+          "Name": "torch",
+          "Version": "2.13.0",
+          "Home-page": "https://pytorch.org",
+          "Location": "/home/rdxa/h3bench/fw-venvs/vllm-omni/lib/python3.12/site-packages"
+        },
+        "transformers": {
+          "Name": "transformers",
+          "Version": "5.14.1",
+          "Home-page": "https://github.com/huggingface/transformers",
+          "Location": "/home/rdxa/h3bench/fw-venvs/vllm-omni/lib/python3.12/site-packages"
+        },
+        "diffusers": {
+          "Name": "diffusers",
+          "Version": "0.40.0",
+          "Home-page": "https://github.com/huggingface/diffusers",
+          "Location": "/home/rdxa/h3bench/fw-venvs/vllm-omni/lib/python3.12/site-packages"
+        },
+        "huggingface_hub": {
+          "Name": "huggingface_hub",
+          "Version": "1.33.0",
+          "Home-page": "https://github.com/huggingface/huggingface_hub",
+          "Location": "/home/rdxa/h3bench/fw-venvs/vllm-omni/lib/python3.12/site-packages"
+        }
+      },
+      "direct_urls": {
+        "vllm_omni-0.31.0rc2.dev98+gf69b1f2b1.dist-info": {
+          "url": "file:///home/rdxa/h3bench/fw-venvs/vllm-omni/src/vllm-omni",
+          "dir_info": {
+            "editable": true
+          }
+        }
+      }
+    },
+    "lightx2v": {
+      "venv_path": "/home/rdxa/h3bench/fw-venvs/lightx2v",
+      "packages": {
+        "lightx2v": {
+          "Name": "lightx2v",
+          "Version": "0.5.0",
+          "Home-page": "https://github.com/ModelTC/LightX2V",
+          "Location": "/home/rdxa/h3bench/fw-venvs/lightx2v/lib/python3.12/site-packages"
+        },
+        "flash_attn": {
+          "Name": "flash_attn",
+          "Version": "2.8.3",
+          "Home-page": "https://github.com/Dao-AILab/flash-attention",
+          "Location": "/home/rdxa/h3bench/fw-venvs/lightx2v/lib/python3.12/site-packages"
+        },
+        "flashinfer-python": {
+          "Name": "flashinfer-python",
+          "Version": "0.6.11",
+          "Home-page": "https://github.com/flashinfer-ai/flashinfer",
+          "Location": "/home/rdxa/h3bench/fw-venvs/lightx2v/lib/python3.12/site-packages"
+        },
+        "torch": {
+          "Name": "torch",
+          "Version": "2.11.0",
+          "Home-page": "https://pytorch.org",
+          "Location": "/home/rdxa/h3bench/fw-venvs/lightx2v/lib/python3.12/site-packages"
+        },
+        "transformers": {
+          "Name": "transformers",
+          "Version": "5.19.0",
+          "Home-page": "https://github.com/huggingface/transformers",
+          "Location": "/home/rdxa/h3bench/fw-venvs/lightx2v/lib/python3.12/site-packages"
+        },
+        "diffusers": {
+          "Name": "diffusers",
+          "Version": "0.41.0",
+          "Home-page": "https://github.com/huggingface/diffusers",
+          "Location": "/home/rdxa/h3bench/fw-venvs/lightx2v/lib/python3.12/site-packages"
+        },
+        "huggingface_hub": {
+          "Name": "huggingface_hub",
+          "Version": "1.33.0",
+          "Home-page": "https://github.com/huggingface/huggingface_hub",
+          "Location": "/home/rdxa/h3bench/fw-venvs/lightx2v/lib/python3.12/site-packages"
+        }
+      },
+      "direct_urls": {
+        "lightx2v-0.5.0.dist-info": {
+          "url": "https://github.com/ModelTC/LightX2V.git",
+          "vcs_info": {
+            "commit_id": "b6d38283cb8176303f9155e639bcd496553d3402",
+            "requested_revision": "b6d38283cb8176303f9155e639bcd496553d3402",
+            "vcs": "git"
+          }
+        }
+      }
+    },
+    "trtllm-visual": {
+      "venv_path": "/home/rdxa/h3bench/fw-venvs/trtllm-visual"
+    },
+    "comfyui": {
+      "venv_path": "/home/rdxa/h3bench/fw-venvs/comfyui",
+      "packages": {
+        "torchvision": {
+          "Name": "torchvision",
+          "Version": "0.29.1+cu130",
+          "Home-page": "https://github.com/pytorch/vision",
+          "Location": "/home/rdxa/h3bench/fw-venvs/comfyui/lib/python3.12/site-packages"
+        },
+        "torchaudio": {
+          "Name": "torchaudio",
+          "Version": "2.11.0+cu130",
+          "Home-page": "https://github.com/pytorch/audio",
+          "Location": "/home/rdxa/h3bench/fw-venvs/comfyui/lib/python3.12/site-packages"
+        },
+        "comfy-kitchen": {
+          "Name": "comfy-kitchen",
+          "Version": "0.2.37",
+          "Home-page": "https://github.com/Comfy-Org/comfy-kitchen",
+          "Location": "/home/rdxa/h3bench/fw-venvs/comfyui/lib/python3.12/site-packages"
+        },
+        "comfy-aimdo": {
+          "Name": "comfy-aimdo",
+          "Version": "0.5.6",
+          "Home-page": "",
+          "Location": "/home/rdxa/h3bench/fw-venvs/comfyui/lib/python3.12/site-packages"
+        },
+        "comfyui_frontend_package": {
+          "Name": "comfyui_frontend_package",
+          "Version": "1.55.14",
+          "Home-page": "",
+          "Location": "/home/rdxa/h3bench/fw-venvs/comfyui/lib/python3.12/site-packages"
+        },
+        "safetensors": {
+          "Name": "safetensors",
+          "Version": "0.8.0",
+          "Home-page": "https://github.com/huggingface/safetensors",
+          "Location": "/home/rdxa/h3bench/fw-venvs/comfyui/lib/python3.12/site-packages"
+        },
+        "torch": {
+          "Name": "torch",
+          "Version": "2.14.1+cu130",
+          "Home-page": "https://pytorch.org",
+          "Location": "/home/rdxa/h3bench/fw-venvs/comfyui/lib/python3.12/site-packages"
+        },
+        "transformers": {
+          "Name": "transformers",
+          "Version": "5.19.0",
+          "Home-page": "https://github.com/huggingface/transformers",
+          "Location": "/home/rdxa/h3bench/fw-venvs/comfyui/lib/python3.12/site-packages"
+        },
+        "huggingface_hub": {
+          "Name": "huggingface_hub",
+          "Version": "2.2.0",
+          "Home-page": "https://github.com/huggingface/huggingface_hub",
+          "Location": "/home/rdxa/h3bench/fw-venvs/comfyui/lib/python3.12/site-packages"
+        }
+      },
+      "source_commit": "0df64eb242b7c5759c3e86afd5d1846d923b1033",
+      "source_commit_date": "2026-10-09T19:55:48-07:00"
+    },
+    "fastvideo": {
+      "venv_path": "/home/rdxa/h3bench/fw-venvs/fastvideo"
+    }
+  },
+  "benchmark_env": {},
+  "benchmark_framework_args": {
+    "vllm-omni": [],
+    "lightx2v": {
+      "config": {
+        "use_compile": true
+      }
+    },
+    "fastvideo": []
+  },
+  "torch_compile_disabled": false,
+  "benchmark_modes": [
+    "single_e2e",
+    "throughput"
+  ],
+  "requested_sglang_profile": "auto",
+  "request_inputs": "distinct-per-request",
+  "results": [
+    {
+      "case_id": "qwen_image_21_edit_1024",
+      "framework": "vllm-omni",
+      "mode": "single_e2e",
+      "model": "Qwen/Qwen-Image-2.1",
+      "task": "image-edit",
+      "width": 1024,
+      "height": 1024,
+      "num_frames": null,
+      "fps": null,
+      "num_inference_steps": 40,
+      "guidance_scale": 1.0,
+      "guidance_scale_2": null,
+      "true_cfg_scale": null,
+      "negative_prompt_set": false,
+      "num_gpus": 1,
+      "latency_s": null,
+      "error": "500 Server Error: Internal Server Error for url: http://127.0.0.1:48005/v1/images/edits",
+      "framework_metadata": {
+        "profile": "rtx5090-cpu-offload",
+        "profile_request": "auto",
+        "profile_source": "hardware",
+        "framework_ref": "vllm-omni main f69b1f2b19ce + vllm==0.31.0",
+        "hardware": [
+          "rtx5090"
+        ],
+        "hardware_candidates": [
+          "rtx5090"
+        ],
+        "description": "One 32 GB RTX 5090: vLLM-Omni's model-level CPU offload with its default CUDA-graph decode, cuDNN attention.",
+        "notes": "The recipe (recipes/Qwen/Qwen-Image-2.1.md @ f69b1f2b1, checked 2026-10-10) puts BF16 peak GPU memory at 36.9 GB, and the default resident command OOMed at its dummy run on a 32 GB RTX 5090 (rdxa-5090-pa, 2026-10-10). The recipe's low-memory path is model-level CPU offload: with CUDA-graph decode on (the default) the DiT stays on the device and the rest moves off, the counterpart of sglang's rtx5090 profile (DiT resident, text encoder offloaded). cuDNN attention as in this case's Blackwell profile and the H3 RTX 5090 recipe. VALIDATION PENDING (2026-10-10 round).",
+        "install_specs": null,
+        "server_bin": null,
+        "use_omni_arg": null,
+        "required_help_args": null,
+        "serve_args": "--enable-cpu-offload",
+        "num_gpus": 1,
+        "extra_env_keys": [
+          "DIFFUSION_ATTENTION_BACKEND"
+        ],
+        "request_inputs": "distinct-per-request"
+      },
+      "server_command": "vllm serve Qwen/Qwen-Image-2.1 --port 48005 --host 127.0.0.1 --omni --enable-cpu-offload",
+      "metrics": {
+        "server_startup_s": 32.04,
+        "warmup_s": 1.94
+      }
+    }
+  ],
+  "throughput_results": [],
+  "partial": false,
+  "model_revisions": {
+    "Qwen/Qwen-Image-2.1": "d26bb61231c349cf6b7896fa83353113880e1ba3"
+  }
+}

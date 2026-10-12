@@ -1,0 +1,14 @@
+HR x4f dbf bb560dc minimax_h3_fasth3_v2_t2va_5s: select VSA-H3 for sgla
+HR x4f minimax_h3_fasth3_v2_t2va_5s TUNE sgl_eager_r1_1: median=10.028 samples=[10.039, 10.017] spread=0.2% server=10.034 err=None
+HR x4f minimax_h3_fasth3_v2_t2va_5s      cmd: sglang serve --model-path FastVideo/FastVideo-FastH3-8-Step-V2 --port 61521 --host 127.0.0.1 --backend sglang --num-gpus 4 --model-type diffusion --warmup-mode server --ulysses-degree 4 --component-attention-backends transformer=video_sparse_attn_h3 --performance-mode speed --enable-torch-compile false --revision 71a17d72c58ce3eeec418144de2a5a2090cb4c04 --enable-torch-compile false
+HR x4f minimax_h3_fasth3_v2_t2va_5s r1 VEAGER median=11.064 samples=[11.094, 11.034] eager=True profile=default err=None
+HR x4f minimax_h3_fasth3_v2_t2va_5s TUNE sgl_eager_r2_1: median=10.055 samples=[10.032, 10.078] spread=0.5% server=10.04 err=None
+HR x4f minimax_h3_fasth3_v2_t2va_5s      cmd: sglang serve --model-path FastVideo/FastVideo-FastH3-8-Step-V2 --port 61541 --host 127.0.0.1 --backend sglang --num-gpus 4 --model-type diffusion --warmup-mode server --ulysses-degree 4 --component-attention-backends transformer=video_sparse_attn_h3 --performance-mode speed --enable-torch-compile false --revision 71a17d72c58ce3eeec418144de2a5a2090cb4c04 --enable-torch-compile false
+HR x4f minimax_h3_fasth3_v2_t2va_5s r2 VEAGER median=10.983 samples=[11.043, 10.924] eager=True profile=default err=None
+HR x4f minimax_h3_t2va_5s_4gpu TUNE sgl_eager_r1_1: median=72.046 samples=[72.143, 71.949] spread=0.3% server=72.141 err=None
+HR x4f minimax_h3_t2va_5s_4gpu      cmd: sglang serve --model-path MiniMaxAI/MiniMax-H3 --port 61561 --host 127.0.0.1 --backend sglang --num-gpus 4 --model-type diffusion --warmup-mode server --model-variant fl2va --ulysses-degree 4 --encoder-parallel auto --performance-mode speed --enable-torch-compile false --enable-torch-compile false
+HR x4f minimax_h3_t2va_5s_4gpu r1 VEAGER median=75.221 samples=[75.183, 75.259] eager=True profile=default err=None
+HR x4f minimax_h3_t2va_5s_4gpu TUNE sgl_eager_r2_1: median=72.077 samples=[72.173, 71.981] spread=0.3% server=72.174 err=None
+HR x4f minimax_h3_t2va_5s_4gpu      cmd: sglang serve --model-path MiniMaxAI/MiniMax-H3 --port 61581 --host 127.0.0.1 --backend sglang --num-gpus 4 --model-type diffusion --warmup-mode server --model-variant fl2va --ulysses-degree 4 --encoder-parallel auto --performance-mode speed --enable-torch-compile false --enable-torch-compile false
+HR x4f minimax_h3_t2va_5s_4gpu r2 VEAGER median=75.212 samples=[75.232, 75.192] eager=True profile=default err=None
+=== HR_x4f_DONE 2026-10-11T11:49:23+00:00

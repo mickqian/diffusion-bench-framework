@@ -52,7 +52,7 @@ VALID_STATUS = {"supported", "unsupported", "no_profile", "failed", "not_run", "
 # b200-* (minimax-h3), leaving them outside the compile policy. Each class is
 # resolved through config_guard.hardware_candidates, as the runtime resolves a
 # box's GPU names, so a GB300 box selects exactly what the lint checked.
-DATACENTER_HARDWARE = ("h100", "h200", "b200", "b300", "gb200", "gb300")
+DATACENTER_HARDWARE = ("h100", "h200", "b200", "b300", "gb200", "gb300", "mi355x", "mi350x", "mi300x")
 POLICY_HARDWARE = DATACENTER_HARDWARE + ("rtx5090", "rtx4090")
 # One hardware vocabulary, not two: POLICY_HARDWARE, `command_profiles[*].hardware`
 # and `status_by_hardware` keys all name tokens the RUNTIME derives from the GPU
@@ -115,7 +115,6 @@ _LIGHTX2V_OFFLOAD_KEYS = ("lazy_load", "unload_modules")
 # Delete an entry when its cell is re-derived or justified: the list only shrinks.
 KNOWN_COMPETITOR_VIOLATIONS = {
     ("cosmos3_nano_t2i_720p", "vllm-omni", "default"),
-    ("cosmos3_nano_t2i_720p", "vllm-omni", "h200-2gpu-cfg"),
     ("ltx2_twostage_t2v", "lightx2v", "h100-1gpu"),
 }
 STRICT_COMPETITOR_POLICY_ENV = "DIFFUSION_BENCH_STRICT_COMPETITOR_POLICY"

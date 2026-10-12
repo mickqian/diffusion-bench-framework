@@ -1,0 +1,9 @@
+GB hf token loaded
+GB dbf 41c50b0 Report: the RTX 5090 desktop cells, sglang on main 6
+GB sglang /scratch/gb/sgl-main/python/sglang/__init__.py
+GB profile has: component-attention-backends transformer=video_sparse_attn_h3
+GB r1 sglang median=5.472 samples=[5.483, 5.461] denoise=3.504 decode=1.572 err=None
+GB r1 backend:       1 Using dynamic_cudnn_sdpa attention backend;      2 Using video_sparse_attn_h3 attention backend;
+GB r2 sglang median=5.478 samples=[5.478, 5.478] denoise=3.506 decode=1.573 err=None
+GB r2 backend:       1 Using dynamic_cudnn_sdpa attention backend;      2 Using video_sparse_attn_h3 attention backend;
+=== GB_DONE 2026-10-11T16:11:32+00:00

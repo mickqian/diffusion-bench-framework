@@ -9,7 +9,7 @@
         --reproduce scripts/biweekly_fair_bench.sh
 
 Appends the run's sections to docs/data/historical-cross-framework.json, points
-docs/data/latest-cross-framework.json at it, and refreshes the inline snapshots
+docs/data/latest-cross-framework.json at it (unless --keep-latest), and refreshes the inline snapshots
 that back file:// previews. Re-publishing the same --run-id replaces its
 sections rather than appending duplicates, so a re-run is idempotent.
 """
@@ -173,6 +173,12 @@ def main() -> int:
         metavar="KEY=TEXT",
         help="run-specific caveat for the published policy block, repeatable",
     )
+    ap.add_argument(
+        "--keep-latest",
+        action="store_true",
+        help="add the run to the history but leave latest-cross-framework.json "
+        "on its current run (a side run must not replace the headline)",
+    )
     ap.add_argument("--dry-run", action="store_true")
     args = ap.parse_args()
 
@@ -256,7 +262,9 @@ def main() -> int:
     _dump(HISTORICAL, hist)
     print(f"wrote {HISTORICAL.relative_to(ROOT)} ({len(hist['sections'])} sections)")
 
-    if LATEST.exists():
+    if args.keep_latest:
+        print(f"left {LATEST.relative_to(ROOT)} on its current run (--keep-latest)")
+    elif LATEST.exists():
         latest = _load(LATEST)
         # carry the run's identity across too; replacing only `sections` left an
         # H200 run described by the previous H100 run's id, title and hardware.

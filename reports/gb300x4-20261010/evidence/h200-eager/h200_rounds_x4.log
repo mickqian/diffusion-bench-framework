@@ -1,0 +1,30 @@
+HR x4 dbf 6ef1787 cosmos3_nano_t2i_720p: an H200 vLLM-Omni profile on 
+HR x4 fastvideo-kernel 0.3.5
+HR x4 torch 2.13.0+cu130 -> 2.13.0+cu130
+HR x4 minimax_h3_fasth3_v2_t2va_5s TUNE sgl_eager_r1_1: median=12.66 samples=[12.646, 12.674] spread=0.2% server=12.666 err=None
+HR x4 minimax_h3_fasth3_v2_t2va_5s      cmd: sglang serve --model-path FastVideo/FastVideo-FastH3-8-Step-V2 --port 59021 --host 127.0.0.1 --backend sglang --num-gpus 4 --model-type diffusion --warmup-mode server --ulysses-degree 4 --performance-mode speed --enable-torch-compile false --revision 71a17d72c58ce3eeec418144de2a5a2090cb4c04 --enable-torch-compile false
+HR x4 minimax_h3_fasth3_v2_t2va_5s r1 VEAGER median=10.946 samples=[10.971, 10.92] eager=True profile=default err=None
+HR x4 minimax_h3_fasth3_v2_t2va_5s TUNE sgl_eager_r2_1: median=12.653 samples=[12.647, 12.659] spread=0.1% server=12.619 err=None
+HR x4 minimax_h3_fasth3_v2_t2va_5s      cmd: sglang serve --model-path FastVideo/FastVideo-FastH3-8-Step-V2 --port 59041 --host 127.0.0.1 --backend sglang --num-gpus 4 --model-type diffusion --warmup-mode server --ulysses-degree 4 --performance-mode speed --enable-torch-compile false --revision 71a17d72c58ce3eeec418144de2a5a2090cb4c04 --enable-torch-compile false
+HR x4 minimax_h3_fasth3_v2_t2va_5s r2 VEAGER median=11.003 samples=[11.024, 10.982] eager=True profile=default err=None
+=== HR_x4_DONE 2026-10-11T08:17:45+00:00
+HR x4c dbf 6ef1787 cosmos3_nano_t2i_720p: an H200 vLLM-Omni profile on 
+HR x4c cosmos3_nano_t2i_720p TUNE sgl_eager_r1_1: median=1.726 samples=[1.715, 1.726, 1.72, 1.727, 1.726] spread=0.7% server=1.612 err=None
+HR x4c cosmos3_nano_t2i_720p      cmd: sglang serve --model-path nvidia/Cosmos3-Nano --port 59221 --host 127.0.0.1 --backend sglang --num-gpus 2 --model-type diffusion --warmup-mode server --attention-backend fa --tp-size 2 --enable-torch-compile false
+HR x4c cosmos3_nano_t2i_720p TUNE sgl_cfg_r1_1: median=0.944 samples=[0.942, 0.942, 0.946, 0.944, 0.946] spread=0.5% server=0.824 err=None
+HR x4c cosmos3_nano_t2i_720p      cmd: sglang serve --model-path nvidia/Cosmos3-Nano --port 59223 --host 127.0.0.1 --backend sglang --num-gpus 2 --model-type diffusion --warmup-mode server --attention-backend fa --tp-size 2 --enable-torch-compile false --tp-size 1 --cfg-parallel-size 2
+HR x4c cosmos3_nano_t2i_720p r1 VEAGER median=1.304 samples=[1.309, 1.288, 1.304, 1.302, 1.359] eager=True profile=h200-2gpu-cfg-flash err=None
+HR x4c cosmos3_nano_t2i_720p TUNE sgl_eager_r2_1: median=1.704 samples=[1.694, 1.701, 1.704, 1.711, 1.713] spread=1.1% server=1.591 err=None
+HR x4c cosmos3_nano_t2i_720p      cmd: sglang serve --model-path nvidia/Cosmos3-Nano --port 59241 --host 127.0.0.1 --backend sglang --num-gpus 2 --model-type diffusion --warmup-mode server --attention-backend fa --tp-size 2 --enable-torch-compile false
+HR x4c cosmos3_nano_t2i_720p TUNE sgl_cfg_r2_1: median=0.946 samples=[0.945, 0.946, 0.945, 0.95, 0.947] spread=0.6% server=0.824 err=None
+HR x4c cosmos3_nano_t2i_720p      cmd: sglang serve --model-path nvidia/Cosmos3-Nano --port 59243 --host 127.0.0.1 --backend sglang --num-gpus 2 --model-type diffusion --warmup-mode server --attention-backend fa --tp-size 2 --enable-torch-compile false --tp-size 1 --cfg-parallel-size 2
+HR x4c cosmos3_nano_t2i_720p r2 VEAGER median=1.306 samples=[1.306, 1.29, 1.319, 1.296, 1.306] eager=True profile=h200-2gpu-cfg-flash err=None
+=== HR_x4c_DONE 2026-10-11T08:26:56+00:00
+HR x4h dbf 6ef1787 cosmos3_nano_t2i_720p: an H200 vLLM-Omni profile on 
+HR x4h minimax_h3_t2va_5s TUNE sgl_eager_r1_1: median=143.448 samples=[143.244, 143.652] spread=0.3% server=None err=None
+HR x4h minimax_h3_t2va_5s      cmd: sglang serve --model-path MiniMaxAI/MiniMax-H3 --port 59421 --host 127.0.0.1 --backend sglang --num-gpus 2 --model-type diffusion --warmup-mode server --model-variant fl2va --ulysses-degree 2 --performance-mode speed --enable-torch-compile false --enable-torch-compile false
+HR x4h minimax_h3_t2va_5s r1 VEAGER median=146.483 samples=[146.465, 146.501] eager=True profile=default err=None
+HR x4h minimax_h3_t2va_5s TUNE sgl_eager_r2_1: median=143.341 samples=[143.1, 143.582] spread=0.3% server=None err=None
+HR x4h minimax_h3_t2va_5s      cmd: sglang serve --model-path MiniMaxAI/MiniMax-H3 --port 59441 --host 127.0.0.1 --backend sglang --num-gpus 2 --model-type diffusion --warmup-mode server --model-variant fl2va --ulysses-degree 2 --performance-mode speed --enable-torch-compile false --enable-torch-compile false
+HR x4h minimax_h3_t2va_5s r2 VEAGER median=146.568 samples=[146.489, 146.647] eager=True profile=default err=None
+=== HR_x4h_DONE 2026-10-11T09:08:46+00:00

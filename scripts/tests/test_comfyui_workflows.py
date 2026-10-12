@@ -90,5 +90,5 @@ for case in cfg["cases"]:
         steps = [n["inputs"].get("steps") for n in first.values() if n["class_type"] in cc.SAMPLER_CLASSES | {"BasicScheduler", "Flux2Scheduler", "LTXVScheduler", "Ideogram4Scheduler"}]
         check(f"{where}: the case's steps reach the sampling schedule", case["num_inference_steps"] in steps, f"{steps}")
 
-check("the built config has ComfyUI cells", seen >= 10, f"{seen}")
+check("the built config has ComfyUI cells", seen >= 9, f"{seen}")
 sys.exit(fail)

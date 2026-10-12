@@ -38,6 +38,10 @@ GPU_NAMES = {
     "gb300": "NVIDIA GB300, 284208 MiB, 580.95.05",
     "rtx5090": "NVIDIA GeForce RTX 5090, 32607 MiB, 580.65.06",
     "rtx4090": "NVIDIA GeForce RTX 4090, 24564 MiB, 580.65.06",
+    # AMD boxes report through rocm-smi (run_comparison._rocm_smi_gpus), in the same shape
+    "mi355x": "AMD Instinct MI355X, 294896 MiB, 6.16.6",
+    "mi350x": "AMD Instinct MI350X, 294896 MiB, 6.16.6",
+    "mi300x": "AMD Instinct MI300X, 196592 MiB, 6.16.6",
 }
 os.environ.pop(HARDWARE_PROFILE_ENV, None)
 

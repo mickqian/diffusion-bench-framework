@@ -1,0 +1,8 @@
+HR x2 dbf 6ef1787 cosmos3_nano_t2i_720p: an H200 vLLM-Omni profile on 
+HR x2 minimax_h3_ref2va_5s TUNE sgl_eager_r1_1: median=222.788 samples=[222.621, 222.956] spread=0.2% server=None err=None
+HR x2 minimax_h3_ref2va_5s      cmd: sglang serve --model-path MiniMaxAI/MiniMax-H3 --port 59621 --host 127.0.0.1 --backend sglang --num-gpus 2 --model-type diffusion --warmup-mode server --model-variant ref2va --ulysses-degree 2 --performance-mode speed --enable-torch-compile false --enable-torch-compile false
+HR x2 minimax_h3_ref2va_5s r1 VEAGER median=227.242 samples=[227.258, 227.225] eager=True profile=default err=None
+HR x2 minimax_h3_ref2va_5s TUNE sgl_eager_r2_1: median=222.766 samples=[222.423, 223.108] spread=0.3% server=None err=None
+HR x2 minimax_h3_ref2va_5s      cmd: sglang serve --model-path MiniMaxAI/MiniMax-H3 --port 59641 --host 127.0.0.1 --backend sglang --num-gpus 2 --model-type diffusion --warmup-mode server --model-variant ref2va --ulysses-degree 2 --performance-mode speed --enable-torch-compile false --enable-torch-compile false
+HR x2 minimax_h3_ref2va_5s r2 VEAGER median=226.981 samples=[226.966, 226.996] eager=True profile=default err=None
+=== HR_x2_DONE 2026-10-11T09:07:16+00:00

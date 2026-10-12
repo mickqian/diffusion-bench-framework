@@ -1,0 +1,17 @@
+H2E dbf dd7a9c7 GB300 round: sglang eager against vLLM-Omni eager, e
+H2E sglang /scratch/h200eager/sgl-main/python/sglang/__init__.py True
+H2E install rc=0 stamp=/scratch/h200eager/fw-venvs/vllm-omni/.diffusion-bench-install-stamp
+H2E vllm 0.31.0 vllm-omni 0.31.0rc2.dev98+gf69b1f2b1
+H2E qwen_image_21_t2i_1024 TUNE sgl_eager_1: median=4.489 samples=[4.475, 4.483, 4.494, 4.489, 4.503] spread=0.6% server=4.311 err=None
+H2E qwen_image_21_t2i_1024      cmd: sglang serve --model-path Qwen/Qwen-Image-2.1 --port 55021 --host 127.0.0.1 --backend sglang --model-type diffusion --warmup-mode server --performance-mode speed --enable-torch-compile false
+H2E qwen_image_21_t2i_1024 VEAGER median=6.218 samples=[6.205, 6.241, 6.218, 6.245, 6.206] eager=True err=None
+H2E qwen_image_21_edit_1024 TUNE sgl_eager_1: median=5.396 samples=[5.384, 5.394, 5.407, 5.404, 5.396] spread=0.4% server=5.238 err=None
+H2E qwen_image_21_edit_1024      cmd: sglang serve --model-path Qwen/Qwen-Image-2.1 --port 55041 --host 127.0.0.1 --backend sglang --model-type diffusion --warmup-mode server --performance-mode speed --enable-torch-compile false
+H2E qwen_image_21_edit_1024 VEAGER median=6.916 samples=[6.939, 7.058, 6.908, 6.914, 6.916] eager=True err=None
+H2E qwen_image_21_t2i_1024_2gpu TUNE sgl_eager_1: median=2.752 samples=[2.742, 2.744, 2.752, 2.754, 2.754] spread=0.4% server=2.573 err=None
+H2E qwen_image_21_t2i_1024_2gpu      cmd: sglang serve --model-path Qwen/Qwen-Image-2.1 --port 55061 --host 127.0.0.1 --backend sglang --num-gpus 2 --model-type diffusion --warmup-mode server --ulysses-degree 2 --performance-mode speed --enable-torch-compile false
+H2E qwen_image_21_t2i_1024_2gpu VEAGER median=3.698 samples=[3.691, 3.695, 3.698, 3.698, 3.702] eager=True err=None
+H2E zimage_turbo_t2i_1024 TUNE sgl_eager_1: median=0.58 samples=[0.576, 0.58, 0.58, 0.58, 0.575] spread=0.9% server=0.526 err=None
+H2E zimage_turbo_t2i_1024      cmd: sglang serve --model-path Tongyi-MAI/Z-Image-Turbo --port 55081 --host 127.0.0.1 --backend sglang --num-gpus 2 --model-type diffusion --warmup-mode server --tp-size 2 --dit-layerwise-offload false --performance-mode speed --enable-torch-compile false --enable-torch-compile false
+H2E zimage_turbo_t2i_1024 VEAGER median=0.802 samples=[0.795, 0.805, 0.8, 0.804, 0.802] eager=True err=None
+=== H2E_DONE 2026-10-11T05:43:54+00:00

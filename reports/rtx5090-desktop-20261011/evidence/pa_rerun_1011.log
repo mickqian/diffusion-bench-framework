@@ -1,0 +1,17 @@
+PA sglang tree: /home/rdxa/h3bench/sglang-6576e50/python/sglang/__init__.py
+PA dbf bbe4d62 Merge remote-tracking branch 'origin/main' into roun
+=== B200 cross-framework run START 2026-10-11T08:11:02-07:00 ===
+=== repo=/home/rdxa/h3bench/dbf frameworks=[sglang] hw=rtx5090 gpus=0 ===
+=== 2026-10-11T08:11:02-07:00 case qwen_image_21_t2i_1024 ===
+RESULT qwen_image_21_t2i_1024 rc=0   [server] Warmup requests:   0%|          | 0/1 [00:00<?, ?req/s][2026-10-11 08:11:33] [32mINFO[0m:     127.0.0.1:43468 - "[1mGET /health HTTP/1.1[0m" [91m503 Service Unavailable[0m 
+=== 2026-10-11T08:13:44-07:00 case qwen_image_21_edit_1024 ===
+RESULT qwen_image_21_edit_1024 rc=0   [server] Warmup requests:   0%|          | 0/1 [00:00<?, ?req/s][2026-10-11 08:14:10] [32mINFO[0m:     127.0.0.1:57568 - "[1mGET /health HTTP/1.1[0m" [91m503 Service Unavailable[0m 
+=== 2026-10-11T08:16:41-07:00 case minimax_h3_t2va_480p_1gpu ===
+RESULT minimax_h3_t2va_480p_1gpu rc=0   [server] Warmup requests:   0%|          | 0/1 [00:00<?, ?req/s][2026-10-11 08:17:29] [32mINFO[0m:     127.0.0.1:43182 - "[1mGET /health HTTP/1.1[0m" [91m503 Service Unavailable[0m 
+=== B200 cross-framework run DONE 2026-10-11T08:25:15-07:00 ===
+PA qwen_image_21_t2i_1024 VEAGER median=15.888 samples=[15.859, 15.861, 15.888, 15.889, 15.904] eager=True err=None
+PA qwen_image_21_edit_1024 VEAGER median=18.469 samples=[18.387, 18.436, 18.469, 18.476, 18.489] eager=True err=None
+RESULT minimax_h3_t2va_480p_1gpu rc=0   [server] Warmup requests:   0%|          | 0/1 [00:00<?, ?req/s][2026-10-11 08:17:29] [32mINFO[0m:     127.0.0.1:43182 - "[1mGET /health HTTP/1.1[0m" [91m503 Service Unavailable[0m 
+RESULT qwen_image_21_edit_1024 rc=0   [server] Warmup requests:   0%|          | 0/1 [00:00<?, ?req/s][2026-10-11 08:14:10] [32mINFO[0m:     127.0.0.1:57568 - "[1mGET /health HTTP/1.1[0m" [91m503 Service Unavailable[0m 
+RESULT qwen_image_21_t2i_1024 rc=0   [server] Warmup requests:   0%|          | 0/1 [00:00<?, ?req/s][2026-10-11 08:11:33] [32mINFO[0m:     127.0.0.1:43468 - "[1mGET /health HTTP/1.1[0m" [91m503 Service Unavailable[0m 
+=== PA_DONE 2026-10-11T08:31:53-07:00
