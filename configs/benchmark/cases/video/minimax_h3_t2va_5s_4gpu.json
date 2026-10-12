@@ -173,6 +173,28 @@
         }
       },
       "command_profiles": {
+        "blackwell-sp4-sdpa": {
+          "hardware": [
+            "b200",
+            "b300",
+            "gb200",
+            "gb300"
+          ],
+          "framework_ref": "lightx2v main b6d38283 (2026-10-09)",
+          "upstream_recipe": {
+            "repo": "ModelTC/LightX2V",
+            "path": "configs/minimax_h3/minimax_h3_sp.json",
+            "commit": "fabad30491",
+            "commit_date": "2026-09-10",
+            "section": "SP4 preset, the default of scripts/minimax_h3/run_minimax_h3_t2av_parallel.sh; served per 'Server and POST' with --model-variant fl2av"
+          },
+          "num_gpus": 4,
+          "serve_args": "--model-variant fl2av",
+          "lightx2v_config": {
+            "attn_type": "torch_sdpa"
+          },
+          "notes": "Replaces blackwell-sp4-fa2: FlashAttention 2 on Blackwell is the slow exact kernel, and that profile was never validated (its notes said so); it published 141.04 s on minimax_h3_t2va_5s (4xGB300, 2026-10-10) against sglang's 57.46 s. LightX2V's MiniMax-H3 attention is single-segment (transformer_infer.py builds cu_seqlens = (0, seq_len)), so torch_sdpa -- cuDNN SDPA on sm_100/sm_103 -- computes the same attention. flash_attn4 also takes single-segment input, but the installer removes flash_attn.cute (no cutlass-dsl satisfies it). Probed 2026-10-12 on a 2xGB300 gb300-tml pod (LightX2V b6d38283, torch 2.14.1), minimax_h3_t2va_5s: torch_sdpa TP2 68.90 s, torch_sdpa Ulysses2 67.32 s, sglang main on the same pod 62.52 s. VALIDATION on a whole-node 4xGB300 pending."
+        },
         "default": {
           "description": "LightX2V's four-GPU MiniMax-H3 preset made resident and compiled: Ulysses SP4, world-TP text encoder, tile-parallel VAE decode, FlashAttention 3 (Hopper).",
           "framework_ref": "lightx2v main 0c2edc12 (2026-10-05)",

@@ -126,7 +126,8 @@ framework_health_check() {
       done
       ;;
     lightx2v)
-      "${VENV_PATH}/bin/python3" -c 'import importlib.util; assert importlib.util.find_spec("lightx2v"); import lightx2v.server.main; import flash_attn'
+      "${VENV_PATH}/bin/python3" -c 'import importlib.util; assert importlib.util.find_spec("lightx2v"); import lightx2v.server.main'
+      if [[ "${LIGHTX2V_INSTALL_FA2:-1}" == "1" ]]; then "${VENV_PATH}/bin/python3" -c 'import flash_attn'; fi
       if [[ "${LIGHTX2V_INSTALL_FA3}" == "1" ]]; then
         "${VENV_PATH}/bin/python3" -c 'import flash_attn_interface; assert hasattr(flash_attn_interface, "flash_attn_func")'
       fi
@@ -295,7 +296,12 @@ PY
     fi
     export MAX_JOBS
     export TORCH_CUDA_ARCH_LIST="${TORCH_CUDA_ARCH_LIST:-9.0}"
-    python3 -m pip install --upgrade --no-cache-dir --no-build-isolation --no-deps --no-binary flash-attn "${LIGHTX2V_FLASH_ATTN_INSTALL_SPEC:-flash-attn==2.8.3}"
+    # LIGHTX2V_INSTALL_FA2=0 skips it: flash-attn 2.8.3 no longer compiles against the
+    # lmsysorg/sglang:latest aarch64 image's torch headers (2026-10-12), and the
+    # Blackwell profiles run torch_sdpa.
+    if [[ "${LIGHTX2V_INSTALL_FA2:-1}" == "1" ]]; then
+      python3 -m pip install --upgrade --no-cache-dir --no-build-isolation --no-deps --no-binary flash-attn "${LIGHTX2V_FLASH_ATTN_INSTALL_SPEC:-flash-attn==2.8.3}"
+    fi
     if [[ "${LIGHTX2V_INSTALL_FA3}" != "1" ]]; then
       echo "lightx2v: FA3 skipped (LIGHTX2V_INSTALL_FA3=${LIGHTX2V_INSTALL_FA3})"
     elif [[ -n "${LIGHTX2V_FLASH_ATTN3_INSTALL_SPEC:-}" ]]; then
@@ -319,7 +325,8 @@ PY
     # cutlass-dsl slips past that guard. Drop the unused cute submodule so the
     # import fails as a plain ModuleNotFoundError instead, which the existing
     # fallback handles correctly.
-    python3 -c "
+    if [[ "${LIGHTX2V_INSTALL_FA2:-1}" == "1" ]]; then
+      python3 -c "
 import pathlib
 import flash_attn
 cute_dir = pathlib.Path(flash_attn.__file__).parent / 'cute'
@@ -328,6 +335,7 @@ if cute_dir.exists():
     shutil.rmtree(cute_dir)
     print(f'removed unusable {cute_dir}')
 "
+    fi
     ;;
   trtllm-visual)
     # TensorRT-LLM VisualGen, served via `trtllm-serve`. Wheels live on the
