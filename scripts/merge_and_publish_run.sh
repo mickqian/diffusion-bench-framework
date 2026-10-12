@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Merge a finished run's per-case JSONs, gate it, and publish.
 #
-#   scripts/merge_and_publish_run.sh <results-glob> <run-id> <label> <gpu> <reproduce> [--live] [--keep-latest] [--note K=V ...]
+#   scripts/merge_and_publish_run.sh <results-glob> <run-id> <label> <gpu> <reproduce> [--live] [--keep-latest] [--round ID --round-label TEXT] [--note K=V ...]
 #
 #   scripts/merge_and_publish_run.sh \
 #       'tmp/pull/run_b200final0913_*.json' b200x4-final-20260913 \
@@ -40,6 +40,7 @@ while [ "$#" -gt 0 ]; do
   case "$1" in
     --live) LIVE=1; shift ;;
     --keep-latest) PUBLISH_ARGS+=(--keep-latest); shift ;;
+    --round|--round-label) PUBLISH_ARGS+=("$1" "$2"); shift 2 ;;
     --note) PUBLISH_ARGS+=(--note "$2"); shift 2 ;;
     *) echo "unknown argument: $1" >&2; exit 2 ;;
   esac
