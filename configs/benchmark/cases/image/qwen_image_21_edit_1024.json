@@ -2,7 +2,7 @@
   "id": "qwen_image_21_edit_1024",
   "model": "Qwen/Qwen-Image-2.1",
   "task": "image-edit",
-  "label": "Qwen-Image-2.1 edit 1024 (1 GPU, one reference)",
+  "label": "Qwen-Image-2.1 edit 1024 (one reference)",
   "prompt": "Make the cat wear a red hat",
   "reference_image": true,
   "width": 1024,

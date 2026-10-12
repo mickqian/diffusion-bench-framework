@@ -2,7 +2,7 @@
   "id": "qwen_image_21_t2i_1024_2gpu",
   "model": "Qwen/Qwen-Image-2.1",
   "task": "text-to-image",
-  "label": "Qwen-Image-2.1 T2I 1024 (2 GPU)",
+  "label": "Qwen-Image-2.1 T2I 1024",
   "prompt": "A warehouse robot folds a blue cloth on a clean workbench.",
   "width": 1024,
   "height": 1024,
