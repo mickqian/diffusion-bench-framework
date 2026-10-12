@@ -55,9 +55,14 @@ def case_details(case: dict) -> str:
 
 
 def case_label(case: dict) -> str:
-    """Display name. Cases carry `label`; fall back to the id so a newly added
-    case still publishes instead of raising in an unattended run."""
-    return case.get("label") or case["id"]
+    """Display name with the case's GPU count, which a title must state (the
+    same model runs as a 1-, 2- and 4-GPU case). Cases carry `label`; fall back
+    to the id so a newly added case still publishes in an unattended run."""
+    label = case.get("label") or case["id"]
+    gpus = case.get("num_gpus")
+    if not gpus:
+        return label
+    return f"{label} · {gpus} GPU{'' if gpus == 1 else 's'}"
 
 
 def _rows_by_mode(merged: dict, mode: str) -> tuple[dict, dict]:
