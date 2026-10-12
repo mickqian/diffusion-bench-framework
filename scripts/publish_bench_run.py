@@ -174,6 +174,13 @@ def main() -> int:
         help="run-specific caveat for the published policy block, repeatable",
     )
     ap.add_argument(
+        "--round",
+        default=None,
+        help="id of the bench round this run belongs to; the page shows a round's "
+        "runs (one per hardware) in one history tab",
+    )
+    ap.add_argument("--round-label", default=None, help="title of that round's tab")
+    ap.add_argument(
         "--keep-latest",
         action="store_true",
         help="add the run to the history but leave latest-cross-framework.json "
@@ -213,6 +220,10 @@ def main() -> int:
     if not sections:
         print("error: run produced no publishable sections", file=sys.stderr)
         return 1
+    if args.round:
+        for sec in sections:
+            sec["round"] = args.round
+            sec["round_label"] = args.round_label or args.round
 
     leads = {sec["id"]: thinnest_lead(sec, merged, args.gpu) for sec in sections}
     for sec in sections:

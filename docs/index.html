@@ -3545,11 +3545,13 @@
         const order = [];
         const byRun = {};
         (data.sections || []).forEach((s) => {
-          const run = s.run || s.id;
+          // a round's hardware shares one tab, so one bench reads in one place
+          const run = s.round || s.run || s.id;
           if (!byRun[run]) {
-            byRun[run] = { run, label: s.run_label || s.title, date: s.date || "", gpu: s.gpu || "", scope: s.scope || "", modes: [] };
+            byRun[run] = { run, label: s.round_label || s.run_label || s.title, date: s.date || "", gpu: s.gpu || "", gpus: [], scope: s.scope || "", modes: [] };
             order.push(run);
           }
+          if (s.gpu && !byRun[run].gpus.includes(s.gpu)) byRun[run].gpus.push(s.gpu);
           byRun[run].modes.push(s);
         });
         // newest first. Insertion order used to decide this, and the legacy
@@ -3564,7 +3566,7 @@
       // "4x NVIDIA B200 183GB" -> "4xB200"; capacity and vendor carry no meaning
       // in a tab strip
       function shortGpu(gpu) {
-        const m = String(gpu || "").match(/(?:(\d+)\s*x\s*)?(?:NVIDIA\s+)?([A-Z]\d{3,4})/i);
+        const m = String(gpu || "").match(/(?:(\d+)\s*x\s*)?(?:NVIDIA\s+)?(?:GeForce\s+)?(RTX\s*\d{4}|[A-Z]{1,2}\d{3,4})/i);
         return m ? (m[1] ? m[1] + "\u00d7" : "") + m[2].toUpperCase() : "";
       }
 
@@ -3574,7 +3576,8 @@
       // two H200 runs indistinguishable. The descriptive title is still shown in
       // the summary line below, so nothing is lost by shortening the tab.
       function historyTabLabel(run) {
-        const parts = [(run.date || "").slice(0, 10), shortGpu(run.gpu), run.scope].filter(Boolean);
+        const gpus = (run.gpus && run.gpus.length ? run.gpus : [run.gpu]).map(shortGpu).filter(Boolean).join(" + ");
+        const parts = [(run.date || "").slice(0, 10), gpus, run.scope].filter(Boolean);
         return parts.length ? parts.join(" \u00b7 ") : run.label;
       }
 
@@ -3609,7 +3612,7 @@
           <div class="hs-line">
             <span class="hs-title">${escapeHtml(run.label)}</span>
             ${run.date ? `<span class="hs-date">📅 ${escapeHtml(run.date)}</span>` : ""}
-            ${run.gpu ? `<span class="hs-gpu">${escapeHtml(run.gpu)}</span>` : ""}
+            ${run.gpu ? `<span class="hs-gpu">${escapeHtml((run.gpus && run.gpus.length > 1 ? run.gpus : [run.gpu]).join(" + "))}</span>` : ""}
             <span class="hs-meta">cache-free · client-side wall-clock · single-request = steady-state median</span>
             ${repro}
           </div>
@@ -3946,7 +3949,11 @@
         const MODE_LABEL = { single_e2e: "Single-request latency · lower is faster", throughput: "High-pressure throughput · higher QPS is faster" };
         if (!root) return;
         root.innerHTML = run.modes
-          .map((sec) => `<div class="bnx-mode"><h4 class="bnx-modeh">${escapeHtml(MODE_LABEL[sec.mode] || sec.mode)}</h4>${bench2Html(data, sec)}</div>`)
+          .map((sec) => {
+            // a round tab holds every hardware it ran on; name it on each table
+            const hw = run.gpus && run.gpus.length > 1 ? `${sec.gpu} · ` : "";
+            return `<div class="bnx-mode"><h4 class="bnx-modeh">${escapeHtml(hw + (MODE_LABEL[sec.mode] || sec.mode))}</h4>${bench2Html(data, sec)}</div>`;
+          })
           .join("");
         if (window.__bnxIO) window.__bnxIO.disconnect();
         window.__bnxIO = new IntersectionObserver((es) => {
