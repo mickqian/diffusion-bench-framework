@@ -3,6 +3,7 @@
   "model": "Qwen/Qwen-Image-2.1",
   "task": "text-to-image",
   "label": "Qwen-Image-2.1 T2I 1024",
+  "throughput": true,
   "prompt": "A warehouse robot folds a blue cloth on a clean workbench.",
   "width": 1024,
   "height": 1024,

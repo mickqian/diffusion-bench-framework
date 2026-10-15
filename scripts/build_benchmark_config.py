@@ -119,6 +119,20 @@ KNOWN_COMPETITOR_VIOLATIONS = {
 }
 STRICT_COMPETITOR_POLICY_ENV = "DIFFUSION_BENCH_STRICT_COMPETITOR_POLICY"
 
+# In-scope frameworks with no runnable cell in any case, each with the date and
+# why. Without this a framework drops out of every run and nothing says so. The
+# build reports a gap missing here, or an entry whose framework has a runnable
+# cell again, as an ERROR line; it is not fatal because a test tree may build one
+# case alone, and scripts/tests/test_competitor_policy_lint.py fails on it for
+# the repo's own matrix.
+KNOWN_FRAMEWORK_GAPS = {
+    "trtllm-visual": (
+        "2026-10-15: its only measured cells were the FLUX.1-dev and FLUX.2-dev rows, "
+        "retired for FLUX.3, which it does not serve; its Z-Image, Wan2.2 and LTX-2 "
+        "cells are not validated yet."
+    ),
+}
+
 
 SELECTED_ROWS = []  # (case, fw, hw, profile, args, exception, matches, recipe, config)
 MISSING_RECIPES = {}  # (case, fw, profile) -> datacenter classes that select it
@@ -517,6 +531,17 @@ def build():
         if cid not in order:
             errors.append(f"{cid}: not in cases/_order.json (append it)")
             ordered.append(cases_by_id[cid])
+
+    runnable = {fw for case in ordered for fw in case["frameworks"]}
+    for fw in in_scope:
+        if fw in runnable and fw in KNOWN_FRAMEWORK_GAPS:
+            print(f"ERROR: {fw}: listed in KNOWN_FRAMEWORK_GAPS but has a runnable cell -- delete the entry",
+                  file=sys.stderr)
+        elif fw not in runnable and fw in KNOWN_FRAMEWORK_GAPS:
+            print(f"WARNING: {fw} has no runnable cell: {KNOWN_FRAMEWORK_GAPS[fw]}", file=sys.stderr)
+        elif fw not in runnable:
+            print(f"ERROR: {fw}: no runnable cell in any case -- validate one, or add it to KNOWN_FRAMEWORK_GAPS",
+                  file=sys.stderr)
 
     if errors:
         print("BUILD FAILED — matrix/validation errors:", file=sys.stderr)

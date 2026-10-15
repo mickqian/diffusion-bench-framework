@@ -74,105 +74,17 @@ offloaded on datacenter hardware without one (see KNOWN_COMPETITOR_VIOLATIONS).
 | cosmos3_nano_t2v_720p_189f | vllm-omni | mi355x | `default` |  |  |  | `--num-gpus 4 --cfg-parallel-size 2 --ulysses-degree 2 --model-class-name Cosmos3OmniDiffusersPipeline --stage-init-timeout 900 --init-timeout 1800 --no-guardrails --diffusion-attention-backend FLASH_ATTN --cache-backend none` |  |
 | cosmos3_nano_t2v_720p_189f | vllm-omni | rtx4090 | `default` |  |  |  | `--num-gpus 4 --cfg-parallel-size 2 --ulysses-degree 2 --model-class-name Cosmos3OmniDiffusersPipeline --stage-init-timeout 900 --init-timeout 1800 --no-guardrails --diffusion-attention-backend FLASH_ATTN --cache-backend none` |  |
 | cosmos3_nano_t2v_720p_189f | vllm-omni | rtx5090 | `default` |  |  |  | `--num-gpus 4 --cfg-parallel-size 2 --ulysses-degree 2 --model-class-name Cosmos3OmniDiffusersPipeline --stage-init-timeout 900 --init-timeout 1800 --no-guardrails --diffusion-attention-backend FLASH_ATTN --cache-backend none` |  |
-| flux1_dev_t2i_1024 | sglang | b200 | `blackwell-2gpu-tp-eager` |  | AMBIGUOUS: blackwell-2gpu-tp-speed-eager |  | `--model-type diffusion --warmup-mode server --dit-layerwise-offload false --tp-size 2 --enable-torch-compile false` |  |
-| flux1_dev_t2i_1024 | sglang | b300 | `blackwell-2gpu-tp-eager` |  | AMBIGUOUS: blackwell-2gpu-tp-speed-eager |  | `--model-type diffusion --warmup-mode server --dit-layerwise-offload false --tp-size 2 --enable-torch-compile false` |  |
-| flux1_dev_t2i_1024 | sglang | gb200 | `blackwell-2gpu-tp-eager` |  | AMBIGUOUS: blackwell-2gpu-tp-speed-eager |  | `--model-type diffusion --warmup-mode server --dit-layerwise-offload false --tp-size 2 --enable-torch-compile false` |  |
-| flux1_dev_t2i_1024 | sglang | gb300 | `gb300-2gpu-tp-compile` | yes | AMBIGUOUS: blackwell-2gpu-tp-eager, blackwell-2gpu-tp-speed-eager |  | `--model-type diffusion --warmup-mode server --dit-layerwise-offload false --tp-size 2 --enable-torch-compile true` |  |
-| flux1_dev_t2i_1024 | sglang | h100 | `h100-h200-2gpu-tp-eager` |  | AMBIGUOUS: h100-h200-2gpu-tp-speed-eager |  | `--model-type diffusion --warmup-mode server --dit-layerwise-offload false --tp-size 2 --enable-torch-compile false` |  |
-| flux1_dev_t2i_1024 | sglang | h200 | `h100-h200-2gpu-tp-eager` |  | AMBIGUOUS: h100-h200-2gpu-tp-speed-eager |  | `--model-type diffusion --warmup-mode server --dit-layerwise-offload false --tp-size 2 --enable-torch-compile false` |  |
-| flux1_dev_t2i_1024 | sglang | mi300x | `default` |  |  |  | `--model-type diffusion --warmup-mode server --dit-layerwise-offload false --tp-size 2` |  |
-| flux1_dev_t2i_1024 | sglang | mi350x | `default` |  |  |  | `--model-type diffusion --warmup-mode server --dit-layerwise-offload false --tp-size 2` |  |
-| flux1_dev_t2i_1024 | sglang | mi355x | `default` |  |  |  | `--model-type diffusion --warmup-mode server --dit-layerwise-offload false --tp-size 2` |  |
-| flux1_dev_t2i_1024 | sglang | rtx4090 | `default` |  |  |  | `--model-type diffusion --warmup-mode server --dit-layerwise-offload false --tp-size 2` |  |
-| flux1_dev_t2i_1024 | sglang | rtx5090 | `default` |  |  |  | `--model-type diffusion --warmup-mode server --dit-layerwise-offload false --tp-size 2` |  |
-| flux1_dev_t2i_1024 | vllm-omni | b200 | `blackwell-2gpu-tp-eager` |  |  |  |  | `DIFFUSION_ATTENTION_BACKEND=FLASHINFER_ATTN` |
-| flux1_dev_t2i_1024 | vllm-omni | b300 | `blackwell-2gpu-tp-eager` |  |  |  |  | `DIFFUSION_ATTENTION_BACKEND=FLASHINFER_ATTN` |
-| flux1_dev_t2i_1024 | vllm-omni | gb200 | `blackwell-2gpu-tp-eager` |  |  |  |  | `DIFFUSION_ATTENTION_BACKEND=FLASHINFER_ATTN` |
-| flux1_dev_t2i_1024 | vllm-omni | gb300 | `blackwell-2gpu-tp-eager` |  |  |  |  | `DIFFUSION_ATTENTION_BACKEND=FLASHINFER_ATTN` |
-| flux1_dev_t2i_1024 | vllm-omni | h100 | `h100-h200-2gpu-tp-eager` |  |  |  |  | `DIFFUSION_ATTENTION_BACKEND=FLASH_ATTN` |
-| flux1_dev_t2i_1024 | vllm-omni | h200 | `h100-h200-2gpu-tp-eager` |  |  |  |  | `DIFFUSION_ATTENTION_BACKEND=FLASH_ATTN` |
-| flux1_dev_t2i_1024 | vllm-omni | mi300x | `default` |  |  |  |  | `DIFFUSION_ATTENTION_BACKEND=FLASH_ATTN` |
-| flux1_dev_t2i_1024 | vllm-omni | mi350x | `default` |  |  |  |  | `DIFFUSION_ATTENTION_BACKEND=FLASH_ATTN` |
-| flux1_dev_t2i_1024 | vllm-omni | mi355x | `default` |  |  |  |  | `DIFFUSION_ATTENTION_BACKEND=FLASH_ATTN` |
-| flux1_dev_t2i_1024 | vllm-omni | rtx4090 | `default` |  |  |  |  | `DIFFUSION_ATTENTION_BACKEND=FLASH_ATTN` |
-| flux1_dev_t2i_1024 | vllm-omni | rtx5090 | `default` |  |  |  |  | `DIFFUSION_ATTENTION_BACKEND=FLASH_ATTN` |
-| flux1_dev_t2i_1024 | trtllm-visual | b200 | `default` |  |  |  | `--backend pytorch` |  |
-| flux1_dev_t2i_1024 | trtllm-visual | b300 | `default` |  |  |  | `--backend pytorch` |  |
-| flux1_dev_t2i_1024 | trtllm-visual | gb200 | `default` |  |  |  | `--backend pytorch` |  |
-| flux1_dev_t2i_1024 | trtllm-visual | gb300 | `default` |  |  |  | `--backend pytorch` |  |
-| flux1_dev_t2i_1024 | trtllm-visual | h100 | `h100-h200-2gpu-tp-speed` |  |  |  | `--backend pytorch` |  |
-| flux1_dev_t2i_1024 | trtllm-visual | h200 | `h100-h200-2gpu-tp-speed` |  |  |  | `--backend pytorch` |  |
-| flux1_dev_t2i_1024 | trtllm-visual | mi300x | `default` |  |  |  | `--backend pytorch` |  |
-| flux1_dev_t2i_1024 | trtllm-visual | mi350x | `default` |  |  |  | `--backend pytorch` |  |
-| flux1_dev_t2i_1024 | trtllm-visual | mi355x | `default` |  |  |  | `--backend pytorch` |  |
-| flux1_dev_t2i_1024 | trtllm-visual | rtx4090 | `default` |  |  |  | `--backend pytorch` |  |
-| flux1_dev_t2i_1024 | trtllm-visual | rtx5090 | `default` |  |  |  | `--backend pytorch` |  |
-| flux1_dev_t2i_1024 | comfyui | b200 | `blackwell-gpuonly` |  |  |  | `--gpu-only` | `workflow=flux1_dev_t2i.json compile=true` |
-| flux1_dev_t2i_1024 | comfyui | b300 | `blackwell-gpuonly` |  |  |  | `--gpu-only` | `workflow=flux1_dev_t2i.json compile=true` |
-| flux1_dev_t2i_1024 | comfyui | gb200 | `blackwell-gpuonly` |  |  |  | `--gpu-only` | `workflow=flux1_dev_t2i.json compile=true` |
-| flux1_dev_t2i_1024 | comfyui | gb300 | `blackwell-gpuonly` |  |  |  | `--gpu-only` | `workflow=flux1_dev_t2i.json compile=true` |
-| flux1_dev_t2i_1024 | comfyui | h100 | `default` |  |  |  |  | `workflow=flux1_dev_t2i.json compile=true` |
-| flux1_dev_t2i_1024 | comfyui | h200 | `default` |  |  |  |  | `workflow=flux1_dev_t2i.json compile=true` |
-| flux1_dev_t2i_1024 | comfyui | mi300x | `default` |  |  |  |  | `workflow=flux1_dev_t2i.json compile=true` |
-| flux1_dev_t2i_1024 | comfyui | mi350x | `default` |  |  |  |  | `workflow=flux1_dev_t2i.json compile=true` |
-| flux1_dev_t2i_1024 | comfyui | mi355x | `default` |  |  |  |  | `workflow=flux1_dev_t2i.json compile=true` |
-| flux1_dev_t2i_1024 | comfyui | rtx4090 | `default` |  |  |  |  | `workflow=flux1_dev_t2i.json compile=true` |
-| flux1_dev_t2i_1024 | comfyui | rtx5090 | `default` |  |  |  |  | `workflow=flux1_dev_t2i.json compile=true` |
-| flux2_dev_t2i_1024 | sglang | b200 | `blackwell-2gpu-tp-eager` |  | AMBIGUOUS: blackwell-2gpu-tp-speed-eager |  | `--model-type diffusion --warmup-mode server --dit-layerwise-offload false --tp-size 2 --enable-torch-compile false` |  |
-| flux2_dev_t2i_1024 | sglang | b300 | `blackwell-2gpu-tp-eager` |  | AMBIGUOUS: blackwell-2gpu-tp-speed-eager |  | `--model-type diffusion --warmup-mode server --dit-layerwise-offload false --tp-size 2 --enable-torch-compile false` |  |
-| flux2_dev_t2i_1024 | sglang | gb200 | `blackwell-2gpu-tp-eager` |  | AMBIGUOUS: blackwell-2gpu-tp-speed-eager |  | `--model-type diffusion --warmup-mode server --dit-layerwise-offload false --tp-size 2 --enable-torch-compile false` |  |
-| flux2_dev_t2i_1024 | sglang | gb300 | `blackwell-2gpu-tp-eager` |  | AMBIGUOUS: blackwell-2gpu-tp-speed-eager |  | `--model-type diffusion --warmup-mode server --dit-layerwise-offload false --tp-size 2 --enable-torch-compile false` |  |
-| flux2_dev_t2i_1024 | sglang | h100 | `h100-h200-2gpu-tp-eager` |  | AMBIGUOUS: h100-h200-2gpu-tp-speed-eager |  | `--model-type diffusion --warmup-mode server --dit-layerwise-offload false --tp-size 2 --enable-torch-compile false` |  |
-| flux2_dev_t2i_1024 | sglang | h200 | `h100-h200-2gpu-tp-eager` |  | AMBIGUOUS: h100-h200-2gpu-tp-speed-eager |  | `--model-type diffusion --warmup-mode server --dit-layerwise-offload false --tp-size 2 --enable-torch-compile false` |  |
-| flux2_dev_t2i_1024 | sglang | mi300x | `default` |  |  |  | `--model-type diffusion --warmup-mode server --dit-layerwise-offload false --tp-size 2` |  |
-| flux2_dev_t2i_1024 | sglang | mi350x | `default` |  |  |  | `--model-type diffusion --warmup-mode server --dit-layerwise-offload false --tp-size 2` |  |
-| flux2_dev_t2i_1024 | sglang | mi355x | `default` |  |  |  | `--model-type diffusion --warmup-mode server --dit-layerwise-offload false --tp-size 2` |  |
-| flux2_dev_t2i_1024 | sglang | rtx4090 | `default` |  |  |  | `--model-type diffusion --warmup-mode server --dit-layerwise-offload false --tp-size 2` |  |
-| flux2_dev_t2i_1024 | sglang | rtx5090 | `default` |  |  |  | `--model-type diffusion --warmup-mode server --dit-layerwise-offload false --tp-size 2` |  |
-| flux2_dev_t2i_1024 | vllm-omni | b200 | `blackwell-2gpu-tp-eager` |  |  |  |  | `DIFFUSION_ATTENTION_BACKEND=FLASHINFER_ATTN` |
-| flux2_dev_t2i_1024 | vllm-omni | b300 | `blackwell-2gpu-tp-eager` |  |  |  |  | `DIFFUSION_ATTENTION_BACKEND=FLASHINFER_ATTN` |
-| flux2_dev_t2i_1024 | vllm-omni | gb200 | `blackwell-2gpu-tp-eager` |  |  |  |  | `DIFFUSION_ATTENTION_BACKEND=FLASHINFER_ATTN` |
-| flux2_dev_t2i_1024 | vllm-omni | gb300 | `blackwell-2gpu-tp-eager` |  |  |  |  | `DIFFUSION_ATTENTION_BACKEND=FLASHINFER_ATTN` |
-| flux2_dev_t2i_1024 | vllm-omni | h100 | `h100-h200-2gpu-tp-eager` |  |  |  |  | `DIFFUSION_ATTENTION_BACKEND=FLASH_ATTN` |
-| flux2_dev_t2i_1024 | vllm-omni | h200 | `h100-h200-2gpu-tp-eager` |  |  |  |  | `DIFFUSION_ATTENTION_BACKEND=FLASH_ATTN` |
-| flux2_dev_t2i_1024 | vllm-omni | mi300x | `default` |  |  |  |  | `DIFFUSION_ATTENTION_BACKEND=FLASH_ATTN` |
-| flux2_dev_t2i_1024 | vllm-omni | mi350x | `default` |  |  |  |  | `DIFFUSION_ATTENTION_BACKEND=FLASH_ATTN` |
-| flux2_dev_t2i_1024 | vllm-omni | mi355x | `default` |  |  |  |  | `DIFFUSION_ATTENTION_BACKEND=FLASH_ATTN` |
-| flux2_dev_t2i_1024 | vllm-omni | rtx4090 | `default` |  |  |  |  | `DIFFUSION_ATTENTION_BACKEND=FLASH_ATTN` |
-| flux2_dev_t2i_1024 | vllm-omni | rtx5090 | `default` |  |  |  |  | `DIFFUSION_ATTENTION_BACKEND=FLASH_ATTN` |
-| flux2_dev_t2i_1024 | lightx2v | b200 | `blackwell-fa2-flashinfer` |  |  |  |  | `{"model_variant":"dev","sample_guide_scale":4.0,"vae_scale_factor":16,"feature_caching":"None","enable_cfg":false,"patch_size":2,"tokenizer_max_length":512,"rope_type":"flashinfer_rope","text_encoder_out_layers":[10,20,30],"attn_type":"flash_attn2"}` |
-| flux2_dev_t2i_1024 | lightx2v | b300 | `blackwell-fa2-flashinfer` |  |  |  |  | `{"model_variant":"dev","sample_guide_scale":4.0,"vae_scale_factor":16,"feature_caching":"None","enable_cfg":false,"patch_size":2,"tokenizer_max_length":512,"rope_type":"flashinfer_rope","text_encoder_out_layers":[10,20,30],"attn_type":"flash_attn2"}` |
-| flux2_dev_t2i_1024 | lightx2v | gb200 | `blackwell-fa2-flashinfer` |  |  |  |  | `{"model_variant":"dev","sample_guide_scale":4.0,"vae_scale_factor":16,"feature_caching":"None","enable_cfg":false,"patch_size":2,"tokenizer_max_length":512,"rope_type":"flashinfer_rope","text_encoder_out_layers":[10,20,30],"attn_type":"flash_attn2"}` |
-| flux2_dev_t2i_1024 | lightx2v | gb300 | `blackwell-fa2-flashinfer` |  |  |  |  | `{"model_variant":"dev","sample_guide_scale":4.0,"vae_scale_factor":16,"feature_caching":"None","enable_cfg":false,"patch_size":2,"tokenizer_max_length":512,"rope_type":"flashinfer_rope","text_encoder_out_layers":[10,20,30],"attn_type":"flash_attn2"}` |
-| flux2_dev_t2i_1024 | lightx2v | h100 | `h100-cpu-offload` | yes |  |  |  | `{"model_variant":"dev","sample_guide_scale":4.0,"vae_scale_factor":16,"feature_caching":"None","enable_cfg":false,"patch_size":2,"tokenizer_max_length":512,"rope_type":"flashinfer_rope","text_encoder_out_layers":[10,20,30],"cpu_offload":true,"offload_granularity":"model"}` |
-| flux2_dev_t2i_1024 | lightx2v | h200 | `h200-fa3-flashinfer` |  |  |  |  | `{"model_variant":"dev","sample_guide_scale":4.0,"vae_scale_factor":16,"feature_caching":"None","enable_cfg":false,"patch_size":2,"tokenizer_max_length":512,"rope_type":"flashinfer_rope","text_encoder_out_layers":[10,20,30],"attn_type":"flash_attn3"}` |
-| flux2_dev_t2i_1024 | lightx2v | mi300x | `default` |  |  |  |  | `{"model_variant":"dev","sample_guide_scale":4.0,"vae_scale_factor":16,"feature_caching":"None","enable_cfg":false,"patch_size":2,"tokenizer_max_length":512,"rope_type":"flashinfer_rope","text_encoder_out_layers":[10,20,30]}` |
-| flux2_dev_t2i_1024 | lightx2v | mi350x | `default` |  |  |  |  | `{"model_variant":"dev","sample_guide_scale":4.0,"vae_scale_factor":16,"feature_caching":"None","enable_cfg":false,"patch_size":2,"tokenizer_max_length":512,"rope_type":"flashinfer_rope","text_encoder_out_layers":[10,20,30]}` |
-| flux2_dev_t2i_1024 | lightx2v | mi355x | `default` |  |  |  |  | `{"model_variant":"dev","sample_guide_scale":4.0,"vae_scale_factor":16,"feature_caching":"None","enable_cfg":false,"patch_size":2,"tokenizer_max_length":512,"rope_type":"flashinfer_rope","text_encoder_out_layers":[10,20,30]}` |
-| flux2_dev_t2i_1024 | lightx2v | rtx4090 | `default` |  |  |  |  | `{"model_variant":"dev","sample_guide_scale":4.0,"vae_scale_factor":16,"feature_caching":"None","enable_cfg":false,"patch_size":2,"tokenizer_max_length":512,"rope_type":"flashinfer_rope","text_encoder_out_layers":[10,20,30]}` |
-| flux2_dev_t2i_1024 | lightx2v | rtx5090 | `default` |  |  |  |  | `{"model_variant":"dev","sample_guide_scale":4.0,"vae_scale_factor":16,"feature_caching":"None","enable_cfg":false,"patch_size":2,"tokenizer_max_length":512,"rope_type":"flashinfer_rope","text_encoder_out_layers":[10,20,30]}` |
-| flux2_dev_t2i_1024 | trtllm-visual | b200 | `default` |  |  |  | `--backend pytorch` |  |
-| flux2_dev_t2i_1024 | trtllm-visual | b300 | `default` |  |  |  | `--backend pytorch` |  |
-| flux2_dev_t2i_1024 | trtllm-visual | gb200 | `default` |  |  |  | `--backend pytorch` |  |
-| flux2_dev_t2i_1024 | trtllm-visual | gb300 | `default` |  |  |  | `--backend pytorch` |  |
-| flux2_dev_t2i_1024 | trtllm-visual | h100 | `h100-h200-2gpu-tp-speed` |  |  |  | `--backend pytorch` |  |
-| flux2_dev_t2i_1024 | trtllm-visual | h200 | `h100-h200-2gpu-tp-speed` |  |  |  | `--backend pytorch` |  |
-| flux2_dev_t2i_1024 | trtllm-visual | mi300x | `default` |  |  |  | `--backend pytorch` |  |
-| flux2_dev_t2i_1024 | trtllm-visual | mi350x | `default` |  |  |  | `--backend pytorch` |  |
-| flux2_dev_t2i_1024 | trtllm-visual | mi355x | `default` |  |  |  | `--backend pytorch` |  |
-| flux2_dev_t2i_1024 | trtllm-visual | rtx4090 | `default` |  |  |  | `--backend pytorch` |  |
-| flux2_dev_t2i_1024 | trtllm-visual | rtx5090 | `default` |  |  |  | `--backend pytorch` |  |
-| flux2_dev_t2i_1024 | comfyui | b200 | `blackwell-gpuonly` |  |  |  | `--gpu-only` | `workflow=flux2_dev_t2i.json compile=true` |
-| flux2_dev_t2i_1024 | comfyui | b300 | `blackwell-gpuonly` |  |  |  | `--gpu-only` | `workflow=flux2_dev_t2i.json compile=true` |
-| flux2_dev_t2i_1024 | comfyui | gb200 | `blackwell-gpuonly` |  |  |  | `--gpu-only` | `workflow=flux2_dev_t2i.json compile=true` |
-| flux2_dev_t2i_1024 | comfyui | gb300 | `blackwell-gpuonly` |  |  |  | `--gpu-only` | `workflow=flux2_dev_t2i.json compile=true` |
-| flux2_dev_t2i_1024 | comfyui | h100 | `default` |  |  |  |  | `workflow=flux2_dev_t2i.json compile=true` |
-| flux2_dev_t2i_1024 | comfyui | h200 | `default` |  |  |  |  | `workflow=flux2_dev_t2i.json compile=true` |
-| flux2_dev_t2i_1024 | comfyui | mi300x | `default` |  |  |  |  | `workflow=flux2_dev_t2i.json compile=true` |
-| flux2_dev_t2i_1024 | comfyui | mi350x | `default` |  |  |  |  | `workflow=flux2_dev_t2i.json compile=true` |
-| flux2_dev_t2i_1024 | comfyui | mi355x | `default` |  |  |  |  | `workflow=flux2_dev_t2i.json compile=true` |
-| flux2_dev_t2i_1024 | comfyui | rtx4090 | `default` |  |  |  |  | `workflow=flux2_dev_t2i.json compile=true` |
-| flux2_dev_t2i_1024 | comfyui | rtx5090 | `default` |  |  |  |  | `workflow=flux2_dev_t2i.json compile=true` |
+| flux3_klein_base_t2i_1024 | sglang | b200 | `default` |  |  |  | `--model-type diffusion --warmup-mode server --enable-cfg-parallel --performance-mode speed` |  |
+| flux3_klein_base_t2i_1024 | sglang | b300 | `default` |  |  |  | `--model-type diffusion --warmup-mode server --enable-cfg-parallel --performance-mode speed` |  |
+| flux3_klein_base_t2i_1024 | sglang | gb200 | `default` |  |  |  | `--model-type diffusion --warmup-mode server --enable-cfg-parallel --performance-mode speed` |  |
+| flux3_klein_base_t2i_1024 | sglang | gb300 | `default` |  |  |  | `--model-type diffusion --warmup-mode server --enable-cfg-parallel --performance-mode speed` |  |
+| flux3_klein_base_t2i_1024 | sglang | h100 | `default` |  |  |  | `--model-type diffusion --warmup-mode server --enable-cfg-parallel --performance-mode speed` |  |
+| flux3_klein_base_t2i_1024 | sglang | h200 | `default` |  |  |  | `--model-type diffusion --warmup-mode server --enable-cfg-parallel --performance-mode speed` |  |
+| flux3_klein_base_t2i_1024 | sglang | mi300x | `default` |  |  |  | `--model-type diffusion --warmup-mode server --enable-cfg-parallel --performance-mode speed` |  |
+| flux3_klein_base_t2i_1024 | sglang | mi350x | `default` |  |  |  | `--model-type diffusion --warmup-mode server --enable-cfg-parallel --performance-mode speed` |  |
+| flux3_klein_base_t2i_1024 | sglang | mi355x | `default` |  |  |  | `--model-type diffusion --warmup-mode server --enable-cfg-parallel --performance-mode speed` |  |
+| flux3_klein_base_t2i_1024 | sglang | rtx4090 | `default` |  |  |  | `--model-type diffusion --warmup-mode server --enable-cfg-parallel --performance-mode speed` |  |
+| flux3_klein_base_t2i_1024 | sglang | rtx5090 | `default` |  |  |  | `--model-type diffusion --warmup-mode server --enable-cfg-parallel --performance-mode speed` |  |
 | ideogram4_t2i_1024_2gpu_tp | sglang | b200 | `default` |  |  |  | `--model-type diffusion --warmup-mode server --dit-layerwise-offload false --tp-size 2` |  |
 | ideogram4_t2i_1024_2gpu_tp | sglang | b300 | `default` |  |  |  | `--model-type diffusion --warmup-mode server --dit-layerwise-offload false --tp-size 2` |  |
 | ideogram4_t2i_1024_2gpu_tp | sglang | gb200 | `default` |  |  |  | `--model-type diffusion --warmup-mode server --dit-layerwise-offload false --tp-size 2` |  |

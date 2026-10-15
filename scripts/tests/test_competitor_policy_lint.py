@@ -187,6 +187,9 @@ with tempfile.TemporaryDirectory() as td:
     proc = build(tmp)
     check("the repo builds with the known violations reported, not fatal", proc.returncode == 0,
           proc.stdout + proc.stderr)
+    check("every in-scope framework has a runnable cell or a KNOWN_FRAMEWORK_GAPS entry, and no entry is stale",
+          "no runnable cell in any case" not in proc.stderr
+          and "has a runnable cell -- delete the entry" not in proc.stderr, proc.stderr)
     for cid, fw, name in sorted(bbc.KNOWN_COMPETITOR_VIOLATIONS):
         check(f"known violation printed: {cid}/{fw}[{name}]", f"{cid}/{fw}[{name}]" in proc.stderr)
     selected = (tmp / "configs" / "benchmark" / "SELECTED.md").read_text()
@@ -195,7 +198,12 @@ with tempfile.TemporaryDirectory() as td:
           "run scripts/build_benchmark_config.py")
     check("SELECTED.md has a framework column", "| case | framework | hw |" in selected)
     for fw in ("sglang", "vllm-omni", "lightx2v", "trtllm-visual", "comfyui"):
-        check(f"SELECTED.md lists {fw} rows", f"| {fw} | h100 |" in selected and f"| {fw} | gb300 |" in selected)
+        listed = f"| {fw} | h100 |" in selected and f"| {fw} | gb300 |" in selected
+        if fw in bbc.KNOWN_FRAMEWORK_GAPS:
+            check(f"{fw} is a known gap: no SELECTED.md rows, and the build says so",
+                  not listed and f"WARNING: {fw} has no runnable cell" in proc.stderr)
+        else:
+            check(f"SELECTED.md lists {fw} rows", listed)
     check("the H3 vLLM-Omni cell on B200 is the measured resident Blackwell command",
           "| minimax_h3_t2va_5s | vllm-omni | b200 | `blackwell-2gpu` |  |  | vllm-project/vllm-omni@" in selected)
     check("its H100 cell is the offload profile with its exception",
@@ -223,5 +231,15 @@ with tempfile.TemporaryDirectory() as td:
     proc = build(tmp)
     check("a known violation that is fixed must leave the list",
           proc.returncode == 1 and "no longer violates" in proc.stderr, proc.stderr)
+
+with tempfile.TemporaryDirectory() as td:
+    tmp = fresh_tree(td)
+    for path in (tmp / "configs" / "benchmark" / "cases").glob("*/*.json"):
+        data = json.loads(path.read_text())
+        data["frameworks"]["fastvideo"] = {"status": "unsupported", "reason": "test: every cell taken away"}
+        path.write_text(json.dumps(data, indent=2) + "\n")
+    proc = build(tmp)
+    check("a framework that loses every cell without a KNOWN_FRAMEWORK_GAPS entry is reported",
+          "ERROR: fastvideo: no runnable cell in any case" in proc.stderr, proc.stderr)
 
 sys.exit(fail)

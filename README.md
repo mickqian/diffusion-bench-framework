@@ -26,8 +26,8 @@ diffusion-bench-compare --dry-run --modes single_e2e throughput
 # Run selected cases:
 diffusion-bench-compare \
   --config configs/comparison_configs.json \
-  --case-ids flux2_dev_t2i_1024 qwen_image_2512_t2i_1024 \
-  --frameworks sglang trtllm-visual \
+  --case-ids qwen_image_21_t2i_1024 zimage_turbo_t2i_1024 \
+  --frameworks sglang vllm-omni \
   --modes single_e2e throughput \
   --run-id "$(date -u +%Y%m%d-%H%M%S)" --output comparison-results.json
 ```

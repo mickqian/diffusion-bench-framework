@@ -1,0 +1,64 @@
+{
+  "id": "flux3_klein_base_t2i_1024",
+  "model": "black-forest-labs/flux-3-image-klein-base",
+  "task": "text-to-image",
+  "label": "FLUX.3 Image Klein Base T2I",
+  "prompt": "A futuristic cyberpunk city at night, neon lights reflecting on wet streets",
+  "width": 1024,
+  "height": 1024,
+  "seed": 42,
+  "num_gpus": 2,
+  "num_inference_steps": 50,
+  "guidance_scale": 3.5,
+  "notes": "Replaces flux1_dev_t2i_1024 and flux2_dev_t2i_1024 (retired 2026-10-15); their published results stay in the reports. Base checkpoint, not the step-distilled black-forest-labs/flux-3-image-klein: a distilled, reduced-step model is a lossy substitute under this repo's policy. 50 steps and CFG 3.5 are the Base settings sglang's FLUX.3 cookbook validated at 1024x1024 (sglang#44418); the prompt and seed are the retired FLUX rows', so the families line up. The repo is gated (auto-approved request plus the flux-kommunity-license); the account whose HF_TOKEN the run uses must have accepted it. No other tracked framework serves FLUX.3 yet (checked 2026-10-15), so this row is sglang-only until one does. VALIDATION PENDING (2026-10-15): derived, not yet measured.",
+  "frameworks": {
+    "sglang": {
+      "status": "supported",
+      "serve_args": "--model-type diffusion --warmup-mode server --enable-cfg-parallel --performance-mode speed",
+      "extra_env": {},
+      "command_profiles": {
+        "default": {
+          "description": "CFG parallelism on two GPUs: each GPU runs one CFG branch of the Base model.",
+          "sglang_ref": "current-main (FLUX.3 Image since sglang#44418, merged 2026-10-15)",
+          "num_gpus": 2,
+          "serve_args": "--model-type diffusion --warmup-mode server --enable-cfg-parallel --performance-mode speed",
+          "notes": "The Base model runs CFG 3.5, two DiT branches per step, and this repo measured CFG parallelism as the multi-GPU latency path for two-branch models (Qwen-Image true-CFG: 6.49 s against 11.14 s for TP). The cookbook lists TP, Ulysses and CFG parallelism for this pipeline and measured one GPU only (H200 BF16 T2I 7.09 s, GB300 3.21 s, eager, FlashAttention). Eager, as the cookbook recommends (breakable CUDA graphs showed no clear win on GB300). VALIDATION PENDING (2026-10-15): derived, not yet measured."
+        },
+        "tp2-candidate": {
+          "description": "TP2 alternative for the tuning A/B. Never selected: no hardware tag.",
+          "sglang_ref": "current-main",
+          "num_gpus": 2,
+          "serve_args": "--model-type diffusion --warmup-mode server --tp-size 2 --enable-cfg-parallel false --performance-mode speed",
+          "notes": "Kept so scripts/tune_sglang_serve_args.sh can interleave it against the CFG-parallel default. TP times Ulysses must divide the 24 attention heads (cookbook). CFG parallelism is turned off explicitly: sglang auto-enables it on two or more GPUs when no sequence-parallel flag is set. VALIDATION PENDING (2026-10-15): derived, not yet measured."
+        },
+        "ulysses2-candidate": {
+          "description": "Ulysses-2 alternative for the tuning A/B. Never selected: no hardware tag.",
+          "sglang_ref": "current-main",
+          "num_gpus": 2,
+          "serve_args": "--model-type diffusion --warmup-mode server --tp-size 1 --ulysses-degree 2 --performance-mode speed",
+          "notes": "Kept for the tuning A/B, as for tp2-candidate. VALIDATION PENDING (2026-10-15): derived, not yet measured."
+        }
+      }
+    },
+    "vllm-omni": {
+      "status": "unsupported",
+      "reason": "vLLM-Omni main has no FLUX.3 pipeline (2026-10-15): a code search for flux3 / flux-3-image over vllm-project/vllm-omni returns no hits, and no open or merged PR adds one."
+    },
+    "lightx2v": {
+      "status": "unsupported",
+      "reason": "LightX2V main has no FLUX.3 serving path (2026-10-15): no flux3 / flux-3-image code or PR in ModelTC/LightX2V; its FLUX coverage ends at FLUX.2."
+    },
+    "trtllm-visual": {
+      "status": "unsupported",
+      "reason": "TensorRT-LLM VisualGen has no FLUX.3 pipeline (2026-10-15): no flux3 / flux-3-image code in NVIDIA/TensorRT-LLM; its FLUX models are FLUX.1 and FLUX.2."
+    },
+    "comfyui": {
+      "status": "unsupported",
+      "reason": "ComfyUI core has no FLUX.3 model or official workflow (2026-10-15): no flux3 code in comfyanonymous/ComfyUI."
+    },
+    "fastvideo": {
+      "status": "unsupported",
+      "reason": "FastVideo main has no FLUX.3 pipeline (2026-10-15): no flux3 code in hao-ai-lab/FastVideo."
+    }
+  }
+}

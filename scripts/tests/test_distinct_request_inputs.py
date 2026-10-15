@@ -392,7 +392,14 @@ with tempfile.TemporaryDirectory() as tmp:
         for path in set(mp4_written):
             os.remove(path)
 
-check("drove every framework in scope", set(covered) == set(rc.FRAMEWORK_ORDER), f"{sorted(covered)}")
+sys.path.insert(0, str(ROOT / "scripts"))
+import build_benchmark_config as bbc  # noqa: E402
+
+check(
+    "drove every framework in scope that has a runnable cell",
+    set(covered) == set(rc.FRAMEWORK_ORDER) - set(bbc.KNOWN_FRAMEWORK_GAPS),
+    f"{sorted(covered)}",
+)
 check(
     "through warmup, single_e2e and throughput each",
     all(phases == {"warmup", "single_e2e", "throughput"} for phases in covered.values()),
