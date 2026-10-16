@@ -219,7 +219,9 @@ case "${FRAMEWORK}" in
       mkdir -p "$(dirname "${omni_src}")"
       git clone -q --depth 1 --branch "${omni_ref}" "${omni_url}" "${omni_src}" \
         || git clone -q "${omni_url}" "${omni_src}"
-      ( cd "${omni_src}" && git checkout -q "${omni_ref}" 2>/dev/null || true )
+      # A full clone holds only branch and tag commits; an unreachable ref must not install main.
+      git -C "${omni_src}" checkout -q "${omni_ref}" \
+        || { echo "vllm-omni ref ${omni_ref} is on no branch or tag of ${omni_url}" >&2; exit 1; }
       echo "vllm-omni source at $(cd "${omni_src}" && git rev-parse --short=12 HEAD)"
       if (( omni_rocm )); then
         VLLM_OMNI_TARGET_DEVICE=rocm python3 -m pip install -e "${omni_src}" --no-build-isolation

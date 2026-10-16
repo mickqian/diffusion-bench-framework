@@ -10,7 +10,7 @@
   "num_gpus": 2,
   "num_inference_steps": 50,
   "guidance_scale": 3.5,
-  "notes": "Replaces flux1_dev_t2i_1024 and flux2_dev_t2i_1024 (retired 2026-10-15); their published results stay in the reports. Base checkpoint, not the step-distilled black-forest-labs/flux-3-image-klein: a distilled, reduced-step model is a lossy substitute under this repo's policy. 50 steps and CFG 3.5 are the Base settings sglang's FLUX.3 cookbook validated at 1024x1024 (sglang#44418); the seed is the retired FLUX rows'. The prompt is the retired rows' short request (\"A futuristic cyberpunk city at night, neon lights reflecting on wet streets\") expanded once by BFL's prompt upsampler, because the model card says FLUX.3 is not meant to run on a short prompt: black-forest-labs/flux-3-image-klein-pup rev 3f3edb52, served by sglang with --enable-deterministic-inference --disable-radix-cache through the flux3-klein-pup enhancer protocol (sglang PR, 2026-10-16), caption md5 b0e44fd9c061; reruns reproduce it exactly. The caption is frozen here so every framework encodes the same 303 words; the upsampler itself is not timed. The repo is gated (auto-approved request plus the flux-kommunity-license); the account whose HF_TOKEN the run uses must have accepted it. ComfyUI serves it on master (official v0.41 templates); vLLM-Omni and TensorRT-LLM have open PRs (2026-10-16). sglang measured on 2xH200 2026-10-16 (profile h200-2gpu-cfg-parallel); other hardware VALIDATION PENDING.",
+  "notes": "Replaces flux1_dev_t2i_1024 and flux2_dev_t2i_1024 (retired 2026-10-15); their published results stay in the reports. Base checkpoint, not the step-distilled black-forest-labs/flux-3-image-klein: a distilled, reduced-step model is a lossy substitute under this repo's policy. 50 steps and CFG 3.5 are the Base settings sglang's FLUX.3 cookbook validated at 1024x1024 (sglang#44418); the seed is the retired FLUX rows'. The prompt is the retired rows' short request (\"A futuristic cyberpunk city at night, neon lights reflecting on wet streets\") expanded once by BFL's prompt upsampler, because the model card says FLUX.3 is not meant to run on a short prompt: black-forest-labs/flux-3-image-klein-pup rev 3f3edb52, served by sglang with --enable-deterministic-inference --disable-radix-cache through the flux3-klein-pup enhancer protocol (sglang PR, 2026-10-16), caption md5 b0e44fd9c061; reruns reproduce it exactly. The caption is frozen here so every framework encodes the same 303 words; the upsampler itself is not timed. The repo is gated (auto-approved request plus the flux-kommunity-license); the account whose HF_TOKEN the run uses must have accepted it. ComfyUI serves it on master (official v0.41 templates); vLLM-Omni and TensorRT-LLM have open PRs (2026-10-16). Measured on 2xH200 2026-10-16 with this caption: sglang 4.035 s, ComfyUI 5.364 s (vLLM-Omni pre-merge 4.534 s); other hardware VALIDATION PENDING.",
   "frameworks": {
     "sglang": {
       "status": "supported",
@@ -52,7 +52,7 @@
     },
     "vllm-omni": {
       "status": "unsupported",
-      "reason": "No FLUX.3 pipeline on vLLM-Omni main (2026-10-16). It is in the open, approved PR vllm-project/vllm-omni#9007 (head c4330f88eb44, served as `vllm serve <dir> --omni --cfg-parallel-size N`); reclassify once it merges."
+      "reason": "No FLUX.3 pipeline on vLLM-Omni main (2026-10-16). It is in the open, approved PR vllm-project/vllm-omni#9007; reclassify once it merges. Measured pre-merge on 2xH200 2026-10-16 at head 389a02a149ce with vllm==0.31.0 (the head's docker/Dockerfile.ci): CFG parallel 2 4.534 s, one GPU 9.101 s (regional compile, FLASH_ATTN). Its FLUX.3 loader reads only a local package directory (model_path = the snapshot dir), and requests need --served-model-name set to the case model."
     },
     "lightx2v": {
       "status": "unsupported",
@@ -65,20 +65,23 @@
     "comfyui": {
       "status": "supported",
       "num_gpus": 2,
-      "serve_args": "",
+      "serve_args": "--gpu-only",
       "comfyui": {
         "workflow": "flux3_klein_base_t2i.json",
         "models": {
-          "diffusion_models/flux3_image_klein_base_bf16.safetensors": "black-forest-labs/flux-3-image-klein-comfy:diffusion_models/flux3_image_klein_base_bf16.safetensors",
-          "text_encoders/qwen3vl_4b_bf16.safetensors": "black-forest-labs/flux-3-image-klein-comfy:text_encoders/qwen3vl_4b_bf16.safetensors",
-          "vae/flux2-vae.safetensors": "black-forest-labs/flux-3-image-klein-comfy:vae/flux2-vae.safetensors"
+          "diffusion_models/flux3_image_klein_base_bf16.safetensors": "black-forest-labs/flux-3-image-klein-base:model.safetensors",
+          "text_encoders/qwen3vl_4b_bf16.safetensors": "merge:black-forest-labs/flux-3-image-klein-base:text_encoder",
+          "vae/flux2-vae.safetensors": "black-forest-labs/flux-3-image-klein-base:ae.safetensors"
         },
-        "compile": true
+        "params": {
+          "cfg_gpus": 2
+        },
+        "compile": false
       },
       "command_profiles": {
         "default": {
           "description": "ComfyUI master, core nodes only, the official FLUX.3 Klein Base text-to-image template with full-precision weights; CFG branches split over the case's two GPUs.",
-          "framework_ref": "ComfyUI master HEAD",
+          "framework_ref": "ComfyUI master HEAD (measured at 5a665890)",
           "upstream_recipe": {
             "repo": "Comfy-Org/workflow_templates",
             "path": "templates/image_flux3_klein_t2i.json",
@@ -87,8 +90,9 @@
             "section": "Text to Image (FLUX 3 Image Klein) subgraph"
           },
           "num_gpus": 2,
-          "serve_args": "",
-          "notes": "Official image_flux3_klein_t2i template (Comfy-Org/workflow_templates) flattened from its subgraph, with the BF16 DiT and Qwen3-VL-4B from black-forest-labs/flux-3-image-klein-comfy in place of the template's int8_convrot defaults (a different numeric class). The template's prompt-upsampler branch (enable_prompt_upsampler) is left out: the case already carries the upsampled caption, so every framework encodes the same text. Sampler euler / scheduler simple and the empty negative prompt follow the template; steps, CFG, size and seed follow the case. MultiGPU_WorkUnits puts the CFG branches on the two GPUs, ComfyUI's counterpart of CFG parallelism. Compile on (TorchCompileModel). VALIDATION PENDING (2026-10-16): derived, not yet measured."
+          "serve_args": "--gpu-only",
+          "notes": "Official image_flux3_klein_t2i template (Comfy-Org/workflow_templates) flattened from its subgraph, at full precision in place of the template's int8_convrot defaults (a different numeric class). Weights come from the Base repo itself: black-forest-labs/flux-3-image-klein-comfy (gated separately; 403 for the bench account on 2026-10-16) ships flux3_image_klein_base_bf16.safetensors and flux2-vae.safetensors with the same LFS sha256 as the Base repo's model.safetensors and ae.safetensors, and its qwen3vl_4b_bf16.safetensors is the Base repo's two text_encoder shards in one file (merge:, names and values unchanged; ComfyUI's flux3 CLIPLoader maps the transformers key prefix itself). The template's prompt-upsampler branch is left out: the case already carries the upsampled caption. Sampler euler / scheduler simple and the empty negative prompt follow the template; steps, CFG, size and seed follow the case. MultiGPU_WorkUnits (cfg_gpus 2) puts the CFG branches on the two GPUs, ComfyUI's counterpart of CFG parallelism. --gpu-only keeps every model on the card (placement only). 2xH200 2026-10-16 (flux3x-h200, ComfyUI 5a665890, torch 2.14.1+cu130): eager CFG split 5.364 s (5.321-5.527); on one GPU compiled 9.046 s against eager 9.734 s. Other hardware VALIDATION PENDING.",
+          "policy_exception": "Compile broken with the CFG split, not a speed choice (2026-10-16, ComfyUI 5a665890 on torch 2.14.1+cu130, 2xH200): with TorchCompileModel in front of MultiGPU_WorkUnits the first KSampler fails with torch._dynamo TorchRuntimeError 'Tensor device mismatch' (cuda:1 and cuda:0) in the time embedding, so the two-GPU cell runs eager. The eager split (5.36 s) beats the best compiled layout, one GPU (9.05 s). --gpu-only is needed for compile at all: without it, ComfyUI's auto-enabled dynamic VRAM records a malloc graph inside the dynamo trace and fails on 'torch.Stream' has no attribute 'cuda_stream'."
         }
       }
     },

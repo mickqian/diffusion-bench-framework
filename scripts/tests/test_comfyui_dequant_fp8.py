@@ -67,4 +67,25 @@ with tempfile.TemporaryDirectory() as tmp:
         and Path(path).stat().st_mtime_ns == stamp,
     )
 
+with tempfile.TemporaryDirectory() as tmp:
+    tmp = Path(tmp)
+    snapshot = tmp / "hub" / "models--org--te" / "snapshots" / "def456"
+    (snapshot / "text_encoder").mkdir(parents=True)
+    g = torch.Generator().manual_seed(1)
+    shards = [
+        {"model.layers.0.w": torch.randn(4, 4, generator=g).to(torch.bfloat16)},
+        {"model.layers.1.w": torch.randn(4, 4, generator=g).to(torch.bfloat16)},
+    ]
+    for i, shard in enumerate(shards):
+        save_file(shard, str(snapshot / "text_encoder" / f"model-0000{i + 1}-of-00002.safetensors"))
+    huggingface_hub.snapshot_download = lambda repo_id, allow_patterns: str(snapshot)
+    huggingface_hub.constants.HF_HUB_CACHE = str(tmp / "hub")
+
+    merged = load_file(rc._resolve_comfyui_model("merge:org/te:text_encoder"))
+    want = {**shards[0], **shards[1]}
+    check(
+        "merge: joins BF16 shards into one file, names and values unchanged",
+        sorted(merged) == sorted(want) and all(torch.equal(merged[k], v) for k, v in want.items()),
+    )
+
 sys.exit(fail)

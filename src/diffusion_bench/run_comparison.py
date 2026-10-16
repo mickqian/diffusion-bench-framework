@@ -672,14 +672,17 @@ def _comfyui_workspace(case: dict) -> Path:
 
 
 COMFYUI_DEQUANT_FP8_PREFIX = "dequant-fp8:"
+# A sharded BF16 folder (e.g. a transformers text encoder) needs only the merge.
+COMFYUI_MERGE_PREFIX = "merge:"
 
 
 def _dequantized_fp8_checkpoint(spec: str) -> str:
-    """`repo:folder`'s FP8 safetensors as one BF16 file, cached by revision.
+    """`repo:folder`'s safetensors shards as one BF16 file, cached by revision.
 
-    Dequantized exactly as sglang's weight-only FP8 linears do (`weight.to(bf16)
-    * weight_scale.to(bf16)` per row), so ComfyUI runs the same weights in BF16:
-    its own loader runs FP8 checkpoints as W8A8 on sm90+, a lossy class.
+    FP8 weights are dequantized exactly as sglang's weight-only FP8 linears do
+    (`weight.to(bf16) * weight_scale.to(bf16)` per row), so ComfyUI runs the same
+    weights in BF16: its own loader runs FP8 checkpoints as W8A8 on sm90+, a lossy
+    class. Other tensors pass through unchanged.
     """
     import torch
     from huggingface_hub import constants, snapshot_download
@@ -714,9 +717,11 @@ def _dequantized_fp8_checkpoint(spec: str) -> str:
 
 def _resolve_comfyui_model(source: str) -> str:
     """`repo:path` names a file in a Hugging Face repo; `dequant-fp8:repo:folder`
-    that folder's FP8 weights dequantized to BF16; anything else is a local path."""
-    if source.startswith(COMFYUI_DEQUANT_FP8_PREFIX):
-        return _dequantized_fp8_checkpoint(source[len(COMFYUI_DEQUANT_FP8_PREFIX) :])
+    that folder's FP8 weights dequantized to BF16, `merge:repo:folder` its shards
+    as one file; anything else is a local path."""
+    for prefix in (COMFYUI_DEQUANT_FP8_PREFIX, COMFYUI_MERGE_PREFIX):
+        if source.startswith(prefix):
+            return _dequantized_fp8_checkpoint(source[len(prefix) :])
     if os.path.isabs(source):
         if not os.path.exists(source):
             raise FileNotFoundError(f"ComfyUI model file {source} does not exist")

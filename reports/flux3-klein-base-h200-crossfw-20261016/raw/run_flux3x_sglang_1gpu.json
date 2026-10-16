@@ -1,0 +1,354 @@
+{
+  "timestamp": "2026-10-16T04:14:32.468820+00:00",
+  "commit_sha": "36e76e3c16ec2e5909dc3ffb224c783435a48c8c",
+  "run_id": "local",
+  "hardware": {
+    "runner_labels": null,
+    "gpu_config": null,
+    "gpus": [
+      "NVIDIA H200, 143771 MiB, 595.71.05",
+      "NVIDIA H200, 143771 MiB, 595.71.05"
+    ],
+    "hardware_profile_override": "h200"
+  },
+  "sglang_runtime": {
+    "package_version": "0.5.22",
+    "module_path": "/scratch/sgl/python/sglang/__init__.py",
+    "git_root": "/scratch/sgl",
+    "git_commit": "e5274752a8960796178c4054efc789edca713f32"
+  },
+  "framework_runtime": {
+    "venv_root": "/scratch/state/fw-venvs",
+    "install_specs": {
+      "vllm": "vllm==0.30.0",
+      "vllm_omni": "git+https://github.com/vllm-project/vllm-omni.git@c4330f88eb442a0daebded9671689d65e9613e33",
+      "lightx2v": "git+https://github.com/ModelTC/LightX2V.git@7efd05f8e1425b83321fd4f1cef779ef6504076f",
+      "lightx2v_flash_attn": "flash-attn==2.8.3",
+      "lightx2v_flash_attn3": "",
+      "lightx2v_fa3_hf_repo": "varunneal/flash-attention-3",
+      "lightx2v_fa3_hf_revision": "de87b9b5af06dd9984df595bef90b2eba44b181a",
+      "lightx2v_fa3_hf_subdir": "build/torch28-cxx11-cu128-x86_64-linux/flash_attention_3",
+      "lightx2v_flashinfer": "flashinfer-python==0.6.11",
+      "trtllm": "tensorrt-llm==1.3.0rc18",
+      "fastvideo": "https://github.com/hao-ai-lab/FastVideo.git@main",
+      "torch_cuda_arch_list": ""
+    },
+    "launchers": {
+      "vllm_omni_server_bin": "vllm",
+      "vllm_omni_required_help_args": "--omni",
+      "trtllm_visual_server_bin": "trtllm-serve"
+    },
+    "vllm-omni": {
+      "venv_path": "/scratch/state/fw-venvs/vllm-omni",
+      "packages": {
+        "vllm": {
+          "Name": "vllm",
+          "Version": "0.30.0",
+          "Home-page": "https://github.com/vllm-project/vllm",
+          "Location": "/scratch/state/fw-venvs/vllm-omni/lib/python3.12/site-packages"
+        },
+        "vllm-omni": {
+          "Name": "vllm-omni",
+          "Version": "0.29.0rc2.dev251+gc4330f88e",
+          "Home-page": "https://github.com/vllm-project/vllm-omni",
+          "Location": "/scratch/state/fw-venvs/vllm-omni/lib/python3.12/site-packages"
+        },
+        "torch": {
+          "Name": "torch",
+          "Version": "2.13.0",
+          "Home-page": "https://pytorch.org",
+          "Location": "/scratch/state/fw-venvs/vllm-omni/lib/python3.12/site-packages"
+        },
+        "transformers": {
+          "Name": "transformers",
+          "Version": "5.14.1",
+          "Home-page": "https://github.com/huggingface/transformers",
+          "Location": "/scratch/state/fw-venvs/vllm-omni/lib/python3.12/site-packages"
+        },
+        "diffusers": {
+          "Name": "diffusers",
+          "Version": "0.40.0",
+          "Home-page": "https://github.com/huggingface/diffusers",
+          "Location": "/scratch/state/fw-venvs/vllm-omni/lib/python3.12/site-packages"
+        },
+        "huggingface_hub": {
+          "Name": "huggingface_hub",
+          "Version": "1.33.0",
+          "Home-page": "https://github.com/huggingface/huggingface_hub",
+          "Location": "/scratch/state/fw-venvs/vllm-omni/lib/python3.12/site-packages"
+        }
+      },
+      "direct_urls": {
+        "vllm_omni-0.29.0rc2.dev251+gc4330f88e.dist-info": {
+          "url": "file:///scratch/state/fw-venvs/vllm-omni/src/vllm-omni",
+          "dir_info": {
+            "editable": true
+          }
+        }
+      }
+    },
+    "lightx2v": {
+      "venv_path": "/scratch/state/fw-venvs/lightx2v"
+    },
+    "trtllm-visual": {
+      "venv_path": "/scratch/state/fw-venvs/trtllm-visual"
+    },
+    "comfyui": {
+      "venv_path": "/scratch/state/fw-venvs/comfyui",
+      "packages": {
+        "torchvision": {
+          "Name": "torchvision",
+          "Version": "0.29.1+cu130",
+          "Home-page": "https://github.com/pytorch/vision",
+          "Location": "/scratch/state/fw-venvs/comfyui/lib/python3.12/site-packages"
+        },
+        "torchaudio": {
+          "Name": "torchaudio",
+          "Version": "2.11.0+cu130",
+          "Home-page": "https://github.com/pytorch/audio",
+          "Location": "/scratch/state/fw-venvs/comfyui/lib/python3.12/site-packages"
+        },
+        "comfy-kitchen": {
+          "Name": "comfy-kitchen",
+          "Version": "0.2.37",
+          "Home-page": "https://github.com/Comfy-Org/comfy-kitchen",
+          "Location": "/scratch/state/fw-venvs/comfyui/lib/python3.12/site-packages"
+        },
+        "comfy-aimdo": {
+          "Name": "comfy-aimdo",
+          "Version": "0.5.6",
+          "Home-page": "",
+          "Location": "/scratch/state/fw-venvs/comfyui/lib/python3.12/site-packages"
+        },
+        "comfyui_frontend_package": {
+          "Name": "comfyui_frontend_package",
+          "Version": "1.55.17",
+          "Home-page": "",
+          "Location": "/scratch/state/fw-venvs/comfyui/lib/python3.12/site-packages"
+        },
+        "safetensors": {
+          "Name": "safetensors",
+          "Version": "0.8.0",
+          "Home-page": "https://github.com/huggingface/safetensors",
+          "Location": "/scratch/state/fw-venvs/comfyui/lib/python3.12/site-packages"
+        },
+        "torch": {
+          "Name": "torch",
+          "Version": "2.14.1+cu130",
+          "Home-page": "https://pytorch.org",
+          "Location": "/scratch/state/fw-venvs/comfyui/lib/python3.12/site-packages"
+        },
+        "transformers": {
+          "Name": "transformers",
+          "Version": "5.20.0",
+          "Home-page": "https://github.com/huggingface/transformers",
+          "Location": "/scratch/state/fw-venvs/comfyui/lib/python3.12/site-packages"
+        },
+        "huggingface_hub": {
+          "Name": "huggingface_hub",
+          "Version": "2.2.0",
+          "Home-page": "https://github.com/huggingface/huggingface_hub",
+          "Location": "/scratch/state/fw-venvs/comfyui/lib/python3.12/site-packages"
+        }
+      },
+      "source_commit": "5a665890ded5020c282f63c4ea2dd9e083e025ff",
+      "source_commit_date": "2026-10-15T20:51:17-04:00"
+    },
+    "fastvideo": {
+      "venv_path": "/scratch/state/fw-venvs/fastvideo"
+    }
+  },
+  "benchmark_env": {},
+  "benchmark_framework_args": {
+    "vllm-omni": [],
+    "lightx2v": {
+      "config": {
+        "use_compile": true
+      }
+    },
+    "fastvideo": []
+  },
+  "torch_compile_disabled": false,
+  "benchmark_modes": [
+    "single_e2e"
+  ],
+  "requested_sglang_profile": "auto",
+  "request_inputs": "distinct-per-request",
+  "results": [
+    {
+      "case_id": "flux3_klein_base_t2i_1024_1gpu",
+      "framework": "sglang",
+      "mode": "single_e2e",
+      "model": "black-forest-labs/flux-3-image-klein-base",
+      "task": "text-to-image",
+      "width": 1024,
+      "height": 1024,
+      "num_frames": null,
+      "fps": null,
+      "num_inference_steps": 50,
+      "guidance_scale": 3.5,
+      "guidance_scale_2": null,
+      "true_cfg_scale": null,
+      "negative_prompt_set": false,
+      "num_gpus": 1,
+      "latency_s": 7.17,
+      "error": null,
+      "framework_metadata": {
+        "profile": "default",
+        "profile_request": "auto",
+        "profile_source": "default",
+        "framework_ref": null,
+        "hardware": null,
+        "hardware_candidates": [
+          "h200"
+        ],
+        "description": "One GPU, resident.",
+        "notes": null,
+        "install_specs": null,
+        "server_bin": null,
+        "use_omni_arg": null,
+        "required_help_args": null,
+        "serve_args": "--model-type diffusion --warmup-mode server --enable-cfg-parallel false --performance-mode speed",
+        "num_gpus": 1,
+        "extra_env_keys": [],
+        "request_inputs": "distinct-per-request",
+        "sglang_profile": "default",
+        "sglang_profile_request": "auto",
+        "sglang_profile_source": "default",
+        "sglang_ref": "current-main"
+      },
+      "server_command": "sglang serve --model-path black-forest-labs/flux-3-image-klein-base --port 61201 --host 127.0.0.1 --backend sglang --model-type diffusion --warmup-mode server --enable-cfg-parallel false --performance-mode speed",
+      "metrics": {
+        "client_latency_s": 7.17,
+        "client_latency_min_s": 7.168,
+        "client_latency_max_s": 7.178,
+        "measured_repeats": 5,
+        "server_latency_s": 7.1,
+        "server_latency_source": "separate instrumented request, not one of the measured repeats",
+        "diagnostic_stages_s": {
+          "Flux3ImageTextEncodeStage": 0.042,
+          "Flux3ImageConditionEncodeStage": 0.0,
+          "Flux3ImageDenoiseStage": 6.771,
+          "Flux3ImageDecodeStage": 0.285
+        },
+        "diagnostic_stage_sum_s": 7.097,
+        "diagnostic_client_latency_s": 7.18,
+        "unattributed_tail_s": 0.083,
+        "unattributed_tail_frac": 0.011,
+        "latency_samples_s": [
+          7.168,
+          7.17,
+          7.178,
+          7.171,
+          7.17
+        ],
+        "latency_spread_pct": 0.1,
+        "warmup_latencies_s": [
+          0.635,
+          0.53
+        ],
+        "warmup_steady_latencies_s": [
+          7.124,
+          7.143
+        ],
+        "server_startup_s": 32.04,
+        "warmup_s": 15.43
+      }
+    },
+    {
+      "case_id": "flux3_klein_base_t2i_1024_1gpu",
+      "framework": "vllm-omni",
+      "mode": "single_e2e",
+      "model": "black-forest-labs/flux-3-image-klein-base",
+      "task": "text-to-image",
+      "width": 1024,
+      "height": 1024,
+      "num_frames": null,
+      "fps": null,
+      "num_inference_steps": 50,
+      "guidance_scale": 3.5,
+      "guidance_scale_2": null,
+      "true_cfg_scale": null,
+      "negative_prompt_set": false,
+      "num_gpus": 1,
+      "latency_s": null,
+      "error": "vllm-omni server exited before health check passed (exit 1) -- but the server first failed to READ the checkpoint, which is the real cause: \u001b[0;36m(APIServer pid=11957)\u001b[0;0m ERROR 10-16 04:16:36 [stage_runtime.py:308]     raise FileNotFoundError(\"Diffusers pipeline index not found\")",
+      "framework_metadata": {
+        "profile": "default",
+        "profile_request": "auto",
+        "profile_source": "default",
+        "framework_ref": "vllm-omni PR #9007 head c4330f88eb44 (pre-merge) + vllm==0.30.0",
+        "hardware": null,
+        "hardware_candidates": [
+          "h200"
+        ],
+        "description": "vLLM-Omni FLUX.3 server from the open PR's run_server.sh, CFG parallel 1.",
+        "notes": "Pre-merge measurement, not part of the committed matrix.",
+        "install_specs": null,
+        "server_bin": null,
+        "use_omni_arg": null,
+        "required_help_args": null,
+        "serve_args": "--cfg-parallel-size 1",
+        "num_gpus": 1,
+        "extra_env_keys": [],
+        "request_inputs": "distinct-per-request"
+      },
+      "server_command": "vllm serve black-forest-labs/flux-3-image-klein-base --port 61201 --host 127.0.0.1 --omni --cfg-parallel-size 1",
+      "metrics": {}
+    },
+    {
+      "case_id": "flux3_klein_base_t2i_1024_1gpu",
+      "framework": "comfyui",
+      "mode": "single_e2e",
+      "model": "black-forest-labs/flux-3-image-klein-base",
+      "task": "text-to-image",
+      "width": 1024,
+      "height": 1024,
+      "num_frames": null,
+      "fps": null,
+      "num_inference_steps": 50,
+      "guidance_scale": 3.5,
+      "guidance_scale_2": null,
+      "true_cfg_scale": null,
+      "negative_prompt_set": false,
+      "num_gpus": 1,
+      "latency_s": null,
+      "error": "403 Client Error. (Request ID: Root=1-6ad1a534-6bd249287a4b3d5e297d87f6;89c42cc5-4583-46e7-8b86-4da31d22a837)\n\nCannot access gated repo for url https://huggingface.co/black-forest-labs/flux-3-image-klein-comfy/resolve/main/diffusion_models/flux3_image_klein_base_bf16.safetensors.\nAccess to model black-forest-labs/flux-3-image-klein-comfy is restricted and you are not in the authorized list. Visit https://huggingface.co/black-forest-labs/flux-3-image-klein-comfy to ask for access.",
+      "framework_metadata": {
+        "profile": "default",
+        "profile_request": "auto",
+        "profile_source": "default",
+        "framework_ref": "ComfyUI master HEAD",
+        "hardware": null,
+        "hardware_candidates": [
+          "h200"
+        ],
+        "description": "ComfyUI master, core nodes only, the official FLUX.3 Klein Base text-to-image template with full-precision weights; CFG branches split over the case's two GPUs.",
+        "notes": "Official image_flux3_klein_t2i template (Comfy-Org/workflow_templates) flattened from its subgraph, with the BF16 DiT and Qwen3-VL-4B from black-forest-labs/flux-3-image-klein-comfy in place of the template's int8_convrot defaults (a different numeric class). The template's prompt-upsampler branch (enable_prompt_upsampler) is left out: the case already carries the upsampled caption, so every framework encodes the same text. Sampler euler / scheduler simple and the empty negative prompt follow the template; steps, CFG, size and seed follow the case. MultiGPU_WorkUnits puts the CFG branches on the two GPUs, ComfyUI's counterpart of CFG parallelism. Compile on (TorchCompileModel). VALIDATION PENDING (2026-10-16): derived, not yet measured.",
+        "install_specs": null,
+        "server_bin": null,
+        "use_omni_arg": null,
+        "required_help_args": null,
+        "serve_args": "",
+        "num_gpus": 1,
+        "extra_env_keys": [],
+        "request_inputs": "distinct-per-request",
+        "comfyui_workflow": "flux3_klein_base_t2i.json",
+        "comfyui_models": {
+          "diffusion_models/flux3_image_klein_base_bf16.safetensors": "black-forest-labs/flux-3-image-klein-comfy:diffusion_models/flux3_image_klein_base_bf16.safetensors",
+          "text_encoders/qwen3vl_4b_bf16.safetensors": "black-forest-labs/flux-3-image-klein-comfy:text_encoders/qwen3vl_4b_bf16.safetensors",
+          "vae/flux2-vae.safetensors": "black-forest-labs/flux-3-image-klein-comfy:vae/flux2-vae.safetensors"
+        },
+        "comfyui_params": null,
+        "comfyui_compile": true
+      },
+      "server_command": "python3 /scratch/state/fw-venvs/comfyui/ComfyUI/main.py --listen 127.0.0.1 --port 61201 --disable-auto-launch --extra-model-paths-config /tmp/diffusion-bench-comfyui/flux3_klein_base_t2i_1024_1gpu/extra_model_paths.yaml --input-directory /tmp/diffusion-bench-comfyui/flux3_klein_base_t2i_1024_1gpu/input --output-directory /tmp/diffusion-bench-comfyui/flux3_klein_base_t2i_1024_1gpu/output",
+      "metrics": {}
+    }
+  ],
+  "throughput_results": [],
+  "partial": false,
+  "model_revisions": {
+    "black-forest-labs/flux-3-image-klein-base": "6d332ea733673c12d816d98b2bff145bd51bd6d9"
+  }
+}

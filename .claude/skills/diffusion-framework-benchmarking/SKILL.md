@@ -103,6 +103,14 @@ Every framework entry should carry `command_profiles`, not just inline args.
 - **sglang on Blackwell: trust its measured auto-selection; do NOT pin `--attention-backend fa`.** Every case without an explicit backend resolves to an SDPA variant on B200 (`dynamic_cudnn_sdpa`, or `torch_sdpa` for minimax-h3) while cosmos3 pins `fa` -- which looks like a mis-selection, especially next to a video case running 3.3x slower than its H200 figure. It is not. Measured on 4xB200, forcing `fa`: wan22 751.6s vs 689s auto (9% worse), ltx2 7.52s vs 6.02s (25% worse), minimax-h3 74.16s vs 73.64s (equal). #38689's measured selection is doing its job on Blackwell, so leave it alone and look elsewhere for a slow video case. (Whether cosmos3's pinned `fa` still beats auto on B200 is untested.)
 - **vLLM-Omni on Blackwell: use `CUDNN_ATTN`.** `DIFFUSION_ATTENTION_BACKEND=FLASH_ATTN` is a Hopper-only precompiled kernel and vLLM-Omni refuses it on sm_100 ("FLASH_ATTN was explicitly selected but is unsupported"), killing the server at worker init. `FLASHINFER_ATTN` starts and serves static image shapes fine (zimage, flux) but dies under torch.compile on dynamic shapes -- `AsPythonConstantNotImplementedError: SymNodeVariable() is not a constant` inside the FlashInfer backend's `_ensure_plan` -- seen on qwen-image and cosmos3 t2v. Measured on B200 for qwen-image: CUDNN_ATTN **2.741s**, TRTLLM_ATTN 3.274s, FLASH_ATTN_HUB and TORCH_SDPA would not start, FLASHINFER_ATTN 500s. The env value is `TORCH_SDPA`, not `SDPA` (the class's `get_name()` and the env vocabulary differ; a wrong value fails at worker init with the valid list in the message). **Audit the selection before a run rather than debugging cells afterwards**: resolve every case's vllm-omni profile for the target hardware and print its backend -- all six vLLM-Omni failures in the first B200 matrix were this one cause, and one pass over the config would have found them in seconds.
 - **vLLM-Omni 0.29 removed `--stage-configs-path`** ("no longer supported; use `deploy_config` instead"), so a profile carrying it fails with `unrecognized arguments` before anything loads. For Cosmos3 T2I/video, upstream's own deploy file says those checkpoints must keep the **default single-stage diffusion fallback** -- do not write a deploy_config for them; `--num-gpus`, `--cfg-parallel-size`, `--ulysses-degree` and `--no-guardrails` are all first-class flags now. Watch for `enforce_eager` hiding inside an old stage-configs YAML: the harness strips `--enforce-eager` from neither a command line nor a YAML (compile-on mode only stops it adding one), so such a profile silently benchmarks the competitor compile-off, against the stated policy and to its own disadvantage. The build lint now reads the YAML a profile references.
+- **Measuring a vLLM-Omni PR before it merges (FLUX.3, #9007, 2026-10-16).**
+  - **Pick vLLM from the *current head's* `docker/Dockerfile.ci`** (`VLLM_VERSION` / `VLLM_BASE_TAG`), re-read on every push. The PR rebased from a v0.29.0 base (vllm-omni 0.29.0rc2) to v0.31.0 (0.31.0rc2) in one day. Reading the old head's file cost two installs:
+    - 0.30.0 failed at worker init on an IR-op assertion (`rms_norm` priority `vllm_c` not registered);
+    - 0.29.0 under the new head printed "mismatched major/minor versions";
+    - 0.31.0 under the old head failed to import `RoutedExpertsLists`.
+  - **The FLUX.3 loader reads only a local package directory.** `_read_flux3_package_config` checks `os.path.isdir`; a repo id falls through to the Diffusers path and fails with "Diffusers pipeline index not found". So set the cell's `model_path` to the snapshot dir.
+  - **Add `--served-model-name <case model>`.** Requests carry the case's repo id, so without it every request is refused as "Model mismatch".
+  - A PR head on an upstream branch installs through the full-clone fallback. The installer now fails, instead of installing main, when a ref is on no branch or tag.
 - vLLM-Omni diffusion paths are usually single-GPU. Do not make SGLang multi-GPU only because another framework is slower; compare same-GPU-count data when possible and label intentional differences.
 - LightX2V's task API is `extra="forbid"`, so a request carrying any field it has dropped fails whole with a 422 and no usable detail. Its main HEAD (2026-09) removed `infer_steps`, `height`, `width`, `target_shape`, `target_video_length`, `guidance_scale` and `fps` from the request: sizing is `size: [h, w]`, frames are `num_frames`, and **steps/guidance/fps now come only from the launch config** (`_write_lightx2v_config` already writes them). Endpoints split too — `POST /v1/tasks/` is deprecated and always routes to *video*; images go to `/v1/tasks/image/` or `/v1/tasks/image/sync`, video to `/v1/tasks/video/`. Prefer the **sync** image endpoint: submit+poll adds the poll interval to the measurement, and at the old 1s interval that more than doubled a sub-second image case. When the API moves again, validate the payloads offline against the installed `lightx2v.server.schema` models before spending GPU time — it is a 5-second check that catches the whole class.
 - LightX2V often needs model-specific attention, parallelism, and offload settings. Check upstream cookbook/configs before marking a case unsupported. Prefer another full-precision attention type (FA2/FA3/FA4/SDPA) over SageAttention when a same-precision-class option works — SageAttention (`sage_attn2`/`sage_attn3`) is a legitimate LightX2V fast path but is int8 QK-quantized, a different numeric class from full-precision FA3/FA4; it is not an automatic "fair" swap and must be labeled as a distinct precision path if used (see the Fairness Checklist attention-backend rule).
@@ -472,7 +480,29 @@ anything:
   `max_gpus=1` is a no-op, so templates carry it with `{{cfg_gpus}}`. ComfyUI
   has no GPU-count flag and `--cuda-device` rewrites CUDA_VISIBLE_DEVICES with
   ABSOLUTE ids, so the harness narrows visibility to the first `num_gpus` of
-  what it was given instead.
+  what it was given instead. **`cfg_gpus` defaults to 1 in the client**: a
+  multi-GPU cell must set `comfyui.params.cfg_gpus`, or the split is a silent
+  no-op. The FLUX.3 cell was first committed without it, and its "2-GPU" and
+  1-GPU runs both measured 9.05 s.
+- **Compile and dynamic VRAM conflict; `--gpu-only` resolves it.** ComfyUI
+  master auto-enables fast-disk / dynamic VRAM. Its malloc graph
+  (`comfy/model_prefetch.py` → `comfy_aimdo.malloc_graph.record`) then runs
+  inside the TorchCompileModel trace, and the first KSampler fails with
+  `'torch.Stream' object has no attribute 'cuda_stream'`. That error is why
+  Qwen-Image 2.1 and MiniMax-H3 went eager. `--gpu-only` turns dynamic VRAM off,
+  and compile then runs: FLUX.3 on H200 measured 9.05 s compiled vs 9.73 s eager
+  (2026-10-16, ComfyUI 5a665890). The flag changes placement only. Use it
+  wherever the graph fits on the card before falling back to eager.
+- **A gated Comfy repack can usually be rebuilt from the model's own repo.**
+  `black-forest-labs/flux-3-image-klein-comfy` returned 403 to a token that
+  could read `flux-3-image-klein-base`. The HF tree API exposes LFS sha256
+  without file access. Comparing hashes showed the Comfy DiT and VAE are
+  byte-identical to the Base repo's root `model.safetensors` / `ae.safetensors`.
+  The Comfy text encoder is the Base repo's two transformers shards in one file:
+  ComfyUI's Qwen3-VL loaders strip the `model.language_model.` prefix
+  themselves. So map the DiT and VAE to the Base files, and the text encoder to
+  `merge:<repo>:text_encoder`, which joins BF16 shards with names and values
+  unchanged.
 - Each case gets its own model tree of symlinks (`--extra-model-paths-config`),
   because the checkpoints do not have unique names (FLUX.1, Z-Image and FLUX.2
   all ship `vae/ae.safetensors`).

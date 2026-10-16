@@ -1,0 +1,22 @@
+{
+ "framework": "diffusers",
+ "version": "0.41.0.dev0",
+ "latency_s": 10.715,
+ "samples_s": [
+  10.715,
+  10.681,
+  10.732,
+  10.719,
+  10.705
+ ],
+ "kwargs": {
+  "height": 1024,
+  "width": 1024,
+  "num_inference_steps": 50,
+  "output": "images"
+ },
+ "image_size": [
+  1024,
+  1024
+ ]
+}

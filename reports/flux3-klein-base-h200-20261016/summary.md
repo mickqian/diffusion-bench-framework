@@ -13,6 +13,9 @@ This report covers one framework only. vLLM-Omni, LightX2V, TensorRT-LLM VisualG
 ComfyUI and FastVideo have no FLUX.3 pipeline on their main lines (checked
 2026-10-15).
 
+Cross-framework results (sglang, ComfyUI, vLLM-Omni PR, diffusers) with the case's upsampled
+caption are in `../flux3-klein-base-h200-crossfw-20261016/`; this report used the short prompt.
+
 ## Single request
 
 `scripts/devbox_run_cases.sh` runs `run_comparison --modes single_e2e`. The latency is the

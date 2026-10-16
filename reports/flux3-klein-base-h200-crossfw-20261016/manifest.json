@@ -1,0 +1,70 @@
+{
+  "id": "flux3-klein-base-h200-crossfw-20261016",
+  "format_version": 1,
+  "created_at": "2026-10-16",
+  "title": "FLUX.3 Image Klein Base on H200: four frameworks",
+  "description": "Cross-framework single-request latency for FLUX.3 Image Klein Base (text-to-image, 1024x1024, 50 steps, CFG 3.5, the case's frozen upsampled caption) on one 2xH200 rx devbox, at two GPUs and one GPU: sglang main, ComfyUI master, vLLM-Omni PR #9007 (pre-merge, labeled, outside the committed matrix) and diffusers main as a one-GPU reference.",
+  "benchmark_repo": {
+    "base_commit": "36e76e3",
+    "case": "configs/benchmark/cases/image/flux3_klein_base_t2i_1024.json",
+    "runner": "scripts/devbox_run_cases.sh (run_comparison --modes single_e2e) on variant configs; diffusers via diffusers_ref.py",
+    "variant_config": "Built on the box from configs/comparison_configs.json at 36e76e3: (1) a copy of the case with id flux3_klein_base_t2i_1024_1gpu, num_gpus 1, sglang serve_args '--model-type diffusion --warmup-mode server --enable-cfg-parallel false --performance-mode speed'; (2) ComfyUI models mapped to the Base repo (model.safetensors, ae.safetensors, merge of text_encoder), serve_args --gpu-only, params.cfg_gpus 2 on the two-GPU case, compile on/off arms; (3) a vllm-omni cell with model_path = the 6d332ea7 snapshot dir and serve_args '--cfg-parallel-size N --served-model-name black-forest-labs/flux-3-image-klein-base'. The committed case now carries (2)."
+  },
+  "runtime": {
+    "hardware": "rx devbox flux3x-h200, 2x NVIDIA H200 141 GB, driver 595.71.05",
+    "model": "black-forest-labs/flux-3-image-klein-base",
+    "model_revisions": {
+      "sglang, comfyui, vllm-omni": "6d332ea733673c12d816d98b2bff145bd51bd6d9",
+      "diffusers": "3f7fa5ee22ca1d5a5cc095ac7cc96e6a173b4c86",
+      "note": "Weight blobs (model.safetensors, ae.safetensors, text_encoder shards, tokenizer, chat template) are identical across 6d332ea7, 3f7fa5ee and f66af34f; only modular_model_index.json differs."
+    },
+    "sglang": {"commit": "e5274752a8960796178c4054efc789edca713f32", "date": "2026-10-16", "torch": "2.14.1+cu130"},
+    "comfyui": {"commit": "5a665890ded5020c282f63c4ea2dd9e083e025ff", "torch": "2.14.1+cu130", "comfy_aimdo": "0.5.6"},
+    "vllm-omni": {"pr": "vllm-project/vllm-omni#9007", "head": "389a02a149ced03a9550368565571fff9d1d99f3", "version": "0.31.0rc2.dev235+g389a02a14", "vllm": "0.31.0", "torch": "2.13.0+cu130"},
+    "diffusers": {"commit": "d42ebf9c6e0b46103b74283f5324357a67acaa04", "version": "0.41.0.dev0", "torch": "2.14.1+cu130", "transformers": "5.19.0"}
+  },
+  "workload": {
+    "task": "text-to-image",
+    "resolution": "1024x1024",
+    "num_inference_steps": 50,
+    "guidance_scale": 3.5,
+    "seed": 42,
+    "outputs_per_request": 1,
+    "prompt": "the case prompt: 303-word upsampled caption, md5 b0e44fd9c061 (see the case notes)"
+  },
+  "policy": {
+    "latency_source": "client-side wall clock, median of 5 measured requests after warmup",
+    "precision": "native BF16 everywhere; full-precision attention (sglang FA, vLLM-Omni FLASH_ATTN); no quantized checkpoint, no cache",
+    "compile": "sglang eager (cookbook); vLLM-Omni regional compile; ComfyUI compile at one GPU, eager at two (compile breaks the MultiGPU CFG split); diffusers eager reference",
+    "pre_merge": "vLLM-Omni rows measure an open PR and are labeled; the committed matrix keeps the cell unsupported until it merges"
+  },
+  "results": {
+    "two_gpus": {
+      "sglang": {"latency_s": 4.035, "samples_s": [4.034, 4.035, 4.042, 4.048, 4.033], "stages_s": {"text_encode": 0.041, "denoise": 3.736, "decode": 0.241}},
+      "vllm-omni (PR #9007, pre-merge)": {"latency_s": 4.534, "samples_s": [4.523, 4.53, 4.553, 4.534, 4.537]},
+      "comfyui (eager CFG split)": {"latency_s": 5.364, "samples_s": [5.326, 5.517, 5.364, 5.527, 5.321]},
+      "comfyui (compile + CFG split)": "failed: torch._dynamo TorchRuntimeError Tensor device mismatch (cuda:1, cuda:0)"
+    },
+    "one_gpu": {
+      "sglang": {"latency_s": 7.17, "samples_s": [7.168, 7.17, 7.178, 7.171, 7.17], "stages_s": {"text_encode": 0.042, "denoise": 6.771, "decode": 0.285}},
+      "comfyui (compile)": {"latency_s": 9.046, "samples_s": [9.046, 9.348, 9.037, 9.352, 9.034]},
+      "comfyui (eager)": {"latency_s": 9.734, "samples_s": [9.763, 9.535, 9.771, 9.522, 9.734], "note": "two GPUs visible, cfg_gpus 1 (one GPU used)"},
+      "vllm-omni (PR #9007, pre-merge)": {"latency_s": 9.101, "samples_s": [9.102, 9.101, 9.068, 9.109, 9.098]},
+      "diffusers (reference)": {"latency_s": 10.715, "samples_s": [10.715, 10.681, 10.732, 10.719, 10.705]}
+    }
+  },
+  "files": {
+    "raw/run_flux3x_sglang_2gpu.json": "sglang two-GPU row; its comfyui (403) and vllm-omni (vllm 0.30.0) rows are superseded by the files below",
+    "raw/run_flux3x_sglang_1gpu.json": "sglang one-GPU row; same superseded rows",
+    "raw/run_flux3x_comfyui_2gpu_eager_cfgsplit.json": "ComfyUI two GPUs, eager, cfg_gpus 2",
+    "failures/run_flux3x_comfyui_2gpu_compile_cfgsplit_failed.json": "ComfyUI two GPUs, compile + cfg_gpus 2: failed",
+    "raw/run_flux3x_comfyui_1gpu_compile.json": "ComfyUI one GPU, compile, --gpu-only",
+    "raw/run_flux3x_comfyui_1gpu_eager.json": "ComfyUI eager, cfg_gpus 1",
+    "raw/run_flux3x_vllm_omni_pr9007_2gpu.json": "vLLM-Omni PR head, CFG parallel 2",
+    "raw/run_flux3x_vllm_omni_pr9007_1gpu.json": "vLLM-Omni PR head, one GPU",
+    "raw/diffusers_main_1gpu.json": "diffusers main, one GPU",
+    "diffusers_ref.py": "the diffusers reference script",
+    "images/": "512x512 copies of one output each from ComfyUI (one GPU), vLLM-Omni (one GPU) and diffusers"
+  },
+  "reproduce": "See summary.md 'What each row needed'. sglang and ComfyUI rows follow the committed case; vLLM-Omni needs VLLM_INSTALL_SPEC=vllm==0.31.0 VLLM_OMNI_INSTALL_SPEC=git+https://github.com/vllm-project/vllm-omni.git@389a02a149ced03a9550368565571fff9d1d99f3 and the variant cell described under benchmark_repo.variant_config."
+}

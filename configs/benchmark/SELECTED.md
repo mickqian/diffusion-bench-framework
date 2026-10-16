@@ -85,17 +85,17 @@ offloaded on datacenter hardware without one (see KNOWN_COMPETITOR_VIOLATIONS).
 | flux3_klein_base_t2i_1024 | sglang | mi355x | `default` |  |  |  | `--model-type diffusion --warmup-mode server --enable-cfg-parallel --performance-mode speed` |  |
 | flux3_klein_base_t2i_1024 | sglang | rtx4090 | `default` |  |  |  | `--model-type diffusion --warmup-mode server --enable-cfg-parallel --performance-mode speed` |  |
 | flux3_klein_base_t2i_1024 | sglang | rtx5090 | `default` |  |  |  | `--model-type diffusion --warmup-mode server --enable-cfg-parallel --performance-mode speed` |  |
-| flux3_klein_base_t2i_1024 | comfyui | b200 | `default` |  |  | Comfy-Org/workflow_templates@4b728a4ec167 (2026-10-16) |  | `workflow=flux3_klein_base_t2i.json compile=true` |
-| flux3_klein_base_t2i_1024 | comfyui | b300 | `default` |  |  | Comfy-Org/workflow_templates@4b728a4ec167 (2026-10-16) |  | `workflow=flux3_klein_base_t2i.json compile=true` |
-| flux3_klein_base_t2i_1024 | comfyui | gb200 | `default` |  |  | Comfy-Org/workflow_templates@4b728a4ec167 (2026-10-16) |  | `workflow=flux3_klein_base_t2i.json compile=true` |
-| flux3_klein_base_t2i_1024 | comfyui | gb300 | `default` |  |  | Comfy-Org/workflow_templates@4b728a4ec167 (2026-10-16) |  | `workflow=flux3_klein_base_t2i.json compile=true` |
-| flux3_klein_base_t2i_1024 | comfyui | h100 | `default` |  |  | Comfy-Org/workflow_templates@4b728a4ec167 (2026-10-16) |  | `workflow=flux3_klein_base_t2i.json compile=true` |
-| flux3_klein_base_t2i_1024 | comfyui | h200 | `default` |  |  | Comfy-Org/workflow_templates@4b728a4ec167 (2026-10-16) |  | `workflow=flux3_klein_base_t2i.json compile=true` |
-| flux3_klein_base_t2i_1024 | comfyui | mi300x | `default` |  |  | Comfy-Org/workflow_templates@4b728a4ec167 (2026-10-16) |  | `workflow=flux3_klein_base_t2i.json compile=true` |
-| flux3_klein_base_t2i_1024 | comfyui | mi350x | `default` |  |  | Comfy-Org/workflow_templates@4b728a4ec167 (2026-10-16) |  | `workflow=flux3_klein_base_t2i.json compile=true` |
-| flux3_klein_base_t2i_1024 | comfyui | mi355x | `default` |  |  | Comfy-Org/workflow_templates@4b728a4ec167 (2026-10-16) |  | `workflow=flux3_klein_base_t2i.json compile=true` |
-| flux3_klein_base_t2i_1024 | comfyui | rtx4090 | `default` |  |  | Comfy-Org/workflow_templates@4b728a4ec167 (2026-10-16) |  | `workflow=flux3_klein_base_t2i.json compile=true` |
-| flux3_klein_base_t2i_1024 | comfyui | rtx5090 | `default` |  |  | Comfy-Org/workflow_templates@4b728a4ec167 (2026-10-16) |  | `workflow=flux3_klein_base_t2i.json compile=true` |
+| flux3_klein_base_t2i_1024 | comfyui | b200 | `default` | yes |  | Comfy-Org/workflow_templates@4b728a4ec167 (2026-10-16) | `--gpu-only` | `workflow=flux3_klein_base_t2i.json compile=false` |
+| flux3_klein_base_t2i_1024 | comfyui | b300 | `default` | yes |  | Comfy-Org/workflow_templates@4b728a4ec167 (2026-10-16) | `--gpu-only` | `workflow=flux3_klein_base_t2i.json compile=false` |
+| flux3_klein_base_t2i_1024 | comfyui | gb200 | `default` | yes |  | Comfy-Org/workflow_templates@4b728a4ec167 (2026-10-16) | `--gpu-only` | `workflow=flux3_klein_base_t2i.json compile=false` |
+| flux3_klein_base_t2i_1024 | comfyui | gb300 | `default` | yes |  | Comfy-Org/workflow_templates@4b728a4ec167 (2026-10-16) | `--gpu-only` | `workflow=flux3_klein_base_t2i.json compile=false` |
+| flux3_klein_base_t2i_1024 | comfyui | h100 | `default` | yes |  | Comfy-Org/workflow_templates@4b728a4ec167 (2026-10-16) | `--gpu-only` | `workflow=flux3_klein_base_t2i.json compile=false` |
+| flux3_klein_base_t2i_1024 | comfyui | h200 | `default` | yes |  | Comfy-Org/workflow_templates@4b728a4ec167 (2026-10-16) | `--gpu-only` | `workflow=flux3_klein_base_t2i.json compile=false` |
+| flux3_klein_base_t2i_1024 | comfyui | mi300x | `default` | yes |  | Comfy-Org/workflow_templates@4b728a4ec167 (2026-10-16) | `--gpu-only` | `workflow=flux3_klein_base_t2i.json compile=false` |
+| flux3_klein_base_t2i_1024 | comfyui | mi350x | `default` | yes |  | Comfy-Org/workflow_templates@4b728a4ec167 (2026-10-16) | `--gpu-only` | `workflow=flux3_klein_base_t2i.json compile=false` |
+| flux3_klein_base_t2i_1024 | comfyui | mi355x | `default` | yes |  | Comfy-Org/workflow_templates@4b728a4ec167 (2026-10-16) | `--gpu-only` | `workflow=flux3_klein_base_t2i.json compile=false` |
+| flux3_klein_base_t2i_1024 | comfyui | rtx4090 | `default` | yes |  | Comfy-Org/workflow_templates@4b728a4ec167 (2026-10-16) | `--gpu-only` | `workflow=flux3_klein_base_t2i.json compile=false` |
+| flux3_klein_base_t2i_1024 | comfyui | rtx5090 | `default` | yes |  | Comfy-Org/workflow_templates@4b728a4ec167 (2026-10-16) | `--gpu-only` | `workflow=flux3_klein_base_t2i.json compile=false` |
 | ideogram4_t2i_1024_2gpu_tp | sglang | b200 | `default` |  |  |  | `--model-type diffusion --warmup-mode server --dit-layerwise-offload false --tp-size 2` |  |
 | ideogram4_t2i_1024_2gpu_tp | sglang | b300 | `default` |  |  |  | `--model-type diffusion --warmup-mode server --dit-layerwise-offload false --tp-size 2` |  |
 | ideogram4_t2i_1024_2gpu_tp | sglang | gb200 | `default` |  |  |  | `--model-type diffusion --warmup-mode server --dit-layerwise-offload false --tp-size 2` |  |
