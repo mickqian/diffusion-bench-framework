@@ -1,0 +1,96 @@
+{
+  "id": "flux3-klein-base-h200-20261016",
+  "format_version": 1,
+  "created_at": "2026-10-16",
+  "title": "FLUX.3 Image Klein Base on 2xH200",
+  "description": "First benchmark of FLUX.3 Image (black-forest-labs/flux-3-image-klein-base, text-to-image, 1024x1024, 50 steps, CFG 3.5) in this repo, on one 2xH200 rx devbox, with a three-way two-GPU layout sweep (CFG parallel / TP2 / Ulysses-2). Single-framework: no other tracked framework serves FLUX.3 on its main line yet.",
+  "benchmark_repo": {
+    "base_commit": "7fc859678b86c0f263ed75456f7f1465c724cadf",
+    "case": "configs/benchmark/cases/image/flux3_klein_base_t2i_1024.json",
+    "config": "configs/comparison_configs.json",
+    "runner": "scripts/devbox_run_cases.sh (run_comparison --modes single_e2e); layout sweep with scripts/tune_sglang_serve_args.sh"
+  },
+  "runtime": {
+    "sglang_commit": "c15edf314d20073630e672eb477cbcc3c58fac57",
+    "sglang_version": "0.5.22",
+    "sglang_date": "2026-10-16",
+    "torch": "2.14.1+cu130",
+    "transformers": "5.19.0",
+    "model": "black-forest-labs/flux-3-image-klein-base",
+    "model_revision": "f66af34f9c155a3eedf3823f77a800a2a97d6d2c",
+    "note": "FLUX.3 Image support landed in sglang on 2026-10-15 (sgl-project/sglang#44418). The lmsysorg/sglang:latest image (baa9bef, 2026-10-13) predates it, so sglang ran from a main checkout via DBF_SGLANG_PYTHONPATH; the result records that commit."
+  },
+  "workload": {
+    "task": "text-to-image",
+    "resolution": "1024x1024",
+    "num_inference_steps": 50,
+    "guidance_scale": 3.5,
+    "seed": 42,
+    "outputs_per_request": 1,
+    "prompt": "A futuristic cyberpunk city at night, neon lights reflecting on wet streets",
+    "note": "The Base settings sglang's FLUX.3 cookbook validated. The step-distilled flux-3-image-klein is not used: a reduced-step model is a lossy substitute under this repo's policy."
+  },
+  "policy": {
+    "latency_source": "client-side single_e2e latency_s, median of 5 measured requests after warmup",
+    "torch_compile": "off (sglang compile-off policy); eager, as the cookbook recommends",
+    "cache": "no response cache, no Cache-DiT",
+    "precision": "native BF16 checkpoint; no FP8R/NVFP4 variant, no quantized attention (FlashAttention selected by the runtime)",
+    "placement": "all components resident (--performance-mode speed); the runtime's auto policy would layerwise-offload the text encoder even with 139 GiB free",
+    "hardware": "one rx devbox, 2x H200 141 GB (h200-sci-k8s-1), not CI/runner/build infrastructure",
+    "cross_framework": "none: vLLM-Omni, LightX2V, TensorRT-LLM VisualGen, ComfyUI and FastVideo have no FLUX.3 pipeline on main (checked 2026-10-15)"
+  },
+  "frameworks": {
+    "sglang": "measured",
+    "vllm-omni": "unsupported (no FLUX.3 pipeline on main, 2026-10-15)",
+    "lightx2v": "unsupported (no FLUX.3 serving path, 2026-10-15)",
+    "trtllm-visual": "unsupported (VisualGen covers FLUX.1/FLUX.2 only, 2026-10-15)",
+    "comfyui": "unsupported (no FLUX.3 model or official workflow, 2026-10-15)",
+    "fastvideo": "unsupported (no FLUX.3 pipeline, 2026-10-15)"
+  },
+  "results": {
+    "single_e2e": {
+      "profile": "h200-2gpu-cfg-parallel",
+      "latency_s": 3.631,
+      "samples_s": [
+        3.626,
+        3.63,
+        3.64,
+        3.631,
+        3.639
+      ],
+      "server_latency_s": 3.626,
+      "stages_s": {
+        "text_encode": 0.02,
+        "denoise": 3.386,
+        "decode": 0.217
+      },
+      "unattributed_tail_s": 0.015
+    },
+    "layout_sweep_medians_s": {
+      "cfg_parallel": [
+        3.637,
+        3.633,
+        3.634
+      ],
+      "tp2": [
+        4.018,
+        4.027,
+        4.036
+      ],
+      "ulysses2": [
+        4.428,
+        4.441,
+        4.431
+      ]
+    }
+  },
+  "files": {
+    "raw/run_flux3h200_flux3_klein_base_t2i_1024.json": "the formal single_e2e run with the pinned profile -- the number the summary publishes",
+    "raw/tune/tune_*.json": "the layout sweep, 3 interleaved rounds x 3 arms, run_comparison output per arm",
+    "images/flux3_klein_base_t2i_1024_h200_cfg_parallel.jpg": "the last measured request's output"
+  },
+  "reproduce": [
+    "scripts/tune_sglang_serve_args.sh flux3_klein_base_t2i_1024 3 'cfg=ENV:PYTHONPATH=<sglang>/python:src' 'tp2=--tp-size 2 --enable-cfg-parallel false ENV:PYTHONPATH=<sglang>/python:src' 'uly2=--enable-cfg-parallel false --ulysses-degree 2 ENV:PYTHONPATH=<sglang>/python:src'  (DBF_HARDWARE_PROFILE=h200 TUNE_PORT_BASE=61000)",
+    "DBF_FRAMEWORKS=sglang DBF_HARDWARE_PROFILE=h200 DBF_SGLANG_PYTHONPATH=<sglang>/python scripts/devbox_run_cases.sh flux3h200 0,1 61200 single_e2e flux3_klein_base_t2i_1024"
+  ]
+}

@@ -1,0 +1,160 @@
+{
+  "timestamp": "2026-10-16T02:11:45.114089+00:00",
+  "commit_sha": "1f84cbd231b8cb33270d1ac4aec927627a0053dc",
+  "run_id": "local",
+  "hardware": {
+    "runner_labels": null,
+    "gpu_config": null,
+    "gpus": [
+      "NVIDIA H200, 143771 MiB, 595.71.05",
+      "NVIDIA H200, 143771 MiB, 595.71.05"
+    ],
+    "hardware_profile_override": "h200"
+  },
+  "sglang_runtime": {
+    "package_version": "0.5.22",
+    "module_path": "/scratch/sgl/python/sglang/__init__.py",
+    "git_root": "/scratch/sgl",
+    "git_commit": "c15edf314d20073630e672eb477cbcc3c58fac57"
+  },
+  "framework_runtime": {
+    "venv_root": "/scratch/state/fw-venvs",
+    "install_specs": {
+      "vllm": "vllm==0.18.0",
+      "vllm_omni": "vllm-omni==0.18.0",
+      "lightx2v": "git+https://github.com/ModelTC/LightX2V.git@7efd05f8e1425b83321fd4f1cef779ef6504076f",
+      "lightx2v_flash_attn": "flash-attn==2.8.3",
+      "lightx2v_flash_attn3": "",
+      "lightx2v_fa3_hf_repo": "varunneal/flash-attention-3",
+      "lightx2v_fa3_hf_revision": "de87b9b5af06dd9984df595bef90b2eba44b181a",
+      "lightx2v_fa3_hf_subdir": "build/torch28-cxx11-cu128-x86_64-linux/flash_attention_3",
+      "lightx2v_flashinfer": "flashinfer-python==0.6.11",
+      "trtllm": "tensorrt-llm==1.3.0rc18",
+      "fastvideo": "https://github.com/hao-ai-lab/FastVideo.git@main",
+      "torch_cuda_arch_list": ""
+    },
+    "launchers": {
+      "vllm_omni_server_bin": "vllm",
+      "vllm_omni_required_help_args": "--omni",
+      "trtllm_visual_server_bin": "trtllm-serve"
+    },
+    "vllm-omni": {
+      "venv_path": "/scratch/state/fw-venvs/vllm-omni"
+    },
+    "lightx2v": {
+      "venv_path": "/scratch/state/fw-venvs/lightx2v"
+    },
+    "trtllm-visual": {
+      "venv_path": "/scratch/state/fw-venvs/trtllm-visual"
+    },
+    "comfyui": {
+      "venv_path": "/scratch/state/fw-venvs/comfyui"
+    },
+    "fastvideo": {
+      "venv_path": "/scratch/state/fw-venvs/fastvideo"
+    }
+  },
+  "benchmark_env": {},
+  "benchmark_framework_args": {
+    "vllm-omni": [],
+    "lightx2v": {
+      "config": {
+        "use_compile": true
+      }
+    },
+    "fastvideo": []
+  },
+  "torch_compile_disabled": false,
+  "benchmark_modes": [
+    "single_e2e"
+  ],
+  "requested_sglang_profile": "auto",
+  "request_inputs": "distinct-per-request",
+  "results": [
+    {
+      "case_id": "flux3_klein_base_t2i_1024",
+      "framework": "sglang",
+      "mode": "single_e2e",
+      "model": "black-forest-labs/flux-3-image-klein-base",
+      "task": "text-to-image",
+      "width": 1024,
+      "height": 1024,
+      "num_frames": null,
+      "fps": null,
+      "num_inference_steps": 50,
+      "guidance_scale": 3.5,
+      "guidance_scale_2": null,
+      "true_cfg_scale": null,
+      "negative_prompt_set": false,
+      "num_gpus": 2,
+      "latency_s": 4.428,
+      "error": null,
+      "framework_metadata": {
+        "profile": "default",
+        "profile_request": "auto",
+        "profile_source": "default",
+        "framework_ref": null,
+        "hardware": null,
+        "hardware_candidates": [
+          "h200"
+        ],
+        "description": "CFG parallelism on two GPUs: each GPU runs one CFG branch of the Base model.",
+        "notes": "The Base model runs CFG 3.5, two DiT branches per step, and this repo measured CFG parallelism as the multi-GPU latency path for two-branch models (Qwen-Image true-CFG: 6.49 s against 11.14 s for TP). The cookbook lists TP, Ulysses and CFG parallelism for this pipeline and measured one GPU only (H200 BF16 T2I 7.09 s, GB300 3.21 s, eager, FlashAttention). Eager, as the cookbook recommends (breakable CUDA graphs showed no clear win on GB300). VALIDATION PENDING (2026-10-15): derived, not yet measured.",
+        "install_specs": null,
+        "server_bin": null,
+        "use_omni_arg": null,
+        "required_help_args": null,
+        "serve_args": "--model-type diffusion --warmup-mode server --enable-cfg-parallel --performance-mode speed",
+        "num_gpus": 2,
+        "extra_env_keys": [],
+        "request_inputs": "distinct-per-request",
+        "sglang_profile": "default",
+        "sglang_profile_request": "auto",
+        "sglang_profile_source": "default",
+        "sglang_ref": "current-main (FLUX.3 Image since sglang#44418, merged 2026-10-15)"
+      },
+      "server_command": "sglang serve --model-path black-forest-labs/flux-3-image-klein-base --port 61004 --host 127.0.0.1 --backend sglang --num-gpus 2 --model-type diffusion --warmup-mode server --enable-cfg-parallel --performance-mode speed --enable-cfg-parallel false --ulysses-degree 2",
+      "metrics": {
+        "client_latency_s": 4.428,
+        "client_latency_min_s": 4.424,
+        "client_latency_max_s": 4.44,
+        "measured_repeats": 5,
+        "server_latency_s": 4.432,
+        "server_latency_source": "separate instrumented request, not one of the measured repeats",
+        "diagnostic_stages_s": {
+          "Flux3ImageTextEncodeStage": 0.022,
+          "Flux3ImageConditionEncodeStage": 0.0,
+          "Flux3ImageDenoiseStage": 4.266,
+          "Flux3ImageDecodeStage": 0.142
+        },
+        "diagnostic_stage_sum_s": 4.429,
+        "diagnostic_client_latency_s": 4.446,
+        "unattributed_tail_s": 0.017,
+        "unattributed_tail_frac": 0.004,
+        "latency_samples_s": [
+          4.424,
+          4.428,
+          4.425,
+          4.432,
+          4.44
+        ],
+        "latency_spread_pct": 0.4,
+        "warmup_latencies_s": [
+          0.384,
+          0.37
+        ],
+        "warmup_steady_latencies_s": [
+          4.419,
+          4.417
+        ],
+        "server_startup_s": 42.05,
+        "warmup_s": 9.59
+      }
+    }
+  ],
+  "throughput_results": [],
+  "partial": false,
+  "model_revisions": {
+    "black-forest-labs/flux-3-image-klein-base": "f66af34f9c155a3eedf3823f77a800a2a97d6d2c"
+  }
+}
