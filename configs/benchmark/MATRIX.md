@@ -6,7 +6,7 @@ A trailing `(h100: FAIL)` is a `status_by_hardware` override: the cell reads dif
 
 | case | task | sglang | vllm-omni | lightx2v | trtllm-visual | comfyui | fastvideo |
 |---|---|---|---|---|---|---|---|
-| flux3_klein_base_t2i_1024 | text-to-image | profile | n/a | n/a | n/a | n/a | n/a |
+| flux3_klein_base_t2i_1024 | text-to-image | profile | n/a | n/a | n/a | profile | n/a |
 | qwen_image_21_t2i_1024 | text-to-image | profile | profile | profile | n/a | profile | n/a |
 | qwen_image_21_t2i_1024_2gpu | text-to-image | profile | profile | no-cmd | n/a | TODO | n/a |
 | qwen_image_21_edit_1024 | image-edit | profile | profile | no-cmd | n/a | no-cmd | n/a |

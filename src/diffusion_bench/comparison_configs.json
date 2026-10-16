@@ -23,14 +23,14 @@
             "model": "black-forest-labs/flux-3-image-klein-base",
             "task": "text-to-image",
             "label": "FLUX.3 Image Klein Base T2I",
-            "prompt": "A futuristic cyberpunk city at night, neon lights reflecting on wet streets",
+            "prompt": "Photorealistic digital illustration of a futuristic cyberpunk city at night, viewed from street level along a broad avenue after heavy rain. The wet black asphalt fills the foreground, reflecting long bands of cyan, magenta, violet, and acid-red neon light in broken ripples around shallow puddles. A narrow stream of runoff crosses the bottom edge beside a grated drain clogged with scraps of paper and metallic debris. In the center, a low autonomous taxi with a dark glass canopy drives toward the viewer, its angular body edged by red warning lights and illuminated by blue underbody strips. Water sprays behind its wheels, while two smaller vehicles recede into the distance as elongated silhouettes with glowing tail lamps. On both sides, dense towers rise beyond stacked balconies, exposed pipes, ventilation ducts, suspended cables, and crowded storefronts. Vertical neon signs project over the sidewalks: a cyan sign on the left reads \"NIGHT MARKET\", a magenta sign above it reads \"SYNTHETIC DISTRICT\", and a red sign on the right reads \"OPEN 24 HOURS\". Smaller panels display abstract symbols and illegible fine print. Elevated pedestrian bridges cross between buildings overhead, carrying clusters of dark human silhouettes beneath transparent umbrellas. Near the left curb, a compact food stall glows turquoise under a striped awning, with steam rising from a metal vent and catching pink light. On the right, a lone figure in a long black hooded coat stands beneath a transparent umbrella, facing the traffic; the coat’s reflective seams trace electric-blue highlights across the shoulders. Tall holographic advertisements float above the intersection, including a rotating wireframe face surrounded by pulsing geometric graphics. In the background, skyscrapers merge into a dark canyon of illuminated windows, rooftop antennas, and luminous skybridges. Low clouds obscure the upper towers, while mist and rain scatter the neon into colored halos around the highest signs.",
             "width": 1024,
             "height": 1024,
             "seed": 42,
             "num_gpus": 2,
             "num_inference_steps": 50,
             "guidance_scale": 3.5,
-            "notes": "Replaces flux1_dev_t2i_1024 and flux2_dev_t2i_1024 (retired 2026-10-15); their published results stay in the reports. Base checkpoint, not the step-distilled black-forest-labs/flux-3-image-klein: a distilled, reduced-step model is a lossy substitute under this repo's policy. 50 steps and CFG 3.5 are the Base settings sglang's FLUX.3 cookbook validated at 1024x1024 (sglang#44418); the prompt and seed are the retired FLUX rows', so the families line up. The repo is gated (auto-approved request plus the flux-kommunity-license); the account whose HF_TOKEN the run uses must have accepted it. No other tracked framework serves FLUX.3 yet (checked 2026-10-15), so this row is sglang-only until one does. sglang measured on 2xH200 2026-10-16 (profile h200-2gpu-cfg-parallel); other hardware VALIDATION PENDING.",
+            "notes": "Replaces flux1_dev_t2i_1024 and flux2_dev_t2i_1024 (retired 2026-10-15); their published results stay in the reports. Base checkpoint, not the step-distilled black-forest-labs/flux-3-image-klein: a distilled, reduced-step model is a lossy substitute under this repo's policy. 50 steps and CFG 3.5 are the Base settings sglang's FLUX.3 cookbook validated at 1024x1024 (sglang#44418); the seed is the retired FLUX rows'. The prompt is the retired rows' short request (\"A futuristic cyberpunk city at night, neon lights reflecting on wet streets\") expanded once by BFL's prompt upsampler, because the model card says FLUX.3 is not meant to run on a short prompt: black-forest-labs/flux-3-image-klein-pup rev 3f3edb52, served by sglang with --enable-deterministic-inference --disable-radix-cache through the flux3-klein-pup enhancer protocol (sglang PR, 2026-10-16), caption md5 b0e44fd9c061; reruns reproduce it exactly. The caption is frozen here so every framework encodes the same 303 words; the upsampler itself is not timed. The repo is gated (auto-approved request plus the flux-kommunity-license); the account whose HF_TOKEN the run uses must have accepted it. ComfyUI serves it on master (official v0.41 templates); vLLM-Omni and TensorRT-LLM have open PRs (2026-10-16). sglang measured on 2xH200 2026-10-16 (profile h200-2gpu-cfg-parallel); other hardware VALIDATION PENDING.",
             "frameworks": {
                 "sglang": {
                     "serve_args": "--model-type diffusion --warmup-mode server --enable-cfg-parallel --performance-mode speed",
@@ -68,20 +68,160 @@
                             "notes": "Kept for the tuning A/B, as for tp2-candidate. 2xH200 2026-10-16: 4.428/4.441/4.431 s, 22% slower than CFG parallel."
                         }
                     }
+                },
+                "comfyui": {
+                    "num_gpus": 2,
+                    "serve_args": "",
+                    "comfyui": {
+                        "workflow": "flux3_klein_base_t2i.json",
+                        "models": {
+                            "diffusion_models/flux3_image_klein_base_bf16.safetensors": "black-forest-labs/flux-3-image-klein-comfy:diffusion_models/flux3_image_klein_base_bf16.safetensors",
+                            "text_encoders/qwen3vl_4b_bf16.safetensors": "black-forest-labs/flux-3-image-klein-comfy:text_encoders/qwen3vl_4b_bf16.safetensors",
+                            "vae/flux2-vae.safetensors": "black-forest-labs/flux-3-image-klein-comfy:vae/flux2-vae.safetensors"
+                        },
+                        "compile": true,
+                        "workflow_graph": {
+                            "1": {
+                                "class_type": "UNETLoader",
+                                "inputs": {
+                                    "unet_name": "flux3_image_klein_base_bf16.safetensors",
+                                    "weight_dtype": "default"
+                                }
+                            },
+                            "2": {
+                                "class_type": "CLIPLoader",
+                                "inputs": {
+                                    "clip_name": "qwen3vl_4b_bf16.safetensors",
+                                    "type": "flux3",
+                                    "device": "default"
+                                }
+                            },
+                            "3": {
+                                "class_type": "VAELoader",
+                                "inputs": {
+                                    "vae_name": "flux2-vae.safetensors"
+                                }
+                            },
+                            "4": {
+                                "class_type": "MultiGPU_WorkUnits",
+                                "inputs": {
+                                    "model": [
+                                        "1",
+                                        0
+                                    ],
+                                    "max_gpus": "{{cfg_gpus}}"
+                                }
+                            },
+                            "5": {
+                                "class_type": "CLIPTextEncode",
+                                "inputs": {
+                                    "text": "{{prompt}}",
+                                    "clip": [
+                                        "2",
+                                        0
+                                    ],
+                                    "__bench_nonce": "{{nonce}}"
+                                }
+                            },
+                            "6": {
+                                "class_type": "CLIPTextEncode",
+                                "inputs": {
+                                    "text": "{{negative_prompt}}",
+                                    "clip": [
+                                        "2",
+                                        0
+                                    ],
+                                    "__bench_nonce": "{{nonce}}"
+                                }
+                            },
+                            "7": {
+                                "class_type": "EmptyFlux2LatentImage",
+                                "inputs": {
+                                    "width": "{{width}}",
+                                    "height": "{{height}}",
+                                    "batch_size": 1
+                                }
+                            },
+                            "8": {
+                                "class_type": "KSampler",
+                                "inputs": {
+                                    "model": [
+                                        "4",
+                                        0
+                                    ],
+                                    "seed": "{{seed}}",
+                                    "steps": "{{steps}}",
+                                    "cfg": "{{guidance}}",
+                                    "sampler_name": "euler",
+                                    "scheduler": "simple",
+                                    "positive": [
+                                        "5",
+                                        0
+                                    ],
+                                    "negative": [
+                                        "6",
+                                        0
+                                    ],
+                                    "latent_image": [
+                                        "7",
+                                        0
+                                    ],
+                                    "denoise": 1.0
+                                }
+                            },
+                            "9": {
+                                "class_type": "VAEDecode",
+                                "inputs": {
+                                    "samples": [
+                                        "8",
+                                        0
+                                    ],
+                                    "vae": [
+                                        "3",
+                                        0
+                                    ]
+                                }
+                            },
+                            "10": {
+                                "class_type": "SaveImage",
+                                "inputs": {
+                                    "images": [
+                                        "9",
+                                        0
+                                    ],
+                                    "filename_prefix": "{{filename_prefix}}"
+                                }
+                            }
+                        }
+                    },
+                    "command_profiles": {
+                        "default": {
+                            "description": "ComfyUI master, core nodes only, the official FLUX.3 Klein Base text-to-image template with full-precision weights; CFG branches split over the case's two GPUs.",
+                            "framework_ref": "ComfyUI master HEAD",
+                            "upstream_recipe": {
+                                "repo": "Comfy-Org/workflow_templates",
+                                "path": "templates/image_flux3_klein_t2i.json",
+                                "commit": "4b728a4ec167",
+                                "commit_date": "2026-10-16",
+                                "section": "Text to Image (FLUX 3 Image Klein) subgraph"
+                            },
+                            "num_gpus": 2,
+                            "serve_args": "",
+                            "notes": "Official image_flux3_klein_t2i template (Comfy-Org/workflow_templates) flattened from its subgraph, with the BF16 DiT and Qwen3-VL-4B from black-forest-labs/flux-3-image-klein-comfy in place of the template's int8_convrot defaults (a different numeric class). The template's prompt-upsampler branch (enable_prompt_upsampler) is left out: the case already carries the upsampled caption, so every framework encodes the same text. Sampler euler / scheduler simple and the empty negative prompt follow the template; steps, CFG, size and seed follow the case. MultiGPU_WorkUnits puts the CFG branches on the two GPUs, ComfyUI's counterpart of CFG parallelism. Compile on (TorchCompileModel). VALIDATION PENDING (2026-10-16): derived, not yet measured."
+                        }
+                    }
                 }
             },
             "report_framework_statuses": {
                 "vllm-omni": "unsupported",
                 "lightx2v": "unsupported",
                 "trtllm-visual": "unsupported",
-                "comfyui": "unsupported",
                 "fastvideo": "unsupported"
             },
             "report_framework_reasons": {
-                "vllm-omni": "vLLM-Omni main has no FLUX.3 pipeline (2026-10-15): a code search for flux3 / flux-3-image over vllm-project/vllm-omni returns no hits, and no open or merged PR adds one.",
+                "vllm-omni": "No FLUX.3 pipeline on vLLM-Omni main (2026-10-16). It is in the open, approved PR vllm-project/vllm-omni#9007 (head c4330f88eb44, served as `vllm serve <dir> --omni --cfg-parallel-size N`); reclassify once it merges.",
                 "lightx2v": "LightX2V main has no FLUX.3 serving path (2026-10-15): no flux3 / flux-3-image code or PR in ModelTC/LightX2V; its FLUX coverage ends at FLUX.2.",
-                "trtllm-visual": "TensorRT-LLM VisualGen has no FLUX.3 pipeline (2026-10-15): no flux3 / flux-3-image code in NVIDIA/TensorRT-LLM; its FLUX models are FLUX.1 and FLUX.2.",
-                "comfyui": "ComfyUI core has no FLUX.3 model or official workflow (2026-10-15): no flux3 code in comfyanonymous/ComfyUI.",
+                "trtllm-visual": "No FLUX.3 pipeline on TensorRT-LLM main (2026-10-16); NVIDIA/TensorRT-LLM#20430 adds it and is still a draft.",
                 "fastvideo": "FastVideo main has no FLUX.3 pipeline (2026-10-15): no flux3 code in hao-ai-lab/FastVideo."
             }
         },
