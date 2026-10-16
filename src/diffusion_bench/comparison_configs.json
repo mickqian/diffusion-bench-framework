@@ -30,7 +30,7 @@
             "num_gpus": 2,
             "num_inference_steps": 50,
             "guidance_scale": 3.5,
-            "notes": "Replaces flux1_dev_t2i_1024 and flux2_dev_t2i_1024 (retired 2026-10-15); their published results stay in the reports. Base checkpoint, not the step-distilled black-forest-labs/flux-3-image-klein: a distilled, reduced-step model is a lossy substitute under this repo's policy. 50 steps and CFG 3.5 are the Base settings sglang's FLUX.3 cookbook validated at 1024x1024 (sglang#44418); the prompt and seed are the retired FLUX rows', so the families line up. The repo is gated (auto-approved request plus the flux-kommunity-license); the account whose HF_TOKEN the run uses must have accepted it. No other tracked framework serves FLUX.3 yet (checked 2026-10-15), so this row is sglang-only until one does. VALIDATION PENDING (2026-10-15): derived, not yet measured.",
+            "notes": "Replaces flux1_dev_t2i_1024 and flux2_dev_t2i_1024 (retired 2026-10-15); their published results stay in the reports. Base checkpoint, not the step-distilled black-forest-labs/flux-3-image-klein: a distilled, reduced-step model is a lossy substitute under this repo's policy. 50 steps and CFG 3.5 are the Base settings sglang's FLUX.3 cookbook validated at 1024x1024 (sglang#44418); the prompt and seed are the retired FLUX rows', so the families line up. The repo is gated (auto-approved request plus the flux-kommunity-license); the account whose HF_TOKEN the run uses must have accepted it. No other tracked framework serves FLUX.3 yet (checked 2026-10-15), so this row is sglang-only until one does. sglang measured on 2xH200 2026-10-16 (profile h200-2gpu-cfg-parallel); other hardware VALIDATION PENDING.",
             "frameworks": {
                 "sglang": {
                     "serve_args": "--model-type diffusion --warmup-mode server --enable-cfg-parallel --performance-mode speed",
@@ -41,21 +41,31 @@
                             "sglang_ref": "current-main (FLUX.3 Image since sglang#44418, merged 2026-10-15)",
                             "num_gpus": 2,
                             "serve_args": "--model-type diffusion --warmup-mode server --enable-cfg-parallel --performance-mode speed",
-                            "notes": "The Base model runs CFG 3.5, two DiT branches per step, and this repo measured CFG parallelism as the multi-GPU latency path for two-branch models (Qwen-Image true-CFG: 6.49 s against 11.14 s for TP). The cookbook lists TP, Ulysses and CFG parallelism for this pipeline and measured one GPU only (H200 BF16 T2I 7.09 s, GB300 3.21 s, eager, FlashAttention). Eager, as the cookbook recommends (breakable CUDA graphs showed no clear win on GB300). VALIDATION PENDING (2026-10-15): derived, not yet measured."
+                            "notes": "The Base model runs CFG 3.5, two DiT branches per step, and this repo measured CFG parallelism as the multi-GPU latency path for two-branch models (Qwen-Image true-CFG: 6.49 s against 11.14 s for TP). The cookbook lists TP, Ulysses and CFG parallelism for this pipeline and measured one GPU only (H200 BF16 T2I 7.09 s, GB300 3.21 s, eager, FlashAttention). Eager, as the cookbook recommends (breakable CUDA graphs showed no clear win on GB300). Measured fastest on H200 (see h200-2gpu-cfg-parallel); other hardware VALIDATION PENDING."
+                        },
+                        "h200-2gpu-cfg-parallel": {
+                            "description": "H200: CFG parallelism on two GPUs, the fastest measured layout.",
+                            "hardware": [
+                                "h200"
+                            ],
+                            "sglang_ref": "main c15edf314d (FLUX.3 Image since sglang#44418)",
+                            "num_gpus": 2,
+                            "serve_args": "--model-type diffusion --warmup-mode server --enable-cfg-parallel --performance-mode speed",
+                            "notes": "2026-10-16, 2xH200 (h200-sci), sglang main c15edf314d, torch 2.14.1+cu130, transformers 5.19.0, checkpoint f66af34f9c15, scripts/tune_sglang_serve_args.sh 3 interleaved rounds x 5 requests: CFG parallel 3.637/3.633/3.634 s, TP2 4.018/4.027/4.036 s, Ulysses-2 4.428/4.441/4.431 s (every CFG-parallel sample below every TP2 and Ulysses-2 sample; spreads 0.3-1.1%). FA attention selected by default; text encoder resident under --performance-mode speed (the auto policy layerwise-offloads it even with 139 GiB free)."
                         },
                         "tp2-candidate": {
                             "description": "TP2 alternative for the tuning A/B. Never selected: no hardware tag.",
                             "sglang_ref": "current-main",
                             "num_gpus": 2,
                             "serve_args": "--model-type diffusion --warmup-mode server --tp-size 2 --enable-cfg-parallel false --performance-mode speed",
-                            "notes": "Kept so scripts/tune_sglang_serve_args.sh can interleave it against the CFG-parallel default. TP times Ulysses must divide the 24 attention heads (cookbook). CFG parallelism is turned off explicitly: sglang auto-enables it on two or more GPUs when no sequence-parallel flag is set. VALIDATION PENDING (2026-10-15): derived, not yet measured."
+                            "notes": "Kept so scripts/tune_sglang_serve_args.sh can interleave it against the CFG-parallel default. TP times Ulysses must divide the 24 attention heads (cookbook). CFG parallelism is turned off explicitly: sglang auto-enables it on two or more GPUs when no sequence-parallel flag is set. 2xH200 2026-10-16: 4.018/4.027/4.036 s, 11% slower than CFG parallel."
                         },
                         "ulysses2-candidate": {
                             "description": "Ulysses-2 alternative for the tuning A/B. Never selected: no hardware tag.",
                             "sglang_ref": "current-main",
                             "num_gpus": 2,
                             "serve_args": "--model-type diffusion --warmup-mode server --tp-size 1 --ulysses-degree 2 --performance-mode speed",
-                            "notes": "Kept for the tuning A/B, as for tp2-candidate. VALIDATION PENDING (2026-10-15): derived, not yet measured."
+                            "notes": "Kept for the tuning A/B, as for tp2-candidate. 2xH200 2026-10-16: 4.428/4.441/4.431 s, 22% slower than CFG parallel."
                         }
                     }
                 }

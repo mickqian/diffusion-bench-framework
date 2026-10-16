@@ -79,7 +79,7 @@ offloaded on datacenter hardware without one (see KNOWN_COMPETITOR_VIOLATIONS).
 | flux3_klein_base_t2i_1024 | sglang | gb200 | `default` |  |  |  | `--model-type diffusion --warmup-mode server --enable-cfg-parallel --performance-mode speed` |  |
 | flux3_klein_base_t2i_1024 | sglang | gb300 | `default` |  |  |  | `--model-type diffusion --warmup-mode server --enable-cfg-parallel --performance-mode speed` |  |
 | flux3_klein_base_t2i_1024 | sglang | h100 | `default` |  |  |  | `--model-type diffusion --warmup-mode server --enable-cfg-parallel --performance-mode speed` |  |
-| flux3_klein_base_t2i_1024 | sglang | h200 | `default` |  |  |  | `--model-type diffusion --warmup-mode server --enable-cfg-parallel --performance-mode speed` |  |
+| flux3_klein_base_t2i_1024 | sglang | h200 | `h200-2gpu-cfg-parallel` |  |  |  | `--model-type diffusion --warmup-mode server --enable-cfg-parallel --performance-mode speed` |  |
 | flux3_klein_base_t2i_1024 | sglang | mi300x | `default` |  |  |  | `--model-type diffusion --warmup-mode server --enable-cfg-parallel --performance-mode speed` |  |
 | flux3_klein_base_t2i_1024 | sglang | mi350x | `default` |  |  |  | `--model-type diffusion --warmup-mode server --enable-cfg-parallel --performance-mode speed` |  |
 | flux3_klein_base_t2i_1024 | sglang | mi355x | `default` |  |  |  | `--model-type diffusion --warmup-mode server --enable-cfg-parallel --performance-mode speed` |  |
