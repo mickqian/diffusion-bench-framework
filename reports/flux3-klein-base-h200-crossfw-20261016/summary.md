@@ -91,16 +91,39 @@ sglang stages (server timers, one instrumented request):
   `3f7fa5ee` has no `config.json`, because diffusers never fetched it, and vLLM-Omni pointed
   at it fails with `Flux3ModularPipeline not found in diffusion model registry`.
 
-## Leads
+## CFG-parallel scaling, measured
 
-- **sglang's CFG-parallel scaling is 1.81× on denoise** (6.771 → 3.736 s), while vLLM-Omni
-  scales 2.01× end to end. sglang still wins at two GPUs by 11%, but the 0.35 s it gives
-  up there is worth a look:
-  - the two ranks carry different text lengths (303-word prompt vs empty negative), so
-    the branches are unbalanced;
-  - each step also pays the CFG combine.
-- **Not run:** throughput mode (FLUX.3 is not in the representative throughput pair),
-  other hardware, TensorRT-LLM (draft PR #20430), LightX2V and FastVideo (no FLUX.3).
+sglang scales 1.78× from one GPU to two, and vLLM-Omni 2.01×. A follow-up checked
+whether sglang's two-GPU path has overhead to recover. It does not.
+
+Setup: CUDA events around each rank's forward and the gather, in a measurement-only patch
+(`cfg_parallel_breakdown/measurement.patch`, never upstreamed). Fresh 2×H200 box, sglang
+main `e1d2057`, median of steps 5–49, three requests per arm after two warmups.
+
+| arm | uncond rank forward | its wait + gather | cond rank forward | step | e2e p50 |
+|---|---|---|---|---|---|
+| 2 GPUs, empty negative (80 vs 480 text tokens) | 64.87 ms | 12.93 ms | 77.88 ms | 77.94 ms | 4.040 s |
+| 2 GPUs, negative = caption (480 vs 480) | 76.70 ms | 0.88 ms | 77.41 ms | 77.44 ms | 4.008 s |
+| 1 GPU, empty negative (packed, one forward) | | | | 135.5 ms | 7.182 s |
+| 1 GPU, negative = caption (packed) | | | | 144.0 ms | 7.599 s |
+
+- **The CFG combine costs under 1 ms a step.** The two-GPU step is the cond branch's
+  forward plus about 0.05 ms.
+- **Branch imbalance.** With the empty negative, the uncond rank idles about 13 ms (17%) of
+  every step waiting for the cond rank. This is inherent to splitting two unequal branches.
+- **Packing on one GPU.** sglang packs both branches into one varlen forward on a single
+  GPU. That is 5–7% faster than two separate forwards (135.5 ms against 64.87 + 77.88 =
+  142.75 ms), so the one-GPU baseline is faster.
+- **Where the gap to 2× comes from.** Together, the imbalance and the packing explain it.
+  Even with equal branches, scaling is 1.90× end to end.
+- **vLLM-Omni.** Its one-GPU step (about 176 ms) is about twice its two-GPU step, which is
+  consistent with running both branches at equal cost. Its higher ratio comes from a slower
+  baseline. sglang is faster in absolute terms at both GPU counts.
+
+## Not run
+
+Throughput mode (FLUX.3 is not in the representative throughput pair), other hardware,
+TensorRT-LLM (draft PR #20430), LightX2V and FastVideo (no FLUX.3).
 
 The first-day sglang-only report, `flux3-klein-base-h200-20261016`, used the short prompt
 (3.631 s on two GPUs). Its numbers are not comparable with these.

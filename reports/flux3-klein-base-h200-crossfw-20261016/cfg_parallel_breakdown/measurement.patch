@@ -1,0 +1,67 @@
+diff --git a/python/sglang/multimodal_gen/runtime/pipelines_core/stages/model_specific_stages/flux3_image.py b/python/sglang/multimodal_gen/runtime/pipelines_core/stages/model_specific_stages/flux3_image.py
+index b3b57a351d0..e93095ceb05 100644
+--- a/python/sglang/multimodal_gen/runtime/pipelines_core/stages/model_specific_stages/flux3_image.py
++++ b/python/sglang/multimodal_gen/runtime/pipelines_core/stages/model_specific_stages/flux3_image.py
+@@ -622,17 +622,57 @@ class _CFGParallelModel:
+ 
+     def __call__(self, *, packed: Packed):
+         half = packed.num_samples // 2
+-        predictions = run_cfg_parallel(
+-            self.policy,
+-            lambda branch: self.model(
++        if get_forward_context().current_timestep == 0:
++            _CFGPROF.clear()
++        ev = [torch.cuda.Event(enable_timing=True) for _ in range(3)]
++        ev[0].record()
++
++        def _fwd(branch):
++            out = self.model(
+                 packed=packed.slice_samples(
+                     branch.kwargs["index"] * half, (branch.kwargs["index"] + 1) * half
+                 )
+-            )["image"],
+-        )
++            )["image"]
++            ev[1].record()
++            return out
++
++        predictions = run_cfg_parallel(self.policy, _fwd)
++        ev[2].record()
++        _CFGPROF.append(ev)
++        if len(_CFGPROF) == _CFGPROF_STEPS:
++            torch.cuda.synchronize()
++            import statistics
++
++            from sglang.multimodal_gen.runtime.distributed.parallel_state import (
++                get_classifier_free_guidance_rank,
++            )
++
++            rows = _CFGPROF[5:]
++            fwd = [a.elapsed_time(b) for a, b, _ in rows]
++            gat = [b.elapsed_time(c) for _, b, c in rows]
++            step = [x[0].elapsed_time(y[0]) for x, y in zip(rows, rows[1:])]
++            tokens = [
++                {
++                    k: v.shape[0]
++                    for k, v in packed.slice_samples(i * half, (i + 1) * half).data.items()
++                    if isinstance(v, torch.Tensor)
++                }
++                for i in range(2)
++            ]
++            print(
++                f"CFGPROF rank={get_classifier_free_guidance_rank()} steps={len(rows)} "
++                f"fwd_ms={statistics.median(fwd):.2f} gather_ms={statistics.median(gat):.2f} "
++                f"step_ms={statistics.median(step):.2f} tokens(uncond,cond)={tokens}",
++                flush=True,
++            )
++            _CFGPROF.clear()
+         return {"image": torch.cat(predictions)}
+ 
+ 
++_CFGPROF: list = []
++_CFGPROF_STEPS = int(os.environ.get("CFGPROF_STEPS", "50"))
++
++
+ class Flux3ImageDenoiseStage(DenoisingStage):
+     def __init__(self, transformer, package_config) -> None:
+         super().__init__(transformer=transformer, scheduler=None)
