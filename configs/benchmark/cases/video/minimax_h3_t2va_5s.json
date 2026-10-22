@@ -114,9 +114,10 @@
           "upstream_recipe": {
             "repo": "vllm-project/vllm-omni",
             "path": "recipes/MiniMaxAI/MiniMax-H3.md",
-            "commit": "f69b1f2b1",
-            "commit_date": "2026-10-10",
-            "section": "Two 24/32 GB GPUs: TP2 distributed layerwise offload"
+            "commit": "95b1d97f2ec2",
+            "commit_date": "2026-10-21",
+            "section": "Two 24/32 GB GPUs: TP2 distributed layerwise offload",
+            "recheck": "Re-checked 2026-10-22: the only change since the profile was written moved the FastH3 sections to recipes/FastVideo/ (95b1d97f); the base H3 serving sections are unchanged. The previously recorded f69b1f2b1 was a repo HEAD, not a commit to this file."
           },
           "num_gpus": 2,
           "serve_args": "--trust-remote-code --task-type fl2va --num-gpus 2 --tensor-parallel-size 2 --usp 1 --ring 1 --text-encoder-tp-size 2 --vae-patch-parallel-size 2 --vae-parallel-mode tile --vae-use-tiling",
@@ -134,9 +135,10 @@
           "upstream_recipe": {
             "repo": "vllm-project/vllm-omni",
             "path": "recipes/MiniMaxAI/MiniMax-H3.md",
-            "commit": "f69b1f2b1",
-            "commit_date": "2026-10-10",
-            "section": "Two 24/32 GB GPUs: TP2 distributed layerwise offload"
+            "commit": "95b1d97f2ec2",
+            "commit_date": "2026-10-21",
+            "section": "Two 24/32 GB GPUs: TP2 distributed layerwise offload",
+            "recheck": "Re-checked 2026-10-22: the only change since the profile was written moved the FastH3 sections to recipes/FastVideo/ (95b1d97f); the base H3 serving sections are unchanged. The previously recorded f69b1f2b1 was a repo HEAD, not a commit to this file."
           },
           "num_gpus": 2,
           "serve_args": "--trust-remote-code --task-type fl2va --num-gpus 2 --tensor-parallel-size 2 --usp 1 --ring 1 --text-encoder-tp-size 2 --vae-patch-parallel-size 2 --vae-parallel-mode tile --vae-use-tiling --diffusion-attention-backend CUDNN_ATTN",
@@ -156,9 +158,10 @@
           "upstream_recipe": {
             "repo": "vllm-project/vllm-omni",
             "path": "recipes/MiniMaxAI/MiniMax-H3.md",
-            "commit": "f69b1f2b1",
-            "commit_date": "2026-10-10",
-            "section": "Two 24/32 GB GPUs: TP2 distributed layerwise offload"
+            "commit": "95b1d97f2ec2",
+            "commit_date": "2026-10-21",
+            "section": "Two 24/32 GB GPUs: TP2 distributed layerwise offload",
+            "recheck": "Re-checked 2026-10-22: the only change since the profile was written moved the FastH3 sections to recipes/FastVideo/ (95b1d97f); the base H3 serving sections are unchanged. The previously recorded f69b1f2b1 was a repo HEAD, not a commit to this file."
           },
           "extra_env": {
             "VLLM_WORKER_MULTIPROC_METHOD": "spawn",
@@ -182,9 +185,10 @@
           "upstream_recipe": {
             "repo": "vllm-project/vllm-omni",
             "path": "recipes/MiniMaxAI/MiniMax-H3.md",
-            "commit": "f69b1f2b1",
-            "commit_date": "2026-10-10",
-            "section": "Four GPUs: throughput-oriented combined service"
+            "commit": "95b1d97f2ec2",
+            "commit_date": "2026-10-21",
+            "section": "Four GPUs: throughput-oriented combined service",
+            "recheck": "Re-checked 2026-10-22: the only change since the profile was written moved the FastH3 sections to recipes/FastVideo/ (95b1d97f); the base H3 serving sections are unchanged. The previously recorded f69b1f2b1 was a repo HEAD, not a commit to this file."
           },
           "num_gpus": 2,
           "serve_args": "--trust-remote-code --task-type fl2va --num-gpus 2 --usp 2 --ring 1 --vae-patch-parallel-size 2 --vae-parallel-mode tile --vae-use-tiling",
@@ -215,9 +219,10 @@
           "upstream_recipe": {
             "repo": "vllm-project/vllm-omni",
             "path": "recipes/MiniMaxAI/MiniMax-H3.md",
-            "commit": "f69b1f2b1",
-            "commit_date": "2026-10-10",
-            "section": "ROCm four GPUs"
+            "commit": "95b1d97f2ec2",
+            "commit_date": "2026-10-21",
+            "section": "ROCm four GPUs",
+            "recheck": "Re-checked 2026-10-22: the only change since the profile was written moved the FastH3 sections to recipes/FastVideo/ (95b1d97f); the base H3 serving sections are unchanged. The previously recorded f69b1f2b1 was a repo HEAD, not a commit to this file."
           },
           "num_gpus": 2,
           "serve_args": "--trust-remote-code --task-type fl2va --num-gpus 2 --usp 2 --ring 1 --text-encoder-tp-size 2 --vae-patch-parallel-size 2 --vae-parallel-mode tile --vae-use-tiling --diffusion-attention-backend FLASH_ATTN",
@@ -287,9 +292,10 @@
           "upstream_recipe": {
             "repo": "ModelTC/LightX2V",
             "path": "configs/minimax_h3/minimax_h3_tp.json",
-            "commit": "fabad30491",
-            "commit_date": "2026-09-10",
-            "section": "TP2 preset (scripts/minimax_h3/README.md parallel table: TP2 -> --nproc_per_node 2), served per 'Server and POST' with --model-variant fl2av"
+            "commit": "c301bc5de71a",
+            "commit_date": "2026-10-12",
+            "section": "TP2 preset (scripts/minimax_h3/README.md parallel table: TP2 -> --nproc_per_node 2), served per 'Server and POST' with --model-variant fl2av",
+            "recheck": "Re-checked 2026-10-22: #1592/#1604 only dropped keys that now default to the same values (lazy_load, unload_modules, audio_sampling_rate) and made deployment config override checkpoint defaults in set_config.py; no command change."
           },
           "num_gpus": 2,
           "serve_args": "--model-variant fl2av",
@@ -309,9 +315,10 @@
           "upstream_recipe": {
             "repo": "ModelTC/LightX2V",
             "path": "configs/minimax_h3/minimax_h3_tp.json",
-            "commit": "fabad30491",
-            "commit_date": "2026-09-10",
-            "section": "TP2 preset (scripts/minimax_h3/README.md parallel table: TP2 -> --nproc_per_node 2), served per 'Server and POST' with --model-variant fl2av"
+            "commit": "c301bc5de71a",
+            "commit_date": "2026-10-12",
+            "section": "TP2 preset (scripts/minimax_h3/README.md parallel table: TP2 -> --nproc_per_node 2), served per 'Server and POST' with --model-variant fl2av",
+            "recheck": "Re-checked 2026-10-22: #1592/#1604 only dropped keys that now default to the same values (lazy_load, unload_modules, audio_sampling_rate) and made deployment config override checkpoint defaults in set_config.py; no command change."
           },
           "num_gpus": 2,
           "serve_args": "--model-variant fl2av",
@@ -329,9 +336,10 @@
           "upstream_recipe": {
             "repo": "ModelTC/LightX2V",
             "path": "configs/minimax_h3/minimax_h3_tp.json",
-            "commit": "fabad30491",
-            "commit_date": "2026-09-10",
-            "section": "TP2 preset (scripts/minimax_h3/README.md parallel table: TP2 -> --nproc_per_node 2), served per 'Server and POST' with --model-variant fl2av"
+            "commit": "c301bc5de71a",
+            "commit_date": "2026-10-12",
+            "section": "TP2 preset (scripts/minimax_h3/README.md parallel table: TP2 -> --nproc_per_node 2), served per 'Server and POST' with --model-variant fl2av",
+            "recheck": "Re-checked 2026-10-22: #1592/#1604 only dropped keys that now default to the same values (lazy_load, unload_modules, audio_sampling_rate) and made deployment config override checkpoint defaults in set_config.py; no command change."
           },
           "num_gpus": 2,
           "serve_args": "--model-variant fl2av",

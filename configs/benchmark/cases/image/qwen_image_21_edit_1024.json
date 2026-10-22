@@ -94,9 +94,10 @@
           "upstream_recipe": {
             "repo": "vllm-project/vllm-omni",
             "path": "recipes/Qwen/Qwen-Image-2.1.md",
-            "commit": "f69b1f2b1",
-            "commit_date": "2026-10-10",
-            "section": "Online Serving"
+            "commit": "b164fea79753",
+            "commit_date": "2026-10-17",
+            "section": "Online Serving",
+            "recheck": "Re-checked 2026-10-22: the recipe gained a Qwen-Image-2.1-Turbo four-GPU section and NPU defaults (910b8f07, b164fea7); the base-model serving sections this profile follows are unchanged. Its new exact text-conditioning cache cannot hit the harness's distinct per-request prompts."
           },
           "num_gpus": 1,
           "serve_args": "",
@@ -111,9 +112,10 @@
           "upstream_recipe": {
             "repo": "vllm-project/vllm-omni",
             "path": "recipes/Qwen/Qwen-Image-2.1.md",
-            "commit": "f69b1f2b1",
-            "commit_date": "2026-10-10",
-            "section": "Online Serving"
+            "commit": "b164fea79753",
+            "commit_date": "2026-10-17",
+            "section": "Online Serving",
+            "recheck": "Re-checked 2026-10-22: the recipe gained a Qwen-Image-2.1-Turbo four-GPU section and NPU defaults (910b8f07, b164fea7); the base-model serving sections this profile follows are unchanged. Its new exact text-conditioning cache cannot hit the harness's distinct per-request prompts."
           },
           "serve_args": "--enable-cpu-offload --no-enable-cuda-graph-decode",
           "extra_env": {
@@ -133,9 +135,10 @@
           "upstream_recipe": {
             "repo": "vllm-project/vllm-omni",
             "path": "recipes/Qwen/Qwen-Image-2.1.md",
-            "commit": "f69b1f2b1",
-            "commit_date": "2026-10-10",
-            "section": "Online Serving"
+            "commit": "b164fea79753",
+            "commit_date": "2026-10-17",
+            "section": "Online Serving",
+            "recheck": "Re-checked 2026-10-22: the recipe gained a Qwen-Image-2.1-Turbo four-GPU section and NPU defaults (910b8f07, b164fea7); the base-model serving sections this profile follows are unchanged. Its new exact text-conditioning cache cannot hit the harness's distinct per-request prompts."
           },
           "num_gpus": 1,
           "serve_args": "",

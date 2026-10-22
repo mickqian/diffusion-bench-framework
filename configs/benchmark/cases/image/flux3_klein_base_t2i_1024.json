@@ -85,9 +85,10 @@
           "upstream_recipe": {
             "repo": "Comfy-Org/workflow_templates",
             "path": "templates/image_flux3_klein_t2i.json",
-            "commit": "4b728a4ec167",
-            "commit_date": "2026-10-16",
-            "section": "Text to Image (FLUX 3 Image Klein) subgraph"
+            "commit": "369c1ed12496",
+            "commit_date": "2026-10-17",
+            "section": "Text to Image (FLUX 3 Image Klein) subgraph",
+            "recheck": "Re-checked 2026-10-22: the template's default steps went 25 -> 50 (the case sets steps), model files were renamed with hyphens, and an optional Flux3LayoutPrompt node was added; sampler, scheduler and graph are unchanged."
           },
           "num_gpus": 2,
           "serve_args": "--gpu-only",

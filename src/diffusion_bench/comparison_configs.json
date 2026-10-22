@@ -204,9 +204,10 @@
                             "upstream_recipe": {
                                 "repo": "Comfy-Org/workflow_templates",
                                 "path": "templates/image_flux3_klein_t2i.json",
-                                "commit": "4b728a4ec167",
-                                "commit_date": "2026-10-16",
-                                "section": "Text to Image (FLUX 3 Image Klein) subgraph"
+                                "commit": "369c1ed12496",
+                                "commit_date": "2026-10-17",
+                                "section": "Text to Image (FLUX 3 Image Klein) subgraph",
+                                "recheck": "Re-checked 2026-10-22: the template's default steps went 25 -> 50 (the case sets steps), model files were renamed with hyphens, and an optional Flux3LayoutPrompt node was added; sampler, scheduler and graph are unchanged."
                             },
                             "num_gpus": 2,
                             "serve_args": "--gpu-only",
@@ -323,9 +324,10 @@
                             "upstream_recipe": {
                                 "repo": "vllm-project/vllm-omni",
                                 "path": "recipes/Qwen/Qwen-Image-2.1.md",
-                                "commit": "f69b1f2b1",
-                                "commit_date": "2026-10-10",
-                                "section": "Online Serving"
+                                "commit": "b164fea79753",
+                                "commit_date": "2026-10-17",
+                                "section": "Online Serving",
+                                "recheck": "Re-checked 2026-10-22: the recipe gained a Qwen-Image-2.1-Turbo four-GPU section and NPU defaults (910b8f07, b164fea7); the base-model serving sections this profile follows are unchanged. Its new exact text-conditioning cache cannot hit the harness's distinct per-request prompts."
                             },
                             "num_gpus": 1,
                             "serve_args": "",
@@ -340,9 +342,10 @@
                             "upstream_recipe": {
                                 "repo": "vllm-project/vllm-omni",
                                 "path": "recipes/Qwen/Qwen-Image-2.1.md",
-                                "commit": "f69b1f2b1",
-                                "commit_date": "2026-10-10",
-                                "section": "Online Serving"
+                                "commit": "b164fea79753",
+                                "commit_date": "2026-10-17",
+                                "section": "Online Serving",
+                                "recheck": "Re-checked 2026-10-22: the recipe gained a Qwen-Image-2.1-Turbo four-GPU section and NPU defaults (910b8f07, b164fea7); the base-model serving sections this profile follows are unchanged. Its new exact text-conditioning cache cannot hit the harness's distinct per-request prompts."
                             },
                             "serve_args": "--enable-cpu-offload --no-enable-cuda-graph-decode",
                             "extra_env": {
@@ -362,9 +365,10 @@
                             "upstream_recipe": {
                                 "repo": "vllm-project/vllm-omni",
                                 "path": "recipes/Qwen/Qwen-Image-2.1.md",
-                                "commit": "f69b1f2b1",
-                                "commit_date": "2026-10-10",
-                                "section": "Online Serving"
+                                "commit": "b164fea79753",
+                                "commit_date": "2026-10-17",
+                                "section": "Online Serving",
+                                "recheck": "Re-checked 2026-10-22: the recipe gained a Qwen-Image-2.1-Turbo four-GPU section and NPU defaults (910b8f07, b164fea7); the base-model serving sections this profile follows are unchanged. Its new exact text-conditioning cache cannot hit the harness's distinct per-request prompts."
                             },
                             "num_gpus": 1,
                             "serve_args": "",
@@ -687,9 +691,10 @@
                             "upstream_recipe": {
                                 "repo": "vllm-project/vllm-omni",
                                 "path": "recipes/Qwen/Qwen-Image-2.1.md",
-                                "commit": "f69b1f2b1",
-                                "commit_date": "2026-10-10",
-                                "section": "Online Serving"
+                                "commit": "b164fea79753",
+                                "commit_date": "2026-10-17",
+                                "section": "Online Serving",
+                                "recheck": "Re-checked 2026-10-22: the recipe gained a Qwen-Image-2.1-Turbo four-GPU section and NPU defaults (910b8f07, b164fea7); the base-model serving sections this profile follows are unchanged. Its new exact text-conditioning cache cannot hit the harness's distinct per-request prompts."
                             },
                             "num_gpus": 2,
                             "serve_args": "--usp 2",
@@ -707,9 +712,10 @@
                             "upstream_recipe": {
                                 "repo": "vllm-project/vllm-omni",
                                 "path": "recipes/Qwen/Qwen-Image-2.1.md",
-                                "commit": "f69b1f2b1",
-                                "commit_date": "2026-10-10",
-                                "section": "Online Serving"
+                                "commit": "b164fea79753",
+                                "commit_date": "2026-10-17",
+                                "section": "Online Serving",
+                                "recheck": "Re-checked 2026-10-22: the recipe gained a Qwen-Image-2.1-Turbo four-GPU section and NPU defaults (910b8f07, b164fea7); the base-model serving sections this profile follows are unchanged. Its new exact text-conditioning cache cannot hit the harness's distinct per-request prompts."
                             },
                             "num_gpus": 2,
                             "serve_args": "--usp 2",
@@ -828,9 +834,10 @@
                             "upstream_recipe": {
                                 "repo": "vllm-project/vllm-omni",
                                 "path": "recipes/Qwen/Qwen-Image-2.1.md",
-                                "commit": "f69b1f2b1",
-                                "commit_date": "2026-10-10",
-                                "section": "Online Serving"
+                                "commit": "b164fea79753",
+                                "commit_date": "2026-10-17",
+                                "section": "Online Serving",
+                                "recheck": "Re-checked 2026-10-22: the recipe gained a Qwen-Image-2.1-Turbo four-GPU section and NPU defaults (910b8f07, b164fea7); the base-model serving sections this profile follows are unchanged. Its new exact text-conditioning cache cannot hit the harness's distinct per-request prompts."
                             },
                             "num_gpus": 1,
                             "serve_args": "",
@@ -845,9 +852,10 @@
                             "upstream_recipe": {
                                 "repo": "vllm-project/vllm-omni",
                                 "path": "recipes/Qwen/Qwen-Image-2.1.md",
-                                "commit": "f69b1f2b1",
-                                "commit_date": "2026-10-10",
-                                "section": "Online Serving"
+                                "commit": "b164fea79753",
+                                "commit_date": "2026-10-17",
+                                "section": "Online Serving",
+                                "recheck": "Re-checked 2026-10-22: the recipe gained a Qwen-Image-2.1-Turbo four-GPU section and NPU defaults (910b8f07, b164fea7); the base-model serving sections this profile follows are unchanged. Its new exact text-conditioning cache cannot hit the harness's distinct per-request prompts."
                             },
                             "serve_args": "--enable-cpu-offload --no-enable-cuda-graph-decode",
                             "extra_env": {
@@ -867,9 +875,10 @@
                             "upstream_recipe": {
                                 "repo": "vllm-project/vllm-omni",
                                 "path": "recipes/Qwen/Qwen-Image-2.1.md",
-                                "commit": "f69b1f2b1",
-                                "commit_date": "2026-10-10",
-                                "section": "Online Serving"
+                                "commit": "b164fea79753",
+                                "commit_date": "2026-10-17",
+                                "section": "Online Serving",
+                                "recheck": "Re-checked 2026-10-22: the recipe gained a Qwen-Image-2.1-Turbo four-GPU section and NPU defaults (910b8f07, b164fea7); the base-model serving sections this profile follows are unchanged. Its new exact text-conditioning cache cannot hit the harness's distinct per-request prompts."
                             },
                             "num_gpus": 1,
                             "serve_args": "",
@@ -3409,9 +3418,10 @@
                             "upstream_recipe": {
                                 "repo": "vllm-project/vllm-omni",
                                 "path": "recipes/MiniMaxAI/MiniMax-H3.md",
-                                "commit": "f69b1f2b1",
-                                "commit_date": "2026-10-10",
-                                "section": "Two 24/32 GB GPUs: TP2 distributed layerwise offload"
+                                "commit": "95b1d97f2ec2",
+                                "commit_date": "2026-10-21",
+                                "section": "Two 24/32 GB GPUs: TP2 distributed layerwise offload",
+                                "recheck": "Re-checked 2026-10-22: the only change since the profile was written moved the FastH3 sections to recipes/FastVideo/ (95b1d97f); the base H3 serving sections are unchanged. The previously recorded f69b1f2b1 was a repo HEAD, not a commit to this file."
                             },
                             "num_gpus": 2,
                             "serve_args": "--trust-remote-code --task-type fl2va --num-gpus 2 --tensor-parallel-size 2 --usp 1 --ring 1 --text-encoder-tp-size 2 --vae-patch-parallel-size 2 --vae-parallel-mode tile --vae-use-tiling",
@@ -3429,9 +3439,10 @@
                             "upstream_recipe": {
                                 "repo": "vllm-project/vllm-omni",
                                 "path": "recipes/MiniMaxAI/MiniMax-H3.md",
-                                "commit": "f69b1f2b1",
-                                "commit_date": "2026-10-10",
-                                "section": "Two 24/32 GB GPUs: TP2 distributed layerwise offload"
+                                "commit": "95b1d97f2ec2",
+                                "commit_date": "2026-10-21",
+                                "section": "Two 24/32 GB GPUs: TP2 distributed layerwise offload",
+                                "recheck": "Re-checked 2026-10-22: the only change since the profile was written moved the FastH3 sections to recipes/FastVideo/ (95b1d97f); the base H3 serving sections are unchanged. The previously recorded f69b1f2b1 was a repo HEAD, not a commit to this file."
                             },
                             "num_gpus": 2,
                             "serve_args": "--trust-remote-code --task-type fl2va --num-gpus 2 --tensor-parallel-size 2 --usp 1 --ring 1 --text-encoder-tp-size 2 --vae-patch-parallel-size 2 --vae-parallel-mode tile --vae-use-tiling --diffusion-attention-backend CUDNN_ATTN",
@@ -3451,9 +3462,10 @@
                             "upstream_recipe": {
                                 "repo": "vllm-project/vllm-omni",
                                 "path": "recipes/MiniMaxAI/MiniMax-H3.md",
-                                "commit": "f69b1f2b1",
-                                "commit_date": "2026-10-10",
-                                "section": "Two 24/32 GB GPUs: TP2 distributed layerwise offload"
+                                "commit": "95b1d97f2ec2",
+                                "commit_date": "2026-10-21",
+                                "section": "Two 24/32 GB GPUs: TP2 distributed layerwise offload",
+                                "recheck": "Re-checked 2026-10-22: the only change since the profile was written moved the FastH3 sections to recipes/FastVideo/ (95b1d97f); the base H3 serving sections are unchanged. The previously recorded f69b1f2b1 was a repo HEAD, not a commit to this file."
                             },
                             "extra_env": {
                                 "VLLM_WORKER_MULTIPROC_METHOD": "spawn",
@@ -3477,9 +3489,10 @@
                             "upstream_recipe": {
                                 "repo": "vllm-project/vllm-omni",
                                 "path": "recipes/MiniMaxAI/MiniMax-H3.md",
-                                "commit": "f69b1f2b1",
-                                "commit_date": "2026-10-10",
-                                "section": "Four GPUs: throughput-oriented combined service"
+                                "commit": "95b1d97f2ec2",
+                                "commit_date": "2026-10-21",
+                                "section": "Four GPUs: throughput-oriented combined service",
+                                "recheck": "Re-checked 2026-10-22: the only change since the profile was written moved the FastH3 sections to recipes/FastVideo/ (95b1d97f); the base H3 serving sections are unchanged. The previously recorded f69b1f2b1 was a repo HEAD, not a commit to this file."
                             },
                             "num_gpus": 2,
                             "serve_args": "--trust-remote-code --task-type fl2va --num-gpus 2 --usp 2 --ring 1 --vae-patch-parallel-size 2 --vae-parallel-mode tile --vae-use-tiling",
@@ -3510,9 +3523,10 @@
                             "upstream_recipe": {
                                 "repo": "vllm-project/vllm-omni",
                                 "path": "recipes/MiniMaxAI/MiniMax-H3.md",
-                                "commit": "f69b1f2b1",
-                                "commit_date": "2026-10-10",
-                                "section": "ROCm four GPUs"
+                                "commit": "95b1d97f2ec2",
+                                "commit_date": "2026-10-21",
+                                "section": "ROCm four GPUs",
+                                "recheck": "Re-checked 2026-10-22: the only change since the profile was written moved the FastH3 sections to recipes/FastVideo/ (95b1d97f); the base H3 serving sections are unchanged. The previously recorded f69b1f2b1 was a repo HEAD, not a commit to this file."
                             },
                             "num_gpus": 2,
                             "serve_args": "--trust-remote-code --task-type fl2va --num-gpus 2 --usp 2 --ring 1 --text-encoder-tp-size 2 --vae-patch-parallel-size 2 --vae-parallel-mode tile --vae-use-tiling --diffusion-attention-backend FLASH_ATTN",
@@ -3581,9 +3595,10 @@
                             "upstream_recipe": {
                                 "repo": "ModelTC/LightX2V",
                                 "path": "configs/minimax_h3/minimax_h3_tp.json",
-                                "commit": "fabad30491",
-                                "commit_date": "2026-09-10",
-                                "section": "TP2 preset (scripts/minimax_h3/README.md parallel table: TP2 -> --nproc_per_node 2), served per 'Server and POST' with --model-variant fl2av"
+                                "commit": "c301bc5de71a",
+                                "commit_date": "2026-10-12",
+                                "section": "TP2 preset (scripts/minimax_h3/README.md parallel table: TP2 -> --nproc_per_node 2), served per 'Server and POST' with --model-variant fl2av",
+                                "recheck": "Re-checked 2026-10-22: #1592/#1604 only dropped keys that now default to the same values (lazy_load, unload_modules, audio_sampling_rate) and made deployment config override checkpoint defaults in set_config.py; no command change."
                             },
                             "num_gpus": 2,
                             "serve_args": "--model-variant fl2av",
@@ -3603,9 +3618,10 @@
                             "upstream_recipe": {
                                 "repo": "ModelTC/LightX2V",
                                 "path": "configs/minimax_h3/minimax_h3_tp.json",
-                                "commit": "fabad30491",
-                                "commit_date": "2026-09-10",
-                                "section": "TP2 preset (scripts/minimax_h3/README.md parallel table: TP2 -> --nproc_per_node 2), served per 'Server and POST' with --model-variant fl2av"
+                                "commit": "c301bc5de71a",
+                                "commit_date": "2026-10-12",
+                                "section": "TP2 preset (scripts/minimax_h3/README.md parallel table: TP2 -> --nproc_per_node 2), served per 'Server and POST' with --model-variant fl2av",
+                                "recheck": "Re-checked 2026-10-22: #1592/#1604 only dropped keys that now default to the same values (lazy_load, unload_modules, audio_sampling_rate) and made deployment config override checkpoint defaults in set_config.py; no command change."
                             },
                             "num_gpus": 2,
                             "serve_args": "--model-variant fl2av",
@@ -3623,9 +3639,10 @@
                             "upstream_recipe": {
                                 "repo": "ModelTC/LightX2V",
                                 "path": "configs/minimax_h3/minimax_h3_tp.json",
-                                "commit": "fabad30491",
-                                "commit_date": "2026-09-10",
-                                "section": "TP2 preset (scripts/minimax_h3/README.md parallel table: TP2 -> --nproc_per_node 2), served per 'Server and POST' with --model-variant fl2av"
+                                "commit": "c301bc5de71a",
+                                "commit_date": "2026-10-12",
+                                "section": "TP2 preset (scripts/minimax_h3/README.md parallel table: TP2 -> --nproc_per_node 2), served per 'Server and POST' with --model-variant fl2av",
+                                "recheck": "Re-checked 2026-10-22: #1592/#1604 only dropped keys that now default to the same values (lazy_load, unload_modules, audio_sampling_rate) and made deployment config override checkpoint defaults in set_config.py; no command change."
                             },
                             "num_gpus": 2,
                             "serve_args": "--model-variant fl2av",
@@ -4000,9 +4017,10 @@
                             "upstream_recipe": {
                                 "repo": "vllm-project/vllm-omni",
                                 "path": "recipes/MiniMaxAI/MiniMax-H3.md",
-                                "commit": "f69b1f2b1",
-                                "commit_date": "2026-10-10",
-                                "section": "Four GPUs: throughput-oriented combined service"
+                                "commit": "95b1d97f2ec2",
+                                "commit_date": "2026-10-21",
+                                "section": "Four GPUs: throughput-oriented combined service",
+                                "recheck": "Re-checked 2026-10-22: the only change since the profile was written moved the FastH3 sections to recipes/FastVideo/ (95b1d97f); the base H3 serving sections are unchanged. The previously recorded f69b1f2b1 was a repo HEAD, not a commit to this file."
                             },
                             "num_gpus": 4,
                             "serve_args": "--trust-remote-code --task-type fl2va --num-gpus 4 --usp 4 --ring 1 --vae-patch-parallel-size 4 --vae-parallel-mode tile --vae-use-tiling",
@@ -4019,9 +4037,10 @@
                             "upstream_recipe": {
                                 "repo": "vllm-project/vllm-omni",
                                 "path": "recipes/MiniMaxAI/MiniMax-H3.md",
-                                "commit": "f69b1f2b1",
-                                "commit_date": "2026-10-10",
-                                "section": "ROCm four GPUs"
+                                "commit": "95b1d97f2ec2",
+                                "commit_date": "2026-10-21",
+                                "section": "ROCm four GPUs",
+                                "recheck": "Re-checked 2026-10-22: the only change since the profile was written moved the FastH3 sections to recipes/FastVideo/ (95b1d97f); the base H3 serving sections are unchanged. The previously recorded f69b1f2b1 was a repo HEAD, not a commit to this file."
                             },
                             "num_gpus": 4,
                             "serve_args": "--trust-remote-code --task-type fl2va --num-gpus 4 --usp 4 --ring 1 --text-encoder-tp-size 4 --vae-patch-parallel-size 4 --vae-parallel-mode tile --vae-use-tiling --diffusion-attention-backend FLASH_ATTN",
@@ -4091,9 +4110,10 @@
                             "upstream_recipe": {
                                 "repo": "ModelTC/LightX2V",
                                 "path": "configs/minimax_h3/minimax_h3_sp.json",
-                                "commit": "fabad30491",
-                                "commit_date": "2026-09-10",
-                                "section": "SP4 preset, the default of scripts/minimax_h3/run_minimax_h3_t2av_parallel.sh; served per 'Server and POST' with --model-variant fl2av"
+                                "commit": "c301bc5de71a",
+                                "commit_date": "2026-10-12",
+                                "section": "SP4 preset, the default of scripts/minimax_h3/run_minimax_h3_t2av_parallel.sh; served per 'Server and POST' with --model-variant fl2av",
+                                "recheck": "Re-checked 2026-10-22: #1592/#1604 only dropped keys that now default to the same values (lazy_load, unload_modules, audio_sampling_rate) and made deployment config override checkpoint defaults in set_config.py; no command change."
                             },
                             "num_gpus": 4,
                             "serve_args": "--model-variant fl2av",
@@ -4108,9 +4128,10 @@
                             "upstream_recipe": {
                                 "repo": "ModelTC/LightX2V",
                                 "path": "configs/minimax_h3/minimax_h3_sp.json",
-                                "commit": "fabad30491",
-                                "commit_date": "2026-09-10",
-                                "section": "SP4 preset, the default of scripts/minimax_h3/run_minimax_h3_t2av_parallel.sh; served per 'Server and POST' with --model-variant fl2av"
+                                "commit": "c301bc5de71a",
+                                "commit_date": "2026-10-12",
+                                "section": "SP4 preset, the default of scripts/minimax_h3/run_minimax_h3_t2av_parallel.sh; served per 'Server and POST' with --model-variant fl2av",
+                                "recheck": "Re-checked 2026-10-22: #1592/#1604 only dropped keys that now default to the same values (lazy_load, unload_modules, audio_sampling_rate) and made deployment config override checkpoint defaults in set_config.py; no command change."
                             },
                             "num_gpus": 4,
                             "serve_args": "--model-variant fl2av",
@@ -4128,9 +4149,10 @@
                             "upstream_recipe": {
                                 "repo": "ModelTC/LightX2V",
                                 "path": "configs/minimax_h3/minimax_h3_sp.json",
-                                "commit": "fabad30491",
-                                "commit_date": "2026-09-10",
-                                "section": "SP4 preset, the default of scripts/minimax_h3/run_minimax_h3_t2av_parallel.sh; served per 'Server and POST' with --model-variant fl2av"
+                                "commit": "c301bc5de71a",
+                                "commit_date": "2026-10-12",
+                                "section": "SP4 preset, the default of scripts/minimax_h3/run_minimax_h3_t2av_parallel.sh; served per 'Server and POST' with --model-variant fl2av",
+                                "recheck": "Re-checked 2026-10-22: #1592/#1604 only dropped keys that now default to the same values (lazy_load, unload_modules, audio_sampling_rate) and made deployment config override checkpoint defaults in set_config.py; no command change."
                             },
                             "num_gpus": 4,
                             "serve_args": "--model-variant fl2av",
@@ -4593,9 +4615,10 @@
                             "upstream_recipe": {
                                 "repo": "vllm-project/vllm-omni",
                                 "path": "recipes/MiniMaxAI/MiniMax-H3.md",
-                                "commit": "f69b1f2b1",
-                                "commit_date": "2026-10-10",
-                                "section": "Two 24/32 GB GPUs: TP2 distributed layerwise offload"
+                                "commit": "95b1d97f2ec2",
+                                "commit_date": "2026-10-21",
+                                "section": "Two 24/32 GB GPUs: TP2 distributed layerwise offload",
+                                "recheck": "Re-checked 2026-10-22: the only change since the profile was written moved the FastH3 sections to recipes/FastVideo/ (95b1d97f); the base H3 serving sections are unchanged. The previously recorded f69b1f2b1 was a repo HEAD, not a commit to this file."
                             },
                             "num_gpus": 2,
                             "serve_args": "--trust-remote-code --task-type ref2va --num-gpus 2 --tensor-parallel-size 2 --usp 1 --ring 1 --text-encoder-tp-size 2 --vae-patch-parallel-size 2 --vae-parallel-mode tile --vae-use-tiling",
@@ -4613,9 +4636,10 @@
                             "upstream_recipe": {
                                 "repo": "vllm-project/vllm-omni",
                                 "path": "recipes/MiniMaxAI/MiniMax-H3.md",
-                                "commit": "f69b1f2b1",
-                                "commit_date": "2026-10-10",
-                                "section": "Two 24/32 GB GPUs: TP2 distributed layerwise offload"
+                                "commit": "95b1d97f2ec2",
+                                "commit_date": "2026-10-21",
+                                "section": "Two 24/32 GB GPUs: TP2 distributed layerwise offload",
+                                "recheck": "Re-checked 2026-10-22: the only change since the profile was written moved the FastH3 sections to recipes/FastVideo/ (95b1d97f); the base H3 serving sections are unchanged. The previously recorded f69b1f2b1 was a repo HEAD, not a commit to this file."
                             },
                             "num_gpus": 2,
                             "serve_args": "--trust-remote-code --task-type ref2va --num-gpus 2 --tensor-parallel-size 2 --usp 1 --ring 1 --text-encoder-tp-size 2 --vae-patch-parallel-size 2 --vae-parallel-mode tile --vae-use-tiling --diffusion-attention-backend CUDNN_ATTN",
@@ -4635,9 +4659,10 @@
                             "upstream_recipe": {
                                 "repo": "vllm-project/vllm-omni",
                                 "path": "recipes/MiniMaxAI/MiniMax-H3.md",
-                                "commit": "f69b1f2b1",
-                                "commit_date": "2026-10-10",
-                                "section": "Two 24/32 GB GPUs: TP2 distributed layerwise offload"
+                                "commit": "95b1d97f2ec2",
+                                "commit_date": "2026-10-21",
+                                "section": "Two 24/32 GB GPUs: TP2 distributed layerwise offload",
+                                "recheck": "Re-checked 2026-10-22: the only change since the profile was written moved the FastH3 sections to recipes/FastVideo/ (95b1d97f); the base H3 serving sections are unchanged. The previously recorded f69b1f2b1 was a repo HEAD, not a commit to this file."
                             },
                             "extra_env": {
                                 "VLLM_WORKER_MULTIPROC_METHOD": "spawn",
@@ -4661,9 +4686,10 @@
                             "upstream_recipe": {
                                 "repo": "vllm-project/vllm-omni",
                                 "path": "recipes/MiniMaxAI/MiniMax-H3.md",
-                                "commit": "f69b1f2b1",
-                                "commit_date": "2026-10-10",
-                                "section": "Four GPUs: throughput-oriented combined service"
+                                "commit": "95b1d97f2ec2",
+                                "commit_date": "2026-10-21",
+                                "section": "Four GPUs: throughput-oriented combined service",
+                                "recheck": "Re-checked 2026-10-22: the only change since the profile was written moved the FastH3 sections to recipes/FastVideo/ (95b1d97f); the base H3 serving sections are unchanged. The previously recorded f69b1f2b1 was a repo HEAD, not a commit to this file."
                             },
                             "num_gpus": 2,
                             "serve_args": "--trust-remote-code --task-type ref2va --num-gpus 2 --usp 2 --ring 1 --vae-patch-parallel-size 2 --vae-parallel-mode tile --vae-use-tiling",
@@ -4694,9 +4720,10 @@
                             "upstream_recipe": {
                                 "repo": "vllm-project/vllm-omni",
                                 "path": "recipes/MiniMaxAI/MiniMax-H3.md",
-                                "commit": "f69b1f2b1",
-                                "commit_date": "2026-10-10",
-                                "section": "ROCm four GPUs"
+                                "commit": "95b1d97f2ec2",
+                                "commit_date": "2026-10-21",
+                                "section": "ROCm four GPUs",
+                                "recheck": "Re-checked 2026-10-22: the only change since the profile was written moved the FastH3 sections to recipes/FastVideo/ (95b1d97f); the base H3 serving sections are unchanged. The previously recorded f69b1f2b1 was a repo HEAD, not a commit to this file."
                             },
                             "num_gpus": 2,
                             "serve_args": "--trust-remote-code --task-type ref2va --num-gpus 2 --usp 2 --ring 1 --text-encoder-tp-size 2 --vae-patch-parallel-size 2 --vae-parallel-mode tile --vae-use-tiling --diffusion-attention-backend FLASH_ATTN",
@@ -4766,9 +4793,10 @@
                             "upstream_recipe": {
                                 "repo": "ModelTC/LightX2V",
                                 "path": "configs/minimax_h3/minimax_h3_tp.json",
-                                "commit": "fabad30491",
-                                "commit_date": "2026-09-10",
-                                "section": "TP2 preset, served per scripts/minimax_h3/server/start_server_ref2av.sh with --model-variant ref2av"
+                                "commit": "c301bc5de71a",
+                                "commit_date": "2026-10-12",
+                                "section": "TP2 preset, served per scripts/minimax_h3/server/start_server_ref2av.sh with --model-variant ref2av",
+                                "recheck": "Re-checked 2026-10-22: #1592/#1604 only dropped keys that now default to the same values (lazy_load, unload_modules, audio_sampling_rate) and made deployment config override checkpoint defaults in set_config.py; no command change."
                             },
                             "num_gpus": 2,
                             "serve_args": "--model-variant ref2av",
@@ -4788,9 +4816,10 @@
                             "upstream_recipe": {
                                 "repo": "ModelTC/LightX2V",
                                 "path": "configs/minimax_h3/minimax_h3_tp.json",
-                                "commit": "fabad30491",
-                                "commit_date": "2026-09-10",
-                                "section": "TP2 preset, served per scripts/minimax_h3/server/start_server_ref2av.sh with --model-variant ref2av"
+                                "commit": "c301bc5de71a",
+                                "commit_date": "2026-10-12",
+                                "section": "TP2 preset, served per scripts/minimax_h3/server/start_server_ref2av.sh with --model-variant ref2av",
+                                "recheck": "Re-checked 2026-10-22: #1592/#1604 only dropped keys that now default to the same values (lazy_load, unload_modules, audio_sampling_rate) and made deployment config override checkpoint defaults in set_config.py; no command change."
                             },
                             "num_gpus": 2,
                             "serve_args": "--model-variant ref2av",
@@ -4808,9 +4837,10 @@
                             "upstream_recipe": {
                                 "repo": "ModelTC/LightX2V",
                                 "path": "configs/minimax_h3/minimax_h3_tp.json",
-                                "commit": "fabad30491",
-                                "commit_date": "2026-09-10",
-                                "section": "TP2 preset, served per scripts/minimax_h3/server/start_server_ref2av.sh with --model-variant ref2av"
+                                "commit": "c301bc5de71a",
+                                "commit_date": "2026-10-12",
+                                "section": "TP2 preset, served per scripts/minimax_h3/server/start_server_ref2av.sh with --model-variant ref2av",
+                                "recheck": "Re-checked 2026-10-22: #1592/#1604 only dropped keys that now default to the same values (lazy_load, unload_modules, audio_sampling_rate) and made deployment config override checkpoint defaults in set_config.py; no command change."
                             },
                             "num_gpus": 2,
                             "serve_args": "--model-variant ref2av",
@@ -5189,14 +5219,30 @@
                             "framework_ref": "vllm-omni main 56763cd6c383 + vllm==0.30.0 + fastvideo-kernel==0.3.5 installed --no-deps (VLLM_OMNI_VSA_KERNEL_SPEC)",
                             "upstream_recipe": {
                                 "repo": "vllm-project/vllm-omni",
-                                "path": "recipes/MiniMaxAI/MiniMax-H3.md",
-                                "commit": "7266fc613",
-                                "commit_date": "2026-09-28",
-                                "section": "FastH3 8-Step V2 full checkpoint"
+                                "path": "recipes/FastVideo/FastH3-V2.md",
+                                "commit": "95b1d97f2ec2",
+                                "commit_date": "2026-10-21",
+                                "section": "Start the server (fasth3-8step-8gpu.yaml)",
+                                "recheck": "2026-10-22: the V2 recipe moved to recipes/FastVideo/FastH3-V2.md and now serves eight GPUs from recipes/FastVideo/fasth3-8step-8gpu.yaml: FASTVIDEO_VSA with the cuDNN provider (the [cudnn-bsa] extra), USP 8, HSDP, text-encoder TP 8, VAE patch parallel 8 with tiling, enforce-eager. This profile keeps the previously measured 4-GPU command until the cudnn-vsa-candidate profile is measured against it."
                             },
                             "num_gpus": 4,
                             "serve_args": "--trust-remote-code --task-type fl2va --num-gpus 4 --usp 4 --ring 1 --vae-patch-parallel-size 4 --vae-parallel-mode tile --vae-use-tiling --diffusion-attention-backend FASTVIDEO_VSA --revision 71a17d72c58ce3eeec418144de2a5a2090cb4c04",
                             "notes": "The recipe's command minus host/port/served-model-name. It says not to pass --fastvideo-vsa-topk (the tile count is derived per request from the trained 80% policy). T2VA is served by the FL2VA partition. Validated 2026-09-30 on 4xH200: 12.06 s client median. The `vsa` extra's fastvideo-kernel 0.3.4 fails on H200 inside the request ('Error in tile TMA descriptor creation', then 'CUDA error: an illegal instruction was encountered'); 0.3.5 works, but its wheel declares torch==2.12.0, so a normal install downgrades vLLM 0.30's torch 2.13.0 and the server dies at startup with 'operator torchvision::nms does not exist'. Install it with --no-deps (scripts/install_comparison_frameworks.sh, VLLM_OMNI_VSA_KERNEL_SPEC). 4xGB300: 8.261/8.254 s; with extra_params.preencode_mp4 (its overlapped encode, off by default) 7.484/7.379 s. The V2 release's bundled vae/ and audio_vae/ are tensor-for-tensor the base-H3@9bfb6693 VAEs this loader fetches, so both engines decode with the same weights."
+                        },
+                        "cudnn-vsa-candidate": {
+                            "description": "Candidate from the current FastH3 V2 recipe (fasth3-8step-8gpu.yaml) scaled to four GPUs. Never selected: no hardware tag.",
+                            "framework_ref": "vllm-omni main (round 2026-10-22) with the [cudnn-bsa] extra",
+                            "num_gpus": 4,
+                            "serve_args": "--trust-remote-code --task-type fl2va --num-gpus 4 --usp 4 --ring 1 --use-hsdp --text-encoder-tp-size 4 --vae-patch-parallel-size 4 --vae-use-tiling --enforce-eager --diffusion-attention-config {\"default\":{\"backend\":\"FASTVIDEO_VSA\",\"fastvideo_vsa_provider\":\"cudnn\"}}",
+                            "upstream_recipe": {
+                                "repo": "vllm-project/vllm-omni",
+                                "path": "recipes/FastVideo/FastH3-V2.md",
+                                "commit": "95b1d97f2ec2",
+                                "commit_date": "2026-10-21",
+                                "section": "Start the server (fasth3-8step-8gpu.yaml)",
+                                "recheck": "2026-10-22: the V2 recipe moved to recipes/FastVideo/FastH3-V2.md and now serves eight GPUs from recipes/FastVideo/fasth3-8step-8gpu.yaml: FASTVIDEO_VSA with the cuDNN provider (the [cudnn-bsa] extra), USP 8, HSDP, text-encoder TP 8, VAE patch parallel 8 with tiling, enforce-eager. This profile keeps the previously measured 4-GPU command until the h200-cudnn-vsa candidate is measured against it."
+                            },
+                            "notes": "Recipe placement (USP, HSDP, text-encoder TP, VAE patch parallel + tiling) and its cuDNN VSA provider at 4 GPUs. The recipe pins enforce-eager. VALIDATION PENDING: A/B against default on 4xH200 before promoting."
                         }
                     },
                     "framework_ref": "vllm-omni main 56763cd6c383 + vllm==0.30.0 + fastvideo-kernel==0.3.5 installed --no-deps (VLLM_OMNI_VSA_KERNEL_SPEC)"
