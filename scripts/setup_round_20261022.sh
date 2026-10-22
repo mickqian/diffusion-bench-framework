@@ -50,10 +50,21 @@ echo "S sglang $(git -C "${STATE}/sgl" log --oneline -1) imports $(PYTHONPATH="$
   [[ -n "${HF_TOKEN:-}" ]] && printf '%s' "${HF_TOKEN}" > "${STATE}/.hftoken" ) \
   && [[ -s "${STATE}/.hftoken" ]] && echo "S hf token ok" || echo "S WARN no HF token"
 
+# LightX2V runs at its own image's torch (pytorch:2.11.0-cuda13.0, dockerfiles/Dockerfile_cu130):
+# flash-attn 2.8.3 pins -std=c++17 and torch 2.14's headers need C++20 (fails on
+# `std::strong_ordering`, 2026-10-22). The SKILL's "Installing a competitor when
+# the box's torch has moved on" has the rule.
+printf 'torch==2.11.0\ntorchvision==0.26.0\ntorchaudio==2.11.0\n' > "${STATE}/lightx2v_torch_constraints.txt"
+
 cd "${STATE}/dbf" || exit 1
 for fw in ${FRAMEWORKS}; do
   t0=$(date +%s)
-  bash scripts/install_comparison_frameworks.sh "${fw}" > "${STATE}/logs/install_${fw}.log" 2>&1
+  if [[ "${fw}" == lightx2v ]]; then
+    PIP_CONSTRAINT="${STATE}/lightx2v_torch_constraints.txt" \
+      bash scripts/install_comparison_frameworks.sh "${fw}" > "${STATE}/logs/install_${fw}.log" 2>&1
+  else
+    bash scripts/install_comparison_frameworks.sh "${fw}" > "${STATE}/logs/install_${fw}.log" 2>&1
+  fi
   rc=$?
   stamp="${STATE}/fw-venvs/${fw}/.diffusion-bench-install-stamp"
   echo "S install ${fw} rc=${rc} stamp=$([[ -f ${stamp} ]] && echo yes || echo NO) $(( $(date +%s) - t0 ))s"

@@ -72,6 +72,7 @@ write_desired_stamp() {
         echo "lightx2v_install_fa3=${LIGHTX2V_INSTALL_FA3}"
         echo "lightx2v_sageattention_install_spec=${LIGHTX2V_SAGEATTENTION_INSTALL_SPEC:-sageattention==1.0.6}"
         echo "lightx2v_flashinfer_install_spec=${LIGHTX2V_FLASHINFER_INSTALL_SPEC:-flashinfer-python==0.6.11}"
+        echo "lightx2v_sgl_kernel_install_spec=${LIGHTX2V_SGL_KERNEL_INSTALL_SPEC:-sglang-kernel==0.4.4}"
         echo "lightx2v_hf_xet_install_spec=${LIGHTX2V_HF_XET_INSTALL_SPEC:-hf-xet}"
         echo "lightx2v_librosa_install_spec=${LIGHTX2V_LIBROSA_INSTALL_SPEC:-librosa}"
         echo "torch_cuda_arch_list=${TORCH_CUDA_ARCH_LIST:-9.0}"
@@ -314,6 +315,11 @@ PY
     fi
     python3 -m pip install --upgrade --upgrade-strategy only-if-needed "${LIGHTX2V_SAGEATTENTION_INSTALL_SPEC:-sageattention==1.0.6}"
     python3 -m pip install --upgrade --upgrade-strategy only-if-needed "${LIGHTX2V_FLASHINFER_INSTALL_SPEC:-flashinfer-python==0.6.11}"
+    # LightX2V's own image (dockerfiles/Dockerfile_cu130) installs sglang-kernel: the
+    # sgl-kernel RMSNorm its Wan/LTX/Z-Image/H3 configs select. Without it the norm
+    # silently falls back to torch (common/ops/norm/rms_norm_weight.py), a slower
+    # path than LightX2V ships. --no-deps keeps the venv's torch.
+    python3 -m pip install --no-deps "${LIGHTX2V_SGL_KERNEL_INSTALL_SPEC:-sglang-kernel==0.4.4}"
     python3 -m pip install --upgrade --upgrade-strategy only-if-needed "${LIGHTX2V_LIBROSA_INSTALL_SPEC:-librosa}"
     python3 -m pip install --upgrade --force-reinstall pyzmq
     # flash-attn==2.8.3's cute submodule statically references
