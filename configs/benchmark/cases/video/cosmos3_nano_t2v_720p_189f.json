@@ -378,6 +378,47 @@
             "section": "4-GPU layout, applied to Nano"
           },
           "notes": "The official 4-GPU Cosmos3 layout (CFG 2 x Ulysses 2, parallel VAE 4); Cosmos3 is VANILLA-only per the docs; CUDA graphs off (no official Cosmos3 config enables them). --visual_gen_args forces the VisualGen path: without it 1.4.0rc1 treats the cosmos3_omni checkpoint as an LLM (the 1.3.0rc26 startup hang). flow_shift moves into extra_params, max_sequence_length is top-level, guardrails off; UniPC, 35 steps = 35 evaluations. VANILLA attention is torch SDPA (FlashAttention on Hopper); no cache_config or quant_config, so the row is BF16 and cache-free; compile at the case shape so the first request does not recompile; JSON to /v1/videos/sync (or /v1/images/generations), whose reply is the media itself. The YAML is passed with --visual_gen_args (trtllm-serve has no --extra_visual_gen_options). VALIDATION PENDING (round 2026-10-22, 2xH200/4xH200)."
+        },
+        "cand-fa4": {
+          "description": "FA4 attention, as in NVIDIA's Blackwell Cosmos3 config. Never selected on its own: A/B arm, picked with DIFFUSION_BENCH_FRAMEWORK_PROFILE.",
+          "framework_ref": "tensorrt-llm 1.4.0rc1 (tag 0372799d1543, 2026-10-19)",
+          "num_gpus": 4,
+          "serve_args": "",
+          "visual_gen_args": {
+            "attention_config": {
+              "backend": "FA4"
+            },
+            "parallel_config": {
+              "cfg_size": 2,
+              "ulysses_size": 2,
+              "parallel_vae_size": 4
+            },
+            "torch_compile_config": {
+              "enable": true
+            },
+            "cuda_graph_config": {
+              "enable": false
+            },
+            "compilation_config": {
+              "resolutions": [
+                [
+                  720,
+                  1280
+                ]
+              ],
+              "num_frames": [
+                189
+              ]
+            }
+          },
+          "upstream_recipe": {
+            "repo": "NVIDIA/TensorRT-LLM",
+            "path": "examples/visual_gen/configs/cosmos3_t2v_bf16_gb200_nvl72.yaml",
+            "commit": "0372799d1543",
+            "commit_date": "2026-10-19",
+            "section": "Blackwell BF16 config: attention_config.backend FA4"
+          },
+          "notes": "NVIDIA's Blackwell Cosmos3 config uses FA4 (exact attention, same precision class as VANILLA); CUDA graphs replay the same kernels. Neither changes the output. VALIDATION PENDING (round 2026-10-22, 4xB300 A/B after the matrix)."
         }
       },
       "extra_env_reason": "The harness exports PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True. Under it, the CUDA IPC handle TRT-LLM's rank 0 hands its media over with needs pidfd_getfd in the server process, which RunPod containers deny: every request logged 'pidfd_getfd: Operation not permitted' and hung to the read timeout (4xB300, 2026-10-22). Plain segments use cudaIpcMemHandle instead."

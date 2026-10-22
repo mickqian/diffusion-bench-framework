@@ -59,4 +59,8 @@ arms cosmos3_nano_t2v_720p_189f vllm-omni 1 b300 cand-permute
 arms wan22_t2v_a14b_720p vllm-omni 1 b300 cand-hsdp cand-permute cand-devpost
 arms wan22_t2v_a14b_720p lightx2v 1 b300 cand-tuned
 arms wan22_t2v_a14b_720p trtllm-visual 1 b300 default
+# second wave, after the matrix: NVIDIA's Blackwell Cosmos3 config runs FA4, the profiles VANILLA
+arms cosmos3_nano_t2i_720p trtllm-visual 2 b300 cand-fa4 cand-fa4-graph cand-graph
+arms cosmos3_nano_t2v_720p_189f trtllm-visual 1 b300 cand-fa4
+arms cosmos3_nano_i2v_720p_189f trtllm-visual 1 b300 cand-fa4
 echo "=== AB DONE $(date -Is) ==="
