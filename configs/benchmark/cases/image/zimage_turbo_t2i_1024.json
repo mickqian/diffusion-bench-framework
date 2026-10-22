@@ -150,7 +150,14 @@
             "b300",
             "gb300"
           ],
-          "notes": "seq_p_quant_scheme (fp8/fp4 communication) stays off. Promoted from cand-fusion by the 2026-10-22 4xB300 A/B (scripts/run_b300_ab_20261022.sh): two interleaved rounds, 0.810 / 0.829 s against the previous blackwell-fa2's 0.851 / 0.852 s."
+          "notes": "seq_p_quant_scheme (fp8/fp4 communication) stays off. Promoted from cand-fusion by the 2026-10-22 4xB300 A/B (scripts/run_b300_ab_20261022.sh): two interleaved rounds, 0.810 / 0.829 s against the previous blackwell-fa2's 0.851 / 0.852 s.",
+          "upstream_recipe": {
+            "repo": "ModelTC/LightX2V",
+            "path": "configs/z_image/z_image_turbo_t2i_dist.json",
+            "commit": "4fe984c07b16",
+            "commit_date": "2026-10-10",
+            "section": "Ulysses sequence parallel over 2 GPUs (scripts/z_image/z_image_turbo_t2i_dist.sh)"
+          }
         },
         "default": {
           "description": "Best known LightX2V command/config for aligned non-cache benchmark runs.",

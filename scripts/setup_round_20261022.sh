@@ -21,6 +21,9 @@ export VLLM_INSTALL_SPEC="${VLLM_INSTALL_SPEC:-vllm==0.32.0}"
 export VLLM_OMNI_INSTALL_SPEC="${VLLM_OMNI_INSTALL_SPEC:-git+https://github.com/vllm-project/vllm-omni.git@0da1d831e07fadccc3ab51ef27b7c21623b693c2}"
 export LIGHTX2V_INSTALL_SPEC="${LIGHTX2V_INSTALL_SPEC:-git+https://github.com/ModelTC/LightX2V.git@19c19614b067f1746ac24350dfd097e1c0b48591}"
 export TRTLLM_INSTALL_SPEC="${TRTLLM_INSTALL_SPEC:-tensorrt-llm==1.4.0rc1}"
+# FastH3 V2 on vLLM-Omni needs the FastVideo VSA kernel (its FlashInfer path is SM120-only); the
+# profile notes give 0.3.5 --no-deps. The B300 box was set up without it and the cell failed.
+export VLLM_OMNI_VSA_KERNEL_SPEC="${VLLM_OMNI_VSA_KERNEL_SPEC:-fastvideo-kernel==0.3.5}"
 export TRTLLM_TORCH_INSTALL_SPEC="${TRTLLM_TORCH_INSTALL_SPEC:-torch==2.14.0}"
 export COMFYUI_INSTALL_SPEC="${COMFYUI_INSTALL_SPEC:-https://github.com/comfyanonymous/ComfyUI.git@1a82e6d01f395b43275c77acd289af1eb7090bb9}"
 export FASTVIDEO_INSTALL_SPEC="${FASTVIDEO_INSTALL_SPEC:-https://github.com/hao-ai-lab/FastVideo.git@fa2d1324c60050cd65209c6aaeac470e7fb412f5}"

@@ -86,6 +86,19 @@
         "VLLM_OMNI_VIDEO_SYNC_TIMEOUT": "1800"
       },
       "command_profiles": {
+        "blackwell-4gpu-static": {
+          "serve_args": "--trust-remote-code --task-type fl2va --num-gpus 4 --usp 4 --ring 1 --vae-patch-parallel-size 4 --vae-parallel-mode tile --vae-use-tiling --no-diffusion-compile-dynamic",
+          "extra_env": {},
+          "num_gpus": 4,
+          "description": "Blackwell: The selected command plus --no-diffusion-compile-dynamic (docs: the setting for fixed shapes).",
+          "hardware": [
+            "b200",
+            "gb200",
+            "b300",
+            "gb300"
+          ],
+          "notes": " Promoted from cand-static by the 2026-10-22 4xB300 A/B (scripts/run_b300_ab_20261022.sh): measured on the T2VA 2-GPU case (69.40 against 70.22 s, same model and flag); extended to 4 GPUs and re-measured in the matrix."
+        },
         "default": {
           "description": "vLLM-Omni's 'Four GPUs' recipe as written: no offload, Ulysses 4, native tiled VAE patch parallelism 4, regional compile, Omni's default attention for the hardware.",
           "framework_ref": "vllm-omni main",
@@ -307,14 +320,22 @@
         }
       },
       "command_profiles": {
-        "blackwell-fa4": {
-          "description": "Blackwell: the same config with FA4 attention, the exact kernel NVIDIA tunes for Blackwell (its official LTX-2 configs use it).",
-          "hardware": [
-            "b200",
-            "gb200",
-            "b300",
-            "gb300"
-          ],
+        "default": {
+          "description": "TensorRT-LLM VisualGen, NVIDIA's official minimax-h3-bf16-8gpu.yaml at BF16, 4 GPU(s).",
+          "framework_ref": "tensorrt-llm 1.4.0rc1 (tag 0372799d1543, 2026-10-19)",
+          "num_gpus": 4,
+          "serve_args": "",
+          "upstream_recipe": {
+            "repo": "NVIDIA/TensorRT-LLM",
+            "path": "examples/visual_gen/configs/minimax-h3-bf16-8gpu.yaml",
+            "commit": "92d23a83799d",
+            "commit_date": "2026-10-09",
+            "section": "BF16 multi-GPU config scaled to pure Ulysses 4"
+          },
+          "notes": "H3 multi-GPU is pure Ulysses (cfg_size 1: guidance-distilled); CUDA graphs, caches and a non-empty negative prompt are rejected; num_frames must be 17n+5 (124); MiniMaxH3Scheduler counts sigma grid points, so 50 = 49 evaluations as in sglang; flow shifts fixed at 12/3 like the harness. Audio returns as AAC in the MP4. VANILLA attention is torch SDPA (FlashAttention on Hopper); no cache_config or quant_config, so the row is BF16 and cache-free; compile at the case shape so the first request does not recompile; JSON to /v1/videos/sync (or /v1/images/generations), whose reply is the media itself. The YAML is passed with --visual_gen_args (trtllm-serve has no --extra_visual_gen_options). VALIDATION PENDING (round 2026-10-22, 2xH200/4xH200). Blackwell: VANILLA beat FA4 on H3 T2VA 2-GPU, 74.33 against 76.63 s (4xB300 A/B, 2026-10-22), so it is selected there too."
+        },
+        "cand-fa4": {
+          "description": "FA4 attention. Never selected: the 2026-10-22 4xB300 A/B had VANILLA ahead on H3.",
           "framework_ref": "tensorrt-llm 1.4.0rc1 (tag 0372799d1543, 2026-10-19)",
           "num_gpus": 4,
           "serve_args": "",
@@ -352,21 +373,7 @@
             "commit_date": "2026-10-09",
             "section": "BF16 multi-GPU config scaled to pure Ulysses 4"
           },
-          "notes": "FA4 is exact attention, the same precision class as VANILLA (torch SDPA). This repo measured VANILLA fastest on Hopper and FA4 on Blackwell for TRT-LLM VisualGen; A/B'd against `default` (VANILLA) on B300. VALIDATION PENDING (round 2026-10-22, 4xB300)."
-        },
-        "default": {
-          "description": "TensorRT-LLM VisualGen, NVIDIA's official minimax-h3-bf16-8gpu.yaml at BF16, 4 GPU(s).",
-          "framework_ref": "tensorrt-llm 1.4.0rc1 (tag 0372799d1543, 2026-10-19)",
-          "num_gpus": 4,
-          "serve_args": "",
-          "upstream_recipe": {
-            "repo": "NVIDIA/TensorRT-LLM",
-            "path": "examples/visual_gen/configs/minimax-h3-bf16-8gpu.yaml",
-            "commit": "92d23a83799d",
-            "commit_date": "2026-10-09",
-            "section": "BF16 multi-GPU config scaled to pure Ulysses 4"
-          },
-          "notes": "H3 multi-GPU is pure Ulysses (cfg_size 1: guidance-distilled); CUDA graphs, caches and a non-empty negative prompt are rejected; num_frames must be 17n+5 (124); MiniMaxH3Scheduler counts sigma grid points, so 50 = 49 evaluations as in sglang; flow shifts fixed at 12/3 like the harness. Audio returns as AAC in the MP4. VANILLA attention is torch SDPA (FlashAttention on Hopper); no cache_config or quant_config, so the row is BF16 and cache-free; compile at the case shape so the first request does not recompile; JSON to /v1/videos/sync (or /v1/images/generations), whose reply is the media itself. The YAML is passed with --visual_gen_args (trtllm-serve has no --extra_visual_gen_options). VALIDATION PENDING (round 2026-10-22, 2xH200/4xH200)."
+          "notes": "H3 T2VA 2-GPU A/B on 4xB300 (2026-10-22): FA4 76.63 s against VANILLA 74.33 s, so the default (VANILLA) stays selected on Blackwell for H3. Kept for future A/Bs."
         }
       },
       "extra_env_reason": "The harness exports PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True. Under it, the CUDA IPC handle TRT-LLM's rank 0 hands its media over with needs pidfd_getfd in the server process, which RunPod containers deny: every request logged 'pidfd_getfd: Operation not permitted' and hung to the read timeout (4xB300, 2026-10-22). Plain segments use cudaIpcMemHandle instead."

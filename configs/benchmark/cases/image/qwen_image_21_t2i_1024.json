@@ -101,7 +101,15 @@
             "b300",
             "gb300"
           ],
-          "notes": " Promoted from cand-static by the 2026-10-22 4xB300 A/B (scripts/run_b300_ab_20261022.sh): two interleaved rounds, 2.372 / 2.376 s against blackwell-cudnn's 2.400 / 2.407 s (every sample below)."
+          "notes": " Promoted from cand-static by the 2026-10-22 4xB300 A/B (scripts/run_b300_ab_20261022.sh): two interleaved rounds, 2.372 / 2.376 s against blackwell-cudnn's 2.400 / 2.407 s (every sample below).",
+          "upstream_recipe": {
+            "repo": "vllm-project/vllm-omni",
+            "path": "recipes/Qwen/Qwen-Image-2.1.md",
+            "commit": "b164fea79753",
+            "commit_date": "2026-10-17",
+            "section": "Online Serving",
+            "recheck": "Re-checked 2026-10-22: the recipe gained a Qwen-Image-2.1-Turbo four-GPU section and NPU defaults (910b8f07, b164fea7); the base-model serving sections this profile follows are unchanged. Its new exact text-conditioning cache cannot hit the harness's distinct per-request prompts."
+          }
         },
         "default": {
           "description": "vLLM-Omni's documented Qwen-Image-2.1 server (`vllm serve Qwen/Qwen-Image-2.1 --omni`): regional torch.compile plus CUDA-graph decode, both on by default.",

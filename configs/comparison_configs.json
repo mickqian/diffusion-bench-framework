@@ -331,7 +331,15 @@
                                 "b300",
                                 "gb300"
                             ],
-                            "notes": " Promoted from cand-static by the 2026-10-22 4xB300 A/B (scripts/run_b300_ab_20261022.sh): two interleaved rounds, 2.372 / 2.376 s against blackwell-cudnn's 2.400 / 2.407 s (every sample below)."
+                            "notes": " Promoted from cand-static by the 2026-10-22 4xB300 A/B (scripts/run_b300_ab_20261022.sh): two interleaved rounds, 2.372 / 2.376 s against blackwell-cudnn's 2.400 / 2.407 s (every sample below).",
+                            "upstream_recipe": {
+                                "repo": "vllm-project/vllm-omni",
+                                "path": "recipes/Qwen/Qwen-Image-2.1.md",
+                                "commit": "b164fea79753",
+                                "commit_date": "2026-10-17",
+                                "section": "Online Serving",
+                                "recheck": "Re-checked 2026-10-22: the recipe gained a Qwen-Image-2.1-Turbo four-GPU section and NPU defaults (910b8f07, b164fea7); the base-model serving sections this profile follows are unchanged. Its new exact text-conditioning cache cannot hit the harness's distinct per-request prompts."
+                            }
                         },
                         "default": {
                             "description": "vLLM-Omni's documented Qwen-Image-2.1 server (`vllm serve Qwen/Qwen-Image-2.1 --omni`): regional torch.compile plus CUDA-graph decode, both on by default.",
@@ -774,7 +782,15 @@
                                 "b300",
                                 "gb300"
                             ],
-                            "notes": " Promoted from cand-static by the 2026-10-22 4xB300 A/B (scripts/run_b300_ab_20261022.sh): two interleaved rounds, 1.558 / 1.560 s against blackwell-cudnn's 2.156 / 2.129 s: dynamic-shape compile cost vLLM-Omni 28% on this cell."
+                            "notes": " Promoted from cand-static by the 2026-10-22 4xB300 A/B (scripts/run_b300_ab_20261022.sh): two interleaved rounds, 1.558 / 1.560 s against blackwell-cudnn's 2.156 / 2.129 s: dynamic-shape compile cost vLLM-Omni 28% on this cell.",
+                            "upstream_recipe": {
+                                "repo": "vllm-project/vllm-omni",
+                                "path": "recipes/Qwen/Qwen-Image-2.1.md",
+                                "commit": "b164fea79753",
+                                "commit_date": "2026-10-17",
+                                "section": "Online Serving",
+                                "recheck": "Re-checked 2026-10-22: the recipe gained a Qwen-Image-2.1-Turbo four-GPU section and NPU defaults (910b8f07, b164fea7); the base-model serving sections this profile follows are unchanged. Its new exact text-conditioning cache cannot hit the harness's distinct per-request prompts."
+                            }
                         },
                         "default": {
                             "description": "vLLM-Omni's documented Qwen-Image-2.1 server (`vllm serve Qwen/Qwen-Image-2.1 --omni`): regional torch.compile plus CUDA-graph decode, both on by default.",
@@ -941,7 +957,15 @@
                                 "b300",
                                 "gb300"
                             ],
-                            "notes": " Promoted from cand-static by the 2026-10-22 4xB300 A/B (scripts/run_b300_ab_20261022.sh): two interleaved rounds, 2.861 / 2.861 s against blackwell-cudnn's 2.902 / 2.888 s."
+                            "notes": " Promoted from cand-static by the 2026-10-22 4xB300 A/B (scripts/run_b300_ab_20261022.sh): two interleaved rounds, 2.861 / 2.861 s against blackwell-cudnn's 2.902 / 2.888 s.",
+                            "upstream_recipe": {
+                                "repo": "vllm-project/vllm-omni",
+                                "path": "recipes/Qwen/Qwen-Image-2.1.md",
+                                "commit": "b164fea79753",
+                                "commit_date": "2026-10-17",
+                                "section": "Online Serving",
+                                "recheck": "Re-checked 2026-10-22: the recipe gained a Qwen-Image-2.1-Turbo four-GPU section and NPU defaults (910b8f07, b164fea7); the base-model serving sections this profile follows are unchanged. Its new exact text-conditioning cache cannot hit the harness's distinct per-request prompts."
+                            }
                         },
                         "default": {
                             "description": "vLLM-Omni's documented Qwen-Image-2.1 server (`vllm serve Qwen/Qwen-Image-2.1 --omni`): regional torch.compile plus CUDA-graph decode, both on by default.",
@@ -1176,7 +1200,14 @@
                                 "b300",
                                 "gb300"
                             ],
-                            "notes": "seq_p_quant_scheme (fp8/fp4 communication) stays off. Promoted from cand-fusion by the 2026-10-22 4xB300 A/B (scripts/run_b300_ab_20261022.sh): two interleaved rounds, 0.810 / 0.829 s against the previous blackwell-fa2's 0.851 / 0.852 s."
+                            "notes": "seq_p_quant_scheme (fp8/fp4 communication) stays off. Promoted from cand-fusion by the 2026-10-22 4xB300 A/B (scripts/run_b300_ab_20261022.sh): two interleaved rounds, 0.810 / 0.829 s against the previous blackwell-fa2's 0.851 / 0.852 s.",
+                            "upstream_recipe": {
+                                "repo": "ModelTC/LightX2V",
+                                "path": "configs/z_image/z_image_turbo_t2i_dist.json",
+                                "commit": "4fe984c07b16",
+                                "commit_date": "2026-10-10",
+                                "section": "Ulysses sequence parallel over 2 GPUs (scripts/z_image/z_image_turbo_t2i_dist.sh)"
+                            }
                         },
                         "default": {
                             "description": "Best known LightX2V command/config for aligned non-cache benchmark runs.",
@@ -1738,6 +1769,29 @@
                         "DIFFUSION_ATTENTION_BACKEND": "FLASH_ATTN"
                     },
                     "command_profiles": {
+                        "blackwell-4gpu-cfg2-usp2-vaepp-devpost": {
+                            "serve_args": "--num-gpus 4 --cfg-parallel-size 2 --usp 2 --vae-patch-parallel-size 4 --vae-parallel-mode spatial_shard_width --no-diffusion-compile-dynamic --video-output-transport {\"enable_device_postprocess\":true}",
+                            "extra_env": {
+                                "DIFFUSION_ATTENTION_BACKEND": "CUDNN_ATTN"
+                            },
+                            "num_gpus": 4,
+                            "description": "Blackwell: GPU-side video postprocess (docs: at most one level in 255 from the host path).",
+                            "hardware": [
+                                "b200",
+                                "gb200",
+                                "b300",
+                                "gb300"
+                            ],
+                            "notes": " Promoted from cand-devpost by the 2026-10-22 4xB300 A/B (scripts/run_b300_ab_20261022.sh): one round, 100.23 s (100.20/100.27) against blackwell-4gpu-cfg2-usp2-vaepp's 101.75 s (101.70/101.80). Device postprocess changes the uint8 frames by at most one level (rounding), not the model math; taken because the faster competitor command is the conservative choice.",
+                            "framework_ref": "vllm-omni main 0da1d831e07f + vllm==0.32.0",
+                            "upstream_recipe": {
+                                "repo": "vllm-project/vllm-omni",
+                                "path": "recipes/Wan-AI/Wan2.2-T2V.md",
+                                "commit": "62ebad2d7cd7",
+                                "commit_date": "2026-09-25",
+                                "section": "8x NVIDIA H20 / H100 / A100 (scaled to 4 GPUs)"
+                            }
+                        },
                         "blackwell-4gpu-cfg2-usp2-vaepp": {
                             "description": "Blackwell: the recipe's GPU layout scaled to four GPUs, cuDNN attention (FLASH_ATTN is Hopper-only).",
                             "hardware": [
@@ -2019,14 +2073,22 @@
                         }
                     },
                     "command_profiles": {
-                        "blackwell-fa4": {
-                            "description": "Blackwell: the same config with FA4 attention, the exact kernel NVIDIA tunes for Blackwell (its official LTX-2 configs use it).",
-                            "hardware": [
-                                "b200",
-                                "gb200",
-                                "b300",
-                                "gb300"
-                            ],
+                        "default": {
+                            "description": "TensorRT-LLM VisualGen, NVIDIA's official wan2.2-t2v-fp4-4gpu.yaml at BF16, 4 GPU(s).",
+                            "framework_ref": "tensorrt-llm 1.4.0rc1 (tag 0372799d1543, 2026-10-19)",
+                            "num_gpus": 4,
+                            "serve_args": "",
+                            "upstream_recipe": {
+                                "repo": "NVIDIA/TensorRT-LLM",
+                                "path": "examples/visual_gen/configs/wan2.2-t2v-fp4-4gpu.yaml",
+                                "commit": "059396899c11",
+                                "commit_date": "2026-06-17",
+                                "section": "4-GPU layout with its FP4 quant_config removed"
+                            },
+                            "notes": "Official 4-GPU Wan2.2 layout (CFG 2 x async Ulysses 2, parallel VAE 4) at BF16, CUDA graphs off as in the config. guidance_scale_2 rides extra_params; boundary_ratio comes from the checkpoint (0.875); UniPC, 40 steps = 40 evaluations of a CFG pair; the negative prompt is sglang's default, as for ComfyUI. VANILLA attention is torch SDPA (FlashAttention on Hopper); no cache_config or quant_config, so the row is BF16 and cache-free; compile at the case shape so the first request does not recompile; JSON to /v1/videos/sync (or /v1/images/generations), whose reply is the media itself. The YAML is passed with --visual_gen_args (trtllm-serve has no --extra_visual_gen_options). VALIDATION PENDING (round 2026-10-22, 2xH200/4xH200). Blackwell: VANILLA beat FA4 on Wan2.2 T2V 4-GPU, 94.55 against 97.42 s (4xB300 A/B, 2026-10-22), so it is selected there too."
+                        },
+                        "cand-fa4": {
+                            "description": "FA4 attention. Never selected: the 2026-10-22 4xB300 A/B had VANILLA ahead on Wan2.2.",
                             "framework_ref": "tensorrt-llm 1.4.0rc1 (tag 0372799d1543, 2026-10-19)",
                             "num_gpus": 4,
                             "serve_args": "",
@@ -2065,21 +2127,7 @@
                                 "commit_date": "2026-06-17",
                                 "section": "4-GPU layout with its FP4 quant_config removed"
                             },
-                            "notes": "FA4 is exact attention, the same precision class as VANILLA (torch SDPA). This repo measured VANILLA fastest on Hopper and FA4 on Blackwell for TRT-LLM VisualGen; A/B'd against `default` (VANILLA) on B300. VALIDATION PENDING (round 2026-10-22, 4xB300)."
-                        },
-                        "default": {
-                            "description": "TensorRT-LLM VisualGen, NVIDIA's official wan2.2-t2v-fp4-4gpu.yaml at BF16, 4 GPU(s).",
-                            "framework_ref": "tensorrt-llm 1.4.0rc1 (tag 0372799d1543, 2026-10-19)",
-                            "num_gpus": 4,
-                            "serve_args": "",
-                            "upstream_recipe": {
-                                "repo": "NVIDIA/TensorRT-LLM",
-                                "path": "examples/visual_gen/configs/wan2.2-t2v-fp4-4gpu.yaml",
-                                "commit": "059396899c11",
-                                "commit_date": "2026-06-17",
-                                "section": "4-GPU layout with its FP4 quant_config removed"
-                            },
-                            "notes": "Official 4-GPU Wan2.2 layout (CFG 2 x async Ulysses 2, parallel VAE 4) at BF16, CUDA graphs off as in the config. guidance_scale_2 rides extra_params; boundary_ratio comes from the checkpoint (0.875); UniPC, 40 steps = 40 evaluations of a CFG pair; the negative prompt is sglang's default, as for ComfyUI. VANILLA attention is torch SDPA (FlashAttention on Hopper); no cache_config or quant_config, so the row is BF16 and cache-free; compile at the case shape so the first request does not recompile; JSON to /v1/videos/sync (or /v1/images/generations), whose reply is the media itself. The YAML is passed with --visual_gen_args (trtllm-serve has no --extra_visual_gen_options). VALIDATION PENDING (round 2026-10-22, 2xH200/4xH200)."
+                            "notes": "Wan2.2 T2V 4-GPU A/B on 4xB300 (2026-10-22): FA4 97.42 s (97.20/97.65) against VANILLA 94.55 s (94.52/94.58), so the default (VANILLA) stays selected on Blackwell for Wan2.2. Kept for future A/Bs."
                         }
                     },
                     "extra_env_reason": "The harness exports PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True. Under it, the CUDA IPC handle TRT-LLM's rank 0 hands its media over with needs pidfd_getfd in the server process, which RunPod containers deny: every request logged 'pidfd_getfd: Operation not permitted' and hung to the read timeout (4xB300, 2026-10-22). Plain segments use cudaIpcMemHandle instead."
@@ -4336,6 +4384,27 @@
                         "VLLM_OMNI_VIDEO_SYNC_TIMEOUT": "1800"
                     },
                     "command_profiles": {
+                        "blackwell-2gpu-static": {
+                            "serve_args": "--trust-remote-code --task-type fl2va --num-gpus 2 --tensor-parallel-size 2 --usp 1 --ring 1 --text-encoder-tp-size 2 --vae-patch-parallel-size 2 --vae-parallel-mode tile --vae-use-tiling --diffusion-attention-backend CUDNN_ATTN --no-diffusion-compile-dynamic",
+                            "extra_env": {},
+                            "num_gpus": 2,
+                            "description": "Blackwell: The selected command plus --no-diffusion-compile-dynamic (docs: the setting for fixed shapes).",
+                            "hardware": [
+                                "b200",
+                                "gb200",
+                                "b300",
+                                "gb300"
+                            ],
+                            "notes": " Promoted from cand-static by the 2026-10-22 4xB300 A/B (scripts/run_b300_ab_20261022.sh): one round, 69.40 s (69.40/69.41) against blackwell-2gpu's 70.22 s (70.18/70.26).",
+                            "upstream_recipe": {
+                                "repo": "vllm-project/vllm-omni",
+                                "path": "recipes/MiniMaxAI/MiniMax-H3.md",
+                                "commit": "95b1d97f2ec2",
+                                "commit_date": "2026-10-21",
+                                "section": "Two 24/32 GB GPUs: TP2 distributed layerwise offload",
+                                "recheck": "Re-checked 2026-10-22: the only change since the profile was written moved the FastH3 sections to recipes/FastVideo/ (95b1d97f); the base H3 serving sections are unchanged. The previously recorded f69b1f2b1 was a repo HEAD, not a commit to this file."
+                            }
+                        },
                         "default": {
                             "description": "vLLM-Omni's fastest measured MiniMax-H3 command on datacenter GPUs: TP2, text-encoder TP2, native tiled VAE patch parallelism 2, resident, compiled, Omni's default attention for the hardware.",
                             "framework_ref": "vllm-omni main 56763cd6c383 + vllm==0.30.0",
@@ -4644,14 +4713,22 @@
                         }
                     },
                     "command_profiles": {
-                        "blackwell-fa4": {
-                            "description": "Blackwell: the same config with FA4 attention, the exact kernel NVIDIA tunes for Blackwell (its official LTX-2 configs use it).",
-                            "hardware": [
-                                "b200",
-                                "gb200",
-                                "b300",
-                                "gb300"
-                            ],
+                        "default": {
+                            "description": "TensorRT-LLM VisualGen, NVIDIA's official minimax-h3-bf16-8gpu.yaml at BF16, 2 GPU(s).",
+                            "framework_ref": "tensorrt-llm 1.4.0rc1 (tag 0372799d1543, 2026-10-19)",
+                            "num_gpus": 2,
+                            "serve_args": "",
+                            "upstream_recipe": {
+                                "repo": "NVIDIA/TensorRT-LLM",
+                                "path": "examples/visual_gen/configs/minimax-h3-bf16-8gpu.yaml",
+                                "commit": "92d23a83799d",
+                                "commit_date": "2026-10-09",
+                                "section": "BF16 multi-GPU config scaled to pure Ulysses 2"
+                            },
+                            "notes": "H3 multi-GPU is pure Ulysses (cfg_size 1: guidance-distilled); CUDA graphs, caches and a non-empty negative prompt are rejected; num_frames must be 17n+5 (124); MiniMaxH3Scheduler counts sigma grid points, so 50 = 49 evaluations as in sglang; flow shifts fixed at 12/3 like the harness. Audio returns as AAC in the MP4. VANILLA attention is torch SDPA (FlashAttention on Hopper); no cache_config or quant_config, so the row is BF16 and cache-free; compile at the case shape so the first request does not recompile; JSON to /v1/videos/sync (or /v1/images/generations), whose reply is the media itself. The YAML is passed with --visual_gen_args (trtllm-serve has no --extra_visual_gen_options). VALIDATION PENDING (round 2026-10-22, 2xH200/4xH200). Blackwell: VANILLA beat FA4 on H3 T2VA 2-GPU, 74.33 against 76.63 s (4xB300 A/B, 2026-10-22), so it is selected there too."
+                        },
+                        "cand-fa4": {
+                            "description": "FA4 attention. Never selected: the 2026-10-22 4xB300 A/B had VANILLA ahead on H3.",
                             "framework_ref": "tensorrt-llm 1.4.0rc1 (tag 0372799d1543, 2026-10-19)",
                             "num_gpus": 2,
                             "serve_args": "",
@@ -4689,21 +4766,7 @@
                                 "commit_date": "2026-10-09",
                                 "section": "BF16 multi-GPU config scaled to pure Ulysses 2"
                             },
-                            "notes": "FA4 is exact attention, the same precision class as VANILLA (torch SDPA). This repo measured VANILLA fastest on Hopper and FA4 on Blackwell for TRT-LLM VisualGen; A/B'd against `default` (VANILLA) on B300. VALIDATION PENDING (round 2026-10-22, 4xB300)."
-                        },
-                        "default": {
-                            "description": "TensorRT-LLM VisualGen, NVIDIA's official minimax-h3-bf16-8gpu.yaml at BF16, 2 GPU(s).",
-                            "framework_ref": "tensorrt-llm 1.4.0rc1 (tag 0372799d1543, 2026-10-19)",
-                            "num_gpus": 2,
-                            "serve_args": "",
-                            "upstream_recipe": {
-                                "repo": "NVIDIA/TensorRT-LLM",
-                                "path": "examples/visual_gen/configs/minimax-h3-bf16-8gpu.yaml",
-                                "commit": "92d23a83799d",
-                                "commit_date": "2026-10-09",
-                                "section": "BF16 multi-GPU config scaled to pure Ulysses 2"
-                            },
-                            "notes": "H3 multi-GPU is pure Ulysses (cfg_size 1: guidance-distilled); CUDA graphs, caches and a non-empty negative prompt are rejected; num_frames must be 17n+5 (124); MiniMaxH3Scheduler counts sigma grid points, so 50 = 49 evaluations as in sglang; flow shifts fixed at 12/3 like the harness. Audio returns as AAC in the MP4. VANILLA attention is torch SDPA (FlashAttention on Hopper); no cache_config or quant_config, so the row is BF16 and cache-free; compile at the case shape so the first request does not recompile; JSON to /v1/videos/sync (or /v1/images/generations), whose reply is the media itself. The YAML is passed with --visual_gen_args (trtllm-serve has no --extra_visual_gen_options). VALIDATION PENDING (round 2026-10-22, 2xH200/4xH200)."
+                            "notes": "H3 T2VA 2-GPU A/B on 4xB300 (2026-10-22): FA4 76.63 s against VANILLA 74.33 s, so the default (VANILLA) stays selected on Blackwell for H3. Kept for future A/Bs."
                         }
                     },
                     "extra_env_reason": "The harness exports PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True. Under it, the CUDA IPC handle TRT-LLM's rank 0 hands its media over with needs pidfd_getfd in the server process, which RunPod containers deny: every request logged 'pidfd_getfd: Operation not permitted' and hung to the read timeout (4xB300, 2026-10-22). Plain segments use cudaIpcMemHandle instead."
@@ -5078,6 +5141,19 @@
                         "VLLM_OMNI_VIDEO_SYNC_TIMEOUT": "1800"
                     },
                     "command_profiles": {
+                        "blackwell-4gpu-static": {
+                            "serve_args": "--trust-remote-code --task-type fl2va --num-gpus 4 --usp 4 --ring 1 --vae-patch-parallel-size 4 --vae-parallel-mode tile --vae-use-tiling --no-diffusion-compile-dynamic",
+                            "extra_env": {},
+                            "num_gpus": 4,
+                            "description": "Blackwell: The selected command plus --no-diffusion-compile-dynamic (docs: the setting for fixed shapes).",
+                            "hardware": [
+                                "b200",
+                                "gb200",
+                                "b300",
+                                "gb300"
+                            ],
+                            "notes": " Promoted from cand-static by the 2026-10-22 4xB300 A/B (scripts/run_b300_ab_20261022.sh): measured on the T2VA 2-GPU case (69.40 against 70.22 s, same model and flag); extended to 4 GPUs and re-measured in the matrix."
+                        },
                         "default": {
                             "description": "vLLM-Omni's 'Four GPUs' recipe as written: no offload, Ulysses 4, native tiled VAE patch parallelism 4, regional compile, Omni's default attention for the hardware.",
                             "framework_ref": "vllm-omni main",
@@ -5297,14 +5373,22 @@
                         }
                     },
                     "command_profiles": {
-                        "blackwell-fa4": {
-                            "description": "Blackwell: the same config with FA4 attention, the exact kernel NVIDIA tunes for Blackwell (its official LTX-2 configs use it).",
-                            "hardware": [
-                                "b200",
-                                "gb200",
-                                "b300",
-                                "gb300"
-                            ],
+                        "default": {
+                            "description": "TensorRT-LLM VisualGen, NVIDIA's official minimax-h3-bf16-8gpu.yaml at BF16, 4 GPU(s).",
+                            "framework_ref": "tensorrt-llm 1.4.0rc1 (tag 0372799d1543, 2026-10-19)",
+                            "num_gpus": 4,
+                            "serve_args": "",
+                            "upstream_recipe": {
+                                "repo": "NVIDIA/TensorRT-LLM",
+                                "path": "examples/visual_gen/configs/minimax-h3-bf16-8gpu.yaml",
+                                "commit": "92d23a83799d",
+                                "commit_date": "2026-10-09",
+                                "section": "BF16 multi-GPU config scaled to pure Ulysses 4"
+                            },
+                            "notes": "H3 multi-GPU is pure Ulysses (cfg_size 1: guidance-distilled); CUDA graphs, caches and a non-empty negative prompt are rejected; num_frames must be 17n+5 (124); MiniMaxH3Scheduler counts sigma grid points, so 50 = 49 evaluations as in sglang; flow shifts fixed at 12/3 like the harness. Audio returns as AAC in the MP4. VANILLA attention is torch SDPA (FlashAttention on Hopper); no cache_config or quant_config, so the row is BF16 and cache-free; compile at the case shape so the first request does not recompile; JSON to /v1/videos/sync (or /v1/images/generations), whose reply is the media itself. The YAML is passed with --visual_gen_args (trtllm-serve has no --extra_visual_gen_options). VALIDATION PENDING (round 2026-10-22, 2xH200/4xH200). Blackwell: VANILLA beat FA4 on H3 T2VA 2-GPU, 74.33 against 76.63 s (4xB300 A/B, 2026-10-22), so it is selected there too."
+                        },
+                        "cand-fa4": {
+                            "description": "FA4 attention. Never selected: the 2026-10-22 4xB300 A/B had VANILLA ahead on H3.",
                             "framework_ref": "tensorrt-llm 1.4.0rc1 (tag 0372799d1543, 2026-10-19)",
                             "num_gpus": 4,
                             "serve_args": "",
@@ -5342,21 +5426,7 @@
                                 "commit_date": "2026-10-09",
                                 "section": "BF16 multi-GPU config scaled to pure Ulysses 4"
                             },
-                            "notes": "FA4 is exact attention, the same precision class as VANILLA (torch SDPA). This repo measured VANILLA fastest on Hopper and FA4 on Blackwell for TRT-LLM VisualGen; A/B'd against `default` (VANILLA) on B300. VALIDATION PENDING (round 2026-10-22, 4xB300)."
-                        },
-                        "default": {
-                            "description": "TensorRT-LLM VisualGen, NVIDIA's official minimax-h3-bf16-8gpu.yaml at BF16, 4 GPU(s).",
-                            "framework_ref": "tensorrt-llm 1.4.0rc1 (tag 0372799d1543, 2026-10-19)",
-                            "num_gpus": 4,
-                            "serve_args": "",
-                            "upstream_recipe": {
-                                "repo": "NVIDIA/TensorRT-LLM",
-                                "path": "examples/visual_gen/configs/minimax-h3-bf16-8gpu.yaml",
-                                "commit": "92d23a83799d",
-                                "commit_date": "2026-10-09",
-                                "section": "BF16 multi-GPU config scaled to pure Ulysses 4"
-                            },
-                            "notes": "H3 multi-GPU is pure Ulysses (cfg_size 1: guidance-distilled); CUDA graphs, caches and a non-empty negative prompt are rejected; num_frames must be 17n+5 (124); MiniMaxH3Scheduler counts sigma grid points, so 50 = 49 evaluations as in sglang; flow shifts fixed at 12/3 like the harness. Audio returns as AAC in the MP4. VANILLA attention is torch SDPA (FlashAttention on Hopper); no cache_config or quant_config, so the row is BF16 and cache-free; compile at the case shape so the first request does not recompile; JSON to /v1/videos/sync (or /v1/images/generations), whose reply is the media itself. The YAML is passed with --visual_gen_args (trtllm-serve has no --extra_visual_gen_options). VALIDATION PENDING (round 2026-10-22, 2xH200/4xH200)."
+                            "notes": "H3 T2VA 2-GPU A/B on 4xB300 (2026-10-22): FA4 76.63 s against VANILLA 74.33 s, so the default (VANILLA) stays selected on Blackwell for H3. Kept for future A/Bs."
                         }
                     },
                     "extra_env_reason": "The harness exports PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True. Under it, the CUDA IPC handle TRT-LLM's rank 0 hands its media over with needs pidfd_getfd in the server process, which RunPod containers deny: every request logged 'pidfd_getfd: Operation not permitted' and hung to the read timeout (4xB300, 2026-10-22). Plain segments use cudaIpcMemHandle instead."
@@ -5814,6 +5884,27 @@
                         "VLLM_OMNI_VIDEO_SYNC_TIMEOUT": "1800"
                     },
                     "command_profiles": {
+                        "blackwell-2gpu-static": {
+                            "serve_args": "--trust-remote-code --task-type ref2va --num-gpus 2 --tensor-parallel-size 2 --usp 1 --ring 1 --text-encoder-tp-size 2 --vae-patch-parallel-size 2 --vae-parallel-mode tile --vae-use-tiling --diffusion-attention-backend CUDNN_ATTN --no-diffusion-compile-dynamic",
+                            "extra_env": {},
+                            "num_gpus": 2,
+                            "description": "Blackwell: The selected command plus --no-diffusion-compile-dynamic (docs: the setting for fixed shapes).",
+                            "hardware": [
+                                "b200",
+                                "gb200",
+                                "b300",
+                                "gb300"
+                            ],
+                            "notes": " Promoted from cand-static by the 2026-10-22 4xB300 A/B (scripts/run_b300_ab_20261022.sh): measured on the T2VA 2-GPU case (69.40 against 70.22 s, same model and flag); extended to Ref2VA and re-measured in the matrix.",
+                            "upstream_recipe": {
+                                "repo": "vllm-project/vllm-omni",
+                                "path": "recipes/MiniMaxAI/MiniMax-H3.md",
+                                "commit": "95b1d97f2ec2",
+                                "commit_date": "2026-10-21",
+                                "section": "Two 24/32 GB GPUs: TP2 distributed layerwise offload",
+                                "recheck": "Re-checked 2026-10-22: the only change since the profile was written moved the FastH3 sections to recipes/FastVideo/ (95b1d97f); the base H3 serving sections are unchanged. The previously recorded f69b1f2b1 was a repo HEAD, not a commit to this file."
+                            }
+                        },
                         "default": {
                             "description": "vLLM-Omni's fastest measured MiniMax-H3 command on datacenter GPUs: TP2, text-encoder TP2, native tiled VAE patch parallelism 2, resident, compiled, Omni's default attention for the hardware.",
                             "framework_ref": "vllm-omni main 56763cd6c383 + vllm==0.30.0",
@@ -6126,14 +6217,22 @@
                         }
                     },
                     "command_profiles": {
-                        "blackwell-fa4": {
-                            "description": "Blackwell: the same config with FA4 attention, the exact kernel NVIDIA tunes for Blackwell (its official LTX-2 configs use it).",
-                            "hardware": [
-                                "b200",
-                                "gb200",
-                                "b300",
-                                "gb300"
-                            ],
+                        "default": {
+                            "description": "TensorRT-LLM VisualGen, NVIDIA's official minimax-h3-ref2va-bf16-1gpu.yaml at BF16, 2 GPU(s).",
+                            "framework_ref": "tensorrt-llm 1.4.0rc1 (tag 0372799d1543, 2026-10-19)",
+                            "num_gpus": 2,
+                            "serve_args": "",
+                            "upstream_recipe": {
+                                "repo": "NVIDIA/TensorRT-LLM",
+                                "path": "examples/visual_gen/configs/minimax-h3-ref2va-bf16-1gpu.yaml",
+                                "commit": "aa026bf86db4",
+                                "commit_date": "2026-10-06",
+                                "section": "Ref2VA BF16 config with pure Ulysses 2"
+                            },
+                            "notes": "H3 multi-GPU is pure Ulysses (cfg_size 1: guidance-distilled); CUDA graphs, caches and a non-empty negative prompt are rejected; num_frames must be 17n+5 (124); MiniMaxH3Scheduler counts sigma grid points, so 50 = 49 evaluations as in sglang; flow shifts fixed at 12/3 like the harness. Audio returns as AAC in the MP4. Ref2VA loads transformer_ref/; the server resizes references to a 2048 px short edge (LANCZOS, multiple of 32) like the harness and adds the <Picture 1> tag itself. NVIDIA validates Ref2VA on one GPU; Ulysses Ref2VA is ours to validate. VANILLA attention is torch SDPA (FlashAttention on Hopper); no cache_config or quant_config, so the row is BF16 and cache-free; compile at the case shape so the first request does not recompile; JSON to /v1/videos/sync (or /v1/images/generations), whose reply is the media itself. The YAML is passed with --visual_gen_args (trtllm-serve has no --extra_visual_gen_options). VALIDATION PENDING (round 2026-10-22, 2xH200/4xH200). Blackwell: VANILLA beat FA4 on H3 T2VA 2-GPU, 74.33 against 76.63 s (4xB300 A/B, 2026-10-22), so it is selected there too."
+                        },
+                        "cand-fa4": {
+                            "description": "FA4 attention. Never selected: the 2026-10-22 4xB300 A/B had VANILLA ahead on H3.",
                             "framework_ref": "tensorrt-llm 1.4.0rc1 (tag 0372799d1543, 2026-10-19)",
                             "num_gpus": 2,
                             "serve_args": "",
@@ -6174,21 +6273,7 @@
                                 "commit_date": "2026-10-06",
                                 "section": "Ref2VA BF16 config with pure Ulysses 2"
                             },
-                            "notes": "FA4 is exact attention, the same precision class as VANILLA (torch SDPA). This repo measured VANILLA fastest on Hopper and FA4 on Blackwell for TRT-LLM VisualGen; A/B'd against `default` (VANILLA) on B300. VALIDATION PENDING (round 2026-10-22, 4xB300)."
-                        },
-                        "default": {
-                            "description": "TensorRT-LLM VisualGen, NVIDIA's official minimax-h3-ref2va-bf16-1gpu.yaml at BF16, 2 GPU(s).",
-                            "framework_ref": "tensorrt-llm 1.4.0rc1 (tag 0372799d1543, 2026-10-19)",
-                            "num_gpus": 2,
-                            "serve_args": "",
-                            "upstream_recipe": {
-                                "repo": "NVIDIA/TensorRT-LLM",
-                                "path": "examples/visual_gen/configs/minimax-h3-ref2va-bf16-1gpu.yaml",
-                                "commit": "aa026bf86db4",
-                                "commit_date": "2026-10-06",
-                                "section": "Ref2VA BF16 config with pure Ulysses 2"
-                            },
-                            "notes": "H3 multi-GPU is pure Ulysses (cfg_size 1: guidance-distilled); CUDA graphs, caches and a non-empty negative prompt are rejected; num_frames must be 17n+5 (124); MiniMaxH3Scheduler counts sigma grid points, so 50 = 49 evaluations as in sglang; flow shifts fixed at 12/3 like the harness. Audio returns as AAC in the MP4. Ref2VA loads transformer_ref/; the server resizes references to a 2048 px short edge (LANCZOS, multiple of 32) like the harness and adds the <Picture 1> tag itself. NVIDIA validates Ref2VA on one GPU; Ulysses Ref2VA is ours to validate. VANILLA attention is torch SDPA (FlashAttention on Hopper); no cache_config or quant_config, so the row is BF16 and cache-free; compile at the case shape so the first request does not recompile; JSON to /v1/videos/sync (or /v1/images/generations), whose reply is the media itself. The YAML is passed with --visual_gen_args (trtllm-serve has no --extra_visual_gen_options). VALIDATION PENDING (round 2026-10-22, 2xH200/4xH200)."
+                            "notes": "H3 T2VA 2-GPU A/B on 4xB300 (2026-10-22): FA4 76.63 s against VANILLA 74.33 s, so the default (VANILLA) stays selected on Blackwell for H3. Kept for future A/Bs."
                         }
                     },
                     "extra_env_reason": "The harness exports PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True. Under it, the CUDA IPC handle TRT-LLM's rank 0 hands its media over with needs pidfd_getfd in the server process, which RunPod containers deny: every request logged 'pidfd_getfd: Operation not permitted' and hung to the read timeout (4xB300, 2026-10-22). Plain segments use cudaIpcMemHandle instead."
@@ -6596,7 +6681,7 @@
                                 "section": "Start the server (fasth3-8step-8gpu.yaml)",
                                 "recheck": "2026-10-22: the V2 recipe moved to recipes/FastVideo/FastH3-V2.md and now serves eight GPUs from recipes/FastVideo/fasth3-8step-8gpu.yaml: FASTVIDEO_VSA with the cuDNN provider (the [cudnn-bsa] extra), USP 8, HSDP, text-encoder TP 8, VAE patch parallel 8 with tiling, enforce-eager. This profile keeps the previously measured 4-GPU command until the h200-cudnn-vsa candidate is measured against it."
                             },
-                            "notes": "Recipe placement (USP, HSDP, text-encoder TP, VAE patch parallel + tiling) and its cuDNN VSA provider at 4 GPUs. The recipe pins enforce-eager. VALIDATION PENDING: A/B against default on 4xH200 before promoting."
+                            "notes": "Recipe placement (USP, HSDP, text-encoder TP, VAE patch parallel + tiling) and its cuDNN VSA provider at 4 GPUs. The recipe pins enforce-eager. 4xB300 A/B 2026-10-22: hung in the first request (execute_model RPC and a 4-rank collective timed out after 600 s, 'DLO DP collective wave timed out'), so the measured default stays."
                         }
                     },
                     "framework_ref": "vllm-omni main 56763cd6c383 + vllm==0.30.0 + fastvideo-kernel==0.3.5 installed --no-deps (VLLM_OMNI_VSA_KERNEL_SPEC)"

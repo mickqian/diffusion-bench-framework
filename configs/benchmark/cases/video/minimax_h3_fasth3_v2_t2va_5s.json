@@ -102,7 +102,7 @@
             "section": "Start the server (fasth3-8step-8gpu.yaml)",
             "recheck": "2026-10-22: the V2 recipe moved to recipes/FastVideo/FastH3-V2.md and now serves eight GPUs from recipes/FastVideo/fasth3-8step-8gpu.yaml: FASTVIDEO_VSA with the cuDNN provider (the [cudnn-bsa] extra), USP 8, HSDP, text-encoder TP 8, VAE patch parallel 8 with tiling, enforce-eager. This profile keeps the previously measured 4-GPU command until the h200-cudnn-vsa candidate is measured against it."
           },
-          "notes": "Recipe placement (USP, HSDP, text-encoder TP, VAE patch parallel + tiling) and its cuDNN VSA provider at 4 GPUs. The recipe pins enforce-eager. VALIDATION PENDING: A/B against default on 4xH200 before promoting."
+          "notes": "Recipe placement (USP, HSDP, text-encoder TP, VAE patch parallel + tiling) and its cuDNN VSA provider at 4 GPUs. The recipe pins enforce-eager. 4xB300 A/B 2026-10-22: hung in the first request (execute_model RPC and a 4-rank collective timed out after 600 s, 'DLO DP collective wave timed out'), so the measured default stays."
         }
       },
       "framework_ref": "vllm-omni main 56763cd6c383 + vllm==0.30.0 + fastvideo-kernel==0.3.5 installed --no-deps (VLLM_OMNI_VSA_KERNEL_SPEC)"

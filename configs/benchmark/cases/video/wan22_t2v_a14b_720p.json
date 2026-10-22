@@ -35,6 +35,29 @@
         "DIFFUSION_ATTENTION_BACKEND": "FLASH_ATTN"
       },
       "command_profiles": {
+        "blackwell-4gpu-cfg2-usp2-vaepp-devpost": {
+          "serve_args": "--num-gpus 4 --cfg-parallel-size 2 --usp 2 --vae-patch-parallel-size 4 --vae-parallel-mode spatial_shard_width --no-diffusion-compile-dynamic --video-output-transport {\"enable_device_postprocess\":true}",
+          "extra_env": {
+            "DIFFUSION_ATTENTION_BACKEND": "CUDNN_ATTN"
+          },
+          "num_gpus": 4,
+          "description": "Blackwell: GPU-side video postprocess (docs: at most one level in 255 from the host path).",
+          "hardware": [
+            "b200",
+            "gb200",
+            "b300",
+            "gb300"
+          ],
+          "notes": " Promoted from cand-devpost by the 2026-10-22 4xB300 A/B (scripts/run_b300_ab_20261022.sh): one round, 100.23 s (100.20/100.27) against blackwell-4gpu-cfg2-usp2-vaepp's 101.75 s (101.70/101.80). Device postprocess changes the uint8 frames by at most one level (rounding), not the model math; taken because the faster competitor command is the conservative choice.",
+          "framework_ref": "vllm-omni main 0da1d831e07f + vllm==0.32.0",
+          "upstream_recipe": {
+            "repo": "vllm-project/vllm-omni",
+            "path": "recipes/Wan-AI/Wan2.2-T2V.md",
+            "commit": "62ebad2d7cd7",
+            "commit_date": "2026-09-25",
+            "section": "8x NVIDIA H20 / H100 / A100 (scaled to 4 GPUs)"
+          }
+        },
         "blackwell-4gpu-cfg2-usp2-vaepp": {
           "description": "Blackwell: the recipe's GPU layout scaled to four GPUs, cuDNN attention (FLASH_ATTN is Hopper-only).",
           "hardware": [
@@ -318,14 +341,22 @@
         }
       },
       "command_profiles": {
-        "blackwell-fa4": {
-          "description": "Blackwell: the same config with FA4 attention, the exact kernel NVIDIA tunes for Blackwell (its official LTX-2 configs use it).",
-          "hardware": [
-            "b200",
-            "gb200",
-            "b300",
-            "gb300"
-          ],
+        "default": {
+          "description": "TensorRT-LLM VisualGen, NVIDIA's official wan2.2-t2v-fp4-4gpu.yaml at BF16, 4 GPU(s).",
+          "framework_ref": "tensorrt-llm 1.4.0rc1 (tag 0372799d1543, 2026-10-19)",
+          "num_gpus": 4,
+          "serve_args": "",
+          "upstream_recipe": {
+            "repo": "NVIDIA/TensorRT-LLM",
+            "path": "examples/visual_gen/configs/wan2.2-t2v-fp4-4gpu.yaml",
+            "commit": "059396899c11",
+            "commit_date": "2026-06-17",
+            "section": "4-GPU layout with its FP4 quant_config removed"
+          },
+          "notes": "Official 4-GPU Wan2.2 layout (CFG 2 x async Ulysses 2, parallel VAE 4) at BF16, CUDA graphs off as in the config. guidance_scale_2 rides extra_params; boundary_ratio comes from the checkpoint (0.875); UniPC, 40 steps = 40 evaluations of a CFG pair; the negative prompt is sglang's default, as for ComfyUI. VANILLA attention is torch SDPA (FlashAttention on Hopper); no cache_config or quant_config, so the row is BF16 and cache-free; compile at the case shape so the first request does not recompile; JSON to /v1/videos/sync (or /v1/images/generations), whose reply is the media itself. The YAML is passed with --visual_gen_args (trtllm-serve has no --extra_visual_gen_options). VALIDATION PENDING (round 2026-10-22, 2xH200/4xH200). Blackwell: VANILLA beat FA4 on Wan2.2 T2V 4-GPU, 94.55 against 97.42 s (4xB300 A/B, 2026-10-22), so it is selected there too."
+        },
+        "cand-fa4": {
+          "description": "FA4 attention. Never selected: the 2026-10-22 4xB300 A/B had VANILLA ahead on Wan2.2.",
           "framework_ref": "tensorrt-llm 1.4.0rc1 (tag 0372799d1543, 2026-10-19)",
           "num_gpus": 4,
           "serve_args": "",
@@ -364,21 +395,7 @@
             "commit_date": "2026-06-17",
             "section": "4-GPU layout with its FP4 quant_config removed"
           },
-          "notes": "FA4 is exact attention, the same precision class as VANILLA (torch SDPA). This repo measured VANILLA fastest on Hopper and FA4 on Blackwell for TRT-LLM VisualGen; A/B'd against `default` (VANILLA) on B300. VALIDATION PENDING (round 2026-10-22, 4xB300)."
-        },
-        "default": {
-          "description": "TensorRT-LLM VisualGen, NVIDIA's official wan2.2-t2v-fp4-4gpu.yaml at BF16, 4 GPU(s).",
-          "framework_ref": "tensorrt-llm 1.4.0rc1 (tag 0372799d1543, 2026-10-19)",
-          "num_gpus": 4,
-          "serve_args": "",
-          "upstream_recipe": {
-            "repo": "NVIDIA/TensorRT-LLM",
-            "path": "examples/visual_gen/configs/wan2.2-t2v-fp4-4gpu.yaml",
-            "commit": "059396899c11",
-            "commit_date": "2026-06-17",
-            "section": "4-GPU layout with its FP4 quant_config removed"
-          },
-          "notes": "Official 4-GPU Wan2.2 layout (CFG 2 x async Ulysses 2, parallel VAE 4) at BF16, CUDA graphs off as in the config. guidance_scale_2 rides extra_params; boundary_ratio comes from the checkpoint (0.875); UniPC, 40 steps = 40 evaluations of a CFG pair; the negative prompt is sglang's default, as for ComfyUI. VANILLA attention is torch SDPA (FlashAttention on Hopper); no cache_config or quant_config, so the row is BF16 and cache-free; compile at the case shape so the first request does not recompile; JSON to /v1/videos/sync (or /v1/images/generations), whose reply is the media itself. The YAML is passed with --visual_gen_args (trtllm-serve has no --extra_visual_gen_options). VALIDATION PENDING (round 2026-10-22, 2xH200/4xH200)."
+          "notes": "Wan2.2 T2V 4-GPU A/B on 4xB300 (2026-10-22): FA4 97.42 s (97.20/97.65) against VANILLA 94.55 s (94.52/94.58), so the default (VANILLA) stays selected on Blackwell for Wan2.2. Kept for future A/Bs."
         }
       },
       "extra_env_reason": "The harness exports PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True. Under it, the CUDA IPC handle TRT-LLM's rank 0 hands its media over with needs pidfd_getfd in the server process, which RunPod containers deny: every request logged 'pidfd_getfd: Operation not permitted' and hung to the read timeout (4xB300, 2026-10-22). Plain segments use cudaIpcMemHandle instead."

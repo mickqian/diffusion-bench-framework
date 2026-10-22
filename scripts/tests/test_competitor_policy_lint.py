@@ -205,7 +205,7 @@ with tempfile.TemporaryDirectory() as td:
         else:
             check(f"SELECTED.md lists {fw} rows", listed)
     check("the H3 vLLM-Omni cell on B200 is the measured resident Blackwell command",
-          "| minimax_h3_t2va_5s | vllm-omni | b200 | `blackwell-2gpu` |  |  | vllm-project/vllm-omni@" in selected)
+          "| minimax_h3_t2va_5s | vllm-omni | b200 | `blackwell-2gpu-static` |  | AMBIGUOUS: blackwell-2gpu | vllm-project/vllm-omni@" in selected)
     check("its H100 cell is the offload profile with its exception",
           "| minimax_h3_t2va_5s | vllm-omni | h100 | `h100-2gpu-dlo` | yes |" in selected)
     check("a known violation is marked in SELECTED.md",
