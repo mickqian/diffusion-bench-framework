@@ -69,8 +69,8 @@ arms ltx2.3_twostage_t2v_2gpus vllm-omni 1 b300
 # sglang: 7d2e355 moved four B300 cells onto GB300 profiles, measured behind a Grace host. LTX-2
 # under them read 9.9 s on B300 against 4.4 s server-side eager on x86 B200 (2026-09-25), so each
 # GB300 profile is A/B'd here against the profile B300 selected before.
-arms ltx2_twostage_t2v sglang 2 gb300-cfg-parallel-compile default cand-bcg
-arms ltx2.3_twostage_t2v_2gpus sglang 2 default cand-bcg
+arms ltx2_twostage_t2v sglang 2 gb300-cfg-parallel-compile default cand-bcg cand-usp2 cand-usp2-bcg
+arms ltx2.3_twostage_t2v_2gpus sglang 2 default cand-bcg cand-usp2 cand-usp2-bcg
 arms cosmos3_nano_t2i_720p sglang 2 gb300-2gpu-cfg-parallel-compile blackwell-2gpu-cfg-parallel
 arms qwen_image_21_t2i_1024_2gpu sglang 2 gb300-2gpu-tp2 b200-2gpu-ulysses-fa
 arms cosmos3_nano_t2v_720p_189f sglang 1 gb-4gpu-cfg-ulysses-speed default
