@@ -63,4 +63,11 @@ arms wan22_t2v_a14b_720p trtllm-visual 1 b300 default
 arms cosmos3_nano_t2i_720p trtllm-visual 2 b300 cand-fa4 cand-fa4-graph cand-graph
 arms cosmos3_nano_t2v_720p_189f trtllm-visual 1 b300 cand-fa4
 arms cosmos3_nano_i2v_720p_189f trtllm-visual 1 b300 cand-fa4
+# sglang: 7d2e355 moved four B300 cells onto GB300 profiles, measured behind a Grace host. LTX-2
+# under them read 9.9 s on B300 against 4.4 s server-side eager on x86 B200 (2026-09-25), so each
+# GB300 profile is A/B'd here against the profile B300 selected before.
+arms ltx2_twostage_t2v sglang 2 gb300-cfg-parallel-compile default
+arms cosmos3_nano_t2i_720p sglang 2 gb300-2gpu-cfg-parallel-compile blackwell-2gpu-cfg-parallel
+arms qwen_image_21_t2i_1024_2gpu sglang 2 gb300-2gpu-tp2 b200-2gpu-ulysses-fa
+arms cosmos3_nano_t2v_720p_189f sglang 1 gb-4gpu-cfg-ulysses-speed default
 echo "=== AB DONE $(date -Is) ==="
