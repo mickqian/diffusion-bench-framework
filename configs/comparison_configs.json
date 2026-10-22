@@ -2445,6 +2445,12 @@
                             "num_gpus": 2,
                             "serve_args": "--model-type diffusion --warmup-mode server --enable-cfg-parallel --pipeline-class-name LTX2TwoStagePipeline --ltx2-two-stage-device-mode resident",
                             "notes": "Resident mode keeps both stages in VRAM on H200-class GPUs."
+                        },
+                        "cand-bcg": {
+                            "sglang_ref": "current-main",
+                            "serve_args": "--model-type diffusion --warmup-mode server --enable-cfg-parallel --pipeline-class-name LTX2TwoStagePipeline --dit-layerwise-offload false --performance-mode speed --enable-torch-compile false --enable-breakable-cuda-graph true --warmup-resolutions 768x512 --warmup-num-frames 121",
+                            "description": "The default command plus breakable CUDA graphs (LTX-2/2.3 are on sglang's validated BCG list), captured at the case shape. Never selected on its own: A/B arm.",
+                            "notes": "TRT-LLM's LTX-2 row runs CUDA graphs (NVIDIA's official config) at 0.044 s per stage-1 step against sglang's 0.192 s (4xB300, 2026-10-22); stage 1 is ~1.5k tokens, so the step is launch-bound. BCG replays the same kernels, so the output is unchanged. VALIDATION PENDING (4xB300 A/B)."
                         }
                     }
                 },
@@ -3094,6 +3100,26 @@
             "fps": 24,
             "num_inference_steps": 30,
             "guidance_scale": 3.0,
+            "framework_request_extra": {
+                "vllm-omni": {
+                    "extra_params": {
+                        "video_cfg_scale": 3.0,
+                        "audio_cfg_scale": 7.0,
+                        "video_stg_scale": 1.0,
+                        "audio_stg_scale": 1.0,
+                        "video_modality_scale": 3.0,
+                        "audio_modality_scale": 3.0,
+                        "video_rescale_scale": 0.7,
+                        "audio_rescale_scale": 0.7,
+                        "video_stg_blocks": [
+                            28
+                        ],
+                        "audio_stg_blocks": [
+                            28
+                        ]
+                    }
+                }
+            },
             "frameworks": {
                 "sglang": {
                     "serve_args": "--model-type diffusion --warmup-mode server --enable-cfg-parallel --pipeline-class-name LTX2TwoStagePipeline",
@@ -3132,19 +3158,77 @@
                             "num_gpus": 2,
                             "serve_args": "--model-type diffusion --warmup-mode server --enable-cfg-parallel --pipeline-class-name LTX2TwoStagePipeline --ltx2-two-stage-device-mode original",
                             "notes": "Use this only when official switching semantics are more important than latency."
+                        },
+                        "cand-bcg": {
+                            "sglang_ref": "current-main",
+                            "serve_args": "--model-type diffusion --warmup-mode server --enable-cfg-parallel --pipeline-class-name LTX2TwoStagePipeline --enable-breakable-cuda-graph true --warmup-resolutions 768x512 --warmup-num-frames 121",
+                            "description": "The default command plus breakable CUDA graphs (LTX-2/2.3 are on sglang's validated BCG list), captured at the case shape. Never selected on its own: A/B arm.",
+                            "notes": "TRT-LLM's LTX-2 row runs CUDA graphs (NVIDIA's official config) at 0.044 s per stage-1 step against sglang's 0.192 s (4xB300, 2026-10-22); stage 1 is ~1.5k tokens, so the step is launch-bound. BCG replays the same kernels, so the output is unchanged. VALIDATION PENDING (4xB300 A/B)."
+                        }
+                    }
+                },
+                "vllm-omni": {
+                    "model": "diffusers/LTX-2.3-Diffusers",
+                    "num_gpus": 2,
+                    "serve_args": "--num-gpus 2 --cfg-parallel-size 2 --model-class-name LTX2TwoStagePipeline --stage-init-timeout 600 --no-diffusion-compile-dynamic",
+                    "extra_env": {
+                        "DIFFUSION_ATTENTION_BACKEND": "FLASH_ATTN"
+                    },
+                    "request_omit_keys": [
+                        "guidance_scale"
+                    ],
+                    "model_override_reason": "vLLM-Omni loads LTX-2.3 only from the Diffusers conversion of the official weights (its recipe: 'LTX-2.3 requires the Diffusers checkpoint; the raw Lightricks/LTX-2.3 safetensors repository is not directly loadable'); the two-stage upsampler and distilled LoRA still come from Lightricks/LTX-2.3.",
+                    "command_profiles": {
+                        "blackwell-2gpu-twostage-cfg": {
+                            "description": "Blackwell: ordinary LTX-2.3 two-stage with guidance parallel 2 (two of stage 1's four passes per rank), cuDNN attention.",
+                            "hardware": [
+                                "b200",
+                                "gb200",
+                                "b300",
+                                "gb300"
+                            ],
+                            "framework_ref": "vllm-omni main 0da1d831e07f + vllm==0.32.0",
+                            "num_gpus": 2,
+                            "serve_args": "--num-gpus 2 --cfg-parallel-size 2 --model-class-name LTX2TwoStagePipeline --stage-init-timeout 600 --no-diffusion-compile-dynamic",
+                            "extra_env": {
+                                "DIFFUSION_ATTENTION_BACKEND": "CUDNN_ATTN"
+                            },
+                            "upstream_recipe": {
+                                "repo": "vllm-project/vllm-omni",
+                                "path": "recipes/LTX/LTX-2.md",
+                                "commit": "71f0fa47acff",
+                                "commit_date": "2026-10-19",
+                                "section": "Serving (ordinary LTX-2.3 two-stage); Guidance Parallelism"
+                            },
+                            "notes": "Stage 1 runs the official LTX-2.3 guider by default (video CFG 3 / audio CFG 7, STG 1.0 on block 28, modality 3, rescale 0.7: four transformer passes a step), the same values as sglang's LTX23SamplingParams; the request pins them in extra_params and omits the top-level guidance_scale, which vLLM-Omni applies to BOTH CFG fields after extra_params (audio CFG 7 would become 3). Default negative prompt is the ltx-pipelines one in both. VALIDATION PENDING (round 2026-10-22, 4xB300)."
+                        },
+                        "default": {
+                            "description": "Ordinary LTX-2.3 two-stage with guidance parallel 2.",
+                            "framework_ref": "vllm-omni main 0da1d831e07f + vllm==0.32.0",
+                            "num_gpus": 2,
+                            "serve_args": "--num-gpus 2 --cfg-parallel-size 2 --model-class-name LTX2TwoStagePipeline --stage-init-timeout 600 --no-diffusion-compile-dynamic",
+                            "extra_env": {
+                                "DIFFUSION_ATTENTION_BACKEND": "FLASH_ATTN"
+                            },
+                            "upstream_recipe": {
+                                "repo": "vllm-project/vllm-omni",
+                                "path": "recipes/LTX/LTX-2.md",
+                                "commit": "71f0fa47acff",
+                                "commit_date": "2026-10-19",
+                                "section": "Serving (ordinary LTX-2.3 two-stage); Guidance Parallelism"
+                            },
+                            "notes": "As blackwell-2gpu-twostage-cfg with FLASH_ATTN (Hopper). Not measured yet."
                         }
                     }
                 }
             },
             "report_framework_statuses": {
-                "vllm-omni": "no_profile",
                 "lightx2v": "unsupported",
                 "trtllm-visual": "unsupported",
                 "comfyui": "no_profile",
                 "fastvideo": "no_profile"
             },
             "report_framework_reasons": {
-                "vllm-omni": "No compatible vLLM-Omni LTX2.3 serving profile is configured.",
                 "lightx2v": "LightX2V cannot run the official LTX-2.3 two-stage workload: one transformer serves both stages with any LoRA merged at load (ltx2_runner.py at 19c19614), and the profile it had never enabled the upsampler, so every earlier row was one stage at the full 768x512 -- heavier than sglang's two-stage, never comparable. Audited 2026-10-22.",
                 "trtllm-visual": "TensorRT-LLM 1.4.0rc1 has no LTX-2.3: LTX2Pipeline lists only Lightricks/LTX-2 (19B), and '2.3' appears in no hf_id, config, test or supported-models table (checked 2026-10-22).",
                 "comfyui": "ComfyUI loads LTX-2.3, but no official workflow reproduces this case: sglang runs LTX-2.3's multimodal guidance in stage 1 (video CFG 3 + STG 1.0 on block 28 + modality 3, audio CFG 7 + STG + modality -- up to four DiT passes per step, LTX23SamplingParams), while ComfyUI's LTX-2.3 T2V template (and the LTX-2.5 one) is the distilled-LoRA fast path at cfg 1. A graph built from LTXVSpatioTemporalGuidance / LTXVModalityGuidance / LTXVDualCFGGuider could match it but has no upstream reference and is not validated.",

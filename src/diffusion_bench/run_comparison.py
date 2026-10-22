@@ -1694,6 +1694,10 @@ def send_request_vllm_omni(base_url: str, case: dict, config: dict) -> float:
             if key in case:
                 data[key] = str(case[key])
         _update_form_data(data, _request_extra(case, "vllm-omni"))
+        fw_entry = (case.get("frameworks") or {}).get("vllm-omni") or {}
+        # LTX applies a top-level guidance_scale to BOTH video and audio CFG, after extra_params.
+        for key in fw_entry.get("request_omit_keys", ()):
+            data.pop(key, None)
         # A case may condition on a reference image without setting the
         # top-level `reference_image`: for sglang, ref2va is selected by a
         # `conditions[]` entry, and setting `reference_image` would reroute
@@ -1701,7 +1705,6 @@ def send_request_vllm_omni(base_url: str, case: dict, config: dict) -> float:
         # opts in separately -- otherwise vLLM-Omni receives no reference and
         # answers `ref2va requires at least one image or video reference`,
         # which reads like an unsupported case rather than a missing argument.
-        fw_entry = (case.get("frameworks") or {}).get("vllm-omni") or {}
         files = None
         if case.get("reference_image") or fw_entry.get("reference_image"):
             files = {

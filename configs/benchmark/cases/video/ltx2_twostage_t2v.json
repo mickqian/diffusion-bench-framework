@@ -45,6 +45,12 @@
           "num_gpus": 2,
           "serve_args": "--model-type diffusion --warmup-mode server --enable-cfg-parallel --pipeline-class-name LTX2TwoStagePipeline --ltx2-two-stage-device-mode resident",
           "notes": "Resident mode keeps both stages in VRAM on H200-class GPUs."
+        },
+        "cand-bcg": {
+          "sglang_ref": "current-main",
+          "serve_args": "--model-type diffusion --warmup-mode server --enable-cfg-parallel --pipeline-class-name LTX2TwoStagePipeline --dit-layerwise-offload false --performance-mode speed --enable-torch-compile false --enable-breakable-cuda-graph true --warmup-resolutions 768x512 --warmup-num-frames 121",
+          "description": "The default command plus breakable CUDA graphs (LTX-2/2.3 are on sglang's validated BCG list), captured at the case shape. Never selected on its own: A/B arm.",
+          "notes": "TRT-LLM's LTX-2 row runs CUDA graphs (NVIDIA's official config) at 0.044 s per stage-1 step against sglang's 0.192 s (4xB300, 2026-10-22); stage 1 is ~1.5k tokens, so the step is launch-bound. BCG replays the same kernels, so the output is unchanged. VALIDATION PENDING (4xB300 A/B)."
         }
       }
     },
