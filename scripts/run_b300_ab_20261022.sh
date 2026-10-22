@@ -7,6 +7,7 @@
 # through its profile.
 #
 #   bash scripts/run_b300_ab_20261022.sh
+#   AB_CASES='cosmos3.* trtllm-visual|ltx2.3.* vllm-omni| sglang$' bash scripts/run_b300_ab_20261022.sh  # second wave
 #
 # Arms print as `ARM <case> <framework> <arm> r<k> RESULT ...` lines.
 set -u
@@ -63,6 +64,8 @@ arms wan22_t2v_a14b_720p trtllm-visual 1 b300 default
 arms cosmos3_nano_t2i_720p trtllm-visual 2 b300 cand-fa4 cand-fa4-graph cand-graph
 arms cosmos3_nano_t2v_720p_189f trtllm-visual 1 b300 cand-fa4
 arms cosmos3_nano_i2v_720p_189f trtllm-visual 1 b300 cand-fa4
+# the new vLLM-Omni LTX-2.3 two-stage cell, validated once before the matrix reruns it
+arms ltx2.3_twostage_t2v_2gpus vllm-omni 1 b300
 # sglang: 7d2e355 moved four B300 cells onto GB300 profiles, measured behind a Grace host. LTX-2
 # under them read 9.9 s on B300 against 4.4 s server-side eager on x86 B200 (2026-09-25), so each
 # GB300 profile is A/B'd here against the profile B300 selected before.
