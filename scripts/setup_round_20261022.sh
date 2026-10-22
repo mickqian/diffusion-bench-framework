@@ -1,10 +1,10 @@
 #!/usr/bin/env bash
-# Prepare one rx devbox for scripts/run_h200_full_20261022.sh: harness and sglang
+# Prepare the round's box (RunPod 4xB300; /workspace is its container disk) for scripts/run_b300_full_20261022.sh: harness and sglang
 # at the round's pins, every competitor installed at its resolved latest, an HF
 # token for the gated checkpoints, then the one-minute GPU health probe.
 #
 #   SGLANG_PIN=<sha> DBF_PIN=<sha> FRAMEWORKS="vllm-omni lightx2v ..." \
-#     setsid -f bash setup_h200_round_20261022.sh > /scratch/r1022/setup.log 2>&1 < /dev/null
+#     setsid -f bash setup_round_20261022.sh > /workspace/r1022/setup.log 2>&1 < /dev/null
 #
 # Competitor versions resolved 2026-10-22 ~04:00 UTC (override to re-resolve):
 #   vllm 0.32.0 (vllm-omni main's docker/Dockerfile.ci) + vllm-omni main 0da1d831e07f
@@ -14,7 +14,7 @@
 # have OOMKilled pods before (2026-10-10).
 set -u
 
-STATE="${DBF_STATE_DIR:-/scratch/r1022}"
+STATE="${DBF_STATE_DIR:-/workspace/r1022}"
 : "${SGLANG_PIN:?SGLANG_PIN}" "${DBF_PIN:?DBF_PIN}"
 FRAMEWORKS="${FRAMEWORKS:-vllm-omni lightx2v trtllm-visual comfyui fastvideo}"
 export VLLM_INSTALL_SPEC="${VLLM_INSTALL_SPEC:-vllm==0.32.0}"
@@ -25,7 +25,6 @@ export TRTLLM_TORCH_INSTALL_SPEC="${TRTLLM_TORCH_INSTALL_SPEC:-torch==2.14.0}"
 export COMFYUI_INSTALL_SPEC="${COMFYUI_INSTALL_SPEC:-https://github.com/comfyanonymous/ComfyUI.git@1a82e6d01f395b43275c77acd289af1eb7090bb9}"
 export FASTVIDEO_INSTALL_SPEC="${FASTVIDEO_INSTALL_SPEC:-https://github.com/hao-ai-lab/FastVideo.git@fa2d1324c60050cd65209c6aaeac470e7fb412f5}"
 export SGLANG_DIFFUSION_FRAMEWORK_VENV_ROOT="${STATE}/fw-venvs"
-export MAX_JOBS="${MAX_JOBS:-16}"
 export HF_HOME="${STATE}/hf" HF_HUB_CACHE="${STATE}/hf/hub" HUGGINGFACE_HUB_CACHE="${STATE}/hf/hub"
 
 mkdir -p "${STATE}"/{logs,fw-venvs,hf,comfy-ws}

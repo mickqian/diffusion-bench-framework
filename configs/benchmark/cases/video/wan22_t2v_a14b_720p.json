@@ -35,6 +35,29 @@
         "DIFFUSION_ATTENTION_BACKEND": "FLASH_ATTN"
       },
       "command_profiles": {
+        "blackwell-4gpu-cfg2-usp2-vaepp": {
+          "description": "Blackwell: the recipe's GPU layout scaled to four GPUs, cuDNN attention (FLASH_ATTN is Hopper-only).",
+          "hardware": [
+            "b200",
+            "gb200",
+            "b300",
+            "gb300"
+          ],
+          "framework_ref": "vllm-omni main 0da1d831e07f + vllm==0.32.0",
+          "num_gpus": 4,
+          "serve_args": "--num-gpus 4 --cfg-parallel-size 2 --usp 2 --vae-patch-parallel-size 4 --vae-parallel-mode spatial_shard_width --no-diffusion-compile-dynamic",
+          "extra_env": {
+            "DIFFUSION_ATTENTION_BACKEND": "CUDNN_ATTN"
+          },
+          "upstream_recipe": {
+            "repo": "vllm-project/vllm-omni",
+            "path": "recipes/Wan-AI/Wan2.2-T2V.md",
+            "commit": "62ebad2d7cd7",
+            "commit_date": "2026-09-25",
+            "section": "8x NVIDIA H20 / H100 / A100 (scaled to 4 GPUs)"
+          },
+          "notes": "Replaces TP4, a layout the GPU recipe never uses. VAE decode split with spatial_shard_width (matches single-GPU decode within tolerance) instead of the recipe's tiling (not exact). HSDP left out: it only saves memory and both experts fit; Skip-Softmax left out (lossy, Blackwell-only). --no-diffusion-compile-dynamic: the docs' setting for a fixed-shape workload. VALIDATION PENDING (round 2026-10-22, 4xB300)."
+        },
         "h200-4gpu-cfg2-usp2-vaepp": {
           "description": "H200: the recipe's GPU layout (CFG parallel x Ulysses, VAE patch parallel) scaled to four GPUs.",
           "hardware": [
@@ -124,28 +147,28 @@
           "description": "The recipe's literal HSDP weight sharding on top. Never selected on its own: A/B arm, picked with --hardware-profile <name>.",
           "serve_args": "--num-gpus 4 --cfg-parallel-size 2 --usp 2 --vae-patch-parallel-size 4 --vae-parallel-mode spatial_shard_width --no-diffusion-compile-dynamic --use-hsdp",
           "extra_env": {
-            "DIFFUSION_ATTENTION_BACKEND": "FLASH_ATTN"
+            "DIFFUSION_ATTENTION_BACKEND": "CUDNN_ATTN"
           },
           "num_gpus": 4,
-          "notes": " VALIDATION PENDING (round 2026-10-22, 2xH200/4xH200)."
+          "notes": " VALIDATION PENDING (round 2026-10-22, 4xB300)."
         },
         "cand-permute": {
           "description": "Symmetric-memory Ulysses all-to-all (PR #6340: does not change the attention math). Never selected on its own: A/B arm, picked with --hardware-profile <name>.",
           "serve_args": "--num-gpus 4 --cfg-parallel-size 2 --usp 2 --vae-patch-parallel-size 4 --vae-parallel-mode spatial_shard_width --no-diffusion-compile-dynamic --ulysses-a2a-permute",
           "extra_env": {
-            "DIFFUSION_ATTENTION_BACKEND": "FLASH_ATTN"
+            "DIFFUSION_ATTENTION_BACKEND": "CUDNN_ATTN"
           },
           "num_gpus": 4,
-          "notes": " VALIDATION PENDING (round 2026-10-22, 2xH200/4xH200)."
+          "notes": " VALIDATION PENDING (round 2026-10-22, 4xB300)."
         },
         "cand-devpost": {
           "description": "GPU-side video postprocess (docs: at most one level in 255 from the host path). Never selected on its own: A/B arm, picked with --hardware-profile <name>.",
           "serve_args": "--num-gpus 4 --cfg-parallel-size 2 --usp 2 --vae-patch-parallel-size 4 --vae-parallel-mode spatial_shard_width --no-diffusion-compile-dynamic --video-output-transport {\"enable_device_postprocess\":true}",
           "extra_env": {
-            "DIFFUSION_ATTENTION_BACKEND": "FLASH_ATTN"
+            "DIFFUSION_ATTENTION_BACKEND": "CUDNN_ATTN"
           },
           "num_gpus": 4,
-          "notes": " VALIDATION PENDING (round 2026-10-22, 2xH200/4xH200)."
+          "notes": " VALIDATION PENDING (round 2026-10-22, 4xB300)."
         }
       }
     },
@@ -212,8 +235,8 @@
         "cand-tuned": {
           "description": "Lossless LightX2V options found upstream: Triton LayerNorm, fused Ulysses pre/post-processing, channels-last 3D VAE convolutions. Never selected on its own: A/B arm, picked with --hardware-profile <name>.",
           "lightx2v_config": {
-            "self_attn_1_type": "flash_attn3",
-            "cross_attn_1_type": "flash_attn3",
+            "self_attn_1_type": "flash_attn2",
+            "cross_attn_1_type": "flash_attn2",
             "layer_norm_type": "Triton",
             "parallel": {
               "cfg_p_size": 2,
@@ -227,7 +250,7 @@
             "USE_CHANNELS_LAST_3D": "1"
           },
           "num_gpus": 4,
-          "notes": "Upstream uses Triton LayerNorm in other NVIDIA Wan configs; seq_p_tensor_fusion/prepost triton are exact communication fusions; USE_CHANNELS_LAST_3D documents ~9% on the Wan VAE. seq_p_quant_scheme stays off (fp8/fp4 comm). VALIDATION PENDING (round 2026-10-22, 2xH200/4xH200)."
+          "notes": "Upstream uses Triton LayerNorm in other NVIDIA Wan configs; seq_p_tensor_fusion/prepost triton are exact communication fusions; USE_CHANNELS_LAST_3D documents ~9% on the Wan VAE. seq_p_quant_scheme stays off (fp8/fp4 comm). VALIDATION PENDING (round 2026-10-22, 4xB300)."
         }
       },
       "model_override_reason": "Same weights, different packaging: LightX2V reads Wan's original checkpoint layout, while sglang and vLLM-Omni read the Diffusers conversion (Wan2.2-T2V-A14B-Diffusers). Equivalent model path, not a different model."
@@ -293,6 +316,54 @@
         }
       },
       "command_profiles": {
+        "blackwell-fa4": {
+          "description": "Blackwell: the same config with FA4 attention, the exact kernel NVIDIA tunes for Blackwell (its official LTX-2 configs use it).",
+          "hardware": [
+            "b200",
+            "gb200",
+            "b300",
+            "gb300"
+          ],
+          "framework_ref": "tensorrt-llm 1.4.0rc1 (tag 0372799d1543, 2026-10-19)",
+          "num_gpus": 4,
+          "serve_args": "",
+          "visual_gen_args": {
+            "attention_config": {
+              "backend": "FA4"
+            },
+            "parallel_config": {
+              "cfg_size": 2,
+              "ulysses_size": 2,
+              "async_ulysses": true,
+              "parallel_vae_size": 4
+            },
+            "torch_compile_config": {
+              "enable": true
+            },
+            "cuda_graph_config": {
+              "enable": false
+            },
+            "compilation_config": {
+              "resolutions": [
+                [
+                  720,
+                  1280
+                ]
+              ],
+              "num_frames": [
+                81
+              ]
+            }
+          },
+          "upstream_recipe": {
+            "repo": "NVIDIA/TensorRT-LLM",
+            "path": "examples/visual_gen/configs/wan2.2-t2v-fp4-4gpu.yaml",
+            "commit": "059396899c11",
+            "commit_date": "2026-06-17",
+            "section": "4-GPU layout with its FP4 quant_config removed"
+          },
+          "notes": "FA4 is exact attention, the same precision class as VANILLA (torch SDPA). This repo measured VANILLA fastest on Hopper and FA4 on Blackwell for TRT-LLM VisualGen; A/B'd against `default` (VANILLA) on B300. VALIDATION PENDING (round 2026-10-22, 4xB300)."
+        },
         "default": {
           "description": "TensorRT-LLM VisualGen, NVIDIA's official wan2.2-t2v-fp4-4gpu.yaml at BF16, 4 GPU(s).",
           "framework_ref": "tensorrt-llm 1.4.0rc1 (tag 0372799d1543, 2026-10-19)",

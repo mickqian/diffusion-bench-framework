@@ -111,9 +111,11 @@
         "cand-static": {
           "description": "The selected command plus --no-diffusion-compile-dynamic. Never selected on its own: A/B arm, picked with --hardware-profile <name>.",
           "serve_args": "--usp 2 --no-diffusion-compile-dynamic",
-          "extra_env": {},
+          "extra_env": {
+            "DIFFUSION_ATTENTION_BACKEND": "CUDNN_ATTN"
+          },
           "num_gpus": 2,
-          "notes": " VALIDATION PENDING (round 2026-10-22, 2xH200/4xH200)."
+          "notes": " VALIDATION PENDING (round 2026-10-22, 4xB300)."
         }
       }
     },

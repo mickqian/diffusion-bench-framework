@@ -132,6 +132,19 @@
       "serve_args": "--stage-configs-path configs/vllm_omni_cosmos3_h200_2gpu_cfg_guardrails_off.yaml --stage-init-timeout 900 --init-timeout 1800",
       "extra_env": {},
       "command_profiles": {
+        "blackwell-cudnn-static": {
+          "description": "Blackwell vLLM-Omni profile for cosmos3_nano_t2i_720p using cuDNN attention.",
+          "hardware": [
+            "b200",
+            "gb200",
+            "b300",
+            "gb300"
+          ],
+          "framework_ref": "vllm-omni main 0da1d831e07f + vllm==0.32.0",
+          "num_gpus": 2,
+          "serve_args": "--num-gpus 2 --cfg-parallel-size 2 --model-class-name Cosmos3OmniDiffusersPipeline --stage-init-timeout 900 --init-timeout 1800 --no-guardrails --diffusion-attention-backend CUDNN_ATTN --cache-backend none --no-diffusion-compile-dynamic",
+          "notes": "Blackwell attention choice, measured on this box 2026-09-12. FLASH_ATTN is a Hopper-only precompiled kernel -- vLLM-Omni refuses it on sm_100 with 'FLASH_ATTN was explicitly selected but is unsupported'. FLASHINFER_ATTN starts but dies under torch.compile on dynamic shapes (`AsPythonConstantNotImplementedError: SymNodeVariable() is not a constant` in the FlashInfer backend's _ensure_plan), observed on qwen-image and cosmos3 t2v; it is fine for the static image cases (zimage, flux), which are deliberately left on it. CUDNN_ATTN is exact softmax, the same precision class as the kernels the other frameworks run here, measured at 2.741s on qwen-image (vs TRTLLM_ATTN 3.274s) and already the backend minimax-h3 serves with on this box. Also drops --stage-configs-path: vLLM-Omni 0.29 rejects it outright (`stage_configs_path is no longer supported; use deploy_config instead`), and upstream's own cosmos3 deploy file says the T2I/video checkpoints must keep the default single-stage diffusion fallback -- so cfg-parallel and guardrails move to the first-class flags rather than to a new YAML. The old YAML also pinned enforce_eager, which silently ran this competitor compile-off against the policy. 2026-10-22: --no-diffusion-compile-dynamic added; cand-dynamic keeps the previous command for the A/B. VALIDATION PENDING (round 2026-10-22, 4xB300)."
+        },
         "h200-2gpu-cfg-flash-static": {
           "description": "H200 2-GPU CFG-parallel vLLM-Omni Cosmos3 image profile on current flags.",
           "hardware": [
@@ -192,8 +205,11 @@
           ],
           "num_gpus": 2,
           "framework_ref": "vllm-omni f69b1f2b1 + vllm==0.31.0",
-          "serve_args": "--num-gpus 2 --cfg-parallel-size 2 --model-class-name Cosmos3OmniDiffusersPipeline --stage-init-timeout 900 --init-timeout 1800 --no-guardrails --diffusion-attention-backend FLASH_ATTN --cache-backend none",
-          "notes": "Replaces h200-2gpu-cfg, whose --stage-configs-path current vLLM rejects ('unrecognized arguments', 2026-10-11 on 2xH200). Same layout and guardrails-off as that stage config, spelled with the flags the H200 video profiles and blackwell-cudnn use; FLASH_ATTN is the Hopper exact kernel. Validated 2026-10-11 on 4xH200 (cards 0,1), --enforce-eager: 1.304/1.306 s in two rounds."
+          "serve_args": "--num-gpus 2 --cfg-parallel-size 2 --model-class-name Cosmos3OmniDiffusersPipeline --stage-init-timeout 900 --init-timeout 1800 --no-guardrails --diffusion-attention-backend CUDNN_ATTN --cache-backend none",
+          "notes": "Replaces h200-2gpu-cfg, whose --stage-configs-path current vLLM rejects ('unrecognized arguments', 2026-10-11 on 2xH200). Same layout and guardrails-off as that stage config, spelled with the flags the H200 video profiles and blackwell-cudnn use; FLASH_ATTN is the Hopper exact kernel. Validated 2026-10-11 on 4xH200 (cards 0,1), --enforce-eager: 1.304/1.306 s in two rounds.",
+          "extra_env": {
+            "DIFFUSION_ATTENTION_BACKEND": "CUDNN_ATTN"
+          }
         }
       }
     },

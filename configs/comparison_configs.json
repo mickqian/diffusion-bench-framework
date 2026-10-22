@@ -380,9 +380,11 @@
                         "cand-static": {
                             "description": "The selected command plus --no-diffusion-compile-dynamic. Never selected on its own: A/B arm, picked with --hardware-profile <name>.",
                             "serve_args": " --no-diffusion-compile-dynamic",
-                            "extra_env": {},
+                            "extra_env": {
+                                "DIFFUSION_ATTENTION_BACKEND": "CUDNN_ATTN"
+                            },
                             "num_gpus": 1,
-                            "notes": " VALIDATION PENDING (round 2026-10-22, 2xH200/4xH200)."
+                            "notes": " VALIDATION PENDING (round 2026-10-22, 4xB300)."
                         }
                     }
                 },
@@ -483,10 +485,23 @@
                         "cand-vae-compile": {
                             "description": "VAE compile on top (vae_use_compile, used by upstream's qwen_image_21 5090 configs). Never selected on its own: A/B arm, picked with --hardware-profile <name>.",
                             "lightx2v_config": {
+                                "resolution": 1024,
+                                "vae_scale_factor": 16,
+                                "attn_type": "flash_attn2",
+                                "rope_type": "flashinfer_rope",
+                                "rms_norm_type": "fp32_variance",
+                                "layer_norm_type": "Triton",
+                                "modulate_type": "triton",
+                                "fused_qk_rms_norm": true,
+                                "fused_block_ops": true,
+                                "fused_block_min_tokens": 1024,
+                                "enable_cfg": false,
+                                "sample_guide_scale": 1.0,
+                                "warmup": true,
                                 "vae_use_compile": true
                             },
                             "num_gpus": 1,
-                            "notes": " VALIDATION PENDING (round 2026-10-22, 2xH200/4xH200)."
+                            "notes": " VALIDATION PENDING (round 2026-10-22, 4xB300)."
                         }
                     }
                 },
@@ -757,9 +772,11 @@
                         "cand-static": {
                             "description": "The selected command plus --no-diffusion-compile-dynamic. Never selected on its own: A/B arm, picked with --hardware-profile <name>.",
                             "serve_args": "--usp 2 --no-diffusion-compile-dynamic",
-                            "extra_env": {},
+                            "extra_env": {
+                                "DIFFUSION_ATTENTION_BACKEND": "CUDNN_ATTN"
+                            },
                             "num_gpus": 2,
-                            "notes": " VALIDATION PENDING (round 2026-10-22, 2xH200/4xH200)."
+                            "notes": " VALIDATION PENDING (round 2026-10-22, 4xB300)."
                         }
                     }
                 }
@@ -927,9 +944,11 @@
                         "cand-static": {
                             "description": "The selected command plus --no-diffusion-compile-dynamic. Never selected on its own: A/B arm, picked with --hardware-profile <name>.",
                             "serve_args": " --no-diffusion-compile-dynamic",
-                            "extra_env": {},
+                            "extra_env": {
+                                "DIFFUSION_ATTENTION_BACKEND": "CUDNN_ATTN"
+                            },
                             "num_gpus": 1,
-                            "notes": " VALIDATION PENDING (round 2026-10-22, 2xH200/4xH200)."
+                            "notes": " VALIDATION PENDING (round 2026-10-22, 4xB300)."
                         }
                     }
                 }
@@ -990,6 +1009,23 @@
                         "DIFFUSION_ATTENTION_BACKEND": "FLASH_ATTN"
                     },
                     "command_profiles": {
+                        "blackwell-tp2-static": {
+                            "description": "Blackwell: TP2 written out, static compile, FlashInfer attention (the measured Blackwell backend for static image shapes).",
+                            "hardware": [
+                                "b200",
+                                "gb200",
+                                "b300",
+                                "gb300"
+                            ],
+                            "framework_ref": "vllm-omni main 0da1d831e07f + vllm==0.32.0",
+                            "num_gpus": 2,
+                            "serve_args": "--tensor-parallel-size 2 --no-diffusion-compile-dynamic",
+                            "extra_env": {
+                                "DIFFUSION_ATTENTION_BACKEND": "FLASHINFER_ATTN"
+                            },
+                            "upstream_recipe_reason": "recipes/Tongyi-MAI/Z-Image-Turbo.md (62ebad2d7cd7) has only an Intel XPU offline section; the layout follows docs/user_guide/diffusion tensor_parallel.md (TP=2 only) and sequence_parallel.md.",
+                            "notes": "VAE patch parallel stays off: it forces tiled decode (bit-identical only to tiled single-GPU decode) and decode is a sliver of a 1024^2 request. VALIDATION PENDING (round 2026-10-22, 4xB300)."
+                        },
                         "h200-2gpu-tp-static": {
                             "description": "H200: TP2 written out, static compile.",
                             "hardware": [
@@ -1032,19 +1068,19 @@
                             "description": "Ulysses 2 instead of TP2 (30 heads split evenly). Never selected on its own: A/B arm, picked with --hardware-profile <name>.",
                             "serve_args": "--num-gpus 2 --usp 2 --no-diffusion-compile-dynamic",
                             "extra_env": {
-                                "DIFFUSION_ATTENTION_BACKEND": "FLASH_ATTN"
+                                "DIFFUSION_ATTENTION_BACKEND": "FLASHINFER_ATTN"
                             },
                             "num_gpus": 2,
-                            "notes": " VALIDATION PENDING (round 2026-10-22, 2xH200/4xH200)."
+                            "notes": " VALIDATION PENDING (round 2026-10-22, 4xB300)."
                         },
                         "cand-usp2-permute": {
                             "description": "Ulysses 2 with the symmetric-memory all-to-all. Never selected on its own: A/B arm, picked with --hardware-profile <name>.",
                             "serve_args": "--num-gpus 2 --usp 2 --ulysses-a2a-permute --no-diffusion-compile-dynamic",
                             "extra_env": {
-                                "DIFFUSION_ATTENTION_BACKEND": "FLASH_ATTN"
+                                "DIFFUSION_ATTENTION_BACKEND": "FLASHINFER_ATTN"
                             },
                             "num_gpus": 2,
-                            "notes": " VALIDATION PENDING (round 2026-10-22, 2xH200/4xH200)."
+                            "notes": " VALIDATION PENDING (round 2026-10-22, 4xB300)."
                         }
                     }
                 },
@@ -1077,9 +1113,20 @@
                             ],
                             "framework_ref": "lightx2v-0.1.0-z_image+blackwell-fa2",
                             "serve_args": "",
-                            "notes": "Uses the source-built FlashAttention 2 wheel (TORCH_CUDA_ARCH_LIST=10.0) already installed for Blackwell; no cache, torch compile, or quantized model path. Deliberately NOT using SageAttention here -- it is int8 QK-quantized, a different numeric class from the full-precision attention used elsewhere in this comparison.",
+                            "notes": "2026-10-22: like the H200 profile, it had no parallel block, so two ranks each computed the whole image; now Ulysses 2 as upstream's dist config, FA2 (FA3 is Hopper-only). VALIDATION PENDING (round 2026-10-22, 4xB300).",
                             "lightx2v_config": {
-                                "attn_type": "flash_attn2"
+                                "attn_type": "flash_attn2",
+                                "parallel": {
+                                    "seq_p_size": 2,
+                                    "seq_p_attn_type": "ulysses"
+                                }
+                            },
+                            "upstream_recipe": {
+                                "repo": "ModelTC/LightX2V",
+                                "path": "configs/z_image/z_image_turbo_t2i_dist.json",
+                                "commit": "4fe984c07b16",
+                                "commit_date": "2026-10-10",
+                                "section": "Ulysses sequence parallel over 2 GPUs (scripts/z_image/z_image_turbo_t2i_dist.sh)"
                             }
                         },
                         "h200-fa3-flashinfer": {
@@ -1108,7 +1155,7 @@
                         "cand-fusion": {
                             "description": "Exact Ulysses communication fusions upstream offers. Never selected on its own: A/B arm, picked with --hardware-profile <name>.",
                             "lightx2v_config": {
-                                "attn_type": "flash_attn3",
+                                "attn_type": "flash_attn2",
                                 "parallel": {
                                     "seq_p_size": 2,
                                     "seq_p_attn_type": "ulysses",
@@ -1117,7 +1164,7 @@
                                 }
                             },
                             "num_gpus": 2,
-                            "notes": "seq_p_quant_scheme (fp8/fp4 communication) stays off. VALIDATION PENDING (round 2026-10-22, 2xH200/4xH200)."
+                            "notes": "seq_p_quant_scheme (fp8/fp4 communication) stays off. VALIDATION PENDING (round 2026-10-22, 4xB300)."
                         }
                     }
                 },
@@ -1595,6 +1642,29 @@
                         "DIFFUSION_ATTENTION_BACKEND": "FLASH_ATTN"
                     },
                     "command_profiles": {
+                        "blackwell-4gpu-cfg2-usp2-vaepp": {
+                            "description": "Blackwell: the recipe's GPU layout scaled to four GPUs, cuDNN attention (FLASH_ATTN is Hopper-only).",
+                            "hardware": [
+                                "b200",
+                                "gb200",
+                                "b300",
+                                "gb300"
+                            ],
+                            "framework_ref": "vllm-omni main 0da1d831e07f + vllm==0.32.0",
+                            "num_gpus": 4,
+                            "serve_args": "--num-gpus 4 --cfg-parallel-size 2 --usp 2 --vae-patch-parallel-size 4 --vae-parallel-mode spatial_shard_width --no-diffusion-compile-dynamic",
+                            "extra_env": {
+                                "DIFFUSION_ATTENTION_BACKEND": "CUDNN_ATTN"
+                            },
+                            "upstream_recipe": {
+                                "repo": "vllm-project/vllm-omni",
+                                "path": "recipes/Wan-AI/Wan2.2-T2V.md",
+                                "commit": "62ebad2d7cd7",
+                                "commit_date": "2026-09-25",
+                                "section": "8x NVIDIA H20 / H100 / A100 (scaled to 4 GPUs)"
+                            },
+                            "notes": "Replaces TP4, a layout the GPU recipe never uses. VAE decode split with spatial_shard_width (matches single-GPU decode within tolerance) instead of the recipe's tiling (not exact). HSDP left out: it only saves memory and both experts fit; Skip-Softmax left out (lossy, Blackwell-only). --no-diffusion-compile-dynamic: the docs' setting for a fixed-shape workload. VALIDATION PENDING (round 2026-10-22, 4xB300)."
+                        },
                         "h200-4gpu-cfg2-usp2-vaepp": {
                             "description": "H200: the recipe's GPU layout (CFG parallel x Ulysses, VAE patch parallel) scaled to four GPUs.",
                             "hardware": [
@@ -1684,28 +1754,28 @@
                             "description": "The recipe's literal HSDP weight sharding on top. Never selected on its own: A/B arm, picked with --hardware-profile <name>.",
                             "serve_args": "--num-gpus 4 --cfg-parallel-size 2 --usp 2 --vae-patch-parallel-size 4 --vae-parallel-mode spatial_shard_width --no-diffusion-compile-dynamic --use-hsdp",
                             "extra_env": {
-                                "DIFFUSION_ATTENTION_BACKEND": "FLASH_ATTN"
+                                "DIFFUSION_ATTENTION_BACKEND": "CUDNN_ATTN"
                             },
                             "num_gpus": 4,
-                            "notes": " VALIDATION PENDING (round 2026-10-22, 2xH200/4xH200)."
+                            "notes": " VALIDATION PENDING (round 2026-10-22, 4xB300)."
                         },
                         "cand-permute": {
                             "description": "Symmetric-memory Ulysses all-to-all (PR #6340: does not change the attention math). Never selected on its own: A/B arm, picked with --hardware-profile <name>.",
                             "serve_args": "--num-gpus 4 --cfg-parallel-size 2 --usp 2 --vae-patch-parallel-size 4 --vae-parallel-mode spatial_shard_width --no-diffusion-compile-dynamic --ulysses-a2a-permute",
                             "extra_env": {
-                                "DIFFUSION_ATTENTION_BACKEND": "FLASH_ATTN"
+                                "DIFFUSION_ATTENTION_BACKEND": "CUDNN_ATTN"
                             },
                             "num_gpus": 4,
-                            "notes": " VALIDATION PENDING (round 2026-10-22, 2xH200/4xH200)."
+                            "notes": " VALIDATION PENDING (round 2026-10-22, 4xB300)."
                         },
                         "cand-devpost": {
                             "description": "GPU-side video postprocess (docs: at most one level in 255 from the host path). Never selected on its own: A/B arm, picked with --hardware-profile <name>.",
                             "serve_args": "--num-gpus 4 --cfg-parallel-size 2 --usp 2 --vae-patch-parallel-size 4 --vae-parallel-mode spatial_shard_width --no-diffusion-compile-dynamic --video-output-transport {\"enable_device_postprocess\":true}",
                             "extra_env": {
-                                "DIFFUSION_ATTENTION_BACKEND": "FLASH_ATTN"
+                                "DIFFUSION_ATTENTION_BACKEND": "CUDNN_ATTN"
                             },
                             "num_gpus": 4,
-                            "notes": " VALIDATION PENDING (round 2026-10-22, 2xH200/4xH200)."
+                            "notes": " VALIDATION PENDING (round 2026-10-22, 4xB300)."
                         }
                     }
                 },
@@ -1771,8 +1841,8 @@
                         "cand-tuned": {
                             "description": "Lossless LightX2V options found upstream: Triton LayerNorm, fused Ulysses pre/post-processing, channels-last 3D VAE convolutions. Never selected on its own: A/B arm, picked with --hardware-profile <name>.",
                             "lightx2v_config": {
-                                "self_attn_1_type": "flash_attn3",
-                                "cross_attn_1_type": "flash_attn3",
+                                "self_attn_1_type": "flash_attn2",
+                                "cross_attn_1_type": "flash_attn2",
                                 "layer_norm_type": "Triton",
                                 "parallel": {
                                     "cfg_p_size": 2,
@@ -1786,7 +1856,7 @@
                                 "USE_CHANNELS_LAST_3D": "1"
                             },
                             "num_gpus": 4,
-                            "notes": "Upstream uses Triton LayerNorm in other NVIDIA Wan configs; seq_p_tensor_fusion/prepost triton are exact communication fusions; USE_CHANNELS_LAST_3D documents ~9% on the Wan VAE. seq_p_quant_scheme stays off (fp8/fp4 comm). VALIDATION PENDING (round 2026-10-22, 2xH200/4xH200)."
+                            "notes": "Upstream uses Triton LayerNorm in other NVIDIA Wan configs; seq_p_tensor_fusion/prepost triton are exact communication fusions; USE_CHANNELS_LAST_3D documents ~9% on the Wan VAE. seq_p_quant_scheme stays off (fp8/fp4 comm). VALIDATION PENDING (round 2026-10-22, 4xB300)."
                         }
                     },
                     "model_override_reason": "Same weights, different packaging: LightX2V reads Wan's original checkpoint layout, while sglang and vLLM-Omni read the Diffusers conversion (Wan2.2-T2V-A14B-Diffusers). Equivalent model path, not a different model."
@@ -1851,6 +1921,54 @@
                         }
                     },
                     "command_profiles": {
+                        "blackwell-fa4": {
+                            "description": "Blackwell: the same config with FA4 attention, the exact kernel NVIDIA tunes for Blackwell (its official LTX-2 configs use it).",
+                            "hardware": [
+                                "b200",
+                                "gb200",
+                                "b300",
+                                "gb300"
+                            ],
+                            "framework_ref": "tensorrt-llm 1.4.0rc1 (tag 0372799d1543, 2026-10-19)",
+                            "num_gpus": 4,
+                            "serve_args": "",
+                            "visual_gen_args": {
+                                "attention_config": {
+                                    "backend": "FA4"
+                                },
+                                "parallel_config": {
+                                    "cfg_size": 2,
+                                    "ulysses_size": 2,
+                                    "async_ulysses": true,
+                                    "parallel_vae_size": 4
+                                },
+                                "torch_compile_config": {
+                                    "enable": true
+                                },
+                                "cuda_graph_config": {
+                                    "enable": false
+                                },
+                                "compilation_config": {
+                                    "resolutions": [
+                                        [
+                                            720,
+                                            1280
+                                        ]
+                                    ],
+                                    "num_frames": [
+                                        81
+                                    ]
+                                }
+                            },
+                            "upstream_recipe": {
+                                "repo": "NVIDIA/TensorRT-LLM",
+                                "path": "examples/visual_gen/configs/wan2.2-t2v-fp4-4gpu.yaml",
+                                "commit": "059396899c11",
+                                "commit_date": "2026-06-17",
+                                "section": "4-GPU layout with its FP4 quant_config removed"
+                            },
+                            "notes": "FA4 is exact attention, the same precision class as VANILLA (torch SDPA). This repo measured VANILLA fastest on Hopper and FA4 on Blackwell for TRT-LLM VisualGen; A/B'd against `default` (VANILLA) on B300. VALIDATION PENDING (round 2026-10-22, 4xB300)."
+                        },
                         "default": {
                             "description": "TensorRT-LLM VisualGen, NVIDIA's official wan2.2-t2v-fp4-4gpu.yaml at BF16, 4 GPU(s).",
                             "framework_ref": "tensorrt-llm 1.4.0rc1 (tag 0372799d1543, 2026-10-19)",
@@ -2189,6 +2307,29 @@
                         "DIFFUSION_ATTENTION_BACKEND": "FLASH_ATTN"
                     },
                     "command_profiles": {
+                        "blackwell-2gpu-twostage-cfg": {
+                            "description": "Blackwell: the two-stage pipeline with CFG parallel 2, cuDNN attention.",
+                            "hardware": [
+                                "b200",
+                                "gb200",
+                                "b300",
+                                "gb300"
+                            ],
+                            "framework_ref": "vllm-omni main 0da1d831e07f + vllm==0.32.0",
+                            "num_gpus": 2,
+                            "serve_args": "--num-gpus 2 --cfg-parallel-size 2 --model-class-name LTX2TwoStagePipeline --stage-init-timeout 600 --no-diffusion-compile-dynamic",
+                            "extra_env": {
+                                "DIFFUSION_ATTENTION_BACKEND": "CUDNN_ATTN"
+                            },
+                            "upstream_recipe": {
+                                "repo": "vllm-project/vllm-omni",
+                                "path": "recipes/LTX/LTX-2.md",
+                                "commit": "71f0fa47acff",
+                                "commit_date": "2026-10-19",
+                                "section": "Two-Stage Defaults; Guidance Parallelism"
+                            },
+                            "notes": "Every earlier vLLM-Omni LTX-2 row ran the ONE-stage LTX2Pipeline (Lightricks/LTX-2 resolves to it unless --model-class-name LTX2TwoStagePipeline is given): 40 steps at the full 768x512 against sglang's 40 at 384x256 plus a 3-step refine, so it measured a heavier workload. Its LTX recipes also default stage 1 to the LTX-2.3 official guider (STG and a modality pass, four transformer passes a step); the request pins plain CFG 4.0 like sglang's LTX-2 (ltx-pipelines LTX-2 defaults), TRT-LLM and ComfyUI, so every row does two passes a step. VALIDATION PENDING (round 2026-10-22, 4xB300)."
+                        },
                         "h200-2gpu-twostage-cfg": {
                             "description": "H200: the two-stage pipeline (stage 1 at half resolution, x2 latent upsampler, 3-step distilled refine) with CFG parallel 2.",
                             "hardware": [
@@ -2301,6 +2442,58 @@
                         }
                     },
                     "command_profiles": {
+                        "blackwell-fa4": {
+                            "description": "Blackwell: the same config with FA4 attention, the exact kernel NVIDIA tunes for Blackwell (its official LTX-2 configs use it).",
+                            "hardware": [
+                                "b200",
+                                "gb200",
+                                "b300",
+                                "gb300"
+                            ],
+                            "framework_ref": "tensorrt-llm 1.4.0rc1 (tag 0372799d1543, 2026-10-19)",
+                            "num_gpus": 2,
+                            "serve_args": "",
+                            "visual_gen_args": {
+                                "attention_config": {
+                                    "backend": "FA4"
+                                },
+                                "parallel_config": {
+                                    "cfg_size": 2,
+                                    "ulysses_size": 1,
+                                    "parallel_vae_size": 2
+                                },
+                                "torch_compile_config": {
+                                    "enable": true
+                                },
+                                "cuda_graph_config": {
+                                    "enable": true
+                                },
+                                "compilation_config": {
+                                    "resolutions": [
+                                        [
+                                            512,
+                                            768
+                                        ]
+                                    ],
+                                    "num_frames": [
+                                        121
+                                    ]
+                                },
+                                "pipeline_config": {
+                                    "text_encoder_path": "hf://Lightricks/LTX-2/text_encoder",
+                                    "spatial_upsampler_path": "hf://Lightricks/LTX-2/ltx-2-spatial-upscaler-x2-1.0.safetensors",
+                                    "distilled_lora_path": "hf://Lightricks/LTX-2/ltx-2-19b-distilled-lora-384.safetensors"
+                                }
+                            },
+                            "upstream_recipe": {
+                                "repo": "NVIDIA/TensorRT-LLM",
+                                "path": "examples/visual_gen/configs/ltx2-4gpu.yaml",
+                                "commit": "0fbac8ce0dbc",
+                                "commit_date": "2026-08-20",
+                                "section": "4-GPU config scaled to 2 GPUs, keeping the CFG dimension"
+                            },
+                            "notes": "FA4 is exact attention, the same precision class as VANILLA (torch SDPA). This repo measured VANILLA fastest on Hopper and FA4 on Blackwell for TRT-LLM VisualGen; A/B'd against `default` (VANILLA) on B300. VALIDATION PENDING (round 2026-10-22, 4xB300)."
+                        },
                         "default": {
                             "description": "TensorRT-LLM VisualGen, NVIDIA's official ltx2-4gpu.yaml at BF16, 2 GPU(s).",
                             "framework_ref": "tensorrt-llm 1.4.0rc1 (tag 0372799d1543, 2026-10-19)",
@@ -2947,6 +3140,19 @@
                     "serve_args": "--stage-configs-path configs/vllm_omni_cosmos3_h200_2gpu_cfg_guardrails_off.yaml --stage-init-timeout 900 --init-timeout 1800",
                     "extra_env": {},
                     "command_profiles": {
+                        "blackwell-cudnn-static": {
+                            "description": "Blackwell vLLM-Omni profile for cosmos3_nano_t2i_720p using cuDNN attention.",
+                            "hardware": [
+                                "b200",
+                                "gb200",
+                                "b300",
+                                "gb300"
+                            ],
+                            "framework_ref": "vllm-omni main 0da1d831e07f + vllm==0.32.0",
+                            "num_gpus": 2,
+                            "serve_args": "--num-gpus 2 --cfg-parallel-size 2 --model-class-name Cosmos3OmniDiffusersPipeline --stage-init-timeout 900 --init-timeout 1800 --no-guardrails --diffusion-attention-backend CUDNN_ATTN --cache-backend none --no-diffusion-compile-dynamic",
+                            "notes": "Blackwell attention choice, measured on this box 2026-09-12. FLASH_ATTN is a Hopper-only precompiled kernel -- vLLM-Omni refuses it on sm_100 with 'FLASH_ATTN was explicitly selected but is unsupported'. FLASHINFER_ATTN starts but dies under torch.compile on dynamic shapes (`AsPythonConstantNotImplementedError: SymNodeVariable() is not a constant` in the FlashInfer backend's _ensure_plan), observed on qwen-image and cosmos3 t2v; it is fine for the static image cases (zimage, flux), which are deliberately left on it. CUDNN_ATTN is exact softmax, the same precision class as the kernels the other frameworks run here, measured at 2.741s on qwen-image (vs TRTLLM_ATTN 3.274s) and already the backend minimax-h3 serves with on this box. Also drops --stage-configs-path: vLLM-Omni 0.29 rejects it outright (`stage_configs_path is no longer supported; use deploy_config instead`), and upstream's own cosmos3 deploy file says the T2I/video checkpoints must keep the default single-stage diffusion fallback -- so cfg-parallel and guardrails move to the first-class flags rather than to a new YAML. The old YAML also pinned enforce_eager, which silently ran this competitor compile-off against the policy. 2026-10-22: --no-diffusion-compile-dynamic added; cand-dynamic keeps the previous command for the A/B. VALIDATION PENDING (round 2026-10-22, 4xB300)."
+                        },
                         "h200-2gpu-cfg-flash-static": {
                             "description": "H200 2-GPU CFG-parallel vLLM-Omni Cosmos3 image profile on current flags.",
                             "hardware": [
@@ -3007,8 +3213,11 @@
                             ],
                             "num_gpus": 2,
                             "framework_ref": "vllm-omni f69b1f2b1 + vllm==0.31.0",
-                            "serve_args": "--num-gpus 2 --cfg-parallel-size 2 --model-class-name Cosmos3OmniDiffusersPipeline --stage-init-timeout 900 --init-timeout 1800 --no-guardrails --diffusion-attention-backend FLASH_ATTN --cache-backend none",
-                            "notes": "Replaces h200-2gpu-cfg, whose --stage-configs-path current vLLM rejects ('unrecognized arguments', 2026-10-11 on 2xH200). Same layout and guardrails-off as that stage config, spelled with the flags the H200 video profiles and blackwell-cudnn use; FLASH_ATTN is the Hopper exact kernel. Validated 2026-10-11 on 4xH200 (cards 0,1), --enforce-eager: 1.304/1.306 s in two rounds."
+                            "serve_args": "--num-gpus 2 --cfg-parallel-size 2 --model-class-name Cosmos3OmniDiffusersPipeline --stage-init-timeout 900 --init-timeout 1800 --no-guardrails --diffusion-attention-backend CUDNN_ATTN --cache-backend none",
+                            "notes": "Replaces h200-2gpu-cfg, whose --stage-configs-path current vLLM rejects ('unrecognized arguments', 2026-10-11 on 2xH200). Same layout and guardrails-off as that stage config, spelled with the flags the H200 video profiles and blackwell-cudnn use; FLASH_ATTN is the Hopper exact kernel. Validated 2026-10-11 on 4xH200 (cards 0,1), --enforce-eager: 1.304/1.306 s in two rounds.",
+                            "extra_env": {
+                                "DIFFUSION_ATTENTION_BACKEND": "CUDNN_ATTN"
+                            }
                         }
                     }
                 },
@@ -3286,6 +3495,26 @@
                     "serve_args": "--num-gpus 4 --cfg-parallel-size 2 --ulysses-degree 2 --model-class-name Cosmos3OmniDiffusersPipeline --stage-init-timeout 900 --init-timeout 1800 --no-guardrails --diffusion-attention-backend FLASH_ATTN --cache-backend none",
                     "extra_env": {},
                     "command_profiles": {
+                        "blackwell-cudnn-vaepp": {
+                            "hardware": [
+                                "b200",
+                                "gb200",
+                                "b300",
+                                "gb300"
+                            ],
+                            "framework_ref": "vllm-omni main 0da1d831e07f + vllm==0.32.0",
+                            "num_gpus": 4,
+                            "description": "Blackwell: cuDNN attention with the 4-GPU VAE split and device postprocess NVIDIA benchmarked in #5712 (on 4xGB300).",
+                            "serve_args": "--num-gpus 4 --cfg-parallel-size 2 --ulysses-degree 2 --model-class-name Cosmos3OmniDiffusersPipeline --stage-init-timeout 900 --init-timeout 1800 --no-guardrails --diffusion-attention-backend CUDNN_ATTN --cache-backend none --vae-patch-parallel-size 4 --vae-parallel-mode spatial_shard_width --video-output-transport {\"enable_device_postprocess\":true} --no-diffusion-compile-dynamic",
+                            "upstream_recipe": {
+                                "repo": "vllm-project/vllm-omni",
+                                "path": "recipes/cosmos3/Cosmos3-Nano.md",
+                                "commit": "765002061878",
+                                "commit_date": "2026-09-24",
+                                "section": "1x H200 141GB / B300 (Online serving), scaled per #5712"
+                            },
+                            "notes": "PR #5712 (47776fd350f5) benchmarks 4-GPU T2V with CFG 2, Ulysses 2, VAE patch parallel 4 spatial_shard_width and opt-in device postprocess (bytes identical for Cosmos3). SeaCache, the channels_last VAE fast path and fp8 are lossy and stay off. VALIDATION PENDING (round 2026-10-22, 4xB300)."
+                        },
                         "h200-4gpu-cfg-ulysses-vaepp": {
                             "hardware": [
                                 "h200"
@@ -3418,10 +3647,12 @@
                         },
                         "cand-permute": {
                             "description": "Symmetric-memory Ulysses all-to-all (#6340: 81.18 -> 76.57 s on Cosmos3-Nano, 4 GPUs). Never selected on its own: A/B arm, picked with --hardware-profile <name>.",
-                            "serve_args": "--num-gpus 4 --cfg-parallel-size 2 --ulysses-degree 2 --model-class-name Cosmos3OmniDiffusersPipeline --stage-init-timeout 900 --init-timeout 1800 --no-guardrails --diffusion-attention-backend FLASH_ATTN --cache-backend none --vae-patch-parallel-size 4 --vae-parallel-mode spatial_shard_width --video-output-transport {\"enable_device_postprocess\":true} --no-diffusion-compile-dynamic --ulysses-a2a-permute",
-                            "extra_env": {},
+                            "serve_args": "--num-gpus 4 --cfg-parallel-size 2 --ulysses-degree 2 --model-class-name Cosmos3OmniDiffusersPipeline --stage-init-timeout 900 --init-timeout 1800 --no-guardrails --diffusion-attention-backend CUDNN_ATTN --cache-backend none --vae-patch-parallel-size 4 --vae-parallel-mode spatial_shard_width --video-output-transport {\"enable_device_postprocess\":true} --no-diffusion-compile-dynamic --ulysses-a2a-permute",
+                            "extra_env": {
+                                "DIFFUSION_ATTENTION_BACKEND": "CUDNN_ATTN"
+                            },
                             "num_gpus": 4,
-                            "notes": " VALIDATION PENDING (round 2026-10-22, 2xH200/4xH200)."
+                            "notes": " VALIDATION PENDING (round 2026-10-22, 4xB300)."
                         }
                     }
                 },
@@ -3644,6 +3875,26 @@
                     "serve_args": "--num-gpus 4 --cfg-parallel-size 2 --ulysses-degree 2 --model-class-name Cosmos3OmniDiffusersPipeline --stage-init-timeout 900 --init-timeout 1800 --no-guardrails --diffusion-attention-backend FLASH_ATTN --cache-backend none",
                     "extra_env": {},
                     "command_profiles": {
+                        "blackwell-cudnn-vaepp": {
+                            "hardware": [
+                                "b200",
+                                "gb200",
+                                "b300",
+                                "gb300"
+                            ],
+                            "framework_ref": "vllm-omni main 0da1d831e07f + vllm==0.32.0",
+                            "num_gpus": 4,
+                            "description": "Blackwell: cuDNN attention with the 4-GPU VAE split and device postprocess NVIDIA benchmarked in #5712 (on 4xGB300).",
+                            "serve_args": "--num-gpus 4 --cfg-parallel-size 2 --ulysses-degree 2 --model-class-name Cosmos3OmniDiffusersPipeline --stage-init-timeout 900 --init-timeout 1800 --no-guardrails --diffusion-attention-backend CUDNN_ATTN --cache-backend none --vae-patch-parallel-size 4 --vae-parallel-mode spatial_shard_width --video-output-transport {\"enable_device_postprocess\":true} --no-diffusion-compile-dynamic",
+                            "upstream_recipe": {
+                                "repo": "vllm-project/vllm-omni",
+                                "path": "recipes/cosmos3/Cosmos3-Nano.md",
+                                "commit": "765002061878",
+                                "commit_date": "2026-09-24",
+                                "section": "1x H200 141GB / B300 (Online serving), scaled per #5712"
+                            },
+                            "notes": "PR #5712 (47776fd350f5) benchmarks 4-GPU T2V with CFG 2, Ulysses 2, VAE patch parallel 4 spatial_shard_width and opt-in device postprocess (bytes identical for Cosmos3). SeaCache, the channels_last VAE fast path and fp8 are lossy and stay off. VALIDATION PENDING (round 2026-10-22, 4xB300)."
+                        },
                         "h200-4gpu-cfg-ulysses-vaepp": {
                             "hardware": [
                                 "h200"
@@ -3763,10 +4014,12 @@
                         },
                         "cand-permute": {
                             "description": "Symmetric-memory Ulysses all-to-all (#6340: 81.18 -> 76.57 s on Cosmos3-Nano, 4 GPUs). Never selected on its own: A/B arm, picked with --hardware-profile <name>.",
-                            "serve_args": "--num-gpus 4 --cfg-parallel-size 2 --ulysses-degree 2 --model-class-name Cosmos3OmniDiffusersPipeline --stage-init-timeout 900 --init-timeout 1800 --no-guardrails --diffusion-attention-backend FLASH_ATTN --cache-backend none --vae-patch-parallel-size 4 --vae-parallel-mode spatial_shard_width --video-output-transport {\"enable_device_postprocess\":true} --no-diffusion-compile-dynamic --ulysses-a2a-permute",
-                            "extra_env": {},
+                            "serve_args": "--num-gpus 4 --cfg-parallel-size 2 --ulysses-degree 2 --model-class-name Cosmos3OmniDiffusersPipeline --stage-init-timeout 900 --init-timeout 1800 --no-guardrails --diffusion-attention-backend CUDNN_ATTN --cache-backend none --vae-patch-parallel-size 4 --vae-parallel-mode spatial_shard_width --video-output-transport {\"enable_device_postprocess\":true} --no-diffusion-compile-dynamic --ulysses-a2a-permute",
+                            "extra_env": {
+                                "DIFFUSION_ATTENTION_BACKEND": "CUDNN_ATTN"
+                            },
                             "num_gpus": 4,
-                            "notes": " VALIDATION PENDING (round 2026-10-22, 2xH200/4xH200)."
+                            "notes": " VALIDATION PENDING (round 2026-10-22, 4xB300)."
                         }
                     }
                 },
@@ -4096,10 +4349,10 @@
                         },
                         "cand-static": {
                             "description": "The selected command plus --no-diffusion-compile-dynamic (docs: the setting for fixed shapes). Never selected on its own: A/B arm, picked with --hardware-profile <name>.",
-                            "serve_args": "--trust-remote-code --task-type fl2va --num-gpus 2 --tensor-parallel-size 2 --usp 1 --ring 1 --text-encoder-tp-size 2 --vae-patch-parallel-size 2 --vae-parallel-mode tile --vae-use-tiling --no-diffusion-compile-dynamic",
+                            "serve_args": "--trust-remote-code --task-type fl2va --num-gpus 2 --tensor-parallel-size 2 --usp 1 --ring 1 --text-encoder-tp-size 2 --vae-patch-parallel-size 2 --vae-parallel-mode tile --vae-use-tiling --diffusion-attention-backend CUDNN_ATTN --no-diffusion-compile-dynamic",
                             "extra_env": {},
                             "num_gpus": 2,
-                            "notes": " VALIDATION PENDING (round 2026-10-22, 2xH200/4xH200)."
+                            "notes": " VALIDATION PENDING (round 2026-10-22, 4xB300)."
                         }
                     },
                     "reason": "Empirically validated 2026-08-07, first on minimax-h3-5090-2gpu-v4 (2x RTX 5090) then on 2xB200: the default (compiled) profile segfaults identically on both GPU classes 1 step into denoising (see command_profiles.default.notes) -- a confirmed hardware-independent vLLM-Omni bug, despite the recipe's own claim that torch.compile is 'not enabled by default on consumer paths.' --enforce-eager avoids that segfault, but on RTX 5090 it fails differently at startup (a diffusion worker process dies before completing its init handshake, surfaced as EOFError) and never completes a request on that GPU class. On 2xB200 the identical --enforce-eager command works cleanly and completes a correct generation -- see command_profiles.b200-2gpu for the validated numbers and the sglang comparison on the same hardware. Net: vLLM-Omni H3 support is real but fragile below the B200 class tested here; RTX 5090 has no working profile for this case in either variant."
@@ -4276,6 +4529,53 @@
                         }
                     },
                     "command_profiles": {
+                        "blackwell-fa4": {
+                            "description": "Blackwell: the same config with FA4 attention, the exact kernel NVIDIA tunes for Blackwell (its official LTX-2 configs use it).",
+                            "hardware": [
+                                "b200",
+                                "gb200",
+                                "b300",
+                                "gb300"
+                            ],
+                            "framework_ref": "tensorrt-llm 1.4.0rc1 (tag 0372799d1543, 2026-10-19)",
+                            "num_gpus": 2,
+                            "serve_args": "",
+                            "visual_gen_args": {
+                                "attention_config": {
+                                    "backend": "FA4"
+                                },
+                                "parallel_config": {
+                                    "ulysses_size": 2,
+                                    "parallel_vae_size": 2
+                                },
+                                "torch_compile_config": {
+                                    "enable": true
+                                },
+                                "cuda_graph_config": {
+                                    "enable": false
+                                },
+                                "compilation_config": {
+                                    "resolutions": [
+                                        [
+                                            768,
+                                            1344
+                                        ]
+                                    ],
+                                    "num_frames": [
+                                        124
+                                    ],
+                                    "skip_warmup": false
+                                }
+                            },
+                            "upstream_recipe": {
+                                "repo": "NVIDIA/TensorRT-LLM",
+                                "path": "examples/visual_gen/configs/minimax-h3-bf16-8gpu.yaml",
+                                "commit": "92d23a83799d",
+                                "commit_date": "2026-10-09",
+                                "section": "BF16 multi-GPU config scaled to pure Ulysses 2"
+                            },
+                            "notes": "FA4 is exact attention, the same precision class as VANILLA (torch SDPA). This repo measured VANILLA fastest on Hopper and FA4 on Blackwell for TRT-LLM VisualGen; A/B'd against `default` (VANILLA) on B300. VALIDATION PENDING (round 2026-10-22, 4xB300)."
+                        },
                         "default": {
                             "description": "TensorRT-LLM VisualGen, NVIDIA's official minimax-h3-bf16-8gpu.yaml at BF16, 2 GPU(s).",
                             "framework_ref": "tensorrt-llm 1.4.0rc1 (tag 0372799d1543, 2026-10-19)",
@@ -4706,7 +5006,7 @@
                             "serve_args": "--trust-remote-code --task-type fl2va --num-gpus 4 --usp 4 --ring 1 --vae-patch-parallel-size 4 --vae-parallel-mode tile --vae-use-tiling --no-diffusion-compile-dynamic",
                             "extra_env": {},
                             "num_gpus": 4,
-                            "notes": " VALIDATION PENDING (round 2026-10-22, 2xH200/4xH200)."
+                            "notes": " VALIDATION PENDING (round 2026-10-22, 4xB300)."
                         }
                     },
                     "reason": "Empirically validated 2026-08-07, first on minimax-h3-5090-2gpu-v4 (2x RTX 5090) then on 2xB200: the default (compiled) profile segfaults identically on both GPU classes 1 step into denoising (see command_profiles.default.notes) -- a confirmed hardware-independent vLLM-Omni bug, despite the recipe's own claim that torch.compile is 'not enabled by default on consumer paths.' --enforce-eager avoids that segfault, but on RTX 5090 it fails differently at startup (a diffusion worker process dies before completing its init handshake, surfaced as EOFError) and never completes a request on that GPU class. On 2xB200 the identical --enforce-eager command works cleanly and completes a correct generation -- see command_profiles.b200-2gpu for the validated numbers and the sglang comparison on the same hardware. Net: vLLM-Omni H3 support is real but fragile below the B200 class tested here; RTX 5090 has no working profile for this case in either variant."
@@ -4879,6 +5179,53 @@
                         }
                     },
                     "command_profiles": {
+                        "blackwell-fa4": {
+                            "description": "Blackwell: the same config with FA4 attention, the exact kernel NVIDIA tunes for Blackwell (its official LTX-2 configs use it).",
+                            "hardware": [
+                                "b200",
+                                "gb200",
+                                "b300",
+                                "gb300"
+                            ],
+                            "framework_ref": "tensorrt-llm 1.4.0rc1 (tag 0372799d1543, 2026-10-19)",
+                            "num_gpus": 4,
+                            "serve_args": "",
+                            "visual_gen_args": {
+                                "attention_config": {
+                                    "backend": "FA4"
+                                },
+                                "parallel_config": {
+                                    "ulysses_size": 4,
+                                    "parallel_vae_size": 4
+                                },
+                                "torch_compile_config": {
+                                    "enable": true
+                                },
+                                "cuda_graph_config": {
+                                    "enable": false
+                                },
+                                "compilation_config": {
+                                    "resolutions": [
+                                        [
+                                            768,
+                                            1344
+                                        ]
+                                    ],
+                                    "num_frames": [
+                                        124
+                                    ],
+                                    "skip_warmup": false
+                                }
+                            },
+                            "upstream_recipe": {
+                                "repo": "NVIDIA/TensorRT-LLM",
+                                "path": "examples/visual_gen/configs/minimax-h3-bf16-8gpu.yaml",
+                                "commit": "92d23a83799d",
+                                "commit_date": "2026-10-09",
+                                "section": "BF16 multi-GPU config scaled to pure Ulysses 4"
+                            },
+                            "notes": "FA4 is exact attention, the same precision class as VANILLA (torch SDPA). This repo measured VANILLA fastest on Hopper and FA4 on Blackwell for TRT-LLM VisualGen; A/B'd against `default` (VANILLA) on B300. VALIDATION PENDING (round 2026-10-22, 4xB300)."
+                        },
                         "default": {
                             "description": "TensorRT-LLM VisualGen, NVIDIA's official minimax-h3-bf16-8gpu.yaml at BF16, 4 GPU(s).",
                             "framework_ref": "tensorrt-llm 1.4.0rc1 (tag 0372799d1543, 2026-10-19)",
@@ -5474,10 +5821,10 @@
                         },
                         "cand-static": {
                             "description": "The selected command plus --no-diffusion-compile-dynamic (docs: the setting for fixed shapes). Never selected on its own: A/B arm, picked with --hardware-profile <name>.",
-                            "serve_args": "--trust-remote-code --task-type ref2va --num-gpus 2 --tensor-parallel-size 2 --usp 1 --ring 1 --text-encoder-tp-size 2 --vae-patch-parallel-size 2 --vae-parallel-mode tile --vae-use-tiling --no-diffusion-compile-dynamic",
+                            "serve_args": "--trust-remote-code --task-type ref2va --num-gpus 2 --tensor-parallel-size 2 --usp 1 --ring 1 --text-encoder-tp-size 2 --vae-patch-parallel-size 2 --vae-parallel-mode tile --vae-use-tiling --diffusion-attention-backend CUDNN_ATTN --no-diffusion-compile-dynamic",
                             "extra_env": {},
                             "num_gpus": 2,
-                            "notes": " VALIDATION PENDING (round 2026-10-22, 2xH200/4xH200)."
+                            "notes": " VALIDATION PENDING (round 2026-10-22, 4xB300)."
                         }
                     },
                     "reason": "Empirically validated 2026-08-07, first on minimax-h3-5090-2gpu-v4 (2x RTX 5090) then on 2xB200: the default (compiled) profile segfaults identically on both GPU classes 1 step into denoising (see command_profiles.default.notes) -- a confirmed hardware-independent vLLM-Omni bug, despite the recipe's own claim that torch.compile is 'not enabled by default on consumer paths.' --enforce-eager avoids that segfault, but on RTX 5090 it fails differently at startup (a diffusion worker process dies before completing its init handshake, surfaced as EOFError) and never completes a request on that GPU class. On 2xB200 the identical --enforce-eager command works cleanly and completes a correct generation -- see command_profiles.b200-2gpu for the validated numbers and the sglang comparison on the same hardware. Net: vLLM-Omni H3 support is real but fragile below the B200 class tested here; RTX 5090 has no working profile for this case in either variant."
@@ -5658,6 +6005,56 @@
                         }
                     },
                     "command_profiles": {
+                        "blackwell-fa4": {
+                            "description": "Blackwell: the same config with FA4 attention, the exact kernel NVIDIA tunes for Blackwell (its official LTX-2 configs use it).",
+                            "hardware": [
+                                "b200",
+                                "gb200",
+                                "b300",
+                                "gb300"
+                            ],
+                            "framework_ref": "tensorrt-llm 1.4.0rc1 (tag 0372799d1543, 2026-10-19)",
+                            "num_gpus": 2,
+                            "serve_args": "",
+                            "visual_gen_args": {
+                                "attention_config": {
+                                    "backend": "FA4"
+                                },
+                                "parallel_config": {
+                                    "ulysses_size": 2,
+                                    "parallel_vae_size": 2
+                                },
+                                "torch_compile_config": {
+                                    "enable": true
+                                },
+                                "cuda_graph_config": {
+                                    "enable": false
+                                },
+                                "compilation_config": {
+                                    "resolutions": [
+                                        [
+                                            768,
+                                            1344
+                                        ]
+                                    ],
+                                    "num_frames": [
+                                        124
+                                    ],
+                                    "skip_warmup": true
+                                },
+                                "pipeline_config": {
+                                    "workflow": "ref2va"
+                                }
+                            },
+                            "upstream_recipe": {
+                                "repo": "NVIDIA/TensorRT-LLM",
+                                "path": "examples/visual_gen/configs/minimax-h3-ref2va-bf16-1gpu.yaml",
+                                "commit": "aa026bf86db4",
+                                "commit_date": "2026-10-06",
+                                "section": "Ref2VA BF16 config with pure Ulysses 2"
+                            },
+                            "notes": "FA4 is exact attention, the same precision class as VANILLA (torch SDPA). This repo measured VANILLA fastest on Hopper and FA4 on Blackwell for TRT-LLM VisualGen; A/B'd against `default` (VANILLA) on B300. VALIDATION PENDING (round 2026-10-22, 4xB300)."
+                        },
                         "default": {
                             "description": "TensorRT-LLM VisualGen, NVIDIA's official minimax-h3-ref2va-bf16-1gpu.yaml at BF16, 2 GPU(s).",
                             "framework_ref": "tensorrt-llm 1.4.0rc1 (tag 0372799d1543, 2026-10-19)",

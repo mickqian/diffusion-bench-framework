@@ -150,9 +150,11 @@
         "cand-static": {
           "description": "The selected command plus --no-diffusion-compile-dynamic. Never selected on its own: A/B arm, picked with --hardware-profile <name>.",
           "serve_args": " --no-diffusion-compile-dynamic",
-          "extra_env": {},
+          "extra_env": {
+            "DIFFUSION_ATTENTION_BACKEND": "CUDNN_ATTN"
+          },
           "num_gpus": 1,
-          "notes": " VALIDATION PENDING (round 2026-10-22, 2xH200/4xH200)."
+          "notes": " VALIDATION PENDING (round 2026-10-22, 4xB300)."
         }
       }
     },
@@ -254,10 +256,23 @@
         "cand-vae-compile": {
           "description": "VAE compile on top (vae_use_compile, used by upstream's qwen_image_21 5090 configs). Never selected on its own: A/B arm, picked with --hardware-profile <name>.",
           "lightx2v_config": {
+            "resolution": 1024,
+            "vae_scale_factor": 16,
+            "attn_type": "flash_attn2",
+            "rope_type": "flashinfer_rope",
+            "rms_norm_type": "fp32_variance",
+            "layer_norm_type": "Triton",
+            "modulate_type": "triton",
+            "fused_qk_rms_norm": true,
+            "fused_block_ops": true,
+            "fused_block_min_tokens": 1024,
+            "enable_cfg": false,
+            "sample_guide_scale": 1.0,
+            "warmup": true,
             "vae_use_compile": true
           },
           "num_gpus": 1,
-          "notes": " VALIDATION PENDING (round 2026-10-22, 2xH200/4xH200)."
+          "notes": " VALIDATION PENDING (round 2026-10-22, 4xB300)."
         }
       }
     },

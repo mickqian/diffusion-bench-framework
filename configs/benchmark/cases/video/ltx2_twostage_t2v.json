@@ -55,6 +55,29 @@
         "DIFFUSION_ATTENTION_BACKEND": "FLASH_ATTN"
       },
       "command_profiles": {
+        "blackwell-2gpu-twostage-cfg": {
+          "description": "Blackwell: the two-stage pipeline with CFG parallel 2, cuDNN attention.",
+          "hardware": [
+            "b200",
+            "gb200",
+            "b300",
+            "gb300"
+          ],
+          "framework_ref": "vllm-omni main 0da1d831e07f + vllm==0.32.0",
+          "num_gpus": 2,
+          "serve_args": "--num-gpus 2 --cfg-parallel-size 2 --model-class-name LTX2TwoStagePipeline --stage-init-timeout 600 --no-diffusion-compile-dynamic",
+          "extra_env": {
+            "DIFFUSION_ATTENTION_BACKEND": "CUDNN_ATTN"
+          },
+          "upstream_recipe": {
+            "repo": "vllm-project/vllm-omni",
+            "path": "recipes/LTX/LTX-2.md",
+            "commit": "71f0fa47acff",
+            "commit_date": "2026-10-19",
+            "section": "Two-Stage Defaults; Guidance Parallelism"
+          },
+          "notes": "Every earlier vLLM-Omni LTX-2 row ran the ONE-stage LTX2Pipeline (Lightricks/LTX-2 resolves to it unless --model-class-name LTX2TwoStagePipeline is given): 40 steps at the full 768x512 against sglang's 40 at 384x256 plus a 3-step refine, so it measured a heavier workload. Its LTX recipes also default stage 1 to the LTX-2.3 official guider (STG and a modality pass, four transformer passes a step); the request pins plain CFG 4.0 like sglang's LTX-2 (ltx-pipelines LTX-2 defaults), TRT-LLM and ComfyUI, so every row does two passes a step. VALIDATION PENDING (round 2026-10-22, 4xB300)."
+        },
         "h200-2gpu-twostage-cfg": {
           "description": "H200: the two-stage pipeline (stage 1 at half resolution, x2 latent upsampler, 3-step distilled refine) with CFG parallel 2.",
           "hardware": [
@@ -261,6 +284,58 @@
         }
       },
       "command_profiles": {
+        "blackwell-fa4": {
+          "description": "Blackwell: the same config with FA4 attention, the exact kernel NVIDIA tunes for Blackwell (its official LTX-2 configs use it).",
+          "hardware": [
+            "b200",
+            "gb200",
+            "b300",
+            "gb300"
+          ],
+          "framework_ref": "tensorrt-llm 1.4.0rc1 (tag 0372799d1543, 2026-10-19)",
+          "num_gpus": 2,
+          "serve_args": "",
+          "visual_gen_args": {
+            "attention_config": {
+              "backend": "FA4"
+            },
+            "parallel_config": {
+              "cfg_size": 2,
+              "ulysses_size": 1,
+              "parallel_vae_size": 2
+            },
+            "torch_compile_config": {
+              "enable": true
+            },
+            "cuda_graph_config": {
+              "enable": true
+            },
+            "compilation_config": {
+              "resolutions": [
+                [
+                  512,
+                  768
+                ]
+              ],
+              "num_frames": [
+                121
+              ]
+            },
+            "pipeline_config": {
+              "text_encoder_path": "hf://Lightricks/LTX-2/text_encoder",
+              "spatial_upsampler_path": "hf://Lightricks/LTX-2/ltx-2-spatial-upscaler-x2-1.0.safetensors",
+              "distilled_lora_path": "hf://Lightricks/LTX-2/ltx-2-19b-distilled-lora-384.safetensors"
+            }
+          },
+          "upstream_recipe": {
+            "repo": "NVIDIA/TensorRT-LLM",
+            "path": "examples/visual_gen/configs/ltx2-4gpu.yaml",
+            "commit": "0fbac8ce0dbc",
+            "commit_date": "2026-08-20",
+            "section": "4-GPU config scaled to 2 GPUs, keeping the CFG dimension"
+          },
+          "notes": "FA4 is exact attention, the same precision class as VANILLA (torch SDPA). This repo measured VANILLA fastest on Hopper and FA4 on Blackwell for TRT-LLM VisualGen; A/B'd against `default` (VANILLA) on B300. VALIDATION PENDING (round 2026-10-22, 4xB300)."
+        },
         "default": {
           "description": "TensorRT-LLM VisualGen, NVIDIA's official ltx2-4gpu.yaml at BF16, 2 GPU(s).",
           "framework_ref": "tensorrt-llm 1.4.0rc1 (tag 0372799d1543, 2026-10-19)",

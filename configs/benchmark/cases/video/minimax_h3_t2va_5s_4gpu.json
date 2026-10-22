@@ -130,7 +130,7 @@
           "serve_args": "--trust-remote-code --task-type fl2va --num-gpus 4 --usp 4 --ring 1 --vae-patch-parallel-size 4 --vae-parallel-mode tile --vae-use-tiling --no-diffusion-compile-dynamic",
           "extra_env": {},
           "num_gpus": 4,
-          "notes": " VALIDATION PENDING (round 2026-10-22, 2xH200/4xH200)."
+          "notes": " VALIDATION PENDING (round 2026-10-22, 4xB300)."
         }
       },
       "reason": "Empirically validated 2026-08-07, first on minimax-h3-5090-2gpu-v4 (2x RTX 5090) then on 2xB200: the default (compiled) profile segfaults identically on both GPU classes 1 step into denoising (see command_profiles.default.notes) -- a confirmed hardware-independent vLLM-Omni bug, despite the recipe's own claim that torch.compile is 'not enabled by default on consumer paths.' --enforce-eager avoids that segfault, but on RTX 5090 it fails differently at startup (a diffusion worker process dies before completing its init handshake, surfaced as EOFError) and never completes a request on that GPU class. On 2xB200 the identical --enforce-eager command works cleanly and completes a correct generation -- see command_profiles.b200-2gpu for the validated numbers and the sglang comparison on the same hardware. Net: vLLM-Omni H3 support is real but fragile below the B200 class tested here; RTX 5090 has no working profile for this case in either variant."
@@ -305,6 +305,53 @@
         }
       },
       "command_profiles": {
+        "blackwell-fa4": {
+          "description": "Blackwell: the same config with FA4 attention, the exact kernel NVIDIA tunes for Blackwell (its official LTX-2 configs use it).",
+          "hardware": [
+            "b200",
+            "gb200",
+            "b300",
+            "gb300"
+          ],
+          "framework_ref": "tensorrt-llm 1.4.0rc1 (tag 0372799d1543, 2026-10-19)",
+          "num_gpus": 4,
+          "serve_args": "",
+          "visual_gen_args": {
+            "attention_config": {
+              "backend": "FA4"
+            },
+            "parallel_config": {
+              "ulysses_size": 4,
+              "parallel_vae_size": 4
+            },
+            "torch_compile_config": {
+              "enable": true
+            },
+            "cuda_graph_config": {
+              "enable": false
+            },
+            "compilation_config": {
+              "resolutions": [
+                [
+                  768,
+                  1344
+                ]
+              ],
+              "num_frames": [
+                124
+              ],
+              "skip_warmup": false
+            }
+          },
+          "upstream_recipe": {
+            "repo": "NVIDIA/TensorRT-LLM",
+            "path": "examples/visual_gen/configs/minimax-h3-bf16-8gpu.yaml",
+            "commit": "92d23a83799d",
+            "commit_date": "2026-10-09",
+            "section": "BF16 multi-GPU config scaled to pure Ulysses 4"
+          },
+          "notes": "FA4 is exact attention, the same precision class as VANILLA (torch SDPA). This repo measured VANILLA fastest on Hopper and FA4 on Blackwell for TRT-LLM VisualGen; A/B'd against `default` (VANILLA) on B300. VALIDATION PENDING (round 2026-10-22, 4xB300)."
+        },
         "default": {
           "description": "TensorRT-LLM VisualGen, NVIDIA's official minimax-h3-bf16-8gpu.yaml at BF16, 4 GPU(s).",
           "framework_ref": "tensorrt-llm 1.4.0rc1 (tag 0372799d1543, 2026-10-19)",

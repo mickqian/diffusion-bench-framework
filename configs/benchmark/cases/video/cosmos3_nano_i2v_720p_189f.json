@@ -116,6 +116,26 @@
       "serve_args": "--num-gpus 4 --cfg-parallel-size 2 --ulysses-degree 2 --model-class-name Cosmos3OmniDiffusersPipeline --stage-init-timeout 900 --init-timeout 1800 --no-guardrails --diffusion-attention-backend FLASH_ATTN --cache-backend none",
       "extra_env": {},
       "command_profiles": {
+        "blackwell-cudnn-vaepp": {
+          "hardware": [
+            "b200",
+            "gb200",
+            "b300",
+            "gb300"
+          ],
+          "framework_ref": "vllm-omni main 0da1d831e07f + vllm==0.32.0",
+          "num_gpus": 4,
+          "description": "Blackwell: cuDNN attention with the 4-GPU VAE split and device postprocess NVIDIA benchmarked in #5712 (on 4xGB300).",
+          "serve_args": "--num-gpus 4 --cfg-parallel-size 2 --ulysses-degree 2 --model-class-name Cosmos3OmniDiffusersPipeline --stage-init-timeout 900 --init-timeout 1800 --no-guardrails --diffusion-attention-backend CUDNN_ATTN --cache-backend none --vae-patch-parallel-size 4 --vae-parallel-mode spatial_shard_width --video-output-transport {\"enable_device_postprocess\":true} --no-diffusion-compile-dynamic",
+          "upstream_recipe": {
+            "repo": "vllm-project/vllm-omni",
+            "path": "recipes/cosmos3/Cosmos3-Nano.md",
+            "commit": "765002061878",
+            "commit_date": "2026-09-24",
+            "section": "1x H200 141GB / B300 (Online serving), scaled per #5712"
+          },
+          "notes": "PR #5712 (47776fd350f5) benchmarks 4-GPU T2V with CFG 2, Ulysses 2, VAE patch parallel 4 spatial_shard_width and opt-in device postprocess (bytes identical for Cosmos3). SeaCache, the channels_last VAE fast path and fp8 are lossy and stay off. VALIDATION PENDING (round 2026-10-22, 4xB300)."
+        },
         "h200-4gpu-cfg-ulysses-vaepp": {
           "hardware": [
             "h200"
@@ -235,10 +255,12 @@
         },
         "cand-permute": {
           "description": "Symmetric-memory Ulysses all-to-all (#6340: 81.18 -> 76.57 s on Cosmos3-Nano, 4 GPUs). Never selected on its own: A/B arm, picked with --hardware-profile <name>.",
-          "serve_args": "--num-gpus 4 --cfg-parallel-size 2 --ulysses-degree 2 --model-class-name Cosmos3OmniDiffusersPipeline --stage-init-timeout 900 --init-timeout 1800 --no-guardrails --diffusion-attention-backend FLASH_ATTN --cache-backend none --vae-patch-parallel-size 4 --vae-parallel-mode spatial_shard_width --video-output-transport {\"enable_device_postprocess\":true} --no-diffusion-compile-dynamic --ulysses-a2a-permute",
-          "extra_env": {},
+          "serve_args": "--num-gpus 4 --cfg-parallel-size 2 --ulysses-degree 2 --model-class-name Cosmos3OmniDiffusersPipeline --stage-init-timeout 900 --init-timeout 1800 --no-guardrails --diffusion-attention-backend CUDNN_ATTN --cache-backend none --vae-patch-parallel-size 4 --vae-parallel-mode spatial_shard_width --video-output-transport {\"enable_device_postprocess\":true} --no-diffusion-compile-dynamic --ulysses-a2a-permute",
+          "extra_env": {
+            "DIFFUSION_ATTENTION_BACKEND": "CUDNN_ATTN"
+          },
           "num_gpus": 4,
-          "notes": " VALIDATION PENDING (round 2026-10-22, 2xH200/4xH200)."
+          "notes": " VALIDATION PENDING (round 2026-10-22, 4xB300)."
         }
       }
     },

@@ -43,6 +43,23 @@
         "DIFFUSION_ATTENTION_BACKEND": "FLASH_ATTN"
       },
       "command_profiles": {
+        "blackwell-tp2-static": {
+          "description": "Blackwell: TP2 written out, static compile, FlashInfer attention (the measured Blackwell backend for static image shapes).",
+          "hardware": [
+            "b200",
+            "gb200",
+            "b300",
+            "gb300"
+          ],
+          "framework_ref": "vllm-omni main 0da1d831e07f + vllm==0.32.0",
+          "num_gpus": 2,
+          "serve_args": "--tensor-parallel-size 2 --no-diffusion-compile-dynamic",
+          "extra_env": {
+            "DIFFUSION_ATTENTION_BACKEND": "FLASHINFER_ATTN"
+          },
+          "upstream_recipe_reason": "recipes/Tongyi-MAI/Z-Image-Turbo.md (62ebad2d7cd7) has only an Intel XPU offline section; the layout follows docs/user_guide/diffusion tensor_parallel.md (TP=2 only) and sequence_parallel.md.",
+          "notes": "VAE patch parallel stays off: it forces tiled decode (bit-identical only to tiled single-GPU decode) and decode is a sliver of a 1024^2 request. VALIDATION PENDING (round 2026-10-22, 4xB300)."
+        },
         "h200-2gpu-tp-static": {
           "description": "H200: TP2 written out, static compile.",
           "hardware": [
@@ -85,19 +102,19 @@
           "description": "Ulysses 2 instead of TP2 (30 heads split evenly). Never selected on its own: A/B arm, picked with --hardware-profile <name>.",
           "serve_args": "--num-gpus 2 --usp 2 --no-diffusion-compile-dynamic",
           "extra_env": {
-            "DIFFUSION_ATTENTION_BACKEND": "FLASH_ATTN"
+            "DIFFUSION_ATTENTION_BACKEND": "FLASHINFER_ATTN"
           },
           "num_gpus": 2,
-          "notes": " VALIDATION PENDING (round 2026-10-22, 2xH200/4xH200)."
+          "notes": " VALIDATION PENDING (round 2026-10-22, 4xB300)."
         },
         "cand-usp2-permute": {
           "description": "Ulysses 2 with the symmetric-memory all-to-all. Never selected on its own: A/B arm, picked with --hardware-profile <name>.",
           "serve_args": "--num-gpus 2 --usp 2 --ulysses-a2a-permute --no-diffusion-compile-dynamic",
           "extra_env": {
-            "DIFFUSION_ATTENTION_BACKEND": "FLASH_ATTN"
+            "DIFFUSION_ATTENTION_BACKEND": "FLASHINFER_ATTN"
           },
           "num_gpus": 2,
-          "notes": " VALIDATION PENDING (round 2026-10-22, 2xH200/4xH200)."
+          "notes": " VALIDATION PENDING (round 2026-10-22, 4xB300)."
         }
       }
     },
@@ -131,9 +148,20 @@
           ],
           "framework_ref": "lightx2v-0.1.0-z_image+blackwell-fa2",
           "serve_args": "",
-          "notes": "Uses the source-built FlashAttention 2 wheel (TORCH_CUDA_ARCH_LIST=10.0) already installed for Blackwell; no cache, torch compile, or quantized model path. Deliberately NOT using SageAttention here -- it is int8 QK-quantized, a different numeric class from the full-precision attention used elsewhere in this comparison.",
+          "notes": "2026-10-22: like the H200 profile, it had no parallel block, so two ranks each computed the whole image; now Ulysses 2 as upstream's dist config, FA2 (FA3 is Hopper-only). VALIDATION PENDING (round 2026-10-22, 4xB300).",
           "lightx2v_config": {
-            "attn_type": "flash_attn2"
+            "attn_type": "flash_attn2",
+            "parallel": {
+              "seq_p_size": 2,
+              "seq_p_attn_type": "ulysses"
+            }
+          },
+          "upstream_recipe": {
+            "repo": "ModelTC/LightX2V",
+            "path": "configs/z_image/z_image_turbo_t2i_dist.json",
+            "commit": "4fe984c07b16",
+            "commit_date": "2026-10-10",
+            "section": "Ulysses sequence parallel over 2 GPUs (scripts/z_image/z_image_turbo_t2i_dist.sh)"
           }
         },
         "h200-fa3-flashinfer": {
@@ -162,7 +190,7 @@
         "cand-fusion": {
           "description": "Exact Ulysses communication fusions upstream offers. Never selected on its own: A/B arm, picked with --hardware-profile <name>.",
           "lightx2v_config": {
-            "attn_type": "flash_attn3",
+            "attn_type": "flash_attn2",
             "parallel": {
               "seq_p_size": 2,
               "seq_p_attn_type": "ulysses",
@@ -171,7 +199,7 @@
             }
           },
           "num_gpus": 2,
-          "notes": "seq_p_quant_scheme (fp8/fp4 communication) stays off. VALIDATION PENDING (round 2026-10-22, 2xH200/4xH200)."
+          "notes": "seq_p_quant_scheme (fp8/fp4 communication) stays off. VALIDATION PENDING (round 2026-10-22, 4xB300)."
         }
       }
     },
