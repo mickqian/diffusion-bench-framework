@@ -1,169 +1,233 @@
 {
- "id": "zimage_turbo_t2i_1024",
- "model": "Tongyi-MAI/Z-Image-Turbo",
- "task": "text-to-image",
- "label": "Z-Image-Turbo T2I",
- "prompt": "A futuristic cyberpunk city at night, neon lights reflecting on wet streets",
- "width": 1024,
- "height": 1024,
- "seed": 42,
- "num_gpus": 2,
- "num_inference_steps": 9,
- "guidance_scale": 0.0,
- "frameworks": {
-  "sglang": {
-   "status": "supported",
-   "serve_args": "--model-type diffusion --warmup-mode server --tp-size 2",
-   "extra_env": {},
-   "command_profiles": {
-    "default": {
-     "description": "Best known SGLang command for the benchmark repo default profile.",
-     "sglang_ref": "current-main",
-     "serve_args": "--model-type diffusion --warmup-mode server --tp-size 2",
-     "notes": "Keep this profile updated when the best command changes for a SGLang release or commit. Best-lossless = eager: validated compile (0.975s) is slower than eager (0.79s) for this 9-step turbo model, so no compile profile."
+  "id": "zimage_turbo_t2i_1024",
+  "model": "Tongyi-MAI/Z-Image-Turbo",
+  "task": "text-to-image",
+  "label": "Z-Image-Turbo T2I",
+  "prompt": "A futuristic cyberpunk city at night, neon lights reflecting on wet streets",
+  "width": 1024,
+  "height": 1024,
+  "seed": 42,
+  "num_gpus": 2,
+  "num_inference_steps": 9,
+  "guidance_scale": 0.0,
+  "frameworks": {
+    "sglang": {
+      "status": "supported",
+      "serve_args": "--model-type diffusion --warmup-mode server --tp-size 2",
+      "extra_env": {},
+      "command_profiles": {
+        "default": {
+          "description": "Best known SGLang command for the benchmark repo default profile.",
+          "sglang_ref": "current-main",
+          "serve_args": "--model-type diffusion --warmup-mode server --tp-size 2",
+          "notes": "Keep this profile updated when the best command changes for a SGLang release or commit. Best-lossless = eager: validated compile (0.975s) is slower than eager (0.79s) for this 9-step turbo model, so no compile profile."
+        },
+        "h100-h200-2gpu-tp-resident-eager": {
+          "description": "Hopper 2-GPU TP, resident components, eager DiT — measured fastest.",
+          "hardware": [
+            "h100",
+            "h200"
+          ],
+          "sglang_ref": "current-main",
+          "serve_args": "--model-type diffusion --warmup-mode server --tp-size 2 --dit-layerwise-offload false --performance-mode speed --enable-torch-compile false",
+          "policy_exception": "Measured H100 A/B 2026-07-03 (steady-state single_e2e): speed+compile 0.987/0.997s vs speed-eager 0.701/0.699s vs auto-offload default 0.793/0.799s — compile loses on this 9-step turbo model. Explicit --enable-torch-compile false also future-proofs against speed-mode auto-compile (sglang PR #30016).",
+          "notes": "Validated on H100; hardware list includes h200 for selection parity — re-validate there before publishing h200 numbers."
+        }
+      }
     },
-    "h100-h200-2gpu-tp-resident-eager": {
-     "description": "Hopper 2-GPU TP, resident components, eager DiT — measured fastest.",
-     "hardware": [
-      "h100",
-      "h200"
-     ],
-     "sglang_ref": "current-main",
-     "serve_args": "--model-type diffusion --warmup-mode server --tp-size 2 --dit-layerwise-offload false --performance-mode speed --enable-torch-compile false",
-     "policy_exception": "Measured H100 A/B 2026-07-03 (steady-state single_e2e): speed+compile 0.987/0.997s vs speed-eager 0.701/0.699s vs auto-offload default 0.793/0.799s — compile loses on this 9-step turbo model. Explicit --enable-torch-compile false also future-proofs against speed-mode auto-compile (sglang PR #30016).",
-     "notes": "Validated on H100; hardware list includes h200 for selection parity — re-validate there before publishing h200 numbers."
+    "vllm-omni": {
+      "status": "supported",
+      "num_gpus": 2,
+      "serve_args": "",
+      "extra_env": {
+        "DIFFUSION_ATTENTION_BACKEND": "FLASH_ATTN"
+      },
+      "command_profiles": {
+        "h200-2gpu-tp-static": {
+          "description": "H200: TP2 written out, static compile.",
+          "hardware": [
+            "h200"
+          ],
+          "framework_ref": "vllm-omni main 0da1d831e07f + vllm==0.32.0",
+          "num_gpus": 2,
+          "serve_args": "--tensor-parallel-size 2 --no-diffusion-compile-dynamic",
+          "extra_env": {
+            "DIFFUSION_ATTENTION_BACKEND": "FLASH_ATTN"
+          },
+          "upstream_recipe_reason": "recipes/Tongyi-MAI/Z-Image-Turbo.md (62ebad2d7cd7) has only an Intel XPU offline section; the layout follows docs/user_guide/diffusion tensor_parallel.md (TP=2 only) and sequence_parallel.md.",
+          "notes": "VAE patch parallel stays off: it forces tiled decode (bit-identical only to tiled single-GPU decode) and decode is a sliver of a 1024^2 request. VALIDATION PENDING (round 2026-10-22, 2xH200/4xH200)."
+        },
+        "default": {
+          "description": "Best known vLLM-Omni command for aligned non-cache benchmark runs.",
+          "framework_ref": "vllm-omni-0.18.0-cli-env",
+          "serve_args": "",
+          "notes": "Uses env-selected FlashAttention; torch compile is disabled by the benchmark harness.",
+          "extra_env": {
+            "DIFFUSION_ATTENTION_BACKEND": "FLASH_ATTN"
+          }
+        },
+        "blackwell-flashinfer": {
+          "description": "Blackwell vLLM-Omni profile using FlashInfer attention (validated on B200; the FLASH_ATTN backend hits Hopper-only precompiled kernels and fails with 'no kernel image' on sm_100).",
+          "hardware": [
+            "b200",
+            "gb200",
+            "b300",
+            "gb300"
+          ],
+          "framework_ref": "vllm-omni-latest+blackwell-flashinfer",
+          "serve_args": "",
+          "notes": "Same case/model/steps as default; only the attention backend changes for Blackwell compatibility.",
+          "extra_env": {
+            "DIFFUSION_ATTENTION_BACKEND": "FLASHINFER_ATTN"
+          }
+        },
+        "cand-usp2": {
+          "description": "Ulysses 2 instead of TP2 (30 heads split evenly). Never selected on its own: A/B arm, picked with --hardware-profile <name>.",
+          "serve_args": "--num-gpus 2 --usp 2 --no-diffusion-compile-dynamic",
+          "extra_env": {
+            "DIFFUSION_ATTENTION_BACKEND": "FLASH_ATTN"
+          },
+          "num_gpus": 2,
+          "notes": " VALIDATION PENDING (round 2026-10-22, 2xH200/4xH200)."
+        },
+        "cand-usp2-permute": {
+          "description": "Ulysses 2 with the symmetric-memory all-to-all. Never selected on its own: A/B arm, picked with --hardware-profile <name>.",
+          "serve_args": "--num-gpus 2 --usp 2 --ulysses-a2a-permute --no-diffusion-compile-dynamic",
+          "extra_env": {
+            "DIFFUSION_ATTENTION_BACKEND": "FLASH_ATTN"
+          },
+          "num_gpus": 2,
+          "notes": " VALIDATION PENDING (round 2026-10-22, 2xH200/4xH200)."
+        }
+      }
+    },
+    "lightx2v": {
+      "status": "supported",
+      "model": "Tongyi-MAI/Z-Image-Turbo",
+      "model_cls": "z_image",
+      "lightx2v_task": "t2i",
+      "num_gpus": 2,
+      "serve_args": "",
+      "extra_env": {},
+      "lightx2v_config": {
+        "attn_type": "flash_attn3",
+        "enable_cfg": false,
+        "sample_guide_scale": 0.0
+      },
+      "command_profiles": {
+        "default": {
+          "description": "Best known LightX2V command/config for aligned non-cache benchmark runs.",
+          "framework_ref": "lightx2v-0.1.0-z_image",
+          "serve_args": "",
+          "notes": "Uses explicit fast attention/offload settings; no cache, torch compile, or quantized model path."
+        },
+        "blackwell-fa2": {
+          "description": "Blackwell LightX2V profile using FlashAttention 2 (validated on B200 via the flux2 blackwell-fa2-flashinfer profile). Same precision class (full-precision, exact attention) as SGLang's FA4 and vLLM-Omni's FlashInfer backend on Blackwell -- flash_attn3/flash_attn4 hit Hopper-only precompiled kernels or a CUDA-toolkit>=13.1 CuTe-DSL requirement not met by this build, so FA2 is the fastest same-class (full-precision) option available here.",
+          "hardware": [
+            "b200",
+            "gb200",
+            "b300",
+            "gb300"
+          ],
+          "framework_ref": "lightx2v-0.1.0-z_image+blackwell-fa2",
+          "serve_args": "",
+          "notes": "Uses the source-built FlashAttention 2 wheel (TORCH_CUDA_ARCH_LIST=10.0) already installed for Blackwell; no cache, torch compile, or quantized model path. Deliberately NOT using SageAttention here -- it is int8 QK-quantized, a different numeric class from the full-precision attention used elsewhere in this comparison.",
+          "lightx2v_config": {
+            "attn_type": "flash_attn2"
+          }
+        },
+        "h200-fa3-flashinfer": {
+          "description": "H200 fastest available LightX2V command/config for aligned non-cache benchmark runs.",
+          "hardware": [
+            "h200"
+          ],
+          "framework_ref": "lightx2v-0.1.0-z_image+h200-fa3-flashinfer",
+          "serve_args": "",
+          "notes": "2026-10-22: the config had no parallel block, so torchrun's two ranks each computed the whole image (worker.py only calls init_parallel when config['parallel'] is set) and every earlier row measured one GPU on two. Now Ulysses 2 as upstream's dist config. use_compile is ignored by ZImageTransformerInfer. VALIDATION PENDING (round 2026-10-22, 2xH200/4xH200).",
+          "lightx2v_config": {
+            "attn_type": "flash_attn3",
+            "parallel": {
+              "seq_p_size": 2,
+              "seq_p_attn_type": "ulysses"
+            }
+          },
+          "upstream_recipe": {
+            "repo": "ModelTC/LightX2V",
+            "path": "configs/z_image/z_image_turbo_t2i_dist.json",
+            "commit": "4fe984c07b16",
+            "commit_date": "2026-10-10",
+            "section": "Ulysses sequence parallel over 2 GPUs (scripts/z_image/z_image_turbo_t2i_dist.sh)"
+          }
+        },
+        "cand-fusion": {
+          "description": "Exact Ulysses communication fusions upstream offers. Never selected on its own: A/B arm, picked with --hardware-profile <name>.",
+          "lightx2v_config": {
+            "attn_type": "flash_attn3",
+            "parallel": {
+              "seq_p_size": 2,
+              "seq_p_attn_type": "ulysses",
+              "seq_p_tensor_fusion": true,
+              "seq_p_prepost_backend": "triton"
+            }
+          },
+          "num_gpus": 2,
+          "notes": "seq_p_quant_scheme (fp8/fp4 communication) stays off. VALIDATION PENDING (round 2026-10-22, 2xH200/4xH200)."
+        }
+      }
+    },
+    "trtllm-visual": {
+      "status": "not_run",
+      "reason": "Not yet classified. Confirm framework support and add a validated command profile, or mark unsupported."
+    },
+    "comfyui": {
+      "status": "supported",
+      "num_gpus": 1,
+      "serve_args": "",
+      "comfyui": {
+        "workflow": "zimage_turbo_t2i.json",
+        "models": {
+          "diffusion_models/z_image_turbo_bf16.safetensors": "Comfy-Org/z_image_turbo:split_files/diffusion_models/z_image_turbo_bf16.safetensors",
+          "text_encoders/qwen_3_4b.safetensors": "Comfy-Org/z_image_turbo:split_files/text_encoders/qwen_3_4b.safetensors",
+          "vae/ae.safetensors": "Comfy-Org/z_image_turbo:split_files/vae/ae.safetensors"
+        },
+        "compile": true
+      },
+      "command_profiles": {
+        "h200-gpuonly": {
+          "description": "H200: --gpu-only, so TorchCompileModel runs (dynamic VRAM's malloc graph breaks it).",
+          "hardware": [
+            "h200"
+          ],
+          "framework_ref": "ComfyUI master 1a82e6d01f39",
+          "num_gpus": 1,
+          "serve_args": "--gpu-only",
+          "notes": "Placement only. Workflow sampler is res_multistep, as the official image_z_image_turbo template (was euler, same cost per step). VALIDATION PENDING (round 2026-10-22, 2xH200/4xH200)."
+        },
+        "default": {
+          "description": "ComfyUI master, core nodes only, the model's official workflow with full-precision weights.",
+          "framework_ref": "ComfyUI master HEAD",
+          "num_gpus": 1,
+          "serve_args": "",
+          "notes": "Official 'Text to Image (Z-Image-Turbo)' blueprint at the case's 9 steps (sglang's progress bar reads 9/9 per request). euler instead of the blueprint's res_multistep: the same one forward per step, and closer to the flow-matching Euler (shift 3) the other rows run. Weights are the full-precision single-file checkpoints ComfyUI loads (Comfy-Org repackaging or the model's own single-file release); the official template's fp8/int8/nvfp4 defaults are swapped out because they are a different numeric class from every other row. Sampler, scheduler and shift follow the official ComfyUI workflow; steps, CFG, size, frames and seed follow the case. Compile on: the core TorchCompileModel node (inductor) goes behind every diffusion-model loader, as the other competitors run compile-on; measured on FLUX.1 / 1xB200 2026-09-25 at 4.89s against 5.94s and 5.77s eager."
+        },
+        "blackwell-gpuonly": {
+          "description": "Blackwell: the default graph with every model resident on the GPU (--gpu-only).",
+          "hardware": [
+            "b200",
+            "gb200",
+            "b300",
+            "gb300"
+          ],
+          "framework_ref": "ComfyUI master HEAD",
+          "num_gpus": 1,
+          "serve_args": "--gpu-only",
+          "notes": "B200: --gpu-only keeps every model, text encoders included, stored and run on the card; a 183 GB B200 holds the largest graph here (MiniMax-H3: 62 GB DiT + 48 GB Qwen3-VL-32B + VAEs). Placement only, numerics unchanged. Measured 2026-09-25 on 1xB200, FLUX.1 eager, interleaved arms: default 5.94 / 5.77 / 5.79s against --gpu-only 5.56s and --gpu-only --disable-dynamic-vram 5.57s (Qwen-Image-2.1: 3.75 / 3.91 against 3.47 / 3.48) -- every --gpu-only arm below every default arm; disabling dynamic VRAM on top adds nothing, so the simpler flag is kept."
+        }
+      }
+    },
+    "fastvideo": {
+      "status": "no_profile",
+      "reason": "FastVideo main (2b164405c3d1, 2026-10-07) registers Z-Image-Turbo, but this harness integrates FastVideo for MiniMax-H3 only (2026-10-08); no command validated."
     }
-   }
-  },
-  "vllm-omni": {
-   "status": "supported",
-   "num_gpus": 2,
-   "serve_args": "",
-   "extra_env": {
-    "DIFFUSION_ATTENTION_BACKEND": "FLASH_ATTN"
-   },
-   "command_profiles": {
-    "default": {
-     "description": "Best known vLLM-Omni command for aligned non-cache benchmark runs.",
-     "framework_ref": "vllm-omni-0.18.0-cli-env",
-     "serve_args": "",
-     "notes": "Uses env-selected FlashAttention; torch compile is disabled by the benchmark harness.",
-     "extra_env": {
-      "DIFFUSION_ATTENTION_BACKEND": "FLASH_ATTN"
-     }
-    },
-    "blackwell-flashinfer": {
-     "description": "Blackwell vLLM-Omni profile using FlashInfer attention (validated on B200; the FLASH_ATTN backend hits Hopper-only precompiled kernels and fails with 'no kernel image' on sm_100).",
-     "hardware": [
-      "b200",
-      "gb200",
-      "b300",
-      "gb300"
-     ],
-     "framework_ref": "vllm-omni-latest+blackwell-flashinfer",
-     "serve_args": "",
-     "notes": "Same case/model/steps as default; only the attention backend changes for Blackwell compatibility.",
-     "extra_env": {
-      "DIFFUSION_ATTENTION_BACKEND": "FLASHINFER_ATTN"
-     }
-    }
-   }
-  },
-  "lightx2v": {
-   "status": "supported",
-   "model": "Tongyi-MAI/Z-Image-Turbo",
-   "model_cls": "z_image",
-   "lightx2v_task": "t2i",
-   "num_gpus": 2,
-   "serve_args": "",
-   "extra_env": {},
-   "lightx2v_config": {
-    "aspect_ratio": "1:1",
-    "num_channels_latents": 16,
-    "attn_type": "flash_attn3",
-    "enable_cfg": false,
-    "sample_guide_scale": 0.0,
-    "patch_size": 2
-   },
-   "command_profiles": {
-    "default": {
-     "description": "Best known LightX2V command/config for aligned non-cache benchmark runs.",
-     "framework_ref": "lightx2v-0.1.0-z_image",
-     "serve_args": "",
-     "notes": "Uses explicit fast attention/offload settings; no cache, torch compile, or quantized model path."
-    },
-    "blackwell-fa2": {
-     "description": "Blackwell LightX2V profile using FlashAttention 2 (validated on B200 via the flux2 blackwell-fa2-flashinfer profile). Same precision class (full-precision, exact attention) as SGLang's FA4 and vLLM-Omni's FlashInfer backend on Blackwell -- flash_attn3/flash_attn4 hit Hopper-only precompiled kernels or a CUDA-toolkit>=13.1 CuTe-DSL requirement not met by this build, so FA2 is the fastest same-class (full-precision) option available here.",
-     "hardware": [
-      "b200",
-      "gb200",
-      "b300",
-      "gb300"
-     ],
-     "framework_ref": "lightx2v-0.1.0-z_image+blackwell-fa2",
-     "serve_args": "",
-     "notes": "Uses the source-built FlashAttention 2 wheel (TORCH_CUDA_ARCH_LIST=10.0) already installed for Blackwell; no cache, torch compile, or quantized model path. Deliberately NOT using SageAttention here -- it is int8 QK-quantized, a different numeric class from the full-precision attention used elsewhere in this comparison.",
-     "lightx2v_config": {
-      "attn_type": "flash_attn2"
-     }
-    },
-    "h200-fa3-flashinfer": {
-     "description": "H200 fastest available LightX2V command/config for aligned non-cache benchmark runs.",
-     "hardware": [
-      "h200"
-     ],
-     "framework_ref": "lightx2v-0.1.0-z_image+h200-fa3-flashinfer",
-     "serve_args": "",
-     "notes": "Uses FlashAttention 3 with FlashInfer RoPE in the isolated H200 LightX2V venv; no cache, torch compile, or quantized model path.",
-     "lightx2v_config": {
-      "attn_type": "flash_attn3"
-     }
-    }
-   }
-  },
-  "trtllm-visual": {
-   "status": "not_run",
-   "reason": "Not yet classified. Confirm framework support and add a validated command profile, or mark unsupported."
-  },
-  "comfyui": {
-   "status": "supported",
-   "num_gpus": 1,
-   "serve_args": "",
-   "comfyui": {
-    "workflow": "zimage_turbo_t2i.json",
-    "models": {
-     "diffusion_models/z_image_turbo_bf16.safetensors": "Comfy-Org/z_image_turbo:split_files/diffusion_models/z_image_turbo_bf16.safetensors",
-     "text_encoders/qwen_3_4b.safetensors": "Comfy-Org/z_image_turbo:split_files/text_encoders/qwen_3_4b.safetensors",
-     "vae/ae.safetensors": "Comfy-Org/z_image_turbo:split_files/vae/ae.safetensors"
-    },
-    "compile": true
-   },
-   "command_profiles": {
-    "default": {
-     "description": "ComfyUI master, core nodes only, the model's official workflow with full-precision weights.",
-     "framework_ref": "ComfyUI master HEAD",
-     "num_gpus": 1,
-     "serve_args": "",
-     "notes": "Official 'Text to Image (Z-Image-Turbo)' blueprint at the case's 9 steps (sglang's progress bar reads 9/9 per request). euler instead of the blueprint's res_multistep: the same one forward per step, and closer to the flow-matching Euler (shift 3) the other rows run. Weights are the full-precision single-file checkpoints ComfyUI loads (Comfy-Org repackaging or the model's own single-file release); the official template's fp8/int8/nvfp4 defaults are swapped out because they are a different numeric class from every other row. Sampler, scheduler and shift follow the official ComfyUI workflow; steps, CFG, size, frames and seed follow the case. Compile on: the core TorchCompileModel node (inductor) goes behind every diffusion-model loader, as the other competitors run compile-on; measured on FLUX.1 / 1xB200 2026-09-25 at 4.89s against 5.94s and 5.77s eager."
-    },
-    "blackwell-gpuonly": {
-     "description": "Blackwell: the default graph with every model resident on the GPU (--gpu-only).",
-     "hardware": [
-      "b200",
-      "gb200",
-      "b300",
-      "gb300"
-     ],
-     "framework_ref": "ComfyUI master HEAD",
-     "num_gpus": 1,
-     "serve_args": "--gpu-only",
-     "notes": "B200: --gpu-only keeps every model, text encoders included, stored and run on the card; a 183 GB B200 holds the largest graph here (MiniMax-H3: 62 GB DiT + 48 GB Qwen3-VL-32B + VAEs). Placement only, numerics unchanged. Measured 2026-09-25 on 1xB200, FLUX.1 eager, interleaved arms: default 5.94 / 5.77 / 5.79s against --gpu-only 5.56s and --gpu-only --disable-dynamic-vram 5.57s (Qwen-Image-2.1: 3.75 / 3.91 against 3.47 / 3.48) -- every --gpu-only arm below every default arm; disabling dynamic VRAM on top adds nothing, so the simpler flag is kept."
-    }
-   }
-  },
-  "fastvideo": {
-   "status": "no_profile",
-   "reason": "FastVideo main (2b164405c3d1, 2026-10-07) registers Z-Image-Turbo, but this harness integrates FastVideo for MiniMax-H3 only (2026-10-08); no command validated."
   }
- }
 }

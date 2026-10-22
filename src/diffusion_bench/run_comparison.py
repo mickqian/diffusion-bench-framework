@@ -160,6 +160,7 @@ def _post_drained(url: str, **kwargs):
     return resp
 
 GPU_CLEAR_WAIT = 15  # seconds between framework runs
+LIGHTX2V_SYNC_POLL_S = 0.02
 MODE_SINGLE_E2E = "single_e2e"
 MODE_THROUGHPUT = "throughput"
 
@@ -244,6 +245,7 @@ FRAMEWORK_PROFILE_RUNTIME_KEYS = SGLANG_PROFILE_RUNTIME_KEYS | {
     "http_server",
     "http_request",
     "comfyui",
+    "visual_gen_args",
 }
 
 # Downloaded reference images keyed by URL; per-request variant files keyed by
@@ -602,8 +604,35 @@ def _build_lightx2v_cmd(case: dict, fw_cfg: dict, port: int) -> list[str]:
     return cmd
 
 
+HF_URI_PREFIX = "hf://"
+
+
+def _resolve_hf_uri(value: str) -> str:
+    """`hf://<org>/<repo>/<path>`: a file is downloaded, a folder snapshotted; the local path."""
+    from huggingface_hub import hf_hub_download, snapshot_download
+
+    org, repo, *rest = value[len(HF_URI_PREFIX) :].split("/")
+    repo_id, path = f"{org}/{repo}", "/".join(rest)
+    if not path:
+        return snapshot_download(repo_id=repo_id)
+    if os.path.splitext(path)[1]:
+        return hf_hub_download(repo_id=repo_id, filename=path)
+    return os.path.join(snapshot_download(repo_id=repo_id, allow_patterns=[f"{path}/*"]), path)
+
+
+def _resolve_hf_uris(value):
+    """`value` with every `hf://` string inside it resolved (see `_resolve_hf_uri`)."""
+    if isinstance(value, str):
+        return _resolve_hf_uri(value) if value.startswith(HF_URI_PREFIX) else value
+    if isinstance(value, dict):
+        return {key: _resolve_hf_uris(item) for key, item in value.items()}
+    if isinstance(value, list):
+        return [_resolve_hf_uris(item) for item in value]
+    return value
+
+
 def _server_model_path(case: dict, fw_cfg: dict) -> str:
-    return os.path.expandvars(str(fw_cfg.get("model_path") or case["model"]))
+    return _resolve_hf_uris(os.path.expandvars(str(fw_cfg.get("model_path") or case["model"])))
 
 
 def _build_generic_http_cmd(case: dict, fw_cfg: dict, port: int) -> list[str]:
@@ -650,6 +679,9 @@ def _build_generic_http_cmd(case: dict, fw_cfg: dict, port: int) -> list[str]:
     ]
     cmd = [bin_name] + [_render(token) for token in args_template]
 
+    if fw_cfg.get("visual_gen_args"):
+        cmd += [server.get("config_flag", "--visual_gen_args"), _write_visual_gen_args(case, fw_cfg, port)]
+
     tp_flag = server.get("tp_flag")
     if num_gpus > 1 and tp_flag:
         has_tp = any(arg == tp_flag or arg.startswith(f"{tp_flag}=") for arg in cmd)
@@ -659,6 +691,15 @@ def _build_generic_http_cmd(case: dict, fw_cfg: dict, port: int) -> list[str]:
     if fw_cfg.get("serve_args", "").strip():
         cmd += fw_cfg["serve_args"].strip().split()
     return cmd
+
+
+def _write_visual_gen_args(case: dict, fw_cfg: dict, port: int) -> str:
+    """The profile's `visual_gen_args` as the YAML file trtllm-serve reads (JSON is valid YAML)."""
+    root = Path(tempfile.gettempdir()) / "diffusion-bench-trtllm"
+    root.mkdir(parents=True, exist_ok=True)
+    path = root / f"{case['id']}-{port}.yaml"
+    path.write_text(json.dumps(_resolve_hf_uris(fw_cfg["visual_gen_args"]), indent=2) + "\n")
+    return str(path)
 
 
 COMFYUI_WORKSPACE_ENV = "DIFFUSION_BENCH_COMFYUI_WORKSPACE"
@@ -1858,6 +1899,9 @@ def send_request_lightx2v(base_url: str, case: dict, config: dict) -> float:
         resp = _post_drained(
             f"{base_url}/v1/tasks/image/sync",
             json=payload,
+            # The sync endpoint polls its own task on a 0.5 s default tick, which
+            # quantised every LightX2V image latency to 0.5 s multiples.
+            params={"poll_interval_seconds": LIGHTX2V_SYNC_POLL_S},
             timeout=REQUEST_TIMEOUT,
         )
         _raise_for_status(resp)
@@ -1937,6 +1981,38 @@ def _generic_http_request_spec(case: dict, framework: str) -> dict:
     return by_task.get(case["task"]) or {}
 
 
+def _reshape_generic_fields(fields: dict, spec: dict) -> dict:
+    """Move `extra_params_keys` under `extra_params` and drop `omit_keys` (dotted paths allowed).
+
+    For servers that reject unknown top-level fields (TRT-LLM answers 422): the case's
+    shared request extras are shaped for sglang, so a framework entry reshapes them here.
+    """
+    fields = copy.deepcopy(fields)
+    moved = {key: fields.pop(key) for key in spec.get("extra_params_keys", []) if key in fields}
+    if moved:
+        fields["extra_params"] = {**moved, **(fields.get("extra_params") or {})}
+    for path in spec.get("omit_keys", []):
+        *parents, leaf = path.split(".")
+        node = fields
+        for part in parents:
+            node = node.get(part) if isinstance(node, dict) else None
+        if isinstance(node, dict):
+            node.pop(leaf, None)
+    return fields
+
+
+def _check_generic_video(data: bytes, output: str, framework: str) -> None:
+    """Raise unless a sync video reply is the MP4 the case asked for (`mp4`, or `mp4+audio`)."""
+    try:
+        tracks = fastvideo_client.mp4_handler_types(data)
+    except (ValueError, struct.error) as exc:
+        raise RuntimeError(f"{framework} answered {len(data)} bytes that do not parse as MP4: {exc}") from exc
+    wanted = ["vide", "soun"] if output == "mp4+audio" else ["vide"]
+    missing = [kind for kind in wanted if kind not in tracks]
+    if missing:
+        raise RuntimeError(f"{framework}'s MP4 ({len(data)} bytes) has tracks {tracks or 'none'}; missing {missing}")
+
+
 def send_request_generic_http(
     base_url: str, case: dict, config: dict, framework: str
 ) -> float:
@@ -1953,12 +2029,12 @@ def send_request_generic_http(
 
     if task in ("text-to-video", "image-to-video", "text-image-to-video"):
         endpoint = spec.get("endpoint", "/v1/videos")
-        data = {
+        fields: dict = {
             "model": case["model"],
             "prompt": case["prompt"],
             "size": f"{case['width']}x{case['height']}",
-            "width": str(case["width"]),
-            "height": str(case["height"]),
+            "width": case["width"],
+            "height": case["height"],
         }
         for key in (
             "num_inference_steps",
@@ -1970,26 +2046,36 @@ def send_request_generic_http(
             "negative_prompt",
         ):
             if key in case:
-                data[key] = str(case[key])
-        _update_form_data(data, _request_extra(case, framework))
-        files = None
-        if case.get("reference_image"):
-            files = {
-                "input_reference": (
-                    "ref.png",
-                    io.BytesIO(_get_ref_image_bytes(config, case)),
-                    "image/png",
-                )
-            }
+                fields[key] = case[key]
+        fields = _reshape_generic_fields(_deep_merge(fields, _request_extra(case, framework, config)), spec)
         start = time.time()
-        resp = _post_drained(
-            f"{base_url}{endpoint}", data=data, files=files, timeout=REQUEST_TIMEOUT
-        )
+        if spec.get("body") == "json":
+            resp = _post_drained(f"{base_url}{endpoint}", json=fields, timeout=REQUEST_TIMEOUT)
+        else:
+            data: dict = {}
+            _update_form_data(data, fields)
+            files = None
+            if case.get("reference_image"):
+                files = {
+                    spec.get("reference_field", "input_reference"): (
+                        "ref.png",
+                        io.BytesIO(_get_ref_image_bytes(config, case)),
+                        "image/png",
+                    )
+                }
+            resp = _post_drained(
+                f"{base_url}{endpoint}", data=data, files=files, timeout=REQUEST_TIMEOUT
+            )
         _raise_for_status(resp)
+        if spec.get("mode") == "sync":
+            latency = time.time() - start
+            if spec.get("output"):
+                _check_generic_video(resp.content, spec["output"], framework)
+            print(f"  Generated in {latency:.2f}s ({framework})")
+            return latency
         job = resp.json()
-        # Synchronous endpoints return the result directly; async returns a job id.
         job_id = job.get("id")
-        if spec.get("mode") == "sync" or not job_id:
+        if not job_id:
             latency = time.time() - start
             print(f"  Generated in {latency:.2f}s ({framework})")
             return latency
@@ -2013,7 +2099,7 @@ def send_request_generic_http(
     if task == "text-to-image":
         endpoint = spec.get("endpoint", "/v1/images/generations")
         payload = _build_sglang_payload(case, config)
-        payload.update(_request_extra(case, framework, config))
+        payload = _reshape_generic_fields(_deep_merge(payload, _request_extra(case, framework, config)), spec)
         start = time.time()
         resp = _post_drained(
             f"{base_url}{endpoint}", json=payload, timeout=REQUEST_TIMEOUT

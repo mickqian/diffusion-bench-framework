@@ -12,14 +12,14 @@ A trailing `(h100: FAIL)` is a `status_by_hardware` override: the cell reads dif
 | qwen_image_21_edit_1024 | image-edit | profile | profile | no-cmd | n/a | no-cmd | n/a |
 | zimage_turbo_t2i_1024 | text-to-image | profile | profile | profile | TODO | profile | no-cmd |
 | ideogram4_t2i_1024_2gpu_tp | text-to-image | profile | n/a | n/a | n/a | profile | n/a |
-| wan22_t2v_a14b_720p | text-to-video | profile | profile | profile | TODO | profile | no-cmd |
-| ltx2_twostage_t2v | text-to-video | profile | profile | profile | TODO | profile | no-cmd |
-| ltx2.3_twostage_t2v_2gpus | text-to-video | profile | no-cmd | profile (h100: FAIL) | TODO | no-cmd | no-cmd |
-| cosmos3_nano_t2i_720p | text-to-image | profile | profile | n/a | FAIL | n/a | n/a |
-| cosmos3_nano_t2v_720p_189f | text-to-video | profile | profile | n/a | TODO | n/a | n/a |
-| cosmos3_nano_i2v_720p_189f | image-to-video | profile | profile | n/a | TODO | n/a | n/a |
-| minimax_h3_t2va_5s | text-to-video | profile | profile | profile | n/a | profile | profile |
-| minimax_h3_t2va_5s_4gpu | text-to-video | profile | profile | profile | n/a | TODO | profile |
+| wan22_t2v_a14b_720p | text-to-video | profile | profile | profile | profile | profile | no-cmd |
+| ltx2_twostage_t2v | text-to-video | profile | profile | n/a | profile | profile | no-cmd |
+| ltx2.3_twostage_t2v_2gpus | text-to-video | profile | no-cmd | n/a | n/a | no-cmd | no-cmd |
+| cosmos3_nano_t2i_720p | text-to-image | profile | profile | n/a | profile | n/a | n/a |
+| cosmos3_nano_t2v_720p_189f | text-to-video | profile | profile | n/a | profile | n/a | n/a |
+| cosmos3_nano_i2v_720p_189f | image-to-video | profile | profile | n/a | profile | n/a | n/a |
+| minimax_h3_t2va_5s | text-to-video | profile | profile | profile | profile | profile | profile |
+| minimax_h3_t2va_5s_4gpu | text-to-video | profile | profile | profile | profile | TODO | profile |
 | minimax_h3_t2va_480p_1gpu | text-to-video | profile | no-cmd | no-cmd | n/a | profile | no-cmd |
-| minimax_h3_ref2va_5s | text-to-video | profile | profile | profile | n/a | profile | profile |
+| minimax_h3_ref2va_5s | text-to-video | profile | profile | profile | profile | profile | profile |
 | minimax_h3_fasth3_v2_t2va_5s | text-to-video | profile | profile | n/a | n/a | no-cmd | profile |

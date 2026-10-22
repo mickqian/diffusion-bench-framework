@@ -35,6 +35,26 @@
         "DIFFUSION_ATTENTION_BACKEND": "FLASH_ATTN"
       },
       "command_profiles": {
+        "h200-4gpu-cfg2-usp2-vaepp": {
+          "description": "H200: the recipe's GPU layout (CFG parallel x Ulysses, VAE patch parallel) scaled to four GPUs.",
+          "hardware": [
+            "h200"
+          ],
+          "framework_ref": "vllm-omni main 0da1d831e07f + vllm==0.32.0",
+          "num_gpus": 4,
+          "serve_args": "--num-gpus 4 --cfg-parallel-size 2 --usp 2 --vae-patch-parallel-size 4 --vae-parallel-mode spatial_shard_width --no-diffusion-compile-dynamic",
+          "extra_env": {
+            "DIFFUSION_ATTENTION_BACKEND": "FLASH_ATTN"
+          },
+          "upstream_recipe": {
+            "repo": "vllm-project/vllm-omni",
+            "path": "recipes/Wan-AI/Wan2.2-T2V.md",
+            "commit": "62ebad2d7cd7",
+            "commit_date": "2026-09-25",
+            "section": "8x NVIDIA H20 / H100 / A100 (scaled to 4 GPUs)"
+          },
+          "notes": "Replaces TP4, a layout the GPU recipe never uses. VAE decode split with spatial_shard_width (matches single-GPU decode within tolerance) instead of the recipe's tiling (not exact). HSDP left out: it only saves memory and both experts fit; Skip-Softmax left out (lossy, Blackwell-only). --no-diffusion-compile-dynamic: the docs' setting for a fixed-shape workload. VALIDATION PENDING (round 2026-10-22, 2xH200/4xH200)."
+        },
         "blackwell-cudnn": {
           "description": "Blackwell vLLM-Omni profile for wan22_t2v_a14b_720p using cuDNN attention.",
           "hardware": [
@@ -99,6 +119,33 @@
           "extra_env": {
             "DIFFUSION_ATTENTION_BACKEND": "FLASH_ATTN"
           }
+        },
+        "cand-hsdp": {
+          "description": "The recipe's literal HSDP weight sharding on top. Never selected on its own: A/B arm, picked with --hardware-profile <name>.",
+          "serve_args": "--num-gpus 4 --cfg-parallel-size 2 --usp 2 --vae-patch-parallel-size 4 --vae-parallel-mode spatial_shard_width --no-diffusion-compile-dynamic --use-hsdp",
+          "extra_env": {
+            "DIFFUSION_ATTENTION_BACKEND": "FLASH_ATTN"
+          },
+          "num_gpus": 4,
+          "notes": " VALIDATION PENDING (round 2026-10-22, 2xH200/4xH200)."
+        },
+        "cand-permute": {
+          "description": "Symmetric-memory Ulysses all-to-all (PR #6340: does not change the attention math). Never selected on its own: A/B arm, picked with --hardware-profile <name>.",
+          "serve_args": "--num-gpus 4 --cfg-parallel-size 2 --usp 2 --vae-patch-parallel-size 4 --vae-parallel-mode spatial_shard_width --no-diffusion-compile-dynamic --ulysses-a2a-permute",
+          "extra_env": {
+            "DIFFUSION_ATTENTION_BACKEND": "FLASH_ATTN"
+          },
+          "num_gpus": 4,
+          "notes": " VALIDATION PENDING (round 2026-10-22, 2xH200/4xH200)."
+        },
+        "cand-devpost": {
+          "description": "GPU-side video postprocess (docs: at most one level in 255 from the host path). Never selected on its own: A/B arm, picked with --hardware-profile <name>.",
+          "serve_args": "--num-gpus 4 --cfg-parallel-size 2 --usp 2 --vae-patch-parallel-size 4 --vae-parallel-mode spatial_shard_width --no-diffusion-compile-dynamic --video-output-transport {\"enable_device_postprocess\":true}",
+          "extra_env": {
+            "DIFFUSION_ATTENTION_BACKEND": "FLASH_ATTN"
+          },
+          "num_gpus": 4,
+          "notes": " VALIDATION PENDING (round 2026-10-22, 2xH200/4xH200)."
         }
       }
     },
@@ -113,14 +160,12 @@
         "sample_shift": 12.0,
         "self_attn_1_type": "flash_attn3",
         "cross_attn_1_type": "flash_attn3",
-        "cross_attn_2_type": "flash_attn3",
         "enable_cfg": true,
         "parallel": {
           "cfg_p_size": 2,
           "seq_p_size": 2,
           "seq_p_attn_type": "ulysses"
         },
-        "aspect_ratio": "16:9",
         "boundary": 0.875,
         "use_image_encoder": false,
         "cpu_offload": false,
@@ -142,8 +187,7 @@
           "notes": "LightX2V's default FlashAttention-3 path is a Hopper-only precompiled kernel: on B200 it loads and then dies mid-generation with 'no kernel image is available for execution on the device' (flash-attention/hopper/flash_fwd_launch_template.h), taking the server with it. FA2 is built from source for sm_100 in this venv and is the same precision class (exact softmax), matching how SGLang and vLLM-Omni are run here. Deliberately NOT SageAttention: int8 QK quantisation is a different numeric class and not a fair substitute.",
           "lightx2v_config": {
             "self_attn_1_type": "flash_attn2",
-            "cross_attn_1_type": "flash_attn2",
-            "cross_attn_2_type": "flash_attn2"
+            "cross_attn_1_type": "flash_attn2"
           }
         },
         "default": {
@@ -162,16 +206,108 @@
           "notes": "Uses FlashAttention 3 while preserving CFG/sequence parallelism and offload settings; no cache, torch compile, or quantized model path.",
           "lightx2v_config": {
             "self_attn_1_type": "flash_attn3",
-            "cross_attn_1_type": "flash_attn3",
-            "cross_attn_2_type": "flash_attn3"
+            "cross_attn_1_type": "flash_attn3"
           }
+        },
+        "cand-tuned": {
+          "description": "Lossless LightX2V options found upstream: Triton LayerNorm, fused Ulysses pre/post-processing, channels-last 3D VAE convolutions. Never selected on its own: A/B arm, picked with --hardware-profile <name>.",
+          "lightx2v_config": {
+            "self_attn_1_type": "flash_attn3",
+            "cross_attn_1_type": "flash_attn3",
+            "layer_norm_type": "Triton",
+            "parallel": {
+              "cfg_p_size": 2,
+              "seq_p_size": 2,
+              "seq_p_attn_type": "ulysses",
+              "seq_p_tensor_fusion": true,
+              "seq_p_prepost_backend": "triton"
+            }
+          },
+          "extra_env": {
+            "USE_CHANNELS_LAST_3D": "1"
+          },
+          "num_gpus": 4,
+          "notes": "Upstream uses Triton LayerNorm in other NVIDIA Wan configs; seq_p_tensor_fusion/prepost triton are exact communication fusions; USE_CHANNELS_LAST_3D documents ~9% on the Wan VAE. seq_p_quant_scheme stays off (fp8/fp4 comm). VALIDATION PENDING (round 2026-10-22, 2xH200/4xH200)."
         }
       },
       "model_override_reason": "Same weights, different packaging: LightX2V reads Wan's original checkpoint layout, while sglang and vLLM-Omni read the Diffusers conversion (Wan2.2-T2V-A14B-Diffusers). Equivalent model path, not a different model."
     },
     "trtllm-visual": {
-      "status": "not_run",
-      "reason": "Not yet classified. Confirm framework support and add a validated command profile, or mark unsupported."
+      "status": "supported",
+      "num_gpus": 4,
+      "serve_args": "",
+      "extra_env": {},
+      "http_server": {
+        "bin": "trtllm-serve",
+        "args_template": [
+          "serve",
+          "{model}",
+          "--host",
+          "{host}",
+          "--port",
+          "{port}"
+        ],
+        "health_path": "/health"
+      },
+      "http_request": {
+        "text-to-video": {
+          "endpoint": "/v1/videos/sync",
+          "mode": "sync",
+          "body": "json",
+          "output": "mp4",
+          "omit_keys": [
+            "model",
+            "size"
+          ],
+          "extra_params_keys": [
+            "guidance_scale_2"
+          ]
+        }
+      },
+      "visual_gen_args": {
+        "attention_config": {
+          "backend": "VANILLA"
+        },
+        "parallel_config": {
+          "cfg_size": 2,
+          "ulysses_size": 2,
+          "async_ulysses": true,
+          "parallel_vae_size": 4
+        },
+        "torch_compile_config": {
+          "enable": true
+        },
+        "cuda_graph_config": {
+          "enable": false
+        },
+        "compilation_config": {
+          "resolutions": [
+            [
+              720,
+              1280
+            ]
+          ],
+          "num_frames": [
+            81
+          ]
+        }
+      },
+      "command_profiles": {
+        "default": {
+          "description": "TensorRT-LLM VisualGen, NVIDIA's official wan2.2-t2v-fp4-4gpu.yaml at BF16, 4 GPU(s).",
+          "framework_ref": "tensorrt-llm 1.4.0rc1 (tag 0372799d1543, 2026-10-19)",
+          "num_gpus": 4,
+          "serve_args": "",
+          "upstream_recipe": {
+            "repo": "NVIDIA/TensorRT-LLM",
+            "path": "examples/visual_gen/configs/wan2.2-t2v-fp4-4gpu.yaml",
+            "commit": "059396899c11",
+            "commit_date": "2026-06-17",
+            "section": "4-GPU layout with its FP4 quant_config removed"
+          },
+          "notes": "Official 4-GPU Wan2.2 layout (CFG 2 x async Ulysses 2, parallel VAE 4) at BF16, CUDA graphs off as in the config. guidance_scale_2 rides extra_params; boundary_ratio comes from the checkpoint (0.875); UniPC, 40 steps = 40 evaluations of a CFG pair; the negative prompt is sglang's default, as for ComfyUI. VANILLA attention is torch SDPA (FlashAttention on Hopper); no cache_config or quant_config, so the row is BF16 and cache-free; compile at the case shape so the first request does not recompile; JSON to /v1/videos/sync (or /v1/images/generations), whose reply is the media itself. The YAML is passed with --visual_gen_args (trtllm-serve has no --extra_visual_gen_options). VALIDATION PENDING (round 2026-10-22, 2xH200/4xH200)."
+        }
+      }
     },
     "comfyui": {
       "status": "supported",
@@ -213,12 +349,23 @@
           "serve_args": "--gpu-only",
           "notes": "B200: --gpu-only keeps every model, text encoders included, stored and run on the card; a 183 GB B200 holds the largest graph here (MiniMax-H3: 62 GB DiT + 48 GB Qwen3-VL-32B + VAEs). Placement only, numerics unchanged. Measured 2026-09-25 on 1xB200, FLUX.1 eager, interleaved arms: default 5.94 / 5.77 / 5.79s against --gpu-only 5.56s and --gpu-only --disable-dynamic-vram 5.57s (Qwen-Image-2.1: 3.75 / 3.91 against 3.47 / 3.48) -- every --gpu-only arm below every default arm; disabling dynamic VRAM on top adds nothing, so the simpler flag is kept.",
           "policy_exception": "Compile broken with the CFG split, not a speed choice (2026-09-25, ComfyUI 88ab4a06, 1xB200->2xB200, see the default profile's notes): TorchCompileModel with the MultiGPU CFG Split node fails the first request (dynamo 'RuntimeError when making fake tensor call' in KSamplerAdvanced), and the split is worth more than compile's measured 16-18% on FLUX.1."
+        },
+        "cand-gpuonly": {
+          "description": "Eager with --gpu-only: every model stored and run on the card (placement only). Never selected on its own: A/B arm, picked with --hardware-profile <name>.",
+          "serve_args": "--gpu-only",
+          "num_gpus": 2,
+          "notes": "On 2026-09-25 B200 every --gpu-only arm beat ComfyUI's default dynamic-VRAM placement (FLUX.1 eager 5.94 -> 5.56 s). VALIDATION PENDING (round 2026-10-22, 2xH200/4xH200)."
         }
       }
     },
     "fastvideo": {
       "status": "no_profile",
       "reason": "FastVideo main (2b164405c3d1, 2026-10-07) registers Wan2.2-T2V-A14B (examples/serving/openai_wan22_t2v_a14b.yaml), but this harness integrates FastVideo for MiniMax-H3 only (2026-10-08); no command validated."
+    }
+  },
+  "framework_request_extra": {
+    "trtllm-visual": {
+      "negative_prompt": "色调艳丽，过曝，静态，细节模糊不清，字幕，风格，作品，画作，画面，静止，整体发灰，最差质量，低质量，JPEG压缩残留，丑陋的，残缺的，多余的手指，画得不好的手部，画得不好的脸部，畸形的，毁容的，形态畸形的肢体，手指融合，静止不动的画面，杂乱的背景，三条腿，背景人很多，倒着走"
     }
   }
 }

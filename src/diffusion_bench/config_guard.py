@@ -118,7 +118,7 @@ def select_profile(
 PROFILE_RUNTIME_KEYS = frozenset({
     "serve_args", "num_gpus", "extra_env", "benchmark", "model", "model_path",
     "lightx2v_config", "server_bin", "use_omni_arg", "required_help_args",
-    "http_server", "http_request", "comfyui",
+    "http_server", "http_request", "comfyui", "visual_gen_args",
 })
 
 

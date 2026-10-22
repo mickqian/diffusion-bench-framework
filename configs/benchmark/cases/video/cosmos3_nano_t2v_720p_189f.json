@@ -134,6 +134,23 @@
       "serve_args": "--num-gpus 4 --cfg-parallel-size 2 --ulysses-degree 2 --model-class-name Cosmos3OmniDiffusersPipeline --stage-init-timeout 900 --init-timeout 1800 --no-guardrails --diffusion-attention-backend FLASH_ATTN --cache-backend none",
       "extra_env": {},
       "command_profiles": {
+        "h200-4gpu-cfg-ulysses-vaepp": {
+          "hardware": [
+            "h200"
+          ],
+          "framework_ref": "vllm-omni main 0da1d831e07f + vllm==0.32.0",
+          "num_gpus": 4,
+          "description": "H200: CFG 2 x Ulysses 2 with the 4-GPU VAE split and GPU-side postprocess NVIDIA benchmarked in #5712.",
+          "serve_args": "--num-gpus 4 --cfg-parallel-size 2 --ulysses-degree 2 --model-class-name Cosmos3OmniDiffusersPipeline --stage-init-timeout 900 --init-timeout 1800 --no-guardrails --diffusion-attention-backend FLASH_ATTN --cache-backend none --vae-patch-parallel-size 4 --vae-parallel-mode spatial_shard_width --video-output-transport {\"enable_device_postprocess\":true} --no-diffusion-compile-dynamic",
+          "upstream_recipe": {
+            "repo": "vllm-project/vllm-omni",
+            "path": "recipes/cosmos3/Cosmos3-Nano.md",
+            "commit": "765002061878",
+            "commit_date": "2026-09-24",
+            "section": "1x H200 141GB / B300 (Online serving), scaled per #5712"
+          },
+          "notes": "PR #5712 (47776fd350f5) benchmarks 4-GPU T2V with CFG 2, Ulysses 2, VAE patch parallel 4 spatial_shard_width and opt-in device postprocess (bytes identical for Cosmos3). SeaCache, the channels_last VAE fast path and fp8 are lossy and stay off. VALIDATION PENDING (round 2026-10-22, 2xH200/4xH200)."
+        },
         "blackwell-cudnn": {
           "description": "Blackwell vLLM-Omni profile for cosmos3_nano_t2v_720p_189f using cuDNN attention.",
           "hardware": [
@@ -246,6 +263,13 @@
           "num_gpus": 4,
           "serve_args": "--num-gpus 4 --ulysses-degree 4 --model-class-name Cosmos3OmniDiffusersPipeline --stage-init-timeout 900 --init-timeout 1800 --no-guardrails --diffusion-attention-backend FLASH_ATTN --cache-backend none",
           "notes": "Uses all four GPUs for Ulysses sequence parallelism; no cache or torch compile path."
+        },
+        "cand-permute": {
+          "description": "Symmetric-memory Ulysses all-to-all (#6340: 81.18 -> 76.57 s on Cosmos3-Nano, 4 GPUs). Never selected on its own: A/B arm, picked with --hardware-profile <name>.",
+          "serve_args": "--num-gpus 4 --cfg-parallel-size 2 --ulysses-degree 2 --model-class-name Cosmos3OmniDiffusersPipeline --stage-init-timeout 900 --init-timeout 1800 --no-guardrails --diffusion-attention-backend FLASH_ATTN --cache-backend none --vae-patch-parallel-size 4 --vae-parallel-mode spatial_shard_width --video-output-transport {\"enable_device_postprocess\":true} --no-diffusion-compile-dynamic --ulysses-a2a-permute",
+          "extra_env": {},
+          "num_gpus": 4,
+          "notes": " VALIDATION PENDING (round 2026-10-22, 2xH200/4xH200)."
         }
       }
     },
@@ -254,8 +278,84 @@
       "reason": "No tracked LightX2V Cosmos3 serving path in this benchmark."
     },
     "trtllm-visual": {
-      "status": "not_run",
-      "reason": "Not yet classified. Confirm framework support and add a validated command profile, or mark unsupported."
+      "status": "supported",
+      "num_gpus": 4,
+      "serve_args": "",
+      "extra_env": {
+        "TRTLLM_DISABLE_COSMOS3_GUARDRAILS": "1"
+      },
+      "http_server": {
+        "bin": "trtllm-serve",
+        "args_template": [
+          "serve",
+          "{model}",
+          "--host",
+          "{host}",
+          "--port",
+          "{port}"
+        ],
+        "health_path": "/health"
+      },
+      "http_request": {
+        "text-to-video": {
+          "endpoint": "/v1/videos/sync",
+          "mode": "sync",
+          "body": "json",
+          "output": "mp4",
+          "omit_keys": [
+            "model",
+            "size",
+            "extra_params.guardrails",
+            "extra_params.max_sequence_length"
+          ],
+          "extra_params_keys": [
+            "flow_shift"
+          ]
+        }
+      },
+      "visual_gen_args": {
+        "attention_config": {
+          "backend": "VANILLA"
+        },
+        "parallel_config": {
+          "cfg_size": 2,
+          "ulysses_size": 2,
+          "parallel_vae_size": 4
+        },
+        "torch_compile_config": {
+          "enable": true
+        },
+        "cuda_graph_config": {
+          "enable": false
+        },
+        "compilation_config": {
+          "resolutions": [
+            [
+              720,
+              1280
+            ]
+          ],
+          "num_frames": [
+            189
+          ]
+        }
+      },
+      "command_profiles": {
+        "default": {
+          "description": "TensorRT-LLM VisualGen, NVIDIA's official cosmos3-super-4gpu.yaml at BF16, 4 GPU(s).",
+          "framework_ref": "tensorrt-llm 1.4.0rc1 (tag 0372799d1543, 2026-10-19)",
+          "num_gpus": 4,
+          "serve_args": "",
+          "upstream_recipe": {
+            "repo": "NVIDIA/TensorRT-LLM",
+            "path": "examples/visual_gen/configs/cosmos3-super-4gpu.yaml",
+            "commit": "f50ca53daedc",
+            "commit_date": "2026-07-02",
+            "section": "4-GPU layout, applied to Nano"
+          },
+          "notes": "The official 4-GPU Cosmos3 layout (CFG 2 x Ulysses 2, parallel VAE 4); Cosmos3 is VANILLA-only per the docs; CUDA graphs off (no official Cosmos3 config enables them). --visual_gen_args forces the VisualGen path: without it 1.4.0rc1 treats the cosmos3_omni checkpoint as an LLM (the 1.3.0rc26 startup hang). flow_shift moves into extra_params, max_sequence_length is top-level, guardrails off; UniPC, 35 steps = 35 evaluations. VANILLA attention is torch SDPA (FlashAttention on Hopper); no cache_config or quant_config, so the row is BF16 and cache-free; compile at the case shape so the first request does not recompile; JSON to /v1/videos/sync (or /v1/images/generations), whose reply is the media itself. The YAML is passed with --visual_gen_args (trtllm-serve has no --extra_visual_gen_options). VALIDATION PENDING (round 2026-10-22, 2xH200/4xH200)."
+        }
+      }
     },
     "comfyui": {
       "status": "unsupported",
@@ -264,6 +364,14 @@
     "fastvideo": {
       "status": "unsupported",
       "reason": "FastVideo main (2b164405c3d1, 2026-10-07) has Cosmos Predict2/2.5 and GEN3C pipelines but no Cosmos3."
+    }
+  },
+  "framework_request_extra": {
+    "trtllm-visual": {
+      "max_sequence_length": 4096,
+      "extra_params": {
+        "use_guardrails": false
+      }
     }
   }
 }

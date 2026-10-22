@@ -132,6 +132,16 @@
       "serve_args": "--stage-configs-path configs/vllm_omni_cosmos3_h200_2gpu_cfg_guardrails_off.yaml --stage-init-timeout 900 --init-timeout 1800",
       "extra_env": {},
       "command_profiles": {
+        "h200-2gpu-cfg-flash-static": {
+          "description": "H200 2-GPU CFG-parallel vLLM-Omni Cosmos3 image profile on current flags.",
+          "hardware": [
+            "h200"
+          ],
+          "num_gpus": 2,
+          "framework_ref": "vllm-omni f69b1f2b1 + vllm==0.31.0",
+          "serve_args": "--num-gpus 2 --cfg-parallel-size 2 --model-class-name Cosmos3OmniDiffusersPipeline --stage-init-timeout 900 --init-timeout 1800 --no-guardrails --diffusion-attention-backend FLASH_ATTN --cache-backend none --no-diffusion-compile-dynamic",
+          "notes": "Replaces h200-2gpu-cfg, whose --stage-configs-path current vLLM rejects ('unrecognized arguments', 2026-10-11 on 2xH200). Same layout and guardrails-off as that stage config, spelled with the flags the H200 video profiles and blackwell-cudnn use; FLASH_ATTN is the Hopper exact kernel. Validated 2026-10-11 on 4xH200 (cards 0,1), --enforce-eager: 1.304/1.306 s in two rounds. 2026-10-22: --no-diffusion-compile-dynamic added (the docs' setting for a fixed-shape workload); cand-dynamic keeps the previous command for the A/B. VALIDATION PENDING (round 2026-10-22, 2xH200/4xH200)."
+        },
         "h200-2gpu-cfg-flash": {
           "description": "H200 2-GPU CFG-parallel vLLM-Omni Cosmos3 image profile on current flags.",
           "hardware": [
@@ -174,6 +184,16 @@
           "framework_ref": "vllm-omni-cosmos3+h200-cfg2",
           "serve_args": "--stage-configs-path configs/vllm_omni_cosmos3_h200_2gpu_cfg_guardrails_off.yaml --stage-init-timeout 900 --init-timeout 1800",
           "notes": "Uses the two GPUs for CFG parallelism through the stage config; no cache or torch compile path."
+        },
+        "cand-dynamic": {
+          "description": "H200 2-GPU CFG-parallel vLLM-Omni Cosmos3 image profile on current flags.",
+          "hardware": [
+            "h200"
+          ],
+          "num_gpus": 2,
+          "framework_ref": "vllm-omni f69b1f2b1 + vllm==0.31.0",
+          "serve_args": "--num-gpus 2 --cfg-parallel-size 2 --model-class-name Cosmos3OmniDiffusersPipeline --stage-init-timeout 900 --init-timeout 1800 --no-guardrails --diffusion-attention-backend FLASH_ATTN --cache-backend none",
+          "notes": "Replaces h200-2gpu-cfg, whose --stage-configs-path current vLLM rejects ('unrecognized arguments', 2026-10-11 on 2xH200). Same layout and guardrails-off as that stage config, spelled with the flags the H200 video profiles and blackwell-cudnn use; FLASH_ATTN is the Hopper exact kernel. Validated 2026-10-11 on 4xH200 (cards 0,1), --enforce-eager: 1.304/1.306 s in two rounds."
         }
       }
     },
@@ -182,49 +202,122 @@
       "reason": "No tracked LightX2V Cosmos3 serving path in this benchmark."
     },
     "trtllm-visual": {
-      "status": "failed",
-      "reason": "Hangs at startup on the current Cosmos3-Nano checkpoint: trtllm-serve reaches 'Orchestrator is creating IPC executor' / 'using MpiPoolSession to spawn MPI processes' and then produces no output at all -- 40 min in the matrix, and 20 min each at tp=1 and tp=2 in a dedicated probe, so it is not a multi-GPU path issue. The startup log warns 'You are using a model of type cosmos3_omni to instantiate a model of type cosmos3': the checkpoint was re-uploaded 2026-08-26 and declares cosmos3_omni, which tensorrt-llm 1.3.0rc26 does not know. Marked failed rather than left supported so a run does not spend 40 minutes per attempt reaching the same hang. Re-test when trtllm adds cosmos3_omni; the profile is kept below.",
-      "_previous_supported_entry": {
-        "num_gpus": 2,
-        "serve_args": "--backend pytorch",
-        "extra_env": {
-          "TRTLLM_DISABLE_COSMOS3_GUARDRAILS": "1"
-        },
-        "http_server": {
-          "bin": "trtllm-serve",
-          "args_template": [
-            "serve",
-            "{model}",
-            "--host",
-            "{host}",
-            "--port",
-            "{port}"
+      "status": "supported",
+      "num_gpus": 2,
+      "serve_args": "",
+      "extra_env": {
+        "TRTLLM_DISABLE_COSMOS3_GUARDRAILS": "1"
+      },
+      "http_server": {
+        "bin": "trtllm-serve",
+        "args_template": [
+          "serve",
+          "{model}",
+          "--host",
+          "{host}",
+          "--port",
+          "{port}"
+        ],
+        "health_path": "/health"
+      },
+      "http_request": {
+        "text-to-image": {
+          "omit_keys": [
+            "extra_params.guardrails",
+            "extra_params.max_sequence_length"
           ],
-          "tp_flag": "--tp_size",
-          "health_path": "/health"
+          "extra_params_keys": [
+            "flow_shift"
+          ]
+        }
+      },
+      "visual_gen_args": {
+        "attention_config": {
+          "backend": "VANILLA"
         },
-        "http_request": {
-          "text-to-image": {
-            "endpoint": "/v1/images/generations"
-          }
+        "parallel_config": {
+          "cfg_size": 2,
+          "parallel_vae_size": 2
         },
-        "command_profiles": {
-          "default": {
-            "description": "Best known TensorRT-LLM VisualGen command for aligned non-cache Cosmos3 runs.",
-            "framework_ref": "tensorrt-llm-visualgen-trtllm-serve",
-            "serve_args": "--backend pytorch",
-            "notes": "Keep this profile updated as the best command changes. trtllm-serve auto-detects the Cosmos3 diffusion model; add --extra_visual_gen_options <model>.yml for steady-state tuning. PyTorch backend, no TeaCache and no torch compile so the row stays cache-free and comparable. Needs GPU validation."
+        "torch_compile_config": {
+          "enable": true
+        },
+        "cuda_graph_config": {
+          "enable": false
+        },
+        "compilation_config": {
+          "resolutions": [
+            [
+              720,
+              1280
+            ]
+          ],
+          "num_frames": [
+            1
+          ]
+        }
+      },
+      "command_profiles": {
+        "default": {
+          "description": "TensorRT-LLM VisualGen, NVIDIA's official cosmos3-t2i-1gpu.yaml at BF16, 2 GPU(s).",
+          "framework_ref": "tensorrt-llm 1.4.0rc1 (tag 0372799d1543, 2026-10-19)",
+          "num_gpus": 2,
+          "serve_args": "",
+          "upstream_recipe": {
+            "repo": "NVIDIA/TensorRT-LLM",
+            "path": "examples/visual_gen/configs/cosmos3-t2i-1gpu.yaml",
+            "commit": "78ab4e71cef5",
+            "commit_date": "2026-07-30",
+            "section": "T2I config with CFG parallel 2"
           },
-          "h100-h200-2gpu-tp-speed": {
-            "description": "Hopper 2-GPU TP TensorRT-LLM VisualGen Cosmos3 profile probe.",
-            "hardware": [
-              "h100",
-              "h200"
+          "notes": "Official T2I config with the CFG pair split over two GPUs. T2I applies CFG only for t in [400, 1000], as sglang (COSMOS3_T2I_GUIDANCE_INTERVAL) and vLLM-Omni do by default. The earlier 'failed' verdict (startup hang on cosmos3_omni, tensorrt-llm 1.3.0rc26) is retested: --visual_gen_args forces the VisualGen path. VANILLA attention is torch SDPA (FlashAttention on Hopper); no cache_config or quant_config, so the row is BF16 and cache-free; compile at the case shape so the first request does not recompile; JSON to /v1/videos/sync (or /v1/images/generations), whose reply is the media itself. The YAML is passed with --visual_gen_args (trtllm-serve has no --extra_visual_gen_options). VALIDATION PENDING (round 2026-10-22, 2xH200/4xH200)."
+        }
+      },
+      "_previous_failed_entry": {
+        "status": "failed",
+        "reason": "Hangs at startup on the current Cosmos3-Nano checkpoint: trtllm-serve reaches 'Orchestrator is creating IPC executor' / 'using MpiPoolSession to spawn MPI processes' and then produces no output at all -- 40 min in the matrix, and 20 min each at tp=1 and tp=2 in a dedicated probe, so it is not a multi-GPU path issue. The startup log warns 'You are using a model of type cosmos3_omni to instantiate a model of type cosmos3': the checkpoint was re-uploaded 2026-08-26 and declares cosmos3_omni, which tensorrt-llm 1.3.0rc26 does not know. Marked failed rather than left supported so a run does not spend 40 minutes per attempt reaching the same hang. Re-test when trtllm adds cosmos3_omni; the profile is kept below.",
+        "_previous_supported_entry": {
+          "num_gpus": 2,
+          "serve_args": "--backend pytorch",
+          "extra_env": {
+            "TRTLLM_DISABLE_COSMOS3_GUARDRAILS": "1"
+          },
+          "http_server": {
+            "bin": "trtllm-serve",
+            "args_template": [
+              "serve",
+              "{model}",
+              "--host",
+              "{host}",
+              "--port",
+              "{port}"
             ],
-            "num_gpus": 2,
-            "framework_ref": "tensorrt-llm-visualgen+tp2",
-            "serve_args": "--backend pytorch",
-            "notes": "Harness appends --tp_size 2 when num_gpus=2. trtllm-serve auto-detects the Cosmos3 diffusion model; add --extra_visual_gen_options <model>.yml for steady-state tuning. PyTorch backend, no TeaCache and no torch compile so the row stays cache-free and comparable. Needs GPU validation."
+            "tp_flag": "--tp_size",
+            "health_path": "/health"
+          },
+          "http_request": {
+            "text-to-image": {
+              "endpoint": "/v1/images/generations"
+            }
+          },
+          "command_profiles": {
+            "default": {
+              "description": "Best known TensorRT-LLM VisualGen command for aligned non-cache Cosmos3 runs.",
+              "framework_ref": "tensorrt-llm-visualgen-trtllm-serve",
+              "serve_args": "--backend pytorch",
+              "notes": "Keep this profile updated as the best command changes. trtllm-serve auto-detects the Cosmos3 diffusion model; add --extra_visual_gen_options <model>.yml for steady-state tuning. PyTorch backend, no TeaCache and no torch compile so the row stays cache-free and comparable. Needs GPU validation."
+            },
+            "h100-h200-2gpu-tp-speed": {
+              "description": "Hopper 2-GPU TP TensorRT-LLM VisualGen Cosmos3 profile probe.",
+              "hardware": [
+                "h100",
+                "h200"
+              ],
+              "num_gpus": 2,
+              "framework_ref": "tensorrt-llm-visualgen+tp2",
+              "serve_args": "--backend pytorch",
+              "notes": "Harness appends --tp_size 2 when num_gpus=2. trtllm-serve auto-detects the Cosmos3 diffusion model; add --extra_visual_gen_options <model>.yml for steady-state tuning. PyTorch backend, no TeaCache and no torch compile so the row stays cache-free and comparable. Needs GPU validation."
+            }
           }
         }
       }
@@ -236,6 +329,15 @@
     "fastvideo": {
       "status": "unsupported",
       "reason": "FastVideo main (2b164405c3d1, 2026-10-07) has Cosmos Predict2/2.5 and GEN3C pipelines but no Cosmos3."
+    }
+  },
+  "framework_request_extra": {
+    "trtllm-visual": {
+      "max_sequence_length": 4096,
+      "extra_params": {
+        "use_guardrails": false,
+        "output_type": "image"
+      }
     }
   }
 }

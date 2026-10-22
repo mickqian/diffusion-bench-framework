@@ -146,6 +146,13 @@
             "DIFFUSION_ATTENTION_BACKEND": "CUDNN_ATTN"
           },
           "notes": "Carried from Qwen-Image-2512's B200 measurement (CUDNN_ATTN 2.741 s vs TRTLLM_ATTN 3.274 s; FLASH_ATTN refused on sm_100); re-check against the auto selection on the first Blackwell run. Main HEAD lists QwenImage21Pipeline (T2I + up to 4 condition images) since its 2026-10 recipe; the 2026-09 'unsupported' classification was stale. VALIDATION PENDING (2026-10-10 round): derived, not yet measured."
+        },
+        "cand-static": {
+          "description": "The selected command plus --no-diffusion-compile-dynamic. Never selected on its own: A/B arm, picked with --hardware-profile <name>.",
+          "serve_args": " --no-diffusion-compile-dynamic",
+          "extra_env": {},
+          "num_gpus": 1,
+          "notes": " VALIDATION PENDING (round 2026-10-22, 2xH200/4xH200)."
         }
       }
     },
@@ -243,6 +250,14 @@
             "text_encoder_cpu_offload": true
           },
           "notes": "Transcribed from configs/qwen_image_21/qwen_image_21_5090.json -- the NON-quantized 5090 config, which upstream ships alongside the FP8 ones. FA2 against sglang's Torch SDPA is a fair swap: both are exact softmax, and this repo's rule is that each framework gets its fastest kernel of the same precision class. MEASURED 2026-09-21 on a 1x RTX 5090 devbox, LightX2V main 4d709c43 inside upstream's own image (lightx2v/lightx2v:26062001-cu130-5090-fix-260921, torch 2.11.0+cu130, base.sh confirming BF16 with no sensitive-layer override): p50 14.51s, and unlike the H200 it is perfectly unimodal (seven repeats all 14.51) because its compute sits safely below the 14.5s tick boundary and pays a flat ~0.36s. Interleaved ABAB against sglang on the SAME node, 3 rounds x 5 requests: sglang 14.087 / 14.096 / 14.080 against LightX2V 14.514 / 14.513 / 14.512 -- paired diffs +2.9%, +2.9%, +3.0%, 3/3 agreeing in sign, round-to-round spread 0.1% on both sides. This one resolves (the H200 pair does not). About a third of that is the tick; server-side the gap is ~1.9% (sglang 13.879s vs 14.10-14.20s). The memory difference is the one that is not marginal: 17.0 GB steady against 30.7 GB on a 32 GB card. Output equivalence was checked rather than assumed: both return a 1024x1024 PNG at color type 6 (RGBA), LightX2V's alpha carrying real data (range 253-255). The response-size difference is the envelope, not the image -- sglang's 2.43 MB is base64 JSON around a ~1.83 MB PNG against LightX2V's 1.88 MB of raw PNG -- so there is no encode-cost asymmetry between them. INSTALL: do NOT use scripts/install_comparison_frameworks.sh for this -- it builds flash-attn 2.8.3 from source, which cannot compile against torch 2.14+cu130 (flash-attn pins -std=c++17, torch's ATen needs C++20, and 2.8.3.post1 is the newest PyPI release). Upstream's image has flash_attn, flash_attn_interface, flashinfer and sageattention prebuilt. Note also that the tag in LightX2V's README (26062001) does not exist; real tags carry a platform suffix."
+        },
+        "cand-vae-compile": {
+          "description": "VAE compile on top (vae_use_compile, used by upstream's qwen_image_21 5090 configs). Never selected on its own: A/B arm, picked with --hardware-profile <name>.",
+          "lightx2v_config": {
+            "vae_use_compile": true
+          },
+          "num_gpus": 1,
+          "notes": " VALIDATION PENDING (round 2026-10-22, 2xH200/4xH200)."
         }
       }
     },
@@ -285,6 +300,21 @@
           "serve_args": "--gpu-only",
           "notes": "B200: --gpu-only keeps every model, text encoders included, stored and run on the card; a 183 GB B200 holds the largest graph here (MiniMax-H3: 62 GB DiT + 48 GB Qwen3-VL-32B + VAEs). Placement only, numerics unchanged. Measured 2026-09-25 on 1xB200, FLUX.1 eager, interleaved arms: default 5.94 / 5.77 / 5.79s against --gpu-only 5.56s and --gpu-only --disable-dynamic-vram 5.57s (Qwen-Image-2.1: 3.75 / 3.91 against 3.47 / 3.48) -- every --gpu-only arm below every default arm; disabling dynamic VRAM on top adds nothing, so the simpler flag is kept.",
           "policy_exception": "Compile broken, not a speed choice (2026-09-25, ComfyUI 88ab4a06 on B200, see the default profile's notes): with TorchCompileModel the first request fails in KSampler with AttributeError: 'torch.Stream' object has no attribute 'cuda_stream', so the cell runs eager."
+        },
+        "cand-compile-gpuonly": {
+          "description": "TorchCompileModel with --gpu-only (the switch that avoids the cuda_stream failure). Never selected on its own: A/B arm, picked with --hardware-profile <name>.",
+          "serve_args": "--gpu-only",
+          "comfyui": {
+            "compile": true
+          },
+          "num_gpus": 1,
+          "notes": " VALIDATION PENDING (round 2026-10-22, 2xH200/4xH200)."
+        },
+        "cand-gpuonly": {
+          "description": "Eager with --gpu-only: every model stored and run on the card (placement only). Never selected on its own: A/B arm, picked with --hardware-profile <name>.",
+          "serve_args": "--gpu-only",
+          "num_gpus": 1,
+          "notes": "On 2026-09-25 B200 every --gpu-only arm beat ComfyUI's default dynamic-VRAM placement (FLUX.1 eager 5.94 -> 5.56 s). VALIDATION PENDING (round 2026-10-22, 2xH200/4xH200)."
         }
       }
     },

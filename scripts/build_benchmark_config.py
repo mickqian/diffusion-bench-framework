@@ -115,7 +115,6 @@ _LIGHTX2V_OFFLOAD_KEYS = ("lazy_load", "unload_modules")
 # Delete an entry when its cell is re-derived or justified: the list only shrinks.
 KNOWN_COMPETITOR_VIOLATIONS = {
     ("cosmos3_nano_t2i_720p", "vllm-omni", "default"),
-    ("ltx2_twostage_t2v", "lightx2v", "h100-1gpu"),
 }
 STRICT_COMPETITOR_POLICY_ENV = "DIFFUSION_BENCH_STRICT_COMPETITOR_POLICY"
 
@@ -125,13 +124,7 @@ STRICT_COMPETITOR_POLICY_ENV = "DIFFUSION_BENCH_STRICT_COMPETITOR_POLICY"
 # cell again, as an ERROR line; it is not fatal because a test tree may build one
 # case alone, and scripts/tests/test_competitor_policy_lint.py fails on it for
 # the repo's own matrix.
-KNOWN_FRAMEWORK_GAPS = {
-    "trtllm-visual": (
-        "2026-10-15: its only measured cells were the FLUX.1-dev and FLUX.2-dev rows, "
-        "retired for FLUX.3, which it does not serve; its Z-Image, Wan2.2 and LTX-2 "
-        "cells are not validated yet."
-    ),
-}
+KNOWN_FRAMEWORK_GAPS: dict[str, str] = {}
 
 
 SELECTED_ROWS = []  # (case, fw, hw, profile, args, exception, matches, recipe, config)
@@ -197,6 +190,8 @@ def _config_label(fw: str, cfg: dict) -> str:
     if fw == "comfyui":
         spec = cfg.get("comfyui") or {}
         parts.append(f"workflow={spec.get('workflow')} compile={json.dumps(bool(spec.get('compile')))}")
+    if fw == "trtllm-visual" and cfg.get("visual_gen_args"):
+        parts.append(json.dumps(cfg["visual_gen_args"], separators=(",", ":"), sort_keys=True))
     return " ".join(parts)
 
 
@@ -227,6 +222,12 @@ def _competitor_findings(fw: str, cfg: dict) -> list[str]:
         # The key LightX2V reads; upstream's MiniMax-H3 presets ship "use_compile": false.
         if "use_compile" in lcfg and not lcfg["use_compile"]:
             found.append("lightx2v_config.use_compile=false")
+    elif fw == "trtllm-visual":
+        vga = cfg.get("visual_gen_args") or {}
+        if (vga.get("torch_compile_config") or {}).get("enable") is False:
+            found.append("visual_gen_args.torch_compile_config.enable=false")
+        # Caches and quantization change the output: not part of a lossless row.
+        found += [f"visual_gen_args.{key} set" for key in ("cache_config", "quant_config") if vga.get(key)]
     elif fw == "comfyui":
         found += [m.group(0) for m in _COMFYUI_OFFLOAD_RE.finditer(args)]
         if not (cfg.get("comfyui") or {}).get("compile"):

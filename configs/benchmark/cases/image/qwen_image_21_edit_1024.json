@@ -146,6 +146,13 @@
             "DIFFUSION_ATTENTION_BACKEND": "CUDNN_ATTN"
           },
           "notes": "Carried from Qwen-Image-2512's B200 measurement (CUDNN_ATTN 2.741 s vs TRTLLM_ATTN 3.274 s; FLASH_ATTN refused on sm_100); re-check against the auto selection on the first Blackwell run. Image-conditioned requests go through the same QwenImage21Pipeline as text-to-image. VALIDATION PENDING (2026-10-10 round): derived, not yet measured."
+        },
+        "cand-static": {
+          "description": "The selected command plus --no-diffusion-compile-dynamic. Never selected on its own: A/B arm, picked with --hardware-profile <name>.",
+          "serve_args": " --no-diffusion-compile-dynamic",
+          "extra_env": {},
+          "num_gpus": 1,
+          "notes": " VALIDATION PENDING (round 2026-10-22, 2xH200/4xH200)."
         }
       }
     },

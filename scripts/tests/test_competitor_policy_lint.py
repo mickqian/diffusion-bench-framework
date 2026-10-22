@@ -209,7 +209,7 @@ with tempfile.TemporaryDirectory() as td:
     check("its H100 cell is the offload profile with its exception",
           "| minimax_h3_t2va_5s | vllm-omni | h100 | `h100-2gpu-dlo` | yes |" in selected)
     check("a known violation is marked in SELECTED.md",
-          "| ltx2_twostage_t2v | lightx2v | h100 | `h100-1gpu` | VIOLATION |" in selected)
+          "| cosmos3_nano_t2i_720p | vllm-omni | h100 | `default` | VIOLATION |" in selected)
 
     strict = build(tmp, {bbc.STRICT_COMPETITOR_POLICY_ENV: "1"})
     check("strict mode fails on the known violations",
@@ -226,8 +226,8 @@ with tempfile.TemporaryDirectory() as td:
 
 with tempfile.TemporaryDirectory() as td:
     tmp = fresh_tree(td)
-    edit_case(tmp, "video/ltx2_twostage_t2v.json", "lightx2v", "h100-1gpu",
-              lambda p: p.update(policy_exception="Capacity: OOM measured 2026-09-30 on H100."))
+    edit_case(tmp, "image/cosmos3_nano_t2i_720p.json", "vllm-omni", "default",
+              lambda p: p.update(policy_exception="Compile broken, measured 2026-09-30 on H100."))
     proc = build(tmp)
     check("a known violation that is fixed must leave the list",
           proc.returncode == 1 and "no longer violates" in proc.stderr, proc.stderr)

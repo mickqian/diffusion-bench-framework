@@ -240,17 +240,24 @@ with tempfile.TemporaryDirectory() as td:
 # --------------------------------------------------------------------------
 sys.path.insert(0, str(ROOT / "scripts"))
 real = json.loads((ROOT / "configs" / "comparison_configs.json").read_text())
-ltx = "ltx2.3_twostage_t2v_2gpus"
-for hardware, runs in (("h100", False), ("b200", True)):
-    resolved, _ = apply_hardware_statuses(real, [hardware])
-    case = next(c for c in resolved["cases"] if c["id"] == ltx)
-    attempted = "lightx2v" in case["frameworks"]
-    classified = (case.get("report_framework_statuses") or {}).get("lightx2v")
+# Every per-hardware verdict in the repo's own matrix resolves as declared. (The
+# LTX-2.3 LightX2V OOM this schema was built for left on 2026-10-22, when that
+# cell became globally unsupported.)
+declared = [
+    (case["id"], fw, hw, verdict["status"])
+    for case in real["cases"]
+    for fw, by_hw in (case.get("framework_status_by_hardware") or {}).items()
+    for hw, verdict in by_hw.items()
+    if verdict.get("status") != "supported"
+]
+for case_id, fw, hw, status in declared:
+    resolved, _ = apply_hardware_statuses(real, [hw])
+    case = next(c for c in resolved["cases"] if c["id"] == case_id)
     check(
-        attempted is runs and (classified == "failed") is not runs,
-        f"{ltx}: lightx2v {'runs' if runs else 'stays failed'} on {hardware}",
-        f"attempted={attempted} classified={classified}",
+        fw not in case["frameworks"] and (case.get("report_framework_statuses") or {}).get(fw) == status,
+        f"{case_id}: {fw} is classified {status} on {hw}, not run",
     )
+print(f"  (real matrix: {len(declared)} per-hardware verdict(s) checked)")
 
 import build_benchmark_config as bbc  # noqa: E402
 

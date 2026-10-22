@@ -121,7 +121,7 @@
     },
     "comfyui": {
       "status": "no_profile",
-      "reason": "No official ComfyUI workflow for the FastH3 8-Step V2 checkpoint and its VSA attention as of 2026-09-30."
+      "reason": "Comfy-Org/workflow_templates templates/video_fastvideo_fasth3_t2v.json exists (since 2026-09-22), but it runs int8 dense attention and VSA keeping 10% of tiles from step 0.2 -- a different numeric class and a different sparsity from the case's BF16 VSA at the trained 80% (64-token tiles). Re-checked 2026-10-22."
     },
     "fastvideo": {
       "status": "supported",

@@ -376,6 +376,13 @@
                                 "DIFFUSION_ATTENTION_BACKEND": "CUDNN_ATTN"
                             },
                             "notes": "Carried from Qwen-Image-2512's B200 measurement (CUDNN_ATTN 2.741 s vs TRTLLM_ATTN 3.274 s; FLASH_ATTN refused on sm_100); re-check against the auto selection on the first Blackwell run. Main HEAD lists QwenImage21Pipeline (T2I + up to 4 condition images) since its 2026-10 recipe; the 2026-09 'unsupported' classification was stale. VALIDATION PENDING (2026-10-10 round): derived, not yet measured."
+                        },
+                        "cand-static": {
+                            "description": "The selected command plus --no-diffusion-compile-dynamic. Never selected on its own: A/B arm, picked with --hardware-profile <name>.",
+                            "serve_args": " --no-diffusion-compile-dynamic",
+                            "extra_env": {},
+                            "num_gpus": 1,
+                            "notes": " VALIDATION PENDING (round 2026-10-22, 2xH200/4xH200)."
                         }
                     }
                 },
@@ -472,6 +479,14 @@
                                 "text_encoder_cpu_offload": true
                             },
                             "notes": "Transcribed from configs/qwen_image_21/qwen_image_21_5090.json -- the NON-quantized 5090 config, which upstream ships alongside the FP8 ones. FA2 against sglang's Torch SDPA is a fair swap: both are exact softmax, and this repo's rule is that each framework gets its fastest kernel of the same precision class. MEASURED 2026-09-21 on a 1x RTX 5090 devbox, LightX2V main 4d709c43 inside upstream's own image (lightx2v/lightx2v:26062001-cu130-5090-fix-260921, torch 2.11.0+cu130, base.sh confirming BF16 with no sensitive-layer override): p50 14.51s, and unlike the H200 it is perfectly unimodal (seven repeats all 14.51) because its compute sits safely below the 14.5s tick boundary and pays a flat ~0.36s. Interleaved ABAB against sglang on the SAME node, 3 rounds x 5 requests: sglang 14.087 / 14.096 / 14.080 against LightX2V 14.514 / 14.513 / 14.512 -- paired diffs +2.9%, +2.9%, +3.0%, 3/3 agreeing in sign, round-to-round spread 0.1% on both sides. This one resolves (the H200 pair does not). About a third of that is the tick; server-side the gap is ~1.9% (sglang 13.879s vs 14.10-14.20s). The memory difference is the one that is not marginal: 17.0 GB steady against 30.7 GB on a 32 GB card. Output equivalence was checked rather than assumed: both return a 1024x1024 PNG at color type 6 (RGBA), LightX2V's alpha carrying real data (range 253-255). The response-size difference is the envelope, not the image -- sglang's 2.43 MB is base64 JSON around a ~1.83 MB PNG against LightX2V's 1.88 MB of raw PNG -- so there is no encode-cost asymmetry between them. INSTALL: do NOT use scripts/install_comparison_frameworks.sh for this -- it builds flash-attn 2.8.3 from source, which cannot compile against torch 2.14+cu130 (flash-attn pins -std=c++17, torch's ATen needs C++20, and 2.8.3.post1 is the newest PyPI release). Upstream's image has flash_attn, flash_attn_interface, flashinfer and sageattention prebuilt. Note also that the tag in LightX2V's README (26062001) does not exist; real tags carry a platform suffix."
+                        },
+                        "cand-vae-compile": {
+                            "description": "VAE compile on top (vae_use_compile, used by upstream's qwen_image_21 5090 configs). Never selected on its own: A/B arm, picked with --hardware-profile <name>.",
+                            "lightx2v_config": {
+                                "vae_use_compile": true
+                            },
+                            "num_gpus": 1,
+                            "notes": " VALIDATION PENDING (round 2026-10-22, 2xH200/4xH200)."
                         }
                     }
                 },
@@ -603,6 +618,21 @@
                             "serve_args": "--gpu-only",
                             "notes": "B200: --gpu-only keeps every model, text encoders included, stored and run on the card; a 183 GB B200 holds the largest graph here (MiniMax-H3: 62 GB DiT + 48 GB Qwen3-VL-32B + VAEs). Placement only, numerics unchanged. Measured 2026-09-25 on 1xB200, FLUX.1 eager, interleaved arms: default 5.94 / 5.77 / 5.79s against --gpu-only 5.56s and --gpu-only --disable-dynamic-vram 5.57s (Qwen-Image-2.1: 3.75 / 3.91 against 3.47 / 3.48) -- every --gpu-only arm below every default arm; disabling dynamic VRAM on top adds nothing, so the simpler flag is kept.",
                             "policy_exception": "Compile broken, not a speed choice (2026-09-25, ComfyUI 88ab4a06 on B200, see the default profile's notes): with TorchCompileModel the first request fails in KSampler with AttributeError: 'torch.Stream' object has no attribute 'cuda_stream', so the cell runs eager."
+                        },
+                        "cand-compile-gpuonly": {
+                            "description": "TorchCompileModel with --gpu-only (the switch that avoids the cuda_stream failure). Never selected on its own: A/B arm, picked with --hardware-profile <name>.",
+                            "serve_args": "--gpu-only",
+                            "comfyui": {
+                                "compile": true
+                            },
+                            "num_gpus": 1,
+                            "notes": " VALIDATION PENDING (round 2026-10-22, 2xH200/4xH200)."
+                        },
+                        "cand-gpuonly": {
+                            "description": "Eager with --gpu-only: every model stored and run on the card (placement only). Never selected on its own: A/B arm, picked with --hardware-profile <name>.",
+                            "serve_args": "--gpu-only",
+                            "num_gpus": 1,
+                            "notes": "On 2026-09-25 B200 every --gpu-only arm beat ComfyUI's default dynamic-VRAM placement (FLUX.1 eager 5.94 -> 5.56 s). VALIDATION PENDING (round 2026-10-22, 2xH200/4xH200)."
                         }
                     }
                 }
@@ -723,6 +753,13 @@
                                 "DIFFUSION_ATTENTION_BACKEND": "CUDNN_ATTN"
                             },
                             "notes": "Carried from Qwen-Image-2512's B200 measurement (CUDNN_ATTN 2.741 s vs TRTLLM_ATTN 3.274 s; FLASH_ATTN refused on sm_100); re-check against the auto selection on the first Blackwell run. Two GPUs as Ulysses-2: the recipe documents that TP/SP/ring fall back to eager decode (no CUDA graph), so this may not beat its own one-GPU number; the comparison holds the GPU count fixed. VALIDATION PENDING (2026-10-10 round): derived, not yet measured."
+                        },
+                        "cand-static": {
+                            "description": "The selected command plus --no-diffusion-compile-dynamic. Never selected on its own: A/B arm, picked with --hardware-profile <name>.",
+                            "serve_args": "--usp 2 --no-diffusion-compile-dynamic",
+                            "extra_env": {},
+                            "num_gpus": 2,
+                            "notes": " VALIDATION PENDING (round 2026-10-22, 2xH200/4xH200)."
                         }
                     }
                 }
@@ -886,6 +923,13 @@
                                 "DIFFUSION_ATTENTION_BACKEND": "CUDNN_ATTN"
                             },
                             "notes": "Carried from Qwen-Image-2512's B200 measurement (CUDNN_ATTN 2.741 s vs TRTLLM_ATTN 3.274 s; FLASH_ATTN refused on sm_100); re-check against the auto selection on the first Blackwell run. Image-conditioned requests go through the same QwenImage21Pipeline as text-to-image. VALIDATION PENDING (2026-10-10 round): derived, not yet measured."
+                        },
+                        "cand-static": {
+                            "description": "The selected command plus --no-diffusion-compile-dynamic. Never selected on its own: A/B arm, picked with --hardware-profile <name>.",
+                            "serve_args": " --no-diffusion-compile-dynamic",
+                            "extra_env": {},
+                            "num_gpus": 1,
+                            "notes": " VALIDATION PENDING (round 2026-10-22, 2xH200/4xH200)."
                         }
                     }
                 }
@@ -946,6 +990,20 @@
                         "DIFFUSION_ATTENTION_BACKEND": "FLASH_ATTN"
                     },
                     "command_profiles": {
+                        "h200-2gpu-tp-static": {
+                            "description": "H200: TP2 written out, static compile.",
+                            "hardware": [
+                                "h200"
+                            ],
+                            "framework_ref": "vllm-omni main 0da1d831e07f + vllm==0.32.0",
+                            "num_gpus": 2,
+                            "serve_args": "--tensor-parallel-size 2 --no-diffusion-compile-dynamic",
+                            "extra_env": {
+                                "DIFFUSION_ATTENTION_BACKEND": "FLASH_ATTN"
+                            },
+                            "upstream_recipe_reason": "recipes/Tongyi-MAI/Z-Image-Turbo.md (62ebad2d7cd7) has only an Intel XPU offline section; the layout follows docs/user_guide/diffusion tensor_parallel.md (TP=2 only) and sequence_parallel.md.",
+                            "notes": "VAE patch parallel stays off: it forces tiled decode (bit-identical only to tiled single-GPU decode) and decode is a sliver of a 1024^2 request. VALIDATION PENDING (round 2026-10-22, 2xH200/4xH200)."
+                        },
                         "default": {
                             "description": "Best known vLLM-Omni command for aligned non-cache benchmark runs.",
                             "framework_ref": "vllm-omni-0.18.0-cli-env",
@@ -969,6 +1027,24 @@
                             "extra_env": {
                                 "DIFFUSION_ATTENTION_BACKEND": "FLASHINFER_ATTN"
                             }
+                        },
+                        "cand-usp2": {
+                            "description": "Ulysses 2 instead of TP2 (30 heads split evenly). Never selected on its own: A/B arm, picked with --hardware-profile <name>.",
+                            "serve_args": "--num-gpus 2 --usp 2 --no-diffusion-compile-dynamic",
+                            "extra_env": {
+                                "DIFFUSION_ATTENTION_BACKEND": "FLASH_ATTN"
+                            },
+                            "num_gpus": 2,
+                            "notes": " VALIDATION PENDING (round 2026-10-22, 2xH200/4xH200)."
+                        },
+                        "cand-usp2-permute": {
+                            "description": "Ulysses 2 with the symmetric-memory all-to-all. Never selected on its own: A/B arm, picked with --hardware-profile <name>.",
+                            "serve_args": "--num-gpus 2 --usp 2 --ulysses-a2a-permute --no-diffusion-compile-dynamic",
+                            "extra_env": {
+                                "DIFFUSION_ATTENTION_BACKEND": "FLASH_ATTN"
+                            },
+                            "num_gpus": 2,
+                            "notes": " VALIDATION PENDING (round 2026-10-22, 2xH200/4xH200)."
                         }
                     }
                 },
@@ -980,12 +1056,9 @@
                     "serve_args": "",
                     "extra_env": {},
                     "lightx2v_config": {
-                        "aspect_ratio": "1:1",
-                        "num_channels_latents": 16,
                         "attn_type": "flash_attn3",
                         "enable_cfg": false,
-                        "sample_guide_scale": 0.0,
-                        "patch_size": 2
+                        "sample_guide_scale": 0.0
                     },
                     "command_profiles": {
                         "default": {
@@ -1016,10 +1089,35 @@
                             ],
                             "framework_ref": "lightx2v-0.1.0-z_image+h200-fa3-flashinfer",
                             "serve_args": "",
-                            "notes": "Uses FlashAttention 3 with FlashInfer RoPE in the isolated H200 LightX2V venv; no cache, torch compile, or quantized model path.",
+                            "notes": "2026-10-22: the config had no parallel block, so torchrun's two ranks each computed the whole image (worker.py only calls init_parallel when config['parallel'] is set) and every earlier row measured one GPU on two. Now Ulysses 2 as upstream's dist config. use_compile is ignored by ZImageTransformerInfer. VALIDATION PENDING (round 2026-10-22, 2xH200/4xH200).",
                             "lightx2v_config": {
-                                "attn_type": "flash_attn3"
+                                "attn_type": "flash_attn3",
+                                "parallel": {
+                                    "seq_p_size": 2,
+                                    "seq_p_attn_type": "ulysses"
+                                }
+                            },
+                            "upstream_recipe": {
+                                "repo": "ModelTC/LightX2V",
+                                "path": "configs/z_image/z_image_turbo_t2i_dist.json",
+                                "commit": "4fe984c07b16",
+                                "commit_date": "2026-10-10",
+                                "section": "Ulysses sequence parallel over 2 GPUs (scripts/z_image/z_image_turbo_t2i_dist.sh)"
                             }
+                        },
+                        "cand-fusion": {
+                            "description": "Exact Ulysses communication fusions upstream offers. Never selected on its own: A/B arm, picked with --hardware-profile <name>.",
+                            "lightx2v_config": {
+                                "attn_type": "flash_attn3",
+                                "parallel": {
+                                    "seq_p_size": 2,
+                                    "seq_p_attn_type": "ulysses",
+                                    "seq_p_tensor_fusion": true,
+                                    "seq_p_prepost_backend": "triton"
+                                }
+                            },
+                            "num_gpus": 2,
+                            "notes": "seq_p_quant_scheme (fp8/fp4 communication) stays off. VALIDATION PENDING (round 2026-10-22, 2xH200/4xH200)."
                         }
                     }
                 },
@@ -1104,7 +1202,7 @@
                                     "seed": "{{seed}}",
                                     "steps": "{{steps}}",
                                     "cfg": 1.0,
-                                    "sampler_name": "euler",
+                                    "sampler_name": "res_multistep",
                                     "scheduler": "simple",
                                     "positive": [
                                         "5",
@@ -1147,6 +1245,16 @@
                         }
                     },
                     "command_profiles": {
+                        "h200-gpuonly": {
+                            "description": "H200: --gpu-only, so TorchCompileModel runs (dynamic VRAM's malloc graph breaks it).",
+                            "hardware": [
+                                "h200"
+                            ],
+                            "framework_ref": "ComfyUI master 1a82e6d01f39",
+                            "num_gpus": 1,
+                            "serve_args": "--gpu-only",
+                            "notes": "Placement only. Workflow sampler is res_multistep, as the official image_z_image_turbo template (was euler, same cost per step). VALIDATION PENDING (round 2026-10-22, 2xH200/4xH200)."
+                        },
                         "default": {
                             "description": "ComfyUI master, core nodes only, the model's official workflow with full-precision weights.",
                             "framework_ref": "ComfyUI master HEAD",
@@ -1415,6 +1523,21 @@
                             "serve_args": "--gpu-only",
                             "notes": "B200: --gpu-only keeps every model, text encoders included, stored and run on the card; a 183 GB B200 holds the largest graph here (MiniMax-H3: 62 GB DiT + 48 GB Qwen3-VL-32B + VAEs). Placement only, numerics unchanged. Measured 2026-09-25 on 1xB200, FLUX.1 eager, interleaved arms: default 5.94 / 5.77 / 5.79s against --gpu-only 5.56s and --gpu-only --disable-dynamic-vram 5.57s (Qwen-Image-2.1: 3.75 / 3.91 against 3.47 / 3.48) -- every --gpu-only arm below every default arm; disabling dynamic VRAM on top adds nothing, so the simpler flag is kept.",
                             "policy_exception": "Compile broken, not a speed choice (2026-09-25, ComfyUI 88ab4a06 on B200, see the default profile's notes): the first compiled request fails in SamplerCustomAdvanced with a dynamo dynamic-shape AssertionError, so the cell runs eager."
+                        },
+                        "cand-gpuonly": {
+                            "description": "Eager with --gpu-only: every model stored and run on the card (placement only). Never selected on its own: A/B arm, picked with --hardware-profile <name>.",
+                            "serve_args": "--gpu-only",
+                            "num_gpus": 1,
+                            "notes": "On 2026-09-25 B200 every --gpu-only arm beat ComfyUI's default dynamic-VRAM placement (FLUX.1 eager 5.94 -> 5.56 s). VALIDATION PENDING (round 2026-10-22, 2xH200/4xH200)."
+                        },
+                        "cand-compile-gpuonly": {
+                            "description": "TorchCompileModel with --gpu-only (the switch that avoids the dynamic-VRAM cuda_stream failure). Never selected on its own: A/B arm, picked with --hardware-profile <name>.",
+                            "serve_args": "--gpu-only",
+                            "comfyui": {
+                                "compile": true
+                            },
+                            "num_gpus": 1,
+                            "notes": "Single-GPU cell, so the MultiGPU CFG split's compile failure does not apply. VALIDATION PENDING (round 2026-10-22, 2xH200/4xH200)."
                         }
                     }
                 }
@@ -1447,6 +1570,11 @@
             "num_inference_steps": 40,
             "guidance_scale": 4.0,
             "guidance_scale_2": 3.0,
+            "framework_request_extra": {
+                "trtllm-visual": {
+                    "negative_prompt": "色调艳丽，过曝，静态，细节模糊不清，字幕，风格，作品，画作，画面，静止，整体发灰，最差质量，低质量，JPEG压缩残留，丑陋的，残缺的，多余的手指，画得不好的手部，画得不好的脸部，畸形的，毁容的，形态畸形的肢体，手指融合，静止不动的画面，杂乱的背景，三条腿，背景人很多，倒着走"
+                }
+            },
             "frameworks": {
                 "sglang": {
                     "serve_args": "--model-type diffusion --warmup-mode server --enable-cfg-parallel --ulysses-degree 2 --dit-cpu-offload false --text-encoder-cpu-offload --pin-cpu-memory",
@@ -1467,6 +1595,26 @@
                         "DIFFUSION_ATTENTION_BACKEND": "FLASH_ATTN"
                     },
                     "command_profiles": {
+                        "h200-4gpu-cfg2-usp2-vaepp": {
+                            "description": "H200: the recipe's GPU layout (CFG parallel x Ulysses, VAE patch parallel) scaled to four GPUs.",
+                            "hardware": [
+                                "h200"
+                            ],
+                            "framework_ref": "vllm-omni main 0da1d831e07f + vllm==0.32.0",
+                            "num_gpus": 4,
+                            "serve_args": "--num-gpus 4 --cfg-parallel-size 2 --usp 2 --vae-patch-parallel-size 4 --vae-parallel-mode spatial_shard_width --no-diffusion-compile-dynamic",
+                            "extra_env": {
+                                "DIFFUSION_ATTENTION_BACKEND": "FLASH_ATTN"
+                            },
+                            "upstream_recipe": {
+                                "repo": "vllm-project/vllm-omni",
+                                "path": "recipes/Wan-AI/Wan2.2-T2V.md",
+                                "commit": "62ebad2d7cd7",
+                                "commit_date": "2026-09-25",
+                                "section": "8x NVIDIA H20 / H100 / A100 (scaled to 4 GPUs)"
+                            },
+                            "notes": "Replaces TP4, a layout the GPU recipe never uses. VAE decode split with spatial_shard_width (matches single-GPU decode within tolerance) instead of the recipe's tiling (not exact). HSDP left out: it only saves memory and both experts fit; Skip-Softmax left out (lossy, Blackwell-only). --no-diffusion-compile-dynamic: the docs' setting for a fixed-shape workload. VALIDATION PENDING (round 2026-10-22, 2xH200/4xH200)."
+                        },
                         "blackwell-cudnn": {
                             "description": "Blackwell vLLM-Omni profile for wan22_t2v_a14b_720p using cuDNN attention.",
                             "hardware": [
@@ -1531,6 +1679,33 @@
                             "extra_env": {
                                 "DIFFUSION_ATTENTION_BACKEND": "FLASH_ATTN"
                             }
+                        },
+                        "cand-hsdp": {
+                            "description": "The recipe's literal HSDP weight sharding on top. Never selected on its own: A/B arm, picked with --hardware-profile <name>.",
+                            "serve_args": "--num-gpus 4 --cfg-parallel-size 2 --usp 2 --vae-patch-parallel-size 4 --vae-parallel-mode spatial_shard_width --no-diffusion-compile-dynamic --use-hsdp",
+                            "extra_env": {
+                                "DIFFUSION_ATTENTION_BACKEND": "FLASH_ATTN"
+                            },
+                            "num_gpus": 4,
+                            "notes": " VALIDATION PENDING (round 2026-10-22, 2xH200/4xH200)."
+                        },
+                        "cand-permute": {
+                            "description": "Symmetric-memory Ulysses all-to-all (PR #6340: does not change the attention math). Never selected on its own: A/B arm, picked with --hardware-profile <name>.",
+                            "serve_args": "--num-gpus 4 --cfg-parallel-size 2 --usp 2 --vae-patch-parallel-size 4 --vae-parallel-mode spatial_shard_width --no-diffusion-compile-dynamic --ulysses-a2a-permute",
+                            "extra_env": {
+                                "DIFFUSION_ATTENTION_BACKEND": "FLASH_ATTN"
+                            },
+                            "num_gpus": 4,
+                            "notes": " VALIDATION PENDING (round 2026-10-22, 2xH200/4xH200)."
+                        },
+                        "cand-devpost": {
+                            "description": "GPU-side video postprocess (docs: at most one level in 255 from the host path). Never selected on its own: A/B arm, picked with --hardware-profile <name>.",
+                            "serve_args": "--num-gpus 4 --cfg-parallel-size 2 --usp 2 --vae-patch-parallel-size 4 --vae-parallel-mode spatial_shard_width --no-diffusion-compile-dynamic --video-output-transport {\"enable_device_postprocess\":true}",
+                            "extra_env": {
+                                "DIFFUSION_ATTENTION_BACKEND": "FLASH_ATTN"
+                            },
+                            "num_gpus": 4,
+                            "notes": " VALIDATION PENDING (round 2026-10-22, 2xH200/4xH200)."
                         }
                     }
                 },
@@ -1544,14 +1719,12 @@
                         "sample_shift": 12.0,
                         "self_attn_1_type": "flash_attn3",
                         "cross_attn_1_type": "flash_attn3",
-                        "cross_attn_2_type": "flash_attn3",
                         "enable_cfg": true,
                         "parallel": {
                             "cfg_p_size": 2,
                             "seq_p_size": 2,
                             "seq_p_attn_type": "ulysses"
                         },
-                        "aspect_ratio": "16:9",
                         "boundary": 0.875,
                         "use_image_encoder": false,
                         "cpu_offload": false,
@@ -1573,8 +1746,7 @@
                             "notes": "LightX2V's default FlashAttention-3 path is a Hopper-only precompiled kernel: on B200 it loads and then dies mid-generation with 'no kernel image is available for execution on the device' (flash-attention/hopper/flash_fwd_launch_template.h), taking the server with it. FA2 is built from source for sm_100 in this venv and is the same precision class (exact softmax), matching how SGLang and vLLM-Omni are run here. Deliberately NOT SageAttention: int8 QK quantisation is a different numeric class and not a fair substitute.",
                             "lightx2v_config": {
                                 "self_attn_1_type": "flash_attn2",
-                                "cross_attn_1_type": "flash_attn2",
-                                "cross_attn_2_type": "flash_attn2"
+                                "cross_attn_1_type": "flash_attn2"
                             }
                         },
                         "default": {
@@ -1593,12 +1765,107 @@
                             "notes": "Uses FlashAttention 3 while preserving CFG/sequence parallelism and offload settings; no cache, torch compile, or quantized model path.",
                             "lightx2v_config": {
                                 "self_attn_1_type": "flash_attn3",
-                                "cross_attn_1_type": "flash_attn3",
-                                "cross_attn_2_type": "flash_attn3"
+                                "cross_attn_1_type": "flash_attn3"
                             }
+                        },
+                        "cand-tuned": {
+                            "description": "Lossless LightX2V options found upstream: Triton LayerNorm, fused Ulysses pre/post-processing, channels-last 3D VAE convolutions. Never selected on its own: A/B arm, picked with --hardware-profile <name>.",
+                            "lightx2v_config": {
+                                "self_attn_1_type": "flash_attn3",
+                                "cross_attn_1_type": "flash_attn3",
+                                "layer_norm_type": "Triton",
+                                "parallel": {
+                                    "cfg_p_size": 2,
+                                    "seq_p_size": 2,
+                                    "seq_p_attn_type": "ulysses",
+                                    "seq_p_tensor_fusion": true,
+                                    "seq_p_prepost_backend": "triton"
+                                }
+                            },
+                            "extra_env": {
+                                "USE_CHANNELS_LAST_3D": "1"
+                            },
+                            "num_gpus": 4,
+                            "notes": "Upstream uses Triton LayerNorm in other NVIDIA Wan configs; seq_p_tensor_fusion/prepost triton are exact communication fusions; USE_CHANNELS_LAST_3D documents ~9% on the Wan VAE. seq_p_quant_scheme stays off (fp8/fp4 comm). VALIDATION PENDING (round 2026-10-22, 2xH200/4xH200)."
                         }
                     },
                     "model_override_reason": "Same weights, different packaging: LightX2V reads Wan's original checkpoint layout, while sglang and vLLM-Omni read the Diffusers conversion (Wan2.2-T2V-A14B-Diffusers). Equivalent model path, not a different model."
+                },
+                "trtllm-visual": {
+                    "num_gpus": 4,
+                    "serve_args": "",
+                    "extra_env": {},
+                    "http_server": {
+                        "bin": "trtllm-serve",
+                        "args_template": [
+                            "serve",
+                            "{model}",
+                            "--host",
+                            "{host}",
+                            "--port",
+                            "{port}"
+                        ],
+                        "health_path": "/health"
+                    },
+                    "http_request": {
+                        "text-to-video": {
+                            "endpoint": "/v1/videos/sync",
+                            "mode": "sync",
+                            "body": "json",
+                            "output": "mp4",
+                            "omit_keys": [
+                                "model",
+                                "size"
+                            ],
+                            "extra_params_keys": [
+                                "guidance_scale_2"
+                            ]
+                        }
+                    },
+                    "visual_gen_args": {
+                        "attention_config": {
+                            "backend": "VANILLA"
+                        },
+                        "parallel_config": {
+                            "cfg_size": 2,
+                            "ulysses_size": 2,
+                            "async_ulysses": true,
+                            "parallel_vae_size": 4
+                        },
+                        "torch_compile_config": {
+                            "enable": true
+                        },
+                        "cuda_graph_config": {
+                            "enable": false
+                        },
+                        "compilation_config": {
+                            "resolutions": [
+                                [
+                                    720,
+                                    1280
+                                ]
+                            ],
+                            "num_frames": [
+                                81
+                            ]
+                        }
+                    },
+                    "command_profiles": {
+                        "default": {
+                            "description": "TensorRT-LLM VisualGen, NVIDIA's official wan2.2-t2v-fp4-4gpu.yaml at BF16, 4 GPU(s).",
+                            "framework_ref": "tensorrt-llm 1.4.0rc1 (tag 0372799d1543, 2026-10-19)",
+                            "num_gpus": 4,
+                            "serve_args": "",
+                            "upstream_recipe": {
+                                "repo": "NVIDIA/TensorRT-LLM",
+                                "path": "examples/visual_gen/configs/wan2.2-t2v-fp4-4gpu.yaml",
+                                "commit": "059396899c11",
+                                "commit_date": "2026-06-17",
+                                "section": "4-GPU layout with its FP4 quant_config removed"
+                            },
+                            "notes": "Official 4-GPU Wan2.2 layout (CFG 2 x async Ulysses 2, parallel VAE 4) at BF16, CUDA graphs off as in the config. guidance_scale_2 rides extra_params; boundary_ratio comes from the checkpoint (0.875); UniPC, 40 steps = 40 evaluations of a CFG pair; the negative prompt is sglang's default, as for ComfyUI. VANILLA attention is torch SDPA (FlashAttention on Hopper); no cache_config or quant_config, so the row is BF16 and cache-free; compile at the case shape so the first request does not recompile; JSON to /v1/videos/sync (or /v1/images/generations), whose reply is the media itself. The YAML is passed with --visual_gen_args (trtllm-serve has no --extra_visual_gen_options). VALIDATION PENDING (round 2026-10-22, 2xH200/4xH200)."
+                        }
+                    }
                 },
                 "comfyui": {
                     "num_gpus": 2,
@@ -1835,16 +2102,20 @@
                             "serve_args": "--gpu-only",
                             "notes": "B200: --gpu-only keeps every model, text encoders included, stored and run on the card; a 183 GB B200 holds the largest graph here (MiniMax-H3: 62 GB DiT + 48 GB Qwen3-VL-32B + VAEs). Placement only, numerics unchanged. Measured 2026-09-25 on 1xB200, FLUX.1 eager, interleaved arms: default 5.94 / 5.77 / 5.79s against --gpu-only 5.56s and --gpu-only --disable-dynamic-vram 5.57s (Qwen-Image-2.1: 3.75 / 3.91 against 3.47 / 3.48) -- every --gpu-only arm below every default arm; disabling dynamic VRAM on top adds nothing, so the simpler flag is kept.",
                             "policy_exception": "Compile broken with the CFG split, not a speed choice (2026-09-25, ComfyUI 88ab4a06, 1xB200->2xB200, see the default profile's notes): TorchCompileModel with the MultiGPU CFG Split node fails the first request (dynamo 'RuntimeError when making fake tensor call' in KSamplerAdvanced), and the split is worth more than compile's measured 16-18% on FLUX.1."
+                        },
+                        "cand-gpuonly": {
+                            "description": "Eager with --gpu-only: every model stored and run on the card (placement only). Never selected on its own: A/B arm, picked with --hardware-profile <name>.",
+                            "serve_args": "--gpu-only",
+                            "num_gpus": 2,
+                            "notes": "On 2026-09-25 B200 every --gpu-only arm beat ComfyUI's default dynamic-VRAM placement (FLUX.1 eager 5.94 -> 5.56 s). VALIDATION PENDING (round 2026-10-22, 2xH200/4xH200)."
                         }
                     }
                 }
             },
             "report_framework_statuses": {
-                "trtllm-visual": "not_run",
                 "fastvideo": "no_profile"
             },
             "report_framework_reasons": {
-                "trtllm-visual": "Not yet classified. Confirm framework support and add a validated command profile, or mark unsupported.",
                 "fastvideo": "FastVideo main (2b164405c3d1, 2026-10-07) registers Wan2.2-T2V-A14B (examples/serving/openai_wan22_t2v_a14b.yaml), but this harness integrates FastVideo for MiniMax-H3 only (2026-10-08); no command validated."
             }
         },
@@ -1862,6 +2133,21 @@
             "fps": 24,
             "num_inference_steps": 40,
             "guidance_scale": 4.0,
+            "negative_prompt": "blurry, out of focus, overexposed, underexposed, low contrast, washed out colors, excessive noise, grainy texture, poor lighting, flickering, motion blur, distorted proportions, unnatural skin tones, deformed facial features, asymmetrical face, missing facial features, extra limbs, disfigured hands, wrong hand count, artifacts around text, inconsistent perspective, camera shake, incorrect depth of field, background too sharp, background clutter, distracting reflections, harsh shadows, inconsistent lighting direction, color banding, cartoonish rendering, 3D CGI look, unrealistic materials, uncanny valley effect, incorrect ethnicity, wrong gender, exaggerated expressions, wrong gaze direction, mismatched lip sync, silent or muted audio, distorted voice, robotic voice, echo, background noise, off-sync audio, incorrect dialogue, added dialogue, repetitive speech, jittery movement, awkward pauses, incorrect timing, unnatural transitions, inconsistent framing, tilted camera, flat lighting, inconsistent tone, cinematic oversaturation, stylized filters, or AI artifacts.",
+            "framework_request_extra": {
+                "vllm-omni": {
+                    "extra_params": {
+                        "video_cfg_scale": 4.0,
+                        "audio_cfg_scale": 4.0,
+                        "video_stg_scale": 0.0,
+                        "audio_stg_scale": 0.0,
+                        "video_modality_scale": 1.0,
+                        "audio_modality_scale": 1.0,
+                        "video_rescale_scale": 0.0,
+                        "audio_rescale_scale": 0.0
+                    }
+                }
+            },
             "frameworks": {
                 "sglang": {
                     "serve_args": "--model-type diffusion --warmup-mode server --enable-cfg-parallel --pipeline-class-name LTX2TwoStagePipeline",
@@ -1903,6 +2189,26 @@
                         "DIFFUSION_ATTENTION_BACKEND": "FLASH_ATTN"
                     },
                     "command_profiles": {
+                        "h200-2gpu-twostage-cfg": {
+                            "description": "H200: the two-stage pipeline (stage 1 at half resolution, x2 latent upsampler, 3-step distilled refine) with CFG parallel 2.",
+                            "hardware": [
+                                "h200"
+                            ],
+                            "framework_ref": "vllm-omni main 0da1d831e07f + vllm==0.32.0",
+                            "num_gpus": 2,
+                            "serve_args": "--num-gpus 2 --cfg-parallel-size 2 --model-class-name LTX2TwoStagePipeline --stage-init-timeout 600 --no-diffusion-compile-dynamic",
+                            "extra_env": {
+                                "DIFFUSION_ATTENTION_BACKEND": "FLASH_ATTN"
+                            },
+                            "upstream_recipe": {
+                                "repo": "vllm-project/vllm-omni",
+                                "path": "recipes/LTX/LTX-2.md",
+                                "commit": "71f0fa47acff",
+                                "commit_date": "2026-10-19",
+                                "section": "Two-Stage Defaults; Guidance Parallelism"
+                            },
+                            "notes": "Every earlier vLLM-Omni LTX-2 row ran the ONE-stage LTX2Pipeline (Lightricks/LTX-2 resolves to it unless --model-class-name LTX2TwoStagePipeline is given): 40 steps at the full 768x512 against sglang's 40 at 384x256 plus a 3-step refine, so it measured a heavier workload. Its LTX recipes also default stage 1 to the LTX-2.3 official guider (STG and a modality pass, four transformer passes a step); the request pins plain CFG 4.0 like sglang's LTX-2 (ltx-pipelines LTX-2 defaults), TRT-LLM and ComfyUI, so every row does two passes a step. VALIDATION PENDING (round 2026-10-22, 2xH200/4xH200)."
+                        },
                         "blackwell-cudnn": {
                             "description": "Blackwell vLLM-Omni profile for ltx2_twostage_t2v using cuDNN attention.",
                             "hardware": [
@@ -1932,91 +2238,82 @@
                     },
                     "model_override_reason": "Same weights as the case (Lightricks/LTX-2). Previously pointed at rootonchair/LTX-2-19b-distilled, carried over from the pre-JSON config with no rationale: a distilled checkpoint is explicitly lossy, needs far fewer steps, and would have made this cell unfairly fast against sglang and LightX2V on the full model. vLLM-Omni itself refuses it -- 'LTX2Pipeline requires a regular non-distilled LTX checkpoint' -- which is how it surfaced."
                 },
-                "lightx2v": {
-                    "model": "Lightricks/LTX-2",
-                    "model_cls": "ltx2",
-                    "lightx2v_task": "t2av",
+                "trtllm-visual": {
                     "num_gpus": 2,
                     "serve_args": "",
-                    "extra_env": {
-                        "DTYPE": "BF16",
-                        "SENSITIVE_LAYER_DTYPE": "None",
-                        "PROFILING_DEBUG_LEVEL": "0"
-                    },
-                    "lightx2v_config": {
-                        "sample_guide_scale": 4.0,
-                        "attn_type": "flash_attn3",
-                        "sample_shift": [
-                            2.05,
-                            0.95
+                    "extra_env": {},
+                    "model_path": "hf://Lightricks/LTX-2/ltx-2-19b-dev.safetensors",
+                    "http_server": {
+                        "bin": "trtllm-serve",
+                        "args_template": [
+                            "serve",
+                            "{model}",
+                            "--host",
+                            "{host}",
+                            "--port",
+                            "{port}"
                         ],
-                        "enable_cfg": true,
-                        "cpu_offload": false,
-                        "num_channels_latents": 128,
-                        "audio_fps": 24000,
-                        "audio_mel_bins": 16,
-                        "double_precision_rope": true,
-                        "use_tiling_vae": false,
-                        "dit_original_ckpt": "Lightricks/LTX-2/ltx-2-19b-dev.safetensors"
+                        "health_path": "/health"
+                    },
+                    "http_request": {
+                        "text-to-video": {
+                            "endpoint": "/v1/videos/sync",
+                            "mode": "sync",
+                            "body": "json",
+                            "output": "mp4+audio",
+                            "omit_keys": [
+                                "model",
+                                "size"
+                            ],
+                            "extra_params_keys": []
+                        }
+                    },
+                    "visual_gen_args": {
+                        "attention_config": {
+                            "backend": "VANILLA"
+                        },
+                        "parallel_config": {
+                            "cfg_size": 2,
+                            "ulysses_size": 1,
+                            "parallel_vae_size": 2
+                        },
+                        "torch_compile_config": {
+                            "enable": true
+                        },
+                        "cuda_graph_config": {
+                            "enable": true
+                        },
+                        "compilation_config": {
+                            "resolutions": [
+                                [
+                                    512,
+                                    768
+                                ]
+                            ],
+                            "num_frames": [
+                                121
+                            ]
+                        },
+                        "pipeline_config": {
+                            "text_encoder_path": "hf://Lightricks/LTX-2/text_encoder",
+                            "spatial_upsampler_path": "hf://Lightricks/LTX-2/ltx-2-spatial-upscaler-x2-1.0.safetensors",
+                            "distilled_lora_path": "hf://Lightricks/LTX-2/ltx-2-19b-distilled-lora-384.safetensors"
+                        }
                     },
                     "command_profiles": {
-                        "blackwell-fa2": {
-                            "description": "Blackwell LightX2V LTX-2 t2av profile: same config as default with FlashAttention 2 instead of FA3.",
-                            "hardware": [
-                                "b200",
-                                "gb200",
-                                "b300",
-                                "gb300"
-                            ],
-                            "framework_ref": "lightx2v-9bf4d39a-ltx2+blackwell-fa2",
-                            "serve_args": "",
-                            "notes": "LightX2V's default FlashAttention-3 path is a Hopper-only precompiled kernel: on B200 it loads and then dies mid-generation with 'no kernel image is available for execution on the device' (flash-attention/hopper/flash_fwd_launch_template.h), taking the server with it. FA2 is built from source for sm_100 in this venv and is the same precision class (exact softmax), matching how SGLang and vLLM-Omni are run here. Deliberately NOT SageAttention: int8 QK quantisation is a different numeric class and not a fair substitute.",
-                            "lightx2v_config": {
-                                "attn_type": "flash_attn2"
-                            }
-                        },
                         "default": {
-                            "description": "LightX2V upstream LTX-2 t2av path for the LTX-2 121-frame case.",
-                            "framework_ref": "lightx2v-7efd05f8-ltx2+t2av+cfg_parallel",
+                            "description": "TensorRT-LLM VisualGen, NVIDIA's official ltx2-4gpu.yaml at BF16, 2 GPU(s).",
+                            "framework_ref": "tensorrt-llm 1.4.0rc1 (tag 0372799d1543, 2026-10-19)",
                             "num_gpus": 2,
                             "serve_args": "",
-                            "lightx2v_config": {
-                                "parallel": {
-                                    "cfg_p_size": 2
-                                }
+                            "upstream_recipe": {
+                                "repo": "NVIDIA/TensorRT-LLM",
+                                "path": "examples/visual_gen/configs/ltx2-4gpu.yaml",
+                                "commit": "0fbac8ce0dbc",
+                                "commit_date": "2026-08-20",
+                                "section": "4-GPU config scaled to 2 GPUs, keeping the CFG dimension"
                             },
-                            "notes": "Uses upstream LTX-2 audio-video t2av runner with CFG parallelism; no cache, torch compile, or quantized model path."
-                        },
-                        "h200-2gpu": {
-                            "description": "H200 LightX2V LTX-2 t2av command/config.",
-                            "hardware": [
-                                "h200"
-                            ],
-                            "framework_ref": "lightx2v-7efd05f8-ltx2+t2av+cfg_parallel+h200",
-                            "num_gpus": 2,
-                            "serve_args": "",
-                            "lightx2v_config": {
-                                "parallel": {
-                                    "cfg_p_size": 2
-                                }
-                            },
-                            "notes": "Matches upstream scripts/ltx2/run_ltx2_t2av_cfg_parallel.sh semantics with compile disabled by the benchmark harness."
-                        },
-                        "h100-1gpu": {
-                            "description": "H100 LightX2V LTX-2 t2av block-offload command/config.",
-                            "hardware": [
-                                "h100"
-                            ],
-                            "framework_ref": "lightx2v-7efd05f8-ltx2+t2av+offload+h100",
-                            "num_gpus": 1,
-                            "serve_args": "",
-                            "lightx2v_config": {
-                                "cpu_offload": true,
-                                "offload_granularity": "block",
-                                "gemma_cpu_offload": true,
-                                "vae_cpu_offload": false
-                            },
-                            "notes": "Uses upstream block offload because TP keeps Gemma and one DiT shard resident on rank0 and OOMs on H100 80GB."
+                            "notes": "LTX2TwoStagesPipeline: stage 1 at half resolution with CFG, the learned x2 upsampler, stage 2 distilled LoRA on sigmas [0.909375, 0.725, 0.421875, 0] (3 evaluations, no CFG); two-stage turns on when the upsampler and LoRA resolve. The model is the single BF16 file (a directory would also load the fp8/fp4 files and read the config from the alphabetically first). CUDA graphs on as in the official 4-GPU config; attention VANILLA instead of the official FA4 (Blackwell-tuned). Defaults stg_scale 0 / modality_scale 1 are plain CFG, matching sglang. VANILLA attention is torch SDPA (FlashAttention on Hopper); no cache_config or quant_config, so the row is BF16 and cache-free; compile at the case shape so the first request does not recompile; JSON to /v1/videos/sync (or /v1/images/generations), whose reply is the media itself. The YAML is passed with --visual_gen_args (trtllm-serve has no --extra_visual_gen_options). VALIDATION PENDING (round 2026-10-22, 2xH200/4xH200)."
                         }
                     }
                 },
@@ -2419,16 +2716,22 @@
                             "serve_args": "--gpu-only",
                             "notes": "B200: --gpu-only keeps every model, text encoders included, stored and run on the card; a 183 GB B200 holds the largest graph here (MiniMax-H3: 62 GB DiT + 48 GB Qwen3-VL-32B + VAEs). Placement only, numerics unchanged. Measured 2026-09-25 on 1xB200, FLUX.1 eager, interleaved arms: default 5.94 / 5.77 / 5.79s against --gpu-only 5.56s and --gpu-only --disable-dynamic-vram 5.57s (Qwen-Image-2.1: 3.75 / 3.91 against 3.47 / 3.48) -- every --gpu-only arm below every default arm; disabling dynamic VRAM on top adds nothing, so the simpler flag is kept.",
                             "policy_exception": "Compile broken with the CFG split, not a speed choice (2026-09-25, ComfyUI 88ab4a06, 1xB200->2xB200, see the default profile's notes): TorchCompileModel with the MultiGPU CFG Split node fails the first request (dynamo 'Tensor device mismatch' in the stage-1 SamplerCustomAdvanced), and the split is worth more than compile's measured 16-18% on FLUX.1."
+                        },
+                        "cand-gpuonly": {
+                            "description": "Eager with --gpu-only: every model stored and run on the card (placement only). Never selected on its own: A/B arm, picked with --hardware-profile <name>.",
+                            "serve_args": "--gpu-only",
+                            "num_gpus": 2,
+                            "notes": "On 2026-09-25 B200 every --gpu-only arm beat ComfyUI's default dynamic-VRAM placement (FLUX.1 eager 5.94 -> 5.56 s). VALIDATION PENDING (round 2026-10-22, 2xH200/4xH200)."
                         }
                     }
                 }
             },
             "report_framework_statuses": {
-                "trtllm-visual": "not_run",
+                "lightx2v": "unsupported",
                 "fastvideo": "no_profile"
             },
             "report_framework_reasons": {
-                "trtllm-visual": "Not yet classified. Confirm framework support and add a validated command profile, or mark unsupported.",
+                "lightx2v": "LightX2V cannot run the official LTX-2 two-stage workload (dev model for stage 1, distilled LoRA for the 3-step stage-2 refine): its runner loads one transformer and merges lora_configs into it at load, and the use_upsampler path reuses that same transformer for stage 2 (lightx2v/models/runners/ltx2/ltx2_runner.py at 19c19614). The profile it had did not enable the upsampler at all, so every earlier LightX2V row ran ONE stage at the full 768x512 for 40 steps -- a heavier workload than the other rows, never comparable. Audited 2026-10-22.",
                 "fastvideo": "FastVideo main (2b164405c3d1, 2026-10-07) registers LTX-2, but this harness integrates FastVideo for MiniMax-H3 only (2026-10-08); no command validated."
             }
         },
@@ -2486,135 +2789,21 @@
                             "notes": "Use this only when official switching semantics are more important than latency."
                         }
                     }
-                },
-                "lightx2v": {
-                    "model": "Lightricks/LTX-2.3",
-                    "model_path": "Lightricks/LTX-2",
-                    "model_cls": "ltx2",
-                    "lightx2v_task": "t2av",
-                    "num_gpus": 1,
-                    "serve_args": "",
-                    "extra_env": {
-                        "DTYPE": "BF16",
-                        "SENSITIVE_LAYER_DTYPE": "None",
-                        "PROFILING_DEBUG_LEVEL": "0"
-                    },
-                    "lightx2v_config": {
-                        "sample_guide_scale": 3.0,
-                        "attn_type": "flash_attn3",
-                        "sample_shift": [
-                            2.05,
-                            0.95
-                        ],
-                        "enable_cfg": true,
-                        "cpu_offload": false,
-                        "num_channels_latents": 128,
-                        "audio_fps": 24000,
-                        "audio_mel_bins": 16,
-                        "double_precision_rope": true,
-                        "use_tiling_vae": false,
-                        "dit_original_ckpt": "Lightricks/LTX-2.3/ltx-2.3-22b-dev.safetensors",
-                        "caption_proj_before_connector": true,
-                        "cross_attention_adaln": true,
-                        "apply_gated_attention": true,
-                        "mm_guider": {
-                            "enabled": true,
-                            "video": {
-                                "cfg_scale": 3.0,
-                                "stg_scale": 1.0,
-                                "stg_blocks": [
-                                    28
-                                ],
-                                "modality_scale": 3.0,
-                                "rescale_scale": 0.7,
-                                "skip_step": 0
-                            },
-                            "audio": {
-                                "cfg_scale": 7.0,
-                                "stg_scale": 1.0,
-                                "stg_blocks": [
-                                    28
-                                ],
-                                "modality_scale": 3.0,
-                                "rescale_scale": 0.7,
-                                "skip_step": 0
-                            }
-                        }
-                    },
-                    "command_profiles": {
-                        "default": {
-                            "description": "LightX2V upstream LTX-2.3 t2av path for the LTX-2.3 121-frame case.",
-                            "framework_ref": "lightx2v-7efd05f8-ltx2.3+t2av",
-                            "num_gpus": 1,
-                            "serve_args": "",
-                            "notes": "Uses upstream LTX-2.3 audio-video runner. CFG parallel is not enabled because upstream mm_guider and cfg_parallel are not compatible. Also what Blackwell selects: no B200 profile has been validated for this case yet, so the fallback is the upstream single-GPU path."
-                        },
-                        "h200-2gpu-tp": {
-                            "description": "H200 same-GPU LightX2V LTX-2.3 t2av tensor-parallel command/config.",
-                            "hardware": [
-                                "h200"
-                            ],
-                            "framework_ref": "lightx2v-7efd05f8-ltx2.3+t2av+h200+tensor_parallel",
-                            "num_gpus": 2,
-                            "serve_args": "",
-                            "lightx2v_config": {
-                                "parallel": {
-                                    "tensor_p_size": 2
-                                }
-                            },
-                            "notes": "Use tensor parallelism for same-GPU comparison because upstream mm_guider raises when combined with cfg_parallel."
-                        },
-                        "h200-1gpu": {
-                            "description": "H200 LightX2V LTX-2.3 t2av command/config.",
-                            "hardware": [
-                                "h200"
-                            ],
-                            "framework_ref": "lightx2v-7efd05f8-ltx2.3+t2av+h200",
-                            "num_gpus": 1,
-                            "serve_args": "",
-                            "notes": "Single-GPU profile follows current upstream LTX-2.3 scripts; no cache, torch compile, or quantized model path."
-                        },
-                        "h100-2gpu-sp": {
-                            "description": "H100 LightX2V LTX-2.3 t2av: lossless flash_attn3 + sequence parallelism (seq_p_size=2) to shard the 121-frame video activations across 2 GPUs. TP shards weights but the OOM is activation-bound, so SP is the right lever.",
-                            "hardware": [
-                                "h100"
-                            ],
-                            "num_gpus": 2,
-                            "framework_ref": "lightx2v-7efd05f8-ltx2.3+t2av+h100+seqp2+flash",
-                            "serve_args": "",
-                            "lightx2v_config": {
-                                "parallel": {
-                                    "seq_p_size": 2
-                                },
-                                "cpu_offload": true,
-                                "offload_granularity": "block",
-                                "gemma_cpu_offload": true,
-                                "vae_cpu_offload": true
-                            },
-                            "notes": "Best-attempted lossless H100 config (seq_p_size=2 + block cpu_offload + Gemma/VAE offload + flash_attn3). Still OOMs at a later stage on 80GB — LTX-2.3 t2av needs H200. Kept for provenance; result is OOM on H100."
-                        }
-                    }
                 }
             },
             "report_framework_statuses": {
                 "vllm-omni": "no_profile",
-                "trtllm-visual": "not_run",
+                "lightx2v": "unsupported",
+                "trtllm-visual": "unsupported",
                 "comfyui": "no_profile",
                 "fastvideo": "no_profile"
             },
             "report_framework_reasons": {
                 "vllm-omni": "No compatible vLLM-Omni LTX2.3 serving profile is configured.",
-                "trtllm-visual": "Not yet classified. Confirm framework support and add a validated command profile, or mark unsupported.",
+                "lightx2v": "LightX2V cannot run the official LTX-2.3 two-stage workload: one transformer serves both stages with any LoRA merged at load (ltx2_runner.py at 19c19614), and the profile it had never enabled the upsampler, so every earlier row was one stage at the full 768x512 -- heavier than sglang's two-stage, never comparable. Audited 2026-10-22.",
+                "trtllm-visual": "TensorRT-LLM 1.4.0rc1 has no LTX-2.3: LTX2Pipeline lists only Lightricks/LTX-2 (19B), and '2.3' appears in no hf_id, config, test or supported-models table (checked 2026-10-22).",
                 "comfyui": "ComfyUI loads LTX-2.3, but no official workflow reproduces this case: sglang runs LTX-2.3's multimodal guidance in stage 1 (video CFG 3 + STG 1.0 on block 28 + modality 3, audio CFG 7 + STG + modality -- up to four DiT passes per step, LTX23SamplingParams), while ComfyUI's LTX-2.3 T2V template (and the LTX-2.5 one) is the distilled-LoRA fast path at cfg 1. A graph built from LTXVSpatioTemporalGuidance / LTXVModalityGuidance / LTXVDualCFGGuider could match it but has no upstream reference and is not validated.",
                 "fastvideo": "FastVideo main (2b164405c3d1, 2026-10-07) registers LTX-2.3, but this harness integrates FastVideo for MiniMax-H3 only (2026-10-08); no command validated."
-            },
-            "framework_status_by_hardware": {
-                "lightx2v": {
-                    "h100": {
-                        "status": "failed",
-                        "reason": "OOM on H100 80GB: LTX-2.3 22B two-stage 121-frame t2av peak exceeds 80GB even with every lossless lever (seq_p_size=2 activation sharding + block cpu_offload + Gemma/VAE offload + exact flash_attn3). Upstream profiles target H200 141GB. command_profiles carry the best-attempted lossless H100 config for provenance."
-                    }
-                }
             }
         },
         {
@@ -2642,6 +2831,15 @@
                     "num_requests": 8,
                     "max_concurrency": 2,
                     "request_rate": "inf"
+                }
+            },
+            "framework_request_extra": {
+                "trtllm-visual": {
+                    "max_sequence_length": 4096,
+                    "extra_params": {
+                        "use_guardrails": false,
+                        "output_type": "image"
+                    }
                 }
             },
             "frameworks": {
@@ -2749,6 +2947,16 @@
                     "serve_args": "--stage-configs-path configs/vllm_omni_cosmos3_h200_2gpu_cfg_guardrails_off.yaml --stage-init-timeout 900 --init-timeout 1800",
                     "extra_env": {},
                     "command_profiles": {
+                        "h200-2gpu-cfg-flash-static": {
+                            "description": "H200 2-GPU CFG-parallel vLLM-Omni Cosmos3 image profile on current flags.",
+                            "hardware": [
+                                "h200"
+                            ],
+                            "num_gpus": 2,
+                            "framework_ref": "vllm-omni f69b1f2b1 + vllm==0.31.0",
+                            "serve_args": "--num-gpus 2 --cfg-parallel-size 2 --model-class-name Cosmos3OmniDiffusersPipeline --stage-init-timeout 900 --init-timeout 1800 --no-guardrails --diffusion-attention-backend FLASH_ATTN --cache-backend none --no-diffusion-compile-dynamic",
+                            "notes": "Replaces h200-2gpu-cfg, whose --stage-configs-path current vLLM rejects ('unrecognized arguments', 2026-10-11 on 2xH200). Same layout and guardrails-off as that stage config, spelled with the flags the H200 video profiles and blackwell-cudnn use; FLASH_ATTN is the Hopper exact kernel. Validated 2026-10-11 on 4xH200 (cards 0,1), --enforce-eager: 1.304/1.306 s in two rounds. 2026-10-22: --no-diffusion-compile-dynamic added (the docs' setting for a fixed-shape workload); cand-dynamic keeps the previous command for the A/B. VALIDATION PENDING (round 2026-10-22, 2xH200/4xH200)."
+                        },
                         "h200-2gpu-cfg-flash": {
                             "description": "H200 2-GPU CFG-parallel vLLM-Omni Cosmos3 image profile on current flags.",
                             "hardware": [
@@ -2791,19 +2999,147 @@
                             "framework_ref": "vllm-omni-cosmos3+h200-cfg2",
                             "serve_args": "--stage-configs-path configs/vllm_omni_cosmos3_h200_2gpu_cfg_guardrails_off.yaml --stage-init-timeout 900 --init-timeout 1800",
                             "notes": "Uses the two GPUs for CFG parallelism through the stage config; no cache or torch compile path."
+                        },
+                        "cand-dynamic": {
+                            "description": "H200 2-GPU CFG-parallel vLLM-Omni Cosmos3 image profile on current flags.",
+                            "hardware": [
+                                "h200"
+                            ],
+                            "num_gpus": 2,
+                            "framework_ref": "vllm-omni f69b1f2b1 + vllm==0.31.0",
+                            "serve_args": "--num-gpus 2 --cfg-parallel-size 2 --model-class-name Cosmos3OmniDiffusersPipeline --stage-init-timeout 900 --init-timeout 1800 --no-guardrails --diffusion-attention-backend FLASH_ATTN --cache-backend none",
+                            "notes": "Replaces h200-2gpu-cfg, whose --stage-configs-path current vLLM rejects ('unrecognized arguments', 2026-10-11 on 2xH200). Same layout and guardrails-off as that stage config, spelled with the flags the H200 video profiles and blackwell-cudnn use; FLASH_ATTN is the Hopper exact kernel. Validated 2026-10-11 on 4xH200 (cards 0,1), --enforce-eager: 1.304/1.306 s in two rounds."
+                        }
+                    }
+                },
+                "trtllm-visual": {
+                    "num_gpus": 2,
+                    "serve_args": "",
+                    "extra_env": {
+                        "TRTLLM_DISABLE_COSMOS3_GUARDRAILS": "1"
+                    },
+                    "http_server": {
+                        "bin": "trtllm-serve",
+                        "args_template": [
+                            "serve",
+                            "{model}",
+                            "--host",
+                            "{host}",
+                            "--port",
+                            "{port}"
+                        ],
+                        "health_path": "/health"
+                    },
+                    "http_request": {
+                        "text-to-image": {
+                            "omit_keys": [
+                                "extra_params.guardrails",
+                                "extra_params.max_sequence_length"
+                            ],
+                            "extra_params_keys": [
+                                "flow_shift"
+                            ]
+                        }
+                    },
+                    "visual_gen_args": {
+                        "attention_config": {
+                            "backend": "VANILLA"
+                        },
+                        "parallel_config": {
+                            "cfg_size": 2,
+                            "parallel_vae_size": 2
+                        },
+                        "torch_compile_config": {
+                            "enable": true
+                        },
+                        "cuda_graph_config": {
+                            "enable": false
+                        },
+                        "compilation_config": {
+                            "resolutions": [
+                                [
+                                    720,
+                                    1280
+                                ]
+                            ],
+                            "num_frames": [
+                                1
+                            ]
+                        }
+                    },
+                    "command_profiles": {
+                        "default": {
+                            "description": "TensorRT-LLM VisualGen, NVIDIA's official cosmos3-t2i-1gpu.yaml at BF16, 2 GPU(s).",
+                            "framework_ref": "tensorrt-llm 1.4.0rc1 (tag 0372799d1543, 2026-10-19)",
+                            "num_gpus": 2,
+                            "serve_args": "",
+                            "upstream_recipe": {
+                                "repo": "NVIDIA/TensorRT-LLM",
+                                "path": "examples/visual_gen/configs/cosmos3-t2i-1gpu.yaml",
+                                "commit": "78ab4e71cef5",
+                                "commit_date": "2026-07-30",
+                                "section": "T2I config with CFG parallel 2"
+                            },
+                            "notes": "Official T2I config with the CFG pair split over two GPUs. T2I applies CFG only for t in [400, 1000], as sglang (COSMOS3_T2I_GUIDANCE_INTERVAL) and vLLM-Omni do by default. The earlier 'failed' verdict (startup hang on cosmos3_omni, tensorrt-llm 1.3.0rc26) is retested: --visual_gen_args forces the VisualGen path. VANILLA attention is torch SDPA (FlashAttention on Hopper); no cache_config or quant_config, so the row is BF16 and cache-free; compile at the case shape so the first request does not recompile; JSON to /v1/videos/sync (or /v1/images/generations), whose reply is the media itself. The YAML is passed with --visual_gen_args (trtllm-serve has no --extra_visual_gen_options). VALIDATION PENDING (round 2026-10-22, 2xH200/4xH200)."
+                        }
+                    },
+                    "_previous_failed_entry": {
+                        "status": "failed",
+                        "reason": "Hangs at startup on the current Cosmos3-Nano checkpoint: trtllm-serve reaches 'Orchestrator is creating IPC executor' / 'using MpiPoolSession to spawn MPI processes' and then produces no output at all -- 40 min in the matrix, and 20 min each at tp=1 and tp=2 in a dedicated probe, so it is not a multi-GPU path issue. The startup log warns 'You are using a model of type cosmos3_omni to instantiate a model of type cosmos3': the checkpoint was re-uploaded 2026-08-26 and declares cosmos3_omni, which tensorrt-llm 1.3.0rc26 does not know. Marked failed rather than left supported so a run does not spend 40 minutes per attempt reaching the same hang. Re-test when trtllm adds cosmos3_omni; the profile is kept below.",
+                        "_previous_supported_entry": {
+                            "num_gpus": 2,
+                            "serve_args": "--backend pytorch",
+                            "extra_env": {
+                                "TRTLLM_DISABLE_COSMOS3_GUARDRAILS": "1"
+                            },
+                            "http_server": {
+                                "bin": "trtllm-serve",
+                                "args_template": [
+                                    "serve",
+                                    "{model}",
+                                    "--host",
+                                    "{host}",
+                                    "--port",
+                                    "{port}"
+                                ],
+                                "tp_flag": "--tp_size",
+                                "health_path": "/health"
+                            },
+                            "http_request": {
+                                "text-to-image": {
+                                    "endpoint": "/v1/images/generations"
+                                }
+                            },
+                            "command_profiles": {
+                                "default": {
+                                    "description": "Best known TensorRT-LLM VisualGen command for aligned non-cache Cosmos3 runs.",
+                                    "framework_ref": "tensorrt-llm-visualgen-trtllm-serve",
+                                    "serve_args": "--backend pytorch",
+                                    "notes": "Keep this profile updated as the best command changes. trtllm-serve auto-detects the Cosmos3 diffusion model; add --extra_visual_gen_options <model>.yml for steady-state tuning. PyTorch backend, no TeaCache and no torch compile so the row stays cache-free and comparable. Needs GPU validation."
+                                },
+                                "h100-h200-2gpu-tp-speed": {
+                                    "description": "Hopper 2-GPU TP TensorRT-LLM VisualGen Cosmos3 profile probe.",
+                                    "hardware": [
+                                        "h100",
+                                        "h200"
+                                    ],
+                                    "num_gpus": 2,
+                                    "framework_ref": "tensorrt-llm-visualgen+tp2",
+                                    "serve_args": "--backend pytorch",
+                                    "notes": "Harness appends --tp_size 2 when num_gpus=2. trtllm-serve auto-detects the Cosmos3 diffusion model; add --extra_visual_gen_options <model>.yml for steady-state tuning. PyTorch backend, no TeaCache and no torch compile so the row stays cache-free and comparable. Needs GPU validation."
+                                }
+                            }
                         }
                     }
                 }
             },
             "report_framework_statuses": {
                 "lightx2v": "unsupported",
-                "trtllm-visual": "failed",
                 "comfyui": "unsupported",
                 "fastvideo": "unsupported"
             },
             "report_framework_reasons": {
                 "lightx2v": "No tracked LightX2V Cosmos3 serving path in this benchmark.",
-                "trtllm-visual": "Hangs at startup on the current Cosmos3-Nano checkpoint: trtllm-serve reaches 'Orchestrator is creating IPC executor' / 'using MpiPoolSession to spawn MPI processes' and then produces no output at all -- 40 min in the matrix, and 20 min each at tp=1 and tp=2 in a dedicated probe, so it is not a multi-GPU path issue. The startup log warns 'You are using a model of type cosmos3_omni to instantiate a model of type cosmos3': the checkpoint was re-uploaded 2026-08-26 and declares cosmos3_omni, which tensorrt-llm 1.3.0rc26 does not know. Marked failed rather than left supported so a run does not spend 40 minutes per attempt reaching the same hang. Re-test when trtllm adds cosmos3_omni; the profile is kept below.",
                 "comfyui": "ComfyUI core has no Cosmos3: comfy/ldm/cosmos covers Cosmos Predict1 and Predict2 only (CosmosT2V/I2V, CosmosT2IPredict2/I2VPredict2 in comfy/supported_models.py) at master 88ab4a06, 2026-09-25.",
                 "fastvideo": "FastVideo main (2b164405c3d1, 2026-10-07) has Cosmos Predict2/2.5 and GEN3C pipelines but no Cosmos3."
             }
@@ -2830,6 +3166,14 @@
                     "use_resolution_template": false,
                     "use_duration_template": false,
                     "guardrails": false
+                }
+            },
+            "framework_request_extra": {
+                "trtllm-visual": {
+                    "max_sequence_length": 4096,
+                    "extra_params": {
+                        "use_guardrails": false
+                    }
                 }
             },
             "frameworks": {
@@ -2942,6 +3286,23 @@
                     "serve_args": "--num-gpus 4 --cfg-parallel-size 2 --ulysses-degree 2 --model-class-name Cosmos3OmniDiffusersPipeline --stage-init-timeout 900 --init-timeout 1800 --no-guardrails --diffusion-attention-backend FLASH_ATTN --cache-backend none",
                     "extra_env": {},
                     "command_profiles": {
+                        "h200-4gpu-cfg-ulysses-vaepp": {
+                            "hardware": [
+                                "h200"
+                            ],
+                            "framework_ref": "vllm-omni main 0da1d831e07f + vllm==0.32.0",
+                            "num_gpus": 4,
+                            "description": "H200: CFG 2 x Ulysses 2 with the 4-GPU VAE split and GPU-side postprocess NVIDIA benchmarked in #5712.",
+                            "serve_args": "--num-gpus 4 --cfg-parallel-size 2 --ulysses-degree 2 --model-class-name Cosmos3OmniDiffusersPipeline --stage-init-timeout 900 --init-timeout 1800 --no-guardrails --diffusion-attention-backend FLASH_ATTN --cache-backend none --vae-patch-parallel-size 4 --vae-parallel-mode spatial_shard_width --video-output-transport {\"enable_device_postprocess\":true} --no-diffusion-compile-dynamic",
+                            "upstream_recipe": {
+                                "repo": "vllm-project/vllm-omni",
+                                "path": "recipes/cosmos3/Cosmos3-Nano.md",
+                                "commit": "765002061878",
+                                "commit_date": "2026-09-24",
+                                "section": "1x H200 141GB / B300 (Online serving), scaled per #5712"
+                            },
+                            "notes": "PR #5712 (47776fd350f5) benchmarks 4-GPU T2V with CFG 2, Ulysses 2, VAE patch parallel 4 spatial_shard_width and opt-in device postprocess (bytes identical for Cosmos3). SeaCache, the channels_last VAE fast path and fp8 are lossy and stay off. VALIDATION PENDING (round 2026-10-22, 2xH200/4xH200)."
+                        },
                         "blackwell-cudnn": {
                             "description": "Blackwell vLLM-Omni profile for cosmos3_nano_t2v_720p_189f using cuDNN attention.",
                             "hardware": [
@@ -3054,19 +3415,103 @@
                             "num_gpus": 4,
                             "serve_args": "--num-gpus 4 --ulysses-degree 4 --model-class-name Cosmos3OmniDiffusersPipeline --stage-init-timeout 900 --init-timeout 1800 --no-guardrails --diffusion-attention-backend FLASH_ATTN --cache-backend none",
                             "notes": "Uses all four GPUs for Ulysses sequence parallelism; no cache or torch compile path."
+                        },
+                        "cand-permute": {
+                            "description": "Symmetric-memory Ulysses all-to-all (#6340: 81.18 -> 76.57 s on Cosmos3-Nano, 4 GPUs). Never selected on its own: A/B arm, picked with --hardware-profile <name>.",
+                            "serve_args": "--num-gpus 4 --cfg-parallel-size 2 --ulysses-degree 2 --model-class-name Cosmos3OmniDiffusersPipeline --stage-init-timeout 900 --init-timeout 1800 --no-guardrails --diffusion-attention-backend FLASH_ATTN --cache-backend none --vae-patch-parallel-size 4 --vae-parallel-mode spatial_shard_width --video-output-transport {\"enable_device_postprocess\":true} --no-diffusion-compile-dynamic --ulysses-a2a-permute",
+                            "extra_env": {},
+                            "num_gpus": 4,
+                            "notes": " VALIDATION PENDING (round 2026-10-22, 2xH200/4xH200)."
+                        }
+                    }
+                },
+                "trtllm-visual": {
+                    "num_gpus": 4,
+                    "serve_args": "",
+                    "extra_env": {
+                        "TRTLLM_DISABLE_COSMOS3_GUARDRAILS": "1"
+                    },
+                    "http_server": {
+                        "bin": "trtllm-serve",
+                        "args_template": [
+                            "serve",
+                            "{model}",
+                            "--host",
+                            "{host}",
+                            "--port",
+                            "{port}"
+                        ],
+                        "health_path": "/health"
+                    },
+                    "http_request": {
+                        "text-to-video": {
+                            "endpoint": "/v1/videos/sync",
+                            "mode": "sync",
+                            "body": "json",
+                            "output": "mp4",
+                            "omit_keys": [
+                                "model",
+                                "size",
+                                "extra_params.guardrails",
+                                "extra_params.max_sequence_length"
+                            ],
+                            "extra_params_keys": [
+                                "flow_shift"
+                            ]
+                        }
+                    },
+                    "visual_gen_args": {
+                        "attention_config": {
+                            "backend": "VANILLA"
+                        },
+                        "parallel_config": {
+                            "cfg_size": 2,
+                            "ulysses_size": 2,
+                            "parallel_vae_size": 4
+                        },
+                        "torch_compile_config": {
+                            "enable": true
+                        },
+                        "cuda_graph_config": {
+                            "enable": false
+                        },
+                        "compilation_config": {
+                            "resolutions": [
+                                [
+                                    720,
+                                    1280
+                                ]
+                            ],
+                            "num_frames": [
+                                189
+                            ]
+                        }
+                    },
+                    "command_profiles": {
+                        "default": {
+                            "description": "TensorRT-LLM VisualGen, NVIDIA's official cosmos3-super-4gpu.yaml at BF16, 4 GPU(s).",
+                            "framework_ref": "tensorrt-llm 1.4.0rc1 (tag 0372799d1543, 2026-10-19)",
+                            "num_gpus": 4,
+                            "serve_args": "",
+                            "upstream_recipe": {
+                                "repo": "NVIDIA/TensorRT-LLM",
+                                "path": "examples/visual_gen/configs/cosmos3-super-4gpu.yaml",
+                                "commit": "f50ca53daedc",
+                                "commit_date": "2026-07-02",
+                                "section": "4-GPU layout, applied to Nano"
+                            },
+                            "notes": "The official 4-GPU Cosmos3 layout (CFG 2 x Ulysses 2, parallel VAE 4); Cosmos3 is VANILLA-only per the docs; CUDA graphs off (no official Cosmos3 config enables them). --visual_gen_args forces the VisualGen path: without it 1.4.0rc1 treats the cosmos3_omni checkpoint as an LLM (the 1.3.0rc26 startup hang). flow_shift moves into extra_params, max_sequence_length is top-level, guardrails off; UniPC, 35 steps = 35 evaluations. VANILLA attention is torch SDPA (FlashAttention on Hopper); no cache_config or quant_config, so the row is BF16 and cache-free; compile at the case shape so the first request does not recompile; JSON to /v1/videos/sync (or /v1/images/generations), whose reply is the media itself. The YAML is passed with --visual_gen_args (trtllm-serve has no --extra_visual_gen_options). VALIDATION PENDING (round 2026-10-22, 2xH200/4xH200)."
                         }
                     }
                 }
             },
             "report_framework_statuses": {
                 "lightx2v": "unsupported",
-                "trtllm-visual": "not_run",
                 "comfyui": "unsupported",
                 "fastvideo": "unsupported"
             },
             "report_framework_reasons": {
                 "lightx2v": "No tracked LightX2V Cosmos3 serving path in this benchmark.",
-                "trtllm-visual": "Not yet classified. Confirm framework support and add a validated command profile, or mark unsupported.",
                 "comfyui": "ComfyUI core has no Cosmos3: comfy/ldm/cosmos covers Cosmos Predict1 and Predict2 only (CosmosT2V/I2V, CosmosT2IPredict2/I2VPredict2 in comfy/supported_models.py) at master 88ab4a06, 2026-09-25.",
                 "fastvideo": "FastVideo main (2b164405c3d1, 2026-10-07) has Cosmos Predict2/2.5 and GEN3C pipelines but no Cosmos3."
             }
@@ -3095,6 +3540,18 @@
                     "use_resolution_template": false,
                     "use_duration_template": false,
                     "guardrails": false
+                }
+            },
+            "framework_request_extra": {
+                "trtllm-visual": {
+                    "max_sequence_length": 4096,
+                    "extra_params": {
+                        "use_guardrails": false
+                    },
+                    "image_reference": {
+                        "content": "__TEST_IMAGE_URL__",
+                        "format": "base64"
+                    }
                 }
             },
             "frameworks": {
@@ -3187,6 +3644,23 @@
                     "serve_args": "--num-gpus 4 --cfg-parallel-size 2 --ulysses-degree 2 --model-class-name Cosmos3OmniDiffusersPipeline --stage-init-timeout 900 --init-timeout 1800 --no-guardrails --diffusion-attention-backend FLASH_ATTN --cache-backend none",
                     "extra_env": {},
                     "command_profiles": {
+                        "h200-4gpu-cfg-ulysses-vaepp": {
+                            "hardware": [
+                                "h200"
+                            ],
+                            "framework_ref": "vllm-omni main 0da1d831e07f + vllm==0.32.0",
+                            "num_gpus": 4,
+                            "description": "H200: CFG 2 x Ulysses 2 with the 4-GPU VAE split and GPU-side postprocess NVIDIA benchmarked in #5712.",
+                            "serve_args": "--num-gpus 4 --cfg-parallel-size 2 --ulysses-degree 2 --model-class-name Cosmos3OmniDiffusersPipeline --stage-init-timeout 900 --init-timeout 1800 --no-guardrails --diffusion-attention-backend FLASH_ATTN --cache-backend none --vae-patch-parallel-size 4 --vae-parallel-mode spatial_shard_width --video-output-transport {\"enable_device_postprocess\":true} --no-diffusion-compile-dynamic",
+                            "upstream_recipe": {
+                                "repo": "vllm-project/vllm-omni",
+                                "path": "recipes/cosmos3/Cosmos3-Nano.md",
+                                "commit": "765002061878",
+                                "commit_date": "2026-09-24",
+                                "section": "1x H200 141GB / B300 (Online serving), scaled per #5712"
+                            },
+                            "notes": "PR #5712 (47776fd350f5) benchmarks 4-GPU T2V with CFG 2, Ulysses 2, VAE patch parallel 4 spatial_shard_width and opt-in device postprocess (bytes identical for Cosmos3). SeaCache, the channels_last VAE fast path and fp8 are lossy and stay off. VALIDATION PENDING (round 2026-10-22, 2xH200/4xH200)."
+                        },
                         "blackwell-cudnn": {
                             "description": "Blackwell vLLM-Omni profile for cosmos3_nano_i2v_720p_189f using cuDNN attention.",
                             "hardware": [
@@ -3286,19 +3760,103 @@
                             "num_gpus": 4,
                             "serve_args": "--num-gpus 4 --ulysses-degree 4 --model-class-name Cosmos3OmniDiffusersPipeline --stage-init-timeout 900 --init-timeout 1800 --no-guardrails --diffusion-attention-backend FLASH_ATTN --cache-backend none",
                             "notes": "Uses all four GPUs for Ulysses sequence parallelism; no cache or torch compile path."
+                        },
+                        "cand-permute": {
+                            "description": "Symmetric-memory Ulysses all-to-all (#6340: 81.18 -> 76.57 s on Cosmos3-Nano, 4 GPUs). Never selected on its own: A/B arm, picked with --hardware-profile <name>.",
+                            "serve_args": "--num-gpus 4 --cfg-parallel-size 2 --ulysses-degree 2 --model-class-name Cosmos3OmniDiffusersPipeline --stage-init-timeout 900 --init-timeout 1800 --no-guardrails --diffusion-attention-backend FLASH_ATTN --cache-backend none --vae-patch-parallel-size 4 --vae-parallel-mode spatial_shard_width --video-output-transport {\"enable_device_postprocess\":true} --no-diffusion-compile-dynamic --ulysses-a2a-permute",
+                            "extra_env": {},
+                            "num_gpus": 4,
+                            "notes": " VALIDATION PENDING (round 2026-10-22, 2xH200/4xH200)."
+                        }
+                    }
+                },
+                "trtllm-visual": {
+                    "num_gpus": 4,
+                    "serve_args": "",
+                    "extra_env": {
+                        "TRTLLM_DISABLE_COSMOS3_GUARDRAILS": "1"
+                    },
+                    "http_server": {
+                        "bin": "trtllm-serve",
+                        "args_template": [
+                            "serve",
+                            "{model}",
+                            "--host",
+                            "{host}",
+                            "--port",
+                            "{port}"
+                        ],
+                        "health_path": "/health"
+                    },
+                    "http_request": {
+                        "image-to-video": {
+                            "endpoint": "/v1/videos/sync",
+                            "mode": "sync",
+                            "body": "json",
+                            "output": "mp4",
+                            "omit_keys": [
+                                "model",
+                                "size",
+                                "extra_params.guardrails",
+                                "extra_params.max_sequence_length"
+                            ],
+                            "extra_params_keys": [
+                                "flow_shift"
+                            ]
+                        }
+                    },
+                    "visual_gen_args": {
+                        "attention_config": {
+                            "backend": "VANILLA"
+                        },
+                        "parallel_config": {
+                            "cfg_size": 2,
+                            "ulysses_size": 2,
+                            "parallel_vae_size": 4
+                        },
+                        "torch_compile_config": {
+                            "enable": true
+                        },
+                        "cuda_graph_config": {
+                            "enable": false
+                        },
+                        "compilation_config": {
+                            "resolutions": [
+                                [
+                                    720,
+                                    1280
+                                ]
+                            ],
+                            "num_frames": [
+                                189
+                            ]
+                        }
+                    },
+                    "command_profiles": {
+                        "default": {
+                            "description": "TensorRT-LLM VisualGen, NVIDIA's official cosmos3-super-4gpu.yaml at BF16, 4 GPU(s).",
+                            "framework_ref": "tensorrt-llm 1.4.0rc1 (tag 0372799d1543, 2026-10-19)",
+                            "num_gpus": 4,
+                            "serve_args": "",
+                            "upstream_recipe": {
+                                "repo": "NVIDIA/TensorRT-LLM",
+                                "path": "examples/visual_gen/configs/cosmos3-super-4gpu.yaml",
+                                "commit": "f50ca53daedc",
+                                "commit_date": "2026-07-02",
+                                "section": "4-GPU layout, applied to Nano"
+                            },
+                            "notes": "The official 4-GPU Cosmos3 layout (CFG 2 x Ulysses 2, parallel VAE 4); Cosmos3 is VANILLA-only per the docs; CUDA graphs off (no official Cosmos3 config enables them). --visual_gen_args forces the VisualGen path: without it 1.4.0rc1 treats the cosmos3_omni checkpoint as an LLM (the 1.3.0rc26 startup hang). flow_shift moves into extra_params, max_sequence_length is top-level, guardrails off; UniPC, 35 steps = 35 evaluations. VANILLA attention is torch SDPA (FlashAttention on Hopper); no cache_config or quant_config, so the row is BF16 and cache-free; compile at the case shape so the first request does not recompile; JSON to /v1/videos/sync (or /v1/images/generations), whose reply is the media itself. The YAML is passed with --visual_gen_args (trtllm-serve has no --extra_visual_gen_options). VALIDATION PENDING (round 2026-10-22, 2xH200/4xH200)."
                         }
                     }
                 }
             },
             "report_framework_statuses": {
                 "lightx2v": "unsupported",
-                "trtllm-visual": "not_run",
                 "comfyui": "unsupported",
                 "fastvideo": "unsupported"
             },
             "report_framework_reasons": {
                 "lightx2v": "No tracked LightX2V Cosmos3 serving path in this benchmark.",
-                "trtllm-visual": "Not yet classified. Confirm framework support and add a validated command profile, or mark unsupported.",
                 "comfyui": "ComfyUI core has no Cosmos3: comfy/ldm/cosmos covers Cosmos Predict1 and Predict2 only (CosmosT2V/I2V, CosmosT2IPredict2/I2VPredict2 in comfy/supported_models.py) at master 88ab4a06, 2026-09-25.",
                 "fastvideo": "FastVideo main (2b164405c3d1, 2026-10-07) has Cosmos Predict2/2.5 and GEN3C pipelines but no Cosmos3."
             }
@@ -3535,6 +4093,13 @@
                                 "VLLM_OMNI_VIDEO_SYNC_TIMEOUT": "1800"
                             },
                             "notes": "Derived 2026-10-10: the recipe's 'ROCm four GPUs' command scaled to num_gpus=2 the way the CUDA profiles scale its four-GPU section; no CPU offload at 288 GB/GPU. The recipe notes text-encoder TP was validated on gfx942 only. VALIDATION PENDING (2026-10-10 round): derived, not yet measured on this hardware."
+                        },
+                        "cand-static": {
+                            "description": "The selected command plus --no-diffusion-compile-dynamic (docs: the setting for fixed shapes). Never selected on its own: A/B arm, picked with --hardware-profile <name>.",
+                            "serve_args": "--trust-remote-code --task-type fl2va --num-gpus 2 --tensor-parallel-size 2 --usp 1 --ring 1 --text-encoder-tp-size 2 --vae-patch-parallel-size 2 --vae-parallel-mode tile --vae-use-tiling --no-diffusion-compile-dynamic",
+                            "extra_env": {},
+                            "num_gpus": 2,
+                            "notes": " VALIDATION PENDING (round 2026-10-22, 2xH200/4xH200)."
                         }
                     },
                     "reason": "Empirically validated 2026-08-07, first on minimax-h3-5090-2gpu-v4 (2x RTX 5090) then on 2xB200: the default (compiled) profile segfaults identically on both GPU classes 1 step into denoising (see command_profiles.default.notes) -- a confirmed hardware-independent vLLM-Omni bug, despite the recipe's own claim that torch.compile is 'not enabled by default on consumer paths.' --enforce-eager avoids that segfault, but on RTX 5090 it fails differently at startup (a diffusion worker process dies before completing its init handshake, surfaced as EOFError) and never completes a request on that GPU class. On 2xB200 the identical --enforce-eager command works cleanly and completes a correct generation -- see command_profiles.b200-2gpu for the validated numbers and the sglang comparison on the same hardware. Net: vLLM-Omni H3 support is real but fragile below the B200 class tested here; RTX 5090 has no working profile for this case in either variant."
@@ -3650,6 +4215,80 @@
                                 "attn_type": "flash_attn2"
                             },
                             "notes": "VALIDATION PENDING (2026-10-08). flash_attn3 is a Hopper-only kernel; FlashAttention 2 (source-built for sm_100) is what every LightX2V Blackwell profile here runs, the same exact-softmax class. Untested alternative: torch_sdpa (cuDNN / flash SDPA, what sglang resolves for H3 on B200). Otherwise the default profile; see its notes."
+                        }
+                    }
+                },
+                "trtllm-visual": {
+                    "num_gpus": 2,
+                    "serve_args": "",
+                    "extra_env": {},
+                    "http_server": {
+                        "bin": "trtllm-serve",
+                        "args_template": [
+                            "serve",
+                            "{model}",
+                            "--host",
+                            "{host}",
+                            "--port",
+                            "{port}"
+                        ],
+                        "health_path": "/health"
+                    },
+                    "http_request": {
+                        "text-to-video": {
+                            "endpoint": "/v1/videos/sync",
+                            "mode": "sync",
+                            "body": "json",
+                            "output": "mp4+audio",
+                            "omit_keys": [
+                                "model",
+                                "size",
+                                "guidance_scale"
+                            ],
+                            "extra_params_keys": []
+                        }
+                    },
+                    "visual_gen_args": {
+                        "attention_config": {
+                            "backend": "VANILLA"
+                        },
+                        "parallel_config": {
+                            "ulysses_size": 2,
+                            "parallel_vae_size": 2
+                        },
+                        "torch_compile_config": {
+                            "enable": true
+                        },
+                        "cuda_graph_config": {
+                            "enable": false
+                        },
+                        "compilation_config": {
+                            "resolutions": [
+                                [
+                                    768,
+                                    1344
+                                ]
+                            ],
+                            "num_frames": [
+                                124
+                            ],
+                            "skip_warmup": false
+                        }
+                    },
+                    "command_profiles": {
+                        "default": {
+                            "description": "TensorRT-LLM VisualGen, NVIDIA's official minimax-h3-bf16-8gpu.yaml at BF16, 2 GPU(s).",
+                            "framework_ref": "tensorrt-llm 1.4.0rc1 (tag 0372799d1543, 2026-10-19)",
+                            "num_gpus": 2,
+                            "serve_args": "",
+                            "upstream_recipe": {
+                                "repo": "NVIDIA/TensorRT-LLM",
+                                "path": "examples/visual_gen/configs/minimax-h3-bf16-8gpu.yaml",
+                                "commit": "92d23a83799d",
+                                "commit_date": "2026-10-09",
+                                "section": "BF16 multi-GPU config scaled to pure Ulysses 2"
+                            },
+                            "notes": "H3 multi-GPU is pure Ulysses (cfg_size 1: guidance-distilled); CUDA graphs, caches and a non-empty negative prompt are rejected; num_frames must be 17n+5 (124); MiniMaxH3Scheduler counts sigma grid points, so 50 = 49 evaluations as in sglang; flow shifts fixed at 12/3 like the harness. Audio returns as AAC in the MP4. VANILLA attention is torch SDPA (FlashAttention on Hopper); no cache_config or quant_config, so the row is BF16 and cache-free; compile at the case shape so the first request does not recompile; JSON to /v1/videos/sync (or /v1/images/generations), whose reply is the media itself. The YAML is passed with --visual_gen_args (trtllm-serve has no --extra_visual_gen_options). VALIDATION PENDING (round 2026-10-22, 2xH200/4xH200)."
                         }
                     }
                 },
@@ -3839,6 +4478,20 @@
                         }
                     },
                     "command_profiles": {
+                        "h200-eager": {
+                            "description": "H200: eager, dynamic VRAM (the weights do not fit --gpu-only on one 141 GB card).",
+                            "hardware": [
+                                "h200"
+                            ],
+                            "framework_ref": "ComfyUI master 1a82e6d01f39",
+                            "num_gpus": 1,
+                            "serve_args": "",
+                            "comfyui": {
+                                "compile": false
+                            },
+                            "notes": "H3's bf16 DiT, Qwen3-VL-32B and VAEs come to ~139 GB. VALIDATION PENDING (round 2026-10-22, 2xH200/4xH200).",
+                            "policy_exception": "Compile broken, not a speed choice (ComfyUI master, torch 2.14.1): TorchCompileModel fails under dynamic VRAM ('torch.Stream' has no attribute 'cuda_stream', seen on FLUX.3 2026-10-16) and --gpu-only, the switch that avoids it, cannot hold H3's ~139 GB of weights on one 141 GB H200, and H3 has no CFG branch for MultiGPU_WorkUnits to split. So the H200 cell runs eager."
+                        },
                         "default": {
                             "description": "ComfyUI master, core nodes only, the model's official workflow with full-precision weights.",
                             "framework_ref": "ComfyUI master HEAD",
@@ -3916,11 +4569,9 @@
                 }
             },
             "report_framework_statuses": {
-                "trtllm-visual": "unsupported",
                 "diffusers": "unsupported"
             },
             "report_framework_reasons": {
-                "trtllm-visual": "trtllm-visual's tracked scope in this harness is image cases; H3 is a video+audio model.",
                 "diffusers": "MiniMax-H3 is integrated as Modular Diffusers blocks only (no DiffusionPipeline), and only via an unmerged PR (huggingface/diffusers#14355 -- pip install git+.../diffusers.git@refs/pull/14355/head). Not a servable baseline path today."
             }
         },
@@ -4049,6 +4700,13 @@
                                 "VLLM_OMNI_VIDEO_SYNC_TIMEOUT": "1800"
                             },
                             "notes": "The recipe's ROCm four-GPU command; its evidence table measured it on 4x MI300X (T2VA 1344x768 209 f 50 steps, 267.4 s client E2E). VALIDATION PENDING (2026-10-10 round): derived, not yet measured on this hardware."
+                        },
+                        "cand-static": {
+                            "description": "The selected command plus --no-diffusion-compile-dynamic (docs: the setting for fixed shapes). Never selected on its own: A/B arm, picked with --hardware-profile <name>.",
+                            "serve_args": "--trust-remote-code --task-type fl2va --num-gpus 4 --usp 4 --ring 1 --vae-patch-parallel-size 4 --vae-parallel-mode tile --vae-use-tiling --no-diffusion-compile-dynamic",
+                            "extra_env": {},
+                            "num_gpus": 4,
+                            "notes": " VALIDATION PENDING (round 2026-10-22, 2xH200/4xH200)."
                         }
                     },
                     "reason": "Empirically validated 2026-08-07, first on minimax-h3-5090-2gpu-v4 (2x RTX 5090) then on 2xB200: the default (compiled) profile segfaults identically on both GPU classes 1 step into denoising (see command_profiles.default.notes) -- a confirmed hardware-independent vLLM-Omni bug, despite the recipe's own claim that torch.compile is 'not enabled by default on consumer paths.' --enforce-eager avoids that segfault, but on RTX 5090 it fails differently at startup (a diffusion worker process dies before completing its init handshake, surfaced as EOFError) and never completes a request on that GPU class. On 2xB200 the identical --enforce-eager command works cleanly and completes a correct generation -- see command_profiles.b200-2gpu for the validated numbers and the sglang comparison on the same hardware. Net: vLLM-Omni H3 support is real but fragile below the B200 class tested here; RTX 5090 has no working profile for this case in either variant."
@@ -4163,6 +4821,80 @@
                         }
                     }
                 },
+                "trtllm-visual": {
+                    "num_gpus": 4,
+                    "serve_args": "",
+                    "extra_env": {},
+                    "http_server": {
+                        "bin": "trtllm-serve",
+                        "args_template": [
+                            "serve",
+                            "{model}",
+                            "--host",
+                            "{host}",
+                            "--port",
+                            "{port}"
+                        ],
+                        "health_path": "/health"
+                    },
+                    "http_request": {
+                        "text-to-video": {
+                            "endpoint": "/v1/videos/sync",
+                            "mode": "sync",
+                            "body": "json",
+                            "output": "mp4+audio",
+                            "omit_keys": [
+                                "model",
+                                "size",
+                                "guidance_scale"
+                            ],
+                            "extra_params_keys": []
+                        }
+                    },
+                    "visual_gen_args": {
+                        "attention_config": {
+                            "backend": "VANILLA"
+                        },
+                        "parallel_config": {
+                            "ulysses_size": 4,
+                            "parallel_vae_size": 4
+                        },
+                        "torch_compile_config": {
+                            "enable": true
+                        },
+                        "cuda_graph_config": {
+                            "enable": false
+                        },
+                        "compilation_config": {
+                            "resolutions": [
+                                [
+                                    768,
+                                    1344
+                                ]
+                            ],
+                            "num_frames": [
+                                124
+                            ],
+                            "skip_warmup": false
+                        }
+                    },
+                    "command_profiles": {
+                        "default": {
+                            "description": "TensorRT-LLM VisualGen, NVIDIA's official minimax-h3-bf16-8gpu.yaml at BF16, 4 GPU(s).",
+                            "framework_ref": "tensorrt-llm 1.4.0rc1 (tag 0372799d1543, 2026-10-19)",
+                            "num_gpus": 4,
+                            "serve_args": "",
+                            "upstream_recipe": {
+                                "repo": "NVIDIA/TensorRT-LLM",
+                                "path": "examples/visual_gen/configs/minimax-h3-bf16-8gpu.yaml",
+                                "commit": "92d23a83799d",
+                                "commit_date": "2026-10-09",
+                                "section": "BF16 multi-GPU config scaled to pure Ulysses 4"
+                            },
+                            "notes": "H3 multi-GPU is pure Ulysses (cfg_size 1: guidance-distilled); CUDA graphs, caches and a non-empty negative prompt are rejected; num_frames must be 17n+5 (124); MiniMaxH3Scheduler counts sigma grid points, so 50 = 49 evaluations as in sglang; flow shifts fixed at 12/3 like the harness. Audio returns as AAC in the MP4. VANILLA attention is torch SDPA (FlashAttention on Hopper); no cache_config or quant_config, so the row is BF16 and cache-free; compile at the case shape so the first request does not recompile; JSON to /v1/videos/sync (or /v1/images/generations), whose reply is the media itself. The YAML is passed with --visual_gen_args (trtllm-serve has no --extra_visual_gen_options). VALIDATION PENDING (round 2026-10-22, 2xH200/4xH200)."
+                        }
+                    }
+                },
                 "fastvideo": {
                     "num_gpus": 4,
                     "output_audio": true,
@@ -4218,12 +4950,10 @@
                 }
             },
             "report_framework_statuses": {
-                "trtllm-visual": "unsupported",
                 "diffusers": "unsupported",
                 "comfyui": "not_run"
             },
             "report_framework_reasons": {
-                "trtllm-visual": "trtllm-visual's tracked scope in this harness is image cases; H3 is a video+audio model.",
                 "diffusers": "MiniMax-H3 is integrated as Modular Diffusers blocks only (no DiffusionPipeline), and only via an unmerged PR (huggingface/diffusers#14355 -- pip install git+.../diffusers.git@refs/pull/14355/head). Not a servable baseline path today.",
                 "comfyui": "ComfyUI has no sequence or tensor parallelism (its one multi-GPU path splits CFG branches, and H3 runs without CFG), so a four-GPU cell would be its one-GPU number; that number is in minimax_h3_t2va_5s."
             }
@@ -4544,6 +5274,15 @@
                 },
                 "lightx2v": {
                     "task": "ref2av"
+                },
+                "trtllm-visual": {
+                    "image_reference": [
+                        {
+                            "content": "__TEST_IMAGE_URL__",
+                            "format": "base64",
+                            "role": "reference"
+                        }
+                    ]
                 }
             },
             "_note": "Ref2VA is selected by the conditions[] entry with role=reference, not by the harness's reference_image multipart path; __TEST_IMAGE_URL__ is substituted at request time with that request's own copy of meta.test_image_url as a data: URI (until 2026-09-30 with the URL itself, which the server downloaded inside the measured window). Validated on 2x H200 2026-08-26: 222.4s single_e2e (t2va on the same box is 146.7s -- reference conditioning costs ~1.5x). The harness hands every framework the reference already at the official rule's size (reference_short_edge/reference_multiple: 2048px short edge, upscaling allowed, LANCZOS, nearest 32 -- diffusers' MiniMax-H3 modular pipeline `reference_image_short_edge`, and sglang's reference_encoding.py). vLLM-Omni stopped upscaling small references on 2026-09-28 (#8253) and ComfyUI never does, so without this they condition on ~8x fewer reference tokens than the official pipeline (the 1024x704 test image: ~2800 vs ~23800). vLLM-Omni requests carry extra_params.preencode_mp4=true (2026-10-08): its documented, off-by-default overlap of MP4 encoding with the VAE decode (byte-identical frames), the counterpart of sglang's default streamed encode (#41819). Both engines run their best documented output path. vLLM-Omni gets num_inference_steps 49 (2026-10-08): since vllm-omni #7219 (2026-09-24) it reads N as N model passes on linspace(1, 0, N+1), while sglang, FastVideo and LightX2V's 49 read 50 as 50 sigma grid points, i.e. 49 passes; 49 gives Omni the identical 50-point grid. Earlier H3 rounds ran Omni one pass more.",
@@ -4732,6 +5471,13 @@
                                 "VLLM_OMNI_VIDEO_SYNC_TIMEOUT": "1800"
                             },
                             "notes": "Derived 2026-10-10: the recipe's 'ROCm four GPUs' command scaled to num_gpus=2 the way the CUDA profiles scale its four-GPU section; no CPU offload at 288 GB/GPU. The recipe notes text-encoder TP was validated on gfx942 only. VALIDATION PENDING (2026-10-10 round): derived, not yet measured on this hardware."
+                        },
+                        "cand-static": {
+                            "description": "The selected command plus --no-diffusion-compile-dynamic (docs: the setting for fixed shapes). Never selected on its own: A/B arm, picked with --hardware-profile <name>.",
+                            "serve_args": "--trust-remote-code --task-type ref2va --num-gpus 2 --tensor-parallel-size 2 --usp 1 --ring 1 --text-encoder-tp-size 2 --vae-patch-parallel-size 2 --vae-parallel-mode tile --vae-use-tiling --no-diffusion-compile-dynamic",
+                            "extra_env": {},
+                            "num_gpus": 2,
+                            "notes": " VALIDATION PENDING (round 2026-10-22, 2xH200/4xH200)."
                         }
                     },
                     "reason": "Empirically validated 2026-08-07, first on minimax-h3-5090-2gpu-v4 (2x RTX 5090) then on 2xB200: the default (compiled) profile segfaults identically on both GPU classes 1 step into denoising (see command_profiles.default.notes) -- a confirmed hardware-independent vLLM-Omni bug, despite the recipe's own claim that torch.compile is 'not enabled by default on consumer paths.' --enforce-eager avoids that segfault, but on RTX 5090 it fails differently at startup (a diffusion worker process dies before completing its init handshake, surfaced as EOFError) and never completes a request on that GPU class. On 2xB200 the identical --enforce-eager command works cleanly and completes a correct generation -- see command_profiles.b200-2gpu for the validated numbers and the sglang comparison on the same hardware. Net: vLLM-Omni H3 support is real but fragile below the B200 class tested here; RTX 5090 has no working profile for this case in either variant."
@@ -4848,6 +5594,83 @@
                                 "attn_type": "flash_attn2"
                             },
                             "notes": "VALIDATION PENDING (2026-10-08). flash_attn3 is a Hopper-only kernel; FlashAttention 2 (source-built for sm_100) is what every LightX2V Blackwell profile here runs, the same exact-softmax class. Untested alternative: torch_sdpa (cuDNN / flash SDPA, what sglang resolves for H3 on B200). Otherwise the default profile; see its notes."
+                        }
+                    }
+                },
+                "trtllm-visual": {
+                    "num_gpus": 2,
+                    "serve_args": "",
+                    "extra_env": {},
+                    "http_server": {
+                        "bin": "trtllm-serve",
+                        "args_template": [
+                            "serve",
+                            "{model}",
+                            "--host",
+                            "{host}",
+                            "--port",
+                            "{port}"
+                        ],
+                        "health_path": "/health"
+                    },
+                    "http_request": {
+                        "text-to-video": {
+                            "endpoint": "/v1/videos/sync",
+                            "mode": "sync",
+                            "body": "json",
+                            "output": "mp4+audio",
+                            "omit_keys": [
+                                "model",
+                                "size",
+                                "guidance_scale"
+                            ],
+                            "extra_params_keys": []
+                        }
+                    },
+                    "visual_gen_args": {
+                        "attention_config": {
+                            "backend": "VANILLA"
+                        },
+                        "parallel_config": {
+                            "ulysses_size": 2,
+                            "parallel_vae_size": 2
+                        },
+                        "torch_compile_config": {
+                            "enable": true
+                        },
+                        "cuda_graph_config": {
+                            "enable": false
+                        },
+                        "compilation_config": {
+                            "resolutions": [
+                                [
+                                    768,
+                                    1344
+                                ]
+                            ],
+                            "num_frames": [
+                                124
+                            ],
+                            "skip_warmup": true
+                        },
+                        "pipeline_config": {
+                            "workflow": "ref2va"
+                        }
+                    },
+                    "command_profiles": {
+                        "default": {
+                            "description": "TensorRT-LLM VisualGen, NVIDIA's official minimax-h3-ref2va-bf16-1gpu.yaml at BF16, 2 GPU(s).",
+                            "framework_ref": "tensorrt-llm 1.4.0rc1 (tag 0372799d1543, 2026-10-19)",
+                            "num_gpus": 2,
+                            "serve_args": "",
+                            "upstream_recipe": {
+                                "repo": "NVIDIA/TensorRT-LLM",
+                                "path": "examples/visual_gen/configs/minimax-h3-ref2va-bf16-1gpu.yaml",
+                                "commit": "aa026bf86db4",
+                                "commit_date": "2026-10-06",
+                                "section": "Ref2VA BF16 config with pure Ulysses 2"
+                            },
+                            "notes": "H3 multi-GPU is pure Ulysses (cfg_size 1: guidance-distilled); CUDA graphs, caches and a non-empty negative prompt are rejected; num_frames must be 17n+5 (124); MiniMaxH3Scheduler counts sigma grid points, so 50 = 49 evaluations as in sglang; flow shifts fixed at 12/3 like the harness. Audio returns as AAC in the MP4. Ref2VA loads transformer_ref/; the server resizes references to a 2048 px short edge (LANCZOS, multiple of 32) like the harness and adds the <Picture 1> tag itself. NVIDIA validates Ref2VA on one GPU; Ulysses Ref2VA is ours to validate. VANILLA attention is torch SDPA (FlashAttention on Hopper); no cache_config or quant_config, so the row is BF16 and cache-free; compile at the case shape so the first request does not recompile; JSON to /v1/videos/sync (or /v1/images/generations), whose reply is the media itself. The YAML is passed with --visual_gen_args (trtllm-serve has no --extra_visual_gen_options). VALIDATION PENDING (round 2026-10-22, 2xH200/4xH200)."
                         }
                     }
                 },
@@ -5053,6 +5876,20 @@
                         }
                     },
                     "command_profiles": {
+                        "h200-eager": {
+                            "description": "H200: eager, dynamic VRAM (the weights do not fit --gpu-only on one 141 GB card).",
+                            "hardware": [
+                                "h200"
+                            ],
+                            "framework_ref": "ComfyUI master 1a82e6d01f39",
+                            "num_gpus": 1,
+                            "serve_args": "",
+                            "comfyui": {
+                                "compile": false
+                            },
+                            "notes": "H3's bf16 DiT, Qwen3-VL-32B and VAEs come to ~139 GB. VALIDATION PENDING (round 2026-10-22, 2xH200/4xH200).",
+                            "policy_exception": "Compile broken, not a speed choice (ComfyUI master, torch 2.14.1): TorchCompileModel fails under dynamic VRAM ('torch.Stream' has no attribute 'cuda_stream', seen on FLUX.3 2026-10-16) and --gpu-only, the switch that avoids it, cannot hold H3's ~139 GB of weights on one 141 GB H200, and H3 has no CFG branch for MultiGPU_WorkUnits to split. So the H200 cell runs eager."
+                        },
                         "default": {
                             "description": "ComfyUI master, core nodes only, the model's official workflow with full-precision weights.",
                             "framework_ref": "ComfyUI master HEAD",
@@ -5131,11 +5968,9 @@
                 }
             },
             "report_framework_statuses": {
-                "trtllm-visual": "unsupported",
                 "diffusers": "unsupported"
             },
             "report_framework_reasons": {
-                "trtllm-visual": "trtllm-visual's tracked scope in this harness is image cases; H3 is a video+audio model.",
                 "diffusers": "MiniMax-H3 is integrated as Modular Diffusers blocks only (no DiffusionPipeline), and only via an unmerged PR (huggingface/diffusers#14355 -- pip install git+.../diffusers.git@refs/pull/14355/head). Not a servable baseline path today."
             }
         },
@@ -5317,7 +6152,7 @@
                 "lightx2v": "Checked 2026-10-08 against LightX2V main 0c2edc12 (2026-10-05): LightX2V cannot serve this checkpoint under its trained contract (fastvideo_inference.json). V2 is trained for VIDEO_SPARSE_ATTN_H3 at 0.8 sparsity on 64-token tiles, and LightX2V has no VSA backend (its sparse attentions -- Sparge, SVG, radial, NBHD, Sol-Attn, sparse Sage/FA4 -- are other methods; dense attention would run a different model). Its H3 scheduler builds only a uniform shifted grid from infer_steps, so the explicit rungs [999, 874, ..., 125] cannot be given (an 8-step grid starts at 1000). LightX2V's own few-step H3 paths (configs/minimax_h3/dmd/: 4- and 8-step LoRAs on the base checkpoint, mostly FP8/INT8) are a different distillation, not this checkpoint, and are not substituted.",
                 "trtllm-visual": "trtllm-visual's tracked scope in this harness is image cases; H3 is a video+audio model.",
                 "diffusers": "MiniMax-H3 is integrated as Modular Diffusers blocks only (no DiffusionPipeline), and only via an unmerged PR (huggingface/diffusers#14355 -- pip install git+.../diffusers.git@refs/pull/14355/head). Not a servable baseline path today.",
-                "comfyui": "No official ComfyUI workflow for the FastH3 8-Step V2 checkpoint and its VSA attention as of 2026-09-30."
+                "comfyui": "Comfy-Org/workflow_templates templates/video_fastvideo_fasth3_t2v.json exists (since 2026-09-22), but it runs int8 dense attention and VSA keeping 10% of tiles from step 0.2 -- a different numeric class and a different sparsity from the case's BF16 VSA at the trained 80% (64-token tiles). Re-checked 2026-10-22."
             }
         }
     ]

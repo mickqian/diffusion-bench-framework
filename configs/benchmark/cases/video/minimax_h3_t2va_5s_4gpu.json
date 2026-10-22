@@ -124,6 +124,13 @@
             "VLLM_OMNI_VIDEO_SYNC_TIMEOUT": "1800"
           },
           "notes": "The recipe's ROCm four-GPU command; its evidence table measured it on 4x MI300X (T2VA 1344x768 209 f 50 steps, 267.4 s client E2E). VALIDATION PENDING (2026-10-10 round): derived, not yet measured on this hardware."
+        },
+        "cand-static": {
+          "description": "The selected command plus --no-diffusion-compile-dynamic (docs: the setting for fixed shapes). Never selected on its own: A/B arm, picked with --hardware-profile <name>.",
+          "serve_args": "--trust-remote-code --task-type fl2va --num-gpus 4 --usp 4 --ring 1 --vae-patch-parallel-size 4 --vae-parallel-mode tile --vae-use-tiling --no-diffusion-compile-dynamic",
+          "extra_env": {},
+          "num_gpus": 4,
+          "notes": " VALIDATION PENDING (round 2026-10-22, 2xH200/4xH200)."
         }
       },
       "reason": "Empirically validated 2026-08-07, first on minimax-h3-5090-2gpu-v4 (2x RTX 5090) then on 2xB200: the default (compiled) profile segfaults identically on both GPU classes 1 step into denoising (see command_profiles.default.notes) -- a confirmed hardware-independent vLLM-Omni bug, despite the recipe's own claim that torch.compile is 'not enabled by default on consumer paths.' --enforce-eager avoids that segfault, but on RTX 5090 it fails differently at startup (a diffusion worker process dies before completing its init handshake, surfaced as EOFError) and never completes a request on that GPU class. On 2xB200 the identical --enforce-eager command works cleanly and completes a correct generation -- see command_profiles.b200-2gpu for the validated numbers and the sglang comparison on the same hardware. Net: vLLM-Omni H3 support is real but fragile below the B200 class tested here; RTX 5090 has no working profile for this case in either variant."
@@ -240,8 +247,79 @@
       }
     },
     "trtllm-visual": {
-      "status": "unsupported",
-      "reason": "trtllm-visual's tracked scope in this harness is image cases; H3 is a video+audio model."
+      "status": "supported",
+      "num_gpus": 4,
+      "serve_args": "",
+      "extra_env": {},
+      "http_server": {
+        "bin": "trtllm-serve",
+        "args_template": [
+          "serve",
+          "{model}",
+          "--host",
+          "{host}",
+          "--port",
+          "{port}"
+        ],
+        "health_path": "/health"
+      },
+      "http_request": {
+        "text-to-video": {
+          "endpoint": "/v1/videos/sync",
+          "mode": "sync",
+          "body": "json",
+          "output": "mp4+audio",
+          "omit_keys": [
+            "model",
+            "size",
+            "guidance_scale"
+          ],
+          "extra_params_keys": []
+        }
+      },
+      "visual_gen_args": {
+        "attention_config": {
+          "backend": "VANILLA"
+        },
+        "parallel_config": {
+          "ulysses_size": 4,
+          "parallel_vae_size": 4
+        },
+        "torch_compile_config": {
+          "enable": true
+        },
+        "cuda_graph_config": {
+          "enable": false
+        },
+        "compilation_config": {
+          "resolutions": [
+            [
+              768,
+              1344
+            ]
+          ],
+          "num_frames": [
+            124
+          ],
+          "skip_warmup": false
+        }
+      },
+      "command_profiles": {
+        "default": {
+          "description": "TensorRT-LLM VisualGen, NVIDIA's official minimax-h3-bf16-8gpu.yaml at BF16, 4 GPU(s).",
+          "framework_ref": "tensorrt-llm 1.4.0rc1 (tag 0372799d1543, 2026-10-19)",
+          "num_gpus": 4,
+          "serve_args": "",
+          "upstream_recipe": {
+            "repo": "NVIDIA/TensorRT-LLM",
+            "path": "examples/visual_gen/configs/minimax-h3-bf16-8gpu.yaml",
+            "commit": "92d23a83799d",
+            "commit_date": "2026-10-09",
+            "section": "BF16 multi-GPU config scaled to pure Ulysses 4"
+          },
+          "notes": "H3 multi-GPU is pure Ulysses (cfg_size 1: guidance-distilled); CUDA graphs, caches and a non-empty negative prompt are rejected; num_frames must be 17n+5 (124); MiniMaxH3Scheduler counts sigma grid points, so 50 = 49 evaluations as in sglang; flow shifts fixed at 12/3 like the harness. Audio returns as AAC in the MP4. VANILLA attention is torch SDPA (FlashAttention on Hopper); no cache_config or quant_config, so the row is BF16 and cache-free; compile at the case shape so the first request does not recompile; JSON to /v1/videos/sync (or /v1/images/generations), whose reply is the media itself. The YAML is passed with --visual_gen_args (trtllm-serve has no --extra_visual_gen_options). VALIDATION PENDING (round 2026-10-22, 2xH200/4xH200)."
+        }
+      }
     },
     "diffusers": {
       "status": "unsupported",
