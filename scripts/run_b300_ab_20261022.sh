@@ -74,4 +74,6 @@ arms ltx2.3_twostage_t2v_2gpus sglang 2 default cand-bcg cand-usp2 cand-usp2-bcg
 arms cosmos3_nano_t2i_720p sglang 2 gb300-2gpu-cfg-parallel-compile blackwell-2gpu-cfg-parallel
 arms qwen_image_21_t2i_1024_2gpu sglang 2 gb300-2gpu-tp2 b200-2gpu-ulysses-fa
 arms cosmos3_nano_t2v_720p_189f sglang 1 gb-4gpu-cfg-ulysses-speed default
+# third wave: TRT-LLM H3 Ref2VA pads its odd sequence under Ulysses 2 and VANILLA falls to masked SDPA
+arms minimax_h3_ref2va_5s trtllm-visual 1 b300 cand-fa4
 echo "=== AB DONE $(date -Is) ==="

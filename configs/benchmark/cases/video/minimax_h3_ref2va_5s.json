@@ -475,9 +475,9 @@
             "path": "examples/visual_gen/configs/minimax-h3-ref2va-bf16-1gpu.yaml",
             "commit": "aa026bf86db4",
             "commit_date": "2026-10-06",
-            "section": "Ref2VA BF16 config with pure Ulysses 2"
+            "section": "Ref2VA BF16 1-GPU config; Ulysses 2 and parallel VAE 2 added by this harness (upstream has no multi-GPU Ref2VA config)"
           },
-          "notes": "H3 multi-GPU is pure Ulysses (cfg_size 1: guidance-distilled); CUDA graphs, caches and a non-empty negative prompt are rejected; num_frames must be 17n+5 (124); MiniMaxH3Scheduler counts sigma grid points, so 50 = 49 evaluations as in sglang; flow shifts fixed at 12/3 like the harness. Audio returns as AAC in the MP4. Ref2VA loads transformer_ref/; the server resizes references to a 2048 px short edge (LANCZOS, multiple of 32) like the harness and adds the <Picture 1> tag itself. NVIDIA validates Ref2VA on one GPU; Ulysses Ref2VA is ours to validate. VANILLA attention is torch SDPA (FlashAttention on Hopper); no cache_config or quant_config, so the row is BF16 and cache-free; compile at the case shape so the first request does not recompile; JSON to /v1/videos/sync (or /v1/images/generations), whose reply is the media itself. The YAML is passed with --visual_gen_args (trtllm-serve has no --extra_visual_gen_options). VALIDATION PENDING (round 2026-10-22, 2xH200/4xH200). Blackwell: VANILLA beat FA4 on H3 T2VA 2-GPU, 74.33 against 76.63 s (4xB300 A/B, 2026-10-22), so it is selected there too."
+          "notes": "H3 multi-GPU is pure Ulysses (cfg_size 1: guidance-distilled); CUDA graphs, caches and a non-empty negative prompt are rejected; num_frames must be 17n+5 (124); MiniMaxH3Scheduler counts sigma grid points, so 50 = 49 evaluations as in sglang; flow shifts fixed at 12/3 like the harness. Audio returns as AAC in the MP4. Ref2VA loads transformer_ref/; the server resizes references to a 2048 px short edge (LANCZOS, multiple of 32) like the harness and adds the <Picture 1> tag itself. NVIDIA validates Ref2VA on one GPU; Ulysses Ref2VA is ours to validate. VANILLA attention is torch SDPA (FlashAttention on Hopper); no cache_config or quant_config, so the row is BF16 and cache-free; compile at the case shape so the first request does not recompile; JSON to /v1/videos/sync (or /v1/images/generations), whose reply is the media itself. The YAML is passed with --visual_gen_args (trtllm-serve has no --extra_visual_gen_options). VALIDATION PENDING (round 2026-10-22, 2xH200/4xH200). Blackwell: VANILLA beat FA4 on H3 T2VA 2-GPU, 74.33 against 76.63 s (4xB300 A/B, 2026-10-22), so it is selected there too. 4xB300 2026-10-22: Ref2VA's sequence is odd (49645 = 5983 text incl. 5952 reference vision tokens + 5952 reference latent rows + 414 audio + 37296 video), so Ulysses 2 pads one token and builds a key_padding_mask; VANILLA then runs masked SDPA in all 50 blocks: 3.09 s/step, 163.6 s, +120% over T2VA where sglang and vLLM-Omni pay +53% for the same work. FA4 handles the pad with seqused_k (cand-fa4, A/B pending). T2VA (37736, even) is unaffected."
         },
         "cand-fa4": {
           "description": "FA4 attention. Never selected: the 2026-10-22 4xB300 A/B had VANILLA ahead on H3.",
@@ -519,7 +519,7 @@
             "path": "examples/visual_gen/configs/minimax-h3-ref2va-bf16-1gpu.yaml",
             "commit": "aa026bf86db4",
             "commit_date": "2026-10-06",
-            "section": "Ref2VA BF16 config with pure Ulysses 2"
+            "section": "Ref2VA BF16 1-GPU config; Ulysses 2 and parallel VAE 2 added by this harness (upstream has no multi-GPU Ref2VA config)"
           },
           "notes": "H3 T2VA 2-GPU A/B on 4xB300 (2026-10-22): FA4 76.63 s against VANILLA 74.33 s, so the default (VANILLA) stays selected on Blackwell for H3. Kept for future A/Bs."
         }
