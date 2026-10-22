@@ -2016,6 +2016,64 @@ def _check_generic_video(data: bytes, output: str, framework: str) -> None:
         raise RuntimeError(f"{framework}'s MP4 ({len(data)} bytes) has tracks {tracks or 'none'}; missing {missing}")
 
 
+GENERIC_VIDEO_TASKS = ("text-to-video", "image-to-video", "text-image-to-video")
+
+
+def _generic_video_fields(case: dict, config: dict, framework: str, spec: dict) -> dict:
+    """A generic HTTP video request's fields: the case's, then its request extras, reshaped by `spec`."""
+    fields: dict = {
+        "model": case["model"],
+        "prompt": case["prompt"],
+        "size": f"{case['width']}x{case['height']}",
+        "width": case["width"],
+        "height": case["height"],
+    }
+    for key in (
+        "num_inference_steps",
+        "guidance_scale",
+        "guidance_scale_2",
+        "seed",
+        "num_frames",
+        "fps",
+        "negative_prompt",
+    ):
+        if key in case:
+            fields[key] = case[key]
+    return _reshape_generic_fields(_deep_merge(fields, _request_extra(case, framework, config)), spec)
+
+
+def _generic_http_json_request(case: dict, config: dict, framework: str) -> dict | None:
+    """single_e2e's request when it is one JSON POST answered by the output itself, else None.
+
+    `{"endpoint", "json", "output"}`, `output` naming the MP4 tracks a video reply
+    must carry. bench_serving's generic backend sends exactly this.
+    """
+    spec = _generic_http_request_spec(case, framework)
+    task = case["task"]
+    if task == "text-to-image":
+        payload = _deep_merge(_build_sglang_payload(case, config), _request_extra(case, framework, config))
+        return {
+            "endpoint": spec.get("endpoint", "/v1/images/generations"),
+            "json": _reshape_generic_fields(payload, spec),
+            "output": None,
+        }
+    if task in GENERIC_VIDEO_TASKS and spec.get("body") == "json" and spec.get("mode") == "sync":
+        return {
+            "endpoint": spec.get("endpoint", "/v1/videos"),
+            "json": _generic_video_fields(case, config, framework, spec),
+            "output": spec.get("output"),
+        }
+    return None
+
+
+def _check_generic_reply(data: bytes, request: dict, framework: str) -> None:
+    """Raise unless the reply to a `_generic_http_json_request` is its output: bytes, and the MP4 tracks named."""
+    if not data:
+        raise RuntimeError(f"{framework} answered an empty body")
+    if request["output"]:
+        _check_generic_video(data, request["output"], framework)
+
+
 def send_request_generic_http(
     base_url: str, case: dict, config: dict, framework: str
 ) -> float:
@@ -2027,30 +2085,22 @@ def send_request_generic_http(
     and polls. Endpoints/mode are overridable per task via ``http_request`` so
     other config-driven backends can deviate without code changes.
     """
+    request = _generic_http_json_request(case, config, framework)
+    if request is not None:
+        start = time.time()
+        resp = _post_drained(f"{base_url}{request['endpoint']}", json=request["json"], timeout=REQUEST_TIMEOUT)
+        latency = time.time() - start
+        _raise_for_status(resp)
+        _check_generic_reply(resp.content, request, framework)
+        print(f"  Generated in {latency:.2f}s ({framework})")
+        return latency
+
     task = case["task"]
     spec = _generic_http_request_spec(case, framework)
 
-    if task in ("text-to-video", "image-to-video", "text-image-to-video"):
+    if task in GENERIC_VIDEO_TASKS:
         endpoint = spec.get("endpoint", "/v1/videos")
-        fields: dict = {
-            "model": case["model"],
-            "prompt": case["prompt"],
-            "size": f"{case['width']}x{case['height']}",
-            "width": case["width"],
-            "height": case["height"],
-        }
-        for key in (
-            "num_inference_steps",
-            "guidance_scale",
-            "guidance_scale_2",
-            "seed",
-            "num_frames",
-            "fps",
-            "negative_prompt",
-        ):
-            if key in case:
-                fields[key] = case[key]
-        fields = _reshape_generic_fields(_deep_merge(fields, _request_extra(case, framework, config)), spec)
+        fields = _generic_video_fields(case, config, framework, spec)
         start = time.time()
         if spec.get("body") == "json":
             resp = _post_drained(f"{base_url}{endpoint}", json=fields, timeout=REQUEST_TIMEOUT)
@@ -2096,19 +2146,6 @@ def send_request_generic_http(
             if time.time() - start > REQUEST_TIMEOUT:
                 raise TimeoutError(f"{framework} video timed out after {REQUEST_TIMEOUT}s")
         latency = time.time() - start
-        print(f"  Generated in {latency:.2f}s ({framework})")
-        return latency
-
-    if task == "text-to-image":
-        endpoint = spec.get("endpoint", "/v1/images/generations")
-        payload = _build_sglang_payload(case, config)
-        payload = _reshape_generic_fields(_deep_merge(payload, _request_extra(case, framework, config)), spec)
-        start = time.time()
-        resp = _post_drained(
-            f"{base_url}{endpoint}", json=payload, timeout=REQUEST_TIMEOUT
-        )
-        latency = time.time() - start
-        _raise_for_status(resp)
         print(f"  Generated in {latency:.2f}s ({framework})")
         return latency
 
@@ -2967,10 +3004,27 @@ def _bench_extra_body(case: dict, framework: str, config: dict) -> dict:
 # bench_serving's own warmups, passed explicitly so the harness numbers every
 # request it sends.
 BENCH_SERVING_WARMUPS = 1
+# Their step count, passed explicitly too: a prebuilt generic HTTP warmup carries its own.
+BENCH_SERVING_WARMUP_STEPS = 3
 
 
 def _bench_request_inputs(case: dict, framework: str, config: dict) -> dict:
     """What bench_serving sends for one request case (see datasets.FixedDataset)."""
+    if framework in GENERIC_HTTP_FRAMEWORKS:
+        request = _generic_http_json_request(case, config, framework)
+        if request is None:
+            raise ValueError(
+                f"{case['id']}: {framework}'s {case['task']} request is not one JSON POST answered by "
+                "the output, which is all bench_serving sends"
+            )
+        # single_e2e's own request, so throughput sends the reshaped body single_e2e does.
+        return {
+            "prompt": case["prompt"],
+            "extra_body": {},
+            "image_paths": None,
+            "input_variant": case["input_variant"],
+            "http_request": request,
+        }
     if framework == "comfyui":
         _write_comfyui_reference(case, config)
     # The same opt-in as send_request_vllm_omni: MiniMax-H3 Ref2VA's reference is
@@ -3019,6 +3073,8 @@ def run_throughput(
         str(num_requests),
         "--warmup-requests",
         str(BENCH_SERVING_WARMUPS),
+        "--warmup-inference-steps",
+        str(BENCH_SERVING_WARMUP_STEPS),
         "--max-concurrency",
         str(max_concurrency),
         "--request-rate",
@@ -3034,10 +3090,19 @@ def run_throughput(
             cmd.extend([f"--{key.replace('_', '-')}", str(case[key])])
     # Its warmups first, continuing this server's numbering, so no throughput
     # request repeats the inputs of any request before it.
-    request_inputs = [
-        _bench_request_inputs(_request_case(case, next(inputs)), framework, config or {})
-        for _ in range(BENCH_SERVING_WARMUPS + num_requests)
-    ]
+    warmup_case = {**case, "num_inference_steps": BENCH_SERVING_WARMUP_STEPS}
+    try:
+        request_inputs = [
+            _bench_request_inputs(
+                _request_case(warmup_case if i < BENCH_SERVING_WARMUPS else case, next(inputs)),
+                framework,
+                config or {},
+            )
+            for i in range(BENCH_SERVING_WARMUPS + num_requests)
+        ]
+    except ValueError as exc:  # recorded here, so the single_e2e result stands
+        result["error"] = str(exc)
+        return result
     inputs_path = log_dir / f"bench_serving_{case['id']}_{framework}_inputs.json"
     inputs_path.write_text(json.dumps(request_inputs))
     cmd.extend(["--request-inputs", str(inputs_path)])

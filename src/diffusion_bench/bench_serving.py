@@ -30,7 +30,7 @@ import numpy as np
 import requests
 from tqdm.asyncio import tqdm
 
-from diffusion_bench import comfyui_client, fastvideo_client
+from diffusion_bench import comfyui_client, fastvideo_client, run_comparison
 from diffusion_bench.datasets import (
     FixedDataset,
     RandomDataset,
@@ -775,6 +775,45 @@ def make_fastvideo_request_func(expect_audio: bool):
     return async_request_fastvideo
 
 
+def make_generic_http_request_func(framework: str):
+    """A generic HTTP framework's request: single_e2e's own, prebuilt by run_comparison and sent as is.
+
+    The reply passes single_e2e's check too (run_comparison._check_generic_reply).
+    """
+
+    async def async_request_generic_http(
+        input: RequestFuncInput,
+        session: aiohttp.ClientSession,
+        pbar: Optional[tqdm] = None,
+    ) -> RequestFuncOutput:
+        output = RequestFuncOutput()
+        request = input.http_request
+        output.start_time = time.perf_counter()
+        try:
+            url = f"{input.api_url}{request['endpoint']}"
+            async with session.post(url, json=request["json"]) as response:
+                body = await response.read()
+                status = response.status
+            output.latency = time.perf_counter() - output.start_time
+            # single_e2e's raise_for_status: any status below 400 is an answer
+            if status < 400:
+                run_comparison._check_generic_reply(body, request, framework)
+                output.success = True
+                output.output_count = 1
+            else:
+                output.error = f"HTTP {status}: {body[:500].decode(errors='replace')}"
+        except Exception as e:  # noqa: BLE001 - a failed request is a recorded error
+            output.latency = time.perf_counter() - output.start_time
+            output.error = f"{type(e).__name__}: {e}"
+        if input.slo_ms is not None and output.success:
+            output.slo_achieved = (output.latency * 1000.0) <= input.slo_ms
+        if pbar:
+            pbar.update(1)
+        return output
+
+    return async_request_generic_http
+
+
 async def benchmark(args):
     from huggingface_hub import model_info
 
@@ -865,6 +904,14 @@ async def benchmark(args):
             raise ValueError(f"--backend fastvideo is benchmarked on video tasks only, not {task_name}")
         api_url = f"{args.base_url}{fastvideo_client.SYNC_VIDEO_PATH}"
         request_func = make_fastvideo_request_func(args.expect_audio)
+    elif backend in run_comparison.GENERIC_HTTP_FRAMEWORKS:
+        if not (args.dataset == "fixed" and args.request_inputs):
+            raise ValueError(
+                f"--backend {backend} sends run_comparison's prebuilt requests: "
+                "needs --dataset fixed --request-inputs"
+            )
+        api_url = args.base_url
+        request_func = make_generic_http_request_func(backend)
     elif task_name in (
         "text-to-video",
         "image-to-video",
@@ -1040,7 +1087,14 @@ def main() -> None:
         "--backend",
         type=str,
         default="sglang",
-        choices=["sglang", "vllm-omni", "lightx2v", "trtllm-visual", "comfyui", "fastvideo"],
+        choices=[
+            "sglang",
+            "vllm-omni",
+            "lightx2v",
+            "comfyui",
+            "fastvideo",
+            *sorted(run_comparison.GENERIC_HTTP_FRAMEWORKS),
+        ],
         help="Serving backend API to benchmark.",
     )
     parser.add_argument(
@@ -1116,8 +1170,8 @@ def main() -> None:
         default=None,
         help=(
             "Fixed dataset: JSON list of per-request inputs (prompt, extra_body, "
-            "image_paths, input_variant), warmups first; replaces --prompt, "
-            "--extra-body and --image-path."
+            "image_paths, input_variant, and a generic HTTP backend's prebuilt "
+            "http_request), warmups first; replaces --prompt, --extra-body and --image-path."
         ),
     )
     parser.add_argument(

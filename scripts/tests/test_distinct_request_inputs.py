@@ -301,8 +301,10 @@ def fake_run_prompt(base_url, graph, *, timeout_s, fetch_outputs):
 
 
 async def fake_bench_request(input, session, pbar=None):
-    image = Path(input.image_paths[0]).read_bytes() if input.image_paths else data_uri_bytes(input.extra_body)
-    record(input.prompt, image, input.extra_body.get("seed"))
+    # a generic HTTP framework is sent its prebuilt single_e2e body instead
+    body = input.http_request["json"] if input.http_request else input.extra_body
+    image = Path(input.image_paths[0]).read_bytes() if input.image_paths else data_uri_bytes(body)
+    record(body.get("prompt", input.prompt), image, body.get("seed"))
     return RequestFuncOutput(success=True, latency=0.01, output_count=1)
 
 
@@ -327,6 +329,7 @@ subprocess.run = fake_subprocess_run
 for name in ("async_request_image_sglang", "async_request_video_sglang", "async_request_vllm_omni", "async_request_lightx2v"):
     setattr(bs, name, fake_bench_request)
 bs.make_fastvideo_request_func = lambda expect_audio: fake_bench_request
+bs.make_generic_http_request_func = lambda framework: fake_bench_request
 
 covered: dict[str, set] = {}
 with tempfile.TemporaryDirectory() as tmp:

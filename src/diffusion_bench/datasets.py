@@ -33,6 +33,8 @@ class RequestFuncInput:
     num_inference_steps: Optional[int] = None
     # run_comparison's index of this request's conditioning inputs, if it set them
     input_variant: Optional[int] = None
+    # generic HTTP: single_e2e's prebuilt request (endpoint, json, output), sent as is
+    http_request: Optional[Dict[str, Any]] = None
 
 
 @dataclass
@@ -293,8 +295,9 @@ class FixedDataset(BaseDataset):
     """One request repeated, with per-request conditioning inputs when given.
 
     `--request-inputs` (written by run_comparison) lists each request's prompt,
-    extra body, reference images and input variant, warmups first, so no
-    request repeats another's inputs. Without it every request is the same.
+    extra body, reference images and input variant (and, for a generic HTTP
+    framework, its prebuilt request), warmups first, so no request repeats
+    another's inputs. Without it every request is the same.
     """
 
     def __init__(self, args, api_url: str = "", model: str = ""):
@@ -345,6 +348,7 @@ class FixedDataset(BaseDataset):
             extra_body=inputs["extra_body"],
             image_paths=inputs["image_paths"],
             input_variant=inputs["input_variant"],
+            http_request=inputs.get("http_request"),
         )
 
 
