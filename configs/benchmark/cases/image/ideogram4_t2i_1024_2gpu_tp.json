@@ -65,6 +65,21 @@
         "compile": false
       },
       "command_profiles": {
+        "blackwell-gpuonly-compile": {
+          "serve_args": "--gpu-only",
+          "comfyui": {
+            "compile": true
+          },
+          "num_gpus": 1,
+          "description": "Blackwell: TorchCompileModel with --gpu-only (the switch that avoids the dynamic-VRAM cuda_stream failure).",
+          "hardware": [
+            "b200",
+            "gb200",
+            "b300",
+            "gb300"
+          ],
+          "notes": "Single-GPU cell, so the MultiGPU CFG split's compile failure does not apply. Promoted from cand-compile-gpuonly by the 2026-10-22 4xB300 A/B (scripts/run_b300_ab_20261022.sh): two interleaved rounds, median 3.777 / 3.694 s compiled against 3.916 / 4.071 s eager (both arms bimodal, 3.67-4.15 s, so the rounds' medians decide)."
+        },
         "default": {
           "description": "ComfyUI master, core nodes only, the model's official workflow with full-precision weights.",
           "framework_ref": "ComfyUI master HEAD",

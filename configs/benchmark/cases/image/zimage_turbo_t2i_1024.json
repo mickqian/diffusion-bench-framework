@@ -132,6 +132,26 @@
         "sample_guide_scale": 0.0
       },
       "command_profiles": {
+        "blackwell-fa2-fusion": {
+          "lightx2v_config": {
+            "attn_type": "flash_attn2",
+            "parallel": {
+              "seq_p_size": 2,
+              "seq_p_attn_type": "ulysses",
+              "seq_p_tensor_fusion": true,
+              "seq_p_prepost_backend": "triton"
+            }
+          },
+          "num_gpus": 2,
+          "description": "Blackwell: Exact Ulysses communication fusions upstream offers.",
+          "hardware": [
+            "b200",
+            "gb200",
+            "b300",
+            "gb300"
+          ],
+          "notes": "seq_p_quant_scheme (fp8/fp4 communication) stays off. Promoted from cand-fusion by the 2026-10-22 4xB300 A/B (scripts/run_b300_ab_20261022.sh): two interleaved rounds, 0.810 / 0.829 s against the previous blackwell-fa2's 0.851 / 0.852 s."
+        },
         "default": {
           "description": "Best known LightX2V command/config for aligned non-cache benchmark runs.",
           "framework_ref": "lightx2v-0.1.0-z_image",

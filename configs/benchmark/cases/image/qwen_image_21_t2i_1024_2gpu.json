@@ -69,6 +69,21 @@
       "num_gpus": 2,
       "serve_args": "",
       "command_profiles": {
+        "blackwell-cudnn-static": {
+          "serve_args": "--usp 2 --no-diffusion-compile-dynamic",
+          "extra_env": {
+            "DIFFUSION_ATTENTION_BACKEND": "CUDNN_ATTN"
+          },
+          "num_gpus": 2,
+          "description": "Blackwell: The selected command plus --no-diffusion-compile-dynamic.",
+          "hardware": [
+            "b200",
+            "gb200",
+            "b300",
+            "gb300"
+          ],
+          "notes": " Promoted from cand-static by the 2026-10-22 4xB300 A/B (scripts/run_b300_ab_20261022.sh): two interleaved rounds, 1.558 / 1.560 s against blackwell-cudnn's 2.156 / 2.129 s: dynamic-shape compile cost vLLM-Omni 28% on this cell."
+        },
         "default": {
           "description": "vLLM-Omni's documented Qwen-Image-2.1 server (`vllm serve Qwen/Qwen-Image-2.1 --omni`): regional torch.compile plus CUDA-graph decode, both on by default.",
           "framework_ref": "vllm-omni main f69b1f2b19ce + vllm==0.31.0",

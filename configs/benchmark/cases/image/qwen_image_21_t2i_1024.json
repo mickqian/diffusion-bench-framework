@@ -88,6 +88,21 @@
       "num_gpus": 1,
       "serve_args": "",
       "command_profiles": {
+        "blackwell-cudnn-static": {
+          "serve_args": " --no-diffusion-compile-dynamic",
+          "extra_env": {
+            "DIFFUSION_ATTENTION_BACKEND": "CUDNN_ATTN"
+          },
+          "num_gpus": 1,
+          "description": "Blackwell: The selected command plus --no-diffusion-compile-dynamic.",
+          "hardware": [
+            "b200",
+            "gb200",
+            "b300",
+            "gb300"
+          ],
+          "notes": " Promoted from cand-static by the 2026-10-22 4xB300 A/B (scripts/run_b300_ab_20261022.sh): two interleaved rounds, 2.372 / 2.376 s against blackwell-cudnn's 2.400 / 2.407 s (every sample below)."
+        },
         "default": {
           "description": "vLLM-Omni's documented Qwen-Image-2.1 server (`vllm serve Qwen/Qwen-Image-2.1 --omni`): regional torch.compile plus CUDA-graph decode, both on by default.",
           "framework_ref": "vllm-omni main f69b1f2b19ce + vllm==0.31.0",
@@ -294,6 +309,21 @@
         "compile": false
       },
       "command_profiles": {
+        "blackwell-gpuonly-compile": {
+          "serve_args": "--gpu-only",
+          "comfyui": {
+            "compile": true
+          },
+          "num_gpus": 1,
+          "description": "Blackwell: TorchCompileModel with --gpu-only (the switch that avoids the cuda_stream failure).",
+          "hardware": [
+            "b200",
+            "gb200",
+            "b300",
+            "gb300"
+          ],
+          "notes": " Promoted from cand-compile-gpuonly by the 2026-10-22 4xB300 A/B (scripts/run_b300_ab_20261022.sh): two interleaved rounds, 3.049 / 3.046 s compiled against 3.359 / 3.277 s eager; with --gpu-only TorchCompileModel no longer hits the dynamic-VRAM cuda_stream failure."
+        },
         "default": {
           "description": "ComfyUI master, core nodes only, the model's official workflow with full-precision weights.",
           "framework_ref": "ComfyUI master HEAD",

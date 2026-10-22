@@ -384,7 +384,9 @@
       "status": "supported",
       "num_gpus": 2,
       "serve_args": "",
-      "extra_env": {},
+      "extra_env": {
+        "PYTORCH_CUDA_ALLOC_CONF": "expandable_segments:False"
+      },
       "http_server": {
         "bin": "trtllm-serve",
         "args_template": [
@@ -506,7 +508,8 @@
           },
           "notes": "H3 multi-GPU is pure Ulysses (cfg_size 1: guidance-distilled); CUDA graphs, caches and a non-empty negative prompt are rejected; num_frames must be 17n+5 (124); MiniMaxH3Scheduler counts sigma grid points, so 50 = 49 evaluations as in sglang; flow shifts fixed at 12/3 like the harness. Audio returns as AAC in the MP4. Ref2VA loads transformer_ref/; the server resizes references to a 2048 px short edge (LANCZOS, multiple of 32) like the harness and adds the <Picture 1> tag itself. NVIDIA validates Ref2VA on one GPU; Ulysses Ref2VA is ours to validate. VANILLA attention is torch SDPA (FlashAttention on Hopper); no cache_config or quant_config, so the row is BF16 and cache-free; compile at the case shape so the first request does not recompile; JSON to /v1/videos/sync (or /v1/images/generations), whose reply is the media itself. The YAML is passed with --visual_gen_args (trtllm-serve has no --extra_visual_gen_options). VALIDATION PENDING (round 2026-10-22, 2xH200/4xH200)."
         }
-      }
+      },
+      "extra_env_reason": "The harness exports PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True. Under it, the CUDA IPC handle TRT-LLM's rank 0 hands its media over with needs pidfd_getfd in the server process, which RunPod containers deny: every request logged 'pidfd_getfd: Operation not permitted' and hung to the read timeout (4xB300, 2026-10-22). Plain segments use cudaIpcMemHandle instead."
     },
     "diffusers": {
       "status": "unsupported",

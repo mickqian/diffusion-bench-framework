@@ -25,9 +25,13 @@ export DIFFUSION_BENCH_COMFYUI_WORKSPACE="${DIFFUSION_BENCH_COMFYUI_WORKSPACE:-$
 source "${DBF_REPO_DIR}/scripts/gpu_job_lock.sh"
 gpu_lock_acquire
 
-arms() {  # <case> <framework> <rounds> <arms...>
+arms() {  # <case> <framework> <rounds> <arms...>; AB_CASES=<regex> resumes a subset
   local case_id=$1 fw=$2 rounds=$3
   shift 3
+  if [[ -n "${AB_CASES:-}" && ! "${case_id} ${fw}" =~ ${AB_CASES} ]]; then
+    port=$((port + 100))
+    return
+  fi
   ARMS_CASE="${case_id}" ARMS_FW="${fw}" ARMS="$*" ROUNDS="${rounds}" \
     bash "${DBF_REPO_DIR}/scripts/run_competitor_arms.sh" "${TAG}_${fw}" "${port}"
   port=$((port + 100))
