@@ -75,6 +75,17 @@
           },
           "notes": "Derived 2026-10-10: this case's default command plus the cookbook builder's mi300x/mi355x backend flags. VALIDATION PENDING (2026-10-10 round): derived, not yet measured on this hardware. MINIMAX_H3_VAE_DECODER_FUSED_NORM=0 (2026-10-10, MI355X, sglang 3831e7e09): the VAE decoder's fused scale-add RMSNorm Triton kernels (#41906) use PTX inline asm (mul.rn.f32, constraint 'f') from sglang/kernels/numerics.py; on ROCm they fail to compile and decode to an all-NaN video. The flag keeps the eager norm path, which computes the same values.",
           "policy_exception": "Same correctness exception as the default profile (checked 2026-08-07): MiniMax-H3's torch.compile path changes numerical output per the sglang cookbook, so it is excluded regardless of hardware."
+        },
+        "cand-noexp": {
+          "description": "Plain CUDA allocator segments, so the copy-engine IPC all-to-all can start. Never selected on its own: A/B arm.",
+          "sglang_ref": "origin/main",
+          "num_gpus": 4,
+          "serve_args": "--model-type diffusion --warmup-mode server --model-variant fl2va --ulysses-degree 4 --encoder-parallel auto --performance-mode speed --enable-torch-compile false",
+          "policy_exception": "Correctness exception, not a speed tradeoff: MiniMax-H3's torch.compile path changes numerical output per the sglang cookbook (docs/cookbook/diffusion/MiniMax/MiniMax-H3.mdx, checked 2026-08-07) -- compile is not enabled by any recommended lossless preset for this model and must not be used to generate consistency ground truth. --enable-torch-compile stays false in every profile for this case until upstream fixes the numerics.",
+          "extra_env": {
+            "PYTORCH_CUDA_ALLOC_CONF": "expandable_segments:False"
+          },
+          "notes": "Derived from `default` (the profile B300 selects). Audit 2026-10-23 (Cosmos3/Wan2.2 finding 1): the harness exports PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True (scripts/devbox_run_cases.sh); sharing an expandable segment needs pidfd_getfd, which RunPod containers deny, so every sglang SP cell of the round logged 'IPC all-to-all (multi-rank) unavailable (pidfd_getfd: Operation not permitted); using NCCL'. TRT-LLM already carries this override for the same reason. Accept the arm only if that line is absent. VALIDATION PENDING (wave 4, 4xB300)."
         }
       }
     },
@@ -375,6 +386,50 @@
             "section": "BF16 multi-GPU config scaled to pure Ulysses 4"
           },
           "notes": "H3 T2VA 2-GPU A/B on 4xB300 (2026-10-22): FA4 76.63 s against VANILLA 74.33 s, so the default (VANILLA) stays selected on Blackwell for H3. Kept for future A/Bs."
+        },
+        "cand-fa4-omp8": {
+          "description": "FA4 attention plus OMP_NUM_THREADS=8 per worker. Never selected on its own: A/B arm.",
+          "framework_ref": "tensorrt-llm 1.4.0rc1 (tag 0372799d1543, 2026-10-19)",
+          "num_gpus": 4,
+          "serve_args": "",
+          "visual_gen_args": {
+            "attention_config": {
+              "backend": "FA4"
+            },
+            "parallel_config": {
+              "ulysses_size": 4,
+              "parallel_vae_size": 4
+            },
+            "torch_compile_config": {
+              "enable": true
+            },
+            "cuda_graph_config": {
+              "enable": false
+            },
+            "compilation_config": {
+              "resolutions": [
+                [
+                  768,
+                  1344
+                ]
+              ],
+              "num_frames": [
+                124
+              ],
+              "skip_warmup": false
+            }
+          },
+          "upstream_recipe": {
+            "repo": "NVIDIA/TensorRT-LLM",
+            "path": "examples/visual_gen/configs/minimax-h3-bf16-8gpu.yaml",
+            "commit": "92d23a83799d",
+            "commit_date": "2026-10-09",
+            "section": "BF16 multi-GPU config scaled to pure Ulysses 4"
+          },
+          "extra_env": {
+            "OMP_NUM_THREADS": "8"
+          },
+          "notes": "Derived from `cand-fa4` (the profile B300 selects). Audit 2026-10-23 (H3 finding 1): TRT-LLM spends 5 s (2 GPU), 8 s (Ref2VA) and 11 s (4 GPU) on the CPU before its denoise loop (row_timestep_plan: torch.full, scatters and torch.unique over the whole sequence per step, on every rank) while its workers share the host's cores with OMP_NUM_THREADS unset. The harness sets OMP_NUM_THREADS for no framework; sglang caps its workers itself (min(16, cores / GPUs), gpu_worker._worker_cpu_intra_op_threads), vLLM-Omni's workers take 1 (set_multiprocessing_worker_envs) and LightX2V's torchrun sets 1, while TRT-LLM and FastVideo keep one thread per core in every worker. Combined with FA4 because this cell's sequence does not split evenly under its Ulysses size (VANILLA then runs masked SDPA; FA4 takes the trailing pad as seqused_k). VALIDATION PENDING (wave 4, 4xB300)."
         }
       },
       "extra_env_reason": "The harness exports PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True. Under it, the CUDA IPC handle TRT-LLM's rank 0 hands its media over with needs pidfd_getfd in the server process, which RunPod containers deny: every request logged 'pidfd_getfd: Operation not permitted' and hung to the read timeout (4xB300, 2026-10-22). Plain segments use cudaIpcMemHandle instead."
@@ -438,6 +493,23 @@
             "FASTVIDEO_FA4": "1"
           },
           "notes": "The default profile with the DiT replicated (a 183 GB B200 holds both 66 GB models and the 11 GB of VAEs, ~40 GB to spare; FastVideo's measured GB200 FastH3 layout replicates it) and FA4, which FastVideo never auto-selects (FASTVIDEO_FA4=1). VALIDATION PENDING (2026-10-08): check 'Using FlashAttention-4 backend' and the memory headroom on B200, and A/B against FSDP and against compile off."
+        },
+        "cand-eager": {
+          "description": "The selected command with regional DiT compile off (eager, exact kernels on). Never selected on its own: A/B arm.",
+          "framework_ref": "FastVideo main (2b164405c3d1 on 2026-10-07) installed `.[fasth3]` with uv: fastvideo-kernel 0.3.5 built from the same checkout, flash-attn-4 @14c37795, torch 2.12.0+cu130; FA3 from the prebuilt torch212-cu130 artifact",
+          "num_gpus": 4,
+          "serve_args": "--generator.engine.use_fsdp_inference false --generator.engine.parallelism.tp_size 1 --generator.engine.parallelism.sp_size 4 --generator.engine.offload.dit false --generator.engine.offload.dit_layerwise false --generator.engine.offload.text_encoder false --generator.engine.offload.image_encoder false --generator.engine.offload.vae false --generator.engine.offload.lazy_module_load false --generator.engine.compile.enabled false --generator.engine.compile.vae_enabled false --generator.pipeline.workload_type t2v --generator.pipeline.experimental.attention_backend FLASH_ATTN --generator.pipeline.experimental.inference_torch_compile false --generator.pipeline.experimental.h3_sequential_load false --generator.pipeline.experimental.vae_parallel_decode true --generator.pipeline.experimental.vae_parallel_decode_strategy gather",
+          "extra_env": {
+            "FASTVIDEO_FA4": "1"
+          },
+          "upstream_recipe": {
+            "repo": "hao-ai-lab/FastVideo",
+            "path": "examples/inference/basic/basic_minimax_h3_t2v.py",
+            "commit": "6e4813f8b408",
+            "commit_date": "2026-10-07",
+            "section": "main(): GeneratorConfig (cookbook recipe minimax-h3-t2v)"
+          },
+          "notes": "Derived from `blackwell-4gpu` (the profile B300 selects). Audit 2026-10-23 (H3 finding 6): FastVideo's own docs report its compiled H3 output does not match eager (docs optimizations.md: MAE 20.2/255, PSNR 16.67 dB), a precision concern on the selected compile profile; under compile the fused NVLink Ulysses all-to-all also declines (ulysses_a2a.py: inert under compile), and 4-GPU scaling is 1.56x where the others get 1.9x. Eager is what DIFFUSION_BENCH_DISABLE_TORCH_COMPILE=1 runs (fastvideo_client.COMPILE_OFF_ARGS), for this cell only. VALIDATION PENDING (wave 4, 4xB300)."
         }
       }
     }

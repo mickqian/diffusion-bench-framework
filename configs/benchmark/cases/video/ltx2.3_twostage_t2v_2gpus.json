@@ -133,6 +133,23 @@
             "section": "Serving (ordinary LTX-2.3 two-stage); Guidance Parallelism"
           },
           "notes": "As blackwell-2gpu-twostage-cfg with FLASH_ATTN (Hopper). Not measured yet."
+        },
+        "cand-vaepp": {
+          "description": "VAE patch parallel 2 (tiled decode on both GPUs). Never selected on its own: A/B arm.",
+          "framework_ref": "vllm-omni main 0da1d831e07f + vllm==0.32.0",
+          "num_gpus": 2,
+          "serve_args": "--num-gpus 2 --cfg-parallel-size 2 --model-class-name LTX2TwoStagePipeline --stage-init-timeout 600 --no-diffusion-compile-dynamic --vae-patch-parallel-size 2",
+          "extra_env": {
+            "DIFFUSION_ATTENTION_BACKEND": "CUDNN_ATTN"
+          },
+          "upstream_recipe": {
+            "repo": "vllm-project/vllm-omni",
+            "path": "recipes/LTX/LTX-2.md",
+            "commit": "71f0fa47acff",
+            "commit_date": "2026-10-19",
+            "section": "Serving (ordinary LTX-2.3 two-stage); Guidance Parallelism"
+          },
+          "notes": "Derived from `blackwell-2gpu-twostage-cfg` (the profile B300 selects). Audit 2026-10-23 (image finding 4, LTX sub-audit): vLLM-Omni decodes on one GPU, although its features matrix lists VAE patch parallel (decode) for LTX-2 and LTX-2.3 (docs/user_guide/diffusion_features.md; tile mode, the flag's default); TRT-LLM (parallel_vae 2) and sglang decode on two. Estimated 0.1-0.2 s. VALIDATION PENDING (wave 4, 4xB300)."
         }
       }
     },

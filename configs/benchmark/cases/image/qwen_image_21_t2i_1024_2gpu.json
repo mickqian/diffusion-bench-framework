@@ -62,6 +62,13 @@
           "num_gpus": 2,
           "serve_args": "--model-type diffusion --warmup-mode server --tp-size 2 --performance-mode speed",
           "notes": "Kept so the tuning script can interleave it against the Ulysses default. VALIDATION PENDING (2026-10-10 round): derived, not yet measured."
+        },
+        "cand-bcg": {
+          "description": "Breakable CUDA graphs captured at the served 1024x1024. Never selected on its own: A/B arm.",
+          "sglang_ref": "main 3831e7e09 + sglang#43565 #43568 #43577 #43575 #43576 #43584 #43586 (GB300 rerun tree)",
+          "num_gpus": 2,
+          "serve_args": "--model-type diffusion --warmup-mode server --ulysses-degree 1 --tp-size 2 --performance-mode speed --attention-backend fa --enable-breakable-cuda-graph true --warmup-resolutions 1024x1024",
+          "notes": "Derived from `gb300-2gpu-tp2` (the profile B300 selects). Audit 2026-10-23 (image sglang-side): Qwen-Image-2.1 BCG replays across prompt lengths since sglang#43633 (in 82f7249c) and was +1.9% on 2xH200 TP2, -0.5% on 1xH200; never measured on B300. The served size is 1024x1024, so that is the one warmup resolution. Grep the server log for '[Diffusion BCG] captured' and for MISSED replays. TP2 keeps the SP world size 1 the Qwen-2.1 padder needs. VALIDATION PENDING (wave 4, 4xB300)."
         }
       }
     },
@@ -140,6 +147,40 @@
           },
           "num_gpus": 2,
           "notes": " VALIDATION PENDING (round 2026-10-22, 4xB300)."
+        },
+        "cand-tp2": {
+          "description": "Tensor parallel 2 (the recipe's multi-GPU path). Never selected on its own: A/B arm.",
+          "num_gpus": 2,
+          "serve_args": "--tensor-parallel-size 2 --no-diffusion-compile-dynamic",
+          "extra_env": {
+            "DIFFUSION_ATTENTION_BACKEND": "CUDNN_ATTN"
+          },
+          "upstream_recipe": {
+            "repo": "vllm-project/vllm-omni",
+            "path": "recipes/Qwen/Qwen-Image-2.1.md",
+            "commit": "b164fea79753",
+            "commit_date": "2026-10-17",
+            "section": "Online Serving",
+            "recheck": "Re-checked 2026-10-22: the recipe gained a Qwen-Image-2.1-Turbo four-GPU section and NPU defaults (910b8f07, b164fea7); the base-model serving sections this profile follows are unchanged. Its new exact text-conditioning cache cannot hit the harness's distinct per-request prompts."
+          },
+          "notes": "Derived from `blackwell-cudnn-static` (the profile B300 selects). Audit 2026-10-23 (image finding 2): the pinned recipe's measured multi-GPU path for Qwen-Image-2.1 is TP (recipes/Qwen/Qwen-Image-2.1.md: H200 TP1 7.30 / TP2 4.89 / TP4 5.12 s; features matrix SP ❓, TP ✅), never measured here; sglang's own TP2 beat its Ulysses-2 by 17% on this box. cuDNN attention and static compile kept. VALIDATION PENDING (wave 4, 4xB300)."
+        },
+        "cand-usp2-permute": {
+          "description": "Ulysses 2 with the permute-free symmetric-memory all-to-all (does not change the attention math). Never selected on its own: A/B arm.",
+          "num_gpus": 2,
+          "serve_args": "--usp 2 --ulysses-a2a-permute --no-diffusion-compile-dynamic",
+          "extra_env": {
+            "DIFFUSION_ATTENTION_BACKEND": "CUDNN_ATTN"
+          },
+          "upstream_recipe": {
+            "repo": "vllm-project/vllm-omni",
+            "path": "recipes/Qwen/Qwen-Image-2.1.md",
+            "commit": "b164fea79753",
+            "commit_date": "2026-10-17",
+            "section": "Online Serving",
+            "recheck": "Re-checked 2026-10-22: the recipe gained a Qwen-Image-2.1-Turbo four-GPU section and NPU defaults (910b8f07, b164fea7); the base-model serving sections this profile follows are unchanged. Its new exact text-conditioning cache cannot hit the harness's distinct per-request prompts."
+          },
+          "notes": "Derived from `blackwell-cudnn-static` (the profile B300 selects). Audit 2026-10-23 (image finding 2): recipes/Qwen/Qwen-Image-2.1.md documents --ulysses-a2a-permute for the Ulysses path; never measured here. cuDNN attention and static compile kept. VALIDATION PENDING (wave 4, 4xB300)."
         }
       }
     },

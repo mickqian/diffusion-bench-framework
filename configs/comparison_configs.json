@@ -311,6 +311,12 @@
                             "serve_args": "--model-type diffusion --warmup-mode server --performance-mode manual --dit-layerwise-offload true",
                             "notes": "Cookbook verifiedRecipes `rtx5090-1-offload`, which upstream marks `unverified: true` -- the ONLY recipe in that table carrying the flag, i.e. the one topology the cookbook itself had not re-tested against the updated checkpoint. Re-tested here 2026-09-21 on a 1x RTX 5090 devbox (sglang 6ad78f2): it works -- healthy, p50 19.946s over 3 repeats after warmup [19.97, 19.95, 19.95], 0.4674 s/step x 40 = 18.70s of the 19.95s, 19333 MiB of 32 GB, 2.43 MB RGBA PNG -- but it is 1.42x SLOWER than the 4090 recipe on the same card, so `rtx5090-1gpu-encoder-layerwise-offload` is what this repo runs. Kept here so the losing arm of that A/B stays on the record. No explicit attention flag in either arm: sm120 is in the cookbook's sm12Hardware list, so the runtime picks SDPA itself.",
                             "policy_exception": "Offload is not a tuning choice on this card, it is the only way the model runs. The checkpoint is 30.9 GiB and the card has 32 GB, so the cookbook's picker DISABLES resident placement on RTX 5090 outright ('the full resident pipeline exceeds one consumer GPU's memory. Select CPU offload.'). Measured 2026-09-21 on a 1x RTX 5090 devbox (sglang 6ad78f2): the offload recipe serves at p50 19.946s using 19333 MiB of 32 GB. There is no resident arm to compare against because a resident server cannot start here."
+                        },
+                        "cand-bcg": {
+                            "description": "Breakable CUDA graphs captured at the served 1024x1024. Never selected on its own: A/B arm.",
+                            "sglang_ref": "sglang 6ad78f22 (2026-09-21)",
+                            "serve_args": "--model-type diffusion --warmup-mode server --performance-mode speed --attention-backend fa --enable-breakable-cuda-graph true --warmup-resolutions 1024x1024",
+                            "notes": "Derived from `b200-1gpu-resident-fa` (the profile B300 selects). Audit 2026-10-23 (image sglang-side): Qwen-Image-2.1 BCG replays across prompt lengths since sglang#43633 (in 82f7249c) and was +1.9% on 2xH200 TP2, -0.5% on 1xH200; never measured on B300. The served size is 1024x1024, so that is the one warmup resolution. Grep the server log for '[Diffusion BCG] captured' and for MISSED replays. The text prefix fits the default buckets (64-1024). VALIDATION PENDING (wave 4, 4xB300)."
                         }
                     }
                 },
@@ -408,6 +414,23 @@
                             },
                             "num_gpus": 1,
                             "notes": " VALIDATION PENDING (round 2026-10-22, 4xB300)."
+                        },
+                        "cand-trtllm-attn": {
+                            "description": "TRTLLM_ATTN (vLLM-Omni's Blackwell default at head_dim 128). Never selected on its own: A/B arm.",
+                            "num_gpus": 1,
+                            "serve_args": " --no-diffusion-compile-dynamic",
+                            "extra_env": {
+                                "DIFFUSION_ATTENTION_BACKEND": "TRTLLM_ATTN"
+                            },
+                            "upstream_recipe": {
+                                "repo": "vllm-project/vllm-omni",
+                                "path": "recipes/Qwen/Qwen-Image-2.1.md",
+                                "commit": "b164fea79753",
+                                "commit_date": "2026-10-17",
+                                "section": "Online Serving",
+                                "recheck": "Re-checked 2026-10-22: the recipe gained a Qwen-Image-2.1-Turbo four-GPU section and NPU defaults (910b8f07, b164fea7); the base-model serving sections this profile follows are unchanged. Its new exact text-conditioning cache cannot hit the harness's distinct per-request prompts."
+                            },
+                            "notes": "Derived from `blackwell-cudnn-static` (the profile B300 selects). Audit 2026-10-23 (Cosmos3/Wan2.2 finding 3): vLLM-Omni 0da1d831 defaults to TRTLLM_ATTN on sm100/sm103 at head_dim 128 (vllm_omni/platforms/cuda/platform.py, 'Defaulting to diffusion attention backend TRTLLM_ATTN'), and the profiles force CUDNN_ATTN from a 2026-09 B200 qwen-image measurement on vLLM 0.29. Confirmation arm only: a 2026-10-23 B300 bf16 microbenchmark at the real per-rank shapes had trtllm-gen dense (the kernel behind TRTLLM_ATTN) 5-20% behind cuDNN SDPA and FA4 at every shape, so the other cells keep CUDNN_ATTN. Grep the server log for the TRTLLM_ATTN selection. VALIDATION PENDING (wave 4, 4xB300)."
                         }
                     }
                 },
@@ -525,6 +548,35 @@
                             },
                             "num_gpus": 1,
                             "notes": " VALIDATION PENDING (round 2026-10-22, 4xB300)."
+                        },
+                        "cand-sdpa": {
+                            "description": "torch SDPA attention; everything else kept. Never selected on its own: A/B arm.",
+                            "framework_ref": "lightx2v main HEAD",
+                            "num_gpus": 1,
+                            "serve_args": "",
+                            "lightx2v_config": {
+                                "resolution": 1024,
+                                "vae_scale_factor": 16,
+                                "attn_type": "torch_sdpa",
+                                "rope_type": "flashinfer_rope",
+                                "rms_norm_type": "fp32_variance",
+                                "layer_norm_type": "Triton",
+                                "modulate_type": "triton",
+                                "fused_qk_rms_norm": true,
+                                "fused_block_ops": true,
+                                "fused_block_min_tokens": 1024,
+                                "enable_cfg": false,
+                                "sample_guide_scale": 1.0,
+                                "warmup": true
+                            },
+                            "upstream_recipe": {
+                                "repo": "ModelTC/LightX2V",
+                                "path": "configs/qwen_image_21/qwen_image_21_torch.json",
+                                "commit": "4fe984c0",
+                                "commit_date": "2026-10-10",
+                                "section": "attn_type torch_sdpa (upstream's torch config); the fused-kernel settings of qwen_image_21.json kept"
+                            },
+                            "notes": "Derived from `blackwell-1gpu-fa2` (the profile B300 selects). Audit 2026-10-23 (image finding 8, Cosmos3/Wan2.2 finding 5): every LightX2V Blackwell cell runs FlashAttention 2 (the sm80 mma.sync path on sm103); torch_sdpa (lightx2v/common/ops/attn/torch_sdpa.py, cuDNN / flash SDPA on B300) was never A/B'd. FA4 is not reachable: the installer deletes flash_attn/cute (no nvidia-cutlass-dsl release satisfies it, see the SKILL), which this arm keeps. torch_sdpa ignores cu_seqlens, which is exact here because every call is one unpadded sequence (batch 1 per CFG rank). VALIDATION PENDING (wave 4, 4xB300)."
                         }
                     }
                 },
@@ -762,6 +814,13 @@
                             "num_gpus": 2,
                             "serve_args": "--model-type diffusion --warmup-mode server --tp-size 2 --performance-mode speed",
                             "notes": "Kept so the tuning script can interleave it against the Ulysses default. VALIDATION PENDING (2026-10-10 round): derived, not yet measured."
+                        },
+                        "cand-bcg": {
+                            "description": "Breakable CUDA graphs captured at the served 1024x1024. Never selected on its own: A/B arm.",
+                            "sglang_ref": "main 3831e7e09 + sglang#43565 #43568 #43577 #43575 #43576 #43584 #43586 (GB300 rerun tree)",
+                            "num_gpus": 2,
+                            "serve_args": "--model-type diffusion --warmup-mode server --ulysses-degree 1 --tp-size 2 --performance-mode speed --attention-backend fa --enable-breakable-cuda-graph true --warmup-resolutions 1024x1024",
+                            "notes": "Derived from `gb300-2gpu-tp2` (the profile B300 selects). Audit 2026-10-23 (image sglang-side): Qwen-Image-2.1 BCG replays across prompt lengths since sglang#43633 (in 82f7249c) and was +1.9% on 2xH200 TP2, -0.5% on 1xH200; never measured on B300. The served size is 1024x1024, so that is the one warmup resolution. Grep the server log for '[Diffusion BCG] captured' and for MISSED replays. TP2 keeps the SP world size 1 the Qwen-2.1 padder needs. VALIDATION PENDING (wave 4, 4xB300)."
                         }
                     }
                 },
@@ -839,6 +898,40 @@
                             },
                             "num_gpus": 2,
                             "notes": " VALIDATION PENDING (round 2026-10-22, 4xB300)."
+                        },
+                        "cand-tp2": {
+                            "description": "Tensor parallel 2 (the recipe's multi-GPU path). Never selected on its own: A/B arm.",
+                            "num_gpus": 2,
+                            "serve_args": "--tensor-parallel-size 2 --no-diffusion-compile-dynamic",
+                            "extra_env": {
+                                "DIFFUSION_ATTENTION_BACKEND": "CUDNN_ATTN"
+                            },
+                            "upstream_recipe": {
+                                "repo": "vllm-project/vllm-omni",
+                                "path": "recipes/Qwen/Qwen-Image-2.1.md",
+                                "commit": "b164fea79753",
+                                "commit_date": "2026-10-17",
+                                "section": "Online Serving",
+                                "recheck": "Re-checked 2026-10-22: the recipe gained a Qwen-Image-2.1-Turbo four-GPU section and NPU defaults (910b8f07, b164fea7); the base-model serving sections this profile follows are unchanged. Its new exact text-conditioning cache cannot hit the harness's distinct per-request prompts."
+                            },
+                            "notes": "Derived from `blackwell-cudnn-static` (the profile B300 selects). Audit 2026-10-23 (image finding 2): the pinned recipe's measured multi-GPU path for Qwen-Image-2.1 is TP (recipes/Qwen/Qwen-Image-2.1.md: H200 TP1 7.30 / TP2 4.89 / TP4 5.12 s; features matrix SP ❓, TP ✅), never measured here; sglang's own TP2 beat its Ulysses-2 by 17% on this box. cuDNN attention and static compile kept. VALIDATION PENDING (wave 4, 4xB300)."
+                        },
+                        "cand-usp2-permute": {
+                            "description": "Ulysses 2 with the permute-free symmetric-memory all-to-all (does not change the attention math). Never selected on its own: A/B arm.",
+                            "num_gpus": 2,
+                            "serve_args": "--usp 2 --ulysses-a2a-permute --no-diffusion-compile-dynamic",
+                            "extra_env": {
+                                "DIFFUSION_ATTENTION_BACKEND": "CUDNN_ATTN"
+                            },
+                            "upstream_recipe": {
+                                "repo": "vllm-project/vllm-omni",
+                                "path": "recipes/Qwen/Qwen-Image-2.1.md",
+                                "commit": "b164fea79753",
+                                "commit_date": "2026-10-17",
+                                "section": "Online Serving",
+                                "recheck": "Re-checked 2026-10-22: the recipe gained a Qwen-Image-2.1-Turbo four-GPU section and NPU defaults (910b8f07, b164fea7); the base-model serving sections this profile follows are unchanged. Its new exact text-conditioning cache cannot hit the harness's distinct per-request prompts."
+                            },
+                            "notes": "Derived from `blackwell-cudnn-static` (the profile B300 selects). Audit 2026-10-23 (image finding 2): recipes/Qwen/Qwen-Image-2.1.md documents --ulysses-a2a-permute for the Ulysses path; never measured here. cuDNN attention and static compile kept. VALIDATION PENDING (wave 4, 4xB300)."
                         }
                     }
                 }
@@ -937,6 +1030,12 @@
                             "serve_args": "--model-type diffusion --warmup-mode server --performance-mode manual --dit-layerwise-offload true",
                             "notes": "Cookbook verifiedRecipes `rtx5090-1-offload`, which upstream marks `unverified: true` -- the ONLY recipe in that table carrying the flag, i.e. the one topology the cookbook itself had not re-tested against the updated checkpoint. Re-tested here 2026-09-21 on a 1x RTX 5090 devbox (sglang 6ad78f2): it works -- healthy, p50 19.946s over 3 repeats after warmup [19.97, 19.95, 19.95], 0.4674 s/step x 40 = 18.70s of the 19.95s, 19333 MiB of 32 GB, 2.43 MB RGBA PNG -- but it is 1.42x SLOWER than the 4090 recipe on the same card, so `rtx5090-1gpu-encoder-layerwise-offload` is what this repo runs. Kept here so the losing arm of that A/B stays on the record. No explicit attention flag in either arm: sm120 is in the cookbook's sm12Hardware list, so the runtime picks SDPA itself.",
                             "policy_exception": "Offload is not a tuning choice on this card, it is the only way the model runs. The checkpoint is 30.9 GiB and the card has 32 GB, so the cookbook's picker DISABLES resident placement on RTX 5090 outright ('the full resident pipeline exceeds one consumer GPU's memory. Select CPU offload.'). Measured 2026-09-21 on a 1x RTX 5090 devbox (sglang 6ad78f2): the offload recipe serves at p50 19.946s using 19333 MiB of 32 GB. There is no resident arm to compare against because a resident server cannot start here."
+                        },
+                        "cand-bcg": {
+                            "description": "Breakable CUDA graphs at the served 1024x1024, with a prefix bucket that holds the edit's condition tokens. Never selected on its own: A/B arm.",
+                            "sglang_ref": "sglang 6ad78f22 (2026-09-21)",
+                            "serve_args": "--model-type diffusion --warmup-mode server --performance-mode speed --attention-backend fa --enable-breakable-cuda-graph true --warmup-resolutions 1024x1024 --bcg-text-buckets 64 128 256 512 1024 5120",
+                            "notes": "Derived from `b200-1gpu-resident-fa` (the profile B300 selects). Audit 2026-10-23 (image sglang-side): Qwen-Image-2.1 BCG replays across prompt lengths since sglang#43633 (in 82f7249c) and was +1.9% on 2xH200 TP2, -0.5% on 1xH200; never measured on B300. The served size is 1024x1024, so that is the one warmup resolution. Grep the server log for '[Diffusion BCG] captured' and for MISSED replays. An edit's prefix K/V carries the condition image's ~4096 latent tokens (the reference resized to the 1024x1024 area, /16) on top of the text, beyond the default buckets' 1024, and the Qwen-2.1 padder runs such a prefix eagerly (model_padders/qwen_image21.py), so the arm adds a 5120 bucket; pad rows never reach attention. VALIDATION PENDING (wave 4, 4xB300)."
                         }
                     }
                 },
@@ -1084,6 +1183,12 @@
                             "serve_args": "--model-type diffusion --warmup-mode server --tp-size 2 --dit-layerwise-offload false --performance-mode speed --enable-torch-compile false",
                             "policy_exception": "Measured H100 A/B 2026-07-03 (steady-state single_e2e): speed+compile 0.987/0.997s vs speed-eager 0.701/0.699s vs auto-offload default 0.793/0.799s — compile loses on this 9-step turbo model. Explicit --enable-torch-compile false also future-proofs against speed-mode auto-compile (sglang PR #30016).",
                             "notes": "Validated on H100; hardware list includes h200 for selection parity — re-validate there before publishing h200 numbers."
+                        },
+                        "cand-speed": {
+                            "description": "performance_mode speed: text encoder resident, eager. Never selected on its own: A/B arm.",
+                            "sglang_ref": "current-main",
+                            "serve_args": "--model-type diffusion --warmup-mode server --tp-size 2 --dit-layerwise-offload false --performance-mode speed --enable-torch-compile false",
+                            "notes": "Derived from `default` (the profile B300 selects). Audit 2026-10-23 (image findings 7, sglang-side 5): B300 falls through to `default` (the resident profile lists only h100/h200), whose performance_mode auto layerwise-offloads the text encoder on a 288 GB GPU (Z-Image log: 'Layerwise offload ready for text_encoder ... resident=0/36', TextEncodingStage 0.066 s = 19% of the request). serve_args are the H100/H200 resident profile's: speed keeps the encoder resident, compile stays off by policy. VALIDATION PENDING (wave 4, 4xB300)."
                         }
                     }
                 },
@@ -1277,6 +1382,27 @@
                             },
                             "num_gpus": 2,
                             "notes": "seq_p_quant_scheme (fp8/fp4 communication) stays off. VALIDATION PENDING (round 2026-10-22, 4xB300)."
+                        },
+                        "cand-sdpa": {
+                            "description": "torch SDPA attention; Ulysses 2 and fusions kept. Never selected on its own: A/B arm.",
+                            "num_gpus": 2,
+                            "lightx2v_config": {
+                                "attn_type": "torch_sdpa",
+                                "parallel": {
+                                    "seq_p_size": 2,
+                                    "seq_p_attn_type": "ulysses",
+                                    "seq_p_tensor_fusion": true,
+                                    "seq_p_prepost_backend": "triton"
+                                }
+                            },
+                            "upstream_recipe": {
+                                "repo": "ModelTC/LightX2V",
+                                "path": "configs/z_image/z_image_turbo_t2i_dist.json",
+                                "commit": "4fe984c07b16",
+                                "commit_date": "2026-10-10",
+                                "section": "Ulysses sequence parallel over 2 GPUs (scripts/z_image/z_image_turbo_t2i_dist.sh)"
+                            },
+                            "notes": "Derived from `blackwell-fa2-fusion` (the profile B300 selects). Audit 2026-10-23 (image finding 8, Cosmos3/Wan2.2 finding 5): every LightX2V Blackwell cell runs FlashAttention 2 (the sm80 mma.sync path on sm103); torch_sdpa (lightx2v/common/ops/attn/torch_sdpa.py, cuDNN / flash SDPA on B300) was never A/B'd. FA4 is not reachable: the installer deletes flash_attn/cute (no nvidia-cutlass-dsl release satisfies it, see the SKILL), which this arm keeps. torch_sdpa ignores cu_seqlens, which is exact here because every call is one unpadded sequence (batch 1 per CFG rank). VALIDATION PENDING (wave 4, 4xB300)."
                         }
                     }
                 },
@@ -1482,6 +1608,12 @@
                                 "FLASHINFER_USE_CUDA_NORM": "1"
                             },
                             "notes": "Speed mode + CUDA norm on Hopper; TP is explicit. Torch compile left off pending FP8 compile validation on GPU. Policy-aligned candidate (compile on, offload off) — NOT yet validated on H100; validate (incl. OOM risk) before publishing."
+                        },
+                        "cand-speed": {
+                            "description": "performance_mode speed: text encoder resident, eager. Never selected on its own: A/B arm.",
+                            "sglang_ref": "current-main",
+                            "serve_args": "--model-type diffusion --warmup-mode server --dit-layerwise-offload false --tp-size 2 --performance-mode speed --enable-torch-compile false",
+                            "notes": "Derived from `default` (the profile B300 selects). Audit 2026-10-23 (image findings 7, sglang-side 5): B300 falls through to `default` (the resident profile lists only h100/h200), whose performance_mode auto layerwise-offloads the text encoder on a 288 GB GPU (Z-Image log: 'Layerwise offload ready for text_encoder ... resident=0/36', TextEncodingStage 0.066 s = 19% of the request). serve_args are the H100/H200 resident profile's: speed keeps the encoder resident, compile stays off by policy. VALIDATION PENDING (wave 4, 4xB300)."
                         }
                     }
                 },
@@ -1763,6 +1895,36 @@
                             "sglang_ref": "current-main",
                             "serve_args": "--model-type diffusion --warmup-mode server --enable-cfg-parallel --ulysses-degree 2 --dit-cpu-offload false --pin-cpu-memory --dit-layerwise-offload false --performance-mode speed --enable-torch-compile false",
                             "notes": "Keep this profile updated when the best command changes for a SGLang release or commit. Policy-aligned candidate (compile on, offload off) — NOT yet validated on H100; validate (incl. OOM risk) before publishing. FOUR-GPU CELLS ON THE 2026-09-13 4xB200 RUN ARE 3-4x SLOW AND IT IS NOT SGLANG. All three 4-GPU cases (this one, cosmos3 t2v 189f, cosmos3 i2v 189f) came out 3-4x slower than the SAME case and workload on H100 (07-03, 07-30) and H200 (08-26), three runs that agree with each other inside 2%. Every framework in those cells moved together -- sglang 0.25-0.32x, vLLM-Omni 0.28-0.30x, LightX2V 0.22x -- so the earlier note here calling it a suspected sglang regression was wrong, and is retracted. Nor is it the box: every 2-GPU case in that same run is 1.7-2.6x FASTER than its H200 figure. The discriminator is GPU COUNT, not model and not framework; the original investigation missed it because every image case is 2-GPU. Already eliminated, do not repeat: model unchanged since 2025-08-09, workload identical in both artifacts, warmup scales linearly, attention backend (`fa` is WORSE than the auto-selected dynamic_cudnn_sdpa), interconnect topology (NV18 all-pairs at 53.125 GB/s), offload off with 113 GiB free, MoE boundary 0.875 with both experts resident. SETTLED: a fresh 4xB200 does NOT reproduce it. MEASURED 2026-09-18 on a fresh 4xB200 (verda-b200-fin-03-3, same node family, sglang v0.5.20, cosmos3 t2v 189f, identical workload and the same `--attention-backend fa`): 2 GPU on cards 0,1 = 58.05s; 2 GPU on cards 2,3 = 58.24s; 4 GPU = 32.34s. Four-GPU scaling is healthy (1.80x over two), and the 4-GPU figure is 1.64x faster than H200's 53.09s -- the normal Blackwell gain. bench-0912 reported 214.90s for that same cell, 6.6x the healthy number. So the hardware is fine and these three cells are ARTIFACTS OF THAT BOX, not Blackwell and not sglang -- which is also the only account consistent with vLLM-Omni and LightX2V being equally slow there. Two further hypotheses died in the same experiment: `fa` is not pathological on Blackwell (arm A pins it and is 1.9x faster than H200), and the NUMA split that puts GPU3 on a different socket costs nothing measurable (58.05 vs 58.24 across it). RE-MEASURED 2026-09-18 and republished: cosmos3 t2v 214.9 -> 31.7, i2v 216.0 -> 31.9, wan22 669.4 -> 106.5, each now 1.68-1.98x faster than its H200 figure, in line with every 2-GPU cell. The two cosmos3 cells ran against Cosmos3-Nano e59a53c25 rather than the 7a312c868 the rest of the artifact records -- the shared cache resolves `main` online, so the revision could not be pinned; both cells reproduce under 0.1% across two runs and vLLM-Omni moved by the same factor, so the revision does not carry the result."
+                        },
+                        "cand-noexp": {
+                            "description": "Plain CUDA allocator segments, so the copy-engine IPC all-to-all can start. Never selected on its own: A/B arm.",
+                            "sglang_ref": "current-main",
+                            "serve_args": "--model-type diffusion --warmup-mode server --enable-cfg-parallel --ulysses-degree 2 --dit-cpu-offload false --pin-cpu-memory --dit-layerwise-offload false --performance-mode speed --enable-torch-compile false",
+                            "extra_env": {
+                                "PYTORCH_CUDA_ALLOC_CONF": "expandable_segments:False"
+                            },
+                            "notes": "Derived from `default` (the profile B300 selects). Audit 2026-10-23 (Cosmos3/Wan2.2 finding 1): the harness exports PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True (scripts/devbox_run_cases.sh); sharing an expandable segment needs pidfd_getfd, which RunPod containers deny, so every sglang SP cell of the round logged 'IPC all-to-all (multi-rank) unavailable (pidfd_getfd: Operation not permitted); using NCCL'. TRT-LLM already carries this override for the same reason. Accept the arm only if that line is absent. VALIDATION PENDING (wave 4, 4xB300)."
+                        },
+                        "cand-kvg": {
+                            "description": "K/V-gather sequence parallel 2 in place of Ulysses 2. Never selected on its own: A/B arm.",
+                            "sglang_ref": "current-main",
+                            "serve_args": "--model-type diffusion --warmup-mode server --enable-cfg-parallel --kv-gather-degree 2 --dit-cpu-offload false --pin-cpu-memory --dit-layerwise-offload false --performance-mode speed --enable-torch-compile false",
+                            "notes": "Derived from `default` (the profile B300 selects). Audit 2026-10-23 (Cosmos3/Wan2.2 finding 2): the pinned --ulysses-degree 2 overrides sglang's own 4-GPU cfg2 x sp2 default, kv_gather_degree=2 (server_args: 'sp_degree=2 defaults to kv_gather_degree=2 (its measured-win zone)'); dropping the pin alone selects it, the explicit flag records it. On 2xH200 K/V-gather beat Ulysses over NCCL by 3.7-13.7% with identical output (sglang#32667). Layers the gather path cannot take fall back to Ulysses. VALIDATION PENDING (wave 4, 4xB300)."
+                        },
+                        "cand-kvg-noexp": {
+                            "description": "K/V-gather sequence parallel 2, plain allocator segments. Never selected on its own: A/B arm.",
+                            "sglang_ref": "current-main",
+                            "serve_args": "--model-type diffusion --warmup-mode server --enable-cfg-parallel --kv-gather-degree 2 --dit-cpu-offload false --pin-cpu-memory --dit-layerwise-offload false --performance-mode speed --enable-torch-compile false",
+                            "extra_env": {
+                                "PYTORCH_CUDA_ALLOC_CONF": "expandable_segments:False"
+                            },
+                            "notes": "Derived from `default` (the profile B300 selects). Audit 2026-10-23 (Cosmos3/Wan2.2 finding 2): the pinned --ulysses-degree 2 overrides sglang's own 4-GPU cfg2 x sp2 default, kv_gather_degree=2 (server_args: 'sp_degree=2 defaults to kv_gather_degree=2 (its measured-win zone)'); dropping the pin alone selects it, the explicit flag records it. On 2xH200 K/V-gather beat Ulysses over NCCL by 3.7-13.7% with identical output (sglang#32667). Layers the gather path cannot take fall back to Ulysses. Combined with cand-noexp's allocator override. VALIDATION PENDING (wave 4, 4xB300)."
+                        },
+                        "cand-fa4attn": {
+                            "description": "FlashAttention 4 (`--attention-backend fa`) in place of the auto cuDNN SDPA. Never selected on its own: A/B arm.",
+                            "sglang_ref": "current-main",
+                            "serve_args": "--model-type diffusion --warmup-mode server --enable-cfg-parallel --ulysses-degree 2 --dit-cpu-offload false --pin-cpu-memory --dit-layerwise-offload false --performance-mode speed --enable-torch-compile false --attention-backend fa",
+                            "notes": "Derived from `default` (the profile B300 selects). 2026-10-23 B300 bf16 microbenchmark at the real per-rank shapes: FA4 beat cuDNN SDPA by 1-4% at the Wan2.2 (75600 tokens, 20 heads) and H3 Ref2VA (49646, 28 heads) shapes and tied at H3 4-GPU, while sglang's auto selection (dynamic_cudnn_sdpa) runs cuDNN on sm10x. `--attention-backend fa` resolves to the FA4 CuTe kernels on Blackwell (platforms/cuda.py: set_fa_ver(4); head size 128 supported; Cosmos3's pinned fa ran flash_fwd_sm100 on this box). VALIDATION PENDING (wave 4, 4xB300)."
                         }
                     }
                 },
@@ -1930,6 +2092,23 @@
                             },
                             "num_gpus": 4,
                             "notes": " VALIDATION PENDING (round 2026-10-22, 4xB300)."
+                        },
+                        "cand-trtllm-attn": {
+                            "description": "TRTLLM_ATTN (vLLM-Omni's Blackwell default at head_dim 128). Never selected on its own: A/B arm.",
+                            "framework_ref": "vllm-omni main 0da1d831e07f + vllm==0.32.0",
+                            "num_gpus": 4,
+                            "serve_args": "--num-gpus 4 --cfg-parallel-size 2 --usp 2 --vae-patch-parallel-size 4 --vae-parallel-mode spatial_shard_width --no-diffusion-compile-dynamic --video-output-transport {\"enable_device_postprocess\":true}",
+                            "extra_env": {
+                                "DIFFUSION_ATTENTION_BACKEND": "TRTLLM_ATTN"
+                            },
+                            "upstream_recipe": {
+                                "repo": "vllm-project/vllm-omni",
+                                "path": "recipes/Wan-AI/Wan2.2-T2V.md",
+                                "commit": "62ebad2d7cd7",
+                                "commit_date": "2026-09-25",
+                                "section": "8x NVIDIA H20 / H100 / A100 (scaled to 4 GPUs)"
+                            },
+                            "notes": "Derived from `blackwell-4gpu-cfg2-usp2-vaepp-devpost` (the profile B300 selects). Audit 2026-10-23 (Cosmos3/Wan2.2 finding 3): vLLM-Omni 0da1d831 defaults to TRTLLM_ATTN on sm100/sm103 at head_dim 128 (vllm_omni/platforms/cuda/platform.py, 'Defaulting to diffusion attention backend TRTLLM_ATTN'), and the profiles force CUDNN_ATTN from a 2026-09 B200 qwen-image measurement on vLLM 0.29. Confirmation arm only: a 2026-10-23 B300 bf16 microbenchmark at the real per-rank shapes had trtllm-gen dense (the kernel behind TRTLLM_ATTN) 5-20% behind cuDNN SDPA and FA4 at every shape, so the other cells keep CUDNN_ATTN. Grep the server log for the TRTLLM_ATTN selection. VALIDATION PENDING (wave 4, 4xB300)."
                         }
                     }
                 },
@@ -2011,6 +2190,23 @@
                             },
                             "num_gpus": 4,
                             "notes": "Upstream uses Triton LayerNorm in other NVIDIA Wan configs; seq_p_tensor_fusion/prepost triton are exact communication fusions; USE_CHANNELS_LAST_3D documents ~9% on the Wan VAE. seq_p_quant_scheme stays off (fp8/fp4 comm). VALIDATION PENDING (round 2026-10-22, 4xB300)."
+                        },
+                        "cand-sdpa": {
+                            "description": "torch SDPA in both attention slots; parallel settings kept. Never selected on its own: A/B arm.",
+                            "framework_ref": "lightx2v-9bf4d39a-wan22+blackwell-fa2",
+                            "serve_args": "",
+                            "lightx2v_config": {
+                                "self_attn_1_type": "torch_sdpa",
+                                "cross_attn_1_type": "torch_sdpa"
+                            },
+                            "upstream_recipe": {
+                                "repo": "ModelTC/LightX2V",
+                                "path": "configs/wan22/wan_moe_t2v.json",
+                                "commit": "cc942919",
+                                "commit_date": "2026-10-15",
+                                "section": "T2V A14B config (CFG 2 x Ulysses 2 added by this harness), attention slots set to torch_sdpa"
+                            },
+                            "notes": "Derived from `blackwell-fa2` (the profile B300 selects). Audit 2026-10-23 (image finding 8, Cosmos3/Wan2.2 finding 5): every LightX2V Blackwell cell runs FlashAttention 2 (the sm80 mma.sync path on sm103); torch_sdpa (lightx2v/common/ops/attn/torch_sdpa.py, cuDNN / flash SDPA on B300) was never A/B'd. FA4 is not reachable: the installer deletes flash_attn/cute (no nvidia-cutlass-dsl release satisfies it, see the SKILL), which this arm keeps. torch_sdpa ignores cu_seqlens, which is exact here because every call is one unpadded sequence (batch 1 per CFG rank). VALIDATION PENDING (wave 4, 4xB300)."
                         }
                     },
                     "model_override_reason": "Same weights, different packaging: LightX2V reads Wan's original checkpoint layout, while sglang and vLLM-Omni read the Diffusers conversion (Wan2.2-T2V-A14B-Diffusers). Equivalent model path, not a different model."
@@ -2132,6 +2328,132 @@
                                 "section": "4-GPU layout with its FP4 quant_config removed"
                             },
                             "notes": "Wan2.2 T2V 4-GPU A/B on 4xB300 (2026-10-22): FA4 97.42 s (97.20/97.65) against VANILLA 94.55 s (94.52/94.58), so the default (VANILLA) stays selected on Blackwell for Wan2.2. Kept for future A/Bs."
+                        },
+                        "cand-cudnn": {
+                            "description": "cuDNN fused SDPA attention. Never selected on its own: A/B arm.",
+                            "framework_ref": "tensorrt-llm 1.4.0rc1 (tag 0372799d1543, 2026-10-19)",
+                            "num_gpus": 4,
+                            "serve_args": "",
+                            "upstream_recipe": {
+                                "repo": "NVIDIA/TensorRT-LLM",
+                                "path": "examples/visual_gen/configs/wan2.2-t2v-fp4-4gpu.yaml",
+                                "commit": "059396899c11",
+                                "commit_date": "2026-06-17",
+                                "section": "4-GPU layout with its FP4 quant_config removed"
+                            },
+                            "visual_gen_args": {
+                                "attention_config": {
+                                    "backend": "CUDNN"
+                                },
+                                "parallel_config": {
+                                    "cfg_size": 2,
+                                    "ulysses_size": 2,
+                                    "async_ulysses": true,
+                                    "parallel_vae_size": 4
+                                },
+                                "torch_compile_config": {
+                                    "enable": true
+                                },
+                                "cuda_graph_config": {
+                                    "enable": false
+                                },
+                                "compilation_config": {
+                                    "resolutions": [
+                                        [
+                                            720,
+                                            1280
+                                        ]
+                                    ],
+                                    "num_frames": [
+                                        81
+                                    ]
+                                }
+                            },
+                            "notes": "Derived from `default` (the profile B300 selects). Audit 2026-10-23 (Cosmos3/Wan2.2 finding 4; Cosmos3 T2I sub-audit): only VANILLA and FA4 were A/B'd; TRT-LLM 1.4.0rc1 AttentionConfig.backend also takes CUDNN, TRTLLM, CUTEDSL and FLASHINFER (tensorrt_llm/visual_gen/args.py). Everything else is the selected visual_gen_args. VALIDATION PENDING (wave 4, 4xB300)."
+                        },
+                        "cand-trtllm": {
+                            "description": "TRTLLM attention (one confirmation arm). Never selected on its own: A/B arm.",
+                            "framework_ref": "tensorrt-llm 1.4.0rc1 (tag 0372799d1543, 2026-10-19)",
+                            "num_gpus": 4,
+                            "serve_args": "",
+                            "upstream_recipe": {
+                                "repo": "NVIDIA/TensorRT-LLM",
+                                "path": "examples/visual_gen/configs/wan2.2-t2v-fp4-4gpu.yaml",
+                                "commit": "059396899c11",
+                                "commit_date": "2026-06-17",
+                                "section": "4-GPU layout with its FP4 quant_config removed"
+                            },
+                            "visual_gen_args": {
+                                "attention_config": {
+                                    "backend": "TRTLLM"
+                                },
+                                "parallel_config": {
+                                    "cfg_size": 2,
+                                    "ulysses_size": 2,
+                                    "async_ulysses": true,
+                                    "parallel_vae_size": 4
+                                },
+                                "torch_compile_config": {
+                                    "enable": true
+                                },
+                                "cuda_graph_config": {
+                                    "enable": false
+                                },
+                                "compilation_config": {
+                                    "resolutions": [
+                                        [
+                                            720,
+                                            1280
+                                        ]
+                                    ],
+                                    "num_frames": [
+                                        81
+                                    ]
+                                }
+                            },
+                            "notes": "Derived from `default` (the profile B300 selects). Audit 2026-10-23 (Cosmos3/Wan2.2 finding 4; Cosmos3 T2I sub-audit): only VANILLA and FA4 were A/B'd; TRT-LLM 1.4.0rc1 AttentionConfig.backend also takes CUDNN, TRTLLM, CUTEDSL and FLASHINFER (tensorrt_llm/visual_gen/args.py). Everything else is the selected visual_gen_args. Confirmation only: the 2026-10-23 B300 microbenchmark had trtllm-gen dense 5-20% behind cuDNN SDPA / FA4. VALIDATION PENDING (wave 4, 4xB300)."
+                        },
+                        "cand-cutedsl": {
+                            "description": "CuTe DSL dense FMHA attention. Never selected on its own: A/B arm.",
+                            "framework_ref": "tensorrt-llm 1.4.0rc1 (tag 0372799d1543, 2026-10-19)",
+                            "num_gpus": 4,
+                            "serve_args": "",
+                            "upstream_recipe": {
+                                "repo": "NVIDIA/TensorRT-LLM",
+                                "path": "examples/visual_gen/configs/wan2.2-t2v-fp4-4gpu.yaml",
+                                "commit": "059396899c11",
+                                "commit_date": "2026-06-17",
+                                "section": "4-GPU layout with its FP4 quant_config removed"
+                            },
+                            "visual_gen_args": {
+                                "attention_config": {
+                                    "backend": "CUTEDSL"
+                                },
+                                "parallel_config": {
+                                    "cfg_size": 2,
+                                    "ulysses_size": 2,
+                                    "async_ulysses": true,
+                                    "parallel_vae_size": 4
+                                },
+                                "torch_compile_config": {
+                                    "enable": true
+                                },
+                                "cuda_graph_config": {
+                                    "enable": false
+                                },
+                                "compilation_config": {
+                                    "resolutions": [
+                                        [
+                                            720,
+                                            1280
+                                        ]
+                                    ],
+                                    "num_frames": [
+                                        81
+                                    ]
+                                }
+                            },
+                            "notes": "Derived from `default` (the profile B300 selects). Audit 2026-10-23 (Cosmos3/Wan2.2 finding 4; Cosmos3 T2I sub-audit): only VANILLA and FA4 were A/B'd; TRT-LLM 1.4.0rc1 AttentionConfig.backend also takes CUDNN, TRTLLM, CUTEDSL and FLASHINFER (tensorrt_llm/visual_gen/args.py). Everything else is the selected visual_gen_args. The 2026-10-23 B300 microbenchmark had CuTe DSL competitive (fastest under sustained load at the H3 shapes). VALIDATION PENDING (wave 4, 4xB300)."
                         }
                     },
                     "extra_env_reason": "The harness exports PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True. Under it, the CUDA IPC handle TRT-LLM's rank 0 hands its media over with needs pidfd_getfd in the server process, which RunPod containers deny: every request logged 'pidfd_getfd: Operation not permitted' and hung to the read timeout (4xB300, 2026-10-22). Plain segments use cudaIpcMemHandle instead."
@@ -2554,6 +2876,23 @@
                             "extra_env": {
                                 "DIFFUSION_ATTENTION_BACKEND": "FLASH_ATTN"
                             }
+                        },
+                        "cand-vaepp": {
+                            "description": "VAE patch parallel 2 (tiled decode on both GPUs). Never selected on its own: A/B arm.",
+                            "framework_ref": "vllm-omni main 0da1d831e07f + vllm==0.32.0",
+                            "num_gpus": 2,
+                            "serve_args": "--num-gpus 2 --cfg-parallel-size 2 --model-class-name LTX2TwoStagePipeline --stage-init-timeout 600 --no-diffusion-compile-dynamic --vae-patch-parallel-size 2",
+                            "extra_env": {
+                                "DIFFUSION_ATTENTION_BACKEND": "CUDNN_ATTN"
+                            },
+                            "upstream_recipe": {
+                                "repo": "vllm-project/vllm-omni",
+                                "path": "recipes/LTX/LTX-2.md",
+                                "commit": "71f0fa47acff",
+                                "commit_date": "2026-10-19",
+                                "section": "Two-Stage Defaults; Guidance Parallelism"
+                            },
+                            "notes": "Derived from `blackwell-2gpu-twostage-cfg` (the profile B300 selects). Audit 2026-10-23 (image finding 4, LTX sub-audit): vLLM-Omni decodes on one GPU, although its features matrix lists VAE patch parallel (decode) for LTX-2 and LTX-2.3 (docs/user_guide/diffusion_features.md; tile mode, the flag's default); TRT-LLM (parallel_vae 2) and sglang decode on two. Estimated 0.1-0.2 s. VALIDATION PENDING (wave 4, 4xB300)."
                         }
                     },
                     "model_override_reason": "Same weights as the case (Lightricks/LTX-2). Previously pointed at rootonchair/LTX-2-19b-distilled, carried over from the pre-JSON config with no rationale: a distilled checkpoint is explicitly lossy, needs far fewer steps, and would have made this cell unfairly fast against sglang and LightX2V on the full model. vLLM-Omni itself refuses it -- 'LTX2Pipeline requires a regular non-distilled LTX checkpoint' -- which is how it surfaced."
@@ -3267,6 +3606,23 @@
                                 "section": "Serving (ordinary LTX-2.3 two-stage); Guidance Parallelism"
                             },
                             "notes": "As blackwell-2gpu-twostage-cfg with FLASH_ATTN (Hopper). Not measured yet."
+                        },
+                        "cand-vaepp": {
+                            "description": "VAE patch parallel 2 (tiled decode on both GPUs). Never selected on its own: A/B arm.",
+                            "framework_ref": "vllm-omni main 0da1d831e07f + vllm==0.32.0",
+                            "num_gpus": 2,
+                            "serve_args": "--num-gpus 2 --cfg-parallel-size 2 --model-class-name LTX2TwoStagePipeline --stage-init-timeout 600 --no-diffusion-compile-dynamic --vae-patch-parallel-size 2",
+                            "extra_env": {
+                                "DIFFUSION_ATTENTION_BACKEND": "CUDNN_ATTN"
+                            },
+                            "upstream_recipe": {
+                                "repo": "vllm-project/vllm-omni",
+                                "path": "recipes/LTX/LTX-2.md",
+                                "commit": "71f0fa47acff",
+                                "commit_date": "2026-10-19",
+                                "section": "Serving (ordinary LTX-2.3 two-stage); Guidance Parallelism"
+                            },
+                            "notes": "Derived from `blackwell-2gpu-twostage-cfg` (the profile B300 selects). Audit 2026-10-23 (image finding 4, LTX sub-audit): vLLM-Omni decodes on one GPU, although its features matrix lists VAE patch parallel (decode) for LTX-2 and LTX-2.3 (docs/user_guide/diffusion_features.md; tile mode, the flag's default); TRT-LLM (parallel_vae 2) and sglang decode on two. Estimated 0.1-0.2 s. VALIDATION PENDING (wave 4, 4xB300)."
                         }
                     }
                 }
@@ -3402,6 +3758,16 @@
                                 "SGLANG_DISABLE_COSMOS3_GUARDRAILS": "1"
                             },
                             "notes": "Measured on 4xB200 2026-09-13, two interleaved rounds. Against the previous `--tp-size 2 --attention-backend fa` command: 0.765 -> 0.576s and 0.797 -> 0.575s, about -25%, taking the cell from losing to vLLM-Omni (0.651-0.662s) to beating it. TWO changes, both measured separately. (1) CFG parallelism instead of TP: the case is guidance_scale 6.0 -- true CFG, two branches -- so one branch per GPU with the DiT replicated and one combine per step beats splitting every layer and paying an all-reduce per layer (0.765 -> 0.584, 0.797 -> 0.617). It is also what sglang's own runtime would choose: cosmos3 inherits auto_enable_cfg_parallel=True with get_auto_cfg_parallel_degree(2)->2 and _model_default_uses_cfg()->True, but `--tp-size 2` made _has_explicit_parallel_policy() true and suppressed it. The sibling Cosmos3 T2V profile already uses CFG parallel; T2I was the odd one out. (2) torch_cudnn_sdpa instead of fa, on top of that: 0.584 -> 0.576 and 0.617 -> 0.575, same sign both rounds, and far steadier -- its repeats spread 0.9% (0.572-0.577) where fa's swung 0.579-0.792. Exact softmax, same precision class as fa, and the backend vLLM-Omni serves this case with. fa2 does not run at all: there is no native transformer for it, so the loader tries a Diffusers fallback and refuses under tp>1. NOTE: at tp_size=1 that refusal no longer guards this cell -- the harness scans the server log for the fallback markers instead. 4xB300 A/B 2026-10-22: 0.576/0.574 s, ahead of the GB300 compile profile (0.603/0.593)."
+                        },
+                        "cand-autoattn": {
+                            "description": "No attention-backend pin: sglang's own selection. Never selected on its own: A/B arm.",
+                            "sglang_ref": "current-main",
+                            "num_gpus": 2,
+                            "serve_args": "--model-type diffusion --warmup-mode server --tp-size 1 --cfg-parallel-size 2 --dit-layerwise-offload false --performance-mode speed --enable-torch-compile false",
+                            "extra_env": {
+                                "SGLANG_DISABLE_COSMOS3_GUARDRAILS": "1"
+                            },
+                            "notes": "Derived from `blackwell-2gpu-cfg-parallel` (the profile B300 selects). Audit 2026-10-23 (Cosmos3/Wan2.2 finding 8): the SKILL records that whether Cosmos3's pinned attention beats sglang's measured auto-selection on Blackwell is untested; auto resolves to dynamic_cudnn_sdpa on sm10x (cuDNN SDPA, FA4 fallback), and TRT-LLM measured torch SDPA 1.1% ahead of FA4 on these shapes. The pin dropped here is `--attention-backend torch_cudnn_sdpa`. VALIDATION PENDING (wave 4, 4xB300)."
                         }
                     }
                 },
@@ -3504,6 +3870,68 @@
                             "extra_env": {
                                 "DIFFUSION_ATTENTION_BACKEND": "CUDNN_ATTN"
                             }
+                        }
+                    }
+                },
+                "lightx2v": {
+                    "reason": "LightX2V 19c19614 serves Cosmos3 (cosmos3 runner, configs/cosmos3/cosmos3_nano_omni.json), but only a Blackwell profile exists (2026-10-23); Hopper and AMD need their own attention choice and a measurement.",
+                    "model_cls": "cosmos3",
+                    "lightx2v_task": "t2i",
+                    "num_gpus": 2,
+                    "serve_args": "",
+                    "extra_env": {},
+                    "lightx2v_config": {
+                        "sample_guide_scale": 6.0,
+                        "sample_shift": 10.0,
+                        "size": [
+                            720,
+                            1280
+                        ],
+                        "enable_cfg": true,
+                        "rms_norm_type": "one-pass",
+                        "attn_rms_norm_type": "one-pass",
+                        "rope_type": "cosmos3_rope",
+                        "self_attn_type": "torch_sdpa",
+                        "causal_self_attn_type": "torch_sdpa",
+                        "add_resolution_template": false,
+                        "add_duration_template": false,
+                        "cpu_offload": false,
+                        "vae_cpu_offload": false,
+                        "lazy_load": false,
+                        "unload_modules": false,
+                        "num_frames": 1,
+                        "parallel": {
+                            "cfg_p_size": 2
+                        }
+                    },
+                    "model_allow_patterns": [
+                        "transformer/*",
+                        "vae/*",
+                        "scheduler/*",
+                        "text_tokenizer/*",
+                        "*.json",
+                        "*.txt"
+                    ],
+                    "command_profiles": {
+                        "blackwell-cfg2-sdpa": {
+                            "description": "Blackwell LightX2V Cosmos3 t2i: the upstream Nano omni config, torch SDPA, CFG parallel 2, resident.",
+                            "hardware": [
+                                "b200",
+                                "gb200",
+                                "b300",
+                                "gb300"
+                            ],
+                            "framework_ref": "lightx2v main 19c19614b067 (2026-10-21)",
+                            "num_gpus": 2,
+                            "serve_args": "",
+                            "upstream_recipe": {
+                                "repo": "ModelTC/LightX2V",
+                                "path": "configs/cosmos3/cosmos3_nano_omni.json",
+                                "commit": "65935cad",
+                                "commit_date": "2026-09-24",
+                                "section": "Nano omni config, num_frames 1 for the runner's t2i task, CFG parallel 2 (cfg_p_size, as cosmos3_nano_omni_t2v_cfg_ulysses_8gpu.json)"
+                            },
+                            "notes": "Onboarded 2026-10-23 from the audits (image finding 3, Cosmos3/Wan2.2 finding 6): LightX2V 19c19614 has RUNNER_REGISTER('cosmos3') with tasks t2i/t2v/i2v (lightx2v/models/runners/cosmos3/cosmos3_runner.py) and configs/cosmos3/cosmos3_nano_omni.json matches this case: 35 steps (the harness writes infer_steps from the case), sample_guide_scale 6.0, sample_shift 10, 720x1280, resolution and duration templates off, one-pass norms, cosmos3_rope; offload off. Attention: torch_sdpa, LightX2V's own default for Cosmos3 (transformer_weights.py) and cuDNN / flash SDPA on B300; the upstream configs name flash_attn3 (Hopper-only) or flash_attn2 (the sm80 path). Every attention call is one sequence (_infer_attn passes a single cu_seqlens segment), so torch_sdpa ignoring cu_seqlens is exact. Text is tokenized to its real length (no padding), as in the other rows. Compile: Cosmos3TransformerInfer never calls init_compile/run_block at 19c19614, so use_compile is ignored and the transformer runs eager, LightX2V's only path. The response is the sync image endpoint's PNG (pipeline_image_encode.py). Its scheduler has no guidance interval, so LightX2V applies CFG on all 35 steps where sglang, TRT-LLM and vLLM-Omni apply it on the 33 inside the T2I window (400, 1000): MORE work for LightX2V, though latency-neutral under CFG parallel (the uncond rank runs alongside). VALIDATION PENDING (wave 4, 4xB300). First measured by the wave-4 A/B (scripts/run_b300_ab_20261022.sh, WAVE=4)."
                         }
                     }
                 },
@@ -3697,6 +4125,86 @@
                                 "section": "T2I config with CFG parallel 2"
                             },
                             "notes": "4xB300 2026-10-22: server exited before health check in both rounds (CUDA graphs on Cosmos3 T2I)."
+                        },
+                        "cand-cudnn": {
+                            "description": "cuDNN fused SDPA attention. Never selected on its own: A/B arm.",
+                            "framework_ref": "tensorrt-llm 1.4.0rc1 (tag 0372799d1543, 2026-10-19)",
+                            "num_gpus": 2,
+                            "serve_args": "",
+                            "upstream_recipe": {
+                                "repo": "NVIDIA/TensorRT-LLM",
+                                "path": "examples/visual_gen/configs/cosmos3-t2i-1gpu.yaml",
+                                "commit": "78ab4e71cef5",
+                                "commit_date": "2026-07-30",
+                                "section": "T2I config with CFG parallel 2"
+                            },
+                            "visual_gen_args": {
+                                "attention_config": {
+                                    "backend": "CUDNN"
+                                },
+                                "parallel_config": {
+                                    "cfg_size": 2,
+                                    "parallel_vae_size": 2
+                                },
+                                "torch_compile_config": {
+                                    "enable": true
+                                },
+                                "cuda_graph_config": {
+                                    "enable": false
+                                },
+                                "compilation_config": {
+                                    "resolutions": [
+                                        [
+                                            720,
+                                            1280
+                                        ]
+                                    ],
+                                    "num_frames": [
+                                        1
+                                    ]
+                                }
+                            },
+                            "notes": "Derived from `default` (the profile B300 selects). Audit 2026-10-23 (Cosmos3/Wan2.2 finding 4; Cosmos3 T2I sub-audit): only VANILLA and FA4 were A/B'd; TRT-LLM 1.4.0rc1 AttentionConfig.backend also takes CUDNN, TRTLLM, CUTEDSL and FLASHINFER (tensorrt_llm/visual_gen/args.py). Everything else is the selected visual_gen_args. VALIDATION PENDING (wave 4, 4xB300)."
+                        },
+                        "cand-cutedsl": {
+                            "description": "CuTe DSL dense FMHA attention. Never selected on its own: A/B arm.",
+                            "framework_ref": "tensorrt-llm 1.4.0rc1 (tag 0372799d1543, 2026-10-19)",
+                            "num_gpus": 2,
+                            "serve_args": "",
+                            "upstream_recipe": {
+                                "repo": "NVIDIA/TensorRT-LLM",
+                                "path": "examples/visual_gen/configs/cosmos3-t2i-1gpu.yaml",
+                                "commit": "78ab4e71cef5",
+                                "commit_date": "2026-07-30",
+                                "section": "T2I config with CFG parallel 2"
+                            },
+                            "visual_gen_args": {
+                                "attention_config": {
+                                    "backend": "CUTEDSL"
+                                },
+                                "parallel_config": {
+                                    "cfg_size": 2,
+                                    "parallel_vae_size": 2
+                                },
+                                "torch_compile_config": {
+                                    "enable": true
+                                },
+                                "cuda_graph_config": {
+                                    "enable": false
+                                },
+                                "compilation_config": {
+                                    "resolutions": [
+                                        [
+                                            720,
+                                            1280
+                                        ]
+                                    ],
+                                    "num_frames": [
+                                        1
+                                    ]
+                                }
+                            },
+                            "notes": "Derived from `default` (the profile B300 selects). Audit 2026-10-23 (Cosmos3/Wan2.2 finding 4; Cosmos3 T2I sub-audit): only VANILLA and FA4 were A/B'd; TRT-LLM 1.4.0rc1 AttentionConfig.backend also takes CUDNN, TRTLLM, CUTEDSL and FLASHINFER (tensorrt_llm/visual_gen/args.py). Everything else is the selected visual_gen_args. Legal here: _resolve_cosmos3_cross_attention_backend rejects CUTEDSL only under Ulysses or Attention2D, and this cell is CFG 2 alone. VALIDATION PENDING (wave 4, 4xB300)."
                         }
                     },
                     "_previous_failed_entry": {
@@ -3751,14 +4259,30 @@
                 }
             },
             "report_framework_statuses": {
-                "lightx2v": "unsupported",
+                "lightx2v": "no_profile",
                 "comfyui": "unsupported",
                 "fastvideo": "unsupported"
             },
             "report_framework_reasons": {
-                "lightx2v": "No tracked LightX2V Cosmos3 serving path in this benchmark.",
+                "lightx2v": "LightX2V 19c19614 serves Cosmos3 (cosmos3 runner, configs/cosmos3/cosmos3_nano_omni.json), but only a Blackwell profile exists (2026-10-23); Hopper and AMD need their own attention choice and a measurement.",
                 "comfyui": "ComfyUI core has no Cosmos3: comfy/ldm/cosmos covers Cosmos Predict1 and Predict2 only (CosmosT2V/I2V, CosmosT2IPredict2/I2VPredict2 in comfy/supported_models.py) at master 88ab4a06, 2026-09-25.",
                 "fastvideo": "FastVideo main (2b164405c3d1, 2026-10-07) has Cosmos Predict2/2.5 and GEN3C pipelines but no Cosmos3."
+            },
+            "framework_status_by_hardware": {
+                "lightx2v": {
+                    "b200": {
+                        "status": "supported"
+                    },
+                    "gb200": {
+                        "status": "supported"
+                    },
+                    "b300": {
+                        "status": "supported"
+                    },
+                    "gb300": {
+                        "status": "supported"
+                    }
+                }
             }
         },
         {
@@ -3879,6 +4403,40 @@
                             "sglang_ref": "current-main",
                             "serve_args": "--model-type diffusion --warmup-mode server --attention-backend fa --cfg-parallel-size 2 --ulysses-degree 2 --dit-layerwise-offload false --performance-mode speed --enable-torch-compile false",
                             "notes": "Measured H100 A/B 2026-07-03 (steady-state single_e2e): 55.115s (auto default) -> 53.614s (-2.7%)."
+                        },
+                        "cand-noexp": {
+                            "description": "Plain CUDA allocator segments, so the copy-engine IPC all-to-all can start. Never selected on its own: A/B arm.",
+                            "sglang_ref": "sgl-project/sglang@3d540563916394115f9612f30601ae3fa97ada7c",
+                            "num_gpus": 4,
+                            "serve_args": "--model-type diffusion --warmup-mode server --attention-backend fa --cfg-parallel-size 2 --ulysses-degree 2",
+                            "extra_env": {
+                                "PYTORCH_CUDA_ALLOC_CONF": "expandable_segments:False"
+                            },
+                            "notes": "Derived from `default` (the profile B300 selects). Audit 2026-10-23 (Cosmos3/Wan2.2 finding 1): the harness exports PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True (scripts/devbox_run_cases.sh); sharing an expandable segment needs pidfd_getfd, which RunPod containers deny, so every sglang SP cell of the round logged 'IPC all-to-all (multi-rank) unavailable (pidfd_getfd: Operation not permitted); using NCCL'. TRT-LLM already carries this override for the same reason. Accept the arm only if that line is absent. VALIDATION PENDING (wave 4, 4xB300)."
+                        },
+                        "cand-kvg": {
+                            "description": "K/V-gather sequence parallel 2 in place of Ulysses 2. Never selected on its own: A/B arm.",
+                            "sglang_ref": "sgl-project/sglang@3d540563916394115f9612f30601ae3fa97ada7c",
+                            "num_gpus": 4,
+                            "serve_args": "--model-type diffusion --warmup-mode server --attention-backend fa --cfg-parallel-size 2 --kv-gather-degree 2",
+                            "notes": "Derived from `default` (the profile B300 selects). Audit 2026-10-23 (Cosmos3/Wan2.2 finding 2): the pinned --ulysses-degree 2 overrides sglang's own 4-GPU cfg2 x sp2 default, kv_gather_degree=2 (server_args: 'sp_degree=2 defaults to kv_gather_degree=2 (its measured-win zone)'); dropping the pin alone selects it, the explicit flag records it. On 2xH200 K/V-gather beat Ulysses over NCCL by 3.7-13.7% with identical output (sglang#32667). Layers the gather path cannot take fall back to Ulysses. VALIDATION PENDING (wave 4, 4xB300)."
+                        },
+                        "cand-kvg-noexp": {
+                            "description": "K/V-gather sequence parallel 2, plain allocator segments. Never selected on its own: A/B arm.",
+                            "sglang_ref": "sgl-project/sglang@3d540563916394115f9612f30601ae3fa97ada7c",
+                            "num_gpus": 4,
+                            "serve_args": "--model-type diffusion --warmup-mode server --attention-backend fa --cfg-parallel-size 2 --kv-gather-degree 2",
+                            "extra_env": {
+                                "PYTORCH_CUDA_ALLOC_CONF": "expandable_segments:False"
+                            },
+                            "notes": "Derived from `default` (the profile B300 selects). Audit 2026-10-23 (Cosmos3/Wan2.2 finding 2): the pinned --ulysses-degree 2 overrides sglang's own 4-GPU cfg2 x sp2 default, kv_gather_degree=2 (server_args: 'sp_degree=2 defaults to kv_gather_degree=2 (its measured-win zone)'); dropping the pin alone selects it, the explicit flag records it. On 2xH200 K/V-gather beat Ulysses over NCCL by 3.7-13.7% with identical output (sglang#32667). Layers the gather path cannot take fall back to Ulysses. Combined with cand-noexp's allocator override. VALIDATION PENDING (wave 4, 4xB300)."
+                        },
+                        "cand-autoattn": {
+                            "description": "No attention-backend pin: sglang's own selection. Never selected on its own: A/B arm.",
+                            "sglang_ref": "sgl-project/sglang@3d540563916394115f9612f30601ae3fa97ada7c",
+                            "num_gpus": 4,
+                            "serve_args": "--model-type diffusion --warmup-mode server --cfg-parallel-size 2 --ulysses-degree 2",
+                            "notes": "Derived from `default` (the profile B300 selects). Audit 2026-10-23 (Cosmos3/Wan2.2 finding 8): the SKILL records that whether Cosmos3's pinned attention beats sglang's measured auto-selection on Blackwell is untested; auto resolves to dynamic_cudnn_sdpa on sm10x (cuDNN SDPA, FA4 fallback), and TRT-LLM measured torch SDPA 1.1% ahead of FA4 on these shapes. The pin dropped here is `--attention-backend fa`. VALIDATION PENDING (wave 4, 4xB300)."
                         }
                     }
                 },
@@ -4064,6 +4622,71 @@
                         }
                     }
                 },
+                "lightx2v": {
+                    "reason": "LightX2V 19c19614 serves Cosmos3 (cosmos3 runner, configs/cosmos3/cosmos3_nano_omni.json), but only a Blackwell profile exists (2026-10-23); Hopper and AMD need their own attention choice and a measurement.",
+                    "model_cls": "cosmos3",
+                    "lightx2v_task": "t2v",
+                    "num_gpus": 4,
+                    "serve_args": "",
+                    "extra_env": {},
+                    "lightx2v_config": {
+                        "sample_guide_scale": 6.0,
+                        "sample_shift": 10.0,
+                        "size": [
+                            720,
+                            1280
+                        ],
+                        "enable_cfg": true,
+                        "rms_norm_type": "one-pass",
+                        "attn_rms_norm_type": "one-pass",
+                        "rope_type": "cosmos3_rope",
+                        "self_attn_type": "torch_sdpa",
+                        "causal_self_attn_type": "torch_sdpa",
+                        "add_resolution_template": false,
+                        "add_duration_template": false,
+                        "cpu_offload": false,
+                        "vae_cpu_offload": false,
+                        "lazy_load": false,
+                        "unload_modules": false,
+                        "num_frames": 189,
+                        "fps": 24.0,
+                        "parallel": {
+                            "cfg_p_size": 2,
+                            "seq_p_size": 2,
+                            "seq_p_attn_type": "ulysses"
+                        }
+                    },
+                    "model_allow_patterns": [
+                        "transformer/*",
+                        "vae/*",
+                        "scheduler/*",
+                        "text_tokenizer/*",
+                        "*.json",
+                        "*.txt"
+                    ],
+                    "command_profiles": {
+                        "blackwell-cfg2-sp2-sdpa": {
+                            "description": "Blackwell LightX2V Cosmos3 t2v: the upstream Nano omni config, torch SDPA, CFG 2 x Ulysses 2, resident.",
+                            "hardware": [
+                                "b200",
+                                "gb200",
+                                "b300",
+                                "gb300"
+                            ],
+                            "framework_ref": "lightx2v main 19c19614b067 (2026-10-21)",
+                            "num_gpus": 4,
+                            "serve_args": "",
+                            "upstream_recipe": {
+                                "repo": "ModelTC/LightX2V",
+                                "path": "configs/cosmos3/cosmos3_nano_omni.json",
+                                "commit": "65935cad",
+                                "commit_date": "2026-09-24",
+                                "section": "Nano omni config with cosmos3_nano_omni_t2v_cfg_ulysses_8gpu.json's CFG x Ulysses layout, scaled to 2 x 2"
+                            },
+                            "notes": "Onboarded 2026-10-23 from the audits (image finding 3, Cosmos3/Wan2.2 finding 6): LightX2V 19c19614 has RUNNER_REGISTER('cosmos3') with tasks t2i/t2v/i2v (lightx2v/models/runners/cosmos3/cosmos3_runner.py) and configs/cosmos3/cosmos3_nano_omni.json matches this case: 35 steps (the harness writes infer_steps from the case), sample_guide_scale 6.0, sample_shift 10, 720x1280, resolution and duration templates off, one-pass norms, cosmos3_rope; offload off. Attention: torch_sdpa, LightX2V's own default for Cosmos3 (transformer_weights.py) and cuDNN / flash SDPA on B300; the upstream configs name flash_attn3 (Hopper-only) or flash_attn2 (the sm80 path). Every attention call is one sequence (_infer_attn passes a single cu_seqlens segment), so torch_sdpa ignoring cu_seqlens is exact. Text is tokenized to its real length (no padding), as in the other rows. Compile: Cosmos3TransformerInfer never calls init_compile/run_block at 19c19614, so use_compile is ignored and the transformer runs eager, LightX2V's only path. The negative prompt comes from the request (the case's), as for the other rows. VALIDATION PENDING (wave 4, 4xB300). First measured by the wave-4 A/B (scripts/run_b300_ab_20261022.sh, WAVE=4)."
+                        }
+                    }
+                },
                 "trtllm-visual": {
                     "num_gpus": 4,
                     "serve_args": "",
@@ -4182,20 +4805,77 @@
                                 "section": "Blackwell BF16 config: attention_config.backend FA4"
                             },
                             "notes": "4xB300 A/B 2026-10-22: 26.31 s against VANILLA 26.02 s; VANILLA stays."
+                        },
+                        "cand-cudnn": {
+                            "description": "cuDNN fused SDPA attention. Never selected on its own: A/B arm.",
+                            "framework_ref": "tensorrt-llm 1.4.0rc1 (tag 0372799d1543, 2026-10-19)",
+                            "num_gpus": 4,
+                            "serve_args": "",
+                            "upstream_recipe": {
+                                "repo": "NVIDIA/TensorRT-LLM",
+                                "path": "examples/visual_gen/configs/cosmos3-super-4gpu.yaml",
+                                "commit": "f50ca53daedc",
+                                "commit_date": "2026-07-02",
+                                "section": "4-GPU layout, applied to Nano"
+                            },
+                            "visual_gen_args": {
+                                "attention_config": {
+                                    "backend": "CUDNN"
+                                },
+                                "parallel_config": {
+                                    "cfg_size": 2,
+                                    "ulysses_size": 2,
+                                    "parallel_vae_size": 4
+                                },
+                                "torch_compile_config": {
+                                    "enable": true
+                                },
+                                "cuda_graph_config": {
+                                    "enable": false
+                                },
+                                "compilation_config": {
+                                    "resolutions": [
+                                        [
+                                            720,
+                                            1280
+                                        ]
+                                    ],
+                                    "num_frames": [
+                                        189
+                                    ]
+                                }
+                            },
+                            "notes": "Derived from `default` (the profile B300 selects). Audit 2026-10-23 (Cosmos3/Wan2.2 finding 4; Cosmos3 T2I sub-audit): only VANILLA and FA4 were A/B'd; TRT-LLM 1.4.0rc1 AttentionConfig.backend also takes CUDNN, TRTLLM, CUTEDSL and FLASHINFER (tensorrt_llm/visual_gen/args.py). Everything else is the selected visual_gen_args. No CUTEDSL arm on this cell: under Ulysses 2 Cosmos3's cross-attention refuses it ('Cosmos3 cross-attention with Ulysses cannot use the CUTEDSL backend', transformer_cosmos3.py). The cuDNN backend raises on a key_padding_mask rather than dropping it. VALIDATION PENDING (wave 4, 4xB300)."
                         }
                     },
                     "extra_env_reason": "The harness exports PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True. Under it, the CUDA IPC handle TRT-LLM's rank 0 hands its media over with needs pidfd_getfd in the server process, which RunPod containers deny: every request logged 'pidfd_getfd: Operation not permitted' and hung to the read timeout (4xB300, 2026-10-22). Plain segments use cudaIpcMemHandle instead."
                 }
             },
             "report_framework_statuses": {
-                "lightx2v": "unsupported",
+                "lightx2v": "no_profile",
                 "comfyui": "unsupported",
                 "fastvideo": "unsupported"
             },
             "report_framework_reasons": {
-                "lightx2v": "No tracked LightX2V Cosmos3 serving path in this benchmark.",
+                "lightx2v": "LightX2V 19c19614 serves Cosmos3 (cosmos3 runner, configs/cosmos3/cosmos3_nano_omni.json), but only a Blackwell profile exists (2026-10-23); Hopper and AMD need their own attention choice and a measurement.",
                 "comfyui": "ComfyUI core has no Cosmos3: comfy/ldm/cosmos covers Cosmos Predict1 and Predict2 only (CosmosT2V/I2V, CosmosT2IPredict2/I2VPredict2 in comfy/supported_models.py) at master 88ab4a06, 2026-09-25.",
                 "fastvideo": "FastVideo main (2b164405c3d1, 2026-10-07) has Cosmos Predict2/2.5 and GEN3C pipelines but no Cosmos3."
+            },
+            "framework_status_by_hardware": {
+                "lightx2v": {
+                    "b200": {
+                        "status": "supported"
+                    },
+                    "gb200": {
+                        "status": "supported"
+                    },
+                    "b300": {
+                        "status": "supported"
+                    },
+                    "gb300": {
+                        "status": "supported"
+                    }
+                }
             }
         },
         {
@@ -4302,6 +4982,40 @@
                             "extra_env": {
                                 "SGLANG_DISABLE_COSMOS3_GUARDRAILS": "1"
                             }
+                        },
+                        "cand-noexp": {
+                            "description": "Plain CUDA allocator segments, so the copy-engine IPC all-to-all can start. Never selected on its own: A/B arm.",
+                            "sglang_ref": "sgl-project/sglang@3d540563916394115f9612f30601ae3fa97ada7c",
+                            "num_gpus": 4,
+                            "serve_args": "--model-type diffusion --warmup-mode server --attention-backend fa --cfg-parallel-size 2 --ulysses-degree 2 --dit-layerwise-offload false --performance-mode speed --enable-torch-compile false",
+                            "extra_env": {
+                                "PYTORCH_CUDA_ALLOC_CONF": "expandable_segments:False"
+                            },
+                            "notes": "Derived from `default` (the profile B300 selects). Audit 2026-10-23 (Cosmos3/Wan2.2 finding 1): the harness exports PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True (scripts/devbox_run_cases.sh); sharing an expandable segment needs pidfd_getfd, which RunPod containers deny, so every sglang SP cell of the round logged 'IPC all-to-all (multi-rank) unavailable (pidfd_getfd: Operation not permitted); using NCCL'. TRT-LLM already carries this override for the same reason. Accept the arm only if that line is absent. VALIDATION PENDING (wave 4, 4xB300)."
+                        },
+                        "cand-kvg": {
+                            "description": "K/V-gather sequence parallel 2 in place of Ulysses 2. Never selected on its own: A/B arm.",
+                            "sglang_ref": "sgl-project/sglang@3d540563916394115f9612f30601ae3fa97ada7c",
+                            "num_gpus": 4,
+                            "serve_args": "--model-type diffusion --warmup-mode server --attention-backend fa --cfg-parallel-size 2 --kv-gather-degree 2 --dit-layerwise-offload false --performance-mode speed --enable-torch-compile false",
+                            "notes": "Derived from `default` (the profile B300 selects). Audit 2026-10-23 (Cosmos3/Wan2.2 finding 2): the pinned --ulysses-degree 2 overrides sglang's own 4-GPU cfg2 x sp2 default, kv_gather_degree=2 (server_args: 'sp_degree=2 defaults to kv_gather_degree=2 (its measured-win zone)'); dropping the pin alone selects it, the explicit flag records it. On 2xH200 K/V-gather beat Ulysses over NCCL by 3.7-13.7% with identical output (sglang#32667). Layers the gather path cannot take fall back to Ulysses. VALIDATION PENDING (wave 4, 4xB300)."
+                        },
+                        "cand-kvg-noexp": {
+                            "description": "K/V-gather sequence parallel 2, plain allocator segments. Never selected on its own: A/B arm.",
+                            "sglang_ref": "sgl-project/sglang@3d540563916394115f9612f30601ae3fa97ada7c",
+                            "num_gpus": 4,
+                            "serve_args": "--model-type diffusion --warmup-mode server --attention-backend fa --cfg-parallel-size 2 --kv-gather-degree 2 --dit-layerwise-offload false --performance-mode speed --enable-torch-compile false",
+                            "extra_env": {
+                                "PYTORCH_CUDA_ALLOC_CONF": "expandable_segments:False"
+                            },
+                            "notes": "Derived from `default` (the profile B300 selects). Audit 2026-10-23 (Cosmos3/Wan2.2 finding 2): the pinned --ulysses-degree 2 overrides sglang's own 4-GPU cfg2 x sp2 default, kv_gather_degree=2 (server_args: 'sp_degree=2 defaults to kv_gather_degree=2 (its measured-win zone)'); dropping the pin alone selects it, the explicit flag records it. On 2xH200 K/V-gather beat Ulysses over NCCL by 3.7-13.7% with identical output (sglang#32667). Layers the gather path cannot take fall back to Ulysses. Combined with cand-noexp's allocator override. VALIDATION PENDING (wave 4, 4xB300)."
+                        },
+                        "cand-autoattn": {
+                            "description": "No attention-backend pin: sglang's own selection. Never selected on its own: A/B arm.",
+                            "sglang_ref": "sgl-project/sglang@3d540563916394115f9612f30601ae3fa97ada7c",
+                            "num_gpus": 4,
+                            "serve_args": "--model-type diffusion --warmup-mode server --cfg-parallel-size 2 --ulysses-degree 2 --dit-layerwise-offload false --performance-mode speed --enable-torch-compile false",
+                            "notes": "Derived from `default` (the profile B300 selects). Audit 2026-10-23 (Cosmos3/Wan2.2 finding 8): the SKILL records that whether Cosmos3's pinned attention beats sglang's measured auto-selection on Blackwell is untested; auto resolves to dynamic_cudnn_sdpa on sm10x (cuDNN SDPA, FA4 fallback), and TRT-LLM measured torch SDPA 1.1% ahead of FA4 on these shapes. The pin dropped here is `--attention-backend fa`. VALIDATION PENDING (wave 4, 4xB300)."
                         }
                     }
                 },
@@ -4474,6 +5188,71 @@
                         }
                     }
                 },
+                "lightx2v": {
+                    "reason": "LightX2V 19c19614 serves Cosmos3 (cosmos3 runner, configs/cosmos3/cosmos3_nano_omni.json), but only a Blackwell profile exists (2026-10-23); Hopper and AMD need their own attention choice and a measurement.",
+                    "model_cls": "cosmos3",
+                    "lightx2v_task": "i2v",
+                    "num_gpus": 4,
+                    "serve_args": "",
+                    "extra_env": {},
+                    "lightx2v_config": {
+                        "sample_guide_scale": 6.0,
+                        "sample_shift": 10.0,
+                        "size": [
+                            720,
+                            1280
+                        ],
+                        "enable_cfg": true,
+                        "rms_norm_type": "one-pass",
+                        "attn_rms_norm_type": "one-pass",
+                        "rope_type": "cosmos3_rope",
+                        "self_attn_type": "torch_sdpa",
+                        "causal_self_attn_type": "torch_sdpa",
+                        "add_resolution_template": false,
+                        "add_duration_template": false,
+                        "cpu_offload": false,
+                        "vae_cpu_offload": false,
+                        "lazy_load": false,
+                        "unload_modules": false,
+                        "num_frames": 189,
+                        "fps": 24.0,
+                        "parallel": {
+                            "cfg_p_size": 2,
+                            "seq_p_size": 2,
+                            "seq_p_attn_type": "ulysses"
+                        }
+                    },
+                    "model_allow_patterns": [
+                        "transformer/*",
+                        "vae/*",
+                        "scheduler/*",
+                        "text_tokenizer/*",
+                        "*.json",
+                        "*.txt"
+                    ],
+                    "command_profiles": {
+                        "blackwell-cfg2-sp2-sdpa": {
+                            "description": "Blackwell LightX2V Cosmos3 i2v: the upstream Nano omni config, torch SDPA, CFG 2 x Ulysses 2, resident.",
+                            "hardware": [
+                                "b200",
+                                "gb200",
+                                "b300",
+                                "gb300"
+                            ],
+                            "framework_ref": "lightx2v main 19c19614b067 (2026-10-21)",
+                            "num_gpus": 4,
+                            "serve_args": "",
+                            "upstream_recipe": {
+                                "repo": "ModelTC/LightX2V",
+                                "path": "configs/cosmos3/cosmos3_nano_omni.json",
+                                "commit": "65935cad",
+                                "commit_date": "2026-09-24",
+                                "section": "Nano omni config (scripts/cosmos3/cosmos3_nano_omni_i2v.sh) with the CFG x Ulysses layout scaled to 2 x 2"
+                            },
+                            "notes": "Onboarded 2026-10-23 from the audits (image finding 3, Cosmos3/Wan2.2 finding 6): LightX2V 19c19614 has RUNNER_REGISTER('cosmos3') with tasks t2i/t2v/i2v (lightx2v/models/runners/cosmos3/cosmos3_runner.py) and configs/cosmos3/cosmos3_nano_omni.json matches this case: 35 steps (the harness writes infer_steps from the case), sample_guide_scale 6.0, sample_shift 10, 720x1280, resolution and duration templates off, one-pass norms, cosmos3_rope; offload off. Attention: torch_sdpa, LightX2V's own default for Cosmos3 (transformer_weights.py) and cuDNN / flash SDPA on B300; the upstream configs name flash_attn3 (Hopper-only) or flash_attn2 (the sm80 path). Every attention call is one sequence (_infer_attn passes a single cu_seqlens segment), so torch_sdpa ignoring cu_seqlens is exact. Text is tokenized to its real length (no padding), as in the other rows. Compile: Cosmos3TransformerInfer never calls init_compile/run_block at 19c19614, so use_compile is ignored and the transformer runs eager, LightX2V's only path. The reference arrives as image_path (a data URI). Two differences from sglang, both LightX2V's own: it resizes the image straight to 1280x720 (no aspect-preserving crop: numerics only), and VAE-encodes it repeated across all 189 frames before keeping the first latent (_prepare_i2v_condition_latents), the extra ~1.9 s TRT-LLM also pays. VALIDATION PENDING (wave 4, 4xB300). First measured by the wave-4 A/B (scripts/run_b300_ab_20261022.sh, WAVE=4)."
+                        }
+                    }
+                },
                 "trtllm-visual": {
                     "num_gpus": 4,
                     "serve_args": "",
@@ -4598,14 +5377,30 @@
                 }
             },
             "report_framework_statuses": {
-                "lightx2v": "unsupported",
+                "lightx2v": "no_profile",
                 "comfyui": "unsupported",
                 "fastvideo": "unsupported"
             },
             "report_framework_reasons": {
-                "lightx2v": "No tracked LightX2V Cosmos3 serving path in this benchmark.",
+                "lightx2v": "LightX2V 19c19614 serves Cosmos3 (cosmos3 runner, configs/cosmos3/cosmos3_nano_omni.json), but only a Blackwell profile exists (2026-10-23); Hopper and AMD need their own attention choice and a measurement.",
                 "comfyui": "ComfyUI core has no Cosmos3: comfy/ldm/cosmos covers Cosmos Predict1 and Predict2 only (CosmosT2V/I2V, CosmosT2IPredict2/I2VPredict2 in comfy/supported_models.py) at master 88ab4a06, 2026-09-25.",
                 "fastvideo": "FastVideo main (2b164405c3d1, 2026-10-07) has Cosmos Predict2/2.5 and GEN3C pipelines but no Cosmos3."
+            },
+            "framework_status_by_hardware": {
+                "lightx2v": {
+                    "b200": {
+                        "status": "supported"
+                    },
+                    "gb200": {
+                        "status": "supported"
+                    },
+                    "b300": {
+                        "status": "supported"
+                    },
+                    "gb300": {
+                        "status": "supported"
+                    }
+                }
             }
         },
         {
@@ -4707,6 +5502,25 @@
                             },
                             "notes": "Derived 2026-10-10 from docs/cookbook/diffusion/MiniMax/MiniMax-H3.mdx (sglang main 3831e7e09): its config builder applies `--attention-backend aiter` + SGLANG_USE_AITER=1 on mi300x/mi355x and keeps weights resident off the consumer tier; the topology is the datacenter Ulysses-2 command this case uses on B200. VALIDATION PENDING (2026-10-10 round): derived, not yet measured on this hardware. MINIMAX_H3_VAE_DECODER_FUSED_NORM=0 (2026-10-10, MI355X, sglang 3831e7e09): the VAE decoder's fused scale-add RMSNorm Triton kernels (#41906) use PTX inline asm (mul.rn.f32, constraint 'f') from sglang/kernels/numerics.py; on ROCm they fail to compile and decode to an all-NaN video. The flag keeps the eager norm path, which computes the same values.",
                             "policy_exception": "Same correctness exception as the default profile (checked 2026-08-07): MiniMax-H3's torch.compile path changes numerical output per the sglang cookbook, so it is excluded regardless of hardware."
+                        },
+                        "cand-noexp": {
+                            "description": "Plain CUDA allocator segments, so the copy-engine IPC all-to-all can start. Never selected on its own: A/B arm.",
+                            "sglang_ref": "8d0c77081 (2026-08-07 checkout, includes sgl-project/sglang#33969)",
+                            "num_gpus": 2,
+                            "serve_args": "--model-type diffusion --warmup-mode server --model-variant fl2va --ulysses-degree 2 --performance-mode speed --enable-torch-compile false",
+                            "policy_exception": "Same correctness exception as the default profile (checked 2026-08-07): MiniMax-H3's torch.compile path changes numerical output per the sglang cookbook, so it is excluded regardless of hardware.",
+                            "extra_env": {
+                                "PYTORCH_CUDA_ALLOC_CONF": "expandable_segments:False"
+                            },
+                            "notes": "Derived from `b200-2gpu` (the profile B300 selects). Audit 2026-10-23 (Cosmos3/Wan2.2 finding 1): the harness exports PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True (scripts/devbox_run_cases.sh); sharing an expandable segment needs pidfd_getfd, which RunPod containers deny, so every sglang SP cell of the round logged 'IPC all-to-all (multi-rank) unavailable (pidfd_getfd: Operation not permitted); using NCCL'. TRT-LLM already carries this override for the same reason. Accept the arm only if that line is absent. VALIDATION PENDING (wave 4, 4xB300)."
+                        },
+                        "cand-fa4attn": {
+                            "description": "FlashAttention 4 (`--attention-backend fa`) in place of the auto cuDNN SDPA. Never selected on its own: A/B arm.",
+                            "sglang_ref": "8d0c77081 (2026-08-07 checkout, includes sgl-project/sglang#33969)",
+                            "num_gpus": 2,
+                            "serve_args": "--model-type diffusion --warmup-mode server --model-variant fl2va --ulysses-degree 2 --performance-mode speed --enable-torch-compile false --attention-backend fa",
+                            "policy_exception": "Same correctness exception as the default profile (checked 2026-08-07): MiniMax-H3's torch.compile path changes numerical output per the sglang cookbook, so it is excluded regardless of hardware.",
+                            "notes": "Derived from `b200-2gpu` (the profile B300 selects). 2026-10-23 B300 bf16 microbenchmark at the real per-rank shapes: FA4 beat cuDNN SDPA by 1-4% at the Wan2.2 (75600 tokens, 20 heads) and H3 Ref2VA (49646, 28 heads) shapes and tied at H3 4-GPU, while sglang's auto selection (dynamic_cudnn_sdpa) runs cuDNN on sm10x. `--attention-backend fa` resolves to the FA4 CuTe kernels on Blackwell (platforms/cuda.py: set_fa_ver(4); head size 128 supported; Cosmos3's pinned fa ran flash_fwd_sm100 on this box). VALIDATION PENDING (wave 4, 4xB300)."
                         }
                     }
                 },
@@ -4869,6 +5683,20 @@
                             "extra_env": {},
                             "num_gpus": 2,
                             "notes": " VALIDATION PENDING (round 2026-10-22, 4xB300)."
+                        },
+                        "cand-usp2": {
+                            "description": "The recipe's high-memory pattern at 2 GPUs: Ulysses 2, no TP. Never selected on its own: A/B arm.",
+                            "num_gpus": 2,
+                            "serve_args": "--trust-remote-code --task-type fl2va --num-gpus 2 --usp 2 --ring 1 --text-encoder-tp-size 2 --vae-patch-parallel-size 2 --vae-parallel-mode tile --vae-use-tiling --diffusion-attention-backend CUDNN_ATTN --no-diffusion-compile-dynamic",
+                            "extra_env": {},
+                            "upstream_recipe": {
+                                "repo": "vllm-project/vllm-omni",
+                                "path": "recipes/MiniMaxAI/MiniMax-H3.md",
+                                "commit": "95b1d97f2ec2",
+                                "commit_date": "2026-10-21",
+                                "section": "Four GPUs: throughput-oriented combined service (no offload, Ulysses, tiled VAE patch parallel, regional compile), scaled to 2 GPUs"
+                            },
+                            "notes": "Derived from `blackwell-2gpu-static` (the profile B300 selects). Audit 2026-10-23 (H3 finding 5): the selected command is the consumer RTX recipe's placement (TP2) without its offload; the recipe's high-memory pattern (recipes/MiniMaxAI/MiniMax-H3.md 'Four GPUs: throughput-oriented combined service': no offload, Ulysses, tiled VAE patch parallel, regional compile, Ring and TP 1) was last measured as USP2 on B200 at an older build (79.4 vs 73.55 s), never on B300 or 0da1d831. Scaled to 2 GPUs; text-encoder TP 2 and static compile kept from the selected profile. Attention stays CUDNN_ATTN rather than the recipe's TRTLLM_ATTN default: the 2026-10-23 B300 microbenchmark had trtllm-gen 5-20% behind cuDNN at the H3 shapes. VALIDATION PENDING (wave 4, 4xB300)."
                         }
                     },
                     "reason": "Empirically validated 2026-08-07, first on minimax-h3-5090-2gpu-v4 (2x RTX 5090) then on 2xB200: the default (compiled) profile segfaults identically on both GPU classes 1 step into denoising (see command_profiles.default.notes) -- a confirmed hardware-independent vLLM-Omni bug, despite the recipe's own claim that torch.compile is 'not enabled by default on consumer paths.' --enforce-eager avoids that segfault, but on RTX 5090 it fails differently at startup (a diffusion worker process dies before completing its init handshake, surfaced as EOFError) and never completes a request on that GPU class. On 2xB200 the identical --enforce-eager command works cleanly and completes a correct generation -- see command_profiles.b200-2gpu for the validated numbers and the sglang comparison on the same hardware. Net: vLLM-Omni H3 support is real but fragile below the B200 class tested here; RTX 5090 has no working profile for this case in either variant."
@@ -5101,6 +5929,23 @@
                                 "section": "BF16 multi-GPU config scaled to pure Ulysses 2"
                             },
                             "notes": "H3 T2VA 2-GPU A/B on 4xB300 (2026-10-22): FA4 76.63 s against VANILLA 74.33 s, so the default (VANILLA) stays selected on Blackwell for H3. Kept for future A/Bs."
+                        },
+                        "cand-omp8": {
+                            "description": "OMP_NUM_THREADS=8 per worker (VANILLA kept: 37742 rows split evenly). Never selected on its own: A/B arm.",
+                            "framework_ref": "tensorrt-llm 1.4.0rc1 (tag 0372799d1543, 2026-10-19)",
+                            "num_gpus": 2,
+                            "serve_args": "",
+                            "upstream_recipe": {
+                                "repo": "NVIDIA/TensorRT-LLM",
+                                "path": "examples/visual_gen/configs/minimax-h3-bf16-8gpu.yaml",
+                                "commit": "92d23a83799d",
+                                "commit_date": "2026-10-09",
+                                "section": "BF16 multi-GPU config scaled to pure Ulysses 2"
+                            },
+                            "extra_env": {
+                                "OMP_NUM_THREADS": "8"
+                            },
+                            "notes": "Derived from `default` (the profile B300 selects). Audit 2026-10-23 (H3 finding 1): TRT-LLM spends 5 s (2 GPU), 8 s (Ref2VA) and 11 s (4 GPU) on the CPU before its denoise loop (row_timestep_plan: torch.full, scatters and torch.unique over the whole sequence per step, on every rank) while its workers share the host's cores with OMP_NUM_THREADS unset. The harness sets OMP_NUM_THREADS for no framework; sglang caps its workers itself (min(16, cores / GPUs), gpu_worker._worker_cpu_intra_op_threads), vLLM-Omni's workers take 1 (set_multiprocessing_worker_envs) and LightX2V's torchrun sets 1, while TRT-LLM and FastVideo keep one thread per core in every worker. VALIDATION PENDING (wave 4, 4xB300)."
                         }
                     },
                     "extra_env_reason": "The harness exports PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True. Under it, the CUDA IPC handle TRT-LLM's rank 0 hands its media over with needs pidfd_getfd in the server process, which RunPod containers deny: every request logged 'pidfd_getfd: Operation not permitted' and hung to the read timeout (4xB300, 2026-10-22). Plain segments use cudaIpcMemHandle instead."
@@ -5377,6 +6222,23 @@
                                 "FASTVIDEO_FA4": "1"
                             },
                             "notes": "The default profile with the DiT replicated (a 183 GB B200 holds both 66 GB models and the 11 GB of VAEs, ~40 GB to spare; FastVideo's measured GB200 FastH3 layout replicates it) and FA4, which FastVideo never auto-selects (FASTVIDEO_FA4=1). VALIDATION PENDING (2026-10-08): check 'Using FlashAttention-4 backend' and the memory headroom on B200, and A/B against FSDP and against compile off."
+                        },
+                        "cand-eager": {
+                            "description": "The selected command with regional DiT compile off (eager, exact kernels on). Never selected on its own: A/B arm.",
+                            "framework_ref": "FastVideo main (2b164405c3d1 on 2026-10-07) installed `.[fasth3]` with uv: fastvideo-kernel 0.3.5 built from the same checkout, flash-attn-4 @14c37795, torch 2.12.0+cu130; FA3 from the prebuilt torch212-cu130 artifact",
+                            "num_gpus": 2,
+                            "serve_args": "--generator.engine.use_fsdp_inference false --generator.engine.parallelism.tp_size 1 --generator.engine.parallelism.sp_size 2 --generator.engine.offload.dit false --generator.engine.offload.dit_layerwise false --generator.engine.offload.text_encoder false --generator.engine.offload.image_encoder false --generator.engine.offload.vae false --generator.engine.offload.lazy_module_load false --generator.engine.compile.enabled false --generator.engine.compile.vae_enabled false --generator.pipeline.workload_type t2v --generator.pipeline.experimental.attention_backend FLASH_ATTN --generator.pipeline.experimental.inference_torch_compile false --generator.pipeline.experimental.h3_sequential_load false --generator.pipeline.experimental.vae_parallel_decode true --generator.pipeline.experimental.vae_parallel_decode_strategy gather",
+                            "extra_env": {
+                                "FASTVIDEO_FA4": "1"
+                            },
+                            "upstream_recipe": {
+                                "repo": "hao-ai-lab/FastVideo",
+                                "path": "examples/inference/basic/basic_minimax_h3_t2v.py",
+                                "commit": "6e4813f8b408",
+                                "commit_date": "2026-10-07",
+                                "section": "main(): GeneratorConfig (cookbook recipe minimax-h3-t2v)"
+                            },
+                            "notes": "Derived from `blackwell-2gpu` (the profile B300 selects). Audit 2026-10-23 (H3 finding 6): FastVideo's own docs report its compiled H3 output does not match eager (docs optimizations.md: MAE 20.2/255, PSNR 16.67 dB), a precision concern on the selected compile profile; under compile the fused NVLink Ulysses all-to-all also declines (ulysses_a2a.py: inert under compile), and 4-GPU scaling is 1.56x where the others get 1.9x. Eager is what DIFFUSION_BENCH_DISABLE_TORCH_COMPILE=1 runs (fastvideo_client.COMPILE_OFF_ARGS), for this cell only. VALIDATION PENDING (wave 4, 4xB300)."
                         }
                     }
                 }
@@ -5465,6 +6327,17 @@
                             },
                             "notes": "Derived 2026-10-10: this case's default command plus the cookbook builder's mi300x/mi355x backend flags. VALIDATION PENDING (2026-10-10 round): derived, not yet measured on this hardware. MINIMAX_H3_VAE_DECODER_FUSED_NORM=0 (2026-10-10, MI355X, sglang 3831e7e09): the VAE decoder's fused scale-add RMSNorm Triton kernels (#41906) use PTX inline asm (mul.rn.f32, constraint 'f') from sglang/kernels/numerics.py; on ROCm they fail to compile and decode to an all-NaN video. The flag keeps the eager norm path, which computes the same values.",
                             "policy_exception": "Same correctness exception as the default profile (checked 2026-08-07): MiniMax-H3's torch.compile path changes numerical output per the sglang cookbook, so it is excluded regardless of hardware."
+                        },
+                        "cand-noexp": {
+                            "description": "Plain CUDA allocator segments, so the copy-engine IPC all-to-all can start. Never selected on its own: A/B arm.",
+                            "sglang_ref": "origin/main",
+                            "num_gpus": 4,
+                            "serve_args": "--model-type diffusion --warmup-mode server --model-variant fl2va --ulysses-degree 4 --encoder-parallel auto --performance-mode speed --enable-torch-compile false",
+                            "policy_exception": "Correctness exception, not a speed tradeoff: MiniMax-H3's torch.compile path changes numerical output per the sglang cookbook (docs/cookbook/diffusion/MiniMax/MiniMax-H3.mdx, checked 2026-08-07) -- compile is not enabled by any recommended lossless preset for this model and must not be used to generate consistency ground truth. --enable-torch-compile stays false in every profile for this case until upstream fixes the numerics.",
+                            "extra_env": {
+                                "PYTORCH_CUDA_ALLOC_CONF": "expandable_segments:False"
+                            },
+                            "notes": "Derived from `default` (the profile B300 selects). Audit 2026-10-23 (Cosmos3/Wan2.2 finding 1): the harness exports PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True (scripts/devbox_run_cases.sh); sharing an expandable segment needs pidfd_getfd, which RunPod containers deny, so every sglang SP cell of the round logged 'IPC all-to-all (multi-rank) unavailable (pidfd_getfd: Operation not permitted); using NCCL'. TRT-LLM already carries this override for the same reason. Accept the arm only if that line is absent. VALIDATION PENDING (wave 4, 4xB300)."
                         }
                     }
                 },
@@ -5762,6 +6635,50 @@
                                 "section": "BF16 multi-GPU config scaled to pure Ulysses 4"
                             },
                             "notes": "H3 T2VA 2-GPU A/B on 4xB300 (2026-10-22): FA4 76.63 s against VANILLA 74.33 s, so the default (VANILLA) stays selected on Blackwell for H3. Kept for future A/Bs."
+                        },
+                        "cand-fa4-omp8": {
+                            "description": "FA4 attention plus OMP_NUM_THREADS=8 per worker. Never selected on its own: A/B arm.",
+                            "framework_ref": "tensorrt-llm 1.4.0rc1 (tag 0372799d1543, 2026-10-19)",
+                            "num_gpus": 4,
+                            "serve_args": "",
+                            "visual_gen_args": {
+                                "attention_config": {
+                                    "backend": "FA4"
+                                },
+                                "parallel_config": {
+                                    "ulysses_size": 4,
+                                    "parallel_vae_size": 4
+                                },
+                                "torch_compile_config": {
+                                    "enable": true
+                                },
+                                "cuda_graph_config": {
+                                    "enable": false
+                                },
+                                "compilation_config": {
+                                    "resolutions": [
+                                        [
+                                            768,
+                                            1344
+                                        ]
+                                    ],
+                                    "num_frames": [
+                                        124
+                                    ],
+                                    "skip_warmup": false
+                                }
+                            },
+                            "upstream_recipe": {
+                                "repo": "NVIDIA/TensorRT-LLM",
+                                "path": "examples/visual_gen/configs/minimax-h3-bf16-8gpu.yaml",
+                                "commit": "92d23a83799d",
+                                "commit_date": "2026-10-09",
+                                "section": "BF16 multi-GPU config scaled to pure Ulysses 4"
+                            },
+                            "extra_env": {
+                                "OMP_NUM_THREADS": "8"
+                            },
+                            "notes": "Derived from `cand-fa4` (the profile B300 selects). Audit 2026-10-23 (H3 finding 1): TRT-LLM spends 5 s (2 GPU), 8 s (Ref2VA) and 11 s (4 GPU) on the CPU before its denoise loop (row_timestep_plan: torch.full, scatters and torch.unique over the whole sequence per step, on every rank) while its workers share the host's cores with OMP_NUM_THREADS unset. The harness sets OMP_NUM_THREADS for no framework; sglang caps its workers itself (min(16, cores / GPUs), gpu_worker._worker_cpu_intra_op_threads), vLLM-Omni's workers take 1 (set_multiprocessing_worker_envs) and LightX2V's torchrun sets 1, while TRT-LLM and FastVideo keep one thread per core in every worker. Combined with FA4 because this cell's sequence does not split evenly under its Ulysses size (VANILLA then runs masked SDPA; FA4 takes the trailing pad as seqused_k). VALIDATION PENDING (wave 4, 4xB300)."
                         }
                     },
                     "extra_env_reason": "The harness exports PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True. Under it, the CUDA IPC handle TRT-LLM's rank 0 hands its media over with needs pidfd_getfd in the server process, which RunPod containers deny: every request logged 'pidfd_getfd: Operation not permitted' and hung to the read timeout (4xB300, 2026-10-22). Plain segments use cudaIpcMemHandle instead."
@@ -5816,6 +6733,23 @@
                                 "FASTVIDEO_FA4": "1"
                             },
                             "notes": "The default profile with the DiT replicated (a 183 GB B200 holds both 66 GB models and the 11 GB of VAEs, ~40 GB to spare; FastVideo's measured GB200 FastH3 layout replicates it) and FA4, which FastVideo never auto-selects (FASTVIDEO_FA4=1). VALIDATION PENDING (2026-10-08): check 'Using FlashAttention-4 backend' and the memory headroom on B200, and A/B against FSDP and against compile off."
+                        },
+                        "cand-eager": {
+                            "description": "The selected command with regional DiT compile off (eager, exact kernels on). Never selected on its own: A/B arm.",
+                            "framework_ref": "FastVideo main (2b164405c3d1 on 2026-10-07) installed `.[fasth3]` with uv: fastvideo-kernel 0.3.5 built from the same checkout, flash-attn-4 @14c37795, torch 2.12.0+cu130; FA3 from the prebuilt torch212-cu130 artifact",
+                            "num_gpus": 4,
+                            "serve_args": "--generator.engine.use_fsdp_inference false --generator.engine.parallelism.tp_size 1 --generator.engine.parallelism.sp_size 4 --generator.engine.offload.dit false --generator.engine.offload.dit_layerwise false --generator.engine.offload.text_encoder false --generator.engine.offload.image_encoder false --generator.engine.offload.vae false --generator.engine.offload.lazy_module_load false --generator.engine.compile.enabled false --generator.engine.compile.vae_enabled false --generator.pipeline.workload_type t2v --generator.pipeline.experimental.attention_backend FLASH_ATTN --generator.pipeline.experimental.inference_torch_compile false --generator.pipeline.experimental.h3_sequential_load false --generator.pipeline.experimental.vae_parallel_decode true --generator.pipeline.experimental.vae_parallel_decode_strategy gather",
+                            "extra_env": {
+                                "FASTVIDEO_FA4": "1"
+                            },
+                            "upstream_recipe": {
+                                "repo": "hao-ai-lab/FastVideo",
+                                "path": "examples/inference/basic/basic_minimax_h3_t2v.py",
+                                "commit": "6e4813f8b408",
+                                "commit_date": "2026-10-07",
+                                "section": "main(): GeneratorConfig (cookbook recipe minimax-h3-t2v)"
+                            },
+                            "notes": "Derived from `blackwell-4gpu` (the profile B300 selects). Audit 2026-10-23 (H3 finding 6): FastVideo's own docs report its compiled H3 output does not match eager (docs optimizations.md: MAE 20.2/255, PSNR 16.67 dB), a precision concern on the selected compile profile; under compile the fused NVLink Ulysses all-to-all also declines (ulysses_a2a.py: inert under compile), and 4-GPU scaling is 1.56x where the others get 1.9x. Eager is what DIFFUSION_BENCH_DISABLE_TORCH_COMPILE=1 runs (fastvideo_client.COMPILE_OFF_ARGS), for this cell only. VALIDATION PENDING (wave 4, 4xB300)."
                         }
                     }
                 }
@@ -6208,6 +7142,25 @@
                             },
                             "notes": "Derived 2026-10-10 from docs/cookbook/diffusion/MiniMax/MiniMax-H3.mdx (sglang main 3831e7e09): its config builder applies `--attention-backend aiter` + SGLANG_USE_AITER=1 on mi300x/mi355x and keeps weights resident off the consumer tier; the topology is the datacenter Ulysses-2 command this case uses on B200. VALIDATION PENDING (2026-10-10 round): derived, not yet measured on this hardware. MINIMAX_H3_VAE_DECODER_FUSED_NORM=0 (2026-10-10, MI355X, sglang 3831e7e09): the VAE decoder's fused scale-add RMSNorm Triton kernels (#41906) use PTX inline asm (mul.rn.f32, constraint 'f') from sglang/kernels/numerics.py; on ROCm they fail to compile and decode to an all-NaN video. The flag keeps the eager norm path, which computes the same values.",
                             "policy_exception": "Same correctness exception as the default profile (checked 2026-08-07): MiniMax-H3's torch.compile path changes numerical output per the sglang cookbook, so it is excluded regardless of hardware."
+                        },
+                        "cand-noexp": {
+                            "description": "Plain CUDA allocator segments, so the copy-engine IPC all-to-all can start. Never selected on its own: A/B arm.",
+                            "sglang_ref": "8d0c77081 (2026-08-07 checkout, includes sgl-project/sglang#33969)",
+                            "num_gpus": 2,
+                            "serve_args": "--model-type diffusion --warmup-mode server --model-variant ref2va --ulysses-degree 2 --performance-mode speed --enable-torch-compile false",
+                            "policy_exception": "Same correctness exception as the default profile (checked 2026-08-07): MiniMax-H3's torch.compile path changes numerical output per the sglang cookbook, so it is excluded regardless of hardware.",
+                            "extra_env": {
+                                "PYTORCH_CUDA_ALLOC_CONF": "expandable_segments:False"
+                            },
+                            "notes": "Derived from `b200-2gpu` (the profile B300 selects). Audit 2026-10-23 (Cosmos3/Wan2.2 finding 1): the harness exports PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True (scripts/devbox_run_cases.sh); sharing an expandable segment needs pidfd_getfd, which RunPod containers deny, so every sglang SP cell of the round logged 'IPC all-to-all (multi-rank) unavailable (pidfd_getfd: Operation not permitted); using NCCL'. TRT-LLM already carries this override for the same reason. Accept the arm only if that line is absent. VALIDATION PENDING (wave 4, 4xB300)."
+                        },
+                        "cand-fa4attn": {
+                            "description": "FlashAttention 4 (`--attention-backend fa`) in place of the auto cuDNN SDPA. Never selected on its own: A/B arm.",
+                            "sglang_ref": "8d0c77081 (2026-08-07 checkout, includes sgl-project/sglang#33969)",
+                            "num_gpus": 2,
+                            "serve_args": "--model-type diffusion --warmup-mode server --model-variant ref2va --ulysses-degree 2 --performance-mode speed --enable-torch-compile false --attention-backend fa",
+                            "policy_exception": "Same correctness exception as the default profile (checked 2026-08-07): MiniMax-H3's torch.compile path changes numerical output per the sglang cookbook, so it is excluded regardless of hardware.",
+                            "notes": "Derived from `b200-2gpu` (the profile B300 selects). 2026-10-23 B300 bf16 microbenchmark at the real per-rank shapes: FA4 beat cuDNN SDPA by 1-4% at the Wan2.2 (75600 tokens, 20 heads) and H3 Ref2VA (49646, 28 heads) shapes and tied at H3 4-GPU, while sglang's auto selection (dynamic_cudnn_sdpa) runs cuDNN on sm10x. `--attention-backend fa` resolves to the FA4 CuTe kernels on Blackwell (platforms/cuda.py: set_fa_ver(4); head size 128 supported; Cosmos3's pinned fa ran flash_fwd_sm100 on this box). VALIDATION PENDING (wave 4, 4xB300)."
                         }
                     }
                 },
@@ -6371,6 +7324,20 @@
                             "extra_env": {},
                             "num_gpus": 2,
                             "notes": " VALIDATION PENDING (round 2026-10-22, 4xB300)."
+                        },
+                        "cand-usp2": {
+                            "description": "The recipe's high-memory pattern at 2 GPUs: Ulysses 2, no TP. Never selected on its own: A/B arm.",
+                            "num_gpus": 2,
+                            "serve_args": "--trust-remote-code --task-type ref2va --num-gpus 2 --usp 2 --ring 1 --text-encoder-tp-size 2 --vae-patch-parallel-size 2 --vae-parallel-mode tile --vae-use-tiling --diffusion-attention-backend CUDNN_ATTN --no-diffusion-compile-dynamic",
+                            "extra_env": {},
+                            "upstream_recipe": {
+                                "repo": "vllm-project/vllm-omni",
+                                "path": "recipes/MiniMaxAI/MiniMax-H3.md",
+                                "commit": "95b1d97f2ec2",
+                                "commit_date": "2026-10-21",
+                                "section": "Four GPUs: throughput-oriented combined service (no offload, Ulysses, tiled VAE patch parallel, regional compile), scaled to 2 GPUs"
+                            },
+                            "notes": "Derived from `blackwell-2gpu-static` (the profile B300 selects). Audit 2026-10-23 (H3 finding 5): the selected command is the consumer RTX recipe's placement (TP2) without its offload; the recipe's high-memory pattern (recipes/MiniMaxAI/MiniMax-H3.md 'Four GPUs: throughput-oriented combined service': no offload, Ulysses, tiled VAE patch parallel, regional compile, Ring and TP 1) was last measured as USP2 on B200 at an older build (79.4 vs 73.55 s), never on B300 or 0da1d831. Scaled to 2 GPUs; text-encoder TP 2 and static compile kept from the selected profile. Attention stays CUDNN_ATTN rather than the recipe's TRTLLM_ATTN default: the 2026-10-23 B300 microbenchmark had trtllm-gen 5-20% behind cuDNN at the H3 shapes. VALIDATION PENDING (wave 4, 4xB300)."
                         }
                     },
                     "reason": "Empirically validated 2026-08-07, first on minimax-h3-5090-2gpu-v4 (2x RTX 5090) then on 2xB200: the default (compiled) profile segfaults identically on both GPU classes 1 step into denoising (see command_profiles.default.notes) -- a confirmed hardware-independent vLLM-Omni bug, despite the recipe's own claim that torch.compile is 'not enabled by default on consumer paths.' --enforce-eager avoids that segfault, but on RTX 5090 it fails differently at startup (a diffusion worker process dies before completing its init handshake, surfaced as EOFError) and never completes a request on that GPU class. On 2xB200 the identical --enforce-eager command works cleanly and completes a correct generation -- see command_profiles.b200-2gpu for the validated numbers and the sglang comparison on the same hardware. Net: vLLM-Omni H3 support is real but fragile below the B200 class tested here; RTX 5090 has no working profile for this case in either variant."
@@ -6610,6 +7577,53 @@
                                 "section": "Ref2VA BF16 1-GPU config; Ulysses 2 and parallel VAE 2 added by this harness (upstream has no multi-GPU Ref2VA config)"
                             },
                             "notes": "H3 T2VA 2-GPU A/B on 4xB300 (2026-10-22): FA4 76.63 s against VANILLA 74.33 s, so the default (VANILLA) stays selected on Blackwell for H3. Kept for future A/Bs."
+                        },
+                        "cand-fa4-omp8": {
+                            "description": "FA4 attention plus OMP_NUM_THREADS=8 per worker. Never selected on its own: A/B arm.",
+                            "framework_ref": "tensorrt-llm 1.4.0rc1 (tag 0372799d1543, 2026-10-19)",
+                            "num_gpus": 2,
+                            "serve_args": "",
+                            "visual_gen_args": {
+                                "attention_config": {
+                                    "backend": "FA4"
+                                },
+                                "parallel_config": {
+                                    "ulysses_size": 2,
+                                    "parallel_vae_size": 2
+                                },
+                                "torch_compile_config": {
+                                    "enable": true
+                                },
+                                "cuda_graph_config": {
+                                    "enable": false
+                                },
+                                "compilation_config": {
+                                    "resolutions": [
+                                        [
+                                            768,
+                                            1344
+                                        ]
+                                    ],
+                                    "num_frames": [
+                                        124
+                                    ],
+                                    "skip_warmup": true
+                                },
+                                "pipeline_config": {
+                                    "workflow": "ref2va"
+                                }
+                            },
+                            "upstream_recipe": {
+                                "repo": "NVIDIA/TensorRT-LLM",
+                                "path": "examples/visual_gen/configs/minimax-h3-ref2va-bf16-1gpu.yaml",
+                                "commit": "aa026bf86db4",
+                                "commit_date": "2026-10-06",
+                                "section": "Ref2VA BF16 1-GPU config; Ulysses 2 and parallel VAE 2 added by this harness (upstream has no multi-GPU Ref2VA config)"
+                            },
+                            "extra_env": {
+                                "OMP_NUM_THREADS": "8"
+                            },
+                            "notes": "Derived from `cand-fa4` (the profile B300 selects). Audit 2026-10-23 (H3 finding 1): TRT-LLM spends 5 s (2 GPU), 8 s (Ref2VA) and 11 s (4 GPU) on the CPU before its denoise loop (row_timestep_plan: torch.full, scatters and torch.unique over the whole sequence per step, on every rank) while its workers share the host's cores with OMP_NUM_THREADS unset. The harness sets OMP_NUM_THREADS for no framework; sglang caps its workers itself (min(16, cores / GPUs), gpu_worker._worker_cpu_intra_op_threads), vLLM-Omni's workers take 1 (set_multiprocessing_worker_envs) and LightX2V's torchrun sets 1, while TRT-LLM and FastVideo keep one thread per core in every worker. Combined with FA4 because this cell's sequence does not split evenly under its Ulysses size (VANILLA then runs masked SDPA; FA4 takes the trailing pad as seqused_k). VALIDATION PENDING (wave 4, 4xB300)."
                         }
                     },
                     "extra_env_reason": "The harness exports PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True. Under it, the CUDA IPC handle TRT-LLM's rank 0 hands its media over with needs pidfd_getfd in the server process, which RunPod containers deny: every request logged 'pidfd_getfd: Operation not permitted' and hung to the read timeout (4xB300, 2026-10-22). Plain segments use cudaIpcMemHandle instead."
@@ -7017,7 +8031,22 @@
                                 "section": "Start the server (fasth3-8step-8gpu.yaml)",
                                 "recheck": "2026-10-22: the V2 recipe moved to recipes/FastVideo/FastH3-V2.md and now serves eight GPUs from recipes/FastVideo/fasth3-8step-8gpu.yaml: FASTVIDEO_VSA with the cuDNN provider (the [cudnn-bsa] extra), USP 8, HSDP, text-encoder TP 8, VAE patch parallel 8 with tiling, enforce-eager. This profile keeps the previously measured 4-GPU command until the h200-cudnn-vsa candidate is measured against it."
                             },
-                            "notes": "Recipe placement (USP, HSDP, text-encoder TP, VAE patch parallel + tiling) and its cuDNN VSA provider at 4 GPUs. The recipe pins enforce-eager. 4xB300 A/B 2026-10-22: hung in the first request (execute_model RPC and a 4-rank collective timed out after 600 s, 'DLO DP collective wave timed out'), so the measured default stays."
+                            "notes": "Recipe placement (USP, HSDP, text-encoder TP, VAE patch parallel + tiling) and its cuDNN VSA provider at 4 GPUs. The recipe pins enforce-eager. 4xB300 A/B 2026-10-22: hung in the first request (execute_model RPC and a 4-rank collective timed out after 600 s, 'DLO DP collective wave timed out'), so the measured default stays. Superseded by cand-cudnn-vsa (wave 4: the provider without HSDP/enforce-eager)."
+                        },
+                        "cand-cudnn-vsa": {
+                            "description": "FASTVIDEO_VSA on the recipe's cuDNN provider, without HSDP or enforce-eager, static compile. Never selected on its own: A/B arm.",
+                            "framework_ref": "vllm-omni main 56763cd6c383 + vllm==0.30.0 + fastvideo-kernel==0.3.5 installed --no-deps (VLLM_OMNI_VSA_KERNEL_SPEC)",
+                            "num_gpus": 4,
+                            "serve_args": "--trust-remote-code --task-type fl2va --num-gpus 4 --usp 4 --ring 1 --vae-patch-parallel-size 4 --vae-parallel-mode tile --vae-use-tiling --diffusion-attention-config {\"default\":{\"backend\":\"FASTVIDEO_VSA\",\"fastvideo_vsa_provider\":\"cudnn\"}} --no-diffusion-compile-dynamic --revision 71a17d72c58ce3eeec418144de2a5a2090cb4c04",
+                            "upstream_recipe": {
+                                "repo": "vllm-project/vllm-omni",
+                                "path": "recipes/FastVideo/FastH3-V2.md",
+                                "commit": "95b1d97f2ec2",
+                                "commit_date": "2026-10-21",
+                                "section": "Start the server (fasth3-8step-8gpu.yaml)",
+                                "recheck": "2026-10-22: the V2 recipe moved to recipes/FastVideo/FastH3-V2.md and now serves eight GPUs from recipes/FastVideo/fasth3-8step-8gpu.yaml: FASTVIDEO_VSA with the cuDNN provider (the [cudnn-bsa] extra), USP 8, HSDP, text-encoder TP 8, VAE patch parallel 8 with tiling, enforce-eager. This profile keeps the previously measured 4-GPU command until the cudnn-vsa-candidate profile is measured against it."
+                            },
+                            "notes": "Derived from `default` (the profile B300 selects). Audit 2026-10-23 (H3 finding 4): the PyPI fastvideo-kernel 0.3.5 has no sm_103a build (block_sparse_attn_sm100a.is_supported requires capability (10, 0)), so on B300 VSA falls to the Triton kernel and runs slower (0.83 s/step) than vLLM-Omni's own dense 4-GPU step (0.73). The recipe (recipes/FastVideo/FastH3-V2.md, fasth3-8step-8gpu.yaml) selects fastvideo_vsa_provider cudnn, which needs the [cudnn-bsa] extra (nvidia-cudnn-frontend==1.31.0 at 0da1d831; require_cudnn_sparse accepts SM90-SM120): install it with VLLM_OMNI_CUDNN_FRONTEND_SPEC=nvidia-cudnn-frontend==1.31.0 (scripts/install_comparison_frameworks.sh). The 2026-10-22 cudnn-vsa-candidate (recipe placement with HSDP + enforce-eager) hung in the first request; this keeps the selected placement and changes only the provider, plus --no-diffusion-compile-dynamic like every other Blackwell vLLM-Omni profile. --diffusion-attention-backend and --diffusion-attention-config.default.backend are mutually exclusive, so the backend moves into the config. VALIDATION PENDING (wave 4, 4xB300)."
                         }
                     },
                     "framework_ref": "vllm-omni main 56763cd6c383 + vllm==0.30.0 + fastvideo-kernel==0.3.5 installed --no-deps (VLLM_OMNI_VSA_KERNEL_SPEC)"

@@ -32,6 +32,12 @@
           "serve_args": "--model-type diffusion --warmup-mode server --tp-size 2 --dit-layerwise-offload false --performance-mode speed --enable-torch-compile false",
           "policy_exception": "Measured H100 A/B 2026-07-03 (steady-state single_e2e): speed+compile 0.987/0.997s vs speed-eager 0.701/0.699s vs auto-offload default 0.793/0.799s — compile loses on this 9-step turbo model. Explicit --enable-torch-compile false also future-proofs against speed-mode auto-compile (sglang PR #30016).",
           "notes": "Validated on H100; hardware list includes h200 for selection parity — re-validate there before publishing h200 numbers."
+        },
+        "cand-speed": {
+          "description": "performance_mode speed: text encoder resident, eager. Never selected on its own: A/B arm.",
+          "sglang_ref": "current-main",
+          "serve_args": "--model-type diffusion --warmup-mode server --tp-size 2 --dit-layerwise-offload false --performance-mode speed --enable-torch-compile false",
+          "notes": "Derived from `default` (the profile B300 selects). Audit 2026-10-23 (image findings 7, sglang-side 5): B300 falls through to `default` (the resident profile lists only h100/h200), whose performance_mode auto layerwise-offloads the text encoder on a 288 GB GPU (Z-Image log: 'Layerwise offload ready for text_encoder ... resident=0/36', TextEncodingStage 0.066 s = 19% of the request). serve_args are the H100/H200 resident profile's: speed keeps the encoder resident, compile stays off by policy. VALIDATION PENDING (wave 4, 4xB300)."
         }
       }
     },
@@ -227,6 +233,27 @@
           },
           "num_gpus": 2,
           "notes": "seq_p_quant_scheme (fp8/fp4 communication) stays off. VALIDATION PENDING (round 2026-10-22, 4xB300)."
+        },
+        "cand-sdpa": {
+          "description": "torch SDPA attention; Ulysses 2 and fusions kept. Never selected on its own: A/B arm.",
+          "num_gpus": 2,
+          "lightx2v_config": {
+            "attn_type": "torch_sdpa",
+            "parallel": {
+              "seq_p_size": 2,
+              "seq_p_attn_type": "ulysses",
+              "seq_p_tensor_fusion": true,
+              "seq_p_prepost_backend": "triton"
+            }
+          },
+          "upstream_recipe": {
+            "repo": "ModelTC/LightX2V",
+            "path": "configs/z_image/z_image_turbo_t2i_dist.json",
+            "commit": "4fe984c07b16",
+            "commit_date": "2026-10-10",
+            "section": "Ulysses sequence parallel over 2 GPUs (scripts/z_image/z_image_turbo_t2i_dist.sh)"
+          },
+          "notes": "Derived from `blackwell-fa2-fusion` (the profile B300 selects). Audit 2026-10-23 (image finding 8, Cosmos3/Wan2.2 finding 5): every LightX2V Blackwell cell runs FlashAttention 2 (the sm80 mma.sync path on sm103); torch_sdpa (lightx2v/common/ops/attn/torch_sdpa.py, cuDNN / flash SDPA on B300) was never A/B'd. FA4 is not reachable: the installer deletes flash_attn/cute (no nvidia-cutlass-dsl release satisfies it, see the SKILL), which this arm keeps. torch_sdpa ignores cu_seqlens, which is exact here because every call is one unpadded sequence (batch 1 per CFG rank). VALIDATION PENDING (wave 4, 4xB300)."
         }
       }
     },

@@ -24,6 +24,9 @@ export TRTLLM_INSTALL_SPEC="${TRTLLM_INSTALL_SPEC:-tensorrt-llm==1.4.0rc1}"
 # FastH3 V2 on vLLM-Omni needs the FastVideo VSA kernel (its FlashInfer path is SM120-only); the
 # profile notes give 0.3.5 --no-deps. The B300 box was set up without it and the cell failed.
 export VLLM_OMNI_VSA_KERNEL_SPEC="${VLLM_OMNI_VSA_KERNEL_SPEC:-fastvideo-kernel==0.3.5}"
+# FastH3's cuDNN VSA provider (wave-4 arm cand-cudnn-vsa) needs vLLM-Omni's [cudnn-bsa] extra; opt in
+# with VLLM_OMNI_CUDNN_FRONTEND_SPEC=nvidia-cudnn-frontend==1.31.0 (empty: not installed). On a box whose
+# venv exists: DBF_VENV_ROOT=${STATE}/fw-venvs scripts/upgrade_framework_stack.sh vllm-omni nvidia-cudnn-frontend==1.31.0
 export TRTLLM_TORCH_INSTALL_SPEC="${TRTLLM_TORCH_INSTALL_SPEC:-torch==2.14.0}"
 export COMFYUI_INSTALL_SPEC="${COMFYUI_INSTALL_SPEC:-https://github.com/comfyanonymous/ComfyUI.git@1a82e6d01f395b43275c77acd289af1eb7090bb9}"
 export FASTVIDEO_INSTALL_SPEC="${FASTVIDEO_INSTALL_SPEC:-https://github.com/hao-ai-lab/FastVideo.git@fa2d1324c60050cd65209c6aaeac470e7fb412f5}"

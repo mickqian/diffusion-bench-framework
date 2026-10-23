@@ -57,6 +57,8 @@ write_desired_stamp() {
         echo "vllm_omni_server_bin=${VLLM_OMNI_SERVER_BIN:-vllm}"
         echo "vllm_omni_required_help_args=${VLLM_OMNI_REQUIRED_HELP_ARGS:---omni}"
         echo "vllm_omni_vsa_kernel_spec=${VLLM_OMNI_VSA_KERNEL_SPEC:-<unset>}"
+        # only when set, so venvs installed before the knob keep a matching stamp
+        [[ -z "${VLLM_OMNI_CUDNN_FRONTEND_SPEC:-}" ]] || echo "vllm_omni_cudnn_frontend_spec=${VLLM_OMNI_CUDNN_FRONTEND_SPEC}"
         echo "vllm_omni_target_device=${VLLM_OMNI_TARGET_DEVICE:-cuda} vllm_rocm_extra_index_url=${VLLM_ROCM_EXTRA_INDEX_URL:-<unset>} vllm_rocm_userspace_release=${VLLM_ROCM_USERSPACE_RELEASE:-<unset>}"
         ;;
       lightx2v)
@@ -241,6 +243,15 @@ case "${FRAMEWORK}" in
       torch_before="$(python3 -c 'import torch; print(torch.__version__)')"
       python3 -m pip install --no-deps "${VLLM_OMNI_VSA_KERNEL_SPEC}"
       python3 -c 'import fastvideo_kernel'
+      [[ "$(python3 -c 'import torch; print(torch.__version__)')" == "${torch_before}" ]]
+    fi
+    # FastH3's cuDNN VSA provider (fastvideo_vsa_provider: cudnn) is the [cudnn-bsa] extra,
+    # nvidia-cudnn-frontend>=1.31.0 (vllm-omni 0da1d831 pins ==1.31.0). Opt in with
+    # VLLM_OMNI_CUDNN_FRONTEND_SPEC=nvidia-cudnn-frontend==1.31.0; --no-deps keeps vLLM's torch.
+    if [[ -n "${VLLM_OMNI_CUDNN_FRONTEND_SPEC:-}" ]]; then
+      torch_before="$(python3 -c 'import torch; print(torch.__version__)')"
+      python3 -m pip install --no-deps "${VLLM_OMNI_CUDNN_FRONTEND_SPEC}"
+      python3 -c 'from cudnn.torch import block_sparse_attention_forward'
       [[ "$(python3 -c 'import torch; print(torch.__version__)')" == "${torch_before}" ]]
     fi
     ;;

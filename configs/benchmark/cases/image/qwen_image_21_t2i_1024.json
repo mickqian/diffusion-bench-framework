@@ -80,6 +80,12 @@
           "serve_args": "--model-type diffusion --warmup-mode server --performance-mode manual --dit-layerwise-offload true",
           "notes": "Cookbook verifiedRecipes `rtx5090-1-offload`, which upstream marks `unverified: true` -- the ONLY recipe in that table carrying the flag, i.e. the one topology the cookbook itself had not re-tested against the updated checkpoint. Re-tested here 2026-09-21 on a 1x RTX 5090 devbox (sglang 6ad78f2): it works -- healthy, p50 19.946s over 3 repeats after warmup [19.97, 19.95, 19.95], 0.4674 s/step x 40 = 18.70s of the 19.95s, 19333 MiB of 32 GB, 2.43 MB RGBA PNG -- but it is 1.42x SLOWER than the 4090 recipe on the same card, so `rtx5090-1gpu-encoder-layerwise-offload` is what this repo runs. Kept here so the losing arm of that A/B stays on the record. No explicit attention flag in either arm: sm120 is in the cookbook's sm12Hardware list, so the runtime picks SDPA itself.",
           "policy_exception": "Offload is not a tuning choice on this card, it is the only way the model runs. The checkpoint is 30.9 GiB and the card has 32 GB, so the cookbook's picker DISABLES resident placement on RTX 5090 outright ('the full resident pipeline exceeds one consumer GPU's memory. Select CPU offload.'). Measured 2026-09-21 on a 1x RTX 5090 devbox (sglang 6ad78f2): the offload recipe serves at p50 19.946s using 19333 MiB of 32 GB. There is no resident arm to compare against because a resident server cannot start here."
+        },
+        "cand-bcg": {
+          "description": "Breakable CUDA graphs captured at the served 1024x1024. Never selected on its own: A/B arm.",
+          "sglang_ref": "sglang 6ad78f22 (2026-09-21)",
+          "serve_args": "--model-type diffusion --warmup-mode server --performance-mode speed --attention-backend fa --enable-breakable-cuda-graph true --warmup-resolutions 1024x1024",
+          "notes": "Derived from `b200-1gpu-resident-fa` (the profile B300 selects). Audit 2026-10-23 (image sglang-side): Qwen-Image-2.1 BCG replays across prompt lengths since sglang#43633 (in 82f7249c) and was +1.9% on 2xH200 TP2, -0.5% on 1xH200; never measured on B300. The served size is 1024x1024, so that is the one warmup resolution. Grep the server log for '[Diffusion BCG] captured' and for MISSED replays. The text prefix fits the default buckets (64-1024). VALIDATION PENDING (wave 4, 4xB300)."
         }
       }
     },
@@ -178,6 +184,23 @@
           },
           "num_gpus": 1,
           "notes": " VALIDATION PENDING (round 2026-10-22, 4xB300)."
+        },
+        "cand-trtllm-attn": {
+          "description": "TRTLLM_ATTN (vLLM-Omni's Blackwell default at head_dim 128). Never selected on its own: A/B arm.",
+          "num_gpus": 1,
+          "serve_args": " --no-diffusion-compile-dynamic",
+          "extra_env": {
+            "DIFFUSION_ATTENTION_BACKEND": "TRTLLM_ATTN"
+          },
+          "upstream_recipe": {
+            "repo": "vllm-project/vllm-omni",
+            "path": "recipes/Qwen/Qwen-Image-2.1.md",
+            "commit": "b164fea79753",
+            "commit_date": "2026-10-17",
+            "section": "Online Serving",
+            "recheck": "Re-checked 2026-10-22: the recipe gained a Qwen-Image-2.1-Turbo four-GPU section and NPU defaults (910b8f07, b164fea7); the base-model serving sections this profile follows are unchanged. Its new exact text-conditioning cache cannot hit the harness's distinct per-request prompts."
+          },
+          "notes": "Derived from `blackwell-cudnn-static` (the profile B300 selects). Audit 2026-10-23 (Cosmos3/Wan2.2 finding 3): vLLM-Omni 0da1d831 defaults to TRTLLM_ATTN on sm100/sm103 at head_dim 128 (vllm_omni/platforms/cuda/platform.py, 'Defaulting to diffusion attention backend TRTLLM_ATTN'), and the profiles force CUDNN_ATTN from a 2026-09 B200 qwen-image measurement on vLLM 0.29. Confirmation arm only: a 2026-10-23 B300 bf16 microbenchmark at the real per-rank shapes had trtllm-gen dense (the kernel behind TRTLLM_ATTN) 5-20% behind cuDNN SDPA and FA4 at every shape, so the other cells keep CUDNN_ATTN. Grep the server log for the TRTLLM_ATTN selection. VALIDATION PENDING (wave 4, 4xB300)."
         }
       }
     },
@@ -296,6 +319,35 @@
           },
           "num_gpus": 1,
           "notes": " VALIDATION PENDING (round 2026-10-22, 4xB300)."
+        },
+        "cand-sdpa": {
+          "description": "torch SDPA attention; everything else kept. Never selected on its own: A/B arm.",
+          "framework_ref": "lightx2v main HEAD",
+          "num_gpus": 1,
+          "serve_args": "",
+          "lightx2v_config": {
+            "resolution": 1024,
+            "vae_scale_factor": 16,
+            "attn_type": "torch_sdpa",
+            "rope_type": "flashinfer_rope",
+            "rms_norm_type": "fp32_variance",
+            "layer_norm_type": "Triton",
+            "modulate_type": "triton",
+            "fused_qk_rms_norm": true,
+            "fused_block_ops": true,
+            "fused_block_min_tokens": 1024,
+            "enable_cfg": false,
+            "sample_guide_scale": 1.0,
+            "warmup": true
+          },
+          "upstream_recipe": {
+            "repo": "ModelTC/LightX2V",
+            "path": "configs/qwen_image_21/qwen_image_21_torch.json",
+            "commit": "4fe984c0",
+            "commit_date": "2026-10-10",
+            "section": "attn_type torch_sdpa (upstream's torch config); the fused-kernel settings of qwen_image_21.json kept"
+          },
+          "notes": "Derived from `blackwell-1gpu-fa2` (the profile B300 selects). Audit 2026-10-23 (image finding 8, Cosmos3/Wan2.2 finding 5): every LightX2V Blackwell cell runs FlashAttention 2 (the sm80 mma.sync path on sm103); torch_sdpa (lightx2v/common/ops/attn/torch_sdpa.py, cuDNN / flash SDPA on B300) was never A/B'd. FA4 is not reachable: the installer deletes flash_attn/cute (no nvidia-cutlass-dsl release satisfies it, see the SKILL), which this arm keeps. torch_sdpa ignores cu_seqlens, which is exact here because every call is one unpadded sequence (batch 1 per CFG rank). VALIDATION PENDING (wave 4, 4xB300)."
         }
       }
     },

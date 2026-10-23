@@ -109,6 +109,40 @@
           "sglang_ref": "current-main",
           "serve_args": "--model-type diffusion --warmup-mode server --attention-backend fa --cfg-parallel-size 2 --ulysses-degree 2 --dit-layerwise-offload false --performance-mode speed --enable-torch-compile false",
           "notes": "Measured H100 A/B 2026-07-03 (steady-state single_e2e): 55.115s (auto default) -> 53.614s (-2.7%)."
+        },
+        "cand-noexp": {
+          "description": "Plain CUDA allocator segments, so the copy-engine IPC all-to-all can start. Never selected on its own: A/B arm.",
+          "sglang_ref": "sgl-project/sglang@3d540563916394115f9612f30601ae3fa97ada7c",
+          "num_gpus": 4,
+          "serve_args": "--model-type diffusion --warmup-mode server --attention-backend fa --cfg-parallel-size 2 --ulysses-degree 2",
+          "extra_env": {
+            "PYTORCH_CUDA_ALLOC_CONF": "expandable_segments:False"
+          },
+          "notes": "Derived from `default` (the profile B300 selects). Audit 2026-10-23 (Cosmos3/Wan2.2 finding 1): the harness exports PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True (scripts/devbox_run_cases.sh); sharing an expandable segment needs pidfd_getfd, which RunPod containers deny, so every sglang SP cell of the round logged 'IPC all-to-all (multi-rank) unavailable (pidfd_getfd: Operation not permitted); using NCCL'. TRT-LLM already carries this override for the same reason. Accept the arm only if that line is absent. VALIDATION PENDING (wave 4, 4xB300)."
+        },
+        "cand-kvg": {
+          "description": "K/V-gather sequence parallel 2 in place of Ulysses 2. Never selected on its own: A/B arm.",
+          "sglang_ref": "sgl-project/sglang@3d540563916394115f9612f30601ae3fa97ada7c",
+          "num_gpus": 4,
+          "serve_args": "--model-type diffusion --warmup-mode server --attention-backend fa --cfg-parallel-size 2 --kv-gather-degree 2",
+          "notes": "Derived from `default` (the profile B300 selects). Audit 2026-10-23 (Cosmos3/Wan2.2 finding 2): the pinned --ulysses-degree 2 overrides sglang's own 4-GPU cfg2 x sp2 default, kv_gather_degree=2 (server_args: 'sp_degree=2 defaults to kv_gather_degree=2 (its measured-win zone)'); dropping the pin alone selects it, the explicit flag records it. On 2xH200 K/V-gather beat Ulysses over NCCL by 3.7-13.7% with identical output (sglang#32667). Layers the gather path cannot take fall back to Ulysses. VALIDATION PENDING (wave 4, 4xB300)."
+        },
+        "cand-kvg-noexp": {
+          "description": "K/V-gather sequence parallel 2, plain allocator segments. Never selected on its own: A/B arm.",
+          "sglang_ref": "sgl-project/sglang@3d540563916394115f9612f30601ae3fa97ada7c",
+          "num_gpus": 4,
+          "serve_args": "--model-type diffusion --warmup-mode server --attention-backend fa --cfg-parallel-size 2 --kv-gather-degree 2",
+          "extra_env": {
+            "PYTORCH_CUDA_ALLOC_CONF": "expandable_segments:False"
+          },
+          "notes": "Derived from `default` (the profile B300 selects). Audit 2026-10-23 (Cosmos3/Wan2.2 finding 2): the pinned --ulysses-degree 2 overrides sglang's own 4-GPU cfg2 x sp2 default, kv_gather_degree=2 (server_args: 'sp_degree=2 defaults to kv_gather_degree=2 (its measured-win zone)'); dropping the pin alone selects it, the explicit flag records it. On 2xH200 K/V-gather beat Ulysses over NCCL by 3.7-13.7% with identical output (sglang#32667). Layers the gather path cannot take fall back to Ulysses. Combined with cand-noexp's allocator override. VALIDATION PENDING (wave 4, 4xB300)."
+        },
+        "cand-autoattn": {
+          "description": "No attention-backend pin: sglang's own selection. Never selected on its own: A/B arm.",
+          "sglang_ref": "sgl-project/sglang@3d540563916394115f9612f30601ae3fa97ada7c",
+          "num_gpus": 4,
+          "serve_args": "--model-type diffusion --warmup-mode server --cfg-parallel-size 2 --ulysses-degree 2",
+          "notes": "Derived from `default` (the profile B300 selects). Audit 2026-10-23 (Cosmos3/Wan2.2 finding 8): the SKILL records that whether Cosmos3's pinned attention beats sglang's measured auto-selection on Blackwell is untested; auto resolves to dynamic_cudnn_sdpa on sm10x (cuDNN SDPA, FA4 fallback), and TRT-LLM measured torch SDPA 1.1% ahead of FA4 on these shapes. The pin dropped here is `--attention-backend fa`. VALIDATION PENDING (wave 4, 4xB300)."
         }
       }
     },
@@ -296,8 +330,84 @@
       }
     },
     "lightx2v": {
-      "status": "unsupported",
-      "reason": "No tracked LightX2V Cosmos3 serving path in this benchmark."
+      "status": "no_profile",
+      "reason": "LightX2V 19c19614 serves Cosmos3 (cosmos3 runner, configs/cosmos3/cosmos3_nano_omni.json), but only a Blackwell profile exists (2026-10-23); Hopper and AMD need their own attention choice and a measurement.",
+      "status_by_hardware": {
+        "b200": {
+          "status": "supported"
+        },
+        "gb200": {
+          "status": "supported"
+        },
+        "b300": {
+          "status": "supported"
+        },
+        "gb300": {
+          "status": "supported"
+        }
+      },
+      "model_cls": "cosmos3",
+      "lightx2v_task": "t2v",
+      "num_gpus": 4,
+      "serve_args": "",
+      "extra_env": {},
+      "lightx2v_config": {
+        "sample_guide_scale": 6.0,
+        "sample_shift": 10.0,
+        "size": [
+          720,
+          1280
+        ],
+        "enable_cfg": true,
+        "rms_norm_type": "one-pass",
+        "attn_rms_norm_type": "one-pass",
+        "rope_type": "cosmos3_rope",
+        "self_attn_type": "torch_sdpa",
+        "causal_self_attn_type": "torch_sdpa",
+        "add_resolution_template": false,
+        "add_duration_template": false,
+        "cpu_offload": false,
+        "vae_cpu_offload": false,
+        "lazy_load": false,
+        "unload_modules": false,
+        "num_frames": 189,
+        "fps": 24.0,
+        "parallel": {
+          "cfg_p_size": 2,
+          "seq_p_size": 2,
+          "seq_p_attn_type": "ulysses"
+        }
+      },
+      "model_allow_patterns": [
+        "transformer/*",
+        "vae/*",
+        "scheduler/*",
+        "text_tokenizer/*",
+        "*.json",
+        "*.txt"
+      ],
+      "command_profiles": {
+        "blackwell-cfg2-sp2-sdpa": {
+          "description": "Blackwell LightX2V Cosmos3 t2v: the upstream Nano omni config, torch SDPA, CFG 2 x Ulysses 2, resident.",
+          "hardware": [
+            "b200",
+            "gb200",
+            "b300",
+            "gb300"
+          ],
+          "framework_ref": "lightx2v main 19c19614b067 (2026-10-21)",
+          "num_gpus": 4,
+          "serve_args": "",
+          "upstream_recipe": {
+            "repo": "ModelTC/LightX2V",
+            "path": "configs/cosmos3/cosmos3_nano_omni.json",
+            "commit": "65935cad",
+            "commit_date": "2026-09-24",
+            "section": "Nano omni config with cosmos3_nano_omni_t2v_cfg_ulysses_8gpu.json's CFG x Ulysses layout, scaled to 2 x 2"
+          },
+          "notes": "Onboarded 2026-10-23 from the audits (image finding 3, Cosmos3/Wan2.2 finding 6): LightX2V 19c19614 has RUNNER_REGISTER('cosmos3') with tasks t2i/t2v/i2v (lightx2v/models/runners/cosmos3/cosmos3_runner.py) and configs/cosmos3/cosmos3_nano_omni.json matches this case: 35 steps (the harness writes infer_steps from the case), sample_guide_scale 6.0, sample_shift 10, 720x1280, resolution and duration templates off, one-pass norms, cosmos3_rope; offload off. Attention: torch_sdpa, LightX2V's own default for Cosmos3 (transformer_weights.py) and cuDNN / flash SDPA on B300; the upstream configs name flash_attn3 (Hopper-only) or flash_attn2 (the sm80 path). Every attention call is one sequence (_infer_attn passes a single cu_seqlens segment), so torch_sdpa ignoring cu_seqlens is exact. Text is tokenized to its real length (no padding), as in the other rows. Compile: Cosmos3TransformerInfer never calls init_compile/run_block at 19c19614, so use_compile is ignored and the transformer runs eager, LightX2V's only path. The negative prompt comes from the request (the case's), as for the other rows. VALIDATION PENDING (wave 4, 4xB300). First measured by the wave-4 A/B (scripts/run_b300_ab_20261022.sh, WAVE=4)."
+        }
+      }
     },
     "trtllm-visual": {
       "status": "supported",
@@ -418,6 +528,47 @@
             "section": "Blackwell BF16 config: attention_config.backend FA4"
           },
           "notes": "4xB300 A/B 2026-10-22: 26.31 s against VANILLA 26.02 s; VANILLA stays."
+        },
+        "cand-cudnn": {
+          "description": "cuDNN fused SDPA attention. Never selected on its own: A/B arm.",
+          "framework_ref": "tensorrt-llm 1.4.0rc1 (tag 0372799d1543, 2026-10-19)",
+          "num_gpus": 4,
+          "serve_args": "",
+          "upstream_recipe": {
+            "repo": "NVIDIA/TensorRT-LLM",
+            "path": "examples/visual_gen/configs/cosmos3-super-4gpu.yaml",
+            "commit": "f50ca53daedc",
+            "commit_date": "2026-07-02",
+            "section": "4-GPU layout, applied to Nano"
+          },
+          "visual_gen_args": {
+            "attention_config": {
+              "backend": "CUDNN"
+            },
+            "parallel_config": {
+              "cfg_size": 2,
+              "ulysses_size": 2,
+              "parallel_vae_size": 4
+            },
+            "torch_compile_config": {
+              "enable": true
+            },
+            "cuda_graph_config": {
+              "enable": false
+            },
+            "compilation_config": {
+              "resolutions": [
+                [
+                  720,
+                  1280
+                ]
+              ],
+              "num_frames": [
+                189
+              ]
+            }
+          },
+          "notes": "Derived from `default` (the profile B300 selects). Audit 2026-10-23 (Cosmos3/Wan2.2 finding 4; Cosmos3 T2I sub-audit): only VANILLA and FA4 were A/B'd; TRT-LLM 1.4.0rc1 AttentionConfig.backend also takes CUDNN, TRTLLM, CUTEDSL and FLASHINFER (tensorrt_llm/visual_gen/args.py). Everything else is the selected visual_gen_args. No CUTEDSL arm on this cell: under Ulysses 2 Cosmos3's cross-attention refuses it ('Cosmos3 cross-attention with Ulysses cannot use the CUTEDSL backend', transformer_cosmos3.py). The cuDNN backend raises on a key_padding_mask rather than dropping it. VALIDATION PENDING (wave 4, 4xB300)."
         }
       },
       "extra_env_reason": "The harness exports PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True. Under it, the CUDA IPC handle TRT-LLM's rank 0 hands its media over with needs pidfd_getfd in the server process, which RunPod containers deny: every request logged 'pidfd_getfd: Operation not permitted' and hung to the read timeout (4xB300, 2026-10-22). Plain segments use cudaIpcMemHandle instead."

@@ -108,6 +108,16 @@
             "SGLANG_DISABLE_COSMOS3_GUARDRAILS": "1"
           },
           "notes": "Measured on 4xB200 2026-09-13, two interleaved rounds. Against the previous `--tp-size 2 --attention-backend fa` command: 0.765 -> 0.576s and 0.797 -> 0.575s, about -25%, taking the cell from losing to vLLM-Omni (0.651-0.662s) to beating it. TWO changes, both measured separately. (1) CFG parallelism instead of TP: the case is guidance_scale 6.0 -- true CFG, two branches -- so one branch per GPU with the DiT replicated and one combine per step beats splitting every layer and paying an all-reduce per layer (0.765 -> 0.584, 0.797 -> 0.617). It is also what sglang's own runtime would choose: cosmos3 inherits auto_enable_cfg_parallel=True with get_auto_cfg_parallel_degree(2)->2 and _model_default_uses_cfg()->True, but `--tp-size 2` made _has_explicit_parallel_policy() true and suppressed it. The sibling Cosmos3 T2V profile already uses CFG parallel; T2I was the odd one out. (2) torch_cudnn_sdpa instead of fa, on top of that: 0.584 -> 0.576 and 0.617 -> 0.575, same sign both rounds, and far steadier -- its repeats spread 0.9% (0.572-0.577) where fa's swung 0.579-0.792. Exact softmax, same precision class as fa, and the backend vLLM-Omni serves this case with. fa2 does not run at all: there is no native transformer for it, so the loader tries a Diffusers fallback and refuses under tp>1. NOTE: at tp_size=1 that refusal no longer guards this cell -- the harness scans the server log for the fallback markers instead. 4xB300 A/B 2026-10-22: 0.576/0.574 s, ahead of the GB300 compile profile (0.603/0.593)."
+        },
+        "cand-autoattn": {
+          "description": "No attention-backend pin: sglang's own selection. Never selected on its own: A/B arm.",
+          "sglang_ref": "current-main",
+          "num_gpus": 2,
+          "serve_args": "--model-type diffusion --warmup-mode server --tp-size 1 --cfg-parallel-size 2 --dit-layerwise-offload false --performance-mode speed --enable-torch-compile false",
+          "extra_env": {
+            "SGLANG_DISABLE_COSMOS3_GUARDRAILS": "1"
+          },
+          "notes": "Derived from `blackwell-2gpu-cfg-parallel` (the profile B300 selects). Audit 2026-10-23 (Cosmos3/Wan2.2 finding 8): the SKILL records that whether Cosmos3's pinned attention beats sglang's measured auto-selection on Blackwell is untested; auto resolves to dynamic_cudnn_sdpa on sm10x (cuDNN SDPA, FA4 fallback), and TRT-LLM measured torch SDPA 1.1% ahead of FA4 on these shapes. The pin dropped here is `--attention-backend torch_cudnn_sdpa`. VALIDATION PENDING (wave 4, 4xB300)."
         }
       }
     },
@@ -215,8 +225,81 @@
       }
     },
     "lightx2v": {
-      "status": "unsupported",
-      "reason": "No tracked LightX2V Cosmos3 serving path in this benchmark."
+      "status": "no_profile",
+      "reason": "LightX2V 19c19614 serves Cosmos3 (cosmos3 runner, configs/cosmos3/cosmos3_nano_omni.json), but only a Blackwell profile exists (2026-10-23); Hopper and AMD need their own attention choice and a measurement.",
+      "status_by_hardware": {
+        "b200": {
+          "status": "supported"
+        },
+        "gb200": {
+          "status": "supported"
+        },
+        "b300": {
+          "status": "supported"
+        },
+        "gb300": {
+          "status": "supported"
+        }
+      },
+      "model_cls": "cosmos3",
+      "lightx2v_task": "t2i",
+      "num_gpus": 2,
+      "serve_args": "",
+      "extra_env": {},
+      "lightx2v_config": {
+        "sample_guide_scale": 6.0,
+        "sample_shift": 10.0,
+        "size": [
+          720,
+          1280
+        ],
+        "enable_cfg": true,
+        "rms_norm_type": "one-pass",
+        "attn_rms_norm_type": "one-pass",
+        "rope_type": "cosmos3_rope",
+        "self_attn_type": "torch_sdpa",
+        "causal_self_attn_type": "torch_sdpa",
+        "add_resolution_template": false,
+        "add_duration_template": false,
+        "cpu_offload": false,
+        "vae_cpu_offload": false,
+        "lazy_load": false,
+        "unload_modules": false,
+        "num_frames": 1,
+        "parallel": {
+          "cfg_p_size": 2
+        }
+      },
+      "model_allow_patterns": [
+        "transformer/*",
+        "vae/*",
+        "scheduler/*",
+        "text_tokenizer/*",
+        "*.json",
+        "*.txt"
+      ],
+      "command_profiles": {
+        "blackwell-cfg2-sdpa": {
+          "description": "Blackwell LightX2V Cosmos3 t2i: the upstream Nano omni config, torch SDPA, CFG parallel 2, resident.",
+          "hardware": [
+            "b200",
+            "gb200",
+            "b300",
+            "gb300"
+          ],
+          "framework_ref": "lightx2v main 19c19614b067 (2026-10-21)",
+          "num_gpus": 2,
+          "serve_args": "",
+          "upstream_recipe": {
+            "repo": "ModelTC/LightX2V",
+            "path": "configs/cosmos3/cosmos3_nano_omni.json",
+            "commit": "65935cad",
+            "commit_date": "2026-09-24",
+            "section": "Nano omni config, num_frames 1 for the runner's t2i task, CFG parallel 2 (cfg_p_size, as cosmos3_nano_omni_t2v_cfg_ulysses_8gpu.json)"
+          },
+          "notes": "Onboarded 2026-10-23 from the audits (image finding 3, Cosmos3/Wan2.2 finding 6): LightX2V 19c19614 has RUNNER_REGISTER('cosmos3') with tasks t2i/t2v/i2v (lightx2v/models/runners/cosmos3/cosmos3_runner.py) and configs/cosmos3/cosmos3_nano_omni.json matches this case: 35 steps (the harness writes infer_steps from the case), sample_guide_scale 6.0, sample_shift 10, 720x1280, resolution and duration templates off, one-pass norms, cosmos3_rope; offload off. Attention: torch_sdpa, LightX2V's own default for Cosmos3 (transformer_weights.py) and cuDNN / flash SDPA on B300; the upstream configs name flash_attn3 (Hopper-only) or flash_attn2 (the sm80 path). Every attention call is one sequence (_infer_attn passes a single cu_seqlens segment), so torch_sdpa ignoring cu_seqlens is exact. Text is tokenized to its real length (no padding), as in the other rows. Compile: Cosmos3TransformerInfer never calls init_compile/run_block at 19c19614, so use_compile is ignored and the transformer runs eager, LightX2V's only path. The response is the sync image endpoint's PNG (pipeline_image_encode.py). Its scheduler has no guidance interval, so LightX2V applies CFG on all 35 steps where sglang, TRT-LLM and vLLM-Omni apply it on the 33 inside the T2I window (400, 1000): MORE work for LightX2V, though latency-neutral under CFG parallel (the uncond rank runs alongside). VALIDATION PENDING (wave 4, 4xB300). First measured by the wave-4 A/B (scripts/run_b300_ab_20261022.sh, WAVE=4)."
+        }
+      }
     },
     "trtllm-visual": {
       "status": "supported",
@@ -409,6 +492,86 @@
             "section": "T2I config with CFG parallel 2"
           },
           "notes": "4xB300 2026-10-22: server exited before health check in both rounds (CUDA graphs on Cosmos3 T2I)."
+        },
+        "cand-cudnn": {
+          "description": "cuDNN fused SDPA attention. Never selected on its own: A/B arm.",
+          "framework_ref": "tensorrt-llm 1.4.0rc1 (tag 0372799d1543, 2026-10-19)",
+          "num_gpus": 2,
+          "serve_args": "",
+          "upstream_recipe": {
+            "repo": "NVIDIA/TensorRT-LLM",
+            "path": "examples/visual_gen/configs/cosmos3-t2i-1gpu.yaml",
+            "commit": "78ab4e71cef5",
+            "commit_date": "2026-07-30",
+            "section": "T2I config with CFG parallel 2"
+          },
+          "visual_gen_args": {
+            "attention_config": {
+              "backend": "CUDNN"
+            },
+            "parallel_config": {
+              "cfg_size": 2,
+              "parallel_vae_size": 2
+            },
+            "torch_compile_config": {
+              "enable": true
+            },
+            "cuda_graph_config": {
+              "enable": false
+            },
+            "compilation_config": {
+              "resolutions": [
+                [
+                  720,
+                  1280
+                ]
+              ],
+              "num_frames": [
+                1
+              ]
+            }
+          },
+          "notes": "Derived from `default` (the profile B300 selects). Audit 2026-10-23 (Cosmos3/Wan2.2 finding 4; Cosmos3 T2I sub-audit): only VANILLA and FA4 were A/B'd; TRT-LLM 1.4.0rc1 AttentionConfig.backend also takes CUDNN, TRTLLM, CUTEDSL and FLASHINFER (tensorrt_llm/visual_gen/args.py). Everything else is the selected visual_gen_args. VALIDATION PENDING (wave 4, 4xB300)."
+        },
+        "cand-cutedsl": {
+          "description": "CuTe DSL dense FMHA attention. Never selected on its own: A/B arm.",
+          "framework_ref": "tensorrt-llm 1.4.0rc1 (tag 0372799d1543, 2026-10-19)",
+          "num_gpus": 2,
+          "serve_args": "",
+          "upstream_recipe": {
+            "repo": "NVIDIA/TensorRT-LLM",
+            "path": "examples/visual_gen/configs/cosmos3-t2i-1gpu.yaml",
+            "commit": "78ab4e71cef5",
+            "commit_date": "2026-07-30",
+            "section": "T2I config with CFG parallel 2"
+          },
+          "visual_gen_args": {
+            "attention_config": {
+              "backend": "CUTEDSL"
+            },
+            "parallel_config": {
+              "cfg_size": 2,
+              "parallel_vae_size": 2
+            },
+            "torch_compile_config": {
+              "enable": true
+            },
+            "cuda_graph_config": {
+              "enable": false
+            },
+            "compilation_config": {
+              "resolutions": [
+                [
+                  720,
+                  1280
+                ]
+              ],
+              "num_frames": [
+                1
+              ]
+            }
+          },
+          "notes": "Derived from `default` (the profile B300 selects). Audit 2026-10-23 (Cosmos3/Wan2.2 finding 4; Cosmos3 T2I sub-audit): only VANILLA and FA4 were A/B'd; TRT-LLM 1.4.0rc1 AttentionConfig.backend also takes CUDNN, TRTLLM, CUTEDSL and FLASHINFER (tensorrt_llm/visual_gen/args.py). Everything else is the selected visual_gen_args. Legal here: _resolve_cosmos3_cross_attention_backend rejects CUTEDSL only under Ulysses or Attention2D, and this cell is CFG 2 alone. VALIDATION PENDING (wave 4, 4xB300)."
         }
       },
       "_previous_failed_entry": {
