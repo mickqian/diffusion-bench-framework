@@ -35,12 +35,11 @@
           "description": "GB200/GB300: the 4-GPU CFG-parallel + Ulysses-2 command, fully resident in explicit speed mode.",
           "hardware": [
             "gb300",
-            "gb200",
-            "b300"
+            "gb200"
           ],
           "sglang_ref": "current-main",
           "serve_args": "--model-type diffusion --warmup-mode server --attention-backend fa --cfg-parallel-size 2 --ulysses-degree 2 --dit-layerwise-offload false --performance-mode speed --enable-torch-compile false",
-          "notes": "2026-10-10, 4x GB300, sglang 3831e7e09: under the default performance_mode=auto, server warmup runs the auto residency probe (1024x1024x81f); after it, gpu_worker._release_warmup_pool drops the IPC/Ulysses all-to-all staging buffers and calls torch.cuda.empty_cache(), which raised RuntimeError 'std::get: wrong index for variant' / 'bad optional access' on some ranks. The ranks diverged and the next ALLTOALL hung until the NCCL watchdog took the server down (health check never passed in 2400 s). Explicit speed mode skips the probe (auto_residency_args_skip_reason) and places what auto chooses on a 288 GB GPU anyway: every component resident. Same command as this model's I2V default. VALIDATION PENDING (2026-10-10 round). 2026-10-22: extended to b300, the same Blackwell Ultra GPU (sm103) as GB300 on an x86 host; the GB300 measurement is the evidence, and the 4xB300 round re-measures it."
+          "notes": "2026-10-10, 4x GB300, sglang 3831e7e09: under the default performance_mode=auto, server warmup runs the auto residency probe (1024x1024x81f); after it, gpu_worker._release_warmup_pool drops the IPC/Ulysses all-to-all staging buffers and calls torch.cuda.empty_cache(), which raised RuntimeError 'std::get: wrong index for variant' / 'bad optional access' on some ranks. The ranks diverged and the next ALLTOALL hung until the NCCL watchdog took the server down (health check never passed in 2400 s). Explicit speed mode skips the probe (auto_residency_args_skip_reason) and places what auto chooses on a 288 GB GPU anyway: every component resident. Same command as this model's I2V default. VALIDATION PENDING (2026-10-10 round). 2026-10-22: extended to b300, the same Blackwell Ultra GPU (sm103) as GB300 on an x86 host; the GB300 measurement is the evidence, and the 4xB300 round re-measures it. 4xB300 A/B 2026-10-22: 26.34 s against default 25.39 s (one round), so B300 runs default."
         },
         "default": {
           "description": "Cosmos3 Nano T2V profile for SGLang-Diffusion main 3d540563.",
@@ -418,7 +417,7 @@
             "commit_date": "2026-10-19",
             "section": "Blackwell BF16 config: attention_config.backend FA4"
           },
-          "notes": "NVIDIA's Blackwell Cosmos3 config uses FA4 (exact attention, same precision class as VANILLA); CUDA graphs replay the same kernels. Neither changes the output. VALIDATION PENDING (round 2026-10-22, 4xB300 A/B after the matrix)."
+          "notes": "4xB300 A/B 2026-10-22: 26.31 s against VANILLA 26.02 s; VANILLA stays."
         }
       },
       "extra_env_reason": "The harness exports PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True. Under it, the CUDA IPC handle TRT-LLM's rank 0 hands its media over with needs pidfd_getfd in the server process, which RunPod containers deny: every request logged 'pidfd_getfd: Operation not permitted' and hung to the read timeout (4xB300, 2026-10-22). Plain segments use cudaIpcMemHandle instead."

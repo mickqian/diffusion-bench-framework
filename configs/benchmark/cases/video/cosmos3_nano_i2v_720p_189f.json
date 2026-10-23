@@ -386,7 +386,7 @@
             "commit_date": "2026-10-19",
             "section": "Blackwell BF16 config: attention_config.backend FA4"
           },
-          "notes": "NVIDIA's Blackwell Cosmos3 config uses FA4 (exact attention, same precision class as VANILLA); CUDA graphs replay the same kernels. Neither changes the output. VALIDATION PENDING (round 2026-10-22, 4xB300 A/B after the matrix)."
+          "notes": "4xB300 A/B 2026-10-22: 28.41 s against VANILLA 28.13 s; VANILLA stays."
         }
       },
       "extra_env_reason": "The harness exports PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True. Under it, the CUDA IPC handle TRT-LLM's rank 0 hands its media over with needs pidfd_getfd in the server process, which RunPod containers deny: every request logged 'pidfd_getfd: Operation not permitted' and hung to the read timeout (4xB300, 2026-10-22). Plain segments use cudaIpcMemHandle instead."

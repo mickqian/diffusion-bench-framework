@@ -18,6 +18,15 @@
       "serve_args": "--model-type diffusion --warmup-mode server --enable-cfg-parallel --pipeline-class-name LTX2TwoStagePipeline",
       "extra_env": {},
       "command_profiles": {
+        "b300-cfg-parallel-bcg": {
+          "sglang_ref": "current-main",
+          "serve_args": "--model-type diffusion --warmup-mode server --enable-cfg-parallel --pipeline-class-name LTX2TwoStagePipeline --enable-breakable-cuda-graph true --warmup-resolutions 768x512 --warmup-num-frames 121",
+          "description": "B300: The default command plus breakable CUDA graphs (LTX-2/2.3 are on sglang's validated BCG list), captured at the case shape.",
+          "hardware": [
+            "b300"
+          ],
+          "notes": "TRT-LLM's LTX-2 row runs CUDA graphs (NVIDIA's official config) at 0.044 s per stage-1 step against sglang's 0.192 s (4xB300, 2026-10-22); stage 1 is ~1.5k tokens, so the step is launch-bound. BCG replays the same kernels, so the output is unchanged. Promoted from cand-bcg by the 2026-10-22 4xB300 A/B (scripts/run_b300_ab_20261022.sh, second wave): two rounds, 4.735/4.726 s against default (eager) 6.294/6.202, cand-usp2-bcg 5.420/5.435, cand-usp2 8.79/9.13."
+        },
         "default": {
           "description": "Fallback SGLang command when no hardware-specific profile matches.",
           "sglang_ref": "current-main",

@@ -36,14 +36,13 @@
         "gb300-2gpu-cfg-parallel-compile": {
           "description": "GB300: CFG-parallel with torch.compile, which beats eager here once the fused kernels stay in the graph.",
           "hardware": [
-            "gb300",
-            "b300"
+            "gb300"
           ],
           "sglang_ref": "main 3831e7e09 + sglang#43565 #43568 #43577 #43575 #43576 #43584 #43586 (GB300 rerun tree)",
           "num_gpus": 2,
           "serve_args": "--model-type diffusion --warmup-mode server --attention-backend torch_cudnn_sdpa --tp-size 1 --cfg-parallel-size 2 --dit-layerwise-offload false --performance-mode speed --enable-torch-compile true --offload-during-compile false",
           "policy_exception": "2026-10-10 GB300 served A/B, NUMA-bound workers, 2 interleaved rounds: compile 0.884/0.876 s vs eager 0.933/0.939 s with sglang#43577 (compile was 1.424/1.435 s before it; outputs bit-identical to main). vLLM-Omni default 0.97-1.02 s.",
-          "notes": " 2026-10-22: extended to b300, the same Blackwell Ultra GPU (sm103) as GB300 on an x86 host; the GB300 measurement is the evidence, and the 4xB300 round re-measures it."
+          "notes": " 2026-10-22: extended to b300, the same Blackwell Ultra GPU (sm103) as GB300 on an x86 host; the GB300 measurement is the evidence, and the 4xB300 round re-measures it. 4xB300 A/B 2026-10-22: 0.603/0.593 s against eager blackwell-2gpu-cfg-parallel 0.576/0.574 s, so B300 (x86 host) runs eager."
         },
         "h200-2gpu-cfg-parallel-fa": {
           "description": "H200 2-GPU CFG-parallel sglang Cosmos3 image profile with FlashAttention.",
@@ -108,7 +107,7 @@
           "extra_env": {
             "SGLANG_DISABLE_COSMOS3_GUARDRAILS": "1"
           },
-          "notes": "Measured on 4xB200 2026-09-13, two interleaved rounds. Against the previous `--tp-size 2 --attention-backend fa` command: 0.765 -> 0.576s and 0.797 -> 0.575s, about -25%, taking the cell from losing to vLLM-Omni (0.651-0.662s) to beating it. TWO changes, both measured separately. (1) CFG parallelism instead of TP: the case is guidance_scale 6.0 -- true CFG, two branches -- so one branch per GPU with the DiT replicated and one combine per step beats splitting every layer and paying an all-reduce per layer (0.765 -> 0.584, 0.797 -> 0.617). It is also what sglang's own runtime would choose: cosmos3 inherits auto_enable_cfg_parallel=True with get_auto_cfg_parallel_degree(2)->2 and _model_default_uses_cfg()->True, but `--tp-size 2` made _has_explicit_parallel_policy() true and suppressed it. The sibling Cosmos3 T2V profile already uses CFG parallel; T2I was the odd one out. (2) torch_cudnn_sdpa instead of fa, on top of that: 0.584 -> 0.576 and 0.617 -> 0.575, same sign both rounds, and far steadier -- its repeats spread 0.9% (0.572-0.577) where fa's swung 0.579-0.792. Exact softmax, same precision class as fa, and the backend vLLM-Omni serves this case with. fa2 does not run at all: there is no native transformer for it, so the loader tries a Diffusers fallback and refuses under tp>1. NOTE: at tp_size=1 that refusal no longer guards this cell -- the harness scans the server log for the fallback markers instead."
+          "notes": "Measured on 4xB200 2026-09-13, two interleaved rounds. Against the previous `--tp-size 2 --attention-backend fa` command: 0.765 -> 0.576s and 0.797 -> 0.575s, about -25%, taking the cell from losing to vLLM-Omni (0.651-0.662s) to beating it. TWO changes, both measured separately. (1) CFG parallelism instead of TP: the case is guidance_scale 6.0 -- true CFG, two branches -- so one branch per GPU with the DiT replicated and one combine per step beats splitting every layer and paying an all-reduce per layer (0.765 -> 0.584, 0.797 -> 0.617). It is also what sglang's own runtime would choose: cosmos3 inherits auto_enable_cfg_parallel=True with get_auto_cfg_parallel_degree(2)->2 and _model_default_uses_cfg()->True, but `--tp-size 2` made _has_explicit_parallel_policy() true and suppressed it. The sibling Cosmos3 T2V profile already uses CFG parallel; T2I was the odd one out. (2) torch_cudnn_sdpa instead of fa, on top of that: 0.584 -> 0.576 and 0.617 -> 0.575, same sign both rounds, and far steadier -- its repeats spread 0.9% (0.572-0.577) where fa's swung 0.579-0.792. Exact softmax, same precision class as fa, and the backend vLLM-Omni serves this case with. fa2 does not run at all: there is no native transformer for it, so the loader tries a Diffusers fallback and refuses under tp>1. NOTE: at tp_size=1 that refusal no longer guards this cell -- the harness scans the server log for the fallback markers instead. 4xB300 A/B 2026-10-22: 0.576/0.574 s, ahead of the GB300 compile profile (0.603/0.593)."
         }
       }
     },
@@ -292,7 +291,7 @@
           "notes": "Official T2I config with the CFG pair split over two GPUs. T2I applies CFG only for t in [400, 1000], as sglang (COSMOS3_T2I_GUIDANCE_INTERVAL) and vLLM-Omni do by default. The earlier 'failed' verdict (startup hang on cosmos3_omni, tensorrt-llm 1.3.0rc26) is retested: --visual_gen_args forces the VisualGen path. VANILLA attention is torch SDPA (FlashAttention on Hopper); no cache_config or quant_config, so the row is BF16 and cache-free; compile at the case shape so the first request does not recompile; JSON to /v1/videos/sync (or /v1/images/generations), whose reply is the media itself. The YAML is passed with --visual_gen_args (trtllm-serve has no --extra_visual_gen_options). VALIDATION PENDING (round 2026-10-22, 2xH200/4xH200)."
         },
         "cand-fa4": {
-          "description": "FA4 attention, as in NVIDIA's Blackwell Cosmos3 config. Never selected on its own: A/B arm, picked with DIFFUSION_BENCH_FRAMEWORK_PROFILE.",
+          "description": "FA4 attention, as in NVIDIA's Blackwell Cosmos3 config. Never selected: lost or failed the 4xB300 A/B.",
           "framework_ref": "tensorrt-llm 1.4.0rc1 (tag 0372799d1543, 2026-10-19)",
           "num_gpus": 2,
           "serve_args": "",
@@ -329,10 +328,10 @@
             "commit_date": "2026-10-19",
             "section": "Blackwell BF16 config: attention_config.backend FA4"
           },
-          "notes": "NVIDIA's Blackwell Cosmos3 config uses FA4 (exact attention, same precision class as VANILLA); CUDA graphs replay the same kernels. Neither changes the output. VALIDATION PENDING (round 2026-10-22, 4xB300 A/B after the matrix)."
+          "notes": "4xB300 A/B 2026-10-22: 1.031/0.960 s against VANILLA 0.599/0.599 s; VANILLA stays."
         },
         "cand-fa4-graph": {
-          "description": "FA4 attention plus CUDA graphs. Never selected on its own: A/B arm, picked with DIFFUSION_BENCH_FRAMEWORK_PROFILE.",
+          "description": "FA4 attention plus CUDA graphs. Never selected: lost or failed the 4xB300 A/B.",
           "framework_ref": "tensorrt-llm 1.4.0rc1 (tag 0372799d1543, 2026-10-19)",
           "num_gpus": 2,
           "serve_args": "",
@@ -369,10 +368,10 @@
             "commit_date": "2026-10-19",
             "section": "Blackwell BF16 config: attention_config.backend FA4"
           },
-          "notes": "NVIDIA's Blackwell Cosmos3 config uses FA4 (exact attention, same precision class as VANILLA); CUDA graphs replay the same kernels. Neither changes the output. VALIDATION PENDING (round 2026-10-22, 4xB300 A/B after the matrix)."
+          "notes": "4xB300 2026-10-22: server exited before health check in both rounds (CUDA graphs on Cosmos3 T2I)."
         },
         "cand-graph": {
-          "description": "VANILLA attention plus CUDA graphs. Never selected on its own: A/B arm, picked with DIFFUSION_BENCH_FRAMEWORK_PROFILE.",
+          "description": "VANILLA attention plus CUDA graphs. Never selected: lost or failed the 4xB300 A/B.",
           "framework_ref": "tensorrt-llm 1.4.0rc1 (tag 0372799d1543, 2026-10-19)",
           "num_gpus": 2,
           "serve_args": "",
@@ -409,7 +408,7 @@
             "commit_date": "2026-07-30",
             "section": "T2I config with CFG parallel 2"
           },
-          "notes": "NVIDIA's Blackwell Cosmos3 config uses FA4 (exact attention, same precision class as VANILLA); CUDA graphs replay the same kernels. Neither changes the output. VALIDATION PENDING (round 2026-10-22, 4xB300 A/B after the matrix)."
+          "notes": "4xB300 2026-10-22: server exited before health check in both rounds (CUDA graphs on Cosmos3 T2I)."
         }
       },
       "_previous_failed_entry": {
