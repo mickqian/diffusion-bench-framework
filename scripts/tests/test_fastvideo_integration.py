@@ -12,8 +12,9 @@ drives the harness's builders offline and checks what FastVideo would receive:
   hardware class selects, and the harness's compile-off mode;
 * the request: only fields FastVideo's VideoGenerationRequest declares, the H3
   shape FastVideo admits, and the step count in FastVideo's convention -- sigma
-  grid points: FastH3 V2 sends 9 (eight forwards; vLLM-Omni and sglang's native
-  FastH3 say 8) and base H3 sends the case's 50 (49 forwards, as on sglang);
+  grid points: FastH3 V2 sends 9 (eight forwards; vLLM-Omni and sglang, which
+  count forwards, say 8) and base H3 sends the case's 50 (49 forwards, the 49
+  sglang and vLLM-Omni are sent);
 * inputs: every request its own prompt, and for Ref2VA its own prepared reference;
 * the output: an MP4 without the audio track the case asks for is an error;
 * bench_serving's request body is the single_e2e one.
@@ -243,11 +244,11 @@ for cid, case in cases.items():
               all(len(r) == 1 and r[0]["image_url"].startswith("data:image/png;base64,") for r in refs)
               and len(set(images)) == 3 and sizes == {(2976, 2048)}, sizes)
 
-# FastVideo counts sigma grid points. sglang does too for base H3, but its native
-# FastH3 V2 counts DiT forwards, like vLLM-Omni.
+# FastVideo counts sigma grid points; sglang (since sglang#38671) and vLLM-Omni count DiT forwards.
 for cid in ("minimax_h3_t2va_5s", "minimax_h3_ref2va_5s"):
-    check(f"{cid}: FastVideo's grid points = sglang's ({steps(cases[cid], 'sglang')})",
-          steps(cases[cid], "fastvideo") == steps(cases[cid], "sglang"))
+    check(f"{cid}: FastVideo's {steps(cases[cid], 'fastvideo')} grid points = sglang's "
+          f"{steps(cases[cid], 'sglang')} forwards + 1",
+          steps(cases[cid], "fastvideo") == steps(cases[cid], "sglang") + 1 == steps(cases[cid], "vllm-omni") + 1)
 v2 = cases["minimax_h3_fasth3_v2_t2va_5s"]
 check("FastH3 V2: FastVideo's 9 grid points = 8 forwards, as vLLM-Omni and sglang are sent",
       steps(v2, "fastvideo") == 9 == steps(v2, "vllm-omni") + 1 == steps(v2, "sglang") + 1)

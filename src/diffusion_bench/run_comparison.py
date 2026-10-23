@@ -1275,18 +1275,56 @@ MAX_REQUEST_INPUTS = 100
 REF_PATCH_PX = 8
 
 
+# Where a case puts the negative prompts it sends: top level and shared or per-framework
+# request extras (any depth); ComfyUI's are in its workflow params (see _tagged_negatives).
+NEGATIVE_PROMPT_SOURCES = ("negative_prompt", "request_extra", "framework_request_extra")
+
+
+def _input_tag(text: str, index: int) -> str:
+    return f"{text} (take {index:02d})"
+
+
+def _tag_negative_prompts(node, index: int):
+    """`node` with every non-blank `negative_prompt` string in it tagged like the prompt.
+
+    A blank negative stays blank: tagging it would add tokens, i.e. work.
+    """
+    if isinstance(node, dict):
+        return {
+            key: _input_tag(value, index)
+            if key == "negative_prompt" and isinstance(value, str) and value.strip()
+            else _tag_negative_prompts(value, index)
+            for key, value in node.items()
+        }
+    if isinstance(node, list):
+        return [_tag_negative_prompts(value, index) for value in node]
+    return node
+
+
+def _tagged_negatives(case: dict, index: int) -> dict:
+    """The entries of `case` that hold the negative prompts it sends, each one tagged."""
+    tagged = _tag_negative_prompts({key: case[key] for key in NEGATIVE_PROMPT_SOURCES if key in case}, index)
+    spec = case.get("_comfyui")
+    if spec and spec.get("params"):
+        # the params only: the workflow graph's inputs are {{placeholders}}
+        tagged["_comfyui"] = {**spec, "params": _tag_negative_prompts(spec["params"], index)}
+    return tagged
+
+
 def _request_case(case: dict, index: int) -> dict:
     """`case` as request `index` to its server: same params, its own conditioning inputs.
 
-    Fixed-width digits keep the prompt's token count, and so every shape, the
-    same across requests (T5 varies by a token, but FLUX pads it to 512).
+    The prompt and every negative prompt the request sends carry the tag, so no
+    encoder output is reusable across requests (sglang caches negatives by content).
+    Fixed-width digits keep the token count, and so every shape, the same across
+    requests (T5 varies by a token, but FLUX pads it to 512).
     """
     if not 0 <= index < MAX_REQUEST_INPUTS:
         raise ValueError(
             f"{case['id']}: request {index} to one server, but two-digit input tags "
             f"cover {MAX_REQUEST_INPUTS}; widen the tag rather than repeat an input"
         )
-    return {**case, "prompt": f"{case['prompt']} (take {index:02d})", "input_variant": index}
+    return {**case, **_tagged_negatives(case, index), "prompt": _input_tag(case["prompt"], index), "input_variant": index}
 
 
 def _mark_reference(image, variant: int):
@@ -1426,6 +1464,15 @@ def _update_form_data(data: dict, values: dict) -> None:
 # ---------------------------------------------------------------------------
 
 
+# Every image cell answers the same lossless format. sglang answers JPEG q75 when a
+# request names none (choose_output_image_ext), except for models whose default is
+# PNG; vLLM-Omni, TRT-LLM, LightX2V's sync endpoint and ComfyUI's SaveImage answer
+# PNG. The field that asks for it, per framework (LightX2V and ComfyUI have none).
+IMAGE_TASKS = ("text-to-image", "image-edit", "image-to-image")
+IMAGE_OUTPUT_FORMAT = "png"
+IMAGE_FORMAT_FIELD = {"sglang": "output_format", "vllm-omni": "output_format", "trtllm-visual": "format"}
+
+
 def _build_sglang_payload(case: dict, config: dict | None = None) -> dict:
     """Build common SGLang request payload."""
     payload = {
@@ -1435,6 +1482,8 @@ def _build_sglang_payload(case: dict, config: dict | None = None) -> dict:
         "n": 1,
         "response_format": "b64_json",
     }
+    if case["task"] in IMAGE_TASKS:
+        payload[IMAGE_FORMAT_FIELD["sglang"]] = IMAGE_OUTPUT_FORMAT
     for key in (
         "num_inference_steps",
         "guidance_scale",
@@ -1613,6 +1662,8 @@ def send_image_conditioned_request_sglang(
             data[key] = str(case[key])
     if perf_dump_path:
         data["perf_dump_path"] = perf_dump_path
+    if task in IMAGE_TASKS:
+        data[IMAGE_FORMAT_FIELD["sglang"]] = IMAGE_OUTPUT_FORMAT
     _update_form_data(data, _request_extra(case, "sglang"))
     # Choose endpoint based on task
     if task in ("image-edit", "image-to-image"):
@@ -1771,6 +1822,7 @@ def send_request_vllm_omni(base_url: str, case: dict, config: dict) -> float:
         ):
             if key in case:
                 data[key] = str(case[key])
+        data[IMAGE_FORMAT_FIELD["vllm-omni"]] = IMAGE_OUTPUT_FORMAT
         _update_form_data(data, _request_extra(case, "vllm-omni"))
         start = time.time()
         resp = _post_drained(
@@ -1847,7 +1899,7 @@ def send_request_vllm_omni(base_url: str, case: dict, config: dict) -> float:
 # launch config (see `_write_lightx2v_config`); the request carries prompt,
 # seed, size, the reference image and, for a multi-task runner (MiniMax-H3),
 # the task.
-LIGHTX2V_IMAGE_TASKS = ("text-to-image", "image-edit", "image-to-image")
+LIGHTX2V_IMAGE_TASKS = IMAGE_TASKS
 # Request tasks whose MP4 muxes the generated audio.
 LIGHTX2V_AV_TASKS = ("t2av", "i2av", "l2av", "fl2av", "ref2av")
 LIGHTX2V_POLL_INTERVAL_S = POLL_INTERVAL_S  # kept for readability at the call site
@@ -2052,6 +2104,9 @@ def _generic_http_json_request(case: dict, config: dict, framework: str) -> dict
     task = case["task"]
     if task == "text-to-image":
         payload = _deep_merge(_build_sglang_payload(case, config), _request_extra(case, framework, config))
+        # sglang's field is not this server's: TRT-LLM's request schema answers 422 to it
+        payload.pop(IMAGE_FORMAT_FIELD["sglang"], None)
+        payload[IMAGE_FORMAT_FIELD[framework]] = IMAGE_OUTPUT_FORMAT
         return {
             "endpoint": spec.get("endpoint", "/v1/images/generations"),
             "json": _reshape_generic_fields(payload, spec),
@@ -2170,6 +2225,7 @@ def send_request_generic_http(
         ):
             if key in case:
                 data[key] = str(case[key])
+        data[IMAGE_FORMAT_FIELD[framework]] = IMAGE_OUTPUT_FORMAT
         _update_form_data(data, _request_extra(case, framework))
         start = time.time()
         resp = _post_drained(
@@ -2997,6 +3053,8 @@ def _bench_extra_body(case: dict, framework: str, config: dict) -> dict:
     ):
         if key in case:
             extra_body[key] = case[key]
+    if case["task"] in IMAGE_TASKS and framework in IMAGE_FORMAT_FIELD:
+        extra_body[IMAGE_FORMAT_FIELD[framework]] = IMAGE_OUTPUT_FORMAT
     extra_body = _deep_merge(extra_body, _request_extra(case, framework, config))
     return extra_body
 

@@ -8,9 +8,9 @@ difference is a way to measure the wrong thing without an error:
   request names its task; ref2av on the base variant would run a different
   transformer than the one sglang loads.
 * Steps count DiT evaluations: `infer_steps` N samples linspace(1, 0, N + 1),
-  while sglang's num_inference_steps 50 is the 50-point grid -- 49 forwards.
-  Copying the case's 50 into the launch config would add a forward and move
-  every sigma.
+  as sglang's num_inference_steps does since sglang#38671, so both get 49 for
+  the official 50-point grid. Copying the case's 50 into the launch config would
+  add a forward and move every sigma.
 * The task API forbids unknown fields, and the H3 runner then rejects any field
   outside its task's list, so the throughput path (bench_serving) must send what
   single_e2e sends -- it used to send infer_steps/height/width/fps.
@@ -95,7 +95,7 @@ try:
         raw = case["frameworks"]["lightx2v"]
         task = case["framework_request_extra"]["lightx2v"]["task"]
         sglang = case["framework_request_extra"]["sglang"]
-        grid_points = sglang.get("num_inference_steps", case["num_inference_steps"])
+        forwards = sglang.get("num_inference_steps", case["num_inference_steps"])
         for hw in ("h200", "b200", "gb300"):
             where = f"{case['id']}/lightx2v on {hw}"
             with contextlib.redirect_stdout(io.StringIO()):
@@ -118,8 +118,9 @@ try:
                 " ".join(cmd),
             )
             check(
-                f"{where}: {launch['infer_steps']} evaluations on sglang's {grid_points}-point grid, shifts 12/3",
-                launch["infer_steps"] == grid_points - 1
+                f"{where}: {launch['infer_steps']} evaluations, the {forwards} forwards sglang is sent, "
+                f"on the case's {case['num_inference_steps']}-point grid, shifts 12/3",
+                launch["infer_steps"] == forwards == case["num_inference_steps"] - 1
                 and launch["video_flow_shift"] == sglang["flow_shift"]
                 and launch["audio_flow_shift"] == sglang["audio_flow_shift"],
                 launch,

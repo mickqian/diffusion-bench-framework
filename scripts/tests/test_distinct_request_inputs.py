@@ -15,6 +15,13 @@ repeats, the diagnostic request, then bench_serving's warmups and requests. The
 last part drives every framework's real request builders against a fake
 transport and checks what each server would have received.
 
+Negative prompts carry the same tag (2026-10-23). sglang's cache keeps negative
+encodings on purpose (`prefer_conditioning_cache`), and a fixed negative -- LTX-2's
+1078-character one through Gemma-12B, Wan2.2's -- was encoded once per server
+while TRT-LLM and vLLM-Omni re-encoded it per request. Where sglang would fall
+back to its own default negative, the case now sends that default explicitly,
+so it is tagged too. A blank negative stays blank (a tag would add work).
+
 The tag is two digits because, across tag values, digits keep the token count
 and letters would not. On the Qwen2.5-VL, Qwen3, Qwen3-VL, Qwen3.5, Gemma-3,
 Mistral-3.1, umT5 and CLIP tokenizers "(take 07)" costs the same for every value,
@@ -236,8 +243,10 @@ def data_uri_bytes(node):
     return None
 
 
-def record(prompt, image, seed):
-    received.append({"prompt": prompt, "image": image, "seed": None if seed is None else str(seed)})
+def record(prompt, image, seed, negative=None):
+    received.append(
+        {"prompt": prompt, "image": image, "seed": None if seed is None else str(seed), "negative": negative}
+    )
 
 
 class FakeResponse:
@@ -278,7 +287,13 @@ def fake_post(url, **kwargs):
     prompt = body.get("prompt")
     if prompt is None and "messages" in body:
         prompt = next(p["text"] for p in body["messages"][0]["content"] if p.get("type") == "text")
-    record(prompt, image, body.get("seed", (body.get("extra_body") or {}).get("seed")))
+    extra_body = body.get("extra_body") or {}
+    record(
+        prompt,
+        image,
+        body.get("seed", extra_body.get("seed")),
+        body.get("negative_prompt", extra_body.get("negative_prompt")),
+    )
     if body.get("save_result_path"):
         mp4_written.append(body["save_result_path"])
         Path(mp4_written[-1]).write_bytes(FAKE_MP4)
@@ -295,8 +310,15 @@ def fake_run_prompt(base_url, graph, *, timeout_s, fetch_outputs):
     loads = [n["inputs"]["image"] for n in graph.values() if n["class_type"] == "LoadImage"]
     image = (current["workspace"] / loads[0]).read_bytes() if loads else None
     texts = {v for n in graph.values() for v in n["inputs"].values() if isinstance(v, str) and "(take " in v}
+    prompts = {t for t in texts if t.startswith(current["prompt"] + " (take ")}
+    negatives = texts - prompts
     seeds = {v for n in graph.values() for k, v in n["inputs"].items() if k in ("seed", "noise_seed")}
-    record(next(iter(texts)) if len(texts) == 1 else texts, image, next(iter(seeds)) if len(seeds) == 1 else seeds)
+    record(
+        next(iter(prompts)) if len(prompts) == 1 else prompts,
+        image,
+        next(iter(seeds)) if len(seeds) == 1 else seeds,
+        next(iter(negatives)) if len(negatives) == 1 else (negatives or None),
+    )
     return 0.01, {"cached_nodes": []}
 
 
@@ -304,7 +326,7 @@ async def fake_bench_request(input, session, pbar=None):
     # a generic HTTP framework is sent its prebuilt single_e2e body instead
     body = input.http_request["json"] if input.http_request else input.extra_body
     image = Path(input.image_paths[0]).read_bytes() if input.image_paths else data_uri_bytes(body)
-    record(body.get("prompt", input.prompt), image, body.get("seed"))
+    record(body.get("prompt", input.prompt), image, body.get("seed"), body.get("negative_prompt"))
     return RequestFuncOutput(success=True, latency=0.01, output_count=1)
 
 
@@ -331,6 +353,25 @@ for name in ("async_request_image_sglang", "async_request_video_sglang", "async_
 bs.make_fastvideo_request_func = lambda expect_audio: fake_bench_request
 bs.make_generic_http_request_func = lambda framework: fake_bench_request
 
+def sent_negative(c, fw):
+    """The non-blank negative prompt the case has `fw` send, untagged, else None."""
+    sources = [c.get("negative_prompt"), (c.get("request_extra") or {}).get("negative_prompt"),
+               ((c.get("framework_request_extra") or {}).get(fw) or {}).get("negative_prompt")]
+    if fw == "comfyui":
+        sources.append((((c["frameworks"]["comfyui"].get("comfyui") or {}).get("params")) or {}).get("negative_prompt"))
+    if fw == "lightx2v":  # the task API takes the case's and its own extras only
+        sources = sources[:1] + sources[2:]
+    found = [s for s in sources if isinstance(s, str) and s.strip()]
+    return found[-1] if found else None
+
+
+# sglang's sampling defaults carry a non-empty negative for these models, used under CFG
+# when a request names none; the case must send it, or the tag cannot reach it.
+SGLANG_DEFAULT_NEGATIVE = {"wan22_t2v_a14b_720p", "ltx2_twostage_t2v", "ltx2.3_twostage_t2v_2gpus"}
+for cid in sorted(SGLANG_DEFAULT_NEGATIVE):
+    c = next(case for case in cfg["cases"] if case["id"] == cid)
+    check(f"{cid}: sglang is sent its default negative explicitly", bool(sent_negative(c, "sglang")))
+
 covered: dict[str, set] = {}
 with tempfile.TemporaryDirectory() as tmp:
     os.environ[rc.COMFYUI_WORKSPACE_ENV] = tmp
@@ -343,6 +384,7 @@ with tempfile.TemporaryDirectory() as tmp:
                     fw_cfg = rc._resolve_framework_config(fw, raw, None, {"hardware_profile_override": "h200"})
                 server_case = rc._case_for_framework(c, fw_cfg)
                 current["workspace"] = rc._comfyui_workspace(c) / "input"
+                current["prompt"] = c["prompt"]
                 current["workspace"].mkdir(parents=True, exist_ok=True)
                 bench = rc._merge_nested(rc._benchmark_config(cfg, server_case), fw_cfg.get("benchmark", {}))
                 received.clear()
@@ -388,6 +430,19 @@ with tempfile.TemporaryDirectory() as tmp:
                     ok,
                     f"{sent}{shapes}" + (f", errors {[r['error'] for r in errors]}" if errors else ""),
                 )
+                negative = sent_negative(c, fw)
+                negatives = [r["negative"] for r in received]
+                if negative:
+                    tags = [p[-len(" (take 00)"):] for p in prompts if isinstance(p, str)]
+                    tagged = negatives == [negative + tag for tag in tags] and len(set(negatives)) == len(negatives)
+                    check(
+                        f"{where}: every request's negative prompt is its own, tagged like its prompt",
+                        tagged,
+                        "" if tagged else f"{[str(n)[-24:] for n in negatives]}",
+                    )
+                else:
+                    blank = all(n is None or not str(n).strip() for n in negatives)
+                    check(f"{where}: no request invents a negative prompt", blank, "" if blank else f"{negatives[:2]}")
     finally:
         rc._post_drained, rc._poll_get, rc._read_perf_dump, cc.run_prompt, time.sleep, requests.get, subprocess.run, sys.argv = saved
         for path in rc._cached_ref_image_paths.values():  # the harness's variant files, in the system temp dir

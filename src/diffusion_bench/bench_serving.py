@@ -690,8 +690,9 @@ def make_comfyui_request_func(bundle_path: str, request_timeout: float):
 
     ComfyUI takes a workflow graph, not a payload, so the runner hands over the
     case and its resolved ComfyUI spec; each request renders its own graph with
-    a fresh nonce (see comfyui_client), the request's steps and seed, and its
-    prompt and reference file from --request-inputs.
+    a fresh nonce (see comfyui_client), the request's steps and seed, its
+    prompt and reference file from --request-inputs, and its negative prompts
+    tagged with the same input variant.
     """
     with open(bundle_path) as f:
         bundle = json.load(f)
@@ -704,7 +705,9 @@ def make_comfyui_request_func(bundle_path: str, request_timeout: float):
     ) -> RequestFuncOutput:
         output = RequestFuncOutput()
         output.start_time = time.perf_counter()
-        case = dict(bundle["case"])
+        case = {**bundle["case"], "_comfyui": spec}
+        case.update(run_comparison._tagged_negatives(case, input.input_variant))
+        request_spec = case.pop("_comfyui")
         case["prompt"] = input.prompt
         case["input_variant"] = input.input_variant
         if input.num_inference_steps:
@@ -712,7 +715,7 @@ def make_comfyui_request_func(bundle_path: str, request_timeout: float):
         if "seed" in input.extra_body:
             case["seed"] = input.extra_body["seed"]
         try:
-            graph = comfyui_client.build_graph(case, spec)
+            graph = comfyui_client.build_graph(case, request_spec)
             await asyncio.to_thread(
                 comfyui_client.run_prompt,
                 input.api_url,
