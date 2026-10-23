@@ -39,7 +39,7 @@ arms() {  # <case> <framework> <rounds> <arms...>; AB_CASES=<regex> resumes a su
 }
 
 export ARMS_HW=b300 GPUS=0,1,2,3 TAG=ab1022b300
-port=63000
+port=40000  # 100 ports per arms line; 63000 overflowed 65535 at the 27th line
 echo "=== AB START $(date -Is) | $(git -C "${DBF_REPO_DIR}" log --oneline -1) ==="
 # images, two rounds each
 arms zimage_turbo_t2i_1024 vllm-omni 2 b300 cand-usp2 cand-usp2-permute
