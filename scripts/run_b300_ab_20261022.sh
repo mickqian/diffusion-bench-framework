@@ -136,4 +136,9 @@ arms cosmos3_nano_i2v_720p_189f sglang 1 b300 cand-noexp cand-kvg cand-kvg-noexp
 arms minimax_h3_t2va_5s sglang 1 b300 cand-noexp cand-fa4attn
 arms minimax_h3_ref2va_5s sglang 1 b300 cand-noexp cand-fa4attn
 arms minimax_h3_t2va_5s_4gpu sglang 1 b300 cand-noexp
+# wave 5: is expandable_segments:False (sglang +3-4.4% on RunPod) an allocator win for the others too?
+wave 5
+arms wan22_t2v_a14b_720p vllm-omni 1 b300 cand-noexp
+arms minimax_h3_t2va_5s vllm-omni 1 b300 cand-noexp
+arms wan22_t2v_a14b_720p lightx2v 1 b300 cand-noexp
 echo "=== AB DONE $(date -Is) ==="

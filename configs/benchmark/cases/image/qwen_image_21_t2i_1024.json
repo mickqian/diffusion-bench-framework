@@ -228,6 +228,41 @@
         "warmup": true
       },
       "command_profiles": {
+        "blackwell-sdpa": {
+          "framework_ref": "lightx2v main HEAD",
+          "num_gpus": 1,
+          "serve_args": "",
+          "lightx2v_config": {
+            "resolution": 1024,
+            "vae_scale_factor": 16,
+            "attn_type": "torch_sdpa",
+            "rope_type": "flashinfer_rope",
+            "rms_norm_type": "fp32_variance",
+            "layer_norm_type": "Triton",
+            "modulate_type": "triton",
+            "fused_qk_rms_norm": true,
+            "fused_block_ops": true,
+            "fused_block_min_tokens": 1024,
+            "enable_cfg": false,
+            "sample_guide_scale": 1.0,
+            "warmup": true
+          },
+          "upstream_recipe": {
+            "repo": "ModelTC/LightX2V",
+            "path": "configs/qwen_image_21/qwen_image_21_torch.json",
+            "commit": "4fe984c0",
+            "commit_date": "2026-10-10",
+            "section": "attn_type torch_sdpa (upstream's torch config); the fused-kernel settings of qwen_image_21.json kept"
+          },
+          "description": "torch SDPA attention; everything else kept.",
+          "hardware": [
+            "b200",
+            "gb200",
+            "b300",
+            "gb300"
+          ],
+          "notes": "Derived from `blackwell-1gpu-fa2` (the profile B300 selects). Audit 2026-10-23 (image finding 8, Cosmos3/Wan2.2 finding 5): every LightX2V Blackwell cell runs FlashAttention 2 (the sm80 mma.sync path on sm103); torch_sdpa (lightx2v/common/ops/attn/torch_sdpa.py, cuDNN / flash SDPA on B300) was never A/B'd. FA4 is not reachable: the installer deletes flash_attn/cute (no nvidia-cutlass-dsl release satisfies it, see the SKILL), which this arm keeps. torch_sdpa ignores cu_seqlens, which is exact here because every call is one unpadded sequence (batch 1 per CFG rank). Promoted from cand-sdpa by the 2026-10-22 4xB300 fourth-wave A/B: two rounds 2.562/2.560 s against FA2 3.026/3.022 s."
+        },
         "default": {
           "description": "Upstream's own general Qwen-Image-2.1 config: FlashAttention3, FlashInfer RoPE, Triton LayerNorm/modulation, fused QK RMSNorm and fused block ops.",
           "framework_ref": "lightx2v main HEAD",

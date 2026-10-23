@@ -72,6 +72,20 @@
       "status": "supported",
       "serve_args": "--model-type diffusion --warmup-mode server --model-variant fl2va --enable-torch-compile false",
       "command_profiles": {
+        "b300-noexp": {
+          "sglang_ref": "8d0c77081 (2026-08-07 checkout, includes sgl-project/sglang#33969)",
+          "num_gpus": 2,
+          "serve_args": "--model-type diffusion --warmup-mode server --model-variant ref2va --ulysses-degree 2 --performance-mode speed --enable-torch-compile false",
+          "policy_exception": "Same correctness exception as the default profile (checked 2026-08-07): MiniMax-H3's torch.compile path changes numerical output per the sglang cookbook, so it is excluded regardless of hardware.",
+          "extra_env": {
+            "PYTORCH_CUDA_ALLOC_CONF": "expandable_segments:False"
+          },
+          "description": "Plain CUDA allocator segments, so the copy-engine IPC all-to-all can start.",
+          "hardware": [
+            "b300"
+          ],
+          "notes": "Derived from `b200-2gpu` (the profile B300 selects). Audit 2026-10-23 (Cosmos3/Wan2.2 finding 1): the harness exports PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True (scripts/devbox_run_cases.sh); sharing an expandable segment needs pidfd_getfd, which RunPod containers deny, so every sglang SP cell of the round logged 'IPC all-to-all (multi-rank) unavailable (pidfd_getfd: Operation not permitted); using NCCL'. TRT-LLM already carries this override for the same reason. Accept the arm only if that line is absent. Promoted from cand-noexp by the 2026-10-22 4xB300 fourth-wave A/B: 98.22 s against b200-2gpu 101.23 s (FA4 102.18). RunPod containers deny pidfd_getfd, so under the harness's expandable_segments:True sglang's multi-rank IPC all-to-all fell back to NCCL ('IPC all-to-all (multi-rank) unavailable'); sglang#45948 (merged 2026-10-23, not in this round's pin 82f7249c) fixes it in sglang. TRT-LLM runs with the same override for the same reason."
+        },
         "default": {
           "description": "Model-default topology; validate before publishing on hardware without a dedicated profile below.",
           "sglang_ref": "current-main",
@@ -499,6 +513,59 @@
         }
       },
       "command_profiles": {
+        "blackwell-fa4-omp8": {
+          "framework_ref": "tensorrt-llm 1.4.0rc1 (tag 0372799d1543, 2026-10-19)",
+          "num_gpus": 2,
+          "serve_args": "",
+          "visual_gen_args": {
+            "attention_config": {
+              "backend": "FA4"
+            },
+            "parallel_config": {
+              "ulysses_size": 2,
+              "parallel_vae_size": 2
+            },
+            "torch_compile_config": {
+              "enable": true
+            },
+            "cuda_graph_config": {
+              "enable": false
+            },
+            "compilation_config": {
+              "resolutions": [
+                [
+                  768,
+                  1344
+                ]
+              ],
+              "num_frames": [
+                124
+              ],
+              "skip_warmup": true
+            },
+            "pipeline_config": {
+              "workflow": "ref2va"
+            }
+          },
+          "upstream_recipe": {
+            "repo": "NVIDIA/TensorRT-LLM",
+            "path": "examples/visual_gen/configs/minimax-h3-ref2va-bf16-1gpu.yaml",
+            "commit": "aa026bf86db4",
+            "commit_date": "2026-10-06",
+            "section": "Ref2VA BF16 1-GPU config; Ulysses 2 and parallel VAE 2 added by this harness (upstream has no multi-GPU Ref2VA config)"
+          },
+          "extra_env": {
+            "OMP_NUM_THREADS": "8"
+          },
+          "description": "FA4 attention plus OMP_NUM_THREADS=8 per worker.",
+          "hardware": [
+            "b200",
+            "gb200",
+            "b300",
+            "gb300"
+          ],
+          "notes": "Derived from `cand-fa4` (the profile B300 selects). Audit 2026-10-23 (H3 finding 1): TRT-LLM spends 5 s (2 GPU), 8 s (Ref2VA) and 11 s (4 GPU) on the CPU before its denoise loop (row_timestep_plan: torch.full, scatters and torch.unique over the whole sequence per step, on every rank) while its workers share the host's cores with OMP_NUM_THREADS unset. The harness sets OMP_NUM_THREADS for no framework; sglang caps its workers itself (min(16, cores / GPUs), gpu_worker._worker_cpu_intra_op_threads), vLLM-Omni's workers take 1 (set_multiprocessing_worker_envs) and LightX2V's torchrun sets 1, while TRT-LLM and FastVideo keep one thread per core in every worker. Combined with FA4 because this cell's sequence does not split evenly under its Ulysses size (VANILLA then runs masked SDPA; FA4 takes the trailing pad as seqused_k). Promoted from cand-fa4-omp8 by the 2026-10-22 4xB300 fourth-wave A/B: 108.23 s against VANILLA 162.89 s (FA4 alone 113.53): Ref2VA's odd sequence makes Ulysses-2 pad, VANILLA falls to masked SDPA; plus OMP_NUM_THREADS=8."
+        },
         "default": {
           "description": "TensorRT-LLM VisualGen, NVIDIA's official minimax-h3-ref2va-bf16-1gpu.yaml at BF16, 2 GPU(s).",
           "framework_ref": "tensorrt-llm 1.4.0rc1 (tag 0372799d1543, 2026-10-19)",

@@ -16,6 +16,15 @@
       "serve_args": "--model-type diffusion --warmup-mode server --dit-layerwise-offload false --tp-size 2",
       "extra_env": {},
       "command_profiles": {
+        "b300-speed": {
+          "sglang_ref": "current-main",
+          "serve_args": "--model-type diffusion --warmup-mode server --dit-layerwise-offload false --tp-size 2 --performance-mode speed --enable-torch-compile false",
+          "description": "performance_mode speed: text encoder resident, eager.",
+          "hardware": [
+            "b300"
+          ],
+          "notes": "Derived from `default` (the profile B300 selects). Audit 2026-10-23 (image findings 7, sglang-side 5): B300 falls through to `default` (the resident profile lists only h100/h200), whose performance_mode auto layerwise-offloads the text encoder on a 288 GB GPU (Z-Image log: 'Layerwise offload ready for text_encoder ... resident=0/36', TextEncodingStage 0.066 s = 19% of the request). serve_args are the H100/H200 resident profile's: speed keeps the encoder resident, compile stays off by policy. Promoted from cand-speed by the 2026-10-22 4xB300 fourth-wave A/B: two rounds, median 2.067 s against default 2.091 s."
+        },
         "default": {
           "description": "Best known SGLang command for Ideogram-4 T2I at 2-GPU TP.",
           "sglang_ref": "current-main",

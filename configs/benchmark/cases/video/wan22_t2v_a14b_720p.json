@@ -19,6 +19,18 @@
       "serve_args": "--model-type diffusion --warmup-mode server --enable-cfg-parallel --ulysses-degree 2 --dit-cpu-offload false --text-encoder-cpu-offload --pin-cpu-memory",
       "extra_env": {},
       "command_profiles": {
+        "b300-noexp": {
+          "sglang_ref": "current-main",
+          "serve_args": "--model-type diffusion --warmup-mode server --enable-cfg-parallel --ulysses-degree 2 --dit-cpu-offload false --pin-cpu-memory --dit-layerwise-offload false --performance-mode speed --enable-torch-compile false",
+          "extra_env": {
+            "PYTORCH_CUDA_ALLOC_CONF": "expandable_segments:False"
+          },
+          "description": "Plain CUDA allocator segments, so the copy-engine IPC all-to-all can start.",
+          "hardware": [
+            "b300"
+          ],
+          "notes": "Derived from `default` (the profile B300 selects). Audit 2026-10-23 (Cosmos3/Wan2.2 finding 1): the harness exports PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True (scripts/devbox_run_cases.sh); sharing an expandable segment needs pidfd_getfd, which RunPod containers deny, so every sglang SP cell of the round logged 'IPC all-to-all (multi-rank) unavailable (pidfd_getfd: Operation not permitted); using NCCL'. TRT-LLM already carries this override for the same reason. Accept the arm only if that line is absent. Promoted from cand-noexp by the 2026-10-22 4xB300 fourth-wave A/B: 92.85 s against default 97.08 s (kv-gather 94.10, kv-gather+noexp 94.14, FA4 95.75). RunPod containers deny pidfd_getfd, so under the harness's expandable_segments:True sglang's multi-rank IPC all-to-all fell back to NCCL ('IPC all-to-all (multi-rank) unavailable'); sglang#45948 (merged 2026-10-23, not in this round's pin 82f7249c) fixes it in sglang. TRT-LLM runs with the same override for the same reason."
+        },
         "default": {
           "description": "Best known SGLang command for the benchmark repo default profile.",
           "sglang_ref": "current-main",
@@ -239,6 +251,24 @@
             "section": "8x NVIDIA H20 / H100 / A100 (scaled to 4 GPUs)"
           },
           "notes": "Derived from `blackwell-4gpu-cfg2-usp2-vaepp-devpost` (the profile B300 selects). Audit 2026-10-23 (Cosmos3/Wan2.2 finding 3): vLLM-Omni 0da1d831 defaults to TRTLLM_ATTN on sm100/sm103 at head_dim 128 (vllm_omni/platforms/cuda/platform.py, 'Defaulting to diffusion attention backend TRTLLM_ATTN'), and the profiles force CUDNN_ATTN from a 2026-09 B200 qwen-image measurement on vLLM 0.29. Confirmation arm only: a 2026-10-23 B300 bf16 microbenchmark at the real per-rank shapes had trtllm-gen dense (the kernel behind TRTLLM_ATTN) 5-20% behind cuDNN SDPA and FA4 at every shape, so the other cells keep CUDNN_ATTN. Grep the server log for the TRTLLM_ATTN selection. VALIDATION PENDING (wave 4, 4xB300)."
+        },
+        "cand-noexp": {
+          "serve_args": "--num-gpus 4 --cfg-parallel-size 2 --usp 2 --vae-patch-parallel-size 4 --vae-parallel-mode spatial_shard_width --no-diffusion-compile-dynamic --video-output-transport {\"enable_device_postprocess\":true}",
+          "extra_env": {
+            "DIFFUSION_ATTENTION_BACKEND": "CUDNN_ATTN",
+            "PYTORCH_CUDA_ALLOC_CONF": "expandable_segments:False"
+          },
+          "num_gpus": 4,
+          "description": "Blackwell: GPU-side video postprocess (docs: at most one level in 255 from the host path). With expandable_segments:False. Never selected on its own: A/B arm.",
+          "notes": "Fairness check (wave 5): sglang gained 3-4.4% from expandable_segments:False on RunPod B300 (its IPC all-to-all was falling back to NCCL); this arm checks whether the allocator setting alone helps this framework too. VALIDATION PENDING (wave 5, 4xB300).",
+          "framework_ref": "vllm-omni main 0da1d831e07f + vllm==0.32.0",
+          "upstream_recipe": {
+            "repo": "vllm-project/vllm-omni",
+            "path": "recipes/Wan-AI/Wan2.2-T2V.md",
+            "commit": "62ebad2d7cd7",
+            "commit_date": "2026-09-25",
+            "section": "8x NVIDIA H20 / H100 / A100 (scaled to 4 GPUs)"
+          }
         }
       }
     },
@@ -267,6 +297,29 @@
         "offload_granularity": "model"
       },
       "command_profiles": {
+        "blackwell-sdpa": {
+          "framework_ref": "lightx2v-9bf4d39a-wan22+blackwell-fa2",
+          "serve_args": "",
+          "lightx2v_config": {
+            "self_attn_1_type": "torch_sdpa",
+            "cross_attn_1_type": "torch_sdpa"
+          },
+          "upstream_recipe": {
+            "repo": "ModelTC/LightX2V",
+            "path": "configs/wan22/wan_moe_t2v.json",
+            "commit": "cc942919",
+            "commit_date": "2026-10-15",
+            "section": "T2V A14B config (CFG 2 x Ulysses 2 added by this harness), attention slots set to torch_sdpa"
+          },
+          "description": "torch SDPA in both attention slots; parallel settings kept.",
+          "hardware": [
+            "b200",
+            "gb200",
+            "b300",
+            "gb300"
+          ],
+          "notes": "Derived from `blackwell-fa2` (the profile B300 selects). Audit 2026-10-23 (image finding 8, Cosmos3/Wan2.2 finding 5): every LightX2V Blackwell cell runs FlashAttention 2 (the sm80 mma.sync path on sm103); torch_sdpa (lightx2v/common/ops/attn/torch_sdpa.py, cuDNN / flash SDPA on B300) was never A/B'd. FA4 is not reachable: the installer deletes flash_attn/cute (no nvidia-cutlass-dsl release satisfies it, see the SKILL), which this arm keeps. torch_sdpa ignores cu_seqlens, which is exact here because every call is one unpadded sequence (batch 1 per CFG rank). Promoted from cand-sdpa by the 2026-10-22 4xB300 fourth-wave A/B: 100.50 s against FA2 241.45 s: flash-attn 2 runs its sm80 path on Blackwell; torch SDPA dispatches to a Blackwell kernel."
+        },
         "blackwell-fa2": {
           "description": "Blackwell LightX2V Wan2.2 profile: same config as default with all three attention slots on FlashAttention 2.",
           "hardware": [
@@ -338,6 +391,26 @@
             "section": "T2V A14B config (CFG 2 x Ulysses 2 added by this harness), attention slots set to torch_sdpa"
           },
           "notes": "Derived from `blackwell-fa2` (the profile B300 selects). Audit 2026-10-23 (image finding 8, Cosmos3/Wan2.2 finding 5): every LightX2V Blackwell cell runs FlashAttention 2 (the sm80 mma.sync path on sm103); torch_sdpa (lightx2v/common/ops/attn/torch_sdpa.py, cuDNN / flash SDPA on B300) was never A/B'd. FA4 is not reachable: the installer deletes flash_attn/cute (no nvidia-cutlass-dsl release satisfies it, see the SKILL), which this arm keeps. torch_sdpa ignores cu_seqlens, which is exact here because every call is one unpadded sequence (batch 1 per CFG rank). VALIDATION PENDING (wave 4, 4xB300)."
+        },
+        "cand-noexp": {
+          "framework_ref": "lightx2v-9bf4d39a-wan22+blackwell-fa2",
+          "serve_args": "",
+          "lightx2v_config": {
+            "self_attn_1_type": "torch_sdpa",
+            "cross_attn_1_type": "torch_sdpa"
+          },
+          "upstream_recipe": {
+            "repo": "ModelTC/LightX2V",
+            "path": "configs/wan22/wan_moe_t2v.json",
+            "commit": "cc942919",
+            "commit_date": "2026-10-15",
+            "section": "T2V A14B config (CFG 2 x Ulysses 2 added by this harness), attention slots set to torch_sdpa"
+          },
+          "description": "torch SDPA in both attention slots; parallel settings kept. With expandable_segments:False. Never selected on its own: A/B arm.",
+          "notes": "Fairness check (wave 5): sglang gained 3-4.4% from expandable_segments:False on RunPod B300 (its IPC all-to-all was falling back to NCCL); this arm checks whether the allocator setting alone helps this framework too. VALIDATION PENDING (wave 5, 4xB300).",
+          "extra_env": {
+            "PYTORCH_CUDA_ALLOC_CONF": "expandable_segments:False"
+          }
         }
       },
       "model_override_reason": "Same weights, different packaging: LightX2V reads Wan's original checkpoint layout, while sglang and vLLM-Omni read the Diffusers conversion (Wan2.2-T2V-A14B-Diffusers). Equivalent model path, not a different model."
@@ -405,6 +478,54 @@
         }
       },
       "command_profiles": {
+        "blackwell-cudnn": {
+          "framework_ref": "tensorrt-llm 1.4.0rc1 (tag 0372799d1543, 2026-10-19)",
+          "num_gpus": 4,
+          "serve_args": "",
+          "upstream_recipe": {
+            "repo": "NVIDIA/TensorRT-LLM",
+            "path": "examples/visual_gen/configs/wan2.2-t2v-fp4-4gpu.yaml",
+            "commit": "059396899c11",
+            "commit_date": "2026-06-17",
+            "section": "4-GPU layout with its FP4 quant_config removed"
+          },
+          "visual_gen_args": {
+            "attention_config": {
+              "backend": "CUDNN"
+            },
+            "parallel_config": {
+              "cfg_size": 2,
+              "ulysses_size": 2,
+              "async_ulysses": true,
+              "parallel_vae_size": 4
+            },
+            "torch_compile_config": {
+              "enable": true
+            },
+            "cuda_graph_config": {
+              "enable": false
+            },
+            "compilation_config": {
+              "resolutions": [
+                [
+                  720,
+                  1280
+                ]
+              ],
+              "num_frames": [
+                81
+              ]
+            }
+          },
+          "description": "cuDNN fused SDPA attention.",
+          "hardware": [
+            "b200",
+            "gb200",
+            "b300",
+            "gb300"
+          ],
+          "notes": "Derived from `default` (the profile B300 selects). Audit 2026-10-23 (Cosmos3/Wan2.2 finding 4; Cosmos3 T2I sub-audit): only VANILLA and FA4 were A/B'd; TRT-LLM 1.4.0rc1 AttentionConfig.backend also takes CUDNN, TRTLLM, CUTEDSL and FLASHINFER (tensorrt_llm/visual_gen/args.py). Everything else is the selected visual_gen_args. Promoted from cand-cudnn by the 2026-10-22 4xB300 fourth-wave A/B: 94.39 s against VANILLA 94.60 s (CUTEDSL 97.55, TRTLLM 100.29)."
+        },
         "default": {
           "description": "TensorRT-LLM VisualGen, NVIDIA's official wan2.2-t2v-fp4-4gpu.yaml at BF16, 4 GPU(s).",
           "framework_ref": "tensorrt-llm 1.4.0rc1 (tag 0372799d1543, 2026-10-19)",

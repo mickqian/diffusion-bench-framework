@@ -31,6 +31,19 @@
         "SGLANG_DISABLE_COSMOS3_GUARDRAILS": "1"
       },
       "command_profiles": {
+        "b300-noexp": {
+          "sglang_ref": "sgl-project/sglang@3d540563916394115f9612f30601ae3fa97ada7c",
+          "num_gpus": 4,
+          "serve_args": "--model-type diffusion --warmup-mode server --attention-backend fa --cfg-parallel-size 2 --ulysses-degree 2",
+          "extra_env": {
+            "PYTORCH_CUDA_ALLOC_CONF": "expandable_segments:False"
+          },
+          "description": "Plain CUDA allocator segments, so the copy-engine IPC all-to-all can start.",
+          "hardware": [
+            "b300"
+          ],
+          "notes": "Derived from `default` (the profile B300 selects). Audit 2026-10-23 (Cosmos3/Wan2.2 finding 1): the harness exports PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True (scripts/devbox_run_cases.sh); sharing an expandable segment needs pidfd_getfd, which RunPod containers deny, so every sglang SP cell of the round logged 'IPC all-to-all (multi-rank) unavailable (pidfd_getfd: Operation not permitted); using NCCL'. TRT-LLM already carries this override for the same reason. Accept the arm only if that line is absent. Promoted from cand-noexp by the 2026-10-22 4xB300 fourth-wave A/B: 24.62 s against default 25.56 s (kv-gather 25.44, auto attention 25.53). RunPod containers deny pidfd_getfd, so under the harness's expandable_segments:True sglang's multi-rank IPC all-to-all fell back to NCCL ('IPC all-to-all (multi-rank) unavailable'); sglang#45948 (merged 2026-10-23, not in this round's pin 82f7249c) fixes it in sglang. TRT-LLM runs with the same override for the same reason."
+        },
         "gb-4gpu-cfg-ulysses-speed": {
           "description": "GB200/GB300: the 4-GPU CFG-parallel + Ulysses-2 command, fully resident in explicit speed mode.",
           "hardware": [

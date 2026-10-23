@@ -84,8 +84,10 @@ for wave, _, cid, fw, rounds, arms in wave4:
     image = case["task"] in ("text-to-image", "image-edit", "image-to-image")
     check(f"{cid} {fw}: the selected profile ({HW}) is an arm, rounds {2 if image else 1}",
           arms[0] == HW and rounds == (2 if image else 1), f"{arms} rounds={rounds}")
-    status, _ = resolve_status(entry, hardware_candidates(None, override=HW))
-    check(f"{cid} {fw}: runnable on {HW}", status == "supported", status)
+    status, reason = resolve_status(entry, hardware_candidates(None, override=HW))
+    # a cell the wave measured as failed keeps its arms line but must say why
+    check(f"{cid} {fw}: runnable on {HW}, or failed with a reason",
+          status == "supported" or (status == "failed" and bool(reason)), status)
     for arm in arms[1:]:
         prof = entry["command_profiles"][arm]
         if "wave 4" not in prof.get("notes", ""):

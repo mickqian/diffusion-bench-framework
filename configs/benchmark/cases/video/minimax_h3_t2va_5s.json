@@ -51,6 +51,20 @@
       "status": "supported",
       "serve_args": "--model-type diffusion --warmup-mode server --model-variant fl2va --enable-torch-compile false",
       "command_profiles": {
+        "b300-noexp": {
+          "sglang_ref": "8d0c77081 (2026-08-07 checkout, includes sgl-project/sglang#33969)",
+          "num_gpus": 2,
+          "serve_args": "--model-type diffusion --warmup-mode server --model-variant fl2va --ulysses-degree 2 --performance-mode speed --enable-torch-compile false",
+          "policy_exception": "Same correctness exception as the default profile (checked 2026-08-07): MiniMax-H3's torch.compile path changes numerical output per the sglang cookbook, so it is excluded regardless of hardware.",
+          "extra_env": {
+            "PYTORCH_CUDA_ALLOC_CONF": "expandable_segments:False"
+          },
+          "description": "Plain CUDA allocator segments, so the copy-engine IPC all-to-all can start.",
+          "hardware": [
+            "b300"
+          ],
+          "notes": "Derived from `b200-2gpu` (the profile B300 selects). Audit 2026-10-23 (Cosmos3/Wan2.2 finding 1): the harness exports PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True (scripts/devbox_run_cases.sh); sharing an expandable segment needs pidfd_getfd, which RunPod containers deny, so every sglang SP cell of the round logged 'IPC all-to-all (multi-rank) unavailable (pidfd_getfd: Operation not permitted); using NCCL'. TRT-LLM already carries this override for the same reason. Accept the arm only if that line is absent. Promoted from cand-noexp by the 2026-10-22 4xB300 fourth-wave A/B: 63.78 s against b200-2gpu 66.05 s at 49 forwards (FA4 67.42). RunPod containers deny pidfd_getfd, so under the harness's expandable_segments:True sglang's multi-rank IPC all-to-all fell back to NCCL ('IPC all-to-all (multi-rank) unavailable'); sglang#45948 (merged 2026-10-23, not in this round's pin 82f7249c) fixes it in sglang. TRT-LLM runs with the same override for the same reason."
+        },
         "default": {
           "description": "Model-default topology; validate before publishing on hardware without a dedicated profile below.",
           "sglang_ref": "current-main",
@@ -293,6 +307,23 @@
             "section": "Four GPUs: throughput-oriented combined service (no offload, Ulysses, tiled VAE patch parallel, regional compile), scaled to 2 GPUs"
           },
           "notes": "Derived from `blackwell-2gpu-static` (the profile B300 selects). Audit 2026-10-23 (H3 finding 5): the selected command is the consumer RTX recipe's placement (TP2) without its offload; the recipe's high-memory pattern (recipes/MiniMaxAI/MiniMax-H3.md 'Four GPUs: throughput-oriented combined service': no offload, Ulysses, tiled VAE patch parallel, regional compile, Ring and TP 1) was last measured as USP2 on B200 at an older build (79.4 vs 73.55 s), never on B300 or 0da1d831. Scaled to 2 GPUs; text-encoder TP 2 and static compile kept from the selected profile. Attention stays CUDNN_ATTN rather than the recipe's TRTLLM_ATTN default: the 2026-10-23 B300 microbenchmark had trtllm-gen 5-20% behind cuDNN at the H3 shapes. VALIDATION PENDING (wave 4, 4xB300)."
+        },
+        "cand-noexp": {
+          "serve_args": "--trust-remote-code --task-type fl2va --num-gpus 2 --tensor-parallel-size 2 --usp 1 --ring 1 --text-encoder-tp-size 2 --vae-patch-parallel-size 2 --vae-parallel-mode tile --vae-use-tiling --diffusion-attention-backend CUDNN_ATTN --no-diffusion-compile-dynamic",
+          "extra_env": {
+            "PYTORCH_CUDA_ALLOC_CONF": "expandable_segments:False"
+          },
+          "num_gpus": 2,
+          "description": "Blackwell: The selected command plus --no-diffusion-compile-dynamic (docs: the setting for fixed shapes). With expandable_segments:False. Never selected on its own: A/B arm.",
+          "notes": "Fairness check (wave 5): sglang gained 3-4.4% from expandable_segments:False on RunPod B300 (its IPC all-to-all was falling back to NCCL); this arm checks whether the allocator setting alone helps this framework too. VALIDATION PENDING (wave 5, 4xB300).",
+          "upstream_recipe": {
+            "repo": "vllm-project/vllm-omni",
+            "path": "recipes/MiniMaxAI/MiniMax-H3.md",
+            "commit": "95b1d97f2ec2",
+            "commit_date": "2026-10-21",
+            "section": "Two 24/32 GB GPUs: TP2 distributed layerwise offload",
+            "recheck": "Re-checked 2026-10-22: the only change since the profile was written moved the FastH3 sections to recipes/FastVideo/ (95b1d97f); the base H3 serving sections are unchanged. The previously recorded f69b1f2b1 was a repo HEAD, not a commit to this file."
+          }
         }
       },
       "reason": "Empirically validated 2026-08-07, first on minimax-h3-5090-2gpu-v4 (2x RTX 5090) then on 2xB200: the default (compiled) profile segfaults identically on both GPU classes 1 step into denoising (see command_profiles.default.notes) -- a confirmed hardware-independent vLLM-Omni bug, despite the recipe's own claim that torch.compile is 'not enabled by default on consumer paths.' --enforce-eager avoids that segfault, but on RTX 5090 it fails differently at startup (a diffusion worker process dies before completing its init handshake, surfaced as EOFError) and never completes a request on that GPU class. On 2xB200 the identical --enforce-eager command works cleanly and completes a correct generation -- see command_profiles.b200-2gpu for the validated numbers and the sglang comparison on the same hardware. Net: vLLM-Omni H3 support is real but fragile below the B200 class tested here; RTX 5090 has no working profile for this case in either variant."
@@ -473,6 +504,29 @@
         }
       },
       "command_profiles": {
+        "blackwell-omp8": {
+          "framework_ref": "tensorrt-llm 1.4.0rc1 (tag 0372799d1543, 2026-10-19)",
+          "num_gpus": 2,
+          "serve_args": "",
+          "upstream_recipe": {
+            "repo": "NVIDIA/TensorRT-LLM",
+            "path": "examples/visual_gen/configs/minimax-h3-bf16-8gpu.yaml",
+            "commit": "92d23a83799d",
+            "commit_date": "2026-10-09",
+            "section": "BF16 multi-GPU config scaled to pure Ulysses 2"
+          },
+          "extra_env": {
+            "OMP_NUM_THREADS": "8"
+          },
+          "description": "OMP_NUM_THREADS=8 per worker (VANILLA kept: 37742 rows split evenly).",
+          "hardware": [
+            "b200",
+            "gb200",
+            "b300",
+            "gb300"
+          ],
+          "notes": "Derived from `default` (the profile B300 selects). Audit 2026-10-23 (H3 finding 1): TRT-LLM spends 5 s (2 GPU), 8 s (Ref2VA) and 11 s (4 GPU) on the CPU before its denoise loop (row_timestep_plan: torch.full, scatters and torch.unique over the whole sequence per step, on every rank) while its workers share the host's cores with OMP_NUM_THREADS unset. The harness sets OMP_NUM_THREADS for no framework; sglang caps its workers itself (min(16, cores / GPUs), gpu_worker._worker_cpu_intra_op_threads), vLLM-Omni's workers take 1 (set_multiprocessing_worker_envs) and LightX2V's torchrun sets 1, while TRT-LLM and FastVideo keep one thread per core in every worker. Promoted from cand-omp8 by the 2026-10-22 4xB300 fourth-wave A/B: 69.63 s against 74.39 s: with OMP unset its 4 workers each keep one thread per core and lose 5-11 s per request to a CPU timestep plan before denoising."
+        },
         "default": {
           "description": "TensorRT-LLM VisualGen, NVIDIA's official minimax-h3-bf16-8gpu.yaml at BF16, 2 GPU(s).",
           "framework_ref": "tensorrt-llm 1.4.0rc1 (tag 0372799d1543, 2026-10-19)",
