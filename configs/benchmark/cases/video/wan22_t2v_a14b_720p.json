@@ -725,7 +725,8 @@
         },
         "params": {
           "cfg_gpus": 2,
-          "negative_prompt": "色调艳丽，过曝，静态，细节模糊不清，字幕，风格，作品，画作，画面，静止，整体发灰，最差质量，低质量，JPEG压缩残留，丑陋的，残缺的，多余的手指，画得不好的手部，画得不好的脸部，畸形的，毁容的，形态畸形的肢体，手指融合，静止不动的画面，杂乱的背景，三条腿，背景人很多，倒着走"
+          "negative_prompt": "色调艳丽，过曝，静态，细节模糊不清，字幕，风格，作品，画作，画面，静止，整体发灰，最差质量，低质量，JPEG压缩残留，丑陋的，残缺的，多余的手指，画得不好的手部，画得不好的脸部，畸形的，毁容的，形态畸形的肢体，手指融合，静止不动的画面，杂乱的背景，三条腿，背景人很多，倒着走",
+          "video_crf": 23.0
         },
         "compile": false
       },
@@ -770,8 +771,21 @@
       "negative_prompt": "色调艳丽，过曝，静态，细节模糊不清，字幕，风格，作品，画作，画面，静止，整体发灰，最差质量，低质量，JPEG压缩残留，丑陋的，残缺的，多余的手指，画得不好的手部，画得不好的脸部，畸形的，毁容的，形态畸形的肢体，手指融合，静止不动的画面，杂乱的背景，三条腿，背景人很多，倒着走"
     },
     "sglang": {
-      "negative_prompt": "色调艳丽，过曝，静态，细节模糊不清，字幕，风格，作品，画作，画面，静止，整体发灰，最差质量，低质量，JPEG压缩残留，丑陋的，残缺的，多余的手指，画得不好的手部，画得不好的脸部，畸形的，毁容的，形态畸形的肢体，手指融合，静止不动的画面，杂乱的背景，三条腿，背景人很多，倒着走"
+      "negative_prompt": "色调艳丽，过曝，静态，细节模糊不清，字幕，风格，作品，画作，画面，静止，整体发灰，最差质量，低质量，JPEG压缩残留，丑陋的，残缺的，多余的手指，画得不好的手部，画得不好的脸部，畸形的，毁容的，形态畸形的肢体，手指融合，静止不动的画面，杂乱的背景，三条腿，背景人很多，倒着走",
+      "x264_preset": "medium",
+      "output_compression": 54,
+      "_note": "MP4 encode = the closest competitor's, TRT-LLM (94.4 s against sglang's 89.5 s on 4xB300, 2026-10-24): TRT-LLM 1.4.0rc1 hard-codes ffmpeg libx264 -preset medium -crf 23 (tensorrt_llm/media/encoding.py:166-172; no request field reaches it). sglang defaults to libx264 preset fast at CRF 25 (multimodal_gen/runtime/entrypoints/utils.py:310 X264_PRESET; :452-455 CRF = int((1 - output_compression / 100) * 51), default output_compression 50); output_compression 54 -> CRF 23. Frames unchanged."
+    },
+    "vllm-omni": {
+      "extra_params": {
+        "video_codec_options": {
+          "preset": "medium",
+          "crf": "23",
+          "threads": "0"
+        }
+      },
+      "_note": "MP4 encode = the closest competitor's, TRT-LLM (94.4 s against sglang's 89.5 s on 4xB300, 2026-10-24): TRT-LLM 1.4.0rc1 hard-codes ffmpeg libx264 -preset medium -crf 23 (tensorrt_llm/media/encoding.py:166-172; no request field reaches it). vLLM-Omni encodes libx264 preset ultrafast, threads 0, CRF 18 unless a request's extra_params.video_codec_options replaces those options (0da1d831: entrypoints/openai/serving_video.py:578/644, diffusion/models/wan2_2/chunked_mp4.py:17, diffusion/models/minimax_h3/pipeline_minimax_h3.py:3211; CRF 18 in diffusion/utils/media_utils.py:365/445); threads 0 kept (its own choice)."
     }
   },
-  "_note": "sglang's request carries its own default negative prompt explicitly (2026-10-23; byte-identical to Wan2_2_Base_SamplingParams.negative_prompt at sglang 82f7249c, the text TRT-LLM and ComfyUI are sent), so the harness can tag it per request like every negative it sends: left to the server default, it was one constant text that sglang's conditioning cache encoded once per server (text_encoding.get_or_compute_negative_text_embedding), while the competitors re-encode theirs."
+  "_note": "sglang's request carries its own default negative prompt explicitly (2026-10-23; byte-identical to Wan2_2_Base_SamplingParams.negative_prompt at sglang 82f7249c, the text TRT-LLM and ComfyUI are sent), so the harness can tag it per request like every negative it sends: left to the server default, it was one constant text that sglang's conditioning cache encoded once per server (text_encoding.get_or_compute_negative_text_embedding), while the competitors re-encode theirs. MP4 encode (fairness rule, 2026-10-24): every framework whose encoder is configurable encodes like the closest competitor, TRT-LLM (94.4 s against sglang's 89.5 s on 4xB300, 2026-10-24): TRT-LLM 1.4.0rc1 hard-codes ffmpeg libx264 -preset medium -crf 23 (tensorrt_llm/media/encoding.py:166-172; no request field reaches it). sglang gets x264_preset medium and output_compression 54 (CRF 23); vLLM-Omni gets extra_params.video_codec_options {preset: medium, crf: 23, threads: 0} (its own thread count kept); ComfyUI's graph sets SaveVideo's h264 re-encode crf to 23 (params.video_crf; ComfyUI's SaveVideo encodes x264 at CRF 18 unless its h264 re-encode crf is set and takes no preset, so x264's medium (comfy_api/latest/_input_impl/video_types.py:214, comfy_extras/nodes_video.py:200), so its medium already matches). Already equal, no knob: LightX2V's save_to_video passes no -preset/-crf, so x264's medium at CRF 23, with no knob (lightx2v/utils/utils.py:298-318). Check a row by x264's options string in the MP4 (`strings out.mp4 | grep -m1 'x264 - core'`)."
 }

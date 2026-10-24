@@ -25,7 +25,10 @@
       "audio_flow_shift": 3.0,
       "num_frames": null,
       "fps": null,
-      "num_inference_steps": 49
+      "num_inference_steps": 49,
+      "x264_preset": "ultrafast",
+      "output_compression": 63,
+      "_note": "MP4 encode = the closest competitor's, vLLM-Omni (37.2 s against sglang's 32.2 s on 4xB300, 2026-10-23; LightX2V 37.4 s): vLLM-Omni encodes libx264 preset ultrafast, threads 0, CRF 18 unless a request's extra_params.video_codec_options replaces those options (0da1d831: entrypoints/openai/serving_video.py:578/644, diffusion/models/wan2_2/chunked_mp4.py:17, diffusion/models/minimax_h3/pipeline_minimax_h3.py:3211; CRF 18 in diffusion/utils/media_utils.py:365/445). sglang defaults to libx264 preset fast at CRF 25 (multimodal_gen/runtime/entrypoints/utils.py:310 X264_PRESET; :452-455 CRF = int((1 - output_compression / 100) * 51), default output_compression 50); output_compression 63 -> CRF 18. Frames unchanged."
     },
     "vllm-omni": {
       "extra_params": {
@@ -218,6 +221,10 @@
         "parallel": {
           "seq_p_size": 4,
           "seq_p_attn_type": "ulysses"
+        },
+        "video_codec_options": {
+          "preset": "ultrafast",
+          "crf": "18"
         }
       },
       "command_profiles": {
@@ -578,5 +585,5 @@
       }
     }
   },
-  "_note": "vLLM-Omni requests carry extra_params.preencode_mp4=true (2026-10-08): its documented, off-by-default overlap of MP4 encoding with the VAE decode (byte-identical frames), the counterpart of sglang's default streamed encode (#41819). Both engines run their best documented output path. vLLM-Omni gets num_inference_steps 49 (2026-10-08): since vllm-omni #7219 (2026-09-24) it reads N as N model passes on linspace(1, 0, N+1), while FastVideo and TRT-LLM read 50 as 50 sigma grid points, i.e. 49 passes, and LightX2V's launch config says 49 passes; 49 gives Omni the identical 50-point grid. Earlier H3 rounds ran Omni one pass more. sglang gets num_inference_steps 49 (2026-10-23): it counts DiT forwards since sglang#38671 (2026-10-10, time_request.py: linspace(1, 0, num_steps + 1)), so the case's 50 ran 50 forwards on a 51-point grid (r1022 logs: 'infer_steps: 50', '50/50') while TRT-LLM and FastVideo read 50 as the official 50-point grid (49 forwards) and vLLM-Omni and LightX2V are given 49 forwards. 49 gives sglang the same grid."
+  "_note": "vLLM-Omni requests carry extra_params.preencode_mp4=true (2026-10-08): its documented, off-by-default overlap of MP4 encoding with the VAE decode (byte-identical frames), the counterpart of sglang's default streamed encode (#41819). Both engines run their best documented output path. vLLM-Omni gets num_inference_steps 49 (2026-10-08): since vllm-omni #7219 (2026-09-24) it reads N as N model passes on linspace(1, 0, N+1), while FastVideo and TRT-LLM read 50 as 50 sigma grid points, i.e. 49 passes, and LightX2V's launch config says 49 passes; 49 gives Omni the identical 50-point grid. Earlier H3 rounds ran Omni one pass more. sglang gets num_inference_steps 49 (2026-10-23): it counts DiT forwards since sglang#38671 (2026-10-10, time_request.py: linspace(1, 0, num_steps + 1)), so the case's 50 ran 50 forwards on a 51-point grid (r1022 logs: 'infer_steps: 50', '50/50') while TRT-LLM and FastVideo read 50 as the official 50-point grid (49 forwards) and vLLM-Omni and LightX2V are given 49 forwards. 49 gives sglang the same grid. MP4 encode (fairness rule, 2026-10-24): every framework whose encoder is configurable encodes like the closest competitor, vLLM-Omni (37.2 s against sglang's 32.2 s on 4xB300, 2026-10-23; LightX2V 37.4 s): x264 ultrafast at CRF 18. sglang gets x264_preset ultrafast and output_compression 63 (CRF 18) through its request; LightX2V gets video_codec_options {preset: ultrafast, crf: 18} in its launch config (LightX2V's MiniMax-H3 runner encodes with PyAV and the launch config's video_codec_options (models/runners/minimax_h3/minimax_h3_runner.py:803, utils/ltx2_media_io.py:249), x264 medium/23 without them); each keeps its own encoder thread count. Recorded, not configurable: TRT-LLM 1.4.0rc1 hard-codes ffmpeg libx264 -preset medium -crf 23 (tensorrt_llm/media/encoding.py:166-172; no request field reaches it); FastVideo encodes ffmpeg libx264 -preset $FASTVIDEO_X264_PRESET (ultrafast) with no -crf, so x264's 23 (fastvideo/envs.py:489, entrypoints/video_generator.py:1382); the CRF has no knob (its preset already matches). Check a row by x264's options string in the MP4 (`strings out.mp4 | grep -m1 'x264 - core'`)."
 }

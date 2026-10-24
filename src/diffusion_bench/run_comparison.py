@@ -193,6 +193,9 @@ SGLANG_EXTRA_SERVE_ARGS_ENV = "DIFFUSION_BENCH_SGLANG_EXTRA_SERVE_ARGS"
 HF_CACHE_DIR_ENV = "DIFFUSION_BENCH_HF_CACHE_DIR"
 SKIP_FRAMEWORK_INSTALL_ENV = "SGLANG_DIFFUSION_SKIP_FRAMEWORK_INSTALL"
 DISABLE_TORCH_COMPILE_ENV = "DIFFUSION_BENCH_DISABLE_TORCH_COMPILE"
+# Directory that keeps every MP4 a framework answers as bytes (vLLM-Omni, FastVideo), written
+# after the clock stops, so an encode audit can read x264's options from the stream.
+KEEP_VIDEO_DIR_ENV = "DIFFUSION_BENCH_KEEP_VIDEO_DIR"
 VLLM_DISABLE_TORCH_COMPILE_ARGS = [
     "--enforce-eager",
     "--compilation-config",
@@ -1430,9 +1433,14 @@ def _substitute_ref_image(node, uri: str):
     return node
 
 
+def _without_comments(extras: dict) -> dict:
+    """A request-extras dict minus its `_`-prefixed keys: cases record why a field is set as `_note`."""
+    return {key: value for key, value in (extras or {}).items() if not key.startswith("_")}
+
+
 def _request_extra(case: dict, framework: str, config: dict | None = None) -> dict:
-    extras = copy.deepcopy(case.get("request_extra", {}))
-    framework_extras = (case.get("framework_request_extra") or {}).get(framework, {})
+    extras = copy.deepcopy(_without_comments(case.get("request_extra", {})))
+    framework_extras = _without_comments((case.get("framework_request_extra") or {}).get(framework, {}))
     merged = _deep_merge(extras, framework_extras)
     if REF_IMAGE_TOKEN in json.dumps(merged):
         if not _reference_image_url(config or {}, case):
@@ -1787,6 +1795,7 @@ def send_request_vllm_omni(base_url: str, case: dict, config: dict) -> float:
                 f"vLLM-Omni /v1/videos/sync answered {len(resp.content)} bytes "
                 f"without an MP4 video track (tracks: {sorted(tracks) or 'none'})"
             )
+        _keep_video_reply("vllm-omni", case, resp.content)
         print(f"  Generated in {latency:.2f}s (vllm-omni)")
         return latency
 
@@ -1918,7 +1927,7 @@ def _lightx2v_payload(case: dict, config: dict, is_image: bool) -> dict:
         payload["negative_prompt"] = case["negative_prompt"]
     # This framework's extras only: the shared request_extra carries fields
     # (qwen_image_21's output_format) the schema rejects.
-    payload.update(copy.deepcopy((case.get("framework_request_extra") or {}).get("lightx2v", {})))
+    payload.update(copy.deepcopy(_without_comments((case.get("framework_request_extra") or {}).get("lightx2v", {}))))
     # The vLLM-Omni opt-in: H3 Ref2VA conditions sglang through a conditions[]
     # extra, so the case itself sets no reference_image.
     fw_entry = (case.get("frameworks") or {}).get("lightx2v") or {}
@@ -2054,6 +2063,17 @@ def _reshape_generic_fields(fields: dict, spec: dict) -> dict:
         if isinstance(node, dict):
             node.pop(leaf, None)
     return fields
+
+
+def _keep_video_reply(framework: str, case: dict, data: bytes) -> None:
+    """Write an MP4 reply into $DIFFUSION_BENCH_KEEP_VIDEO_DIR when set; call after the clock stops."""
+    keep_dir = os.environ.get(KEEP_VIDEO_DIR_ENV)
+    if not keep_dir:
+        return
+    os.makedirs(keep_dir, exist_ok=True)
+    path = os.path.join(keep_dir, f"{framework}_{case['id']}_{time.time_ns() // 1_000_000}.mp4")
+    with open(path, "wb") as f:
+        f.write(data)
 
 
 def _check_generic_video(data: bytes, output: str, framework: str) -> None:
@@ -2305,6 +2325,7 @@ def send_request_fastvideo(base_url: str, case: dict, config: dict) -> float:
     if resp.status_code != 200:
         raise RuntimeError(f"FastVideo HTTP {resp.status_code}: {resp.text[:500]}")
     fastvideo_client.check_mp4(resp.content, audio=_fastvideo_output_audio(case))
+    _keep_video_reply("fastvideo", case, resp.content)
     print(
         f"  Generated in {latency:.2f}s (fastvideo, server "
         f"{resp.headers.get('X-Inference-Time-S', '?')}s, {len(resp.content)} MP4 bytes)"

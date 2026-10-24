@@ -14,5 +14,5 @@
   "13": {"class_type": "KSamplerAdvanced", "inputs": {"model": ["8", 0], "add_noise": "disable", "noise_seed": "{{seed}}", "steps": "{{steps}}", "cfg": "{{guidance_2}}", "sampler_name": "euler", "scheduler": "simple", "positive": ["9", 0], "negative": ["10", 0], "latent_image": ["12", 0], "start_at_step": "{{half_steps}}", "end_at_step": 10000, "return_with_leftover_noise": "disable"}},
   "14": {"class_type": "VAEDecode", "inputs": {"samples": ["13", 0], "vae": ["4", 0]}},
   "15": {"class_type": "CreateVideo", "inputs": {"images": ["14", 0], "fps": "{{fps}}"}},
-  "16": {"class_type": "SaveVideo", "inputs": {"video": ["15", 0], "filename_prefix": "{{filename_prefix}}", "format": "auto", "codec": "auto"}}
+  "16": {"class_type": "SaveVideo", "inputs": {"video": ["15", 0], "filename_prefix": "{{filename_prefix}}", "format": "mp4", "format.codec": "h264", "format.codec.encoding": "re-encode", "format.codec.encoding.crf": "{{video_crf}}"}}
 }
