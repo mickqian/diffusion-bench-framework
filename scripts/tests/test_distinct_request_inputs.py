@@ -367,10 +367,17 @@ def sent_negative(c, fw):
 
 # sglang's sampling defaults carry a non-empty negative for these models, used under CFG
 # when a request names none; the case must send it, or the tag cannot reach it.
-SGLANG_DEFAULT_NEGATIVE = {"wan22_t2v_a14b_720p", "ltx2_twostage_t2v", "ltx2.3_twostage_t2v_2gpus"}
+# (LTX-2 and LTX-2.3 were here until their retirement on 2026-10-24.)
+SGLANG_DEFAULT_NEGATIVE = {"wan22_t2v_a14b_720p"}
 for cid in sorted(SGLANG_DEFAULT_NEGATIVE):
     c = next(case for case in cfg["cases"] if case["id"] == cid)
     check(f"{cid}: sglang is sent its default negative explicitly", bool(sent_negative(c, "sglang")))
+
+# LTX-2.5's distilled path runs unguided: a negative would be unused work, and vLLM-Omni's
+# distilled pipelines reject one.
+ltx25 = next(case for case in cfg["cases"] if case["id"] == "ltx2.5_twostage_t2v_2gpus")
+check("ltx2.5_twostage_t2v_2gpus: unguided, and no framework is sent a negative",
+      ltx25["guidance_scale"] == 1.0 and not any(sent_negative(ltx25, fw) for fw in ltx25["frameworks"]))
 
 covered: dict[str, set] = {}
 with tempfile.TemporaryDirectory() as tmp:

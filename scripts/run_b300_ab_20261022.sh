@@ -9,6 +9,7 @@
 #   bash scripts/run_b300_ab_20261022.sh
 #   AB_CASES='cosmos3.* trtllm-visual|ltx2.3.* vllm-omni| sglang$' bash scripts/run_b300_ab_20261022.sh  # second wave
 #   WAVE=4 bash scripts/run_b300_ab_20261022.sh          # only the lines after `wave 4`
+#   WAVE=8 bash scripts/run_b300_ab_20261022.sh          # LTX-2.5 (2026-10-24)
 #   AB_DRY_RUN=1 WAVE=4 bash scripts/run_b300_ab_20261022.sh  # list them, run nothing
 #
 # WAVE selects a section; AB_CASES (a regex on "<case> <framework>") narrows it
@@ -69,7 +70,7 @@ arms qwen_image_21_t2i_1024_2gpu vllm-omni 2 b300 cand-static
 arms qwen_image_21_edit_1024 vllm-omni 2 b300 cand-static
 arms ideogram4_t2i_1024_2gpu_tp comfyui 2 b300 cand-compile-gpuonly
 # videos, one round each
-arms ltx2_twostage_t2v trtllm-visual 1 b300 default
+# (an LTX-2 TRT-LLM line ran here; LTX-2 and LTX-2.3 lines left with their cases, 2026-10-24)
 arms minimax_h3_t2va_5s trtllm-visual 1 b300 default
 arms minimax_h3_t2va_5s vllm-omni 1 b300 cand-static
 arms minimax_h3_fasth3_v2_t2va_5s vllm-omni 1 b300 cudnn-vsa-candidate
@@ -82,13 +83,11 @@ wave 2
 arms cosmos3_nano_t2i_720p trtllm-visual 2 b300 cand-fa4 cand-fa4-graph cand-graph
 arms cosmos3_nano_t2v_720p_189f trtllm-visual 1 b300 cand-fa4
 arms cosmos3_nano_i2v_720p_189f trtllm-visual 1 b300 cand-fa4
-# the new vLLM-Omni LTX-2.3 two-stage cell, validated once before the matrix reruns it
-arms ltx2.3_twostage_t2v_2gpus vllm-omni 1 b300
+# (the vLLM-Omni LTX-2.3 validation line ran here)
 # sglang: 7d2e355 moved four B300 cells onto GB300 profiles, measured behind a Grace host. LTX-2
 # under them read 9.9 s on B300 against 4.4 s server-side eager on x86 B200 (2026-09-25), so each
-# GB300 profile is A/B'd here against the profile B300 selected before.
-arms ltx2_twostage_t2v sglang 2 gb300-cfg-parallel-compile default cand-bcg cand-usp2 cand-usp2-bcg
-arms ltx2.3_twostage_t2v_2gpus sglang 2 default cand-bcg cand-usp2 cand-usp2-bcg
+# GB300 profile is A/B'd here against the profile B300 selected before (the two LTX lines left
+# with their cases).
 arms cosmos3_nano_t2i_720p sglang 2 gb300-2gpu-cfg-parallel-compile blackwell-2gpu-cfg-parallel
 arms qwen_image_21_t2i_1024_2gpu sglang 2 gb300-2gpu-tp2 b200-2gpu-ulysses-fa
 arms cosmos3_nano_t2v_720p_189f sglang 1 gb-4gpu-cfg-ulysses-speed default
@@ -116,8 +115,7 @@ arms qwen_image_21_edit_1024 sglang 2 b300 cand-bcg
 arms wan22_t2v_a14b_720p vllm-omni 1 b300 cand-trtllm-attn
 arms minimax_h3_t2va_5s vllm-omni 1 b300 cand-usp2
 arms minimax_h3_ref2va_5s vllm-omni 1 b300 cand-usp2
-arms ltx2_twostage_t2v vllm-omni 1 b300 cand-vaepp
-arms ltx2.3_twostage_t2v_2gpus vllm-omni 1 b300 cand-vaepp
+# (the two LTX vLLM-Omni cand-vaepp lines ran here)
 arms minimax_h3_fasth3_v2_t2va_5s vllm-omni 1 b300 cand-cudnn-vsa
 arms wan22_t2v_a14b_720p trtllm-visual 1 b300 cand-cudnn cand-trtllm cand-cutedsl
 arms cosmos3_nano_t2v_720p_189f trtllm-visual 1 b300 cand-cudnn
@@ -141,4 +139,11 @@ wave 5
 arms wan22_t2v_a14b_720p vllm-omni 1 b300 cand-noexp
 arms minimax_h3_t2va_5s vllm-omni 1 b300 cand-noexp
 arms wan22_t2v_a14b_720p lightx2v 1 b300 cand-noexp
+# wave 8 (2026-10-24): LTX-2.5 replaces the LTX-2 and LTX-2.3 rows. Its official distilled
+# two-stage (8 + 3 forwards, 1920x1088, unguided) is new to every framework, so each arms line
+# A/Bs the recipe/cookbook command against the alternatives it documents. Two rounds: the cell is
+# ~10 s a request.
+wave 8
+arms ltx2.5_twostage_t2v_2gpus sglang 2 b300 cand-auto cand-bcg cand-tp2
+arms ltx2.5_twostage_t2v_2gpus vllm-omni 2 b300 cand-untiled cand-trtllm-attn
 echo "=== AB DONE $(date -Is) ==="

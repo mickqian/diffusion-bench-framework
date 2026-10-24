@@ -12,7 +12,7 @@ Add new benchmark coverage without corrupting historical comparability. A case s
 ## Case Checklist
 
 - Use the official model ID or a clearly named local path.
-- The default tracker should include only one representative case per official model ID. Keep LTX-2.3 represented by a two-stage case; put true-CFG, alternate-shape, single-vs-multi-GPU, or non-representative pipeline variants behind explicit `--case-ids` reruns unless broader default coverage is requested.
+- The default tracker should include only one representative case per official model ID. Keep LTX represented by one two-stage case (LTX-2.5's official distilled two-stage since 2026-10-24, which retired the LTX-2 and LTX-2.3 rows); put true-CFG, alternate-shape, single-vs-multi-GPU, or non-representative pipeline variants behind explicit `--case-ids` reruns unless broader default coverage is requested.
 - Specify task, prompt, resolution, frames, seed, and reference-image behavior.
 - Keep sampling params omitted only when model defaults are intentionally being compared.
 - If a README or upstream script uses explicit sampling params, encode them in the case.

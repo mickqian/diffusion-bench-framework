@@ -2885,128 +2885,75 @@
             }
         },
         {
-            "id": "ltx2_twostage_t2v",
-            "model": "Lightricks/LTX-2",
+            "id": "ltx2.5_twostage_t2v_2gpus",
+            "model": "Lightricks/LTX-2.5-Diffusers",
             "task": "text-to-video",
-            "label": "LTX-2 two-stage T2V",
+            "label": "LTX-2.5 two-stage T2V",
             "prompt": "A cat and a dog baking a cake together in a kitchen.",
-            "width": 768,
-            "height": 512,
+            "width": 1920,
+            "height": 1088,
             "num_frames": 121,
             "seed": 42,
             "num_gpus": 2,
             "fps": 24,
-            "num_inference_steps": 40,
-            "guidance_scale": 4.0,
-            "negative_prompt": "blurry, out of focus, overexposed, underexposed, low contrast, washed out colors, excessive noise, grainy texture, poor lighting, flickering, motion blur, distorted proportions, unnatural skin tones, deformed facial features, asymmetrical face, missing facial features, extra limbs, disfigured hands, wrong hand count, artifacts around text, inconsistent perspective, camera shake, incorrect depth of field, background too sharp, background clutter, distracting reflections, harsh shadows, inconsistent lighting direction, color banding, cartoonish rendering, 3D CGI look, unrealistic materials, uncanny valley effect, incorrect ethnicity, wrong gender, exaggerated expressions, wrong gaze direction, mismatched lip sync, silent or muted audio, distorted voice, robotic voice, echo, background noise, off-sync audio, incorrect dialogue, added dialogue, repetitive speech, jittery movement, awkward pauses, incorrect timing, unnatural transitions, inconsistent framing, tilted camera, flat lighting, inconsistent tone, cinematic oversaturation, stylized filters, or AI artifacts.",
+            "num_inference_steps": 8,
+            "guidance_scale": 1.0,
+            "benchmark": {
+                "warmup": {
+                    "num_inference_steps": 8
+                }
+            },
+            "notes": "Replaces ltx2_twostage_t2v and ltx2.3_twostage_t2v_2gpus (retired 2026-10-24); their published results stay in the reports. The workload is LTX-2.5's official distilled two-stage recipe, which is the model's default path: model_index.json points at the distilled DiT (transformer/), whose weights are distilled themselves, so both stages run the same checkpoint and no stage swaps in a LoRA. Stage 1 runs at half resolution (960x544) over the 8 distilled sigmas, the latents go through the x2 latent upsampler, and stage 2 refines at 1920x1088 over the 3-sigma tail (0.909375, 0.725, 0.421875): 8 + 3 DiT forwards, unguided (CFG 1, STG and modality guidance off), so there is no negative prompt and no CFG branch. Sources: the Lightricks/LTX-2.5-Diffusers model card ('Two-stage distilled generation': stage 1 544x960, 121 frames, 24 fps, DISTILLED_SIGMA_VALUES, then STAGE_2_DISTILLED_SIGMA_VALUES at 2x), sglang's LTX-2.5 cookbook (LTX2TwoStagePipeline at 1920x1088, the distilled DiT runs a pinned 8-sigma schedule, CFG parallelism does not apply), and vLLM-Omni's recipe (LTX2DistilledTwoStagePipeline, 1920x1088, 8 + 3 steps). ltx-pipelines' distilled CLI defaults to 1536x1024 with the same schedule. Not a reduced-step substitute: every framework runs the same weights, schedule, guidance, size, frames and fps. Audio is on (joint video + audio, 48 kHz vocoder) and the video decodes with the convolutional VAE (vae/); the optional diffusion decoder and duration head stay off. The conv VAE is the default of diffusers' LTX2Pipeline and of sglang; ltx-pipelines, vLLM-Omni and LightX2V decode with the diffusion VAE by default, so vLLM-Omni is pinned to the conv VAE through its documented ltx2_use_conv_vae switch. Stage 1's sampler differs in kind: ltx-pipelines, vLLM-Omni, FastVideo and ComfyUI step stage 1 with an ancestral Euler (fresh noise each step), diffusers and sglang with plain Euler; the cost is one noise draw per step on a 960x544 latent. Prompt and seed are the retired LTX rows' (the model card asks for long captions; the text encoder pads to a fixed length either way). Two GPUs, as the LTX-2.3 row ran and sglang's cookbook documents (Ulysses 2); vLLM-Omni's low-latency example uses Ulysses N with VAE patch parallel N. The warmups send the same 8 steps: vLLM-Omni's distilled pipelines refuse any other stage-1 count ('uses 8 fixed Stage 1 denoise steps; got 3'), and sglang ignores the count on this pinned schedule. Both frameworks encode the same MP4: vLLM-Omni's video endpoints encode with libx264 preset ultrafast (serving_video.py: video_codec_options) at CRF 18 (diffusion/utils/media_utils.py), while sglang defaults to preset fast at CRF 25 (quality 5): a slower preset at a different rate, i.e. more encode work (~0.28 s on this 1920x1088 x 121 clip, 4xB300, 2026-10-24). The case asks sglang for the same encode through its request fields: x264_preset ultrafast, output_compression 63 (CRF int((1 - 0.63) * 51) = 18). The generated frames are untouched; x264's embedded options string (ref=1 me=dia subme=0 bframes=0 crf=18.0) is the check. VALIDATION PENDING (wave 8, 4xB300).",
             "framework_request_extra": {
-                "vllm-omni": {
-                    "extra_params": {
-                        "video_cfg_scale": 4.0,
-                        "audio_cfg_scale": 4.0,
-                        "video_stg_scale": 0.0,
-                        "audio_stg_scale": 0.0,
-                        "video_modality_scale": 1.0,
-                        "audio_modality_scale": 1.0,
-                        "video_rescale_scale": 0.0,
-                        "audio_rescale_scale": 0.0
-                    }
+                "sglang": {
+                    "x264_preset": "ultrafast",
+                    "output_compression": 63
                 }
             },
             "frameworks": {
                 "sglang": {
-                    "serve_args": "--model-type diffusion --warmup-mode server --enable-cfg-parallel --pipeline-class-name LTX2TwoStagePipeline",
+                    "serve_args": "--model-type diffusion --warmup-mode server --pipeline-class-name LTX2TwoStagePipeline --dit-layerwise-offload false --performance-mode speed --enable-torch-compile false --ulysses-degree 2",
                     "extra_env": {},
                     "command_profiles": {
-                        "b300-cfg-parallel-bcg": {
-                            "sglang_ref": "current-main",
-                            "serve_args": "--model-type diffusion --warmup-mode server --enable-cfg-parallel --pipeline-class-name LTX2TwoStagePipeline --dit-layerwise-offload false --performance-mode speed --enable-torch-compile false --enable-breakable-cuda-graph true --warmup-resolutions 768x512 --warmup-num-frames 121",
-                            "description": "B300: The default command plus breakable CUDA graphs (LTX-2/2.3 are on sglang's validated BCG list), captured at the case shape.",
-                            "hardware": [
-                                "b300"
-                            ],
-                            "notes": "TRT-LLM's LTX-2 row runs CUDA graphs (NVIDIA's official config) at 0.044 s per stage-1 step against sglang's 0.192 s (4xB300, 2026-10-22); stage 1 is ~1.5k tokens, so the step is launch-bound. BCG replays the same kernels, so the output is unchanged. Promoted from cand-bcg by the 2026-10-22 4xB300 A/B (scripts/run_b300_ab_20261022.sh, second wave): two rounds, 3.797/3.785 s against default (eager) 6.693/6.882, gb300-cfg-parallel-compile 9.978/9.767, cand-usp2-bcg 4.613/4.573, cand-usp2 10.40/10.74. BCG replays the same kernels (outputs bitwise equal to eager on 2xH200)."
-                        },
-                        "gb300-cfg-parallel-compile": {
-                            "description": "GB300: CFG-parallel two-stage with torch.compile.",
-                            "hardware": [
-                                "gb300"
-                            ],
-                            "sglang_ref": "main 3831e7e09 + sglang#43565 #43568 #43577 #43575 #43576 #43584 #43586 (GB300 rerun tree)",
-                            "num_gpus": 2,
-                            "serve_args": "--model-type diffusion --warmup-mode server --enable-cfg-parallel --pipeline-class-name LTX2TwoStagePipeline --dit-layerwise-offload false --performance-mode speed --enable-torch-compile true --offload-during-compile false",
-                            "policy_exception": "2026-10-10 GB300 served, NUMA-bound workers (sglang#43565): compile 8.969/8.991 s vs eager 12.709/12.581 s on the same tree; vLLM-Omni default 12.76 s.",
-                            "notes": " 2026-10-22: extended to b300, the same Blackwell Ultra GPU (sm103) as GB300 on an x86 host; the GB300 measurement is the evidence, and the 4xB300 round re-measures it. 4xB300 A/B 2026-10-22: 9.98/9.77 s against eager default 6.69/6.88 and cand-bcg 3.80/3.79 s: compile does not transfer from the Grace host (recompile storm from #44643 plus graph breaks after attention)."
-                        },
                         "default": {
-                            "description": "Best known SGLang command for the benchmark repo default profile.",
-                            "sglang_ref": "current-main",
-                            "serve_args": "--model-type diffusion --warmup-mode server --enable-cfg-parallel --pipeline-class-name LTX2TwoStagePipeline --dit-layerwise-offload false --performance-mode speed --enable-torch-compile false",
-                            "notes": "Keep this profile updated when the best command changes for a SGLang release or commit. Policy-aligned candidate (compile on, offload off) — NOT yet validated on H100; validate (incl. OOM risk) before publishing."
-                        },
-                        "h200-2gpu": {
-                            "description": "H200 command for the LTX2 two-stage 121-frame case.",
-                            "hardware": [
-                                "h200"
-                            ],
+                            "description": "Ulysses 2 across both stages: the sglang LTX-2.5 cookbook's two-GPU preset for long sequences.",
                             "sglang_ref": "current-main",
                             "num_gpus": 2,
-                            "serve_args": "--model-type diffusion --warmup-mode server --enable-cfg-parallel --pipeline-class-name LTX2TwoStagePipeline --ltx2-two-stage-device-mode resident",
-                            "notes": "Resident mode keeps both stages in VRAM on H200-class GPUs."
+                            "serve_args": "--model-type diffusion --warmup-mode server --pipeline-class-name LTX2TwoStagePipeline --dit-layerwise-offload false --performance-mode speed --enable-torch-compile false --ulysses-degree 2",
+                            "notes": "Cookbook 3.3 'Multi-GPU presets': '2 GPUs, long sequences: --num-gpus 2 --ulysses-degree 2'; the distilled DiT runs unguided, so CFG parallelism buys nothing. Stage 2 is 32,640 video tokens (16 x 34 x 60) and stage 1 8,160, both divisible by 2. VALIDATION PENDING (wave 8, 4xB300)."
+                        },
+                        "cand-auto": {
+                            "description": "The runtime's own sequence-parallel choice on two GPUs (no explicit parallel flag). Never selected on its own: A/B arm.",
+                            "sglang_ref": "current-main",
+                            "num_gpus": 2,
+                            "serve_args": "--model-type diffusion --warmup-mode server --pipeline-class-name LTX2TwoStagePipeline --dit-layerwise-offload false --performance-mode speed --enable-torch-compile false",
+                            "notes": "sglang picks its sequence-parallel layout itself when no degree is pinned (kv-gather where it measures a win); a pinned --ulysses-degree 2 overrides that. VALIDATION PENDING (wave 8, 4xB300)."
                         },
                         "cand-bcg": {
+                            "description": "Ulysses 2 plus breakable CUDA graphs captured at the case shape. Never selected on its own: A/B arm.",
                             "sglang_ref": "current-main",
-                            "serve_args": "--model-type diffusion --warmup-mode server --enable-cfg-parallel --pipeline-class-name LTX2TwoStagePipeline --dit-layerwise-offload false --performance-mode speed --enable-torch-compile false --enable-breakable-cuda-graph true --warmup-resolutions 768x512 --warmup-num-frames 121",
-                            "description": "The default command plus breakable CUDA graphs (LTX-2/2.3 are on sglang's validated BCG list), captured at the case shape. Never selected on its own: A/B arm.",
-                            "notes": "TRT-LLM's LTX-2 row runs CUDA graphs (NVIDIA's official config) at 0.044 s per stage-1 step against sglang's 0.192 s (4xB300, 2026-10-22); stage 1 is ~1.5k tokens, so the step is launch-bound. BCG replays the same kernels, so the output is unchanged. VALIDATION PENDING (4xB300 A/B)."
+                            "num_gpus": 2,
+                            "serve_args": "--model-type diffusion --warmup-mode server --pipeline-class-name LTX2TwoStagePipeline --dit-layerwise-offload false --performance-mode speed --enable-torch-compile false --ulysses-degree 2 --enable-breakable-cuda-graph true --warmup-resolutions 1920x1088 --warmup-num-frames 121",
+                            "notes": "LTX-2/2.3 are on sglang's validated BCG list and LTX-2.5 runs the same DiT through LTX2TwoStagePipeline; BCG replays the same kernels, so the output is unchanged. VALIDATION PENDING (wave 8, 4xB300)."
                         },
-                        "cand-usp2": {
+                        "cand-tp2": {
+                            "description": "Tensor parallel 2 instead of Ulysses (cookbook: '2 GPUs, large DiT'). Never selected on its own: A/B arm.",
                             "sglang_ref": "current-main",
-                            "serve_args": "--model-type diffusion --warmup-mode server --enable-cfg-parallel false --ulysses-degree 2 --pipeline-class-name LTX2TwoStagePipeline --dit-layerwise-offload false --performance-mode speed --enable-torch-compile false",
-                            "description": "Ulysses 2 across both stages instead of CFG parallel: stage 2 has no CFG, so under CFG parallel it runs on the main rank alone (LTX2RefinementStage is MAIN_RANK_ONLY). Never selected on its own: A/B arm.",
-                            "notes": "TRT-LLM switches stage 2 from cfg2 to Ulysses 2 ('there is no cfg in stage 2'). Same math, different placement. VALIDATION PENDING (4xB300 A/B)."
-                        },
-                        "cand-usp2-bcg": {
-                            "sglang_ref": "current-main",
-                            "serve_args": "--model-type diffusion --warmup-mode server --enable-cfg-parallel false --ulysses-degree 2 --pipeline-class-name LTX2TwoStagePipeline --dit-layerwise-offload false --performance-mode speed --enable-torch-compile false --enable-breakable-cuda-graph true --warmup-resolutions 768x512 --warmup-num-frames 121",
-                            "description": "cand-usp2 plus breakable CUDA graphs at the case shape. Never selected on its own: A/B arm.",
-                            "notes": "TRT-LLM switches stage 2 from cfg2 to Ulysses 2 ('there is no cfg in stage 2'). Same math, different placement. VALIDATION PENDING (4xB300 A/B)."
+                            "num_gpus": 2,
+                            "serve_args": "--model-type diffusion --warmup-mode server --pipeline-class-name LTX2TwoStagePipeline --dit-layerwise-offload false --performance-mode speed --enable-torch-compile false --tp-size 2",
+                            "notes": "Cookbook 3.3 lists --tp-size 2 for a large DiT; the 32 heads split evenly. VALIDATION PENDING (wave 8, 4xB300)."
                         }
                     }
                 },
                 "vllm-omni": {
-                    "model": "Lightricks/LTX-2",
                     "num_gpus": 2,
-                    "serve_args": "--num-gpus 2 --cfg-parallel-size 2",
+                    "serve_args": "--num-gpus 2 --usp 2 --model-class-name LTX2DistilledTwoStagePipeline --stage-init-timeout 900 --no-diffusion-compile-dynamic --stage-overrides {\"0\":{\"extras\":{\"ltx2_use_conv_vae\":true}}} --vae-patch-parallel-size 2 --vae-use-tiling",
                     "extra_env": {
-                        "DIFFUSION_ATTENTION_BACKEND": "FLASH_ATTN"
+                        "DIFFUSION_ATTENTION_BACKEND": "CUDNN_ATTN"
                     },
                     "command_profiles": {
-                        "blackwell-2gpu-twostage-cfg-vaepp": {
-                            "framework_ref": "vllm-omni main 0da1d831e07f + vllm==0.32.0",
-                            "num_gpus": 2,
-                            "serve_args": "--num-gpus 2 --cfg-parallel-size 2 --model-class-name LTX2TwoStagePipeline --stage-init-timeout 600 --no-diffusion-compile-dynamic --vae-patch-parallel-size 2",
-                            "extra_env": {
-                                "DIFFUSION_ATTENTION_BACKEND": "CUDNN_ATTN"
-                            },
-                            "upstream_recipe": {
-                                "repo": "vllm-project/vllm-omni",
-                                "path": "recipes/LTX/LTX-2.md",
-                                "commit": "71f0fa47acff",
-                                "commit_date": "2026-10-19",
-                                "section": "Two-Stage Defaults; Guidance Parallelism"
-                            },
-                            "description": "VAE patch parallel 2 (tiled decode on both GPUs).",
-                            "hardware": [
-                                "b200",
-                                "gb200",
-                                "b300",
-                                "gb300"
-                            ],
-                            "notes": "Derived from `blackwell-2gpu-twostage-cfg` (the profile B300 selects). Audit 2026-10-23 (image finding 4, LTX sub-audit): vLLM-Omni decodes on one GPU, although its features matrix lists VAE patch parallel (decode) for LTX-2 and LTX-2.3 (docs/user_guide/diffusion_features.md; tile mode, the flag's default); TRT-LLM (parallel_vae 2) and sglang decode on two. Estimated 0.1-0.2 s. Promoted from cand-vaepp by the 2026-10-22 4xB300 fourth-wave A/B: 3.559 s against 3.589 s."
-                        },
-                        "blackwell-2gpu-twostage-cfg": {
-                            "description": "Blackwell: the two-stage pipeline with CFG parallel 2, cuDNN attention.",
+                        "blackwell-2gpu-distilled-usp2": {
+                            "description": "Blackwell: the recipe's distilled two-stage low-latency path at two GPUs (Ulysses 2, VAE patch parallel 2 over tiles), conv VAE, cuDNN attention.",
                             "hardware": [
                                 "b200",
                                 "gb200",
@@ -3015,834 +2962,69 @@
                             ],
                             "framework_ref": "vllm-omni main 0da1d831e07f + vllm==0.32.0",
                             "num_gpus": 2,
-                            "serve_args": "--num-gpus 2 --cfg-parallel-size 2 --model-class-name LTX2TwoStagePipeline --stage-init-timeout 600 --no-diffusion-compile-dynamic",
+                            "serve_args": "--num-gpus 2 --usp 2 --model-class-name LTX2DistilledTwoStagePipeline --stage-init-timeout 900 --no-diffusion-compile-dynamic --stage-overrides {\"0\":{\"extras\":{\"ltx2_use_conv_vae\":true}}} --vae-patch-parallel-size 2 --vae-use-tiling",
                             "extra_env": {
                                 "DIFFUSION_ATTENTION_BACKEND": "CUDNN_ATTN"
                             },
                             "upstream_recipe": {
                                 "repo": "vllm-project/vllm-omni",
-                                "path": "recipes/LTX/LTX-2.md",
-                                "commit": "71f0fa47acff",
-                                "commit_date": "2026-10-19",
-                                "section": "Two-Stage Defaults; Guidance Parallelism"
+                                "path": "recipes/LTX/LTX-2.5.md",
+                                "commit": "a09109802595",
+                                "commit_date": "2026-10-17",
+                                "section": "Multi-GPU low-latency path (distilled two-stage, Ulysses + VAE patch parallel); Video decoder (ltx2_use_conv_vae)"
                             },
-                            "notes": "Every earlier vLLM-Omni LTX-2 row ran the ONE-stage LTX2Pipeline (Lightricks/LTX-2 resolves to it unless --model-class-name LTX2TwoStagePipeline is given): 40 steps at the full 768x512 against sglang's 40 at 384x256 plus a 3-step refine, so it measured a heavier workload. Its LTX recipes also default stage 1 to the LTX-2.3 official guider (STG and a modality pass, four transformer passes a step); the request pins plain CFG 4.0 like sglang's LTX-2 (ltx-pipelines LTX-2 defaults), TRT-LLM and ComfyUI, so every row does two passes a step. VALIDATION PENDING (round 2026-10-22, 4xB300)."
+                            "notes": "The recipe's 'Multi-GPU low-latency path' ('match the Ulysses and VAE patch-parallel degrees to the GPU count', shown at 4) at this case's two GPUs. ltx2_use_conv_vae selects the convolutional VAE the case decodes with (the recipe's default is the diffusion VAE). Distilled pipelines are positive-only, so the request carries no negative prompt. CUDNN_ATTN is vLLM-Omni's measured Blackwell attention for the LTX rows (FLASH_ATTN is Hopper-only). --no-diffusion-compile-dynamic: fixed shapes. VALIDATION PENDING (wave 8, 4xB300)."
                         },
-                        "h200-2gpu-twostage-cfg": {
-                            "description": "H200: the two-stage pipeline (stage 1 at half resolution, x2 latent upsampler, 3-step distilled refine) with CFG parallel 2.",
-                            "hardware": [
-                                "h200"
-                            ],
+                        "default": {
+                            "description": "The recipe's distilled two-stage path at two GPUs, conv VAE (Hopper attention).",
                             "framework_ref": "vllm-omni main 0da1d831e07f + vllm==0.32.0",
                             "num_gpus": 2,
-                            "serve_args": "--num-gpus 2 --cfg-parallel-size 2 --model-class-name LTX2TwoStagePipeline --stage-init-timeout 600 --no-diffusion-compile-dynamic",
+                            "serve_args": "--num-gpus 2 --usp 2 --model-class-name LTX2DistilledTwoStagePipeline --stage-init-timeout 900 --no-diffusion-compile-dynamic --stage-overrides {\"0\":{\"extras\":{\"ltx2_use_conv_vae\":true}}} --vae-patch-parallel-size 2 --vae-use-tiling",
                             "extra_env": {
                                 "DIFFUSION_ATTENTION_BACKEND": "FLASH_ATTN"
                             },
                             "upstream_recipe": {
                                 "repo": "vllm-project/vllm-omni",
-                                "path": "recipes/LTX/LTX-2.md",
-                                "commit": "71f0fa47acff",
-                                "commit_date": "2026-10-19",
-                                "section": "Two-Stage Defaults; Guidance Parallelism"
+                                "path": "recipes/LTX/LTX-2.5.md",
+                                "commit": "a09109802595",
+                                "commit_date": "2026-10-17",
+                                "section": "Multi-GPU low-latency path (distilled two-stage, Ulysses + VAE patch parallel); Video decoder (ltx2_use_conv_vae)"
                             },
-                            "notes": "Every earlier vLLM-Omni LTX-2 row ran the ONE-stage LTX2Pipeline (Lightricks/LTX-2 resolves to it unless --model-class-name LTX2TwoStagePipeline is given): 40 steps at the full 768x512 against sglang's 40 at 384x256 plus a 3-step refine, so it measured a heavier workload. Its LTX recipes also default stage 1 to the LTX-2.3 official guider (STG and a modality pass, four transformer passes a step); the request pins plain CFG 4.0 like sglang's LTX-2 (ltx-pipelines LTX-2 defaults), TRT-LLM and ComfyUI, so every row does two passes a step. VALIDATION PENDING (round 2026-10-22, 2xH200/4xH200)."
+                            "notes": "As blackwell-2gpu-distilled-usp2 with FLASH_ATTN. Not measured."
                         },
-                        "blackwell-cudnn": {
-                            "description": "Blackwell vLLM-Omni profile for ltx2_twostage_t2v using cuDNN attention.",
-                            "hardware": [
-                                "b200",
-                                "gb200",
-                                "b300",
-                                "gb300"
-                            ],
-                            "framework_ref": "vllm-omni-0.29.0rc2+blackwell-cudnn",
-                            "num_gpus": 2,
-                            "serve_args": "--num-gpus 2 --cfg-parallel-size 2",
-                            "notes": "Blackwell attention choice, measured on this box 2026-09-12. FLASH_ATTN is a Hopper-only precompiled kernel -- vLLM-Omni refuses it on sm_100 with 'FLASH_ATTN was explicitly selected but is unsupported'. FLASHINFER_ATTN starts but dies under torch.compile on dynamic shapes (`AsPythonConstantNotImplementedError: SymNodeVariable() is not a constant` in the FlashInfer backend's _ensure_plan), observed on qwen-image and cosmos3 t2v; it is fine for the static image cases (zimage, flux), which are deliberately left on it. CUDNN_ATTN is exact softmax, the same precision class as the kernels the other frameworks run here, measured at 2.741s on qwen-image (vs TRTLLM_ATTN 3.274s) and already the backend minimax-h3 serves with on this box.",
-                            "extra_env": {
-                                "DIFFUSION_ATTENTION_BACKEND": "CUDNN_ATTN"
-                            }
-                        },
-                        "default": {
-                            "description": "Best known vLLM-Omni command for the LTX-2 two-stage 2-GPU case.",
-                            "framework_ref": "vllm-omni-0.18.0-cli-env",
-                            "num_gpus": 2,
-                            "serve_args": "--num-gpus 2 --cfg-parallel-size 2",
-                            "notes": "Uses diffusion CFG parallelism and env-selected FlashAttention; no torch compile or cache path.",
-                            "extra_env": {
-                                "DIFFUSION_ATTENTION_BACKEND": "FLASH_ATTN"
-                            }
-                        },
-                        "cand-vaepp": {
-                            "description": "VAE patch parallel 2 (tiled decode on both GPUs). Never selected on its own: A/B arm.",
+                        "cand-untiled": {
+                            "description": "VAE patch parallel 2 without --vae-use-tiling (the recipe: both decoders are untiled by default). Never selected on its own: A/B arm.",
                             "framework_ref": "vllm-omni main 0da1d831e07f + vllm==0.32.0",
                             "num_gpus": 2,
-                            "serve_args": "--num-gpus 2 --cfg-parallel-size 2 --model-class-name LTX2TwoStagePipeline --stage-init-timeout 600 --no-diffusion-compile-dynamic --vae-patch-parallel-size 2",
+                            "serve_args": "--num-gpus 2 --usp 2 --model-class-name LTX2DistilledTwoStagePipeline --stage-init-timeout 900 --no-diffusion-compile-dynamic --stage-overrides {\"0\":{\"extras\":{\"ltx2_use_conv_vae\":true}}} --vae-patch-parallel-size 2",
                             "extra_env": {
                                 "DIFFUSION_ATTENTION_BACKEND": "CUDNN_ATTN"
                             },
                             "upstream_recipe": {
                                 "repo": "vllm-project/vllm-omni",
-                                "path": "recipes/LTX/LTX-2.md",
-                                "commit": "71f0fa47acff",
-                                "commit_date": "2026-10-19",
-                                "section": "Two-Stage Defaults; Guidance Parallelism"
+                                "path": "recipes/LTX/LTX-2.5.md",
+                                "commit": "a09109802595",
+                                "commit_date": "2026-10-17",
+                                "section": "Multi-GPU low-latency path (distilled two-stage, Ulysses + VAE patch parallel); Video decoder (ltx2_use_conv_vae)"
                             },
-                            "notes": "Derived from `blackwell-2gpu-twostage-cfg` (the profile B300 selects). Audit 2026-10-23 (image finding 4, LTX sub-audit): vLLM-Omni decodes on one GPU, although its features matrix lists VAE patch parallel (decode) for LTX-2 and LTX-2.3 (docs/user_guide/diffusion_features.md; tile mode, the flag's default); TRT-LLM (parallel_vae 2) and sglang decode on two. Estimated 0.1-0.2 s. VALIDATION PENDING (wave 4, 4xB300)."
-                        }
-                    },
-                    "model_override_reason": "Same weights as the case (Lightricks/LTX-2). Previously pointed at rootonchair/LTX-2-19b-distilled, carried over from the pre-JSON config with no rationale: a distilled checkpoint is explicitly lossy, needs far fewer steps, and would have made this cell unfairly fast against sglang and LightX2V on the full model. vLLM-Omni itself refuses it -- 'LTX2Pipeline requires a regular non-distilled LTX checkpoint' -- which is how it surfaced."
-                },
-                "trtllm-visual": {
-                    "num_gpus": 2,
-                    "serve_args": "",
-                    "extra_env": {
-                        "PYTORCH_CUDA_ALLOC_CONF": "expandable_segments:False"
-                    },
-                    "model_path": "hf://Lightricks/LTX-2/ltx-2-19b-dev.safetensors",
-                    "http_server": {
-                        "bin": "trtllm-serve",
-                        "args_template": [
-                            "serve",
-                            "{model}",
-                            "--host",
-                            "{host}",
-                            "--port",
-                            "{port}"
-                        ],
-                        "health_path": "/health"
-                    },
-                    "http_request": {
-                        "text-to-video": {
-                            "endpoint": "/v1/videos/sync",
-                            "mode": "sync",
-                            "body": "json",
-                            "output": "mp4+audio",
-                            "omit_keys": [
-                                "model",
-                                "size"
-                            ],
-                            "extra_params_keys": []
-                        }
-                    },
-                    "visual_gen_args": {
-                        "attention_config": {
-                            "backend": "VANILLA"
+                            "notes": "The recipe's low-latency example adds --vae-use-tiling; whether the conv decode is faster without it at 1920x1088 x 121 frames on a 288 GB card is measured here. VALIDATION PENDING (wave 8, 4xB300)."
                         },
-                        "parallel_config": {
-                            "cfg_size": 2,
-                            "ulysses_size": 1,
-                            "parallel_vae_size": 2
-                        },
-                        "torch_compile_config": {
-                            "enable": true
-                        },
-                        "cuda_graph_config": {
-                            "enable": true
-                        },
-                        "compilation_config": {
-                            "resolutions": [
-                                [
-                                    512,
-                                    768
-                                ]
-                            ],
-                            "num_frames": [
-                                121
-                            ]
-                        },
-                        "pipeline_config": {
-                            "text_encoder_path": "hf://Lightricks/LTX-2/text_encoder",
-                            "spatial_upsampler_path": "hf://Lightricks/LTX-2/ltx-2-spatial-upscaler-x2-1.0.safetensors",
-                            "distilled_lora_path": "hf://Lightricks/LTX-2/ltx-2-19b-distilled-lora-384.safetensors"
-                        }
-                    },
-                    "command_profiles": {
-                        "blackwell-fa4": {
-                            "description": "Blackwell: the same config with FA4 attention, the exact kernel NVIDIA tunes for Blackwell (its official LTX-2 configs use it).",
-                            "hardware": [
-                                "b200",
-                                "gb200",
-                                "b300",
-                                "gb300"
-                            ],
-                            "framework_ref": "tensorrt-llm 1.4.0rc1 (tag 0372799d1543, 2026-10-19)",
-                            "num_gpus": 2,
-                            "serve_args": "",
-                            "visual_gen_args": {
-                                "attention_config": {
-                                    "backend": "FA4"
-                                },
-                                "parallel_config": {
-                                    "cfg_size": 2,
-                                    "ulysses_size": 1,
-                                    "parallel_vae_size": 2
-                                },
-                                "torch_compile_config": {
-                                    "enable": true
-                                },
-                                "cuda_graph_config": {
-                                    "enable": true
-                                },
-                                "compilation_config": {
-                                    "resolutions": [
-                                        [
-                                            512,
-                                            768
-                                        ]
-                                    ],
-                                    "num_frames": [
-                                        121
-                                    ]
-                                },
-                                "pipeline_config": {
-                                    "text_encoder_path": "hf://Lightricks/LTX-2/text_encoder",
-                                    "spatial_upsampler_path": "hf://Lightricks/LTX-2/ltx-2-spatial-upscaler-x2-1.0.safetensors",
-                                    "distilled_lora_path": "hf://Lightricks/LTX-2/ltx-2-19b-distilled-lora-384.safetensors"
-                                }
-                            },
-                            "upstream_recipe": {
-                                "repo": "NVIDIA/TensorRT-LLM",
-                                "path": "examples/visual_gen/configs/ltx2-4gpu.yaml",
-                                "commit": "0fbac8ce0dbc",
-                                "commit_date": "2026-08-20",
-                                "section": "4-GPU config scaled to 2 GPUs, keeping the CFG dimension"
-                            },
-                            "notes": "FA4 is exact attention, the same precision class as VANILLA (torch SDPA). This repo measured VANILLA fastest on Hopper and FA4 on Blackwell for TRT-LLM VisualGen; A/B'd against `default` (VANILLA) on B300. VALIDATION PENDING (round 2026-10-22, 4xB300)."
-                        },
-                        "default": {
-                            "description": "TensorRT-LLM VisualGen, NVIDIA's official ltx2-4gpu.yaml at BF16, 2 GPU(s).",
-                            "framework_ref": "tensorrt-llm 1.4.0rc1 (tag 0372799d1543, 2026-10-19)",
-                            "num_gpus": 2,
-                            "serve_args": "",
-                            "upstream_recipe": {
-                                "repo": "NVIDIA/TensorRT-LLM",
-                                "path": "examples/visual_gen/configs/ltx2-4gpu.yaml",
-                                "commit": "0fbac8ce0dbc",
-                                "commit_date": "2026-08-20",
-                                "section": "4-GPU config scaled to 2 GPUs, keeping the CFG dimension"
-                            },
-                            "notes": "LTX2TwoStagesPipeline: stage 1 at half resolution with CFG, the learned x2 upsampler, stage 2 distilled LoRA on sigmas [0.909375, 0.725, 0.421875, 0] (3 evaluations, no CFG); two-stage turns on when the upsampler and LoRA resolve. The model is the single BF16 file (a directory would also load the fp8/fp4 files and read the config from the alphabetically first). CUDA graphs on as in the official 4-GPU config; attention VANILLA instead of the official FA4 (Blackwell-tuned). Defaults stg_scale 0 / modality_scale 1 are plain CFG, matching sglang. VANILLA attention is torch SDPA (FlashAttention on Hopper); no cache_config or quant_config, so the row is BF16 and cache-free; compile at the case shape so the first request does not recompile; JSON to /v1/videos/sync (or /v1/images/generations), whose reply is the media itself. The YAML is passed with --visual_gen_args (trtllm-serve has no --extra_visual_gen_options). VALIDATION PENDING (round 2026-10-22, 2xH200/4xH200)."
-                        }
-                    },
-                    "extra_env_reason": "The harness exports PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True. Under it, the CUDA IPC handle TRT-LLM's rank 0 hands its media over with needs pidfd_getfd in the server process, which RunPod containers deny: every request logged 'pidfd_getfd: Operation not permitted' and hung to the read timeout (4xB300, 2026-10-22). Plain segments use cudaIpcMemHandle instead."
-                },
-                "comfyui": {
-                    "num_gpus": 2,
-                    "serve_args": "",
-                    "comfyui": {
-                        "workflow": "ltx2_twostage_t2v.json",
-                        "models": {
-                            "checkpoints/ltx-2-19b-dev.safetensors": "Lightricks/LTX-2:ltx-2-19b-dev.safetensors",
-                            "text_encoders/gemma_3_12B_it.safetensors": "Comfy-Org/ltx-2:split_files/text_encoders/gemma_3_12B_it.safetensors",
-                            "loras/ltx-2-19b-distilled-lora-384.safetensors": "Lightricks/LTX-2:ltx-2-19b-distilled-lora-384.safetensors",
-                            "latent_upscale_models/ltx-2-spatial-upscaler-x2-1.0.safetensors": "Lightricks/LTX-2:ltx-2-spatial-upscaler-x2-1.0.safetensors"
-                        },
-                        "params": {
-                            "cfg_gpus": 2,
-                            "negative_prompt": "blurry, out of focus, overexposed, underexposed, low contrast, washed out colors, excessive noise, grainy texture, poor lighting, flickering, motion blur, distorted proportions, unnatural skin tones, deformed facial features, asymmetrical face, missing facial features, extra limbs, disfigured hands, wrong hand count, artifacts around text, inconsistent perspective, camera shake, incorrect depth of field, background too sharp, background clutter, distracting reflections, harsh shadows, inconsistent lighting direction, color banding, cartoonish rendering, 3D CGI look, unrealistic materials, uncanny valley effect, incorrect ethnicity, wrong gender, exaggerated expressions, wrong gaze direction, mismatched lip sync, silent or muted audio, distorted voice, robotic voice, echo, background noise, off-sync audio, incorrect dialogue, added dialogue, repetitive speech, jittery movement, awkward pauses, incorrect timing, unnatural transitions, inconsistent framing, tilted camera, flat lighting, inconsistent tone, cinematic oversaturation, stylized filters, or AI artifacts."
-                        },
-                        "compile": false,
-                        "workflow_graph": {
-                            "1": {
-                                "class_type": "CheckpointLoaderSimple",
-                                "inputs": {
-                                    "ckpt_name": "ltx-2-19b-dev.safetensors"
-                                }
-                            },
-                            "2": {
-                                "class_type": "LTXAVTextEncoderLoader",
-                                "inputs": {
-                                    "text_encoder": "gemma_3_12B_it.safetensors",
-                                    "ckpt_name": "ltx-2-19b-dev.safetensors",
-                                    "device": "default"
-                                }
-                            },
-                            "3": {
-                                "class_type": "LTXVAudioVAELoader",
-                                "inputs": {
-                                    "ckpt_name": "ltx-2-19b-dev.safetensors"
-                                }
-                            },
-                            "4": {
-                                "class_type": "LoraLoaderModelOnly",
-                                "inputs": {
-                                    "model": [
-                                        "1",
-                                        0
-                                    ],
-                                    "lora_name": "ltx-2-19b-distilled-lora-384.safetensors",
-                                    "strength_model": 1.0
-                                }
-                            },
-                            "5": {
-                                "class_type": "MultiGPU_WorkUnits",
-                                "inputs": {
-                                    "model": [
-                                        "1",
-                                        0
-                                    ],
-                                    "max_gpus": "{{cfg_gpus}}"
-                                }
-                            },
-                            "6": {
-                                "class_type": "CLIPTextEncode",
-                                "inputs": {
-                                    "text": "{{prompt}}",
-                                    "clip": [
-                                        "2",
-                                        0
-                                    ],
-                                    "__bench_nonce": "{{nonce}}"
-                                }
-                            },
-                            "7": {
-                                "class_type": "CLIPTextEncode",
-                                "inputs": {
-                                    "text": "{{negative_prompt}}",
-                                    "clip": [
-                                        "2",
-                                        0
-                                    ],
-                                    "__bench_nonce": "{{nonce}}"
-                                }
-                            },
-                            "8": {
-                                "class_type": "LTXVConditioning",
-                                "inputs": {
-                                    "positive": [
-                                        "6",
-                                        0
-                                    ],
-                                    "negative": [
-                                        "7",
-                                        0
-                                    ],
-                                    "frame_rate": "{{fps}}"
-                                }
-                            },
-                            "9": {
-                                "class_type": "EmptyLTXVLatentVideo",
-                                "inputs": {
-                                    "width": "{{half_width}}",
-                                    "height": "{{half_height}}",
-                                    "length": "{{num_frames}}",
-                                    "batch_size": 1
-                                }
-                            },
-                            "10": {
-                                "class_type": "LTXVEmptyLatentAudio",
-                                "inputs": {
-                                    "frames_number": "{{num_frames}}",
-                                    "frame_rate": "{{fps}}",
-                                    "batch_size": 1,
-                                    "audio_vae": [
-                                        "3",
-                                        0
-                                    ]
-                                }
-                            },
-                            "11": {
-                                "class_type": "LTXVConcatAVLatent",
-                                "inputs": {
-                                    "video_latent": [
-                                        "9",
-                                        0
-                                    ],
-                                    "audio_latent": [
-                                        "10",
-                                        0
-                                    ]
-                                }
-                            },
-                            "12": {
-                                "class_type": "LTXVScheduler",
-                                "inputs": {
-                                    "steps": "{{steps}}",
-                                    "max_shift": 2.05,
-                                    "base_shift": 0.95,
-                                    "stretch": true,
-                                    "terminal": 0.1,
-                                    "latent": [
-                                        "11",
-                                        0
-                                    ]
-                                }
-                            },
-                            "13": {
-                                "class_type": "CFGGuider",
-                                "inputs": {
-                                    "model": [
-                                        "5",
-                                        0
-                                    ],
-                                    "positive": [
-                                        "8",
-                                        0
-                                    ],
-                                    "negative": [
-                                        "8",
-                                        1
-                                    ],
-                                    "cfg": "{{guidance}}"
-                                }
-                            },
-                            "14": {
-                                "class_type": "KSamplerSelect",
-                                "inputs": {
-                                    "sampler_name": "euler_ancestral"
-                                }
-                            },
-                            "15": {
-                                "class_type": "RandomNoise",
-                                "inputs": {
-                                    "noise_seed": "{{seed}}"
-                                }
-                            },
-                            "16": {
-                                "class_type": "SamplerCustomAdvanced",
-                                "inputs": {
-                                    "noise": [
-                                        "15",
-                                        0
-                                    ],
-                                    "guider": [
-                                        "13",
-                                        0
-                                    ],
-                                    "sampler": [
-                                        "14",
-                                        0
-                                    ],
-                                    "sigmas": [
-                                        "12",
-                                        0
-                                    ],
-                                    "latent_image": [
-                                        "11",
-                                        0
-                                    ]
-                                }
-                            },
-                            "17": {
-                                "class_type": "LTXVSeparateAVLatent",
-                                "inputs": {
-                                    "av_latent": [
-                                        "16",
-                                        0
-                                    ]
-                                }
-                            },
-                            "18": {
-                                "class_type": "LTXVCropGuides",
-                                "inputs": {
-                                    "positive": [
-                                        "8",
-                                        0
-                                    ],
-                                    "negative": [
-                                        "8",
-                                        1
-                                    ],
-                                    "latent": [
-                                        "17",
-                                        0
-                                    ]
-                                }
-                            },
-                            "19": {
-                                "class_type": "LatentUpscaleModelLoader",
-                                "inputs": {
-                                    "model_name": "ltx-2-spatial-upscaler-x2-1.0.safetensors"
-                                }
-                            },
-                            "20": {
-                                "class_type": "LTXVLatentUpsampler",
-                                "inputs": {
-                                    "samples": [
-                                        "18",
-                                        2
-                                    ],
-                                    "upscale_model": [
-                                        "19",
-                                        0
-                                    ],
-                                    "vae": [
-                                        "1",
-                                        2
-                                    ]
-                                }
-                            },
-                            "21": {
-                                "class_type": "LTXVConcatAVLatent",
-                                "inputs": {
-                                    "video_latent": [
-                                        "20",
-                                        0
-                                    ],
-                                    "audio_latent": [
-                                        "17",
-                                        1
-                                    ]
-                                }
-                            },
-                            "22": {
-                                "class_type": "CFGGuider",
-                                "inputs": {
-                                    "model": [
-                                        "4",
-                                        0
-                                    ],
-                                    "positive": [
-                                        "18",
-                                        0
-                                    ],
-                                    "negative": [
-                                        "18",
-                                        1
-                                    ],
-                                    "cfg": 1.0
-                                }
-                            },
-                            "23": {
-                                "class_type": "ManualSigmas",
-                                "inputs": {
-                                    "sigmas": "0.909375, 0.725, 0.421875, 0.0"
-                                }
-                            },
-                            "24": {
-                                "class_type": "RandomNoise",
-                                "inputs": {
-                                    "noise_seed": "{{seed}}"
-                                }
-                            },
-                            "25": {
-                                "class_type": "SamplerCustomAdvanced",
-                                "inputs": {
-                                    "noise": [
-                                        "24",
-                                        0
-                                    ],
-                                    "guider": [
-                                        "22",
-                                        0
-                                    ],
-                                    "sampler": [
-                                        "14",
-                                        0
-                                    ],
-                                    "sigmas": [
-                                        "23",
-                                        0
-                                    ],
-                                    "latent_image": [
-                                        "21",
-                                        0
-                                    ]
-                                }
-                            },
-                            "26": {
-                                "class_type": "LTXVSeparateAVLatent",
-                                "inputs": {
-                                    "av_latent": [
-                                        "25",
-                                        1
-                                    ]
-                                }
-                            },
-                            "27": {
-                                "class_type": "VAEDecode",
-                                "inputs": {
-                                    "samples": [
-                                        "26",
-                                        0
-                                    ],
-                                    "vae": [
-                                        "1",
-                                        2
-                                    ]
-                                }
-                            },
-                            "28": {
-                                "class_type": "LTXVAudioVAEDecode",
-                                "inputs": {
-                                    "samples": [
-                                        "26",
-                                        1
-                                    ],
-                                    "audio_vae": [
-                                        "3",
-                                        0
-                                    ]
-                                }
-                            },
-                            "29": {
-                                "class_type": "CreateVideo",
-                                "inputs": {
-                                    "images": [
-                                        "27",
-                                        0
-                                    ],
-                                    "fps": "{{fps}}",
-                                    "audio": [
-                                        "28",
-                                        0
-                                    ]
-                                }
-                            },
-                            "30": {
-                                "class_type": "SaveVideo",
-                                "inputs": {
-                                    "video": [
-                                        "29",
-                                        0
-                                    ],
-                                    "filename_prefix": "{{filename_prefix}}",
-                                    "format": "auto",
-                                    "codec": "auto"
-                                }
-                            }
-                        }
-                    },
-                    "command_profiles": {
-                        "default": {
-                            "description": "ComfyUI master, core nodes only, the model's official workflow with full-precision weights.",
-                            "framework_ref": "ComfyUI master HEAD",
-                            "num_gpus": 2,
-                            "serve_args": "",
-                            "notes": "Official video_ltx2_t2v two-stage workflow, which is the ltx-pipelines two-stage recipe sglang's LTX2TwoStagePipeline implements: stage 1 at half resolution on the full model with CFG (case guidance 4.0, negative prompt = sglang's ltx-pipelines default), latent x2 spatial upsample, stage 2 with the distilled LoRA on the same three distilled sigmas. bf16 checkpoint and Gemma-3-12B in place of fp8 / fp4_mixed; untiled VAEDecode in place of the template's tiled decode (a memory measure for small cards, and not bit-exact). Two GPUs through the MultiGPU CFG Split node on the stage-1 model, the counterpart of sglang's --enable-cfg-parallel. Weights are the full-precision single-file checkpoints ComfyUI loads (Comfy-Org repackaging or the model's own single-file release); the official template's fp8/int8/nvfp4 defaults are swapped out because they are a different numeric class from every other row. Sampler, scheduler and shift follow the official ComfyUI workflow; steps, CFG, size, frames and seed follow the case. Compile off: TorchCompileModel together with the MultiGPU CFG Split node fails on the first request (dynamo: 'Tensor device mismatch' in the stage-1 SamplerCustomAdvanced; ComfyUI 88ab4a06, 1xB200->2xB200, 2026-09-25). Splitting the two CFG branches over two cards roughly halves each step, which outweighs compile's measured 16-18% on FLUX.1, so the cell keeps the split and runs eager.",
-                            "policy_exception": "Compile broken with the CFG split, not a speed choice (2026-09-25, ComfyUI 88ab4a06, 1xB200->2xB200, see notes): TorchCompileModel with the MultiGPU CFG Split node fails the first request (dynamo 'Tensor device mismatch' in the stage-1 SamplerCustomAdvanced), and the split is worth more than compile's measured 16-18% on FLUX.1."
-                        },
-                        "blackwell-gpuonly": {
-                            "description": "Blackwell: the default graph with every model resident on the GPU (--gpu-only).",
-                            "hardware": [
-                                "b200",
-                                "gb200",
-                                "b300",
-                                "gb300"
-                            ],
-                            "framework_ref": "ComfyUI master HEAD",
-                            "num_gpus": 2,
-                            "serve_args": "--gpu-only",
-                            "notes": "B200: --gpu-only keeps every model, text encoders included, stored and run on the card; a 183 GB B200 holds the largest graph here (MiniMax-H3: 62 GB DiT + 48 GB Qwen3-VL-32B + VAEs). Placement only, numerics unchanged. Measured 2026-09-25 on 1xB200, FLUX.1 eager, interleaved arms: default 5.94 / 5.77 / 5.79s against --gpu-only 5.56s and --gpu-only --disable-dynamic-vram 5.57s (Qwen-Image-2.1: 3.75 / 3.91 against 3.47 / 3.48) -- every --gpu-only arm below every default arm; disabling dynamic VRAM on top adds nothing, so the simpler flag is kept.",
-                            "policy_exception": "Compile broken with the CFG split, not a speed choice (2026-09-25, ComfyUI 88ab4a06, 1xB200->2xB200, see the default profile's notes): TorchCompileModel with the MultiGPU CFG Split node fails the first request (dynamo 'Tensor device mismatch' in the stage-1 SamplerCustomAdvanced), and the split is worth more than compile's measured 16-18% on FLUX.1."
-                        },
-                        "cand-gpuonly": {
-                            "description": "Eager with --gpu-only: every model stored and run on the card (placement only). Never selected on its own: A/B arm, picked with --hardware-profile <name>.",
-                            "serve_args": "--gpu-only",
-                            "num_gpus": 2,
-                            "notes": "On 2026-09-25 B200 every --gpu-only arm beat ComfyUI's default dynamic-VRAM placement (FLUX.1 eager 5.94 -> 5.56 s). VALIDATION PENDING (round 2026-10-22, 2xH200/4xH200)."
-                        }
-                    }
-                }
-            },
-            "report_framework_statuses": {
-                "lightx2v": "unsupported",
-                "fastvideo": "no_profile"
-            },
-            "report_framework_reasons": {
-                "lightx2v": "LightX2V cannot run the official LTX-2 two-stage workload (dev model for stage 1, distilled LoRA for the 3-step stage-2 refine): its runner loads one transformer and merges lora_configs into it at load, and the use_upsampler path reuses that same transformer for stage 2 (lightx2v/models/runners/ltx2/ltx2_runner.py at 19c19614). The profile it had did not enable the upsampler at all, so every earlier LightX2V row ran ONE stage at the full 768x512 for 40 steps -- a heavier workload than the other rows, never comparable. Audited 2026-10-22.",
-                "fastvideo": "FastVideo main (2b164405c3d1, 2026-10-07) registers LTX-2, but this harness integrates FastVideo for MiniMax-H3 only (2026-10-08); no command validated."
-            }
-        },
-        {
-            "id": "ltx2.3_twostage_t2v_2gpus",
-            "model": "Lightricks/LTX-2.3",
-            "task": "text-to-video",
-            "label": "LTX-2.3 two-stage T2V",
-            "prompt": "A cat and a dog baking a cake together in a kitchen.",
-            "width": 768,
-            "height": 512,
-            "num_frames": 121,
-            "seed": 42,
-            "num_gpus": 2,
-            "fps": 24,
-            "num_inference_steps": 30,
-            "guidance_scale": 3.0,
-            "framework_request_extra": {
-                "vllm-omni": {
-                    "extra_params": {
-                        "video_cfg_scale": 3.0,
-                        "audio_cfg_scale": 7.0,
-                        "video_stg_scale": 1.0,
-                        "audio_stg_scale": 1.0,
-                        "video_modality_scale": 3.0,
-                        "audio_modality_scale": 3.0,
-                        "video_rescale_scale": 0.7,
-                        "audio_rescale_scale": 0.7,
-                        "video_stg_blocks": [
-                            28
-                        ],
-                        "audio_stg_blocks": [
-                            28
-                        ]
-                    }
-                },
-                "sglang": {
-                    "negative_prompt": "blurry, out of focus, overexposed, underexposed, low contrast, washed out colors, excessive noise, grainy texture, poor lighting, flickering, motion blur, distorted proportions, unnatural skin tones, deformed facial features, asymmetrical face, missing facial features, extra limbs, disfigured hands, wrong hand count, artifacts around text, inconsistent perspective, camera shake, incorrect depth of field, background too sharp, background clutter, distracting reflections, harsh shadows, inconsistent lighting direction, color banding, cartoonish rendering, 3D CGI look, unrealistic materials, uncanny valley effect, incorrect ethnicity, wrong gender, exaggerated expressions, wrong gaze direction, mismatched lip sync, silent or muted audio, distorted voice, robotic voice, echo, background noise, off-sync audio, incorrect dialogue, added dialogue, repetitive speech, jittery movement, awkward pauses, incorrect timing, unnatural transitions, inconsistent framing, tilted camera, flat lighting, inconsistent tone, cinematic oversaturation, stylized filters, or AI artifacts."
-                }
-            },
-            "_note": "sglang's request carries its own default negative prompt explicitly (2026-10-23; byte-identical to LTX2SamplingParams.negative_prompt at sglang 82f7249c, the LTX-2 case's negative_prompt), so the harness can tag it per request like every negative it sends: left to the server default, it was one constant text that sglang's conditioning cache encoded once per server (text_encoding.get_or_compute_negative_text_embedding), while the competitors re-encode theirs.",
-            "frameworks": {
-                "sglang": {
-                    "serve_args": "--model-type diffusion --warmup-mode server --enable-cfg-parallel --pipeline-class-name LTX2TwoStagePipeline",
-                    "extra_env": {},
-                    "command_profiles": {
-                        "b300-cfg-parallel-bcg": {
-                            "sglang_ref": "current-main",
-                            "serve_args": "--model-type diffusion --warmup-mode server --enable-cfg-parallel --pipeline-class-name LTX2TwoStagePipeline --enable-breakable-cuda-graph true --warmup-resolutions 768x512 --warmup-num-frames 121",
-                            "description": "B300: The default command plus breakable CUDA graphs (LTX-2/2.3 are on sglang's validated BCG list), captured at the case shape.",
-                            "hardware": [
-                                "b300"
-                            ],
-                            "notes": "TRT-LLM's LTX-2 row runs CUDA graphs (NVIDIA's official config) at 0.044 s per stage-1 step against sglang's 0.192 s (4xB300, 2026-10-22); stage 1 is ~1.5k tokens, so the step is launch-bound. BCG replays the same kernels, so the output is unchanged. Promoted from cand-bcg by the 2026-10-22 4xB300 A/B (scripts/run_b300_ab_20261022.sh, second wave): two rounds, 4.735/4.726 s against default (eager) 6.294/6.202, cand-usp2-bcg 5.420/5.435, cand-usp2 8.79/9.13."
-                        },
-                        "default": {
-                            "description": "Fallback SGLang command when no hardware-specific profile matches.",
-                            "sglang_ref": "current-main",
-                            "serve_args": "--model-type diffusion --warmup-mode server --enable-cfg-parallel --pipeline-class-name LTX2TwoStagePipeline",
-                            "notes": "Use hardware-specific profiles for formal H100/H200 runs."
-                        },
-                        "h100-80gb-2gpu": {
-                            "description": "Cookbook-aligned H100 80GB command for the LTX2.3 two-stage 121-frame case.",
-                            "hardware": [
-                                "h100"
-                            ],
-                            "sglang_ref": "current-main",
-                            "num_gpus": 2,
-                            "serve_args": "--model-type diffusion --warmup-mode server --enable-cfg-parallel --pipeline-class-name LTX2TwoStagePipeline --ltx2-two-stage-device-mode snapshot",
-                            "notes": "Snapshot mode avoids H100 resident VRAM pressure. DEAD AGAINST CURRENT SGLANG (checked 2026-09-13): `--ltx2-two-stage-device-mode snapshot` is rejected by the parser -- the choices are now 'original' and 'resident', so `snapshot` was retired upstream. Not guessing a replacement: 'resident' keeps components on the GPU and this profile exists for an 80GB card, so the substitution has to be measured on H100 rather than picked. Not selected on Blackwell (b200 takes `default`, which does not pass the flag at all), so it has not affected any B200 run. Catch this class with scripts/validate_serve_args.py, which found it.",
-                            "policy_exception": "Measured H100 A/B 2026-07-03 (steady-state single_e2e): speed+compile OOMs on 2x80GB (79.1/79.2 GiB used, 30MiB alloc failure during request) — two-stage residency + compile workspace does not fit. Snapshot device mode is the fastest configuration that fits (12.03s)."
-                        },
-                        "h200-2gpu": {
-                            "description": "Cookbook-aligned H200 command for the LTX2.3 two-stage 121-frame case.",
-                            "hardware": [
-                                "h200"
-                            ],
-                            "sglang_ref": "current-main",
-                            "num_gpus": 2,
-                            "serve_args": "--model-type diffusion --warmup-mode server --enable-cfg-parallel --pipeline-class-name LTX2TwoStagePipeline --ltx2-two-stage-device-mode resident",
-                            "notes": "Resident mode is the fastest LTX2.3 two-stage path when both DiTs fit in VRAM."
-                        },
-                        "official-original-2gpu": {
-                            "description": "Official stage-switching semantics profile for LTX2.3 two-stage comparisons.",
-                            "sglang_ref": "current-main",
-                            "num_gpus": 2,
-                            "serve_args": "--model-type diffusion --warmup-mode server --enable-cfg-parallel --pipeline-class-name LTX2TwoStagePipeline --ltx2-two-stage-device-mode original",
-                            "notes": "Use this only when official switching semantics are more important than latency."
-                        },
-                        "cand-bcg": {
-                            "sglang_ref": "current-main",
-                            "serve_args": "--model-type diffusion --warmup-mode server --enable-cfg-parallel --pipeline-class-name LTX2TwoStagePipeline --enable-breakable-cuda-graph true --warmup-resolutions 768x512 --warmup-num-frames 121",
-                            "description": "The default command plus breakable CUDA graphs (LTX-2/2.3 are on sglang's validated BCG list), captured at the case shape. Never selected on its own: A/B arm.",
-                            "notes": "TRT-LLM's LTX-2 row runs CUDA graphs (NVIDIA's official config) at 0.044 s per stage-1 step against sglang's 0.192 s (4xB300, 2026-10-22); stage 1 is ~1.5k tokens, so the step is launch-bound. BCG replays the same kernels, so the output is unchanged. VALIDATION PENDING (4xB300 A/B)."
-                        },
-                        "cand-usp2": {
-                            "sglang_ref": "current-main",
-                            "serve_args": "--model-type diffusion --warmup-mode server --enable-cfg-parallel false --ulysses-degree 2 --pipeline-class-name LTX2TwoStagePipeline",
-                            "description": "Ulysses 2 across both stages instead of CFG parallel: stage 2 has no CFG, so under CFG parallel it runs on the main rank alone (LTX2RefinementStage is MAIN_RANK_ONLY). Never selected on its own: A/B arm.",
-                            "notes": "TRT-LLM switches stage 2 from cfg2 to Ulysses 2 ('there is no cfg in stage 2'). Same math, different placement. VALIDATION PENDING (4xB300 A/B)."
-                        },
-                        "cand-usp2-bcg": {
-                            "sglang_ref": "current-main",
-                            "serve_args": "--model-type diffusion --warmup-mode server --enable-cfg-parallel false --ulysses-degree 2 --pipeline-class-name LTX2TwoStagePipeline --enable-breakable-cuda-graph true --warmup-resolutions 768x512 --warmup-num-frames 121",
-                            "description": "cand-usp2 plus breakable CUDA graphs at the case shape. Never selected on its own: A/B arm.",
-                            "notes": "TRT-LLM switches stage 2 from cfg2 to Ulysses 2 ('there is no cfg in stage 2'). Same math, different placement. VALIDATION PENDING (4xB300 A/B)."
-                        }
-                    }
-                },
-                "vllm-omni": {
-                    "model": "diffusers/LTX-2.3-Diffusers",
-                    "num_gpus": 2,
-                    "serve_args": "--num-gpus 2 --cfg-parallel-size 2 --model-class-name LTX2TwoStagePipeline --stage-init-timeout 600 --no-diffusion-compile-dynamic",
-                    "extra_env": {
-                        "DIFFUSION_ATTENTION_BACKEND": "FLASH_ATTN"
-                    },
-                    "request_omit_keys": [
-                        "guidance_scale"
-                    ],
-                    "model_override_reason": "vLLM-Omni loads LTX-2.3 only from the Diffusers conversion of the official weights (its recipe: 'LTX-2.3 requires the Diffusers checkpoint; the raw Lightricks/LTX-2.3 safetensors repository is not directly loadable'); the two-stage upsampler and distilled LoRA still come from Lightricks/LTX-2.3.",
-                    "command_profiles": {
-                        "blackwell-2gpu-twostage-cfg-vaepp": {
+                        "cand-trtllm-attn": {
+                            "description": "TRTLLM_ATTN instead of CUDNN_ATTN. Never selected on its own: A/B arm.",
                             "framework_ref": "vllm-omni main 0da1d831e07f + vllm==0.32.0",
                             "num_gpus": 2,
-                            "serve_args": "--num-gpus 2 --cfg-parallel-size 2 --model-class-name LTX2TwoStagePipeline --stage-init-timeout 600 --no-diffusion-compile-dynamic --vae-patch-parallel-size 2",
+                            "serve_args": "--num-gpus 2 --usp 2 --model-class-name LTX2DistilledTwoStagePipeline --stage-init-timeout 900 --no-diffusion-compile-dynamic --stage-overrides {\"0\":{\"extras\":{\"ltx2_use_conv_vae\":true}}} --vae-patch-parallel-size 2 --vae-use-tiling",
                             "extra_env": {
-                                "DIFFUSION_ATTENTION_BACKEND": "CUDNN_ATTN"
+                                "DIFFUSION_ATTENTION_BACKEND": "TRTLLM_ATTN"
                             },
                             "upstream_recipe": {
                                 "repo": "vllm-project/vllm-omni",
-                                "path": "recipes/LTX/LTX-2.md",
-                                "commit": "71f0fa47acff",
-                                "commit_date": "2026-10-19",
-                                "section": "Serving (ordinary LTX-2.3 two-stage); Guidance Parallelism"
+                                "path": "recipes/LTX/LTX-2.5.md",
+                                "commit": "a09109802595",
+                                "commit_date": "2026-10-17",
+                                "section": "Multi-GPU low-latency path (distilled two-stage, Ulysses + VAE patch parallel); Video decoder (ltx2_use_conv_vae)"
                             },
-                            "description": "VAE patch parallel 2 (tiled decode on both GPUs).",
-                            "hardware": [
-                                "b200",
-                                "gb200",
-                                "b300",
-                                "gb300"
-                            ],
-                            "notes": "Derived from `blackwell-2gpu-twostage-cfg` (the profile B300 selects). Audit 2026-10-23 (image finding 4, LTX sub-audit): vLLM-Omni decodes on one GPU, although its features matrix lists VAE patch parallel (decode) for LTX-2 and LTX-2.3 (docs/user_guide/diffusion_features.md; tile mode, the flag's default); TRT-LLM (parallel_vae 2) and sglang decode on two. Estimated 0.1-0.2 s. Promoted from cand-vaepp by the 2026-10-22 4xB300 fourth-wave A/B: 4.456 s against 4.508 s."
-                        },
-                        "blackwell-2gpu-twostage-cfg": {
-                            "description": "Blackwell: ordinary LTX-2.3 two-stage with guidance parallel 2 (two of stage 1's four passes per rank), cuDNN attention.",
-                            "hardware": [
-                                "b200",
-                                "gb200",
-                                "b300",
-                                "gb300"
-                            ],
-                            "framework_ref": "vllm-omni main 0da1d831e07f + vllm==0.32.0",
-                            "num_gpus": 2,
-                            "serve_args": "--num-gpus 2 --cfg-parallel-size 2 --model-class-name LTX2TwoStagePipeline --stage-init-timeout 600 --no-diffusion-compile-dynamic",
-                            "extra_env": {
-                                "DIFFUSION_ATTENTION_BACKEND": "CUDNN_ATTN"
-                            },
-                            "upstream_recipe": {
-                                "repo": "vllm-project/vllm-omni",
-                                "path": "recipes/LTX/LTX-2.md",
-                                "commit": "71f0fa47acff",
-                                "commit_date": "2026-10-19",
-                                "section": "Serving (ordinary LTX-2.3 two-stage); Guidance Parallelism"
-                            },
-                            "notes": "Stage 1 runs the official LTX-2.3 guider by default (video CFG 3 / audio CFG 7, STG 1.0 on block 28, modality 3, rescale 0.7: four transformer passes a step), the same values as sglang's LTX23SamplingParams; the request pins them in extra_params and omits the top-level guidance_scale, which vLLM-Omni applies to BOTH CFG fields after extra_params (audio CFG 7 would become 3). Default negative prompt is the ltx-pipelines one in both. VALIDATION PENDING (round 2026-10-22, 4xB300)."
-                        },
-                        "default": {
-                            "description": "Ordinary LTX-2.3 two-stage with guidance parallel 2.",
-                            "framework_ref": "vllm-omni main 0da1d831e07f + vllm==0.32.0",
-                            "num_gpus": 2,
-                            "serve_args": "--num-gpus 2 --cfg-parallel-size 2 --model-class-name LTX2TwoStagePipeline --stage-init-timeout 600 --no-diffusion-compile-dynamic",
-                            "extra_env": {
-                                "DIFFUSION_ATTENTION_BACKEND": "FLASH_ATTN"
-                            },
-                            "upstream_recipe": {
-                                "repo": "vllm-project/vllm-omni",
-                                "path": "recipes/LTX/LTX-2.md",
-                                "commit": "71f0fa47acff",
-                                "commit_date": "2026-10-19",
-                                "section": "Serving (ordinary LTX-2.3 two-stage); Guidance Parallelism"
-                            },
-                            "notes": "As blackwell-2gpu-twostage-cfg with FLASH_ATTN (Hopper). Not measured yet."
-                        },
-                        "cand-vaepp": {
-                            "description": "VAE patch parallel 2 (tiled decode on both GPUs). Never selected on its own: A/B arm.",
-                            "framework_ref": "vllm-omni main 0da1d831e07f + vllm==0.32.0",
-                            "num_gpus": 2,
-                            "serve_args": "--num-gpus 2 --cfg-parallel-size 2 --model-class-name LTX2TwoStagePipeline --stage-init-timeout 600 --no-diffusion-compile-dynamic --vae-patch-parallel-size 2",
-                            "extra_env": {
-                                "DIFFUSION_ATTENTION_BACKEND": "CUDNN_ATTN"
-                            },
-                            "upstream_recipe": {
-                                "repo": "vllm-project/vllm-omni",
-                                "path": "recipes/LTX/LTX-2.md",
-                                "commit": "71f0fa47acff",
-                                "commit_date": "2026-10-19",
-                                "section": "Serving (ordinary LTX-2.3 two-stage); Guidance Parallelism"
-                            },
-                            "notes": "Derived from `blackwell-2gpu-twostage-cfg` (the profile B300 selects). Audit 2026-10-23 (image finding 4, LTX sub-audit): vLLM-Omni decodes on one GPU, although its features matrix lists VAE patch parallel (decode) for LTX-2 and LTX-2.3 (docs/user_guide/diffusion_features.md; tile mode, the flag's default); TRT-LLM (parallel_vae 2) and sglang decode on two. Estimated 0.1-0.2 s. VALIDATION PENDING (wave 4, 4xB300)."
+                            "notes": "Another exact attention backend vLLM-Omni offers on Blackwell; LTX-2.5's self-attention needs no mask. VALIDATION PENDING (wave 8, 4xB300)."
                         }
                     }
                 }
@@ -3854,10 +3036,10 @@
                 "fastvideo": "no_profile"
             },
             "report_framework_reasons": {
-                "lightx2v": "LightX2V cannot run the official LTX-2.3 two-stage workload: one transformer serves both stages with any LoRA merged at load (ltx2_runner.py at 19c19614), and the profile it had never enabled the upsampler, so every earlier row was one stage at the full 768x512 -- heavier than sglang's two-stage, never comparable. Audited 2026-10-22.",
-                "trtllm-visual": "TensorRT-LLM 1.4.0rc1 has no LTX-2.3: LTX2Pipeline lists only Lightricks/LTX-2 (19B), and '2.3' appears in no hf_id, config, test or supported-models table (checked 2026-10-22).",
-                "comfyui": "ComfyUI loads LTX-2.3, but no official workflow reproduces this case: sglang runs LTX-2.3's multimodal guidance in stage 1 (video CFG 3 + STG 1.0 on block 28 + modality 3, audio CFG 7 + STG + modality -- up to four DiT passes per step, LTX23SamplingParams), while ComfyUI's LTX-2.3 T2V template (and the LTX-2.5 one) is the distilled-LoRA fast path at cfg 1. A graph built from LTXVSpatioTemporalGuidance / LTXVModalityGuidance / LTXVDualCFGGuider could match it but has no upstream reference and is not validated.",
-                "fastvideo": "FastVideo main (2b164405c3d1, 2026-10-07) registers LTX-2.3, but this harness integrates FastVideo for MiniMax-H3 only (2026-10-08); no command validated."
+                "lightx2v": "LightX2V's LTX-2.5 runner (ltx2_5, main 19c19614 = HEAD on 2026-10-24) decodes only with the diffusion VAE: LTX25VideoVAE raises 'LTX25VideoVAE requires a CausalDiffusionVAE checkpoint' for anything else (lightx2v/models/video_encoders/hf/ltx2/model.py), and the runner class fixes video_vae_class, so this case's convolutional decode is not reachable from its config. Its distilled two-stage itself would match (one distilled DiT for both stages, the same 8 + 3 sigmas, CFG 1); a diffusion-VAE row would be different, heavier work. Checked 2026-10-24.",
+                "trtllm-visual": "TensorRT-LLM 1.4.0rc1 (the newest release candidate, installed) has no LTX-2.5: its VisualGen ltx2 package serves Lightricks/LTX-2 (19B) only, and nothing under tensorrt_llm/_torch/visual_gen loads Gemma-4, LTX-2.5's text encoder. Checked 2026-10-24.",
+                "comfyui": "ComfyUI master (1a82e6d0) ships an official LTX-2.5 T2V template (video_ltx2_5_t2v): the same distilled two-stage (8 sigmas, x2 latent upsampler, a 3-sigma tail, CFG 1), but on the int8-convrot DiT and text encoder, with the diffusion VAE (ltx-2.5-video-vae-bf16), a stage-2 schedule starting at 0.85, and a prompt-enhancer node. A bf16 graph with the conv VAE (vae/ltx-2.5-video-vae-conv-bf16) and the official stage-2 sigmas is not built or validated yet. 2026-10-24.",
+                "fastvideo": "FastVideo main (fa2d1324) registers LTX-2.5 distilled (FastVideo/LTX-2.5-Distilled-Diffusers, preset ltx2_5_distilled_two_stage), but this harness integrates FastVideo for MiniMax-H3 only (2026-10-08); no command validated."
             }
         },
         {

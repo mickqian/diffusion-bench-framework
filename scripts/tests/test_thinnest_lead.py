@@ -136,7 +136,7 @@ check("single_e2e tail never lands on a throughput row", "unattributed_tail_s" n
 
 print("tracker issue table")
 REAL = ["qwen_image_21_t2i_1024", "zimage_turbo_t2i_1024", "qwen_image_21_t2i_1024_2gpu",
-        "ltx2.3_twostage_t2v_2gpus"]
+        "ltx2.5_twostage_t2v_2gpus"]
 run = {
     "timestamp": "2026-09-30T00:00:00+00:00",
     "commit_sha": "0" * 40,

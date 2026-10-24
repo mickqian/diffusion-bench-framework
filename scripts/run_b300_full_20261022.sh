@@ -5,7 +5,8 @@
 #
 # Wraps scripts/run_b200_cross_framework_20260912.sh. One box, the two halves in
 # turn (never at once: shared host and PCIe), every framework on the cells' own GPUs:
-#   ROLE=image: image cases and the 2-GPU LTX videos.
+#   ROLE=image: image cases and the 2-GPU LTX video (LTX-2.5 since 2026-10-24, which
+#               retired the LTX-2 and LTX-2.3 rows).
 #   ROLE=video: MiniMax-H3, Cosmos3 189f and Wan2.2.
 # minimax_h3_t2va_480p_1gpu is the single-32 GB consumer case and is not run here.
 #
@@ -53,8 +54,7 @@ zimage_turbo_t2i_1024
 cosmos3_nano_t2i_720p
 flux3_klein_base_t2i_1024
 ideogram4_t2i_1024_2gpu_tp
-ltx2_twostage_t2v
-ltx2.3_twostage_t2v_2gpus
+ltx2.5_twostage_t2v_2gpus
 }" ;;
   video)
     export GPUS="${GPUS:-0,1,2,3}" TAG="${TAG:-b300vid1022}" BASE_PORT="${BASE_PORT:-62000}"

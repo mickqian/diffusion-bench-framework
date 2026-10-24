@@ -13,8 +13,7 @@ A trailing `(h100: FAIL)` is a `status_by_hardware` override: the cell reads dif
 | zimage_turbo_t2i_1024 | text-to-image | profile | profile | profile | TODO | profile | no-cmd |
 | ideogram4_t2i_1024_2gpu_tp | text-to-image | profile | n/a | n/a | n/a | profile | n/a |
 | wan22_t2v_a14b_720p | text-to-video | profile | profile | profile | profile | profile | no-cmd |
-| ltx2_twostage_t2v | text-to-video | profile | profile | n/a | profile | profile | no-cmd |
-| ltx2.3_twostage_t2v_2gpus | text-to-video | profile | profile | n/a | n/a | no-cmd | no-cmd |
+| ltx2.5_twostage_t2v_2gpus | text-to-video | profile | profile | n/a | n/a | no-cmd | no-cmd |
 | cosmos3_nano_t2i_720p | text-to-image | profile | profile | no-cmd (b200: FAIL, b300: FAIL, gb200: FAIL, gb300: FAIL) | profile | n/a | n/a |
 | cosmos3_nano_t2v_720p_189f | text-to-video | profile | profile | no-cmd (b200: profile, b300: profile, gb200: profile, gb300: profile) | profile | n/a | n/a |
 | cosmos3_nano_i2v_720p_189f | image-to-video | profile | profile | no-cmd (b200: profile, b300: profile, gb200: profile, gb300: profile) | profile | n/a | n/a |
