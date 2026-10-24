@@ -77,7 +77,7 @@ for t in "${SGL_MAIN}" "${SGL_WAN}" "${SGL_COS}" "${SGL_H3}"; do
   echo "=== tree ${t} $(git -C "${t%/python}" log --oneline -1 | cut -c1-80)"
 done
 
-port=48000
+port=61500  # above the ephemeral range (32768-60999); 10 per arm
 for cell in ${CELLS}; do
   case_id=${CASE_OF[${cell}]}
   for round in $(seq 1 "${ROUNDS_OF[${cell}]}"); do
