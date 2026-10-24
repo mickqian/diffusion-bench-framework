@@ -2923,7 +2923,7 @@
                             "hardware": [
                                 "b300"
                             ],
-                            "notes": "Wave 8 (4xB300, sglang main 327c906, two interleaved rounds, harness single_e2e): the cookbook's pinned Ulysses 2 6.852/6.757 s, the runtime's own choice (cand-auto: kv-gather 2) 6.535/6.516, Ulysses 2 + BCG (cand-bcg) 6.042/6.075, TP2 8.203/8.117; vLLM-Omni 6.013/5.984 in the same wave. BCG replays bit-identically to eager (same MP4 md5 for four prompts). The two winners combine here; on main + the round's LTX-2.5 decode branches the combination measured 5.200-5.240 s against 5.219-5.281 s for Ulysses 2 + BCG. Wave 9 A/Bs it on main. LTX-2.5 is not on sglang main's validated BCG list yet, so the flag is explicit (sglang branch mick/ltx25-bcg-validated adds it)."
+                            "notes": "Wave 8 (4xB300, sglang main 327c906, two interleaved rounds, harness single_e2e): the cookbook's pinned Ulysses 2 6.852/6.757 s, the runtime's own choice (cand-auto: kv-gather 2) 6.535/6.516, Ulysses 2 + BCG (cand-bcg) 6.042/6.075, TP2 8.203/8.117; vLLM-Omni 6.013/5.984 in the same wave. BCG replays bit-identically to eager (same MP4 md5 for four prompts). The two winners combine here; on main + the round's LTX-2.5 decode branches the combination measured 5.200-5.240 s against 5.219-5.281 s for Ulysses 2 + BCG. Wave 9 on main: 6.016/6.033 s against 6.057 (Ulysses 2 + BCG) and 6.537 (no BCG). Head-to-head (2026-10-24, two interleaved rounds, fresh servers): this profile 6.042/6.114 s on main, 5.259/5.219 s on main + the LTX-2.5 decode branches; vLLM-Omni 6.056/5.952 s. LTX-2.5 is not on sglang main's validated BCG list yet, so the flag is explicit (sglang branch mick/ltx25-bcg-validated adds it)."
                         },
                         "default": {
                             "description": "Ulysses 2 across both stages: the sglang LTX-2.5 cookbook's two-GPU preset for long sequences.",
@@ -2958,7 +2958,7 @@
                             "sglang_ref": "current-main",
                             "num_gpus": 2,
                             "serve_args": "--model-type diffusion --warmup-mode server --pipeline-class-name LTX2TwoStagePipeline --dit-layerwise-offload false --performance-mode speed --enable-torch-compile false --enable-breakable-cuda-graph true --warmup-resolutions 1920x1088 --warmup-num-frames 121",
-                            "notes": "Wave 8 measured the runtime's choice (kv-gather 2 for stage 1) 6.535 s against the pinned Ulysses 2 at 6.852 s, and BCG bit-identical to eager (stage 1 0.244 -> 0.151 s/step on Ulysses 2); this arm combines the two. VALIDATION PENDING (wave 9, 4xB300)."
+                            "notes": "Wave 8 measured the runtime's choice (kv-gather 2 for stage 1) 6.535 s against the pinned Ulysses 2 at 6.852 s, and BCG bit-identical to eager (stage 1 0.244 -> 0.151 s/step on Ulysses 2); this arm combines the two. Wave 9 (4xB300, main 327c906): 6.016/6.033 s against cand-bcg 6.057 and cand-auto 6.537; promoted as b300-auto-bcg."
                         }
                     }
                 },
