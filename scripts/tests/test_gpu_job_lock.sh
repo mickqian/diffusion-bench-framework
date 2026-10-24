@@ -137,4 +137,17 @@ grep -q "this is" "$TMP/i.out"; check "and is reported as another host's" $? "$(
 grep -q "I done" "$TMP/i.out"; check "and the job proceeds" $?
 [ ! -d "$GPU_LOCK_DIR" ]; check "the lock ends free" $?
 
+# --- a lock directory whose parent does not exist ------------------------
+# mkdir fails for a missing parent as well, so the job used to read that as a
+# stale lock, clear nothing and retry forever.
+GPU_LOCK_DIR="$TMP/missing/lock" bash "$TMP/job.sh" J 1 > "$TMP/j.out" 2>&1 &
+J=$!
+{ sleep 20; kill -9 $J 2>/dev/null; } 2>/dev/null & WD=$!
+disown $WD 2>/dev/null || true
+wait $J 2>/dev/null; rc=$?
+kill $WD 2>/dev/null
+[ "$rc" = 1 ]; check "a missing lock parent fails the job at once" $? "exit=$rc"
+grep -q "does not exist" "$TMP/j.out"; check "and says why" $? "$(head -1 "$TMP/j.out" 2>/dev/null)"
+! grep -q "J holding" "$TMP/j.out"; check "without running unlocked" $?
+
 exit $fail

@@ -16,7 +16,9 @@
 # further. A regex cannot tell two waves' lines for one cell apart (the third and
 # fourth waves both have `minimax_h3_ref2va_5s trtllm-visual`), so select waves
 # with WAVE. Every line keeps its port whatever is selected.
-# Arms print as `ARM <case> <framework> <arm> r<k> RESULT ...` lines.
+# Arms print as `ARM <case> <framework> <arm> r<k> RESULT ...` lines; results land in
+# $DBF_LOG_DIR/run_<TAG>_w<wave>_<framework>_<arm>_r<k>_<case>.json (before 2026-10-24 the tag had
+# no wave, and wave 9 overwrote wave 8's files for the arms both ran).
 set -u
 
 export DBF_STATE_DIR="${DBF_STATE_DIR:-/workspace/r1022}"
@@ -50,7 +52,8 @@ arms() {  # <case> <framework> <rounds> <arms...>; WAVE=<n> / AB_CASES=<regex> s
     echo "PLAN wave=${wave} port=${port} ${case_id} ${fw} rounds=${rounds} arms=$*"
   else
     ARMS_CASE="${case_id}" ARMS_FW="${fw}" ARMS="$*" ROUNDS="${rounds}" \
-      bash "${DBF_REPO_DIR}/scripts/run_competitor_arms.sh" "${TAG}_${fw}" "${port}"
+      # the wave is in the tag: two waves arming one cell would otherwise overwrite each other's results
+      bash "${DBF_REPO_DIR}/scripts/run_competitor_arms.sh" "${TAG}_w${wave}_${fw}" "${port}"
   fi
   port=$((port + 100))
 }

@@ -56,6 +56,13 @@ _gpu_lock_signal_exit() {
 
 gpu_lock_acquire() {
     local waited=0
+    # mkdir fails for a missing parent too, and the stale-lock branch below would
+    # then clear nothing and retry forever (a script that set DBF_STATE_DIR after
+    # sourcing this file spun on the /personal default, 2026-10-24)
+    if [ ! -d "$(dirname "${GPU_LOCK_DIR}")" ]; then
+        echo "gpu-lock: $(dirname "${GPU_LOCK_DIR}") does not exist; set DBF_STATE_DIR or GPU_LOCK_DIR before sourcing" >&2
+        exit 1
+    fi
     while true; do
         if mkdir "${GPU_LOCK_DIR}" 2>/dev/null; then
             echo "$$" > "${GPU_LOCK_DIR}/pid"
