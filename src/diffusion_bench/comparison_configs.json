@@ -2903,7 +2903,7 @@
                     "num_inference_steps": 8
                 }
             },
-            "notes": "Replaces ltx2_twostage_t2v and ltx2.3_twostage_t2v_2gpus (retired 2026-10-24); their published results stay in the reports. The workload is LTX-2.5's official distilled two-stage recipe, which is the model's default path: model_index.json points at the distilled DiT (transformer/), whose weights are distilled themselves, so both stages run the same checkpoint and no stage swaps in a LoRA. Stage 1 runs at half resolution (960x544) over the 8 distilled sigmas, the latents go through the x2 latent upsampler, and stage 2 refines at 1920x1088 over the 3-sigma tail (0.909375, 0.725, 0.421875): 8 + 3 DiT forwards, unguided (CFG 1, STG and modality guidance off), so there is no negative prompt and no CFG branch. Sources: the Lightricks/LTX-2.5-Diffusers model card ('Two-stage distilled generation': stage 1 544x960, 121 frames, 24 fps, DISTILLED_SIGMA_VALUES, then STAGE_2_DISTILLED_SIGMA_VALUES at 2x), sglang's LTX-2.5 cookbook (LTX2TwoStagePipeline at 1920x1088, the distilled DiT runs a pinned 8-sigma schedule, CFG parallelism does not apply), and vLLM-Omni's recipe (LTX2DistilledTwoStagePipeline, 1920x1088, 8 + 3 steps). ltx-pipelines' distilled CLI defaults to 1536x1024 with the same schedule. Not a reduced-step substitute: every framework runs the same weights, schedule, guidance, size, frames and fps. Audio is on (joint video + audio, 48 kHz vocoder) and the video decodes with the convolutional VAE (vae/); the optional diffusion decoder and duration head stay off. The conv VAE is the default of diffusers' LTX2Pipeline and of sglang; ltx-pipelines, vLLM-Omni and LightX2V decode with the diffusion VAE by default, so vLLM-Omni is pinned to the conv VAE through its documented ltx2_use_conv_vae switch. Stage 1's sampler differs in kind: ltx-pipelines, vLLM-Omni, FastVideo and ComfyUI step stage 1 with an ancestral Euler (fresh noise each step), diffusers and sglang with plain Euler; the cost is one noise draw per step on a 960x544 latent. Prompt and seed are the retired LTX rows' (the model card asks for long captions; the text encoder pads to a fixed length either way). Two GPUs, as the LTX-2.3 row ran and sglang's cookbook documents (Ulysses 2); vLLM-Omni's low-latency example uses Ulysses N with VAE patch parallel N. The warmups send the same 8 steps: vLLM-Omni's distilled pipelines refuse any other stage-1 count ('uses 8 fixed Stage 1 denoise steps; got 3'), and sglang ignores the count on this pinned schedule. Both frameworks encode the same MP4: vLLM-Omni's video endpoints encode with libx264 preset ultrafast (serving_video.py: video_codec_options) at CRF 18 (diffusion/utils/media_utils.py), while sglang defaults to preset fast at CRF 25 (quality 5): a slower preset at a different rate, i.e. more encode work (~0.28 s on this 1920x1088 x 121 clip, 4xB300, 2026-10-24). The case asks sglang for the same encode through its request fields: x264_preset ultrafast, output_compression 63 (CRF int((1 - 0.63) * 51) = 18). The generated frames are untouched; x264's embedded options string (ref=1 me=dia subme=0 bframes=0 crf=18.0) is the check. VALIDATION PENDING (wave 8, 4xB300).",
+            "notes": "Replaces ltx2_twostage_t2v and ltx2.3_twostage_t2v_2gpus (retired 2026-10-24); their published results stay in the reports. The workload is LTX-2.5's official distilled two-stage recipe, which is the model's default path: model_index.json points at the distilled DiT (transformer/), whose weights are distilled themselves, so both stages run the same checkpoint and no stage swaps in a LoRA. Stage 1 runs at half resolution (960x544) over the 8 distilled sigmas, the latents go through the x2 latent upsampler, and stage 2 refines at 1920x1088 over the 3-sigma tail (0.909375, 0.725, 0.421875): 8 + 3 DiT forwards, unguided (CFG 1, STG and modality guidance off), so there is no negative prompt and no CFG branch. Sources: the Lightricks/LTX-2.5-Diffusers model card ('Two-stage distilled generation': stage 1 544x960, 121 frames, 24 fps, DISTILLED_SIGMA_VALUES, then STAGE_2_DISTILLED_SIGMA_VALUES at 2x), sglang's LTX-2.5 cookbook (LTX2TwoStagePipeline at 1920x1088, the distilled DiT runs a pinned 8-sigma schedule, CFG parallelism does not apply), and vLLM-Omni's recipe (LTX2DistilledTwoStagePipeline, 1920x1088, 8 + 3 steps). ltx-pipelines' distilled CLI defaults to 1536x1024 with the same schedule. Not a reduced-step substitute: every framework runs the same weights, schedule, guidance, size, frames and fps. Audio is on (joint video + audio, 48 kHz vocoder) and the video decodes with the convolutional VAE (vae/); the optional diffusion decoder and duration head stay off. The conv VAE is the default of diffusers' LTX2Pipeline and of sglang; ltx-pipelines, vLLM-Omni and LightX2V decode with the diffusion VAE by default, so vLLM-Omni is pinned to the conv VAE through its documented ltx2_use_conv_vae switch. Stage 1's sampler differs in kind: ltx-pipelines, vLLM-Omni, FastVideo and ComfyUI step stage 1 with an ancestral Euler (fresh noise each step), diffusers and sglang with plain Euler; the cost is one noise draw per step on a 960x544 latent. Prompt and seed are the retired LTX rows' (the model card asks for long captions; the text encoder pads to a fixed length either way). Two GPUs, as the LTX-2.3 row ran and sglang's cookbook documents (Ulysses 2); vLLM-Omni's low-latency example uses Ulysses N with VAE patch parallel N. The warmups send the same 8 steps: vLLM-Omni's distilled pipelines refuse any other stage-1 count ('uses 8 fixed Stage 1 denoise steps; got 3'), and sglang ignores the count on this pinned schedule. Both frameworks encode the same MP4: vLLM-Omni's video endpoints encode with libx264 preset ultrafast (serving_video.py: video_codec_options) at CRF 18 (diffusion/utils/media_utils.py), while sglang defaults to preset fast at CRF 25 (quality 5): a slower preset at a different rate, i.e. more encode work (~0.28 s on this 1920x1088 x 121 clip, 4xB300, 2026-10-24). The case asks sglang for the same encode through its request fields: x264_preset ultrafast, output_compression 63 (CRF int((1 - 0.63) * 51) = 18). The generated frames are untouched; x264's embedded options string (ref=1 me=dia subme=0 bframes=0 crf=18.0) is the check. Measured on 4xB300 in waves 8-9 of the 2026-10-22 round (each profile's notes carry its numbers); other hardware not yet.",
             "framework_request_extra": {
                 "sglang": {
                     "x264_preset": "ultrafast",
@@ -2915,33 +2915,50 @@
                     "serve_args": "--model-type diffusion --warmup-mode server --pipeline-class-name LTX2TwoStagePipeline --dit-layerwise-offload false --performance-mode speed --enable-torch-compile false --ulysses-degree 2",
                     "extra_env": {},
                     "command_profiles": {
+                        "b300-auto-bcg": {
+                            "sglang_ref": "current-main",
+                            "num_gpus": 2,
+                            "serve_args": "--model-type diffusion --warmup-mode server --pipeline-class-name LTX2TwoStagePipeline --dit-layerwise-offload false --performance-mode speed --enable-torch-compile false --enable-breakable-cuda-graph true --warmup-resolutions 1920x1088 --warmup-num-frames 121",
+                            "description": "B300: the runtime's own sequence-parallel choice (kv-gather 2 for stage 1) plus breakable CUDA graphs captured at the case shape.",
+                            "hardware": [
+                                "b300"
+                            ],
+                            "notes": "Wave 8 (4xB300, sglang main 327c906, two interleaved rounds, harness single_e2e): the cookbook's pinned Ulysses 2 6.852/6.757 s, the runtime's own choice (cand-auto: kv-gather 2) 6.535/6.516, Ulysses 2 + BCG (cand-bcg) 6.042/6.075, TP2 8.203/8.117; vLLM-Omni 6.013/5.984 in the same wave. BCG replays bit-identically to eager (same MP4 md5 for four prompts). The two winners combine here; on main + the round's LTX-2.5 decode branches the combination measured 5.200-5.240 s against 5.219-5.281 s for Ulysses 2 + BCG. Wave 9 A/Bs it on main. LTX-2.5 is not on sglang main's validated BCG list yet, so the flag is explicit (sglang branch mick/ltx25-bcg-validated adds it)."
+                        },
                         "default": {
                             "description": "Ulysses 2 across both stages: the sglang LTX-2.5 cookbook's two-GPU preset for long sequences.",
                             "sglang_ref": "current-main",
                             "num_gpus": 2,
                             "serve_args": "--model-type diffusion --warmup-mode server --pipeline-class-name LTX2TwoStagePipeline --dit-layerwise-offload false --performance-mode speed --enable-torch-compile false --ulysses-degree 2",
-                            "notes": "Cookbook 3.3 'Multi-GPU presets': '2 GPUs, long sequences: --num-gpus 2 --ulysses-degree 2'; the distilled DiT runs unguided, so CFG parallelism buys nothing. Stage 2 is 32,640 video tokens (16 x 34 x 60) and stage 1 8,160, both divisible by 2. VALIDATION PENDING (wave 8, 4xB300)."
+                            "notes": "Cookbook 3.3 'Multi-GPU presets': '2 GPUs, long sequences: --num-gpus 2 --ulysses-degree 2'; the distilled DiT runs unguided, so CFG parallelism buys nothing. Stage 2 is 32,640 video tokens (16 x 34 x 60) and stage 1 8,160, both divisible by 2. Wave 8 (4xB300, main 327c906): 6.852/6.757 s; the runtime's own choice and BCG both beat it (see b300-auto-bcg)."
                         },
                         "cand-auto": {
                             "description": "The runtime's own sequence-parallel choice on two GPUs (no explicit parallel flag). Never selected on its own: A/B arm.",
                             "sglang_ref": "current-main",
                             "num_gpus": 2,
                             "serve_args": "--model-type diffusion --warmup-mode server --pipeline-class-name LTX2TwoStagePipeline --dit-layerwise-offload false --performance-mode speed --enable-torch-compile false",
-                            "notes": "sglang picks its sequence-parallel layout itself when no degree is pinned (kv-gather where it measures a win); a pinned --ulysses-degree 2 overrides that. VALIDATION PENDING (wave 8, 4xB300)."
+                            "notes": "sglang picks its sequence-parallel layout itself when no degree is pinned (kv-gather where it measures a win); a pinned --ulysses-degree 2 overrides that. Wave 8 (4xB300): 6.535/6.516 s against 6.852/6.757 for the pinned Ulysses 2; the runtime chose kv_gather_degree 2 (stage 1 1.96 -> 1.62 s)."
                         },
                         "cand-bcg": {
                             "description": "Ulysses 2 plus breakable CUDA graphs captured at the case shape. Never selected on its own: A/B arm.",
                             "sglang_ref": "current-main",
                             "num_gpus": 2,
                             "serve_args": "--model-type diffusion --warmup-mode server --pipeline-class-name LTX2TwoStagePipeline --dit-layerwise-offload false --performance-mode speed --enable-torch-compile false --ulysses-degree 2 --enable-breakable-cuda-graph true --warmup-resolutions 1920x1088 --warmup-num-frames 121",
-                            "notes": "LTX-2/2.3 are on sglang's validated BCG list and LTX-2.5 runs the same DiT through LTX2TwoStagePipeline; BCG replays the same kernels, so the output is unchanged. VALIDATION PENDING (wave 8, 4xB300)."
+                            "notes": "LTX-2/2.3 are on sglang's validated BCG list and LTX-2.5 runs the same DiT through LTX2TwoStagePipeline; BCG replays the same kernels, so the output is unchanged. Wave 8 (4xB300): 6.042/6.075 s against 6.852/6.757 eager; stage 1 0.244 -> 0.151 s/step, MP4s bit-identical to eager."
                         },
                         "cand-tp2": {
                             "description": "Tensor parallel 2 instead of Ulysses (cookbook: '2 GPUs, large DiT'). Never selected on its own: A/B arm.",
                             "sglang_ref": "current-main",
                             "num_gpus": 2,
                             "serve_args": "--model-type diffusion --warmup-mode server --pipeline-class-name LTX2TwoStagePipeline --dit-layerwise-offload false --performance-mode speed --enable-torch-compile false --tp-size 2",
-                            "notes": "Cookbook 3.3 lists --tp-size 2 for a large DiT; the 32 heads split evenly. VALIDATION PENDING (wave 8, 4xB300)."
+                            "notes": "Cookbook 3.3 lists --tp-size 2 for a large DiT; the 32 heads split evenly. Wave 8 (4xB300): 8.203/8.117 s, the slowest arm (stage 1 2.6 s, stage 2 2.8 s)."
+                        },
+                        "cand-auto-bcg": {
+                            "description": "The runtime's own sequence-parallel choice plus breakable CUDA graphs captured at the case shape. Never selected on its own: A/B arm.",
+                            "sglang_ref": "current-main",
+                            "num_gpus": 2,
+                            "serve_args": "--model-type diffusion --warmup-mode server --pipeline-class-name LTX2TwoStagePipeline --dit-layerwise-offload false --performance-mode speed --enable-torch-compile false --enable-breakable-cuda-graph true --warmup-resolutions 1920x1088 --warmup-num-frames 121",
+                            "notes": "Wave 8 measured the runtime's choice (kv-gather 2 for stage 1) 6.535 s against the pinned Ulysses 2 at 6.852 s, and BCG bit-identical to eager (stage 1 0.244 -> 0.151 s/step on Ulysses 2); this arm combines the two. VALIDATION PENDING (wave 9, 4xB300)."
                         }
                     }
                 },
@@ -2973,7 +2990,7 @@
                                 "commit_date": "2026-10-17",
                                 "section": "Multi-GPU low-latency path (distilled two-stage, Ulysses + VAE patch parallel); Video decoder (ltx2_use_conv_vae)"
                             },
-                            "notes": "The recipe's 'Multi-GPU low-latency path' ('match the Ulysses and VAE patch-parallel degrees to the GPU count', shown at 4) at this case's two GPUs. ltx2_use_conv_vae selects the convolutional VAE the case decodes with (the recipe's default is the diffusion VAE). Distilled pipelines are positive-only, so the request carries no negative prompt. CUDNN_ATTN is vLLM-Omni's measured Blackwell attention for the LTX rows (FLASH_ATTN is Hopper-only). --no-diffusion-compile-dynamic: fixed shapes. VALIDATION PENDING (wave 8, 4xB300)."
+                            "notes": "The recipe's 'Multi-GPU low-latency path' ('match the Ulysses and VAE patch-parallel degrees to the GPU count', shown at 4) at this case's two GPUs. ltx2_use_conv_vae selects the convolutional VAE the case decodes with (the recipe's default is the diffusion VAE). Distilled pipelines are positive-only, so the request carries no negative prompt. CUDNN_ATTN is vLLM-Omni's measured Blackwell attention for the LTX rows (FLASH_ATTN is Hopper-only). --no-diffusion-compile-dynamic: fixed shapes. Wave 8 (4xB300, two interleaved rounds): 6.013/5.984 s; no candidate beat it."
                         },
                         "default": {
                             "description": "The recipe's distilled two-stage path at two GPUs, conv VAE (Hopper attention).",
@@ -3007,7 +3024,7 @@
                                 "commit_date": "2026-10-17",
                                 "section": "Multi-GPU low-latency path (distilled two-stage, Ulysses + VAE patch parallel); Video decoder (ltx2_use_conv_vae)"
                             },
-                            "notes": "The recipe's low-latency example adds --vae-use-tiling; whether the conv decode is faster without it at 1920x1088 x 121 frames on a 288 GB card is measured here. VALIDATION PENDING (wave 8, 4xB300)."
+                            "notes": "The recipe's low-latency example adds --vae-use-tiling; whether the conv decode is faster without it at 1920x1088 x 121 frames on a 288 GB card is measured here. Wave 8 (4xB300): 6.029/5.973 s against 6.013/5.984 tiled: a tie, so the recipe's tiling stays."
                         },
                         "cand-trtllm-attn": {
                             "description": "TRTLLM_ATTN instead of CUDNN_ATTN. Never selected on its own: A/B arm.",
@@ -3024,7 +3041,7 @@
                                 "commit_date": "2026-10-17",
                                 "section": "Multi-GPU low-latency path (distilled two-stage, Ulysses + VAE patch parallel); Video decoder (ltx2_use_conv_vae)"
                             },
-                            "notes": "Another exact attention backend vLLM-Omni offers on Blackwell; LTX-2.5's self-attention needs no mask. VALIDATION PENDING (wave 8, 4xB300)."
+                            "notes": "Another exact attention backend vLLM-Omni offers on Blackwell; LTX-2.5's self-attention needs no mask. Wave 8 (4xB300): fails every request -- 'Attention backend TRTLLM_ATTN does not support attn_mask' (LTX-2.5 keeps its connector attention mask)."
                         }
                     }
                 }

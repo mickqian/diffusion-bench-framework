@@ -146,4 +146,7 @@ arms wan22_t2v_a14b_720p lightx2v 1 b300 cand-noexp
 wave 8
 arms ltx2.5_twostage_t2v_2gpus sglang 2 b300 cand-auto cand-bcg cand-tp2
 arms ltx2.5_twostage_t2v_2gpus vllm-omni 2 b300 cand-untiled cand-trtllm-attn
+# wave 9 (2026-10-24): wave 8's sglang winners combined -- the runtime's kv-gather choice and BCG
+wave 9
+arms ltx2.5_twostage_t2v_2gpus sglang 2 cand-auto-bcg cand-auto cand-bcg
 echo "=== AB DONE $(date -Is) ==="

@@ -114,6 +114,7 @@ Every framework entry should carry `command_profiles`, not just inline args.
   - **OMP_NUM_THREADS is set by nobody in the harness, and only some frameworks cap themselves.** sglang caps each worker at min(16, cores / GPUs) (`gpu_worker._worker_cpu_intra_op_threads`), vLLM-Omni's workers take 1 (`set_multiprocessing_worker_envs`), LightX2V's torchrun sets 1; TRT-LLM and FastVideo keep one thread per core in every worker. TRT-LLM's H3 cells then spent 5-11 s on the CPU before denoising (`row_timestep_plan`), so its `cand-omp8` arms test a per-framework env, not a harness-wide one: setting it globally would override the caps the other three choose themselves.
   - **TRT-LLM attention backends are constrained per model.** H3 under Ulysses takes only VANILLA or FA4 (`pipeline_minimax_h3.py`), and VANILLA turns a sequence that Ulysses must pad (37,742 rows % 4 = 2; Ref2VA's 49,651 % 2 = 1) into masked SDPA every block; Cosmos3 cross-attention refuses CUTEDSL under Ulysses or Attention2D; the cuDNN backend raises on a key_padding_mask. Check `seq % ulysses` before reading a VANILLA-vs-FA4 result from another cell.
   - **Wave selection: `WAVE=<n>` in `scripts/run_b300_ab_20261022.sh`, `AB_DRY_RUN=1` to list the plan.** AB_CASES is a regex on "<case> <framework>" and cannot tell two waves' lines for one cell apart. FastH3's cuDNN-VSA provider needs `nvidia-cudnn-frontend==1.31.0` (vLLM-Omni's `[cudnn-bsa]` extra): fresh installs take `VLLM_OMNI_CUDNN_FRONTEND_SPEC`, an existing venv `DBF_VENV_ROOT=<root> scripts/upgrade_framework_stack.sh vllm-omni nvidia-cudnn-frontend==1.31.0`.
+  - **LTX-2.5 replaced the LTX-2 and LTX-2.3 rows (2026-10-24, waves 8-9).** The case is the official distilled two-stage at 1920x1088 (8 + 3 forwards, unguided), and four things decided whether a row did the same work. (1) **The decoder.** vLLM-Omni, LightX2V and ltx-pipelines decode LTX-2.5 with the diffusion VAE by default; sglang and diffusers with the conv VAE. vLLM-Omni switches with `--stage-overrides {"0":{"extras":{"ltx2_use_conv_vae":true}}}` (no spaces: serve_args split on whitespace); LightX2V's `ltx2_5` runner has no conv path at all (`LTX25VideoVAE requires a CausalDiffusionVAE checkpoint`), so it is `unsupported` for this case. (2) **The distilled pipelines refuse the harness's 3-step warmup** (`LTX2DistilledTwoStagePipeline uses 8 fixed Stage 1 denoise steps; got 3`, a 500 per warmup, so vLLM-Omni went into the measured window with one real warmup only): the case pins `benchmark.warmup.num_inference_steps: 8`, as the FastH3 case does. They also reject a negative prompt, so the case sends none. (3) **The MP4 encode.** vLLM-Omni's video endpoints encode x264 `ultrafast` at CRF 18; sglang defaults to `fast` at CRF 25, about 0.28 s more encode on this clip. The case asks sglang for the same encode (`x264_preset`, `output_compression: 63` -> CRF 18). Check any video row by the options string x264 embeds in the stream: `strings out.mp4 | grep -m1 "x264 - core"`. Other video cells have not had this audit. (4) **A pinned `--ulysses-degree 2` overrides sglang's own kv-gather choice**: 6.85 s pinned against 6.54 s for the runtime's choice on main, so sglang's LTX-2.5 candidates leave the degree unset.
 - **vLLM-Omni 0.29 removed `--stage-configs-path`** ("no longer supported; use `deploy_config` instead"), so a profile carrying it fails with `unrecognized arguments` before anything loads. For Cosmos3 T2I/video, upstream's own deploy file says those checkpoints must keep the **default single-stage diffusion fallback** -- do not write a deploy_config for them; `--num-gpus`, `--cfg-parallel-size`, `--ulysses-degree` and `--no-guardrails` are all first-class flags now. Watch for `enforce_eager` hiding inside an old stage-configs YAML: the harness strips `--enforce-eager` from neither a command line nor a YAML (compile-on mode only stops it adding one), so such a profile silently benchmarks the competitor compile-off, against the stated policy and to its own disadvantage. The build lint now reads the YAML a profile references.
 - **Measuring a vLLM-Omni PR before it merges (FLUX.3, #9007, 2026-10-16).**
   - **Pick vLLM from the *current head's* `docker/Dockerfile.ci`** (`VLLM_VERSION` / `VLLM_BASE_TAG`), re-read on every push. The PR rebased from a v0.29.0 base (vllm-omni 0.29.0rc2) to v0.31.0 (0.31.0rc2) in one day. Reading the old head's file cost two installs:
@@ -520,13 +521,15 @@ anything:
   all ship `vae/ae.safetensors`).
 - V3 autogrow inputs are keyed `<input>.<name>` in API format:
   `ref_images.ref_image_0` (MiniMax-H3 R2V), `images.image_1` (Qwen-Image 2.1).
-- **No official workflow reproduces LTX-2.3's stage-1 guidance.** sglang runs
-  its multimodal guider (video CFG 3 + STG + modality, audio CFG 7 + STG +
-  modality: up to four DiT passes per step); ComfyUI's LTX-2.3 and LTX-2.5 T2V
-  templates are the distilled fast path at cfg 1. That cell is `no_profile`
-  until a graph from LTXVSpatioTemporalGuidance / LTXVModalityGuidance /
-  LTXVDualCFGGuider is built and validated. LTX-2 is fine: its official
-  two-stage template is the ltx-pipelines recipe sglang implements.
+- **LTX on ComfyUI (the LTX-2 and LTX-2.3 rows were retired for LTX-2.5 on
+  2026-10-24).** LTX-2.3's stage-1 multimodal guider (up to four DiT passes a
+  step) had no official graph, so that cell was `no_profile`. LTX-2.5's official
+  T2V template (`video_ltx2_5_t2v`) is the case's distilled two-stage at cfg 1,
+  but ships the int8-convrot DiT and text encoder, decodes with the diffusion
+  VAE, starts stage 2 at sigma 0.85 instead of 0.909375, and has a
+  prompt-enhancer node. A bf16 graph with the conv VAE and the official stage-2
+  sigmas is still to be built; it would run on one GPU (cfg 1 leaves the CFG
+  split nothing to split).
 - Before a round, `scripts/smoke_comfyui_workflows.py` runs every workflow once
   at 2 steps through the harness's own launch/request path (all twelve passed
   in about ten minutes on 2026-09-25).
