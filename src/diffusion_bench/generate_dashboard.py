@@ -749,6 +749,12 @@ def _load_report_case_configs(hardware_metadata: dict | None = None) -> dict[str
         if not path.exists():
             continue
         data = json.loads(path.read_text())
+        # A case retired after a run measured it keeps its classifications too.
+        retired_path = path.parent / "benchmark" / "retired_cases.json"
+        if retired_path.exists():
+            live = {case["id"] for case in data.get("cases", [])}
+            retired = [c for c in json.loads(retired_path.read_text())["cases"] if c["id"] not in live]
+            data = {**data, "cases": list(data.get("cases", [])) + retired}
         # Resolve per-hardware classifications against the run's own hardware, so
         # a cell the runner skipped by classification reports as that status with
         # its reason rather than a bare `not_run`.

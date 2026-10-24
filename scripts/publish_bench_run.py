@@ -35,6 +35,8 @@ from diffusion_bench.page_export import (  # noqa: E402
 
 HISTORICAL = ROOT / "docs" / "data" / "historical-cross-framework.json"
 LATEST = ROOT / "docs" / "data" / "latest-cross-framework.json"
+# Cases retired after a run measured them: their rows publish from these frozen definitions.
+RETIRED_CASES = ROOT / "configs" / "benchmark" / "retired_cases.json"
 
 
 def _load(path: Path) -> dict:
@@ -216,6 +218,7 @@ def main() -> int:
         gpu=args.gpu,
         date=run_date,
         reproduce=args.reproduce,
+        retired_cases=_load(RETIRED_CASES)["cases"],
     )
     if not sections:
         print("error: run produced no publishable sections", file=sys.stderr)

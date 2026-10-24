@@ -1,0 +1,75 @@
+{
+  "_note": "Cases retired from the matrix whose measured rows still publish (user decision 2026-10-24: the 2026-10-22 round keeps its LTX-2 and LTX-2.3 rows). page_export.build_sections adds an entry here only for a case id the run measured and the current config no longer has, so the row keeps its label, shape and the other frameworks' classifications instead of vanishing from the page; the runner and the command-drift check never read this file. Each entry is the case as the build emitted it at its last commit in the matrix (retired.last_built_at), reduced to what the page shows.",
+  "cases": [
+    {
+      "id": "ltx2_twostage_t2v",
+      "model": "Lightricks/LTX-2",
+      "task": "text-to-video",
+      "label": "LTX-2 two-stage T2V",
+      "prompt": "A cat and a dog baking a cake together in a kitchen.",
+      "width": 768,
+      "height": 512,
+      "num_frames": 121,
+      "fps": 24,
+      "seed": 42,
+      "num_gpus": 2,
+      "num_inference_steps": 40,
+      "guidance_scale": 4.0,
+      "report_framework_statuses": {
+        "lightx2v": "unsupported",
+        "fastvideo": "no_profile"
+      },
+      "report_framework_reasons": {
+        "lightx2v": "LightX2V cannot run the official LTX-2 two-stage workload (dev model for stage 1, distilled LoRA for the 3-step stage-2 refine): its runner loads one transformer and merges lora_configs into it at load, and the use_upsampler path reuses that same transformer for stage 2 (lightx2v/models/runners/ltx2/ltx2_runner.py at 19c19614). The profile it had did not enable the upsampler at all, so every earlier LightX2V row ran ONE stage at the full 768x512 for 40 steps -- a heavier workload than the other rows, never comparable. Audited 2026-10-22.",
+        "fastvideo": "FastVideo main (2b164405c3d1, 2026-10-07) registers LTX-2, but this harness integrates FastVideo for MiniMax-H3 only (2026-10-08); no command validated."
+      },
+      "measured_frameworks": [
+        "comfyui",
+        "sglang",
+        "trtllm-visual",
+        "vllm-omni"
+      ],
+      "retired": {
+        "date": "2026-10-24",
+        "replaced_by": "ltx2.5_twostage_t2v_2gpus",
+        "last_built_at": "bcb659a"
+      }
+    },
+    {
+      "id": "ltx2.3_twostage_t2v_2gpus",
+      "model": "Lightricks/LTX-2.3",
+      "task": "text-to-video",
+      "label": "LTX-2.3 two-stage T2V",
+      "prompt": "A cat and a dog baking a cake together in a kitchen.",
+      "width": 768,
+      "height": 512,
+      "num_frames": 121,
+      "fps": 24,
+      "seed": 42,
+      "num_gpus": 2,
+      "num_inference_steps": 30,
+      "guidance_scale": 3.0,
+      "report_framework_statuses": {
+        "lightx2v": "unsupported",
+        "trtllm-visual": "unsupported",
+        "comfyui": "no_profile",
+        "fastvideo": "no_profile"
+      },
+      "report_framework_reasons": {
+        "lightx2v": "LightX2V cannot run the official LTX-2.3 two-stage workload: one transformer serves both stages with any LoRA merged at load (ltx2_runner.py at 19c19614), and the profile it had never enabled the upsampler, so every earlier row was one stage at the full 768x512 -- heavier than sglang's two-stage, never comparable. Audited 2026-10-22.",
+        "trtllm-visual": "TensorRT-LLM 1.4.0rc1 has no LTX-2.3: LTX2Pipeline lists only Lightricks/LTX-2 (19B), and '2.3' appears in no hf_id, config, test or supported-models table (checked 2026-10-22).",
+        "comfyui": "ComfyUI loads LTX-2.3, but no official workflow reproduces this case: sglang runs LTX-2.3's multimodal guidance in stage 1 (video CFG 3 + STG 1.0 on block 28 + modality 3, audio CFG 7 + STG + modality -- up to four DiT passes per step, LTX23SamplingParams), while ComfyUI's LTX-2.3 T2V template (and the LTX-2.5 one) is the distilled-LoRA fast path at cfg 1. A graph built from LTXVSpatioTemporalGuidance / LTXVModalityGuidance / LTXVDualCFGGuider could match it but has no upstream reference and is not validated.",
+        "fastvideo": "FastVideo main (2b164405c3d1, 2026-10-07) registers LTX-2.3, but this harness integrates FastVideo for MiniMax-H3 only (2026-10-08); no command validated."
+      },
+      "measured_frameworks": [
+        "sglang",
+        "vllm-omni"
+      ],
+      "retired": {
+        "date": "2026-10-24",
+        "replaced_by": "ltx2.5_twostage_t2v_2gpus",
+        "last_built_at": "bcb659a"
+      }
+    }
+  ]
+}

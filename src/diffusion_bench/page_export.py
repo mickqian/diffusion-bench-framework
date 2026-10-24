@@ -406,7 +406,17 @@ def build_sections(
     gpu: str,
     date: str,
     reproduce: str | None = None,
+    retired_cases: list[dict] | None = None,
 ) -> list[dict]:
+    # Only the cases this run attempted: a one-GPU desktop run listed every
+    # datacenter case as a row of n/a.
+    attempted = {r["case_id"] for r in merged.get("results", []) + merged.get("throughput_results", [])}
+    # A case retired after this run measured it publishes from its frozen
+    # definition (configs/benchmark/retired_cases.json), after the live cases;
+    # rows are built only for config cases, so without it the row would vanish.
+    current = {c["id"] for c in config["cases"]}
+    revived = [c for c in retired_cases or [] if c["id"] in attempted and c["id"] not in current]
+    config = {**config, "cases": list(config["cases"]) + revived}
     # Resolve per-hardware classifications against the run's own hardware, so a
     # cell the runner skipped by classification publishes as that status with its
     # reason rather than a bare `not_run`.
@@ -414,9 +424,6 @@ def build_sections(
         config, hardware_candidates(merged.get("hardware"))
     )
     config_cases = {c["id"]: c for c in resolved_config["cases"]}
-    # Only the cases this run attempted: a one-GPU desktop run listed every
-    # datacenter case as a row of n/a.
-    attempted = {r["case_id"] for r in merged.get("results", []) + merged.get("throughput_results", [])}
     case_order = [c["id"] for c in config["cases"] if c["id"] in attempted]
     versions = framework_versions(merged)
     sections = []
