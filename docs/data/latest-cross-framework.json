@@ -1,11 +1,11 @@
 {
-  "id": "gb300x4-20261010",
-  "title": "4xGB300 cross-framework (latest-vs-latest)",
-  "updated_at": "2026-10-12",
-  "source_report": "reports/round-20261010/",
+  "id": "b300x4-20261022",
+  "title": "4xB300 cross-framework (latest-vs-latest)",
+  "updated_at": "2026-10-29",
+  "source_report": "reports/round-20261022/",
   "source_script": "configs/benchmark/ (explicit matrix) + scripts/build_benchmark_config.py",
   "hardware": {
-    "label": "4x NVIDIA GB300 288GB"
+    "label": "4x NVIDIA B300 SXM6 AC 275GB"
   },
   "policy": {
     "latency_source": "client-side wall clock, steady-state median of back-to-back measured requests after warmup; server-side timers kept only as per-framework diagnostics",
@@ -17,20 +17,22 @@
     "request_inputs": "distinct-per-request",
     "model_revisions": {
       "FastVideo/FastVideo-FastH3-8-Step-V2": "3da2ddfe1",
-      "Lightricks/LTX-2": "dfcc21083",
-      "Lightricks/LTX-2.3": "3c6a4e66e",
+      "Lightricks/LTX-2": "64f65d09e",
+      "Lightricks/LTX-2.3": "c1521179d",
       "MiniMaxAI/MiniMax-H3": "42ed227ee",
       "Qwen/Qwen-Image-2.1": "d26bb6123",
       "Tongyi-MAI/Z-Image-Turbo": "f332072aa",
       "Wan-AI/Wan2.2-T2V-A14B": "c8c270b13",
       "Wan-AI/Wan2.2-T2V-A14B-Diffusers": "5be7df961",
-      "black-forest-labs/FLUX.1-dev": "3de623fc3",
-      "black-forest-labs/FLUX.2-dev": "26afe3a78",
+      "black-forest-labs/flux-3-image-klein-base": "3f7fa5ee2",
+      "diffusers/LTX-2.3-Diffusers": "8eee8edcf",
       "ideogram-ai/ideogram-4-fp8": "ee79a7237",
       "nvidia/Cosmos3-Nano": "e59a53c25"
     },
-    "sglang": "main 6576e50cd5 (every PR from this round merged), run via DBF_SGLANG_PYTHONPATH",
-    "harness": "round-20261010 0466d3c; FastH3 sglang rerun 41c50b0; LightX2V H3 + sglang FLUX.1 reruns 8b4f441"
+    "sglang": "per-cell trees: main 1e894eb92d plus this round's fix/perf PRs, all merged into main by 2026-10-29 except sgl-project/sglang#46100 (Qwen image cells); FastH3 ran main 82f7249ce6. Exact trees per cell in reports/round-20261022/manifest.json. A rerun of the sglang column on one main commit will replace these rows.",
+    "harness": "round-20261022: 320a118 matrix pass, 850052a and bcb659a reruns, 72bdb18 encode-aligned video pass",
+    "video_encode": "every configurable framework encodes the MP4 like its closest competitor; TRT-LLM and LightX2V hard-code x264 medium/CRF 23",
+    "coverage": "LTX-2 and LTX-2.3 retire after this round and keep their rows; LTX-2.5 is not in this publish; FastH3 was not re-measured after the matrix pass"
   },
   "framework_order": [
     "sglang",
@@ -49,112 +51,56 @@
     "fastvideo": "FastVideo"
   },
   "summary": {
-    "cases": 17,
+    "cases": 16,
     "comparable_rows": 16,
     "sglang_diffusion_wins": 16,
     "other_wins": 0,
     "wins": {
       "sglang": 16
     },
-    "note": "Steady-state single-request latency on 4x NVIDIA GB300 288GB, best lossless config per framework. SGLang-Diffusion fastest in 16/16 comparable cases across 17 cases. Throughput is reported separately."
+    "note": "Steady-state single-request latency on 4x NVIDIA B300 SXM6 AC 275GB, best lossless config per framework. SGLang-Diffusion fastest in 16/16 comparable cases across 16 cases. Throughput is reported separately."
   },
   "rows": [
     {
-      "case_id": "flux1_dev_t2i_1024",
-      "case": "FLUX.1-dev T2I · 2 GPUs",
+      "case_id": "flux3_klein_base_t2i_1024",
+      "case": "FLUX.3 Image Klein Base T2I · 2 GPUs",
       "details": "1024x1024 · 50 steps · cfg 3.5",
       "gpus": "2 GPU",
       "mode": "single_e2e",
       "cells": {
         "sglang": {
           "gpus": 2,
-          "profile": "gb300-2gpu-tp-compile",
+          "profile": "default",
           "status": "ok",
-          "latency_s": 2.786,
+          "latency_s": 2.083,
           "ratio_to_sglang": 1.0
         },
         "vllm-omni": {
-          "gpus": 2,
-          "profile": "blackwell-2gpu-tp-eager",
-          "status": "ok",
-          "latency_s": 5.307,
-          "ratio_to_sglang": 1.905
+          "status": "unsupported",
+          "reason": "No FLUX.3 pipeline on vLLM-Omni main (2026-10-16). It is in the open, approved PR vllm-project/vllm-omni#9007; reclassify once it merges. Measured pre-merge on 2xH200 2026-10-16 at head 389a02a149ce with vllm==0.31.0 (the head's docker/Dockerfile.ci): CFG parallel 2 4.534 s, one GPU 9.101 s (regional compile, FLASH_ATTN). Its FLUX.3 loader reads only a local package directory (model_path = the snapshot dir), and requests need --served-model-name set to the case model."
         },
         "lightx2v": {
           "status": "unsupported",
-          "reason": "Tracked LightX2V version has no FLUX.1 serving path; FLUX coverage starts at FLUX.2."
+          "reason": "LightX2V main has no FLUX.3 serving path (2026-10-15): no flux3 / flux-3-image code or PR in ModelTC/LightX2V; its FLUX coverage ends at FLUX.2."
         },
         "trtllm-visual": {
+          "status": "unsupported",
+          "reason": "No FLUX.3 pipeline on TensorRT-LLM main (2026-10-16); NVIDIA/TensorRT-LLM#20430 adds it and is still a draft."
+        },
+        "comfyui": {
           "gpus": 2,
           "profile": "default",
           "status": "ok",
-          "latency_s": 3.104,
-          "ratio_to_sglang": 1.114
-        },
-        "comfyui": {
-          "gpus": 1,
-          "profile": "blackwell-gpuonly",
-          "status": "ok",
-          "latency_s": 4.41,
-          "ratio_to_sglang": 1.583
+          "latency_s": 3.34,
+          "ratio_to_sglang": 1.603
         },
         "fastvideo": {
-          "status": "no_profile",
-          "reason": "FastVideo main (2b164405c3d1, 2026-10-07) registers FLUX.1-dev, but this harness integrates FastVideo for MiniMax-H3 only (2026-10-08); no command validated."
+          "status": "unsupported",
+          "reason": "FastVideo main has no FLUX.3 pipeline (2026-10-15): no flux3 code in hao-ai-lab/FastVideo."
         }
       },
       "winner": "sglang",
-      "winner_speedup": "1.11x"
-    },
-    {
-      "case_id": "flux2_dev_t2i_1024",
-      "case": "FLUX.2-dev T2I · 2 GPUs",
-      "details": "1024x1024 · 50 steps · cfg 4",
-      "gpus": "2 GPU",
-      "mode": "single_e2e",
-      "cells": {
-        "sglang": {
-          "gpus": 2,
-          "profile": "blackwell-2gpu-tp-eager",
-          "status": "ok",
-          "latency_s": 5.129,
-          "ratio_to_sglang": 1.0
-        },
-        "vllm-omni": {
-          "gpus": 2,
-          "profile": "blackwell-2gpu-tp-eager",
-          "status": "ok",
-          "latency_s": 8.368,
-          "ratio_to_sglang": 1.632
-        },
-        "lightx2v": {
-          "gpus": 2,
-          "profile": "blackwell-fa2-flashinfer",
-          "status": "ok",
-          "latency_s": 14.536,
-          "ratio_to_sglang": 2.834
-        },
-        "trtllm-visual": {
-          "gpus": 2,
-          "profile": "default",
-          "status": "ok",
-          "latency_s": 9.288,
-          "ratio_to_sglang": 1.811
-        },
-        "comfyui": {
-          "gpus": 1,
-          "profile": "blackwell-gpuonly",
-          "status": "ok",
-          "latency_s": 12.377,
-          "ratio_to_sglang": 2.413
-        },
-        "fastvideo": {
-          "status": "no_profile",
-          "reason": "FastVideo main (2b164405c3d1, 2026-10-07) registers FLUX.2-dev, but this harness integrates FastVideo for MiniMax-H3 only (2026-10-08); no command validated."
-        }
-      },
-      "winner": "sglang",
-      "winner_speedup": "1.63x"
+      "winner_speedup": "1.60x"
     },
     {
       "case_id": "qwen_image_21_t2i_1024",
@@ -167,22 +113,22 @@
           "gpus": 1,
           "profile": "b200-1gpu-resident-fa",
           "status": "ok",
-          "latency_s": 2.005,
+          "latency_s": 2.175,
           "ratio_to_sglang": 1.0
         },
         "vllm-omni": {
           "gpus": 1,
-          "profile": "blackwell-cudnn",
+          "profile": "blackwell-cudnn-static",
           "status": "ok",
-          "latency_s": 2.147,
-          "ratio_to_sglang": 1.071
+          "latency_s": 2.372,
+          "ratio_to_sglang": 1.091
         },
         "lightx2v": {
           "gpus": 1,
-          "profile": "blackwell-1gpu-fa2",
+          "profile": "blackwell-sdpa",
           "status": "ok",
-          "latency_s": 3.009,
-          "ratio_to_sglang": 1.501
+          "latency_s": 2.56,
+          "ratio_to_sglang": 1.177
         },
         "trtllm-visual": {
           "status": "unsupported",
@@ -190,10 +136,10 @@
         },
         "comfyui": {
           "gpus": 1,
-          "profile": "blackwell-gpuonly",
+          "profile": "blackwell-gpuonly-compile",
           "status": "ok",
-          "latency_s": 3.221,
-          "ratio_to_sglang": 1.606
+          "latency_s": 3.049,
+          "ratio_to_sglang": 1.402
         },
         "fastvideo": {
           "status": "unsupported",
@@ -201,7 +147,7 @@
         }
       },
       "winner": "sglang",
-      "winner_speedup": "1.07x"
+      "winner_speedup": "1.09x"
     },
     {
       "case_id": "qwen_image_21_t2i_1024_2gpu",
@@ -214,15 +160,15 @@
           "gpus": 2,
           "profile": "gb300-2gpu-tp2",
           "status": "ok",
-          "latency_s": 1.67,
+          "latency_s": 1.383,
           "ratio_to_sglang": 1.0
         },
         "vllm-omni": {
           "gpus": 2,
-          "profile": "blackwell-cudnn",
+          "profile": "blackwell-cudnn-static",
           "status": "ok",
-          "latency_s": 3.081,
-          "ratio_to_sglang": 1.845
+          "latency_s": 1.564,
+          "ratio_to_sglang": 1.131
         },
         "lightx2v": {
           "status": "no_profile",
@@ -242,7 +188,7 @@
         }
       },
       "winner": "sglang",
-      "winner_speedup": "1.84x"
+      "winner_speedup": "1.13x"
     },
     {
       "case_id": "qwen_image_21_edit_1024",
@@ -255,15 +201,15 @@
           "gpus": 1,
           "profile": "b200-1gpu-resident-fa",
           "status": "ok",
-          "latency_s": 2.433,
+          "latency_s": 2.621,
           "ratio_to_sglang": 1.0
         },
         "vllm-omni": {
           "gpus": 1,
-          "profile": "blackwell-cudnn",
+          "profile": "blackwell-cudnn-static",
           "status": "ok",
-          "latency_s": 2.598,
-          "ratio_to_sglang": 1.068
+          "latency_s": 2.862,
+          "ratio_to_sglang": 1.092
         },
         "lightx2v": {
           "status": "no_profile",
@@ -283,7 +229,7 @@
         }
       },
       "winner": "sglang",
-      "winner_speedup": "1.07x"
+      "winner_speedup": "1.09x"
     },
     {
       "case_id": "zimage_turbo_t2i_1024",
@@ -294,24 +240,24 @@
       "cells": {
         "sglang": {
           "gpus": 2,
-          "profile": "default",
+          "profile": "b300-speed",
           "status": "ok",
-          "latency_s": 0.516,
+          "latency_s": 0.337,
           "ratio_to_sglang": 1.0
         },
         "vllm-omni": {
           "gpus": 2,
-          "profile": "blackwell-flashinfer",
+          "profile": "blackwell-tp2-static",
           "status": "ok",
-          "latency_s": 0.729,
-          "ratio_to_sglang": 1.413
+          "latency_s": 0.595,
+          "ratio_to_sglang": 1.766
         },
         "lightx2v": {
           "gpus": 2,
-          "profile": "blackwell-fa2",
+          "profile": "blackwell-fa2-fusion",
           "status": "ok",
-          "latency_s": 1.504,
-          "ratio_to_sglang": 2.915
+          "latency_s": 0.831,
+          "ratio_to_sglang": 2.466
         },
         "trtllm-visual": {
           "status": "not_run",
@@ -321,8 +267,8 @@
           "gpus": 1,
           "profile": "blackwell-gpuonly",
           "status": "ok",
-          "latency_s": 0.792,
-          "ratio_to_sglang": 1.535
+          "latency_s": 0.847,
+          "ratio_to_sglang": 2.513
         },
         "fastvideo": {
           "status": "no_profile",
@@ -330,7 +276,7 @@
         }
       },
       "winner": "sglang",
-      "winner_speedup": "1.41x"
+      "winner_speedup": "1.77x"
     },
     {
       "case_id": "ideogram4_t2i_1024_2gpu_tp",
@@ -341,9 +287,9 @@
       "cells": {
         "sglang": {
           "gpus": 2,
-          "profile": "default",
+          "profile": "b300-speed",
           "status": "ok",
-          "latency_s": 2.596,
+          "latency_s": 1.939,
           "ratio_to_sglang": 1.0
         },
         "vllm-omni": {
@@ -360,10 +306,10 @@
         },
         "comfyui": {
           "gpus": 1,
-          "profile": "blackwell-gpuonly",
+          "profile": "blackwell-gpuonly-compile",
           "status": "ok",
-          "latency_s": 3.618,
-          "ratio_to_sglang": 1.394
+          "latency_s": 3.696,
+          "ratio_to_sglang": 1.906
         },
         "fastvideo": {
           "status": "unsupported",
@@ -371,7 +317,7 @@
         }
       },
       "winner": "sglang",
-      "winner_speedup": "1.39x"
+      "winner_speedup": "1.91x"
     },
     {
       "case_id": "wan22_t2v_a14b_720p",
@@ -382,35 +328,38 @@
       "cells": {
         "sglang": {
           "gpus": 4,
-          "profile": "default",
+          "profile": "b300-noexp",
           "status": "ok",
-          "latency_s": 87.025,
+          "latency_s": 89.661,
           "ratio_to_sglang": 1.0
         },
         "vllm-omni": {
           "gpus": 4,
-          "profile": "blackwell-cudnn",
+          "profile": "blackwell-4gpu-cfg2-usp2-vaepp-devpost",
           "status": "ok",
-          "latency_s": 108.988,
-          "ratio_to_sglang": 1.252
+          "latency_s": 99.962,
+          "ratio_to_sglang": 1.115
         },
         "lightx2v": {
           "gpus": 4,
-          "profile": "blackwell-fa2",
+          "profile": "blackwell-sdpa",
           "status": "ok",
-          "latency_s": 225.85,
-          "ratio_to_sglang": 2.595
+          "latency_s": 100.29,
+          "ratio_to_sglang": 1.119
         },
         "trtllm-visual": {
-          "status": "not_run",
-          "reason": "Not yet classified. Confirm framework support and add a validated command profile, or mark unsupported."
+          "gpus": 4,
+          "profile": "blackwell-cudnn",
+          "status": "ok",
+          "latency_s": 94.382,
+          "ratio_to_sglang": 1.053
         },
         "comfyui": {
           "gpus": 2,
           "profile": "blackwell-gpuonly",
           "status": "ok",
-          "latency_s": 484.031,
-          "ratio_to_sglang": 5.562
+          "latency_s": 521.564,
+          "ratio_to_sglang": 5.817
         },
         "fastvideo": {
           "status": "no_profile",
@@ -418,90 +367,7 @@
         }
       },
       "winner": "sglang",
-      "winner_speedup": "1.25x"
-    },
-    {
-      "case_id": "ltx2_twostage_t2v",
-      "case": "LTX-2 two-stage T2V · 2 GPUs",
-      "details": "768x512x121f · 40 steps · cfg 4",
-      "gpus": "2 GPU",
-      "mode": "single_e2e",
-      "cells": {
-        "sglang": {
-          "gpus": 2,
-          "profile": "gb300-cfg-parallel-compile",
-          "status": "ok",
-          "latency_s": 9.075,
-          "ratio_to_sglang": 1.0
-        },
-        "vllm-omni": {
-          "gpus": 2,
-          "profile": "blackwell-cudnn",
-          "status": "ok",
-          "latency_s": 12.755,
-          "ratio_to_sglang": 1.406
-        },
-        "lightx2v": {
-          "gpus": 2,
-          "profile": "blackwell-fa2",
-          "status": "ok",
-          "latency_s": 20.07,
-          "ratio_to_sglang": 2.212
-        },
-        "trtllm-visual": {
-          "status": "not_run",
-          "reason": "Not yet classified. Confirm framework support and add a validated command profile, or mark unsupported."
-        },
-        "comfyui": {
-          "gpus": 2,
-          "profile": "blackwell-gpuonly",
-          "status": "ok",
-          "latency_s": 29.74,
-          "ratio_to_sglang": 3.277
-        },
-        "fastvideo": {
-          "status": "no_profile",
-          "reason": "FastVideo main (2b164405c3d1, 2026-10-07) registers LTX-2, but this harness integrates FastVideo for MiniMax-H3 only (2026-10-08); no command validated."
-        }
-      },
-      "winner": "sglang",
-      "winner_speedup": "1.41x"
-    },
-    {
-      "case_id": "ltx2.3_twostage_t2v_2gpus",
-      "case": "LTX-2.3 two-stage T2V · 2 GPUs",
-      "details": "768x512x121f · 30 steps · cfg 3",
-      "gpus": "2 GPU",
-      "mode": "single_e2e",
-      "cells": {
-        "sglang": {
-          "gpus": 2,
-          "profile": "default",
-          "status": "ok",
-          "latency_s": 11.024,
-          "ratio_to_sglang": 1.0
-        },
-        "vllm-omni": {
-          "status": "no_profile",
-          "reason": "No compatible vLLM-Omni LTX2.3 serving profile is configured."
-        },
-        "lightx2v": {
-          "status": "not_run"
-        },
-        "trtllm-visual": {
-          "status": "not_run",
-          "reason": "Not yet classified. Confirm framework support and add a validated command profile, or mark unsupported."
-        },
-        "comfyui": {
-          "status": "no_profile",
-          "reason": "ComfyUI loads LTX-2.3, but no official workflow reproduces this case: sglang runs LTX-2.3's multimodal guidance in stage 1 (video CFG 3 + STG 1.0 on block 28 + modality 3, audio CFG 7 + STG + modality -- up to four DiT passes per step, LTX23SamplingParams), while ComfyUI's LTX-2.3 T2V template (and the LTX-2.5 one) is the distilled-LoRA fast path at cfg 1. A graph built from LTXVSpatioTemporalGuidance / LTXVModalityGuidance / LTXVDualCFGGuider could match it but has no upstream reference and is not validated."
-        },
-        "fastvideo": {
-          "status": "no_profile",
-          "reason": "FastVideo main (2b164405c3d1, 2026-10-07) registers LTX-2.3, but this harness integrates FastVideo for MiniMax-H3 only (2026-10-08); no command validated."
-        }
-      },
-      "winner": "n/a"
+      "winner_speedup": "1.05x"
     },
     {
       "case_id": "cosmos3_nano_t2i_720p",
@@ -512,25 +378,28 @@
       "cells": {
         "sglang": {
           "gpus": 2,
-          "profile": "gb300-2gpu-cfg-parallel-compile",
+          "profile": "blackwell-2gpu-cfg-parallel",
           "status": "ok",
-          "latency_s": 0.896,
+          "latency_s": 0.515,
           "ratio_to_sglang": 1.0
         },
         "vllm-omni": {
           "gpus": 2,
-          "profile": "blackwell-cudnn",
+          "profile": "blackwell-cudnn-static",
           "status": "ok",
-          "latency_s": 0.935,
-          "ratio_to_sglang": 1.044
+          "latency_s": 0.644,
+          "ratio_to_sglang": 1.25
         },
         "lightx2v": {
-          "status": "unsupported",
-          "reason": "No tracked LightX2V Cosmos3 serving path in this benchmark."
+          "status": "failed",
+          "reason": "LightX2V 19c19614's cosmos3 runner answers /v1/tasks/image/sync with HTTP 500 'Image inference did not return in-memory PNG bytes (result_png)' (4xB300, 2026-10-23): its T2I task does not populate the sync endpoint's in-memory PNG."
         },
         "trtllm-visual": {
-          "status": "failed",
-          "reason": "Hangs at startup on the current Cosmos3-Nano checkpoint: trtllm-serve reaches 'Orchestrator is creating IPC executor' / 'using MpiPoolSession to spawn MPI processes' and then produces no output at all -- 40 min in the matrix, and 20 min each at tp=1 and tp=2 in a dedicated probe, so it is not a multi-GPU path issue. The startup log warns 'You are using a model of type cosmos3_omni to instantiate a model of type cosmos3': the checkpoint was re-uploaded 2026-08-26 and declares cosmos3_omni, which tensorrt-llm 1.3.0rc26 does not know. Marked failed rather than left supported so a run does not spend 40 minutes per attempt reaching the same hang. Re-test when trtllm adds cosmos3_omni; the profile is kept below."
+          "gpus": 2,
+          "profile": "default",
+          "status": "ok",
+          "latency_s": 0.602,
+          "ratio_to_sglang": 1.169
         },
         "comfyui": {
           "status": "unsupported",
@@ -542,7 +411,7 @@
         }
       },
       "winner": "sglang",
-      "winner_speedup": "1.04x"
+      "winner_speedup": "1.17x"
     },
     {
       "case_id": "cosmos3_nano_t2v_720p_189f",
@@ -553,25 +422,31 @@
       "cells": {
         "sglang": {
           "gpus": 4,
-          "profile": "gb-4gpu-cfg-ulysses-speed",
+          "profile": "b300-noexp",
           "status": "ok",
-          "latency_s": 22.465,
+          "latency_s": 22.833,
           "ratio_to_sglang": 1.0
         },
         "vllm-omni": {
           "gpus": 4,
-          "profile": "blackwell-cudnn",
+          "profile": "blackwell-cudnn-vaepp",
           "status": "ok",
-          "latency_s": 26.048,
-          "ratio_to_sglang": 1.159
+          "latency_s": 27.154,
+          "ratio_to_sglang": 1.189
         },
         "lightx2v": {
-          "status": "unsupported",
-          "reason": "No tracked LightX2V Cosmos3 serving path in this benchmark."
+          "gpus": 4,
+          "profile": "blackwell-cfg2-sp2-sdpa",
+          "status": "ok",
+          "latency_s": 44.33,
+          "ratio_to_sglang": 1.941
         },
         "trtllm-visual": {
-          "status": "not_run",
-          "reason": "Not yet classified. Confirm framework support and add a validated command profile, or mark unsupported."
+          "gpus": 4,
+          "profile": "default",
+          "status": "ok",
+          "latency_s": 26.117,
+          "ratio_to_sglang": 1.144
         },
         "comfyui": {
           "status": "unsupported",
@@ -583,7 +458,7 @@
         }
       },
       "winner": "sglang",
-      "winner_speedup": "1.16x"
+      "winner_speedup": "1.14x"
     },
     {
       "case_id": "cosmos3_nano_i2v_720p_189f",
@@ -594,25 +469,31 @@
       "cells": {
         "sglang": {
           "gpus": 4,
-          "profile": "default",
+          "profile": "b300-noexp",
           "status": "ok",
-          "latency_s": 22.628,
+          "latency_s": 22.898,
           "ratio_to_sglang": 1.0
         },
         "vllm-omni": {
           "gpus": 4,
-          "profile": "blackwell-cudnn",
+          "profile": "blackwell-cudnn-vaepp",
           "status": "ok",
-          "latency_s": 26.391,
-          "ratio_to_sglang": 1.166
+          "latency_s": 26.866,
+          "ratio_to_sglang": 1.173
         },
         "lightx2v": {
-          "status": "unsupported",
-          "reason": "No tracked LightX2V Cosmos3 serving path in this benchmark."
+          "gpus": 4,
+          "profile": "blackwell-cfg2-sp2-sdpa",
+          "status": "ok",
+          "latency_s": 46.427,
+          "ratio_to_sglang": 2.028
         },
         "trtllm-visual": {
-          "status": "not_run",
-          "reason": "Not yet classified. Confirm framework support and add a validated command profile, or mark unsupported."
+          "gpus": 4,
+          "profile": "default",
+          "status": "ok",
+          "latency_s": 28.153,
+          "ratio_to_sglang": 1.229
         },
         "comfyui": {
           "status": "unsupported",
@@ -635,46 +516,49 @@
       "cells": {
         "sglang": {
           "gpus": 2,
-          "profile": "default",
+          "profile": "b300-noexp",
           "status": "ok",
-          "latency_s": 57.46,
+          "latency_s": 62.955,
           "ratio_to_sglang": 1.0
         },
         "vllm-omni": {
           "gpus": 2,
-          "profile": "blackwell-2gpu",
+          "profile": "blackwell-2gpu-static",
           "status": "ok",
-          "latency_s": 60.947,
-          "ratio_to_sglang": 1.061
+          "latency_s": 69.268,
+          "ratio_to_sglang": 1.1
         },
         "lightx2v": {
           "gpus": 2,
           "profile": "blackwell-sp2-sdpa",
           "status": "ok",
-          "latency_s": 64.09,
-          "ratio_to_sglang": 1.115
+          "latency_s": 71.755,
+          "ratio_to_sglang": 1.14
         },
         "trtllm-visual": {
-          "status": "unsupported",
-          "reason": "trtllm-visual's tracked scope in this harness is image cases; H3 is a video+audio model."
+          "gpus": 2,
+          "profile": "blackwell-omp8",
+          "status": "ok",
+          "latency_s": 69.603,
+          "ratio_to_sglang": 1.106
         },
         "comfyui": {
           "gpus": 1,
           "profile": "blackwell-gpuonly",
           "status": "ok",
-          "latency_s": 283.481,
-          "ratio_to_sglang": 4.934
+          "latency_s": 304.892,
+          "ratio_to_sglang": 4.843
         },
         "fastvideo": {
           "gpus": 2,
           "profile": "blackwell-2gpu",
           "status": "ok",
-          "latency_s": 61.148,
-          "ratio_to_sglang": 1.064
+          "latency_s": 75.182,
+          "ratio_to_sglang": 1.194
         }
       },
       "winner": "sglang",
-      "winner_speedup": "1.06x"
+      "winner_speedup": "1.10x"
     },
     {
       "case_id": "minimax_h3_t2va_5s_4gpu",
@@ -685,28 +569,31 @@
       "cells": {
         "sglang": {
           "gpus": 4,
-          "profile": "default",
+          "profile": "b300-noexp",
           "status": "ok",
-          "latency_s": 29.714,
+          "latency_s": 32.136,
           "ratio_to_sglang": 1.0
         },
         "vllm-omni": {
           "gpus": 4,
-          "profile": "default",
+          "profile": "blackwell-4gpu-static",
           "status": "ok",
-          "latency_s": 34.078,
-          "ratio_to_sglang": 1.147
+          "latency_s": 37.284,
+          "ratio_to_sglang": 1.16
         },
         "lightx2v": {
           "gpus": 4,
           "profile": "blackwell-sp4-sdpa",
           "status": "ok",
-          "latency_s": 32.536,
-          "ratio_to_sglang": 1.095
+          "latency_s": 37.012,
+          "ratio_to_sglang": 1.152
         },
         "trtllm-visual": {
-          "status": "unsupported",
-          "reason": "trtllm-visual's tracked scope in this harness is image cases; H3 is a video+audio model."
+          "gpus": 4,
+          "profile": "blackwell-fa4-omp8",
+          "status": "ok",
+          "latency_s": 37.793,
+          "ratio_to_sglang": 1.176
         },
         "comfyui": {
           "status": "not_run",
@@ -716,12 +603,12 @@
           "gpus": 4,
           "profile": "blackwell-4gpu",
           "status": "ok",
-          "latency_s": 34.077,
-          "ratio_to_sglang": 1.147
+          "latency_s": 48.568,
+          "ratio_to_sglang": 1.511
         }
       },
       "winner": "sglang",
-      "winner_speedup": "1.09x"
+      "winner_speedup": "1.15x"
     },
     {
       "case_id": "minimax_h3_ref2va_5s",
@@ -732,46 +619,49 @@
       "cells": {
         "sglang": {
           "gpus": 2,
-          "profile": "default",
+          "profile": "b300-noexp",
           "status": "ok",
-          "latency_s": 88.362,
+          "latency_s": 96.64,
           "ratio_to_sglang": 1.0
         },
         "vllm-omni": {
           "gpus": 2,
-          "profile": "blackwell-2gpu",
+          "profile": "blackwell-2gpu-static",
           "status": "ok",
-          "latency_s": 91.91,
-          "ratio_to_sglang": 1.04
+          "latency_s": 106.367,
+          "ratio_to_sglang": 1.101
         },
         "lightx2v": {
           "gpus": 2,
           "profile": "blackwell-sp2-sdpa",
           "status": "ok",
-          "latency_s": 98.466,
-          "ratio_to_sglang": 1.114
+          "latency_s": 113.889,
+          "ratio_to_sglang": 1.178
         },
         "trtllm-visual": {
-          "status": "unsupported",
-          "reason": "trtllm-visual's tracked scope in this harness is image cases; H3 is a video+audio model."
+          "gpus": 2,
+          "profile": "blackwell-fa4-omp8",
+          "status": "ok",
+          "latency_s": 106.92,
+          "ratio_to_sglang": 1.106
         },
         "comfyui": {
           "gpus": 1,
           "profile": "blackwell-gpuonly",
           "status": "ok",
-          "latency_s": 479.477,
-          "ratio_to_sglang": 5.426
+          "latency_s": 516.829,
+          "ratio_to_sglang": 5.348
         },
         "fastvideo": {
           "gpus": 2,
           "profile": "blackwell-2gpu",
           "status": "ok",
-          "latency_s": 90.46,
-          "ratio_to_sglang": 1.024
+          "latency_s": 111.093,
+          "ratio_to_sglang": 1.15
         }
       },
       "winner": "sglang",
-      "winner_speedup": "1.02x"
+      "winner_speedup": "1.10x"
     },
     {
       "case_id": "minimax_h3_fasth3_v2_t2va_5s",
@@ -784,15 +674,15 @@
           "gpus": 4,
           "profile": "default",
           "status": "ok",
-          "latency_s": 5.478,
+          "latency_s": 5.229,
           "ratio_to_sglang": 1.0
         },
         "vllm-omni": {
           "gpus": 4,
           "profile": "default",
           "status": "ok",
-          "latency_s": 7.439,
-          "ratio_to_sglang": 1.358
+          "latency_s": 8.249,
+          "ratio_to_sglang": 1.578
         },
         "lightx2v": {
           "status": "unsupported",
@@ -804,37 +694,125 @@
         },
         "comfyui": {
           "status": "no_profile",
-          "reason": "No official ComfyUI workflow for the FastH3 8-Step V2 checkpoint and its VSA attention as of 2026-09-30."
+          "reason": "Comfy-Org/workflow_templates templates/video_fastvideo_fasth3_t2v.json exists (since 2026-09-22), but it runs int8 dense attention and VSA keeping 10% of tiles from step 0.2 -- a different numeric class and a different sparsity from the case's BF16 VSA at the trained 80% (64-token tiles). Re-checked 2026-10-22."
         },
         "fastvideo": {
           "gpus": 4,
           "profile": "blackwell-4gpu",
           "status": "ok",
-          "latency_s": 7.17,
-          "ratio_to_sglang": 1.309
+          "latency_s": 9.196,
+          "ratio_to_sglang": 1.759
         }
       },
       "winner": "sglang",
-      "winner_speedup": "1.31x"
+      "winner_speedup": "1.58x"
+    },
+    {
+      "case_id": "ltx2_twostage_t2v",
+      "case": "LTX-2 two-stage T2V · 2 GPUs",
+      "details": "768x512x121f · 40 steps · cfg 4",
+      "gpus": "2 GPU",
+      "mode": "single_e2e",
+      "cells": {
+        "sglang": {
+          "gpus": 2,
+          "profile": "b300-cfg-parallel-bcg",
+          "status": "ok",
+          "latency_s": 2.869,
+          "ratio_to_sglang": 1.0
+        },
+        "vllm-omni": {
+          "gpus": 2,
+          "profile": "blackwell-2gpu-twostage-cfg-vaepp",
+          "status": "ok",
+          "latency_s": 3.568,
+          "ratio_to_sglang": 1.244
+        },
+        "lightx2v": {
+          "status": "unsupported",
+          "reason": "LightX2V cannot run the official LTX-2 two-stage workload (dev model for stage 1, distilled LoRA for the 3-step stage-2 refine): its runner loads one transformer and merges lora_configs into it at load, and the use_upsampler path reuses that same transformer for stage 2 (lightx2v/models/runners/ltx2/ltx2_runner.py at 19c19614). The profile it had did not enable the upsampler at all, so every earlier LightX2V row ran ONE stage at the full 768x512 for 40 steps -- a heavier workload than the other rows, never comparable. Audited 2026-10-22."
+        },
+        "trtllm-visual": {
+          "gpus": 2,
+          "profile": "blackwell-fa4",
+          "status": "ok",
+          "latency_s": 3.553,
+          "ratio_to_sglang": 1.238
+        },
+        "comfyui": {
+          "gpus": 2,
+          "profile": "blackwell-gpuonly",
+          "status": "ok",
+          "latency_s": 23.504,
+          "ratio_to_sglang": 8.192
+        },
+        "fastvideo": {
+          "status": "no_profile",
+          "reason": "FastVideo main (2b164405c3d1, 2026-10-07) registers LTX-2, but this harness integrates FastVideo for MiniMax-H3 only (2026-10-08); no command validated."
+        }
+      },
+      "winner": "sglang",
+      "winner_speedup": "1.24x"
+    },
+    {
+      "case_id": "ltx2.3_twostage_t2v_2gpus",
+      "case": "LTX-2.3 two-stage T2V · 2 GPUs",
+      "details": "768x512x121f · 30 steps · cfg 3",
+      "gpus": "2 GPU",
+      "mode": "single_e2e",
+      "cells": {
+        "sglang": {
+          "gpus": 2,
+          "profile": "b300-cfg-parallel-bcg",
+          "status": "ok",
+          "latency_s": 3.905,
+          "ratio_to_sglang": 1.0
+        },
+        "vllm-omni": {
+          "gpus": 2,
+          "profile": "blackwell-2gpu-twostage-cfg-vaepp",
+          "status": "ok",
+          "latency_s": 4.398,
+          "ratio_to_sglang": 1.126
+        },
+        "lightx2v": {
+          "status": "unsupported",
+          "reason": "LightX2V cannot run the official LTX-2.3 two-stage workload: one transformer serves both stages with any LoRA merged at load (ltx2_runner.py at 19c19614), and the profile it had never enabled the upsampler, so every earlier row was one stage at the full 768x512 -- heavier than sglang's two-stage, never comparable. Audited 2026-10-22."
+        },
+        "trtllm-visual": {
+          "status": "unsupported",
+          "reason": "TensorRT-LLM 1.4.0rc1 has no LTX-2.3: LTX2Pipeline lists only Lightricks/LTX-2 (19B), and '2.3' appears in no hf_id, config, test or supported-models table (checked 2026-10-22)."
+        },
+        "comfyui": {
+          "status": "no_profile",
+          "reason": "ComfyUI loads LTX-2.3, but no official workflow reproduces this case: sglang runs LTX-2.3's multimodal guidance in stage 1 (video CFG 3 + STG 1.0 on block 28 + modality 3, audio CFG 7 + STG + modality -- up to four DiT passes per step, LTX23SamplingParams), while ComfyUI's LTX-2.3 T2V template (and the LTX-2.5 one) is the distilled-LoRA fast path at cfg 1. A graph built from LTXVSpatioTemporalGuidance / LTXVModalityGuidance / LTXVDualCFGGuider could match it but has no upstream reference and is not validated."
+        },
+        "fastvideo": {
+          "status": "no_profile",
+          "reason": "FastVideo main (2b164405c3d1, 2026-10-07) registers LTX-2.3, but this harness integrates FastVideo for MiniMax-H3 only (2026-10-08); no command validated."
+        }
+      },
+      "winner": "sglang",
+      "winner_speedup": "1.13x"
     }
   ],
   "sections": [
     {
-      "id": "gb300x4-20261010_single_e2e",
-      "run": "gb300x4-20261010",
-      "run_label": "4xGB300 cross-framework (latest-vs-latest)",
-      "date": "2026-10-10",
-      "gpu": "4x NVIDIA GB300 288GB",
-      "title": "4xGB300 cross-framework (latest-vs-latest)",
+      "id": "b300x4-20261022_single_e2e",
+      "run": "b300x4-20261022",
+      "run_label": "4xB300 cross-framework (latest-vs-latest)",
+      "date": "2026-10-22",
+      "gpu": "4x NVIDIA B300 SXM6 AC 275GB",
+      "title": "4xB300 cross-framework (latest-vs-latest)",
       "subtitle": "Steady-state single-request latency, best lossless config per framework (compile on, no caches, no quantization). SGLang-Diffusion fastest in 16/16 comparable cases.",
       "mode": "single_e2e",
       "framework_versions": {
-        "sglang": "0.5.21 @ e00930c54",
-        "vllm-omni": "vllm-omni 0.31.0rc2.dev98+gf69b1f2b1 + vllm 0.31.0",
-        "lightx2v": "lightx2v 0.5.0 @ b6d38283c",
-        "trtllm-visual": "tensorrt_llm 1.3.0rc29",
-        "comfyui": "ComfyUI @ 0df64eb24 + torch 2.14.1+cu130",
-        "fastvideo": "FastVideo @ d5253fd71 + fastvideo-kernel 0.3.5"
+        "sglang": "0.0.0.dev1+gc1c287a42 @ 3042cea84",
+        "vllm-omni": "vllm-omni 0.32.0rc2.dev46+g0da1d831e + vllm 0.32.0",
+        "lightx2v": "lightx2v 0.5.0 @ 19c19614b",
+        "trtllm-visual": "tensorrt_llm 1.4.0rc1",
+        "comfyui": "ComfyUI @ 1a82e6d01 + torch 2.14.1+cu130",
+        "fastvideo": "FastVideo @ fa2d1324c + fastvideo-kernel 0.3.5"
       },
       "summary": {
         "sglang_wins": 16,
@@ -842,101 +820,45 @@
       },
       "rows": [
         {
-          "case_id": "flux1_dev_t2i_1024",
-          "case": "FLUX.1-dev T2I · 2 GPUs",
+          "case_id": "flux3_klein_base_t2i_1024",
+          "case": "FLUX.3 Image Klein Base T2I · 2 GPUs",
           "details": "1024x1024 · 50 steps · cfg 3.5",
           "gpus": "2 GPU",
           "mode": "single_e2e",
           "cells": {
             "sglang": {
               "gpus": 2,
-              "profile": "gb300-2gpu-tp-compile",
+              "profile": "default",
               "status": "ok",
-              "latency_s": 2.786,
+              "latency_s": 2.083,
               "ratio_to_sglang": 1.0
             },
             "vllm-omni": {
-              "gpus": 2,
-              "profile": "blackwell-2gpu-tp-eager",
-              "status": "ok",
-              "latency_s": 5.307,
-              "ratio_to_sglang": 1.905
+              "status": "unsupported",
+              "reason": "No FLUX.3 pipeline on vLLM-Omni main (2026-10-16). It is in the open, approved PR vllm-project/vllm-omni#9007; reclassify once it merges. Measured pre-merge on 2xH200 2026-10-16 at head 389a02a149ce with vllm==0.31.0 (the head's docker/Dockerfile.ci): CFG parallel 2 4.534 s, one GPU 9.101 s (regional compile, FLASH_ATTN). Its FLUX.3 loader reads only a local package directory (model_path = the snapshot dir), and requests need --served-model-name set to the case model."
             },
             "lightx2v": {
               "status": "unsupported",
-              "reason": "Tracked LightX2V version has no FLUX.1 serving path; FLUX coverage starts at FLUX.2."
+              "reason": "LightX2V main has no FLUX.3 serving path (2026-10-15): no flux3 / flux-3-image code or PR in ModelTC/LightX2V; its FLUX coverage ends at FLUX.2."
             },
             "trtllm-visual": {
+              "status": "unsupported",
+              "reason": "No FLUX.3 pipeline on TensorRT-LLM main (2026-10-16); NVIDIA/TensorRT-LLM#20430 adds it and is still a draft."
+            },
+            "comfyui": {
               "gpus": 2,
               "profile": "default",
               "status": "ok",
-              "latency_s": 3.104,
-              "ratio_to_sglang": 1.114
-            },
-            "comfyui": {
-              "gpus": 1,
-              "profile": "blackwell-gpuonly",
-              "status": "ok",
-              "latency_s": 4.41,
-              "ratio_to_sglang": 1.583
+              "latency_s": 3.34,
+              "ratio_to_sglang": 1.603
             },
             "fastvideo": {
-              "status": "no_profile",
-              "reason": "FastVideo main (2b164405c3d1, 2026-10-07) registers FLUX.1-dev, but this harness integrates FastVideo for MiniMax-H3 only (2026-10-08); no command validated."
+              "status": "unsupported",
+              "reason": "FastVideo main has no FLUX.3 pipeline (2026-10-15): no flux3 code in hao-ai-lab/FastVideo."
             }
           },
           "winner": "sglang",
-          "winner_speedup": "1.11x"
-        },
-        {
-          "case_id": "flux2_dev_t2i_1024",
-          "case": "FLUX.2-dev T2I · 2 GPUs",
-          "details": "1024x1024 · 50 steps · cfg 4",
-          "gpus": "2 GPU",
-          "mode": "single_e2e",
-          "cells": {
-            "sglang": {
-              "gpus": 2,
-              "profile": "blackwell-2gpu-tp-eager",
-              "status": "ok",
-              "latency_s": 5.129,
-              "ratio_to_sglang": 1.0
-            },
-            "vllm-omni": {
-              "gpus": 2,
-              "profile": "blackwell-2gpu-tp-eager",
-              "status": "ok",
-              "latency_s": 8.368,
-              "ratio_to_sglang": 1.632
-            },
-            "lightx2v": {
-              "gpus": 2,
-              "profile": "blackwell-fa2-flashinfer",
-              "status": "ok",
-              "latency_s": 14.536,
-              "ratio_to_sglang": 2.834
-            },
-            "trtllm-visual": {
-              "gpus": 2,
-              "profile": "default",
-              "status": "ok",
-              "latency_s": 9.288,
-              "ratio_to_sglang": 1.811
-            },
-            "comfyui": {
-              "gpus": 1,
-              "profile": "blackwell-gpuonly",
-              "status": "ok",
-              "latency_s": 12.377,
-              "ratio_to_sglang": 2.413
-            },
-            "fastvideo": {
-              "status": "no_profile",
-              "reason": "FastVideo main (2b164405c3d1, 2026-10-07) registers FLUX.2-dev, but this harness integrates FastVideo for MiniMax-H3 only (2026-10-08); no command validated."
-            }
-          },
-          "winner": "sglang",
-          "winner_speedup": "1.63x"
+          "winner_speedup": "1.60x"
         },
         {
           "case_id": "qwen_image_21_t2i_1024",
@@ -949,22 +871,22 @@
               "gpus": 1,
               "profile": "b200-1gpu-resident-fa",
               "status": "ok",
-              "latency_s": 2.005,
+              "latency_s": 2.175,
               "ratio_to_sglang": 1.0
             },
             "vllm-omni": {
               "gpus": 1,
-              "profile": "blackwell-cudnn",
+              "profile": "blackwell-cudnn-static",
               "status": "ok",
-              "latency_s": 2.147,
-              "ratio_to_sglang": 1.071
+              "latency_s": 2.372,
+              "ratio_to_sglang": 1.091
             },
             "lightx2v": {
               "gpus": 1,
-              "profile": "blackwell-1gpu-fa2",
+              "profile": "blackwell-sdpa",
               "status": "ok",
-              "latency_s": 3.009,
-              "ratio_to_sglang": 1.501
+              "latency_s": 2.56,
+              "ratio_to_sglang": 1.177
             },
             "trtllm-visual": {
               "status": "unsupported",
@@ -972,10 +894,10 @@
             },
             "comfyui": {
               "gpus": 1,
-              "profile": "blackwell-gpuonly",
+              "profile": "blackwell-gpuonly-compile",
               "status": "ok",
-              "latency_s": 3.221,
-              "ratio_to_sglang": 1.606
+              "latency_s": 3.049,
+              "ratio_to_sglang": 1.402
             },
             "fastvideo": {
               "status": "unsupported",
@@ -983,7 +905,7 @@
             }
           },
           "winner": "sglang",
-          "winner_speedup": "1.07x"
+          "winner_speedup": "1.09x"
         },
         {
           "case_id": "qwen_image_21_t2i_1024_2gpu",
@@ -996,15 +918,15 @@
               "gpus": 2,
               "profile": "gb300-2gpu-tp2",
               "status": "ok",
-              "latency_s": 1.67,
+              "latency_s": 1.383,
               "ratio_to_sglang": 1.0
             },
             "vllm-omni": {
               "gpus": 2,
-              "profile": "blackwell-cudnn",
+              "profile": "blackwell-cudnn-static",
               "status": "ok",
-              "latency_s": 3.081,
-              "ratio_to_sglang": 1.845
+              "latency_s": 1.564,
+              "ratio_to_sglang": 1.131
             },
             "lightx2v": {
               "status": "no_profile",
@@ -1024,7 +946,7 @@
             }
           },
           "winner": "sglang",
-          "winner_speedup": "1.84x"
+          "winner_speedup": "1.13x"
         },
         {
           "case_id": "qwen_image_21_edit_1024",
@@ -1037,15 +959,15 @@
               "gpus": 1,
               "profile": "b200-1gpu-resident-fa",
               "status": "ok",
-              "latency_s": 2.433,
+              "latency_s": 2.621,
               "ratio_to_sglang": 1.0
             },
             "vllm-omni": {
               "gpus": 1,
-              "profile": "blackwell-cudnn",
+              "profile": "blackwell-cudnn-static",
               "status": "ok",
-              "latency_s": 2.598,
-              "ratio_to_sglang": 1.068
+              "latency_s": 2.862,
+              "ratio_to_sglang": 1.092
             },
             "lightx2v": {
               "status": "no_profile",
@@ -1065,7 +987,7 @@
             }
           },
           "winner": "sglang",
-          "winner_speedup": "1.07x"
+          "winner_speedup": "1.09x"
         },
         {
           "case_id": "zimage_turbo_t2i_1024",
@@ -1076,24 +998,24 @@
           "cells": {
             "sglang": {
               "gpus": 2,
-              "profile": "default",
+              "profile": "b300-speed",
               "status": "ok",
-              "latency_s": 0.516,
+              "latency_s": 0.337,
               "ratio_to_sglang": 1.0
             },
             "vllm-omni": {
               "gpus": 2,
-              "profile": "blackwell-flashinfer",
+              "profile": "blackwell-tp2-static",
               "status": "ok",
-              "latency_s": 0.729,
-              "ratio_to_sglang": 1.413
+              "latency_s": 0.595,
+              "ratio_to_sglang": 1.766
             },
             "lightx2v": {
               "gpus": 2,
-              "profile": "blackwell-fa2",
+              "profile": "blackwell-fa2-fusion",
               "status": "ok",
-              "latency_s": 1.504,
-              "ratio_to_sglang": 2.915
+              "latency_s": 0.831,
+              "ratio_to_sglang": 2.466
             },
             "trtllm-visual": {
               "status": "not_run",
@@ -1103,8 +1025,8 @@
               "gpus": 1,
               "profile": "blackwell-gpuonly",
               "status": "ok",
-              "latency_s": 0.792,
-              "ratio_to_sglang": 1.535
+              "latency_s": 0.847,
+              "ratio_to_sglang": 2.513
             },
             "fastvideo": {
               "status": "no_profile",
@@ -1112,7 +1034,7 @@
             }
           },
           "winner": "sglang",
-          "winner_speedup": "1.41x"
+          "winner_speedup": "1.77x"
         },
         {
           "case_id": "ideogram4_t2i_1024_2gpu_tp",
@@ -1123,9 +1045,9 @@
           "cells": {
             "sglang": {
               "gpus": 2,
-              "profile": "default",
+              "profile": "b300-speed",
               "status": "ok",
-              "latency_s": 2.596,
+              "latency_s": 1.939,
               "ratio_to_sglang": 1.0
             },
             "vllm-omni": {
@@ -1142,10 +1064,10 @@
             },
             "comfyui": {
               "gpus": 1,
-              "profile": "blackwell-gpuonly",
+              "profile": "blackwell-gpuonly-compile",
               "status": "ok",
-              "latency_s": 3.618,
-              "ratio_to_sglang": 1.394
+              "latency_s": 3.696,
+              "ratio_to_sglang": 1.906
             },
             "fastvideo": {
               "status": "unsupported",
@@ -1153,7 +1075,7 @@
             }
           },
           "winner": "sglang",
-          "winner_speedup": "1.39x"
+          "winner_speedup": "1.91x"
         },
         {
           "case_id": "wan22_t2v_a14b_720p",
@@ -1164,35 +1086,38 @@
           "cells": {
             "sglang": {
               "gpus": 4,
-              "profile": "default",
+              "profile": "b300-noexp",
               "status": "ok",
-              "latency_s": 87.025,
+              "latency_s": 89.661,
               "ratio_to_sglang": 1.0
             },
             "vllm-omni": {
               "gpus": 4,
-              "profile": "blackwell-cudnn",
+              "profile": "blackwell-4gpu-cfg2-usp2-vaepp-devpost",
               "status": "ok",
-              "latency_s": 108.988,
-              "ratio_to_sglang": 1.252
+              "latency_s": 99.962,
+              "ratio_to_sglang": 1.115
             },
             "lightx2v": {
               "gpus": 4,
-              "profile": "blackwell-fa2",
+              "profile": "blackwell-sdpa",
               "status": "ok",
-              "latency_s": 225.85,
-              "ratio_to_sglang": 2.595
+              "latency_s": 100.29,
+              "ratio_to_sglang": 1.119
             },
             "trtllm-visual": {
-              "status": "not_run",
-              "reason": "Not yet classified. Confirm framework support and add a validated command profile, or mark unsupported."
+              "gpus": 4,
+              "profile": "blackwell-cudnn",
+              "status": "ok",
+              "latency_s": 94.382,
+              "ratio_to_sglang": 1.053
             },
             "comfyui": {
               "gpus": 2,
               "profile": "blackwell-gpuonly",
               "status": "ok",
-              "latency_s": 484.031,
-              "ratio_to_sglang": 5.562
+              "latency_s": 521.564,
+              "ratio_to_sglang": 5.817
             },
             "fastvideo": {
               "status": "no_profile",
@@ -1200,90 +1125,7 @@
             }
           },
           "winner": "sglang",
-          "winner_speedup": "1.25x"
-        },
-        {
-          "case_id": "ltx2_twostage_t2v",
-          "case": "LTX-2 two-stage T2V · 2 GPUs",
-          "details": "768x512x121f · 40 steps · cfg 4",
-          "gpus": "2 GPU",
-          "mode": "single_e2e",
-          "cells": {
-            "sglang": {
-              "gpus": 2,
-              "profile": "gb300-cfg-parallel-compile",
-              "status": "ok",
-              "latency_s": 9.075,
-              "ratio_to_sglang": 1.0
-            },
-            "vllm-omni": {
-              "gpus": 2,
-              "profile": "blackwell-cudnn",
-              "status": "ok",
-              "latency_s": 12.755,
-              "ratio_to_sglang": 1.406
-            },
-            "lightx2v": {
-              "gpus": 2,
-              "profile": "blackwell-fa2",
-              "status": "ok",
-              "latency_s": 20.07,
-              "ratio_to_sglang": 2.212
-            },
-            "trtllm-visual": {
-              "status": "not_run",
-              "reason": "Not yet classified. Confirm framework support and add a validated command profile, or mark unsupported."
-            },
-            "comfyui": {
-              "gpus": 2,
-              "profile": "blackwell-gpuonly",
-              "status": "ok",
-              "latency_s": 29.74,
-              "ratio_to_sglang": 3.277
-            },
-            "fastvideo": {
-              "status": "no_profile",
-              "reason": "FastVideo main (2b164405c3d1, 2026-10-07) registers LTX-2, but this harness integrates FastVideo for MiniMax-H3 only (2026-10-08); no command validated."
-            }
-          },
-          "winner": "sglang",
-          "winner_speedup": "1.41x"
-        },
-        {
-          "case_id": "ltx2.3_twostage_t2v_2gpus",
-          "case": "LTX-2.3 two-stage T2V · 2 GPUs",
-          "details": "768x512x121f · 30 steps · cfg 3",
-          "gpus": "2 GPU",
-          "mode": "single_e2e",
-          "cells": {
-            "sglang": {
-              "gpus": 2,
-              "profile": "default",
-              "status": "ok",
-              "latency_s": 11.024,
-              "ratio_to_sglang": 1.0
-            },
-            "vllm-omni": {
-              "status": "no_profile",
-              "reason": "No compatible vLLM-Omni LTX2.3 serving profile is configured."
-            },
-            "lightx2v": {
-              "status": "not_run"
-            },
-            "trtllm-visual": {
-              "status": "not_run",
-              "reason": "Not yet classified. Confirm framework support and add a validated command profile, or mark unsupported."
-            },
-            "comfyui": {
-              "status": "no_profile",
-              "reason": "ComfyUI loads LTX-2.3, but no official workflow reproduces this case: sglang runs LTX-2.3's multimodal guidance in stage 1 (video CFG 3 + STG 1.0 on block 28 + modality 3, audio CFG 7 + STG + modality -- up to four DiT passes per step, LTX23SamplingParams), while ComfyUI's LTX-2.3 T2V template (and the LTX-2.5 one) is the distilled-LoRA fast path at cfg 1. A graph built from LTXVSpatioTemporalGuidance / LTXVModalityGuidance / LTXVDualCFGGuider could match it but has no upstream reference and is not validated."
-            },
-            "fastvideo": {
-              "status": "no_profile",
-              "reason": "FastVideo main (2b164405c3d1, 2026-10-07) registers LTX-2.3, but this harness integrates FastVideo for MiniMax-H3 only (2026-10-08); no command validated."
-            }
-          },
-          "winner": "n/a"
+          "winner_speedup": "1.05x"
         },
         {
           "case_id": "cosmos3_nano_t2i_720p",
@@ -1294,25 +1136,28 @@
           "cells": {
             "sglang": {
               "gpus": 2,
-              "profile": "gb300-2gpu-cfg-parallel-compile",
+              "profile": "blackwell-2gpu-cfg-parallel",
               "status": "ok",
-              "latency_s": 0.896,
+              "latency_s": 0.515,
               "ratio_to_sglang": 1.0
             },
             "vllm-omni": {
               "gpus": 2,
-              "profile": "blackwell-cudnn",
+              "profile": "blackwell-cudnn-static",
               "status": "ok",
-              "latency_s": 0.935,
-              "ratio_to_sglang": 1.044
+              "latency_s": 0.644,
+              "ratio_to_sglang": 1.25
             },
             "lightx2v": {
-              "status": "unsupported",
-              "reason": "No tracked LightX2V Cosmos3 serving path in this benchmark."
+              "status": "failed",
+              "reason": "LightX2V 19c19614's cosmos3 runner answers /v1/tasks/image/sync with HTTP 500 'Image inference did not return in-memory PNG bytes (result_png)' (4xB300, 2026-10-23): its T2I task does not populate the sync endpoint's in-memory PNG."
             },
             "trtllm-visual": {
-              "status": "failed",
-              "reason": "Hangs at startup on the current Cosmos3-Nano checkpoint: trtllm-serve reaches 'Orchestrator is creating IPC executor' / 'using MpiPoolSession to spawn MPI processes' and then produces no output at all -- 40 min in the matrix, and 20 min each at tp=1 and tp=2 in a dedicated probe, so it is not a multi-GPU path issue. The startup log warns 'You are using a model of type cosmos3_omni to instantiate a model of type cosmos3': the checkpoint was re-uploaded 2026-08-26 and declares cosmos3_omni, which tensorrt-llm 1.3.0rc26 does not know. Marked failed rather than left supported so a run does not spend 40 minutes per attempt reaching the same hang. Re-test when trtllm adds cosmos3_omni; the profile is kept below."
+              "gpus": 2,
+              "profile": "default",
+              "status": "ok",
+              "latency_s": 0.602,
+              "ratio_to_sglang": 1.169
             },
             "comfyui": {
               "status": "unsupported",
@@ -1324,7 +1169,7 @@
             }
           },
           "winner": "sglang",
-          "winner_speedup": "1.04x"
+          "winner_speedup": "1.17x"
         },
         {
           "case_id": "cosmos3_nano_t2v_720p_189f",
@@ -1335,25 +1180,31 @@
           "cells": {
             "sglang": {
               "gpus": 4,
-              "profile": "gb-4gpu-cfg-ulysses-speed",
+              "profile": "b300-noexp",
               "status": "ok",
-              "latency_s": 22.465,
+              "latency_s": 22.833,
               "ratio_to_sglang": 1.0
             },
             "vllm-omni": {
               "gpus": 4,
-              "profile": "blackwell-cudnn",
+              "profile": "blackwell-cudnn-vaepp",
               "status": "ok",
-              "latency_s": 26.048,
-              "ratio_to_sglang": 1.159
+              "latency_s": 27.154,
+              "ratio_to_sglang": 1.189
             },
             "lightx2v": {
-              "status": "unsupported",
-              "reason": "No tracked LightX2V Cosmos3 serving path in this benchmark."
+              "gpus": 4,
+              "profile": "blackwell-cfg2-sp2-sdpa",
+              "status": "ok",
+              "latency_s": 44.33,
+              "ratio_to_sglang": 1.941
             },
             "trtllm-visual": {
-              "status": "not_run",
-              "reason": "Not yet classified. Confirm framework support and add a validated command profile, or mark unsupported."
+              "gpus": 4,
+              "profile": "default",
+              "status": "ok",
+              "latency_s": 26.117,
+              "ratio_to_sglang": 1.144
             },
             "comfyui": {
               "status": "unsupported",
@@ -1365,7 +1216,7 @@
             }
           },
           "winner": "sglang",
-          "winner_speedup": "1.16x"
+          "winner_speedup": "1.14x"
         },
         {
           "case_id": "cosmos3_nano_i2v_720p_189f",
@@ -1376,25 +1227,31 @@
           "cells": {
             "sglang": {
               "gpus": 4,
-              "profile": "default",
+              "profile": "b300-noexp",
               "status": "ok",
-              "latency_s": 22.628,
+              "latency_s": 22.898,
               "ratio_to_sglang": 1.0
             },
             "vllm-omni": {
               "gpus": 4,
-              "profile": "blackwell-cudnn",
+              "profile": "blackwell-cudnn-vaepp",
               "status": "ok",
-              "latency_s": 26.391,
-              "ratio_to_sglang": 1.166
+              "latency_s": 26.866,
+              "ratio_to_sglang": 1.173
             },
             "lightx2v": {
-              "status": "unsupported",
-              "reason": "No tracked LightX2V Cosmos3 serving path in this benchmark."
+              "gpus": 4,
+              "profile": "blackwell-cfg2-sp2-sdpa",
+              "status": "ok",
+              "latency_s": 46.427,
+              "ratio_to_sglang": 2.028
             },
             "trtllm-visual": {
-              "status": "not_run",
-              "reason": "Not yet classified. Confirm framework support and add a validated command profile, or mark unsupported."
+              "gpus": 4,
+              "profile": "default",
+              "status": "ok",
+              "latency_s": 28.153,
+              "ratio_to_sglang": 1.229
             },
             "comfyui": {
               "status": "unsupported",
@@ -1417,46 +1274,49 @@
           "cells": {
             "sglang": {
               "gpus": 2,
-              "profile": "default",
+              "profile": "b300-noexp",
               "status": "ok",
-              "latency_s": 57.46,
+              "latency_s": 62.955,
               "ratio_to_sglang": 1.0
             },
             "vllm-omni": {
               "gpus": 2,
-              "profile": "blackwell-2gpu",
+              "profile": "blackwell-2gpu-static",
               "status": "ok",
-              "latency_s": 60.947,
-              "ratio_to_sglang": 1.061
+              "latency_s": 69.268,
+              "ratio_to_sglang": 1.1
             },
             "lightx2v": {
               "gpus": 2,
               "profile": "blackwell-sp2-sdpa",
               "status": "ok",
-              "latency_s": 64.09,
-              "ratio_to_sglang": 1.115
+              "latency_s": 71.755,
+              "ratio_to_sglang": 1.14
             },
             "trtllm-visual": {
-              "status": "unsupported",
-              "reason": "trtllm-visual's tracked scope in this harness is image cases; H3 is a video+audio model."
+              "gpus": 2,
+              "profile": "blackwell-omp8",
+              "status": "ok",
+              "latency_s": 69.603,
+              "ratio_to_sglang": 1.106
             },
             "comfyui": {
               "gpus": 1,
               "profile": "blackwell-gpuonly",
               "status": "ok",
-              "latency_s": 283.481,
-              "ratio_to_sglang": 4.934
+              "latency_s": 304.892,
+              "ratio_to_sglang": 4.843
             },
             "fastvideo": {
               "gpus": 2,
               "profile": "blackwell-2gpu",
               "status": "ok",
-              "latency_s": 61.148,
-              "ratio_to_sglang": 1.064
+              "latency_s": 75.182,
+              "ratio_to_sglang": 1.194
             }
           },
           "winner": "sglang",
-          "winner_speedup": "1.06x"
+          "winner_speedup": "1.10x"
         },
         {
           "case_id": "minimax_h3_t2va_5s_4gpu",
@@ -1467,28 +1327,31 @@
           "cells": {
             "sglang": {
               "gpus": 4,
-              "profile": "default",
+              "profile": "b300-noexp",
               "status": "ok",
-              "latency_s": 29.714,
+              "latency_s": 32.136,
               "ratio_to_sglang": 1.0
             },
             "vllm-omni": {
               "gpus": 4,
-              "profile": "default",
+              "profile": "blackwell-4gpu-static",
               "status": "ok",
-              "latency_s": 34.078,
-              "ratio_to_sglang": 1.147
+              "latency_s": 37.284,
+              "ratio_to_sglang": 1.16
             },
             "lightx2v": {
               "gpus": 4,
               "profile": "blackwell-sp4-sdpa",
               "status": "ok",
-              "latency_s": 32.536,
-              "ratio_to_sglang": 1.095
+              "latency_s": 37.012,
+              "ratio_to_sglang": 1.152
             },
             "trtllm-visual": {
-              "status": "unsupported",
-              "reason": "trtllm-visual's tracked scope in this harness is image cases; H3 is a video+audio model."
+              "gpus": 4,
+              "profile": "blackwell-fa4-omp8",
+              "status": "ok",
+              "latency_s": 37.793,
+              "ratio_to_sglang": 1.176
             },
             "comfyui": {
               "status": "not_run",
@@ -1498,12 +1361,12 @@
               "gpus": 4,
               "profile": "blackwell-4gpu",
               "status": "ok",
-              "latency_s": 34.077,
-              "ratio_to_sglang": 1.147
+              "latency_s": 48.568,
+              "ratio_to_sglang": 1.511
             }
           },
           "winner": "sglang",
-          "winner_speedup": "1.09x"
+          "winner_speedup": "1.15x"
         },
         {
           "case_id": "minimax_h3_ref2va_5s",
@@ -1514,46 +1377,49 @@
           "cells": {
             "sglang": {
               "gpus": 2,
-              "profile": "default",
+              "profile": "b300-noexp",
               "status": "ok",
-              "latency_s": 88.362,
+              "latency_s": 96.64,
               "ratio_to_sglang": 1.0
             },
             "vllm-omni": {
               "gpus": 2,
-              "profile": "blackwell-2gpu",
+              "profile": "blackwell-2gpu-static",
               "status": "ok",
-              "latency_s": 91.91,
-              "ratio_to_sglang": 1.04
+              "latency_s": 106.367,
+              "ratio_to_sglang": 1.101
             },
             "lightx2v": {
               "gpus": 2,
               "profile": "blackwell-sp2-sdpa",
               "status": "ok",
-              "latency_s": 98.466,
-              "ratio_to_sglang": 1.114
+              "latency_s": 113.889,
+              "ratio_to_sglang": 1.178
             },
             "trtllm-visual": {
-              "status": "unsupported",
-              "reason": "trtllm-visual's tracked scope in this harness is image cases; H3 is a video+audio model."
+              "gpus": 2,
+              "profile": "blackwell-fa4-omp8",
+              "status": "ok",
+              "latency_s": 106.92,
+              "ratio_to_sglang": 1.106
             },
             "comfyui": {
               "gpus": 1,
               "profile": "blackwell-gpuonly",
               "status": "ok",
-              "latency_s": 479.477,
-              "ratio_to_sglang": 5.426
+              "latency_s": 516.829,
+              "ratio_to_sglang": 5.348
             },
             "fastvideo": {
               "gpus": 2,
               "profile": "blackwell-2gpu",
               "status": "ok",
-              "latency_s": 90.46,
-              "ratio_to_sglang": 1.024
+              "latency_s": 111.093,
+              "ratio_to_sglang": 1.15
             }
           },
           "winner": "sglang",
-          "winner_speedup": "1.02x"
+          "winner_speedup": "1.10x"
         },
         {
           "case_id": "minimax_h3_fasth3_v2_t2va_5s",
@@ -1566,15 +1432,15 @@
               "gpus": 4,
               "profile": "default",
               "status": "ok",
-              "latency_s": 5.478,
+              "latency_s": 5.229,
               "ratio_to_sglang": 1.0
             },
             "vllm-omni": {
               "gpus": 4,
               "profile": "default",
               "status": "ok",
-              "latency_s": 7.439,
-              "ratio_to_sglang": 1.358
+              "latency_s": 8.249,
+              "ratio_to_sglang": 1.578
             },
             "lightx2v": {
               "status": "unsupported",
@@ -1586,45 +1452,133 @@
             },
             "comfyui": {
               "status": "no_profile",
-              "reason": "No official ComfyUI workflow for the FastH3 8-Step V2 checkpoint and its VSA attention as of 2026-09-30."
+              "reason": "Comfy-Org/workflow_templates templates/video_fastvideo_fasth3_t2v.json exists (since 2026-09-22), but it runs int8 dense attention and VSA keeping 10% of tiles from step 0.2 -- a different numeric class and a different sparsity from the case's BF16 VSA at the trained 80% (64-token tiles). Re-checked 2026-10-22."
             },
             "fastvideo": {
               "gpus": 4,
               "profile": "blackwell-4gpu",
               "status": "ok",
-              "latency_s": 7.17,
-              "ratio_to_sglang": 1.309
+              "latency_s": 9.196,
+              "ratio_to_sglang": 1.759
             }
           },
           "winner": "sglang",
-          "winner_speedup": "1.31x"
+          "winner_speedup": "1.58x"
+        },
+        {
+          "case_id": "ltx2_twostage_t2v",
+          "case": "LTX-2 two-stage T2V · 2 GPUs",
+          "details": "768x512x121f · 40 steps · cfg 4",
+          "gpus": "2 GPU",
+          "mode": "single_e2e",
+          "cells": {
+            "sglang": {
+              "gpus": 2,
+              "profile": "b300-cfg-parallel-bcg",
+              "status": "ok",
+              "latency_s": 2.869,
+              "ratio_to_sglang": 1.0
+            },
+            "vllm-omni": {
+              "gpus": 2,
+              "profile": "blackwell-2gpu-twostage-cfg-vaepp",
+              "status": "ok",
+              "latency_s": 3.568,
+              "ratio_to_sglang": 1.244
+            },
+            "lightx2v": {
+              "status": "unsupported",
+              "reason": "LightX2V cannot run the official LTX-2 two-stage workload (dev model for stage 1, distilled LoRA for the 3-step stage-2 refine): its runner loads one transformer and merges lora_configs into it at load, and the use_upsampler path reuses that same transformer for stage 2 (lightx2v/models/runners/ltx2/ltx2_runner.py at 19c19614). The profile it had did not enable the upsampler at all, so every earlier LightX2V row ran ONE stage at the full 768x512 for 40 steps -- a heavier workload than the other rows, never comparable. Audited 2026-10-22."
+            },
+            "trtllm-visual": {
+              "gpus": 2,
+              "profile": "blackwell-fa4",
+              "status": "ok",
+              "latency_s": 3.553,
+              "ratio_to_sglang": 1.238
+            },
+            "comfyui": {
+              "gpus": 2,
+              "profile": "blackwell-gpuonly",
+              "status": "ok",
+              "latency_s": 23.504,
+              "ratio_to_sglang": 8.192
+            },
+            "fastvideo": {
+              "status": "no_profile",
+              "reason": "FastVideo main (2b164405c3d1, 2026-10-07) registers LTX-2, but this harness integrates FastVideo for MiniMax-H3 only (2026-10-08); no command validated."
+            }
+          },
+          "winner": "sglang",
+          "winner_speedup": "1.24x"
+        },
+        {
+          "case_id": "ltx2.3_twostage_t2v_2gpus",
+          "case": "LTX-2.3 two-stage T2V · 2 GPUs",
+          "details": "768x512x121f · 30 steps · cfg 3",
+          "gpus": "2 GPU",
+          "mode": "single_e2e",
+          "cells": {
+            "sglang": {
+              "gpus": 2,
+              "profile": "b300-cfg-parallel-bcg",
+              "status": "ok",
+              "latency_s": 3.905,
+              "ratio_to_sglang": 1.0
+            },
+            "vllm-omni": {
+              "gpus": 2,
+              "profile": "blackwell-2gpu-twostage-cfg-vaepp",
+              "status": "ok",
+              "latency_s": 4.398,
+              "ratio_to_sglang": 1.126
+            },
+            "lightx2v": {
+              "status": "unsupported",
+              "reason": "LightX2V cannot run the official LTX-2.3 two-stage workload: one transformer serves both stages with any LoRA merged at load (ltx2_runner.py at 19c19614), and the profile it had never enabled the upsampler, so every earlier row was one stage at the full 768x512 -- heavier than sglang's two-stage, never comparable. Audited 2026-10-22."
+            },
+            "trtllm-visual": {
+              "status": "unsupported",
+              "reason": "TensorRT-LLM 1.4.0rc1 has no LTX-2.3: LTX2Pipeline lists only Lightricks/LTX-2 (19B), and '2.3' appears in no hf_id, config, test or supported-models table (checked 2026-10-22)."
+            },
+            "comfyui": {
+              "status": "no_profile",
+              "reason": "ComfyUI loads LTX-2.3, but no official workflow reproduces this case: sglang runs LTX-2.3's multimodal guidance in stage 1 (video CFG 3 + STG 1.0 on block 28 + modality 3, audio CFG 7 + STG + modality -- up to four DiT passes per step, LTX23SamplingParams), while ComfyUI's LTX-2.3 T2V template (and the LTX-2.5 one) is the distilled-LoRA fast path at cfg 1. A graph built from LTXVSpatioTemporalGuidance / LTXVModalityGuidance / LTXVDualCFGGuider could match it but has no upstream reference and is not validated."
+            },
+            "fastvideo": {
+              "status": "no_profile",
+              "reason": "FastVideo main (2b164405c3d1, 2026-10-07) registers LTX-2.3, but this harness integrates FastVideo for MiniMax-H3 only (2026-10-08); no command validated."
+            }
+          },
+          "winner": "sglang",
+          "winner_speedup": "1.13x"
         }
       ],
-      "reproduce": "scripts/run_gb300_full_20261010.sh",
+      "reproduce": "scripts/run_b300_full_20261022.sh",
       "reproduce_link": {
-        "path": "scripts/run_gb300_full_20261010.sh",
-        "ref": "8b4f4413b",
-        "url": "https://github.com/mickqian/diffusion-bench-framework/blob/8b4f4413b67f425f89a1ac738d79b327b07a90d7/scripts/run_gb300_full_20261010.sh"
+        "path": "scripts/run_b300_full_20261022.sh",
+        "ref": "a61608e87",
+        "url": "https://github.com/mickqian/diffusion-bench-framework/blob/a61608e87b52debf18c43873e7fec7ceced23a52/scripts/run_b300_full_20261022.sh"
       },
-      "round": "round-20261010",
-      "round_label": "Round 2026-10-10"
+      "round": "round-20261022",
+      "round_label": "Round 2026-10-22"
     },
     {
-      "id": "gb300x4-20261010_throughput",
-      "run": "gb300x4-20261010",
-      "run_label": "4xGB300 cross-framework (latest-vs-latest)",
-      "date": "2026-10-10",
-      "gpu": "4x NVIDIA GB300 288GB",
-      "title": "4xGB300 cross-framework (latest-vs-latest) — throughput",
+      "id": "b300x4-20261022_throughput",
+      "run": "b300x4-20261022",
+      "run_label": "4xB300 cross-framework (latest-vs-latest)",
+      "date": "2026-10-22",
+      "gpu": "4x NVIDIA B300 SXM6 AC 275GB",
+      "title": "4xB300 cross-framework (latest-vs-latest) — throughput",
       "subtitle": "High-pressure throughput on a representative pair (one popular image model, one video+audio case) — the matrix is deliberately not swept, see configs/benchmark/workloads.json. SGLang-Diffusion highest QPS in 2/2 comparable cases.",
       "mode": "throughput",
       "framework_versions": {
-        "sglang": "0.5.21 @ e00930c54",
-        "vllm-omni": "vllm-omni 0.31.0rc2.dev98+gf69b1f2b1 + vllm 0.31.0",
-        "lightx2v": "lightx2v 0.5.0 @ b6d38283c",
-        "trtllm-visual": "tensorrt_llm 1.3.0rc29",
-        "comfyui": "ComfyUI @ 0df64eb24 + torch 2.14.1+cu130",
-        "fastvideo": "FastVideo @ d5253fd71 + fastvideo-kernel 0.3.5"
+        "sglang": "0.0.0.dev1+gc1c287a42 @ 3042cea84",
+        "vllm-omni": "vllm-omni 0.32.0rc2.dev46+g0da1d831e + vllm 0.32.0",
+        "lightx2v": "lightx2v 0.5.0 @ 19c19614b",
+        "trtllm-visual": "tensorrt_llm 1.4.0rc1",
+        "comfyui": "ComfyUI @ 1a82e6d01 + torch 2.14.1+cu130",
+        "fastvideo": "FastVideo @ fa2d1324c + fastvideo-kernel 0.3.5"
       },
       "summary": {
         "sglang_wins": 2,
@@ -1632,59 +1586,59 @@
       },
       "rows": [
         {
-          "case_id": "flux1_dev_t2i_1024",
-          "case": "FLUX.1-dev T2I · 2 GPUs",
-          "details": "1024x1024 · 50 steps · cfg 3.5",
-          "gpus": "2 GPU",
+          "case_id": "qwen_image_21_t2i_1024",
+          "case": "Qwen-Image-2.1 T2I 1024 · 1 GPU",
+          "details": "1024x1024 · 40 steps · cfg 1",
+          "gpus": "1 GPU",
           "mode": "throughput",
           "cells": {
             "sglang": {
-              "gpus": 2,
-              "profile": "gb300-2gpu-tp-compile",
+              "gpus": 1,
+              "profile": "b200-1gpu-resident-fa",
               "status": "ok",
-              "qps": 0.3607,
+              "qps": 0.4637,
               "num_requests": 4,
               "concurrency": 2,
               "ratio_to_sglang": 1.0
             },
             "vllm-omni": {
-              "gpus": 2,
-              "profile": "blackwell-2gpu-tp-eager",
+              "gpus": 1,
+              "profile": "blackwell-cudnn-static",
               "status": "ok",
-              "qps": 0.1909,
+              "qps": 0.4321,
               "num_requests": 4,
               "concurrency": 2,
-              "ratio_to_sglang": 0.529
+              "ratio_to_sglang": 0.932
             },
             "lightx2v": {
-              "status": "unsupported",
-              "reason": "Tracked LightX2V version has no FLUX.1 serving path; FLUX coverage starts at FLUX.2."
-            },
-            "trtllm-visual": {
-              "gpus": 2,
-              "profile": "default",
+              "gpus": 1,
+              "profile": "blackwell-sdpa",
               "status": "ok",
-              "qps": 0.3312,
+              "qps": 0.3625,
               "num_requests": 4,
               "concurrency": 2,
-              "ratio_to_sglang": 0.918
+              "ratio_to_sglang": 0.782
+            },
+            "trtllm-visual": {
+              "status": "unsupported",
+              "reason": "TensorRT-LLM VisualGen carries a Qwen-Image pipeline (tensorrt_llm/_torch/visual_gen/models/qwen_image/) but nothing for the 2.1 architecture: a code search for QwenImage21 / Qwen-Image-2.1 over NVIDIA/TensorRT-LLM returns no hits, and the model is absent from pipeline_registry.py. Qwen-Image-2.1 is a distinct architecture (QwenImage21Pipeline / QwenImage21Transformer2DModel / AutoencoderKLQwenImage21 / Qwen3-VL encoder), so the existing Qwen-Image pipeline does not cover it."
             },
             "comfyui": {
               "gpus": 1,
-              "profile": "blackwell-gpuonly",
+              "profile": "blackwell-gpuonly-compile",
               "status": "ok",
-              "qps": 0.194,
+              "qps": 0.3202,
               "num_requests": 4,
               "concurrency": 2,
-              "ratio_to_sglang": 0.538
+              "ratio_to_sglang": 0.691
             },
             "fastvideo": {
-              "status": "no_profile",
-              "reason": "FastVideo main (2b164405c3d1, 2026-10-07) registers FLUX.1-dev, but this harness integrates FastVideo for MiniMax-H3 only (2026-10-08); no command validated."
+              "status": "unsupported",
+              "reason": "No Qwen-Image pipeline in FastVideo main (2b164405c3d1, 2026-10-07)."
             }
           },
           "winner": "sglang",
-          "winner_speedup": "1.09x"
+          "winner_speedup": "1.07x"
         },
         {
           "case_id": "minimax_h3_t2va_5s",
@@ -1695,167 +1649,171 @@
           "cells": {
             "sglang": {
               "gpus": 2,
-              "profile": "default",
+              "profile": "b300-noexp",
               "status": "ok",
-              "qps": 0.0173,
+              "qps": 0.0158,
               "num_requests": 4,
               "concurrency": 2,
               "ratio_to_sglang": 1.0
             },
             "vllm-omni": {
               "gpus": 2,
-              "profile": "blackwell-2gpu",
+              "profile": "blackwell-2gpu-static",
               "status": "ok",
-              "qps": 0.0164,
+              "qps": 0.0144,
               "num_requests": 4,
               "concurrency": 2,
-              "ratio_to_sglang": 0.948
+              "ratio_to_sglang": 0.911
             },
             "lightx2v": {
               "gpus": 2,
               "profile": "blackwell-sp2-sdpa",
               "status": "ok",
-              "qps": 0.0158,
+              "qps": 0.0138,
               "num_requests": 4,
               "concurrency": 2,
-              "ratio_to_sglang": 0.913
+              "ratio_to_sglang": 0.873
             },
             "trtllm-visual": {
-              "status": "unsupported",
-              "reason": "trtllm-visual's tracked scope in this harness is image cases; H3 is a video+audio model."
+              "gpus": 2,
+              "profile": "blackwell-omp8",
+              "status": "ok",
+              "qps": 0.0147,
+              "num_requests": 4,
+              "concurrency": 2,
+              "ratio_to_sglang": 0.93
             },
             "comfyui": {
               "gpus": 1,
               "profile": "blackwell-gpuonly",
               "status": "ok",
-              "qps": 0.0035,
+              "qps": 0.0033,
               "num_requests": 4,
               "concurrency": 2,
-              "ratio_to_sglang": 0.202
+              "ratio_to_sglang": 0.209
             },
             "fastvideo": {
               "gpus": 2,
               "profile": "blackwell-2gpu",
               "status": "ok",
-              "qps": 0.0163,
+              "qps": 0.0133,
               "num_requests": 4,
               "concurrency": 2,
-              "ratio_to_sglang": 0.942
+              "ratio_to_sglang": 0.842
             }
           },
           "winner": "sglang",
-          "winner_speedup": "1.05x"
+          "winner_speedup": "1.07x"
         }
       ],
-      "reproduce": "scripts/run_gb300_full_20261010.sh",
+      "reproduce": "scripts/run_b300_full_20261022.sh",
       "reproduce_link": {
-        "path": "scripts/run_gb300_full_20261010.sh",
-        "ref": "8b4f4413b",
-        "url": "https://github.com/mickqian/diffusion-bench-framework/blob/8b4f4413b67f425f89a1ac738d79b327b07a90d7/scripts/run_gb300_full_20261010.sh"
+        "path": "scripts/run_b300_full_20261022.sh",
+        "ref": "a61608e87",
+        "url": "https://github.com/mickqian/diffusion-bench-framework/blob/a61608e87b52debf18c43873e7fec7ceced23a52/scripts/run_b300_full_20261022.sh"
       },
-      "round": "round-20261010",
-      "round_label": "Round 2026-10-10"
+      "round": "round-20261022",
+      "round_label": "Round 2026-10-22"
     }
   ],
   "thinnest_lead": [
     {
       "mode": "single_e2e",
       "metric": "latency_s",
-      "case_id": "minimax_h3_ref2va_5s",
-      "case": "MiniMax-H3 Ref2V+A · 2 GPUs",
-      "hardware": "4x NVIDIA GB300 288GB",
+      "case_id": "wan22_t2v_a14b_720p",
+      "case": "Wan2.2 T2V A14B 720p · 4 GPUs",
+      "hardware": "4x NVIDIA B300 SXM6 AC 275GB",
       "sglang": {
-        "gpus": 2,
-        "latency_s": 88.362,
-        "diagnostic_client_latency_s": 88.521,
-        "diagnostic_stage_sum_s": 87.28,
-        "unattributed_tail_s": 1.241,
-        "unattributed_tail_frac": 0.014,
+        "gpus": 4,
+        "latency_s": 89.661,
+        "diagnostic_client_latency_s": 89.721,
+        "diagnostic_stage_sum_s": 89.691,
+        "unattributed_tail_s": 0.03,
+        "unattributed_tail_frac": 0.0,
         "poll_interval_s": 0.02
       },
       "fastest_competitor": {
-        "framework": "fastvideo",
-        "gpus": 2,
-        "latency_s": 90.46
+        "framework": "trtllm-visual",
+        "gpus": 4,
+        "latency_s": 94.382
       },
-      "ratio_to_sglang": 1.024
+      "ratio_to_sglang": 1.053
     },
     {
       "mode": "single_e2e",
       "metric": "latency_s",
-      "case_id": "cosmos3_nano_t2i_720p",
-      "case": "Cosmos3-Nano T2I 720p · 2 GPUs",
-      "hardware": "4x NVIDIA GB300 288GB",
+      "case_id": "qwen_image_21_t2i_1024",
+      "case": "Qwen-Image-2.1 T2I 1024 · 1 GPU",
+      "hardware": "4x NVIDIA B300 SXM6 AC 275GB",
       "sglang": {
-        "gpus": 2,
-        "latency_s": 0.896,
-        "diagnostic_client_latency_s": 0.913,
-        "diagnostic_stage_sum_s": 0.83,
-        "unattributed_tail_s": 0.083,
-        "unattributed_tail_frac": 0.091
+        "gpus": 1,
+        "latency_s": 2.175,
+        "diagnostic_client_latency_s": 2.197,
+        "diagnostic_stage_sum_s": 2.008,
+        "unattributed_tail_s": 0.189,
+        "unattributed_tail_frac": 0.086
       },
       "fastest_competitor": {
         "framework": "vllm-omni",
-        "gpus": 2,
-        "latency_s": 0.935
+        "gpus": 1,
+        "latency_s": 2.372
       },
-      "ratio_to_sglang": 1.044
+      "ratio_to_sglang": 1.091
     },
     {
       "mode": "single_e2e",
       "metric": "latency_s",
-      "case_id": "minimax_h3_t2va_5s",
-      "case": "MiniMax-H3 T2V+A · 2 GPUs",
-      "hardware": "4x NVIDIA GB300 288GB",
+      "case_id": "qwen_image_21_edit_1024",
+      "case": "Qwen-Image-2.1 edit 1024 (one reference) · 1 GPU",
+      "hardware": "4x NVIDIA B300 SXM6 AC 275GB",
       "sglang": {
-        "gpus": 2,
-        "latency_s": 57.46,
-        "diagnostic_client_latency_s": 57.477,
-        "diagnostic_stage_sum_s": 56.777,
-        "unattributed_tail_s": 0.699,
-        "unattributed_tail_frac": 0.012,
-        "poll_interval_s": 0.02
+        "gpus": 1,
+        "latency_s": 2.621,
+        "diagnostic_client_latency_s": 2.614,
+        "diagnostic_stage_sum_s": 2.421,
+        "unattributed_tail_s": 0.193,
+        "unattributed_tail_frac": 0.074
       },
       "fastest_competitor": {
         "framework": "vllm-omni",
-        "gpus": 2,
-        "latency_s": 60.947
+        "gpus": 1,
+        "latency_s": 2.862
       },
-      "ratio_to_sglang": 1.061
+      "ratio_to_sglang": 1.092
+    },
+    {
+      "mode": "throughput",
+      "metric": "qps",
+      "case_id": "qwen_image_21_t2i_1024",
+      "case": "Qwen-Image-2.1 T2I 1024 · 1 GPU",
+      "hardware": "4x NVIDIA B300 SXM6 AC 275GB",
+      "sglang": {
+        "gpus": 1,
+        "qps": 0.4637
+      },
+      "fastest_competitor": {
+        "framework": "vllm-omni",
+        "gpus": 1,
+        "qps": 0.4321
+      },
+      "ratio_to_sglang": 0.932
     },
     {
       "mode": "throughput",
       "metric": "qps",
       "case_id": "minimax_h3_t2va_5s",
       "case": "MiniMax-H3 T2V+A · 2 GPUs",
-      "hardware": "4x NVIDIA GB300 288GB",
+      "hardware": "4x NVIDIA B300 SXM6 AC 275GB",
       "sglang": {
         "gpus": 2,
-        "qps": 0.0173
-      },
-      "fastest_competitor": {
-        "framework": "vllm-omni",
-        "gpus": 2,
-        "qps": 0.0164
-      },
-      "ratio_to_sglang": 0.948
-    },
-    {
-      "mode": "throughput",
-      "metric": "qps",
-      "case_id": "flux1_dev_t2i_1024",
-      "case": "FLUX.1-dev T2I · 2 GPUs",
-      "hardware": "4x NVIDIA GB300 288GB",
-      "sglang": {
-        "gpus": 2,
-        "qps": 0.3607
+        "qps": 0.0158
       },
       "fastest_competitor": {
         "framework": "trtllm-visual",
         "gpus": 2,
-        "qps": 0.3312
+        "qps": 0.0147
       },
-      "ratio_to_sglang": 0.918
+      "ratio_to_sglang": 0.93
     }
   ]
 }

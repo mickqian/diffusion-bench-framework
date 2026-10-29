@@ -1,0 +1,715 @@
+{
+  "timestamp": "2026-10-22T17:16:22.733500+00:00",
+  "commit_sha": "320a118b7303fe9e41d219fe3ccde8d0ed9bf662",
+  "run_id": "local",
+  "hardware": {
+    "runner_labels": null,
+    "gpu_config": null,
+    "gpus": [
+      "NVIDIA B300 SXM6 AC, 275040 MiB, 595.91.07",
+      "NVIDIA B300 SXM6 AC, 275040 MiB, 595.91.07",
+      "NVIDIA B300 SXM6 AC, 275040 MiB, 595.91.07",
+      "NVIDIA B300 SXM6 AC, 275040 MiB, 595.91.07"
+    ],
+    "hardware_profile_override": "b300"
+  },
+  "sglang_runtime": {
+    "package_version": "0.0.0.dev1+gc1c287a42",
+    "module_path": "/workspace/r1022/sgl/python/sglang/__init__.py",
+    "git_root": "/workspace/r1022/sgl",
+    "git_commit": "82f7249ce6c1f2b6c5d293dabdf11d2b21cc667a"
+  },
+  "framework_runtime": {
+    "venv_root": "/workspace/r1022/fw-venvs",
+    "install_specs": {
+      "vllm": "vllm==0.18.0",
+      "vllm_omni": "vllm-omni==0.18.0",
+      "lightx2v": "git+https://github.com/ModelTC/LightX2V.git@7efd05f8e1425b83321fd4f1cef779ef6504076f",
+      "lightx2v_flash_attn": "flash-attn==2.8.3",
+      "lightx2v_flash_attn3": "",
+      "lightx2v_fa3_hf_repo": "varunneal/flash-attention-3",
+      "lightx2v_fa3_hf_revision": "de87b9b5af06dd9984df595bef90b2eba44b181a",
+      "lightx2v_fa3_hf_subdir": "build/torch28-cxx11-cu128-x86_64-linux/flash_attention_3",
+      "lightx2v_flashinfer": "flashinfer-python==0.6.11",
+      "trtllm": "tensorrt-llm==1.3.0rc18",
+      "fastvideo": "https://github.com/hao-ai-lab/FastVideo.git@main",
+      "torch_cuda_arch_list": ""
+    },
+    "launchers": {
+      "vllm_omni_server_bin": "vllm",
+      "vllm_omni_required_help_args": "--omni",
+      "trtllm_visual_server_bin": "trtllm-serve"
+    },
+    "vllm-omni": {
+      "venv_path": "/workspace/r1022/fw-venvs/vllm-omni",
+      "packages": {
+        "vllm": {
+          "Name": "vllm",
+          "Version": "0.32.0",
+          "Home-page": "https://github.com/vllm-project/vllm",
+          "Location": "/workspace/r1022/fw-venvs/vllm-omni/lib/python3.12/site-packages"
+        },
+        "vllm-omni": {
+          "Name": "vllm-omni",
+          "Version": "0.32.0rc2.dev46+g0da1d831e",
+          "Home-page": "https://github.com/vllm-project/vllm-omni",
+          "Location": "/workspace/r1022/fw-venvs/vllm-omni/lib/python3.12/site-packages"
+        },
+        "torch": {
+          "Name": "torch",
+          "Version": "2.13.0",
+          "Home-page": "https://pytorch.org",
+          "Location": "/workspace/r1022/fw-venvs/vllm-omni/lib/python3.12/site-packages"
+        },
+        "transformers": {
+          "Name": "transformers",
+          "Version": "5.19.0",
+          "Home-page": "https://github.com/huggingface/transformers",
+          "Location": "/workspace/r1022/fw-venvs/vllm-omni/lib/python3.12/site-packages"
+        },
+        "diffusers": {
+          "Name": "diffusers",
+          "Version": "0.40.0",
+          "Home-page": "https://github.com/huggingface/diffusers",
+          "Location": "/workspace/r1022/fw-venvs/vllm-omni/lib/python3.12/site-packages"
+        },
+        "huggingface_hub": {
+          "Name": "huggingface_hub",
+          "Version": "1.33.0",
+          "Home-page": "https://github.com/huggingface/huggingface_hub",
+          "Location": "/workspace/r1022/fw-venvs/vllm-omni/lib/python3.12/site-packages"
+        }
+      },
+      "direct_urls": {
+        "vllm_omni-0.32.0rc2.dev46+g0da1d831e.dist-info": {
+          "url": "file:///workspace/r1022/fw-venvs/vllm-omni/src/vllm-omni",
+          "dir_info": {
+            "editable": true
+          }
+        }
+      }
+    },
+    "lightx2v": {
+      "venv_path": "/workspace/r1022/fw-venvs/lightx2v",
+      "packages": {
+        "lightx2v": {
+          "Name": "lightx2v",
+          "Version": "0.5.0",
+          "Home-page": "https://github.com/ModelTC/LightX2V",
+          "Location": "/workspace/r1022/fw-venvs/lightx2v/lib/python3.12/site-packages"
+        },
+        "flash_attn": {
+          "Name": "flash_attn",
+          "Version": "2.8.3",
+          "Home-page": "https://github.com/Dao-AILab/flash-attention",
+          "Location": "/workspace/r1022/fw-venvs/lightx2v/lib/python3.12/site-packages"
+        },
+        "flashinfer-python": {
+          "Name": "flashinfer-python",
+          "Version": "0.6.11",
+          "Home-page": "https://github.com/flashinfer-ai/flashinfer",
+          "Location": "/workspace/r1022/fw-venvs/lightx2v/lib/python3.12/site-packages"
+        },
+        "torch": {
+          "Name": "torch",
+          "Version": "2.11.0",
+          "Home-page": "https://pytorch.org",
+          "Location": "/workspace/r1022/fw-venvs/lightx2v/lib/python3.12/site-packages"
+        },
+        "transformers": {
+          "Name": "transformers",
+          "Version": "5.20.2",
+          "Home-page": "https://github.com/huggingface/transformers",
+          "Location": "/workspace/r1022/fw-venvs/lightx2v/lib/python3.12/site-packages"
+        },
+        "diffusers": {
+          "Name": "diffusers",
+          "Version": "0.41.0",
+          "Home-page": "https://github.com/huggingface/diffusers",
+          "Location": "/workspace/r1022/fw-venvs/lightx2v/lib/python3.12/site-packages"
+        },
+        "huggingface_hub": {
+          "Name": "huggingface_hub",
+          "Version": "1.33.0",
+          "Home-page": "https://github.com/huggingface/huggingface_hub",
+          "Location": "/workspace/r1022/fw-venvs/lightx2v/lib/python3.12/site-packages"
+        }
+      },
+      "direct_urls": {
+        "lightx2v-0.5.0.dist-info": {
+          "url": "https://github.com/ModelTC/LightX2V.git",
+          "vcs_info": {
+            "commit_id": "19c19614b067f1746ac24350dfd097e1c0b48591",
+            "requested_revision": "19c19614b067f1746ac24350dfd097e1c0b48591",
+            "vcs": "git"
+          }
+        }
+      }
+    },
+    "trtllm-visual": {
+      "venv_path": "/workspace/r1022/fw-venvs/trtllm-visual",
+      "packages": {
+        "tensorrt_llm": {
+          "Name": "tensorrt_llm",
+          "Version": "1.4.0rc1",
+          "Home-page": "https://github.com/NVIDIA/TensorRT-LLM",
+          "Location": "/workspace/r1022/fw-venvs/trtllm-visual/lib/python3.12/site-packages"
+        },
+        "torch": {
+          "Name": "torch",
+          "Version": "2.14.0+cu130",
+          "Home-page": "https://pytorch.org",
+          "Location": "/workspace/r1022/fw-venvs/trtllm-visual/lib/python3.12/site-packages"
+        },
+        "transformers": {
+          "Name": "transformers",
+          "Version": "5.5.4",
+          "Home-page": "https://github.com/huggingface/transformers",
+          "Location": "/workspace/r1022/fw-venvs/trtllm-visual/lib/python3.12/site-packages"
+        },
+        "diffusers": {
+          "Name": "diffusers",
+          "Version": "0.40.0",
+          "Home-page": "https://github.com/huggingface/diffusers",
+          "Location": "/workspace/r1022/fw-venvs/trtllm-visual/lib/python3.12/site-packages"
+        },
+        "huggingface_hub": {
+          "Name": "huggingface_hub",
+          "Version": "1.33.0",
+          "Home-page": "https://github.com/huggingface/huggingface_hub",
+          "Location": "/workspace/r1022/fw-venvs/trtllm-visual/lib/python3.12/site-packages"
+        }
+      }
+    },
+    "comfyui": {
+      "venv_path": "/workspace/r1022/fw-venvs/comfyui",
+      "packages": {
+        "torchvision": {
+          "Name": "torchvision",
+          "Version": "0.29.1+cu130",
+          "Home-page": "https://github.com/pytorch/vision",
+          "Location": "/workspace/r1022/fw-venvs/comfyui/lib/python3.12/site-packages"
+        },
+        "torchaudio": {
+          "Name": "torchaudio",
+          "Version": "2.11.0+cu130",
+          "Home-page": "https://github.com/pytorch/audio",
+          "Location": "/workspace/r1022/fw-venvs/comfyui/lib/python3.12/site-packages"
+        },
+        "comfy-kitchen": {
+          "Name": "comfy-kitchen",
+          "Version": "0.2.39",
+          "Home-page": "https://github.com/Comfy-Org/comfy-kitchen",
+          "Location": "/workspace/r1022/fw-venvs/comfyui/lib/python3.12/site-packages"
+        },
+        "comfy-aimdo": {
+          "Name": "comfy-aimdo",
+          "Version": "0.5.6",
+          "Home-page": "",
+          "Location": "/workspace/r1022/fw-venvs/comfyui/lib/python3.12/site-packages"
+        },
+        "comfyui_frontend_package": {
+          "Name": "comfyui_frontend_package",
+          "Version": "1.57.1",
+          "Home-page": "",
+          "Location": "/workspace/r1022/fw-venvs/comfyui/lib/python3.12/site-packages"
+        },
+        "safetensors": {
+          "Name": "safetensors",
+          "Version": "0.8.0",
+          "Home-page": "https://github.com/huggingface/safetensors",
+          "Location": "/workspace/r1022/fw-venvs/comfyui/lib/python3.12/site-packages"
+        },
+        "torch": {
+          "Name": "torch",
+          "Version": "2.14.1+cu130",
+          "Home-page": "https://pytorch.org",
+          "Location": "/workspace/r1022/fw-venvs/comfyui/lib/python3.12/site-packages"
+        },
+        "transformers": {
+          "Name": "transformers",
+          "Version": "5.20.2",
+          "Home-page": "https://github.com/huggingface/transformers",
+          "Location": "/workspace/r1022/fw-venvs/comfyui/lib/python3.12/site-packages"
+        },
+        "huggingface_hub": {
+          "Name": "huggingface_hub",
+          "Version": "2.2.0",
+          "Home-page": "https://github.com/huggingface/huggingface_hub",
+          "Location": "/workspace/r1022/fw-venvs/comfyui/lib/python3.12/site-packages"
+        }
+      },
+      "source_commit": "1a82e6d01f395b43275c77acd289af1eb7090bb9",
+      "source_commit_date": "2026-10-21T23:43:22-04:00"
+    },
+    "fastvideo": {
+      "venv_path": "/workspace/r1022/fw-venvs/fastvideo",
+      "packages": {
+        "fastvideo": {
+          "Name": "fastvideo",
+          "Version": "0.2.1",
+          "Home-page": "",
+          "Location": "/workspace/r1022/fw-venvs/fastvideo/lib/python3.12/site-packages"
+        },
+        "fastvideo-kernel": {
+          "Name": "fastvideo-kernel",
+          "Version": "0.3.5",
+          "Home-page": "https://github.com/hao-ai-lab/FastVideo",
+          "Location": "/workspace/r1022/fw-venvs/fastvideo/lib/python3.12/site-packages"
+        },
+        "flash-attn-4": {
+          "Name": "flash-attn-4",
+          "Version": "4.0.0b24.dev3+g14c3779",
+          "Home-page": "https://github.com/Dao-AILab/flash-attention",
+          "Location": "/workspace/r1022/fw-venvs/fastvideo/lib/python3.12/site-packages"
+        },
+        "nvidia-cutlass-dsl": {
+          "Name": "nvidia-cutlass-dsl",
+          "Version": "4.6.0.dev0",
+          "Home-page": "",
+          "Location": "/workspace/r1022/fw-venvs/fastvideo/lib/python3.12/site-packages"
+        },
+        "flashinfer-python": {
+          "Name": "flashinfer-python",
+          "Version": "0.6.17",
+          "Home-page": "https://github.com/flashinfer-ai/flashinfer",
+          "Location": "/workspace/r1022/fw-venvs/fastvideo/lib/python3.12/site-packages"
+        },
+        "torch": {
+          "Name": "torch",
+          "Version": "2.12.0+cu130",
+          "Home-page": "https://pytorch.org",
+          "Location": "/workspace/r1022/fw-venvs/fastvideo/lib/python3.12/site-packages"
+        },
+        "transformers": {
+          "Name": "transformers",
+          "Version": "5.15.1",
+          "Home-page": "https://github.com/huggingface/transformers",
+          "Location": "/workspace/r1022/fw-venvs/fastvideo/lib/python3.12/site-packages"
+        },
+        "diffusers": {
+          "Name": "diffusers",
+          "Version": "0.41.0",
+          "Home-page": "https://github.com/huggingface/diffusers",
+          "Location": "/workspace/r1022/fw-venvs/fastvideo/lib/python3.12/site-packages"
+        },
+        "huggingface_hub": {
+          "Name": "huggingface_hub",
+          "Version": "1.33.0",
+          "Home-page": "https://github.com/huggingface/huggingface_hub",
+          "Location": "/workspace/r1022/fw-venvs/fastvideo/lib/python3.12/site-packages"
+        }
+      },
+      "source_commit": "fa2d1324c60050cd65209c6aaeac470e7fb412f5",
+      "source_commit_date": "2026-10-21T12:01:54-07:00",
+      "direct_urls": {
+        "fastvideo-0.2.1.dist-info": {
+          "url": "file:///workspace/r1022/fw-venvs/fastvideo/FastVideo",
+          "dir_info": {
+            "editable": true
+          }
+        },
+        "flash_attn_4-4.0.0b24.dev3+g14c3779.dist-info": {
+          "url": "https://github.com/Dao-AILab/flash-attention.git",
+          "vcs_info": {
+            "vcs": "git",
+            "commit_id": "14c377950125c70b7a9dabf9c561fca53715ac7d",
+            "requested_revision": "14c377950125c70b7a9dabf9c561fca53715ac7d"
+          },
+          "subdirectory": "flash_attn/cute"
+        },
+        "fastvideo_kernel-0.3.5.dist-info": {
+          "url": "file:///workspace/r1022/fw-venvs/fastvideo/FastVideo/fastvideo-kernel",
+          "dir_info": {
+            "editable": false
+          }
+        }
+      }
+    }
+  },
+  "benchmark_env": {},
+  "benchmark_framework_args": {
+    "vllm-omni": [],
+    "lightx2v": {
+      "config": {
+        "use_compile": true
+      }
+    },
+    "fastvideo": []
+  },
+  "torch_compile_disabled": false,
+  "benchmark_modes": [
+    "single_e2e",
+    "throughput"
+  ],
+  "requested_sglang_profile": "auto",
+  "request_inputs": "distinct-per-request",
+  "results": [
+    {
+      "case_id": "wan22_t2v_a14b_720p",
+      "framework": "sglang",
+      "mode": "single_e2e",
+      "model": "Wan-AI/Wan2.2-T2V-A14B-Diffusers",
+      "task": "text-to-video",
+      "width": 1280,
+      "height": 720,
+      "num_frames": 81,
+      "fps": 16,
+      "num_inference_steps": 40,
+      "guidance_scale": 4.0,
+      "guidance_scale_2": 3.0,
+      "true_cfg_scale": null,
+      "negative_prompt_set": false,
+      "num_gpus": 4,
+      "latency_s": 97.052,
+      "error": null,
+      "framework_metadata": {
+        "profile": "default",
+        "profile_request": "auto",
+        "profile_source": "default",
+        "framework_ref": null,
+        "hardware": null,
+        "hardware_candidates": [
+          "b300"
+        ],
+        "description": "Best known SGLang command for the benchmark repo default profile.",
+        "notes": "Keep this profile updated when the best command changes for a SGLang release or commit. Policy-aligned candidate (compile on, offload off) \u2014 NOT yet validated on H100; validate (incl. OOM risk) before publishing. FOUR-GPU CELLS ON THE 2026-09-13 4xB200 RUN ARE 3-4x SLOW AND IT IS NOT SGLANG. All three 4-GPU cases (this one, cosmos3 t2v 189f, cosmos3 i2v 189f) came out 3-4x slower than the SAME case and workload on H100 (07-03, 07-30) and H200 (08-26), three runs that agree with each other inside 2%. Every framework in those cells moved together -- sglang 0.25-0.32x, vLLM-Omni 0.28-0.30x, LightX2V 0.22x -- so the earlier note here calling it a suspected sglang regression was wrong, and is retracted. Nor is it the box: every 2-GPU case in that same run is 1.7-2.6x FASTER than its H200 figure. The discriminator is GPU COUNT, not model and not framework; the original investigation missed it because every image case is 2-GPU. Already eliminated, do not repeat: model unchanged since 2025-08-09, workload identical in both artifacts, warmup scales linearly, attention backend (`fa` is WORSE than the auto-selected dynamic_cudnn_sdpa), interconnect topology (NV18 all-pairs at 53.125 GB/s), offload off with 113 GiB free, MoE boundary 0.875 with both experts resident. SETTLED: a fresh 4xB200 does NOT reproduce it. MEASURED 2026-09-18 on a fresh 4xB200 (verda-b200-fin-03-3, same node family, sglang v0.5.20, cosmos3 t2v 189f, identical workload and the same `--attention-backend fa`): 2 GPU on cards 0,1 = 58.05s; 2 GPU on cards 2,3 = 58.24s; 4 GPU = 32.34s. Four-GPU scaling is healthy (1.80x over two), and the 4-GPU figure is 1.64x faster than H200's 53.09s -- the normal Blackwell gain. bench-0912 reported 214.90s for that same cell, 6.6x the healthy number. So the hardware is fine and these three cells are ARTIFACTS OF THAT BOX, not Blackwell and not sglang -- which is also the only account consistent with vLLM-Omni and LightX2V being equally slow there. Two further hypotheses died in the same experiment: `fa` is not pathological on Blackwell (arm A pins it and is 1.9x faster than H200), and the NUMA split that puts GPU3 on a different socket costs nothing measurable (58.05 vs 58.24 across it). RE-MEASURED 2026-09-18 and republished: cosmos3 t2v 214.9 -> 31.7, i2v 216.0 -> 31.9, wan22 669.4 -> 106.5, each now 1.68-1.98x faster than its H200 figure, in line with every 2-GPU cell. The two cosmos3 cells ran against Cosmos3-Nano e59a53c25 rather than the 7a312c868 the rest of the artifact records -- the shared cache resolves `main` online, so the revision could not be pinned; both cells reproduce under 0.1% across two runs and vLLM-Omni moved by the same factor, so the revision does not carry the result.",
+        "install_specs": null,
+        "server_bin": null,
+        "use_omni_arg": null,
+        "required_help_args": null,
+        "serve_args": "--model-type diffusion --warmup-mode server --enable-cfg-parallel --ulysses-degree 2 --dit-cpu-offload false --pin-cpu-memory --dit-layerwise-offload false --performance-mode speed --enable-torch-compile false",
+        "num_gpus": null,
+        "extra_env_keys": [],
+        "request_inputs": "distinct-per-request",
+        "sglang_profile": "default",
+        "sglang_profile_request": "auto",
+        "sglang_profile_source": "default",
+        "sglang_ref": "current-main"
+      },
+      "server_command": "sglang serve --model-path Wan-AI/Wan2.2-T2V-A14B-Diffusers --port 62024 --host 127.0.0.1 --backend sglang --num-gpus 4 --model-type diffusion --warmup-mode server --enable-cfg-parallel --ulysses-degree 2 --dit-cpu-offload false --pin-cpu-memory --dit-layerwise-offload false --performance-mode speed --enable-torch-compile false",
+      "metrics": {
+        "client_latency_s": 97.052,
+        "client_latency_min_s": 97.038,
+        "client_latency_max_s": 97.066,
+        "measured_repeats": 2,
+        "server_latency_s": 97.07,
+        "server_latency_source": "separate instrumented request, not one of the measured repeats",
+        "diagnostic_stages_s": {
+          "InputValidationStage": 0.0,
+          "TextEncodingStage": 0.054,
+          "LatentPreparationStage": 0.0,
+          "TimestepPreparationStage": 0.0,
+          "DenoisingStage": 94.143,
+          "DecodingStage": 2.869
+        },
+        "diagnostic_stage_sum_s": 97.067,
+        "diagnostic_client_latency_s": 97.093,
+        "unattributed_tail_s": 0.026,
+        "unattributed_tail_frac": 0.0,
+        "poll_interval_s": 0.02,
+        "latency_samples_s": [
+          97.066,
+          97.038
+        ],
+        "latency_spread_pct": 0.0,
+        "warmup_latencies_s": [
+          14.953,
+          8.459,
+          8.496
+        ],
+        "warmup_steady_latencies_s": [
+          96.991
+        ],
+        "server_startup_s": 102.1,
+        "warmup_s": 128.9
+      }
+    },
+    {
+      "case_id": "wan22_t2v_a14b_720p",
+      "framework": "vllm-omni",
+      "mode": "single_e2e",
+      "model": "Wan-AI/Wan2.2-T2V-A14B-Diffusers",
+      "task": "text-to-video",
+      "width": 1280,
+      "height": 720,
+      "num_frames": 81,
+      "fps": 16,
+      "num_inference_steps": 40,
+      "guidance_scale": 4.0,
+      "guidance_scale_2": 3.0,
+      "true_cfg_scale": null,
+      "negative_prompt_set": false,
+      "num_gpus": 4,
+      "latency_s": 100.181,
+      "error": null,
+      "framework_metadata": {
+        "profile": "blackwell-4gpu-cfg2-usp2-vaepp-devpost",
+        "profile_request": "auto",
+        "profile_source": "hardware",
+        "framework_ref": "vllm-omni main 0da1d831e07f + vllm==0.32.0",
+        "hardware": [
+          "b200",
+          "gb200",
+          "b300",
+          "gb300"
+        ],
+        "hardware_candidates": [
+          "b300"
+        ],
+        "description": "Blackwell: GPU-side video postprocess (docs: at most one level in 255 from the host path).",
+        "notes": " Promoted from cand-devpost by the 2026-10-22 4xB300 A/B (scripts/run_b300_ab_20261022.sh): one round, 100.23 s (100.20/100.27) against blackwell-4gpu-cfg2-usp2-vaepp's 101.75 s (101.70/101.80). Device postprocess changes the uint8 frames by at most one level (rounding), not the model math; taken because the faster competitor command is the conservative choice.",
+        "install_specs": null,
+        "server_bin": null,
+        "use_omni_arg": null,
+        "required_help_args": null,
+        "serve_args": "--num-gpus 4 --cfg-parallel-size 2 --usp 2 --vae-patch-parallel-size 4 --vae-parallel-mode spatial_shard_width --no-diffusion-compile-dynamic --video-output-transport {\"enable_device_postprocess\":true}",
+        "num_gpus": 4,
+        "extra_env_keys": [
+          "DIFFUSION_ATTENTION_BACKEND"
+        ],
+        "request_inputs": "distinct-per-request"
+      },
+      "server_command": "vllm serve Wan-AI/Wan2.2-T2V-A14B-Diffusers --port 62024 --host 127.0.0.1 --omni --num-gpus 4 --cfg-parallel-size 2 --usp 2 --vae-patch-parallel-size 4 --vae-parallel-mode spatial_shard_width --no-diffusion-compile-dynamic --video-output-transport '{\"enable_device_postprocess\":true}'",
+      "metrics": {
+        "client_latency_s": 100.181,
+        "client_latency_min_s": 100.145,
+        "client_latency_max_s": 100.217,
+        "measured_repeats": 2,
+        "latency_samples_s": [
+          100.145,
+          100.217
+        ],
+        "latency_spread_pct": 0.1,
+        "warmup_latencies_s": [
+          13.275,
+          8.841,
+          8.808
+        ],
+        "warmup_steady_latencies_s": [
+          100.172
+        ],
+        "server_startup_s": 156.31,
+        "warmup_s": 131.1
+      }
+    },
+    {
+      "case_id": "wan22_t2v_a14b_720p",
+      "framework": "lightx2v",
+      "mode": "single_e2e",
+      "model": "Wan-AI/Wan2.2-T2V-A14B",
+      "task": "text-to-video",
+      "width": 1280,
+      "height": 720,
+      "num_frames": 81,
+      "fps": 16,
+      "num_inference_steps": 40,
+      "guidance_scale": 4.0,
+      "guidance_scale_2": 3.0,
+      "true_cfg_scale": null,
+      "negative_prompt_set": false,
+      "num_gpus": 4,
+      "latency_s": 241.612,
+      "error": null,
+      "framework_metadata": {
+        "profile": "blackwell-fa2",
+        "profile_request": "auto",
+        "profile_source": "hardware",
+        "framework_ref": "lightx2v-9bf4d39a-wan22+blackwell-fa2",
+        "hardware": [
+          "b200",
+          "gb200",
+          "b300",
+          "gb300"
+        ],
+        "hardware_candidates": [
+          "b300"
+        ],
+        "description": "Blackwell LightX2V Wan2.2 profile: same config as default with all three attention slots on FlashAttention 2.",
+        "notes": "LightX2V's default FlashAttention-3 path is a Hopper-only precompiled kernel: on B200 it loads and then dies mid-generation with 'no kernel image is available for execution on the device' (flash-attention/hopper/flash_fwd_launch_template.h), taking the server with it. FA2 is built from source for sm_100 in this venv and is the same precision class (exact softmax), matching how SGLang and vLLM-Omni are run here. Deliberately NOT SageAttention: int8 QK quantisation is a different numeric class and not a fair substitute.",
+        "install_specs": null,
+        "server_bin": null,
+        "use_omni_arg": null,
+        "required_help_args": null,
+        "serve_args": "",
+        "num_gpus": null,
+        "extra_env_keys": [],
+        "request_inputs": "distinct-per-request",
+        "lightx2v_config_keys": [
+          "boundary",
+          "cpu_offload",
+          "cross_attn_1_type",
+          "enable_cfg",
+          "offload_granularity",
+          "parallel",
+          "sample_shift",
+          "self_attn_1_type",
+          "t5_cpu_offload",
+          "use_image_encoder",
+          "vae_cpu_offload"
+        ]
+      },
+      "server_command": "torchrun --nproc_per_node=4 -m lightx2v.server --model_path /workspace/r1022/hf/hub/models--Wan-AI--Wan2.2-T2V-A14B/snapshots/c8c270b13ee05bfa474194ac9fb07a5868a97cea --model_cls wan2.2_moe --task t2v --config_json /tmp/lightx2v_config_wan22_t2v_a14b_720p.json --host 127.0.0.1 --port 62024",
+      "metrics": {
+        "client_latency_s": 241.612,
+        "client_latency_min_s": 241.56,
+        "client_latency_max_s": 241.664,
+        "measured_repeats": 2,
+        "latency_samples_s": [
+          241.664,
+          241.56
+        ],
+        "latency_spread_pct": 0.0,
+        "warmup_latencies_s": [
+          295.921
+        ],
+        "server_startup_s": 72.08,
+        "warmup_s": 295.92
+      }
+    },
+    {
+      "case_id": "wan22_t2v_a14b_720p",
+      "framework": "trtllm-visual",
+      "mode": "single_e2e",
+      "model": "Wan-AI/Wan2.2-T2V-A14B-Diffusers",
+      "task": "text-to-video",
+      "width": 1280,
+      "height": 720,
+      "num_frames": 81,
+      "fps": 16,
+      "num_inference_steps": 40,
+      "guidance_scale": 4.0,
+      "guidance_scale_2": 3.0,
+      "true_cfg_scale": null,
+      "negative_prompt_set": false,
+      "num_gpus": 4,
+      "latency_s": 94.658,
+      "error": null,
+      "framework_metadata": {
+        "profile": "default",
+        "profile_request": "auto",
+        "profile_source": "default",
+        "framework_ref": "tensorrt-llm 1.4.0rc1 (tag 0372799d1543, 2026-10-19)",
+        "hardware": null,
+        "hardware_candidates": [
+          "b300"
+        ],
+        "description": "TensorRT-LLM VisualGen, NVIDIA's official wan2.2-t2v-fp4-4gpu.yaml at BF16, 4 GPU(s).",
+        "notes": "Official 4-GPU Wan2.2 layout (CFG 2 x async Ulysses 2, parallel VAE 4) at BF16, CUDA graphs off as in the config. guidance_scale_2 rides extra_params; boundary_ratio comes from the checkpoint (0.875); UniPC, 40 steps = 40 evaluations of a CFG pair; the negative prompt is sglang's default, as for ComfyUI. VANILLA attention is torch SDPA (FlashAttention on Hopper); no cache_config or quant_config, so the row is BF16 and cache-free; compile at the case shape so the first request does not recompile; JSON to /v1/videos/sync (or /v1/images/generations), whose reply is the media itself. The YAML is passed with --visual_gen_args (trtllm-serve has no --extra_visual_gen_options). VALIDATION PENDING (round 2026-10-22, 2xH200/4xH200). Blackwell: VANILLA beat FA4 on Wan2.2 T2V 4-GPU, 94.55 against 97.42 s (4xB300 A/B, 2026-10-22), so it is selected there too.",
+        "install_specs": null,
+        "server_bin": null,
+        "use_omni_arg": null,
+        "required_help_args": null,
+        "serve_args": "",
+        "num_gpus": 4,
+        "extra_env_keys": [
+          "PYTORCH_CUDA_ALLOC_CONF"
+        ],
+        "request_inputs": "distinct-per-request"
+      },
+      "server_command": "trtllm-serve serve Wan-AI/Wan2.2-T2V-A14B-Diffusers --host 127.0.0.1 --port 62024 --visual_gen_args /tmp/diffusion-bench-trtllm/wan22_t2v_a14b_720p-62024.yaml",
+      "metrics": {
+        "client_latency_s": 94.658,
+        "client_latency_min_s": 94.637,
+        "client_latency_max_s": 94.679,
+        "measured_repeats": 2,
+        "latency_samples_s": [
+          94.637,
+          94.679
+        ],
+        "latency_spread_pct": 0.0,
+        "warmup_latencies_s": [
+          8.927,
+          8.559,
+          8.499
+        ],
+        "warmup_steady_latencies_s": [
+          94.399
+        ],
+        "server_startup_s": 130.14,
+        "warmup_s": 120.39
+      }
+    },
+    {
+      "case_id": "wan22_t2v_a14b_720p",
+      "framework": "comfyui",
+      "mode": "single_e2e",
+      "model": "Wan-AI/Wan2.2-T2V-A14B-Diffusers",
+      "task": "text-to-video",
+      "width": 1280,
+      "height": 720,
+      "num_frames": 81,
+      "fps": 16,
+      "num_inference_steps": 40,
+      "guidance_scale": 4.0,
+      "guidance_scale_2": 3.0,
+      "true_cfg_scale": null,
+      "negative_prompt_set": false,
+      "num_gpus": 2,
+      "latency_s": 521.395,
+      "error": null,
+      "framework_metadata": {
+        "profile": "blackwell-gpuonly",
+        "profile_request": "auto",
+        "profile_source": "hardware",
+        "framework_ref": "ComfyUI master HEAD",
+        "hardware": [
+          "b200",
+          "gb200",
+          "b300",
+          "gb300"
+        ],
+        "hardware_candidates": [
+          "b300"
+        ],
+        "description": "Blackwell: the default graph with every model resident on the GPU (--gpu-only).",
+        "notes": "B200: --gpu-only keeps every model, text encoders included, stored and run on the card; a 183 GB B200 holds the largest graph here (MiniMax-H3: 62 GB DiT + 48 GB Qwen3-VL-32B + VAEs). Placement only, numerics unchanged. Measured 2026-09-25 on 1xB200, FLUX.1 eager, interleaved arms: default 5.94 / 5.77 / 5.79s against --gpu-only 5.56s and --gpu-only --disable-dynamic-vram 5.57s (Qwen-Image-2.1: 3.75 / 3.91 against 3.47 / 3.48) -- every --gpu-only arm below every default arm; disabling dynamic VRAM on top adds nothing, so the simpler flag is kept.",
+        "install_specs": null,
+        "server_bin": null,
+        "use_omni_arg": null,
+        "required_help_args": null,
+        "serve_args": "--gpu-only",
+        "num_gpus": 2,
+        "extra_env_keys": [],
+        "request_inputs": "distinct-per-request",
+        "comfyui_workflow": "wan22_t2v_a14b.json",
+        "comfyui_models": {
+          "diffusion_models/wan2.2_t2v_high_noise_14B_fp16.safetensors": "Comfy-Org/Wan_2.2_ComfyUI_Repackaged:split_files/diffusion_models/wan2.2_t2v_high_noise_14B_fp16.safetensors",
+          "diffusion_models/wan2.2_t2v_low_noise_14B_fp16.safetensors": "Comfy-Org/Wan_2.2_ComfyUI_Repackaged:split_files/diffusion_models/wan2.2_t2v_low_noise_14B_fp16.safetensors",
+          "text_encoders/umt5_xxl_fp16.safetensors": "Comfy-Org/Wan_2.2_ComfyUI_Repackaged:split_files/text_encoders/umt5_xxl_fp16.safetensors",
+          "vae/wan_2.1_vae.safetensors": "Comfy-Org/Wan_2.2_ComfyUI_Repackaged:split_files/vae/wan_2.1_vae.safetensors"
+        },
+        "comfyui_params": {
+          "cfg_gpus": 2,
+          "negative_prompt": "\u8272\u8c03\u8273\u4e3d\uff0c\u8fc7\u66dd\uff0c\u9759\u6001\uff0c\u7ec6\u8282\u6a21\u7cca\u4e0d\u6e05\uff0c\u5b57\u5e55\uff0c\u98ce\u683c\uff0c\u4f5c\u54c1\uff0c\u753b\u4f5c\uff0c\u753b\u9762\uff0c\u9759\u6b62\uff0c\u6574\u4f53\u53d1\u7070\uff0c\u6700\u5dee\u8d28\u91cf\uff0c\u4f4e\u8d28\u91cf\uff0cJPEG\u538b\u7f29\u6b8b\u7559\uff0c\u4e11\u964b\u7684\uff0c\u6b8b\u7f3a\u7684\uff0c\u591a\u4f59\u7684\u624b\u6307\uff0c\u753b\u5f97\u4e0d\u597d\u7684\u624b\u90e8\uff0c\u753b\u5f97\u4e0d\u597d\u7684\u8138\u90e8\uff0c\u7578\u5f62\u7684\uff0c\u6bc1\u5bb9\u7684\uff0c\u5f62\u6001\u7578\u5f62\u7684\u80a2\u4f53\uff0c\u624b\u6307\u878d\u5408\uff0c\u9759\u6b62\u4e0d\u52a8\u7684\u753b\u9762\uff0c\u6742\u4e71\u7684\u80cc\u666f\uff0c\u4e09\u6761\u817f\uff0c\u80cc\u666f\u4eba\u5f88\u591a\uff0c\u5012\u7740\u8d70"
+        },
+        "comfyui_compile": false
+      },
+      "server_command": "python3 /workspace/r1022/fw-venvs/comfyui/ComfyUI/main.py --listen 127.0.0.1 --port 62024 --disable-auto-launch --extra-model-paths-config /workspace/r1022/comfy-ws/wan22_t2v_a14b_720p/extra_model_paths.yaml --input-directory /workspace/r1022/comfy-ws/wan22_t2v_a14b_720p/input --output-directory /workspace/r1022/comfy-ws/wan22_t2v_a14b_720p/output --gpu-only",
+      "metrics": {
+        "client_latency_s": 521.395,
+        "client_latency_min_s": 521.386,
+        "client_latency_max_s": 521.405,
+        "measured_repeats": 2,
+        "latency_samples_s": [
+          521.386,
+          521.405
+        ],
+        "latency_spread_pct": 0.0,
+        "warmup_latencies_s": [
+          140.557,
+          43.484,
+          43.486
+        ],
+        "server_startup_s": 290.38,
+        "warmup_s": 227.55
+      }
+    }
+  ],
+  "throughput_results": [],
+  "partial": false,
+  "model_revisions": {
+    "Wan-AI/Wan2.2-T2V-A14B": "c8c270b13ee05bfa474194ac9fb07a5868a97cea",
+    "Wan-AI/Wan2.2-T2V-A14B-Diffusers": "5be7df9619b54f4e2667b2755bc6a756675b5cd7"
+  }
+}
