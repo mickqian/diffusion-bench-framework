@@ -48,11 +48,13 @@ import copy
 import glob
 import json
 import os
+import re
 import sys
 
 REPO = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.insert(0, os.path.join(REPO, "src"))
 from diffusion_bench.config_guard import (  # noqa: E402
+    HARDWARE_TOKENS,
     _merge_nested,
     hardware_tokens,
     upstream_recipe_problems,
@@ -68,6 +70,11 @@ TIERS = ("verbatim", "matched-lossy", "tuned")
 # What every arm is timed by. A source that times something else (LightX2V's
 # offline `RUN pipeline cost`, TRT-LLM's gen_latency) is a deviation.
 RUN_METRIC = "client_e2e_median"
+# How a cell is measured is part of its workload: a source that warms up with
+# one full request and takes the median of three (vLLM-Omni's Qwen-Image-2.1
+# recipe) is not the harness's few-step warmup and median of two, so each of
+# these must be stated and either match or be a deviation.
+REQUIRED_WORKLOAD = ("metric", "warmup", "repeats", "dit_forwards")
 _BODY_DROP = {"status", "status_by_hardware", "reason", "command_profiles", "serve_args", "num_gpus"}
 # Command configs resolved into each arm in full (see build_cell).
 _RESOLVED_CONFIG_KEYS = ("lightx2v_config", "visual_gen_args", "extra_env")
@@ -108,6 +115,15 @@ def unset_path(obj, dotted):
     return True
 
 
+_ABS_PATH_RE = re.compile(r"(?<![\w:])/(?:scratch|data|personal|mnt|home|tmp|opt)\b[^\s\"',]*")
+
+
+def _machine_paths(prof: dict) -> list[str]:
+    """Absolute paths an arm's command reads: things that must exist on the box first."""
+    text = json.dumps({k: prof.get(k) for k in ("serve_args", "lightx2v_config", "visual_gen_args", "extra_env")})
+    return sorted(set(_ABS_PATH_RE.findall(text)))
+
+
 def _inherited_leaves(base: dict, arm: dict, prefix: str) -> list[str]:
     """Dotted paths a deep merge takes from `base` because `arm` does not set them."""
     found = []
@@ -129,7 +145,21 @@ def base_cases():
     return found
 
 
-def build_cell(cell: dict, bases: dict, in_scope: list[str]) -> tuple[dict | None, list[str]]:
+def harness_timing(case: dict, defaults: dict) -> dict:
+    """The warmup and repeat count the harness applies to `case`, as workload strings."""
+    video = "video" in (case.get("task") or "")
+    warm = {**defaults.get("warmup", {}), **((case.get("benchmark") or {}).get("warmup") or {})}
+    requests = warm.get("video_num_requests" if video else "num_requests", warm.get("num_requests"))
+    repeats = (defaults.get("single") or {}).get("video_repeats" if video else "image_repeats")
+    return {
+        "metric": RUN_METRIC,
+        "warmup": f"{requests} request(s) at {warm.get('num_inference_steps')} steps",
+        "repeats": f"median of {repeats}",
+    }
+
+
+def build_cell(cell: dict, bases: dict, in_scope: list[str],
+               defaults: dict | None = None) -> tuple[dict | None, list[str]]:
     """(built case, errors) for one cookbook cell."""
     cid = cell.get("id") or "?"
     errors = []
@@ -153,10 +183,19 @@ def build_cell(cell: dict, bases: dict, in_scope: list[str]) -> tuple[dict | Non
     for key in ("source_hardware", "source_metric"):
         if not src.get(key):
             err(f"cookbook.{key} missing")
+    # The GPU classes the source was written or measured for ([] = not stated).
+    # The build cannot know the box a cell will run on; run_cookbook_cells.sh
+    # says so when DBF_HARDWARE_PROFILE is not among these.
+    source_gpu = src.get("source_gpu")
+    if not isinstance(source_gpu, list) or not all(t in HARDWARE_TOKENS for t in source_gpu):
+        err(f"cookbook.source_gpu must be a list of {HARDWARE_TOKENS} tokens ([] if the source names none)")
     workload = src.get("workload")
     if not isinstance(workload, dict) or not workload:
         err("cookbook.workload missing: copy the source's shape, frames, steps and GPU count")
         workload = {}
+    for key in REQUIRED_WORKLOAD:
+        if key not in workload:
+            err(f"cookbook.workload.{key} missing: state the source's {key} (\"not stated\" if it gives none)")
 
     case = copy.deepcopy(base)
     for dotted, value in (cell.get("set") or {}).items():
@@ -246,6 +285,12 @@ def build_cell(cell: dict, bases: dict, in_scope: list[str]) -> tuple[dict | Non
                         f"{src.get('repo')}:{src.get('path')}")
             elif tier == "matched-lossy" and not prof.get("lossy"):
                 err(f"{where}: matched-lossy arm must list its lossy features in `lossy`")
+            # A cache sidecar or a patched kernel built on one box by hand is
+            # gone with that box (2xH200, 2026-10-30): name how to rebuild it.
+            paths = _machine_paths(prof)
+            if (paths or tier == "matched-lossy") and not prof.get("requires"):
+                err(f"{where}: reads {paths or 'lossy-feature artifacts'} -- list the steps that create them "
+                    "in `requires` (e.g. `scripts/prepare_cookbook_h3.sh sgl-adaln`)")
             elif tier == "tuned" and not prof.get("notes"):
                 err(f"{where}: tuned arm needs `notes` saying what was chosen and why")
             built_profiles[name] = prof
@@ -267,11 +312,12 @@ def build_cell(cell: dict, bases: dict, in_scope: list[str]) -> tuple[dict | Non
 
     # Workload: what the source runs vs what this cell runs.
     actual = {}
+    timing = harness_timing(case, defaults or {})
     for key in workload:
         if key == "dit_forwards":
             continue
-        if key == "metric":
-            actual[key] = RUN_METRIC
+        if key in timing:
+            actual[key] = timing[key]
         else:
             actual[key] = get_path(case, key)
             if actual[key] is _MISSING:
@@ -283,8 +329,6 @@ def build_cell(cell: dict, bases: dict, in_scope: list[str]) -> tuple[dict | Non
     expected = {k: v for k, v in workload.items() if k != "dit_forwards"}
     if "dit_forwards" in workload:
         expected.update({f"dit_forwards.{fw}": workload["dit_forwards"] for fw in verified})
-    elif arms:
-        err("cookbook.workload.dit_forwards missing: the source's DiT forward count")
 
     deviations = {d.get("field"): d for d in cell.get("deviations") or []}
     for field, src_value in expected.items():
@@ -330,7 +374,7 @@ def build(cells_dir=CELLS, out=OUT, out_md=OUT_MD) -> int:
 
     cases, errors = [], []
     for path in sorted(glob.glob(os.path.join(cells_dir, "*.json"))):
-        built, cell_errors = build_cell(load(path), bases, in_scope)
+        built, cell_errors = build_cell(load(path), bases, in_scope, headline["benchmark_defaults"])
         errors += cell_errors
         if built is not None:
             cases.append(built)
@@ -379,7 +423,8 @@ def _write_md(cases, out_md):
             "",
             f"{c['label']}  ",
             f"Source: **{cb['framework']}** `{cb['repo']}:{cb['path']}` @ `{cb['commit']}` "
-            f"({cb['commit_date']}), section \"{cb['section']}\"; written for {cb['source_hardware']}; "
+            f"({cb['commit_date']}), section \"{cb['section']}\"; written for {cb['source_hardware']} "
+            f"(GPU tokens: {', '.join(cb['source_gpu']) or 'none stated'}); "
             f"source metric: {cb['source_metric']}.",
         ]
         if cb.get("sglang_verbatim_gap"):

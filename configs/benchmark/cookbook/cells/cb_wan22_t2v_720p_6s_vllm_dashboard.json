@@ -32,8 +32,14 @@
       "num_frames": 80,
       "fps": 16,
       "num_gpus": 4,
-      "dit_forwards": 6
-    }
+      "dit_forwards": 6,
+      "metric": "mean / P99 latency at max concurrency 1",
+      "warmup": "not stated",
+      "repeats": "--num-prompts N (N not stated)"
+    },
+    "source_gpu": [
+      "a100"
+    ]
   },
   "forwards": {
     "vllm-omni": 6,
@@ -52,6 +58,24 @@
       "source": 4,
       "run": 2,
       "reason": "2-GPU box: the dashboard's CFG 2 x USP 2 + HSDP is scaled to CFG 2 + HSDP"
+    },
+    {
+      "field": "metric",
+      "source": "mean / P99 latency at max concurrency 1",
+      "run": "client_e2e_median",
+      "reason": "every arm is timed by the same client; the source's own timer is not available for the other frameworks"
+    },
+    {
+      "field": "warmup",
+      "source": "not stated",
+      "run": "3 request(s) at 3 steps",
+      "reason": "the harness warms every arm the same way before timing"
+    },
+    {
+      "field": "repeats",
+      "source": "--num-prompts N (N not stated)",
+      "run": "median of 2",
+      "reason": "the harness takes the same median for every arm"
     }
   ],
   "arms": {

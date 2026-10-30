@@ -5,7 +5,7 @@ command. We tune that comparison, so it is also the one where our own setup hide
 problems. On 2xH200 (2026-10-30), running the competitors' published workloads found
 three things no headline row could have shown:
 
-- LTX-2.5 two-stage cannot serve vLLM-Omni's 960x544 single-stage shape.
+- LTX-2.5 two-stage with sglang's own 2-GPU cookbook preset does not start on >=130 GiB GPUs: breakable CUDA graphs come on, and the default warmup shape (960x544) cannot be halved to a 64-aligned size. `cb_ltx25_t2v_1088_2gpu_vllm` keeps that preset as an arm.
 - The MiniMax-H3 server warmup cannot reach the 544 short edge that LightX2V and TRT-LLM ship as their default.
 - The sglang cookbook's own Wan2.2 builder emits `--dit-layerwise-offload true` on a 141 GB H200.
 
@@ -31,8 +31,13 @@ CB_SGLANG_COMMIT=<pin> DBF_SGLANG_PYTHONPATH=<sglang tree at the pin>/python \
 
 The runner's free-space floor does not protect against ephemeral-storage eviction. The 2xH200 box was evicted for exceeding its pod limit (250Gi) while `df` showed terabytes free, and two 2xB200 boxes when their node ran low on ephemeral storage. Keep weights, HF cache and logs on a volume that does not count as ephemeral.
 
-`scripts/check_competitor_recipes.py` checks every cell's source and every cited arm recipe
-for upstream drift, the same way it checks the headline commands.
+`scripts/check_competitor_recipes.py --cookbook` checks every cell's source and every cited arm
+recipe for upstream drift, the same way it checks the headline commands. Without `--cookbook`
+it checks only the headline commands, so a headline round's pre-flight is unchanged.
+
+The runner prints `HARDWARE DEVIATION` when `DBF_HARDWARE_PROFILE` is not among the cell's
+`cookbook.source_gpu`. That is not an error, because running a source's workload on another
+GPU class is often the point, but the report has to carry it.
 
 ## Cell schema
 
@@ -46,13 +51,16 @@ for upstream drift, the same way it checks the headline commands.
     "framework": "lightx2v",              // whose cookbook this is
     "repo": "...", "path": "...", "commit": "<last commit to the file>", "commit_date": "YYYY-MM-DD",
     "section": "...", "source_hardware": "...", "source_metric": "...",
+    "source_gpu": ["h200"],               // runtime hardware tokens; [] if the source names none
     "sglang_verbatim_gap": "...",         // only when the sglang cookbook has no matching command
-    "workload": { "width": 960, "height": 544, "num_gpus": 2, "dit_forwards": 29, "metric": "..." }
+    "workload": { "width": 960, "height": 544, "num_gpus": 2, "dit_forwards": 29,
+                  "metric": "...", "warmup": "...", "repeats": "..." }   // last four required
   },
   "forwards": { "lightx2v": 29, "sglang": 29, "trtllm-visual": null },  // null = unverified
   "deviations": [ { "field": "metric", "source": "...", "run": "client_e2e_median", "reason": "..." } ],
   "arms": { "<framework>": { "cb-<name>": { "tier": "verbatim", "num_gpus": 2, "serve_args": "",
-                                            "upstream_recipe": { ... }, "lightx2v_config": { ... } } } }
+                                            "upstream_recipe": { ... }, "lightx2v_config": { ... },
+                                            "requires": [ "scripts/prepare_cookbook_h3.sh sgl-adaln" ] } } }
 }
 ```
 
@@ -65,8 +73,8 @@ token, because arms are only ever selected explicitly.
 
 | tier | what it is | required |
 |---|---|---|
-| `verbatim` | a command copied from a published cookbook, recipe or config. The harness adds `--model-path`, `--port`, `--host` and `--num-gpus`; do not repeat them. | `upstream_recipe`. The source framework's verbatim arm cites the cell's source file. |
-| `matched-lossy` | turns on the lossy features the source ships with (SageAttention, AdaLN cache, FP8, Cache-DiT) | `lossy` lists them |
+| `verbatim` | a command copied from a published cookbook, recipe or config. The harness adds `--model-path`, `--port`, `--host` and `--num-gpus`, and for sglang also `--backend sglang` (so a native-pipeline miss fails instead of benchmarking the Diffusers fallback); do not repeat them. | `upstream_recipe`. The source framework's verbatim arm cites the cell's source file. |
+| `matched-lossy` | turns on the lossy features the source ships with (SageAttention, AdaLN cache, FP8, Cache-DiT) | `lossy` lists them; `requires` names how to build what they read |
 | `tuned` | anything we chose ourselves | `notes` |
 
 A cell's sglang number is its **verbatim** sglang arm. Tuned rows are reported beside it,
@@ -77,10 +85,17 @@ That gap is itself a finding for the cookbook.
 ### Workload and deviations
 
 `cookbook.workload` copies the source's values. Keys are case fields or dotted paths
-(`request_extra.extra_params.guardrails`). Two keys are special:
+(`request_extra.extra_params.guardrails`). Four are required and compared specially:
 
 - `dit_forwards` is compared against each arm framework's `forwards`.
 - `metric` is compared against `client_e2e_median`, the only timer the harness has.
+- `warmup` and `repeats` are compared against what the harness does for the case, e.g.
+  `3 request(s) at 3 steps` and `median of 2` for video (`benchmark_defaults`, overridden by
+  the case's `benchmark.warmup`). Write `not stated` when the source gives none.
+
+How a number is measured belongs to the workload: vLLM-Omni's Qwen-Image-2.1 recipe warms up
+with one full request and takes the median of three, TRT-LLM precompiles its shapes at startup
+and times three prompts. Any of these that differ from the harness are deviations.
 
 Every difference needs a `deviations` entry whose `source` and `run` match what the build
 sees, and an entry for a field that does not differ fails as stale. Typical entries are a
@@ -102,6 +117,17 @@ case's, so a headline setting could reach a cookbook arm unseen. In the H200 rou
 - fails a verbatim arm unless every inherited key is either `unset` in the cell or named in
   its `allow_inherited`. Use `allow_inherited` only for harness plumbing such as MP4 encode
   alignment or allocator settings.
+
+### Prerequisites
+
+An arm whose command reads an absolute path (an AdaLN cache sidecar, a patched kernel's site
+directory), and every `matched-lossy` arm, lists in `requires` the steps that create what it
+reads. Hand-built artifacts are lost with the box: the H200 round's AdaLN caches and its
+patched SageAttention went with its eviction. `scripts/prepare_cookbook_h3.sh` builds the
+MiniMax-H3 ones: `sgl-adaln`, `lx-adaln`, and `sage`. The `sage` step applies the SM90 fix
+from thu-ml/SageAttention@d9704247 and fails unless the result matches SDPA.
+
+### LightX2V compile
 
 A verbatim LightX2V arm must set `use_compile`. `devbox_run_cases.sh` exports
 `DIFFUSION_BENCH_DISABLE_TORCH_COMPILE=0`, so the harness setdefaults `use_compile: true`,

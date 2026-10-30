@@ -19,8 +19,11 @@
       "guidance_scale": 1.0,
       "num_gpus": 1,
       "dit_forwards": 40,
-      "metric": "offline `RUN pipeline cost` log line (PROFILING_DEBUG_LEVEL=2), one run"
-    }
+      "metric": "offline `RUN pipeline cost` log line (PROFILING_DEBUG_LEVEL=2), one run",
+      "warmup": "config `warmup: true` (startup warmup)",
+      "repeats": "one run"
+    },
+    "source_gpu": []
   },
   "forwards": {
     "lightx2v": 40,
@@ -33,6 +36,18 @@
       "source": "offline `RUN pipeline cost` log line (PROFILING_DEBUG_LEVEL=2), one run",
       "run": "client_e2e_median",
       "reason": "every arm is timed by the same client; the source's own timer is not available for the other frameworks"
+    },
+    {
+      "field": "warmup",
+      "source": "config `warmup: true` (startup warmup)",
+      "run": "2 request(s) at 3 steps",
+      "reason": "the harness warms every arm the same way before timing"
+    },
+    {
+      "field": "repeats",
+      "source": "one run",
+      "run": "median of 5",
+      "reason": "the harness takes the same median for every arm"
     }
   ],
   "arms": {

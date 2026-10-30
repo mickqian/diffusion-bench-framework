@@ -14,6 +14,7 @@ Exit 0: every recorded recipe is current. 1: at least one is stale.
 fresh, so this outranks 1.
 
     python3 scripts/check_competitor_recipes.py
+    python3 scripts/check_competitor_recipes.py --cookbook   # plus the cookbook track
 """
 import argparse
 import glob
@@ -99,15 +100,17 @@ def newer_commits(recipe: dict, list_commits) -> list[dict]:
 def main(argv=None, list_commits=gh_commits) -> int:
     parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     parser.add_argument("--cases-dir", default=CASES)
-    parser.add_argument("--cookbook-dir", default=COOKBOOK_CELLS,
-                        help="cookbook cells to check as well; pass '' to skip them")
+    # Opt-in, so a headline round's pre-flight keeps its rows and exit code.
+    parser.add_argument("--cookbook", action="store_true",
+                        help=f"also check the cookbook track's sources and arm recipes ({COOKBOOK_CELLS})")
+    parser.add_argument("--cookbook-dir", default=None, help="cookbook cells directory (implies --cookbook)")
     args = parser.parse_args(argv)
 
     rows, stale, failed = [], 0, 0
     answers = {}  # (repo, path, commit, commit_date) -> newer commits, or the error
     profiles = recipe_profiles(args.cases_dir)
-    if args.cookbook_dir:
-        profiles += cookbook_profiles(args.cookbook_dir)
+    if args.cookbook or args.cookbook_dir:
+        profiles += cookbook_profiles(args.cookbook_dir or COOKBOOK_CELLS)
     for cid, fw, name, recipe in profiles:
         problems = upstream_recipe_problems(recipe)
         if problems:

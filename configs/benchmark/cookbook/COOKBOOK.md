@@ -7,7 +7,13 @@ ours and never stand in for a framework's cookbook number.
 ## cb_cosmos3_t2v_720p_1gpu_vllm
 
 Cosmos3-Nano T2V 1280x720 189f 35 steps, guardrails on (vLLM-Omni recipe, 1 GPU)  
-Source: **vllm-omni** `vllm-project/vllm-omni:recipes/cosmos3/Cosmos3-Nano.md` @ `45d7c005` (2026-10-23), section "### 1x H200 141GB / B300 (Online serving) > #### Command"; written for 1x H200 141GB / B300; source metric: none published for T2V; the recipe's request is the workload.
+Source: **vllm-omni** `vllm-project/vllm-omni:recipes/cosmos3/Cosmos3-Nano.md` @ `45d7c005` (2026-10-23), section "### 1x H200 141GB / B300 (Online serving) > #### Command"; written for 1x H200 141GB / B300 (GPU tokens: h200, b300); source metric: none published for T2V; the recipe's request is the workload.
+
+| deviation | source | run | reason |
+|---|---|---|---|
+| metric | not stated | client_e2e_median | every arm is timed by the same client; the source's own timer is not available for the other frameworks |
+| warmup | not stated | 3 request(s) at 3 steps | the harness warms every arm the same way before timing |
+| repeats | not stated | median of 2 | the harness takes the same median for every arm |
 
 | framework | arm | tier | forwards | lossy | command | inherited from base case |
 |---|---|---|---|---|---|---|
@@ -20,24 +26,32 @@ Source: **vllm-omni** `vllm-project/vllm-omni:recipes/cosmos3/Cosmos3-Nano.md` @
 ## cb_h3_t2va_544_lightx2v_tp2
 
 MiniMax-H3 T2V+A 544x960 124f, 29 forwards (LightX2V cookbook, TP2)  
-Source: **lightx2v** `ModelTC/LightX2V:configs/minimax_h3/minimax_h3_tp.json` @ `c301bc5d` (2026-10-12), section "whole file"; written for 2 GPUs (TP2); no GPU class stated; source metric: offline `RUN pipeline cost` log line (PROFILING_DEBUG_LEVEL=2), one run.
+Source: **lightx2v** `ModelTC/LightX2V:configs/minimax_h3/minimax_h3_tp.json` @ `c301bc5d` (2026-10-12), section "whole file"; written for 2 GPUs (TP2); no GPU class stated (GPU tokens: none stated); source metric: offline `RUN pipeline cost` log line (PROFILING_DEBUG_LEVEL=2), one run.
 
 | deviation | source | run | reason |
 |---|---|---|---|
 | metric | offline `RUN pipeline cost` log line (PROFILING_DEBUG_LEVEL=2), one run | client_e2e_median | every arm is timed by the same client; the source's own timer is not available for the other frameworks |
+| warmup | not stated | 3 request(s) at 3 steps | the harness warms every arm the same way before timing |
+| repeats | one run | median of 2 | the harness takes the same median for every arm |
 
 | framework | arm | tier | forwards | lossy | command | inherited from base case |
 |---|---|---|---|---|---|---|
 | lightx2v | `cb-lx-verbatim` | verbatim | 29 | sage_attn2 (int8 QK), adaln-cache | `--model-variant fl2av`<br>lightx2v_config `{"infer_steps":29,"video_flow_shift":12.0,"audio_flow_shift":3.0,"enable_cfg":false,"cpu_offload":false,"text_encoder_cpu_offload":false,"vae_cpu_offload":true,"use_adaln_cache":true,"text_encoder_tensor_parallel":true,"vae_decode_parallel":true,"lazy_load":false,"unload_modules":false,"attn_type":"sage_attn2","rms_type":"sgl-kernel","rope_type":"minimax_h3_triton_rope","feature_caching":"NoCaching","warmup":false,"vae_spatial_scale_factor":16,"audio_sampling_rate":32000,"parallel":{"tensor_p_size":2},"video_codec_options":{"preset":"ultrafast","crf":"18"},"num_frames":124,"size":[544,960],"fps":24,"adaln_cache_dir":"/scratch/bench/adaln-cache","offload_granularity":"model","use_compile":false}`<br>extra_env `{"DTYPE":"BF16","SENSITIVE_LAYER_DTYPE":"BF16","PROFILING_DEBUG_LEVEL":"0","TOKENIZERS_PARALLELISM":"false","PYTORCH_CUDA_ALLOC_CONF":"expandable_segments:True","PYTORCH_ALLOC_CONF":"expandable_segments:True"}` | lightx2v_config.lazy_load, lightx2v_config.unload_modules, lightx2v_config.warmup, lightx2v_config.audio_sampling_rate, lightx2v_config.video_codec_options, extra_env.DTYPE, extra_env.SENSITIVE_LAYER_DTYPE, extra_env.PROFILING_DEBUG_LEVEL, extra_env.TOKENIZERS_PARALLELISM, extra_env.PYTORCH_CUDA_ALLOC_CONF, extra_env.PYTORCH_ALLOC_CONF |
 | sglang | `cb-sgl-cookbook` | verbatim | 29 |  | `--ulysses-degree 2 --model-variant fl2va --performance-mode speed` |  |
 | sglang | `cb-sgl-adaln` | matched-lossy | 29 | adaln-cache (precomputed sidecar) | `--ulysses-degree 2 --model-variant fl2va --performance-mode speed --minimax-h3-adaln-cache-path /scratch/bench/sgl-adaln/fl2va-t2va-29.safetensors` |  |
-| sglang | `cb-sgl-adaln-sage` | matched-lossy | 29 | adaln-cache (precomputed sidecar), sage_attn | `--ulysses-degree 2 --model-variant fl2va --performance-mode speed --minimax-h3-adaln-cache-path /scratch/bench/sgl-adaln/fl2va-t2va-29.safetensors --attention-backend sage_attn` |  |
+| sglang | `cb-sgl-adaln-sage` | matched-lossy | 29 | adaln-cache (precomputed sidecar), sage_attn | `--ulysses-degree 2 --model-variant fl2va --performance-mode speed --minimax-h3-adaln-cache-path /scratch/bench/sgl-adaln/fl2va-t2va-29.safetensors --attention-backend sage_attn`<br>extra_env `{"PYTHONPATH":"/scratch/bench/sglang/python:/scratch/bench/sage-sgl-site"}` |  |
 | sglang | `cb-sgl-tuned` | tuned | 29 |  | `--model-type diffusion --warmup-mode server --model-variant fl2va --enable-torch-compile false` |  |
 
 ## cb_h3_t2va_544_trtllm_ulysses2
 
 MiniMax-H3 T2V+A 544x960 124f, 27 forwards (TRT-LLM example, Ulysses 2)  
-Source: **trtllm-visual** `NVIDIA/TensorRT-LLM:examples/visual_gen/configs/minimax-h3-bf16-2gpu.yaml` @ `a8ce107` (2026-10-27), section "whole file"; written for 2 GPUs; no GPU class stated; source metric: benchmark_visual_gen e2e_latency (client).
+Source: **trtllm-visual** `NVIDIA/TensorRT-LLM:examples/visual_gen/configs/minimax-h3-bf16-2gpu.yaml` @ `a8ce107` (2026-10-27), section "whole file"; written for 2 GPUs; no GPU class stated (GPU tokens: none stated); source metric: benchmark_visual_gen e2e_latency (client).
+
+| deviation | source | run | reason |
+|---|---|---|---|
+| metric | benchmark_visual_gen e2e_latency (client) | client_e2e_median | every arm is timed by the same client; the source's own timer is not available for the other frameworks |
+| warmup | startup precompile of 544x960/124 (compilation_config); no warmup request | 3 request(s) at 3 steps | the harness warms every arm the same way before timing |
+| repeats | 3 prompts at concurrency 1 | median of 2 | the harness takes the same median for every arm |
 
 | framework | arm | tier | forwards | lossy | command | inherited from base case |
 |---|---|---|---|---|---|---|
@@ -46,14 +60,50 @@ Source: **trtllm-visual** `NVIDIA/TensorRT-LLM:examples/visual_gen/configs/minim
 | sglang | `cb-sgl-adaln` | matched-lossy | 27 | adaln-cache (precomputed sidecar) | `--ulysses-degree 2 --model-variant fl2va --performance-mode speed --minimax-h3-adaln-cache-path /scratch/bench/sgl-adaln/fl2va-t2va-27.safetensors` |  |
 | sglang | `cb-sgl-tuned` | tuned | 27 |  | `--model-type diffusion --warmup-mode server --model-variant fl2va --enable-torch-compile false` |  |
 
+## cb_ltx25_t2v_1088_2gpu_vllm
+
+LTX-2.5 distilled two-stage T2V 1920x1088 121f 8+3 steps (vLLM-Omni recipe, 4 GPUs scaled to 2)  
+Source: **vllm-omni** `vllm-project/vllm-omni:recipes/LTX/LTX-2.5.md` @ `a0910980` (2026-10-17), section "### Multi-GPU low-latency path"; written for 4 GPUs (Ulysses 4 + VAE patch parallel 4); B300 verified (GPU tokens: b300); source metric: none published for this pipeline.
+
+| deviation | source | run | reason |
+|---|---|---|---|
+| num_gpus | 4 | 2 | 2-GPU box: Ulysses and VAE patch parallel 4 scaled to 2, as the recipe says to match the GPU count |
+| metric | not stated | client_e2e_median | every arm is timed by the same client; the source's own timer is not available for the other frameworks |
+| warmup | not stated | 3 request(s) at 8 steps | the harness warms every arm the same way before timing |
+| repeats | not stated | median of 2 | the harness takes the same median for every arm |
+
+| framework | arm | tier | forwards | lossy | command | inherited from base case |
+|---|---|---|---|---|---|---|
+| vllm-omni | `cb-vllm-verbatim` | verbatim | 11 |  | `--num-gpus 2 --model-class-name LTX2DistilledTwoStagePipeline --usp 2 --vae-patch-parallel-size 2 --vae-use-tiling --stage-init-timeout 900` |  |
+| sglang | `cb-sgl-cookbook` | verbatim | None |  | `--pipeline-class-name LTX2TwoStagePipeline --ulysses-degree 2 --warmup-resolutions 1920x1088 --warmup-num-frames 121` |  |
+| sglang | `cb-sgl-cookbook-preset` | verbatim | None |  | `--pipeline-class-name LTX2TwoStagePipeline --ulysses-degree 2` |  |
+
+## cb_ltx25_t2v_544_1gpu_vllm
+
+LTX-2.5 distilled one-stage T2V 960x544 121f 8 steps (vLLM-Omni recipe, 1 GPU)  
+Source: **vllm-omni** `vllm-project/vllm-omni:recipes/LTX/LTX-2.5.md` @ `a0910980` (2026-10-17), section "## Choose a pipeline; ## Online serving"; written for B300 verified; B200/H200 a capacity-based recommendation, not verified (GPU tokens: b300); source metric: none published for this pipeline.
+
+| deviation | source | run | reason |
+|---|---|---|---|
+| metric | not stated | client_e2e_median | every arm is timed by the same client; the source's own timer is not available for the other frameworks |
+| warmup | not stated | 3 request(s) at 8 steps | the harness warms every arm the same way before timing |
+| repeats | not stated | median of 2 | the harness takes the same median for every arm |
+
+| framework | arm | tier | forwards | lossy | command | inherited from base case |
+|---|---|---|---|---|---|---|
+| vllm-omni | `cb-vllm-verbatim` | verbatim | 8 |  | `--model-class-name LTX2DistilledOneStagePipeline --stage-init-timeout 900` |  |
+| sglang | `cb-sgl-cookbook` | verbatim | 8 |  | `--pipeline-class-name LTX2Pipeline` |  |
+
 ## cb_qwen21_t2i_1024_40s_lightx2v
 
 Qwen-Image-2.1 T2I 1024 40 steps cfg off (LightX2V config, 1 GPU)  
-Source: **lightx2v** `ModelTC/LightX2V:configs/qwen_image_21/qwen_image_21.json` @ `4fe984c0` (2026-10-10), section "whole file"; written for 1 GPU; no GPU class stated; source metric: offline `RUN pipeline cost` log line (PROFILING_DEBUG_LEVEL=2), one run.
+Source: **lightx2v** `ModelTC/LightX2V:configs/qwen_image_21/qwen_image_21.json` @ `4fe984c0` (2026-10-10), section "whole file"; written for 1 GPU; no GPU class stated (GPU tokens: none stated); source metric: offline `RUN pipeline cost` log line (PROFILING_DEBUG_LEVEL=2), one run.
 
 | deviation | source | run | reason |
 |---|---|---|---|
 | metric | offline `RUN pipeline cost` log line (PROFILING_DEBUG_LEVEL=2), one run | client_e2e_median | every arm is timed by the same client; the source's own timer is not available for the other frameworks |
+| warmup | config `warmup: true` (startup warmup) | 2 request(s) at 3 steps | the harness warms every arm the same way before timing |
+| repeats | one run | median of 5 | the harness takes the same median for every arm |
 
 | framework | arm | tier | forwards | lossy | command | inherited from base case |
 |---|---|---|---|---|---|---|
@@ -64,7 +114,13 @@ Source: **lightx2v** `ModelTC/LightX2V:configs/qwen_image_21/qwen_image_21.json`
 ## cb_qwen21_t2i_1024_50s_vllm
 
 Qwen-Image-2.1 T2I 1024 50 steps (vLLM-Omni recipe, 1 GPU)  
-Source: **vllm-omni** `vllm-project/vllm-omni:recipes/Qwen/Qwen-Image-2.1.md` @ `b164fea7` (2026-10-17), section "## Online Serving"; written for 1x H200 (CUDA Graph decode section); source metric: warmup 1 + median of 3, end-to-end per image.
+Source: **vllm-omni** `vllm-project/vllm-omni:recipes/Qwen/Qwen-Image-2.1.md` @ `b164fea7` (2026-10-17), section "## Online Serving"; written for 1x H200 (CUDA Graph decode section) (GPU tokens: h200); source metric: warmup 1 + median of 3, end-to-end per image.
+
+| deviation | source | run | reason |
+|---|---|---|---|
+| metric | end-to-end per image | client_e2e_median | every arm is timed by the same client; the source's own timer is not available for the other frameworks |
+| warmup | 1 request | 2 request(s) at 3 steps | the harness warms every arm the same way before timing |
+| repeats | median of 3 | median of 5 | the harness takes the same median for every arm |
 
 | framework | arm | tier | forwards | lossy | command | inherited from base case |
 |---|---|---|---|---|---|---|
@@ -74,13 +130,16 @@ Source: **vllm-omni** `vllm-project/vllm-omni:recipes/Qwen/Qwen-Image-2.1.md` @ 
 ## cb_wan22_t2v_480p_3s_vllm_dashboard
 
 Wan2.2 T2V 854x480 81f 3 steps (vLLM-Omni dashboard A, 2 GPUs)  
-Source: **vllm-omni** `vllm-project/vllm-omni:benchmarks/diffusion/performance_dashboard/wan_2_2_serving_performance.md` @ `1fa73441` (2026-05-19), section "# 3.1 Basic Serving Command; # 7 Performance Results (CFG 2, USP 2, HSDP on)"; written for 4x A100-SXM4-80GB (CFG 2 x USP 2 + HSDP); source metric: benchmarks/diffusion client, mean / P99 latency, max concurrency 1.
+Source: **vllm-omni** `vllm-project/vllm-omni:benchmarks/diffusion/performance_dashboard/wan_2_2_serving_performance.md` @ `1fa73441` (2026-05-19), section "# 3.1 Basic Serving Command; # 7 Performance Results (CFG 2, USP 2, HSDP on)"; written for 4x A100-SXM4-80GB (CFG 2 x USP 2 + HSDP) (GPU tokens: a100); source metric: benchmarks/diffusion client, mean / P99 latency, max concurrency 1.
 No verbatim sglang arm: The sglang cookbook has no NVIDIA 2-GPU Wan2.2 command: its builder maps any count above 1 to the 4-GPU plan (--dit-layerwise-offload true --num-gpus 4 --ulysses-degree 2 --enable-cfg-parallel) and errors on 2.
 
 | deviation | source | run | reason |
 |---|---|---|---|
 | num_frames | 80 | 81 | Wan2.2 takes 4n+1 frames; 80 is rounded by the pipeline anyway |
 | num_gpus | 4 | 2 | 2-GPU box: the dashboard's CFG 2 x USP 2 + HSDP is scaled to CFG 2 + HSDP |
+| metric | mean / P99 latency at max concurrency 1 | client_e2e_median | every arm is timed by the same client; the source's own timer is not available for the other frameworks |
+| warmup | not stated | 3 request(s) at 3 steps | the harness warms every arm the same way before timing |
+| repeats | --num-prompts N (N not stated) | median of 2 | the harness takes the same median for every arm |
 
 | framework | arm | tier | forwards | lossy | command | inherited from base case |
 |---|---|---|---|---|---|---|
@@ -91,11 +150,13 @@ No verbatim sglang arm: The sglang cookbook has no NVIDIA 2-GPU Wan2.2 command: 
 ## cb_wan22_t2v_720p_40s_1gpu_lightx2v
 
 Wan2.2 T2V A14B 1280x720 81f 40 steps (LightX2V config, 1 GPU)  
-Source: **lightx2v** `ModelTC/LightX2V:configs/wan22/wan_moe_t2v.json` @ `cc942919` (2026-10-15), section "whole file"; written for 1 GPU; no GPU class stated; source metric: offline `RUN pipeline cost` log line (PROFILING_DEBUG_LEVEL=2), one run.
+Source: **lightx2v** `ModelTC/LightX2V:configs/wan22/wan_moe_t2v.json` @ `cc942919` (2026-10-15), section "whole file"; written for 1 GPU; no GPU class stated (GPU tokens: none stated); source metric: offline `RUN pipeline cost` log line (PROFILING_DEBUG_LEVEL=2), one run.
 
 | deviation | source | run | reason |
 |---|---|---|---|
 | metric | offline `RUN pipeline cost` log line (PROFILING_DEBUG_LEVEL=2), one run | client_e2e_median | every arm is timed by the same client; the source's own timer is not available for the other frameworks |
+| warmup | not stated | 3 request(s) at 3 steps | the harness warms every arm the same way before timing |
+| repeats | one run | median of 2 | the harness takes the same median for every arm |
 
 | framework | arm | tier | forwards | lossy | command | inherited from base case |
 |---|---|---|---|---|---|---|
@@ -108,13 +169,16 @@ Source: **lightx2v** `ModelTC/LightX2V:configs/wan22/wan_moe_t2v.json` @ `cc9429
 ## cb_wan22_t2v_720p_6s_vllm_dashboard
 
 Wan2.2 T2V 1280x720 81f 6 steps (vLLM-Omni dashboard B, 2 GPUs)  
-Source: **vllm-omni** `vllm-project/vllm-omni:benchmarks/diffusion/performance_dashboard/wan_2_2_serving_performance.md` @ `1fa73441` (2026-05-19), section "# 3.1 Basic Serving Command; # 7 Performance Results (CFG 2, USP 2, HSDP on)"; written for 4x A100-SXM4-80GB (CFG 2 x USP 2 + HSDP); source metric: benchmarks/diffusion client, mean / P99 latency, max concurrency 1.
+Source: **vllm-omni** `vllm-project/vllm-omni:benchmarks/diffusion/performance_dashboard/wan_2_2_serving_performance.md` @ `1fa73441` (2026-05-19), section "# 3.1 Basic Serving Command; # 7 Performance Results (CFG 2, USP 2, HSDP on)"; written for 4x A100-SXM4-80GB (CFG 2 x USP 2 + HSDP) (GPU tokens: a100); source metric: benchmarks/diffusion client, mean / P99 latency, max concurrency 1.
 No verbatim sglang arm: The sglang cookbook has no NVIDIA 2-GPU Wan2.2 command: its builder maps any count above 1 to the 4-GPU plan (--dit-layerwise-offload true --num-gpus 4 --ulysses-degree 2 --enable-cfg-parallel) and errors on 2.
 
 | deviation | source | run | reason |
 |---|---|---|---|
 | num_frames | 80 | 81 | Wan2.2 takes 4n+1 frames; 80 is rounded by the pipeline anyway |
 | num_gpus | 4 | 2 | 2-GPU box: the dashboard's CFG 2 x USP 2 + HSDP is scaled to CFG 2 + HSDP |
+| metric | mean / P99 latency at max concurrency 1 | client_e2e_median | every arm is timed by the same client; the source's own timer is not available for the other frameworks |
+| warmup | not stated | 3 request(s) at 3 steps | the harness warms every arm the same way before timing |
+| repeats | --num-prompts N (N not stated) | median of 2 | the harness takes the same median for every arm |
 
 | framework | arm | tier | forwards | lossy | command | inherited from base case |
 |---|---|---|---|---|---|---|
@@ -125,7 +189,13 @@ No verbatim sglang arm: The sglang cookbook has no NVIDIA 2-GPU Wan2.2 command: 
 ## cb_zimage_t2i_1024_1gpu_vllm
 
 Z-Image-Turbo 1024 9 steps (vLLM-Omni recipe, 1 GPU)  
-Source: **vllm-omni** `vllm-project/vllm-omni:recipes/Tongyi-MAI/Z-Image-Turbo.md` @ `c586c28e` (2026-10-25), section "## GPU > ### 1x RTX 5880 48GB > #### Command"; written for 1x RTX 5880 48GB; source metric: client latency, size=1024x1024, num_inference_steps=9, seed=42.
+Source: **vllm-omni** `vllm-project/vllm-omni:recipes/Tongyi-MAI/Z-Image-Turbo.md` @ `c586c28e` (2026-10-25), section "## GPU > ### 1x RTX 5880 48GB > #### Command"; written for 1x RTX 5880 48GB (GPU tokens: none stated); source metric: client latency, size=1024x1024, num_inference_steps=9, seed=42.
+
+| deviation | source | run | reason |
+|---|---|---|---|
+| metric | client latency | client_e2e_median | every arm is timed by the same client; the source's own timer is not available for the other frameworks |
+| warmup | not stated | 2 request(s) at 3 steps | the harness warms every arm the same way before timing |
+| repeats | not stated | median of 5 | the harness takes the same median for every arm |
 
 | framework | arm | tier | forwards | lossy | command | inherited from base case |
 |---|---|---|---|---|---|---|
@@ -136,11 +206,13 @@ Source: **vllm-omni** `vllm-project/vllm-omni:recipes/Tongyi-MAI/Z-Image-Turbo.m
 ## cb_zimage_t2i_16x9_1gpu_lightx2v
 
 Z-Image-Turbo 1664x928 9 steps (LightX2V config, 1 GPU)  
-Source: **lightx2v** `ModelTC/LightX2V:configs/z_image/z_image_turbo_t2i.json` @ `4fe984c0` (2026-10-10), section "whole file"; written for 1 GPU; no GPU class stated; source metric: offline `RUN pipeline cost` log line (PROFILING_DEBUG_LEVEL=2), one run.
+Source: **lightx2v** `ModelTC/LightX2V:configs/z_image/z_image_turbo_t2i.json` @ `4fe984c0` (2026-10-10), section "whole file"; written for 1 GPU; no GPU class stated (GPU tokens: none stated); source metric: offline `RUN pipeline cost` log line (PROFILING_DEBUG_LEVEL=2), one run.
 
 | deviation | source | run | reason |
 |---|---|---|---|
 | metric | offline `RUN pipeline cost` log line (PROFILING_DEBUG_LEVEL=2), one run | client_e2e_median | every arm is timed by the same client; the source's own timer is not available for the other frameworks |
+| warmup | not stated | 2 request(s) at 3 steps | the harness warms every arm the same way before timing |
+| repeats | one run | median of 5 | the harness takes the same median for every arm |
 
 | framework | arm | tier | forwards | lossy | command | inherited from base case |
 |---|---|---|---|---|---|---|
@@ -151,12 +223,14 @@ Source: **lightx2v** `ModelTC/LightX2V:configs/z_image/z_image_turbo_t2i.json` @
 ## cb_zimage_t2i_16x9_sp2_lightx2v
 
 Z-Image-Turbo 1664x928 9 steps Ulysses 2 (LightX2V dist config, 2 GPUs)  
-Source: **lightx2v** `ModelTC/LightX2V:configs/z_image/z_image_turbo_t2i_dist.json` @ `4fe984c0` (2026-10-10), section "whole file"; written for 2 GPUs (Ulysses 2); no GPU class stated; source metric: offline `RUN pipeline cost` log line (PROFILING_DEBUG_LEVEL=2), one run.
+Source: **lightx2v** `ModelTC/LightX2V:configs/z_image/z_image_turbo_t2i_dist.json` @ `4fe984c0` (2026-10-10), section "whole file"; written for 2 GPUs (Ulysses 2); no GPU class stated (GPU tokens: none stated); source metric: offline `RUN pipeline cost` log line (PROFILING_DEBUG_LEVEL=2), one run.
 No verbatim sglang arm: The sglang cookbook has no NVIDIA 2-GPU Z-Image command: its builder plans 1 GPU on H200/B200/H100 and errors on 2; the only 2-device recipe is Ascend A3 TP2.
 
 | deviation | source | run | reason |
 |---|---|---|---|
 | metric | offline `RUN pipeline cost` log line (PROFILING_DEBUG_LEVEL=2), one run | client_e2e_median | every arm is timed by the same client; the source's own timer is not available for the other frameworks |
+| warmup | not stated | 2 request(s) at 3 steps | the harness warms every arm the same way before timing |
+| repeats | one run | median of 5 | the harness takes the same median for every arm |
 
 | framework | arm | tier | forwards | lossy | command | inherited from base case |
 |---|---|---|---|---|---|---|

@@ -29,8 +29,15 @@
       "request_extra.flow_shift": 10.0,
       "request_extra.extra_params.guardrails": true,
       "num_gpus": 1,
-      "dit_forwards": 35
-    }
+      "dit_forwards": 35,
+      "metric": "not stated",
+      "warmup": "not stated",
+      "repeats": "not stated"
+    },
+    "source_gpu": [
+      "h200",
+      "b300"
+    ]
   },
   "forwards": {
     "vllm-omni": 35,
@@ -38,7 +45,26 @@
     "lightx2v": 35,
     "trtllm-visual": null
   },
-  "deviations": [],
+  "deviations": [
+    {
+      "field": "metric",
+      "source": "not stated",
+      "run": "client_e2e_median",
+      "reason": "every arm is timed by the same client; the source's own timer is not available for the other frameworks"
+    },
+    {
+      "field": "warmup",
+      "source": "not stated",
+      "run": "3 request(s) at 3 steps",
+      "reason": "the harness warms every arm the same way before timing"
+    },
+    {
+      "field": "repeats",
+      "source": "not stated",
+      "run": "median of 2",
+      "reason": "the harness takes the same median for every arm"
+    }
+  ],
   "arms": {
     "vllm-omni": {
       "cb-vllm-verbatim": {

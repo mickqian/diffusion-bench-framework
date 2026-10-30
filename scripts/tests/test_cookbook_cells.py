@@ -45,9 +45,12 @@ GOOD = {
     "set": {"num_gpus": 1, "width": 1664, "height": 928},
     "unset": ["frameworks.vllm-omni.extra_env.DIFFUSION_ATTENTION_BACKEND"],
     "cookbook": {"framework": "lightx2v", **RECIPE, "source_hardware": "1 GPU", "source_metric": "pipeline cost",
-                 "workload": {"width": 1664, "height": 928, "num_gpus": 1, "dit_forwards": 9, "metric": "pipeline cost"}},
+                 "source_gpu": [],
+                 "workload": {"width": 1664, "height": 928, "num_gpus": 1, "dit_forwards": 9, "metric": "pipeline cost",
+                              "warmup": "2 request(s) at 3 steps", "repeats": "one run"}},
     "forwards": {"lightx2v": 9, "sglang": 9},
-    "deviations": [{"field": "metric", "source": "pipeline cost", "run": "client_e2e_median", "reason": "one client"}],
+    "deviations": [{"field": "metric", "source": "pipeline cost", "run": "client_e2e_median", "reason": "one client"},
+                   {"field": "repeats", "source": "one run", "run": "median of 5", "reason": "same median"}],
     "arms": {
         "lightx2v": {"cb-lx-verbatim": {"tier": "verbatim", "num_gpus": 1, "upstream_recipe": RECIPE,
                                         "serve_args": "", "lightx2v_config": {
@@ -59,11 +62,14 @@ GOOD = {
 }
 
 
+DEFAULTS = json.load(open(ROOT / "configs/comparison_configs.json"))["benchmark_defaults"]
+
+
 def build(mutate=None):
     cell = copy.deepcopy(GOOD)
     if mutate:
         mutate(cell)
-    return bcc.build_cell(cell, BASES, IN_SCOPE)
+    return bcc.build_cell(cell, BASES, IN_SCOPE, DEFAULTS)
 
 
 def errors_of(mutate):
@@ -128,10 +134,25 @@ expect_error("a tuned arm needs notes", lambda c: (no_sglang_verbatim(c), c["arm
                                                    c["cookbook"].update(sglang_verbatim_gap="x")), "needs `notes`")
 expect_error("a matched-lossy arm lists its lossy features",
              lambda c: c["arms"]["sglang"].update({"cb-sgl-sage": {"tier": "matched-lossy", "num_gpus": 1,
-                                                                    "serve_args": ""}}), "lossy features")
+                                                                    "serve_args": "", "requires": ["x"]}}),
+             "lossy features")
 expect_error("unknown tier", lambda c: c["arms"]["sglang"]["cb-sgl-cookbook"].update(tier="best"), "tier 'best'")
 expect_error("ids start with cb_", lambda c: c.update(id="zimage_x"), "must start with `cb_`")
 expect_error("unset of a missing path fails", lambda c: c["unset"].append("frameworks.nope.x"), "unset")
+
+expect_error("timing is part of the workload: warmup must be stated",
+             lambda c: c["cookbook"]["workload"].pop("warmup"), "workload.warmup missing")
+expect_error("a source warmup the harness does not run is a deviation",
+             lambda c: c["cookbook"]["workload"].update(warmup="1 request"), "warmup: runs '2 request(s) at 3 steps'")
+expect_error("source_gpu must be hardware tokens",
+             lambda c: c["cookbook"].update(source_gpu=["hopper"]), "source_gpu")
+expect_error("an arm reading a machine path names how to create it",
+             lambda c: c["arms"]["sglang"]["cb-sgl-cookbook"].update(
+                 serve_args="--minimax-h3-adaln-cache-path /scratch/bench/x.safetensors"), "`requires`")
+expect_error("a matched-lossy arm names its prerequisites",
+             lambda c: c["arms"]["sglang"].update({"cb-sgl-sage": {"tier": "matched-lossy", "num_gpus": 1,
+                                                                    "serve_args": "", "lossy": ["sage_attn"]}}),
+             "`requires`")
 
 # The headline Z-Image vLLM entry sets DIFFUSION_ATTENTION_BACKEND; a verbatim
 # vLLM arm whose recipe does not must not pick it up silently.
@@ -204,5 +225,10 @@ with tempfile.TemporaryDirectory() as td:
     check("an unknown arm is refused before anything runs", r.returncode == 2 and "has no arm" in r.stderr, r.stderr)
     r = run("cb_nope")
     check("an unknown cell is refused", r.returncode == 2 and "no cookbook cell" in r.stderr, r.stderr)
+    r = run("cb_ltx25_t2v_544_1gpu_vllm", "sglang:cb-nope", DBF_HARDWARE_PROFILE="h200")
+    check("a box outside the source's GPU classes is called out",
+          "HARDWARE DEVIATION cb_ltx25_t2v_544_1gpu_vllm" in r.stderr, r.stderr)
+    r = run(cell, "sglang:cb-nope", DBF_HARDWARE_PROFILE="h200")
+    check("a box the source was written for is not", "HARDWARE DEVIATION" not in r.stderr, r.stderr)
 
 sys.exit(fail)

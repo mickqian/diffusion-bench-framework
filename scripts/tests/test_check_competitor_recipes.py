@@ -52,7 +52,7 @@ def run(recipes, list_commits):
     with tempfile.TemporaryDirectory() as td:
         out = io.StringIO()
         with contextlib.redirect_stdout(out):
-            code = ccr.main(["--cases-dir", write_cases(td, recipes), "--cookbook-dir", ""], list_commits=list_commits)
+            code = ccr.main(["--cases-dir", write_cases(td, recipes)], list_commits=list_commits)
         return code, out.getvalue()
 
 

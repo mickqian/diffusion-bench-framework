@@ -20,14 +20,39 @@
       "num_inference_steps": 50,
       "guidance_scale": 1.0,
       "num_gpus": 1,
-      "dit_forwards": 50
-    }
+      "dit_forwards": 50,
+      "metric": "end-to-end per image",
+      "warmup": "1 request",
+      "repeats": "median of 3"
+    },
+    "source_gpu": [
+      "h200"
+    ]
   },
   "forwards": {
     "vllm-omni": 50,
     "sglang": 50
   },
-  "deviations": [],
+  "deviations": [
+    {
+      "field": "metric",
+      "source": "end-to-end per image",
+      "run": "client_e2e_median",
+      "reason": "every arm is timed by the same client; the source's own timer is not available for the other frameworks"
+    },
+    {
+      "field": "warmup",
+      "source": "1 request",
+      "run": "2 request(s) at 3 steps",
+      "reason": "the harness warms every arm the same way before timing"
+    },
+    {
+      "field": "repeats",
+      "source": "median of 3",
+      "run": "median of 5",
+      "reason": "the harness takes the same median for every arm"
+    }
+  ],
   "arms": {
     "vllm-omni": {
       "cb-vllm-verbatim": {

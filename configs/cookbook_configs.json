@@ -290,15 +290,41 @@
                     "request_extra.flow_shift": 10.0,
                     "request_extra.extra_params.guardrails": true,
                     "num_gpus": 1,
-                    "dit_forwards": 35
+                    "dit_forwards": 35,
+                    "metric": "not stated",
+                    "warmup": "not stated",
+                    "repeats": "not stated"
                 },
+                "source_gpu": [
+                    "h200",
+                    "b300"
+                ],
                 "forwards": {
                     "vllm-omni": 35,
                     "sglang": 35,
                     "lightx2v": 35,
                     "trtllm-visual": null
                 },
-                "deviations": [],
+                "deviations": [
+                    {
+                        "field": "metric",
+                        "source": "not stated",
+                        "run": "client_e2e_median",
+                        "reason": "every arm is timed by the same client; the source's own timer is not available for the other frameworks"
+                    },
+                    {
+                        "field": "warmup",
+                        "source": "not stated",
+                        "run": "3 request(s) at 3 steps",
+                        "reason": "the harness warms every arm the same way before timing"
+                    },
+                    {
+                        "field": "repeats",
+                        "source": "not stated",
+                        "run": "median of 2",
+                        "reason": "the harness takes the same median for every arm"
+                    }
+                ],
                 "arms": {
                     "vllm-omni": {
                         "cb-vllm-verbatim": {
@@ -469,6 +495,10 @@
                                 "offload_granularity": "model",
                                 "use_compile": false
                             },
+                            "requires": [
+                                "scripts/prepare_cookbook_h3.sh lx-adaln",
+                                "scripts/prepare_cookbook_h3.sh sage"
+                            ],
                             "allow_inherited": [
                                 "extra_env",
                                 "lightx2v_config.lazy_load",
@@ -525,6 +555,9 @@
                             "lossy": [
                                 "adaln-cache (precomputed sidecar)"
                             ],
+                            "requires": [
+                                "scripts/prepare_cookbook_h3.sh sgl-adaln"
+                            ],
                             "upstream_recipe": {
                                 "repo": "sgl-project/sglang",
                                 "path": "docs/cookbook/diffusion/MiniMax/MiniMax-H3.mdx",
@@ -542,6 +575,10 @@
                                 "adaln-cache (precomputed sidecar)",
                                 "sage_attn"
                             ],
+                            "requires": [
+                                "scripts/prepare_cookbook_h3.sh sgl-adaln",
+                                "scripts/prepare_cookbook_h3.sh sage"
+                            ],
                             "upstream_recipe": {
                                 "repo": "sgl-project/sglang",
                                 "path": "docs/cookbook/diffusion/MiniMax/MiniMax-H3.mdx",
@@ -550,7 +587,10 @@
                                 "section": "AdaLN cache: precomputed sidecar (--minimax-h3-adaln-cache-path)"
                             },
                             "serve_args": "--ulysses-degree 2 --model-variant fl2va --performance-mode speed --minimax-h3-adaln-cache-path /scratch/bench/sgl-adaln/fl2va-t2va-29.safetensors --attention-backend sage_attn",
-                            "notes": "Matches both of the source's lossy features. Needs SageAttention with the SM90 fix (thu-ml/SageAttention@d9704247) in the sglang env; without it sglang warns and falls back to FA."
+                            "notes": "Matches both of the source's lossy features. PYTHONPATH puts the patched SageAttention (thu-ml/SageAttention@d9704247) next to the pinned sglang tree; without it sglang warns and falls back to FA, and the row measures FA under a Sage label.",
+                            "extra_env": {
+                                "PYTHONPATH": "/scratch/bench/sglang/python:/scratch/bench/sage-sgl-site"
+                            }
                         },
                         "cb-sgl-tuned": {
                             "tier": "tuned",
@@ -590,8 +630,11 @@
                     "num_frames": 124,
                     "num_gpus": 2,
                     "dit_forwards": 29,
-                    "metric": "offline `RUN pipeline cost` log line (PROFILING_DEBUG_LEVEL=2), one run"
+                    "metric": "offline `RUN pipeline cost` log line (PROFILING_DEBUG_LEVEL=2), one run",
+                    "warmup": "not stated",
+                    "repeats": "one run"
                 },
+                "source_gpu": [],
                 "forwards": {
                     "lightx2v": 29,
                     "sglang": 29
@@ -602,6 +645,18 @@
                         "source": "offline `RUN pipeline cost` log line (PROFILING_DEBUG_LEVEL=2), one run",
                         "run": "client_e2e_median",
                         "reason": "every arm is timed by the same client; the source's own timer is not available for the other frameworks"
+                    },
+                    {
+                        "field": "warmup",
+                        "source": "not stated",
+                        "run": "3 request(s) at 3 steps",
+                        "reason": "the harness warms every arm the same way before timing"
+                    },
+                    {
+                        "field": "repeats",
+                        "source": "one run",
+                        "run": "median of 2",
+                        "reason": "the harness takes the same median for every arm"
                     }
                 ],
                 "arms": {
@@ -820,6 +875,9 @@
                             "lossy": [
                                 "adaln-cache (precomputed sidecar)"
                             ],
+                            "requires": [
+                                "scripts/prepare_cookbook_h3.sh sgl-adaln"
+                            ],
                             "upstream_recipe": {
                                 "repo": "sgl-project/sglang",
                                 "path": "docs/cookbook/diffusion/MiniMax/MiniMax-H3.mdx",
@@ -875,13 +933,36 @@
                     "num_frames": 124,
                     "num_inference_steps": 28,
                     "num_gpus": 2,
-                    "dit_forwards": 27
+                    "dit_forwards": 27,
+                    "metric": "benchmark_visual_gen e2e_latency (client)",
+                    "warmup": "startup precompile of 544x960/124 (compilation_config); no warmup request",
+                    "repeats": "3 prompts at concurrency 1"
                 },
+                "source_gpu": [],
                 "forwards": {
                     "trtllm-visual": 27,
                     "sglang": 27
                 },
-                "deviations": [],
+                "deviations": [
+                    {
+                        "field": "metric",
+                        "source": "benchmark_visual_gen e2e_latency (client)",
+                        "run": "client_e2e_median",
+                        "reason": "every arm is timed by the same client; the source's own timer is not available for the other frameworks"
+                    },
+                    {
+                        "field": "warmup",
+                        "source": "startup precompile of 544x960/124 (compilation_config); no warmup request",
+                        "run": "3 request(s) at 3 steps",
+                        "reason": "the harness warms every arm the same way before timing"
+                    },
+                    {
+                        "field": "repeats",
+                        "source": "3 prompts at concurrency 1",
+                        "run": "median of 2",
+                        "reason": "the harness takes the same median for every arm"
+                    }
+                ],
                 "arms": {
                     "trtllm-visual": {
                         "cb-trt-verbatim": {
@@ -927,6 +1008,348 @@
                 }
             },
             "notes": "TRT-LLM reads 28 steps as 28 sigma grid points (27 DiT forwards); sglang is sent 27 forwards."
+        },
+        {
+            "id": "cb_ltx25_t2v_1088_2gpu_vllm",
+            "model": "Lightricks/LTX-2.5-Diffusers",
+            "task": "text-to-video",
+            "label": "LTX-2.5 distilled two-stage T2V 1920x1088 121f 8+3 steps (vLLM-Omni recipe, 4 GPUs scaled to 2)",
+            "prompt": "A cat and a dog baking a cake together in a kitchen.",
+            "width": 1920,
+            "height": 1088,
+            "num_frames": 121,
+            "seed": 42,
+            "num_gpus": 2,
+            "fps": 24,
+            "num_inference_steps": 8,
+            "guidance_scale": 1.0,
+            "benchmark": {
+                "warmup": {
+                    "num_inference_steps": 8
+                }
+            },
+            "notes": "LightX2V ships configs/ltx2/ltx2_5_distilled.json (ce0f526ae62c), but the harness has never served LTX-2.5 through LightX2V (headline status unsupported); add its arm once that path is validated.",
+            "frameworks": {
+                "vllm-omni": {
+                    "serve_args": "",
+                    "command_profiles": {
+                        "cb-vllm-verbatim": {
+                            "tier": "verbatim",
+                            "num_gpus": 2,
+                            "upstream_recipe": {
+                                "repo": "vllm-project/vllm-omni",
+                                "path": "recipes/LTX/LTX-2.5.md",
+                                "commit": "a0910980",
+                                "commit_date": "2026-10-17",
+                                "section": "### Multi-GPU low-latency path"
+                            },
+                            "serve_args": "--num-gpus 2 --model-class-name LTX2DistilledTwoStagePipeline --usp 2 --vae-patch-parallel-size 2 --vae-use-tiling --stage-init-timeout 900",
+                            "notes": "The recipe's four-GPU command with --usp / --vae-patch-parallel-size matched to 2 GPUs, as it instructs; 8 distilled steps plus the 3-step refinement.",
+                            "extra_env": {}
+                        }
+                    }
+                },
+                "sglang": {
+                    "serve_args": "",
+                    "command_profiles": {
+                        "cb-sgl-cookbook": {
+                            "tier": "verbatim",
+                            "num_gpus": 2,
+                            "upstream_recipe": {
+                                "repo": "sgl-project/sglang",
+                                "path": "docs/cookbook/diffusion/LTX/LTX2.5.mdx",
+                                "commit": "af7d941fc3",
+                                "commit_date": "2026-10-24",
+                                "section": "### 3.3 Multi-GPU presets: '2 GPUs, long sequences' + ### 3.2 Configuration Tips (on >=130 GiB GPUs pass the served shape via --warmup-resolutions / --warmup-num-frames)"
+                            },
+                            "serve_args": "--pipeline-class-name LTX2TwoStagePipeline --ulysses-degree 2 --warmup-resolutions 1920x1088 --warmup-num-frames 121",
+                            "notes": "The 2-GPU preset plus the warmup shape the cookbook tells >=130 GiB GPUs to pass. Forward count unverified: the cookbook says 'a short refinement' without a number.",
+                            "extra_env": {}
+                        },
+                        "cb-sgl-cookbook-preset": {
+                            "tier": "verbatim",
+                            "num_gpus": 2,
+                            "upstream_recipe": {
+                                "repo": "sgl-project/sglang",
+                                "path": "docs/cookbook/diffusion/LTX/LTX2.5.mdx",
+                                "commit": "af7d941fc3",
+                                "commit_date": "2026-10-24",
+                                "section": "### 3.3 Multi-GPU presets: '2 GPUs, long sequences'"
+                            },
+                            "serve_args": "--pipeline-class-name LTX2TwoStagePipeline --ulysses-degree 2",
+                            "notes": "The preset alone. On >=130 GiB GPUs breakable CUDA graphs turn on and the default warmup shape is the sampling default 960x544, which two-stage cannot halve to a 64-aligned size (warmup_request_builder._resolve_default_warmup_resolution at 3a01d4cc): expected to fail to start on H200/B200 until that is fixed.",
+                            "extra_env": {}
+                        }
+                    }
+                }
+            },
+            "framework_request_extra": {
+                "sglang": {
+                    "x264_preset": "ultrafast",
+                    "output_compression": 63,
+                    "_note": "MP4 encode = the closest competitor's, vLLM-Omni (6.00 s on 2xB300, 2026-10-24): vLLM-Omni encodes libx264 preset ultrafast, threads 0, CRF 18 unless a request's extra_params.video_codec_options replaces those options (0da1d831: entrypoints/openai/serving_video.py:578/644, diffusion/models/wan2_2/chunked_mp4.py:17, diffusion/models/minimax_h3/pipeline_minimax_h3.py:3211; CRF 18 in diffusion/utils/media_utils.py:365/445). sglang defaults to libx264 preset fast at CRF 25 (multimodal_gen/runtime/entrypoints/utils.py:310 X264_PRESET; :452-455 CRF = int((1 - output_compression / 100) * 51), default output_compression 50); output_compression 63 -> CRF 18. Frames unchanged."
+                }
+            },
+            "report_framework_statuses": {
+                "lightx2v": "not_run",
+                "trtllm-visual": "not_run",
+                "comfyui": "not_run",
+                "fastvideo": "not_run"
+            },
+            "report_framework_reasons": {
+                "lightx2v": "no arm in this cookbook cell",
+                "trtllm-visual": "no arm in this cookbook cell",
+                "comfyui": "no arm in this cookbook cell",
+                "fastvideo": "no arm in this cookbook cell"
+            },
+            "track": "cookbook",
+            "cookbook": {
+                "framework": "vllm-omni",
+                "repo": "vllm-project/vllm-omni",
+                "path": "recipes/LTX/LTX-2.5.md",
+                "commit": "a0910980",
+                "commit_date": "2026-10-17",
+                "section": "### Multi-GPU low-latency path",
+                "source_hardware": "4 GPUs (Ulysses 4 + VAE patch parallel 4); B300 verified",
+                "source_metric": "none published for this pipeline",
+                "workload": {
+                    "width": 1920,
+                    "height": 1088,
+                    "num_frames": 121,
+                    "fps": 24,
+                    "num_inference_steps": 8,
+                    "num_gpus": 4,
+                    "dit_forwards": 11,
+                    "metric": "not stated",
+                    "warmup": "not stated",
+                    "repeats": "not stated"
+                },
+                "source_gpu": [
+                    "b300"
+                ],
+                "forwards": {
+                    "vllm-omni": 11,
+                    "sglang": null
+                },
+                "deviations": [
+                    {
+                        "field": "num_gpus",
+                        "source": 4,
+                        "run": 2,
+                        "reason": "2-GPU box: Ulysses and VAE patch parallel 4 scaled to 2, as the recipe says to match the GPU count"
+                    },
+                    {
+                        "field": "metric",
+                        "source": "not stated",
+                        "run": "client_e2e_median",
+                        "reason": "every arm is timed by the same client; the source's own timer is not available for the other frameworks"
+                    },
+                    {
+                        "field": "warmup",
+                        "source": "not stated",
+                        "run": "3 request(s) at 8 steps",
+                        "reason": "the harness warms every arm the same way before timing"
+                    },
+                    {
+                        "field": "repeats",
+                        "source": "not stated",
+                        "run": "median of 2",
+                        "reason": "the harness takes the same median for every arm"
+                    }
+                ],
+                "arms": {
+                    "vllm-omni": {
+                        "cb-vllm-verbatim": {
+                            "tier": "verbatim",
+                            "upstream_recipe": {
+                                "repo": "vllm-project/vllm-omni",
+                                "path": "recipes/LTX/LTX-2.5.md",
+                                "commit": "a0910980",
+                                "commit_date": "2026-10-17",
+                                "section": "### Multi-GPU low-latency path"
+                            }
+                        }
+                    },
+                    "sglang": {
+                        "cb-sgl-cookbook": {
+                            "tier": "verbatim",
+                            "upstream_recipe": {
+                                "repo": "sgl-project/sglang",
+                                "path": "docs/cookbook/diffusion/LTX/LTX2.5.mdx",
+                                "commit": "af7d941fc3",
+                                "commit_date": "2026-10-24",
+                                "section": "### 3.3 Multi-GPU presets: '2 GPUs, long sequences' + ### 3.2 Configuration Tips (on >=130 GiB GPUs pass the served shape via --warmup-resolutions / --warmup-num-frames)"
+                            }
+                        },
+                        "cb-sgl-cookbook-preset": {
+                            "tier": "verbatim",
+                            "upstream_recipe": {
+                                "repo": "sgl-project/sglang",
+                                "path": "docs/cookbook/diffusion/LTX/LTX2.5.mdx",
+                                "commit": "af7d941fc3",
+                                "commit_date": "2026-10-24",
+                                "section": "### 3.3 Multi-GPU presets: '2 GPUs, long sequences'"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        {
+            "id": "cb_ltx25_t2v_544_1gpu_vllm",
+            "model": "Lightricks/LTX-2.5-Diffusers",
+            "task": "text-to-video",
+            "label": "LTX-2.5 distilled one-stage T2V 960x544 121f 8 steps (vLLM-Omni recipe, 1 GPU)",
+            "prompt": "A cat and a dog baking a cake together in a kitchen.",
+            "width": 960,
+            "height": 544,
+            "num_frames": 121,
+            "seed": 42,
+            "num_gpus": 1,
+            "fps": 24,
+            "num_inference_steps": 8,
+            "guidance_scale": 1.0,
+            "benchmark": {
+                "warmup": {
+                    "num_inference_steps": 8
+                }
+            },
+            "notes": "LightX2V ships configs/ltx2/ltx2_5_distilled.json (ce0f526ae62c), but the harness has never served LTX-2.5 through LightX2V (headline status unsupported); add its arm once that path is validated.",
+            "frameworks": {
+                "vllm-omni": {
+                    "serve_args": "",
+                    "command_profiles": {
+                        "cb-vllm-verbatim": {
+                            "tier": "verbatim",
+                            "num_gpus": 1,
+                            "upstream_recipe": {
+                                "repo": "vllm-project/vllm-omni",
+                                "path": "recipes/LTX/LTX-2.5.md",
+                                "commit": "a0910980",
+                                "commit_date": "2026-10-17",
+                                "section": "## Choose a pipeline; ## Online serving"
+                            },
+                            "serve_args": "--model-class-name LTX2DistilledOneStagePipeline --stage-init-timeout 900",
+                            "notes": "The pipeline table's distilled one-stage default (960x544, 8 steps) served as in 'Online serving'; default DiffVAE decoder.",
+                            "extra_env": {}
+                        }
+                    }
+                },
+                "sglang": {
+                    "serve_args": "",
+                    "command_profiles": {
+                        "cb-sgl-cookbook": {
+                            "tier": "verbatim",
+                            "num_gpus": 1,
+                            "upstream_recipe": {
+                                "repo": "sgl-project/sglang",
+                                "path": "docs/cookbook/diffusion/LTX/LTX2.5.mdx",
+                                "commit": "af7d941fc3",
+                                "commit_date": "2026-10-24",
+                                "section": "### 3.1 Basic Configuration (`On a single high-VRAM GPU no extra flags are needed`)"
+                            },
+                            "serve_args": "--pipeline-class-name LTX2Pipeline",
+                            "notes": "sglang's one-stage pipeline serves the distilled DiT by default (960x544, 121 frames, 8 steps).",
+                            "extra_env": {}
+                        }
+                    }
+                }
+            },
+            "framework_request_extra": {
+                "sglang": {
+                    "x264_preset": "ultrafast",
+                    "output_compression": 63,
+                    "_note": "MP4 encode = the closest competitor's, vLLM-Omni (6.00 s on 2xB300, 2026-10-24): vLLM-Omni encodes libx264 preset ultrafast, threads 0, CRF 18 unless a request's extra_params.video_codec_options replaces those options (0da1d831: entrypoints/openai/serving_video.py:578/644, diffusion/models/wan2_2/chunked_mp4.py:17, diffusion/models/minimax_h3/pipeline_minimax_h3.py:3211; CRF 18 in diffusion/utils/media_utils.py:365/445). sglang defaults to libx264 preset fast at CRF 25 (multimodal_gen/runtime/entrypoints/utils.py:310 X264_PRESET; :452-455 CRF = int((1 - output_compression / 100) * 51), default output_compression 50); output_compression 63 -> CRF 18. Frames unchanged."
+                }
+            },
+            "report_framework_statuses": {
+                "lightx2v": "not_run",
+                "trtllm-visual": "not_run",
+                "comfyui": "not_run",
+                "fastvideo": "not_run"
+            },
+            "report_framework_reasons": {
+                "lightx2v": "no arm in this cookbook cell",
+                "trtllm-visual": "no arm in this cookbook cell",
+                "comfyui": "no arm in this cookbook cell",
+                "fastvideo": "no arm in this cookbook cell"
+            },
+            "track": "cookbook",
+            "cookbook": {
+                "framework": "vllm-omni",
+                "repo": "vllm-project/vllm-omni",
+                "path": "recipes/LTX/LTX-2.5.md",
+                "commit": "a0910980",
+                "commit_date": "2026-10-17",
+                "section": "## Choose a pipeline; ## Online serving",
+                "source_hardware": "B300 verified; B200/H200 a capacity-based recommendation, not verified",
+                "source_metric": "none published for this pipeline",
+                "workload": {
+                    "width": 960,
+                    "height": 544,
+                    "num_frames": 121,
+                    "fps": 24,
+                    "num_inference_steps": 8,
+                    "num_gpus": 1,
+                    "dit_forwards": 8,
+                    "metric": "not stated",
+                    "warmup": "not stated",
+                    "repeats": "not stated"
+                },
+                "source_gpu": [
+                    "b300"
+                ],
+                "forwards": {
+                    "vllm-omni": 8,
+                    "sglang": 8
+                },
+                "deviations": [
+                    {
+                        "field": "metric",
+                        "source": "not stated",
+                        "run": "client_e2e_median",
+                        "reason": "every arm is timed by the same client; the source's own timer is not available for the other frameworks"
+                    },
+                    {
+                        "field": "warmup",
+                        "source": "not stated",
+                        "run": "3 request(s) at 8 steps",
+                        "reason": "the harness warms every arm the same way before timing"
+                    },
+                    {
+                        "field": "repeats",
+                        "source": "not stated",
+                        "run": "median of 2",
+                        "reason": "the harness takes the same median for every arm"
+                    }
+                ],
+                "arms": {
+                    "vllm-omni": {
+                        "cb-vllm-verbatim": {
+                            "tier": "verbatim",
+                            "upstream_recipe": {
+                                "repo": "vllm-project/vllm-omni",
+                                "path": "recipes/LTX/LTX-2.5.md",
+                                "commit": "a0910980",
+                                "commit_date": "2026-10-17",
+                                "section": "## Choose a pipeline; ## Online serving"
+                            }
+                        }
+                    },
+                    "sglang": {
+                        "cb-sgl-cookbook": {
+                            "tier": "verbatim",
+                            "upstream_recipe": {
+                                "repo": "sgl-project/sglang",
+                                "path": "docs/cookbook/diffusion/LTX/LTX2.5.mdx",
+                                "commit": "af7d941fc3",
+                                "commit_date": "2026-10-24",
+                                "section": "### 3.1 Basic Configuration (`On a single high-VRAM GPU no extra flags are needed`)"
+                            }
+                        }
+                    }
+                }
+            }
         },
         {
             "id": "cb_qwen21_t2i_1024_40s_lightx2v",
@@ -1058,8 +1481,11 @@
                     "guidance_scale": 1.0,
                     "num_gpus": 1,
                     "dit_forwards": 40,
-                    "metric": "offline `RUN pipeline cost` log line (PROFILING_DEBUG_LEVEL=2), one run"
+                    "metric": "offline `RUN pipeline cost` log line (PROFILING_DEBUG_LEVEL=2), one run",
+                    "warmup": "config `warmup: true` (startup warmup)",
+                    "repeats": "one run"
                 },
+                "source_gpu": [],
                 "forwards": {
                     "lightx2v": 40,
                     "sglang": 40,
@@ -1071,6 +1497,18 @@
                         "source": "offline `RUN pipeline cost` log line (PROFILING_DEBUG_LEVEL=2), one run",
                         "run": "client_e2e_median",
                         "reason": "every arm is timed by the same client; the source's own timer is not available for the other frameworks"
+                    },
+                    {
+                        "field": "warmup",
+                        "source": "config `warmup: true` (startup warmup)",
+                        "run": "2 request(s) at 3 steps",
+                        "reason": "the harness warms every arm the same way before timing"
+                    },
+                    {
+                        "field": "repeats",
+                        "source": "one run",
+                        "run": "median of 5",
+                        "reason": "the harness takes the same median for every arm"
                     }
                 ],
                 "arms": {
@@ -1201,13 +1639,38 @@
                     "num_inference_steps": 50,
                     "guidance_scale": 1.0,
                     "num_gpus": 1,
-                    "dit_forwards": 50
+                    "dit_forwards": 50,
+                    "metric": "end-to-end per image",
+                    "warmup": "1 request",
+                    "repeats": "median of 3"
                 },
+                "source_gpu": [
+                    "h200"
+                ],
                 "forwards": {
                     "vllm-omni": 50,
                     "sglang": 50
                 },
-                "deviations": [],
+                "deviations": [
+                    {
+                        "field": "metric",
+                        "source": "end-to-end per image",
+                        "run": "client_e2e_median",
+                        "reason": "every arm is timed by the same client; the source's own timer is not available for the other frameworks"
+                    },
+                    {
+                        "field": "warmup",
+                        "source": "1 request",
+                        "run": "2 request(s) at 3 steps",
+                        "reason": "the harness warms every arm the same way before timing"
+                    },
+                    {
+                        "field": "repeats",
+                        "source": "median of 3",
+                        "run": "median of 5",
+                        "reason": "the harness takes the same median for every arm"
+                    }
+                ],
                 "arms": {
                     "vllm-omni": {
                         "cb-vllm-verbatim": {
@@ -1386,8 +1849,14 @@
                     "num_frames": 80,
                     "fps": 16,
                     "num_gpus": 4,
-                    "dit_forwards": 3
+                    "dit_forwards": 3,
+                    "metric": "mean / P99 latency at max concurrency 1",
+                    "warmup": "not stated",
+                    "repeats": "--num-prompts N (N not stated)"
                 },
+                "source_gpu": [
+                    "a100"
+                ],
                 "forwards": {
                     "vllm-omni": 3,
                     "sglang": 3,
@@ -1405,6 +1874,24 @@
                         "source": 4,
                         "run": 2,
                         "reason": "2-GPU box: the dashboard's CFG 2 x USP 2 + HSDP is scaled to CFG 2 + HSDP"
+                    },
+                    {
+                        "field": "metric",
+                        "source": "mean / P99 latency at max concurrency 1",
+                        "run": "client_e2e_median",
+                        "reason": "every arm is timed by the same client; the source's own timer is not available for the other frameworks"
+                    },
+                    {
+                        "field": "warmup",
+                        "source": "not stated",
+                        "run": "3 request(s) at 3 steps",
+                        "reason": "the harness warms every arm the same way before timing"
+                    },
+                    {
+                        "field": "repeats",
+                        "source": "--num-prompts N (N not stated)",
+                        "run": "median of 2",
+                        "reason": "the harness takes the same median for every arm"
                     }
                 ],
                 "arms": {
@@ -1621,8 +2108,11 @@
                     "guidance_scale_2": 3.0,
                     "num_gpus": 1,
                     "dit_forwards": 40,
-                    "metric": "offline `RUN pipeline cost` log line (PROFILING_DEBUG_LEVEL=2), one run"
+                    "metric": "offline `RUN pipeline cost` log line (PROFILING_DEBUG_LEVEL=2), one run",
+                    "warmup": "not stated",
+                    "repeats": "one run"
                 },
+                "source_gpu": [],
                 "forwards": {
                     "lightx2v": 40,
                     "sglang": 40,
@@ -1634,6 +2124,18 @@
                         "source": "offline `RUN pipeline cost` log line (PROFILING_DEBUG_LEVEL=2), one run",
                         "run": "client_e2e_median",
                         "reason": "every arm is timed by the same client; the source's own timer is not available for the other frameworks"
+                    },
+                    {
+                        "field": "warmup",
+                        "source": "not stated",
+                        "run": "3 request(s) at 3 steps",
+                        "reason": "the harness warms every arm the same way before timing"
+                    },
+                    {
+                        "field": "repeats",
+                        "source": "one run",
+                        "run": "median of 2",
+                        "reason": "the harness takes the same median for every arm"
                     }
                 ],
                 "arms": {
@@ -1839,8 +2341,14 @@
                     "num_frames": 80,
                     "fps": 16,
                     "num_gpus": 4,
-                    "dit_forwards": 6
+                    "dit_forwards": 6,
+                    "metric": "mean / P99 latency at max concurrency 1",
+                    "warmup": "not stated",
+                    "repeats": "--num-prompts N (N not stated)"
                 },
+                "source_gpu": [
+                    "a100"
+                ],
                 "forwards": {
                     "vllm-omni": 6,
                     "sglang": 6,
@@ -1858,6 +2366,24 @@
                         "source": 4,
                         "run": 2,
                         "reason": "2-GPU box: the dashboard's CFG 2 x USP 2 + HSDP is scaled to CFG 2 + HSDP"
+                    },
+                    {
+                        "field": "metric",
+                        "source": "mean / P99 latency at max concurrency 1",
+                        "run": "client_e2e_median",
+                        "reason": "every arm is timed by the same client; the source's own timer is not available for the other frameworks"
+                    },
+                    {
+                        "field": "warmup",
+                        "source": "not stated",
+                        "run": "3 request(s) at 3 steps",
+                        "reason": "the harness warms every arm the same way before timing"
+                    },
+                    {
+                        "field": "repeats",
+                        "source": "--num-prompts N (N not stated)",
+                        "run": "median of 2",
+                        "reason": "the harness takes the same median for every arm"
                     }
                 ],
                 "arms": {
@@ -1990,14 +2516,37 @@
                     "height": 1024,
                     "num_inference_steps": 9,
                     "num_gpus": 1,
-                    "dit_forwards": 9
+                    "dit_forwards": 9,
+                    "metric": "client latency",
+                    "warmup": "not stated",
+                    "repeats": "not stated"
                 },
+                "source_gpu": [],
                 "forwards": {
                     "vllm-omni": 9,
                     "sglang": 9,
                     "lightx2v": 9
                 },
-                "deviations": [],
+                "deviations": [
+                    {
+                        "field": "metric",
+                        "source": "client latency",
+                        "run": "client_e2e_median",
+                        "reason": "every arm is timed by the same client; the source's own timer is not available for the other frameworks"
+                    },
+                    {
+                        "field": "warmup",
+                        "source": "not stated",
+                        "run": "2 request(s) at 3 steps",
+                        "reason": "the harness warms every arm the same way before timing"
+                    },
+                    {
+                        "field": "repeats",
+                        "source": "not stated",
+                        "run": "median of 5",
+                        "reason": "the harness takes the same median for every arm"
+                    }
+                ],
                 "arms": {
                     "vllm-omni": {
                         "cb-vllm-verbatim": {
@@ -2144,8 +2693,11 @@
                     "guidance_scale": 0.0,
                     "num_gpus": 1,
                     "dit_forwards": 9,
-                    "metric": "offline `RUN pipeline cost` log line (PROFILING_DEBUG_LEVEL=2), one run"
+                    "metric": "offline `RUN pipeline cost` log line (PROFILING_DEBUG_LEVEL=2), one run",
+                    "warmup": "not stated",
+                    "repeats": "one run"
                 },
+                "source_gpu": [],
                 "forwards": {
                     "lightx2v": 9,
                     "sglang": 9,
@@ -2157,6 +2709,18 @@
                         "source": "offline `RUN pipeline cost` log line (PROFILING_DEBUG_LEVEL=2), one run",
                         "run": "client_e2e_median",
                         "reason": "every arm is timed by the same client; the source's own timer is not available for the other frameworks"
+                    },
+                    {
+                        "field": "warmup",
+                        "source": "not stated",
+                        "run": "2 request(s) at 3 steps",
+                        "reason": "the harness warms every arm the same way before timing"
+                    },
+                    {
+                        "field": "repeats",
+                        "source": "one run",
+                        "run": "median of 5",
+                        "reason": "the harness takes the same median for every arm"
                     }
                 ],
                 "arms": {
@@ -2297,8 +2861,11 @@
                     "guidance_scale": 0.0,
                     "num_gpus": 2,
                     "dit_forwards": 9,
-                    "metric": "offline `RUN pipeline cost` log line (PROFILING_DEBUG_LEVEL=2), one run"
+                    "metric": "offline `RUN pipeline cost` log line (PROFILING_DEBUG_LEVEL=2), one run",
+                    "warmup": "not stated",
+                    "repeats": "one run"
                 },
+                "source_gpu": [],
                 "forwards": {
                     "lightx2v": 9,
                     "sglang": 9,
@@ -2310,6 +2877,18 @@
                         "source": "offline `RUN pipeline cost` log line (PROFILING_DEBUG_LEVEL=2), one run",
                         "run": "client_e2e_median",
                         "reason": "every arm is timed by the same client; the source's own timer is not available for the other frameworks"
+                    },
+                    {
+                        "field": "warmup",
+                        "source": "not stated",
+                        "run": "2 request(s) at 3 steps",
+                        "reason": "the harness warms every arm the same way before timing"
+                    },
+                    {
+                        "field": "repeats",
+                        "source": "one run",
+                        "run": "median of 5",
+                        "reason": "the harness takes the same median for every arm"
                     }
                 ],
                 "arms": {

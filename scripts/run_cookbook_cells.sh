@@ -29,12 +29,23 @@ CONFIG="${DBF_REPO_DIR}/configs/cookbook_configs.json"
 STATE="${DBF_STATE_DIR:-${DBF_LOG_DIR}}"
 
 arms=("$@")
-listed="$(python3 - "$CONFIG" "$CELL" <<'PY'
+listed="$(python3 - "$CONFIG" "$CELL" "${DBF_HARDWARE_PROFILE:-}" <<'PY'
 import json, sys
 cases = {c["id"]: c for c in json.load(open(sys.argv[1]))["cases"]}
 if sys.argv[2] not in cases:
     sys.exit(f"no cookbook cell {sys.argv[2]!r} in {sys.argv[1]}")
-for fw, body in cases[sys.argv[2]]["frameworks"].items():
+cell = cases[sys.argv[2]]
+cookbook = cell["cookbook"]
+source = cookbook.get("source_gpu") or []
+if sys.argv[3] not in source:
+    # Not fatal: running a workload on another GPU class than its source is
+    # often the point. It is still a deviation the report has to carry.
+    written = cookbook.get("source_hardware")
+    tokens = source or "none stated"
+    here = sys.argv[3] or "unset DBF_HARDWARE_PROFILE"
+    print(f"HARDWARE DEVIATION {sys.argv[2]}: source written for {written!r} (GPU tokens {tokens}), running on {here}",
+          file=sys.stderr)
+for fw, body in cell["frameworks"].items():
     for name in body["command_profiles"]:
         print(f"{fw}:{name}")
 PY

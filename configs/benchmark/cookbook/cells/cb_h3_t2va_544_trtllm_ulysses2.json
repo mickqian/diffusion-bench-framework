@@ -39,14 +39,37 @@
       "num_frames": 124,
       "num_inference_steps": 28,
       "num_gpus": 2,
-      "dit_forwards": 27
-    }
+      "dit_forwards": 27,
+      "metric": "benchmark_visual_gen e2e_latency (client)",
+      "warmup": "startup precompile of 544x960/124 (compilation_config); no warmup request",
+      "repeats": "3 prompts at concurrency 1"
+    },
+    "source_gpu": []
   },
   "forwards": {
     "trtllm-visual": 27,
     "sglang": 27
   },
-  "deviations": [],
+  "deviations": [
+    {
+      "field": "metric",
+      "source": "benchmark_visual_gen e2e_latency (client)",
+      "run": "client_e2e_median",
+      "reason": "every arm is timed by the same client; the source's own timer is not available for the other frameworks"
+    },
+    {
+      "field": "warmup",
+      "source": "startup precompile of 544x960/124 (compilation_config); no warmup request",
+      "run": "3 request(s) at 3 steps",
+      "reason": "the harness warms every arm the same way before timing"
+    },
+    {
+      "field": "repeats",
+      "source": "3 prompts at concurrency 1",
+      "run": "median of 2",
+      "reason": "the harness takes the same median for every arm"
+    }
+  ],
   "arms": {
     "trtllm-visual": {
       "cb-trt-verbatim": {
@@ -110,6 +133,9 @@
         "num_gpus": 2,
         "lossy": [
           "adaln-cache (precomputed sidecar)"
+        ],
+        "requires": [
+          "scripts/prepare_cookbook_h3.sh sgl-adaln"
         ],
         "upstream_recipe": {
           "repo": "sgl-project/sglang",

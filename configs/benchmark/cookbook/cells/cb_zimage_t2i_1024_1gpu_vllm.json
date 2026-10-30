@@ -22,15 +22,38 @@
       "height": 1024,
       "num_inference_steps": 9,
       "num_gpus": 1,
-      "dit_forwards": 9
-    }
+      "dit_forwards": 9,
+      "metric": "client latency",
+      "warmup": "not stated",
+      "repeats": "not stated"
+    },
+    "source_gpu": []
   },
   "forwards": {
     "vllm-omni": 9,
     "sglang": 9,
     "lightx2v": 9
   },
-  "deviations": [],
+  "deviations": [
+    {
+      "field": "metric",
+      "source": "client latency",
+      "run": "client_e2e_median",
+      "reason": "every arm is timed by the same client; the source's own timer is not available for the other frameworks"
+    },
+    {
+      "field": "warmup",
+      "source": "not stated",
+      "run": "2 request(s) at 3 steps",
+      "reason": "the harness warms every arm the same way before timing"
+    },
+    {
+      "field": "repeats",
+      "source": "not stated",
+      "run": "median of 5",
+      "reason": "the harness takes the same median for every arm"
+    }
+  ],
   "arms": {
     "vllm-omni": {
       "cb-vllm-verbatim": {

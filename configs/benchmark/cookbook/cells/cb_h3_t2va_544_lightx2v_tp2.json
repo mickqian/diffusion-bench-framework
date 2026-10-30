@@ -29,8 +29,11 @@
       "num_frames": 124,
       "num_gpus": 2,
       "dit_forwards": 29,
-      "metric": "offline `RUN pipeline cost` log line (PROFILING_DEBUG_LEVEL=2), one run"
-    }
+      "metric": "offline `RUN pipeline cost` log line (PROFILING_DEBUG_LEVEL=2), one run",
+      "warmup": "not stated",
+      "repeats": "one run"
+    },
+    "source_gpu": []
   },
   "forwards": {
     "lightx2v": 29,
@@ -42,6 +45,18 @@
       "source": "offline `RUN pipeline cost` log line (PROFILING_DEBUG_LEVEL=2), one run",
       "run": "client_e2e_median",
       "reason": "every arm is timed by the same client; the source's own timer is not available for the other frameworks"
+    },
+    {
+      "field": "warmup",
+      "source": "not stated",
+      "run": "3 request(s) at 3 steps",
+      "reason": "the harness warms every arm the same way before timing"
+    },
+    {
+      "field": "repeats",
+      "source": "one run",
+      "run": "median of 2",
+      "reason": "the harness takes the same median for every arm"
     }
   ],
   "arms": {
@@ -90,6 +105,10 @@
             "tensor_p_size": 2
           }
         },
+        "requires": [
+          "scripts/prepare_cookbook_h3.sh lx-adaln",
+          "scripts/prepare_cookbook_h3.sh sage"
+        ],
         "allow_inherited": [
           "extra_env",
           "lightx2v_config.lazy_load",
@@ -122,6 +141,9 @@
         "lossy": [
           "adaln-cache (precomputed sidecar)"
         ],
+        "requires": [
+          "scripts/prepare_cookbook_h3.sh sgl-adaln"
+        ],
         "upstream_recipe": {
           "repo": "sgl-project/sglang",
           "path": "docs/cookbook/diffusion/MiniMax/MiniMax-H3.mdx",
@@ -139,6 +161,10 @@
           "adaln-cache (precomputed sidecar)",
           "sage_attn"
         ],
+        "requires": [
+          "scripts/prepare_cookbook_h3.sh sgl-adaln",
+          "scripts/prepare_cookbook_h3.sh sage"
+        ],
         "upstream_recipe": {
           "repo": "sgl-project/sglang",
           "path": "docs/cookbook/diffusion/MiniMax/MiniMax-H3.mdx",
@@ -147,7 +173,10 @@
           "section": "AdaLN cache: precomputed sidecar (--minimax-h3-adaln-cache-path)"
         },
         "serve_args": "--ulysses-degree 2 --model-variant fl2va --performance-mode speed --minimax-h3-adaln-cache-path /scratch/bench/sgl-adaln/fl2va-t2va-29.safetensors --attention-backend sage_attn",
-        "notes": "Matches both of the source's lossy features. Needs SageAttention with the SM90 fix (thu-ml/SageAttention@d9704247) in the sglang env; without it sglang warns and falls back to FA."
+        "notes": "Matches both of the source's lossy features. PYTHONPATH puts the patched SageAttention (thu-ml/SageAttention@d9704247) next to the pinned sglang tree; without it sglang warns and falls back to FA, and the row measures FA under a Sage label.",
+        "extra_env": {
+          "PYTHONPATH": "/scratch/bench/sglang/python:/scratch/bench/sage-sgl-site"
+        }
       },
       "cb-sgl-tuned": {
         "tier": "tuned",
