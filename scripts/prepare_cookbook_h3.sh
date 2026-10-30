@@ -76,7 +76,16 @@ open(p, "w").write(new); print("sm90 fix applied")
 PY
     export TORCH_CUDA_ARCH_LIST="${TORCH_CUDA_ARCH_LIST:-9.0}" EXT_PARALLEL=4 NVCC_APPEND_FLAGS="--threads 8"
     (cd "$tree" && "$LXPY" -m pip install -q --no-build-isolation --no-deps --force-reinstall .)
-    (cd "$tree" && "$SGPY" -m pip install -q --no-build-isolation --no-deps --upgrade \
+    # The sglang image's torch 2.14 headers need C++20 ("#error C++20 or later
+    # compatible compiler is required to use PyTorch"); SageAttention 2.2.0's
+    # setup.py pins -std=c++17. Build sglang's copy from a tree with the newer
+    # standard -- a compiler flag only; the accuracy check below still decides.
+    local sgl_tree="${SRC}/SageAttention-sgl"
+    rm -rf "$sgl_tree" && cp -a "$tree" "$sgl_tree"
+    if "$SGPY" -c 'import sys, torch; sys.exit(0 if tuple(map(int, torch.__version__.split(".")[:2])) >= (2, 14) else 1)'; then
+        sed -i 's/-std=c++17/-std=c++20/g' "$sgl_tree/setup.py"
+    fi
+    (cd "$sgl_tree" && "$SGPY" -m pip install -q --no-build-isolation --no-deps --upgrade \
         --target "${STATE}/sage-sgl-site" .)
     # Accuracy against SDPA, the check that found the bug; > 0.1 means the fix did not take.
     cat > "${STATE}/tmp/sage_check.py" <<'PY'
