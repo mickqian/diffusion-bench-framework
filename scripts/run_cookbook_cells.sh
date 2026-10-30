@@ -10,13 +10,16 @@
 # With no fw:arm list, every arm of the cell runs, in the cell's order.
 # Results: $DBF_LOG_DIR/run_<tag>_<fw>_<arm>_<cell>.json, one ARM line per arm.
 #
-# Why each guard is here (2xH200 cookbook round, 2026-10-30):
+# Why each guard is here (2026-10-29/30 rounds):
 #   * sglang arms refuse to start unless DBF_SGLANG_PYTHONPATH is a git tree at
-#     CB_SGLANG_COMMIT. Every arm of that round ran /sgl-workspace/sglang, the
-#     image's tree, while the notes named a different pin.
+#     CB_SGLANG_COMMIT. The image's /sgl-workspace/sglang was the pin on the
+#     2xH200 box and baa9befa on the 2xB200 one; only checking tells them apart.
 #   * Each arm takes the GPU lock (scripts/gpu_job_lock.sh) for its own run only.
-#   * The run stops when the state disk has less than CB_MIN_FREE_GB free (120):
-#     two B200 devboxes were evicted for node ephemeral storage mid-queue.
+#   * The run stops when the state disk has less than CB_MIN_FREE_GB free (120).
+#     That guards a full disk, NOT the pod's ephemeral-storage limit: two B200
+#     boxes and the 2xH200 box were evicted for exceeding it (250Gi on the H200,
+#     2026-10-30 10:50 UTC) with terabytes free on `df`. Keep weights and logs
+#     on a volume that does not count toward that limit.
 set -u
 
 TAG="${1:?tag}"; GPUS="${2:?gpu ids, e.g. 0,1}"; port="${3:?base port}"; CELL="${4:?cell id}"; shift 4

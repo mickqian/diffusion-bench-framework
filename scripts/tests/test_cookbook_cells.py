@@ -6,7 +6,7 @@ verbatim. Each check below is a way that claim went wrong, or nearly did, in
 the 2xH200 cookbook round (2026-10-30): a headline 4-GPU TRT-LLM config leaked
 `parallel_vae_size: 4` and `torch_compile_config` into "verbatim" 1-GPU arms,
 the harness turned LightX2V compile on where the source leaves it off, and
-every sglang arm ran the image's sglang instead of the pin.
+the image's sglang tree was the pin on one box and another commit on the next.
 """
 import copy
 import importlib.util
