@@ -7,6 +7,8 @@
 #   CB_SGLANG_COMMIT=3a01d4cc DBF_SGLANG_PYTHONPATH=/scratch/bench/sglang/python \
 #     bash scripts/run_cookbook_cells.sh <tag> <gpu_ids> <base_port> <cell_id> [fw:arm ...]
 #
+# CB_CONFIG points at another built config (an experiment copy with probe arms).
+#
 # With no fw:arm list, every arm of the cell runs, in the cell's order.
 # Results: $DBF_LOG_DIR/run_<tag>_<fw>_<arm>_<cell>.json, one ARM line per arm.
 #
@@ -25,7 +27,9 @@ set -u
 
 TAG="${1:?tag}"; GPUS="${2:?gpu ids, e.g. 0,1}"; port="${3:?base port}"; CELL="${4:?cell id}"; shift 4
 : "${DBF_REPO_DIR:?DBF_REPO_DIR}" "${DBF_LOG_DIR:?DBF_LOG_DIR}"
-CONFIG="${DBF_REPO_DIR}/configs/cookbook_configs.json"
+# CB_CONFIG: an experiment copy of the built config (extra probe arms); the
+# result JSON records the config's arms either way.
+CONFIG="${CB_CONFIG:-${DBF_REPO_DIR}/configs/cookbook_configs.json}"
 STATE="${DBF_STATE_DIR:-${DBF_LOG_DIR}}"
 
 arms=("$@")
