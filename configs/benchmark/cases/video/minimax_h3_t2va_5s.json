@@ -133,6 +133,16 @@
           "serve_args": "--model-type diffusion --warmup-mode server --model-variant fl2va --ulysses-degree 2 --performance-mode speed --enable-torch-compile false --attention-backend fa",
           "policy_exception": "Same correctness exception as the default profile (checked 2026-08-07): MiniMax-H3's torch.compile path changes numerical output per the sglang cookbook, so it is excluded regardless of hardware.",
           "notes": "Derived from `b200-2gpu` (the profile B300 selects). 2026-10-23 B300 bf16 microbenchmark at the real per-rank shapes: FA4 beat cuDNN SDPA by 1-4% at the Wan2.2 (75600 tokens, 20 heads) and H3 Ref2VA (49646, 28 heads) shapes and tied at H3 4-GPU, while sglang's auto selection (dynamic_cudnn_sdpa) runs cuDNN on sm10x. `--attention-backend fa` resolves to the FA4 CuTe kernels on Blackwell (platforms/cuda.py: set_fa_ver(4); head size 128 supported; Cosmos3's pinned fa ran flash_fwd_sm100 on this box). VALIDATION PENDING (wave 4, 4xB300)."
+        },
+        "dp2-throughput": {
+          "sglang_ref": "8ecabd3c1e1 (sglang main, 2026-10-30)",
+          "num_gpus": 2,
+          "serve_args": "--model-type diffusion --warmup-mode server --model-variant fl2va --dp-size 2 --performance-mode speed --enable-torch-compile false",
+          "extra_env": {
+            "PYTORCH_CUDA_ALLOC_CONF": "expandable_segments:False"
+          },
+          "description": "Throughput-only: b300-noexp with --ulysses-degree 2 replaced by --dp-size 2 (one replica per GPU, no Ulysses).",
+          "notes": "No `hardware` key and no hardware token in the name on purpose (selection also matches profile names by substring): auto-selection keeps b300-noexp for single_e2e (one request on one GPU takes ~116.5 s against 62.6 s under U2), and the round's throughput invocation selects this profile explicitly (SGLANG_BENCH_SGLANG_PROFILE=dp2-throughput). A/B 2026-10-30 on b300final (4xB300, harness throughput, 4 requests at concurrency 2, fresh server per arm): U2 250.578/250.570 s, DP2 238.571/238.585/238.569/238.564 s (-4.8%). Output: MP4 md5-identical to a warm 1-GPU no-SP server for the same request, on either GPU; U2 differs from both (existing SP numerics). sglang's server warmup reaches only replica 0 (round-robin), and a process's first real request differs in its audio bits (cold path, also on 1 GPU with --warmup-mode off); the harness warmups reach both replicas, so measured requests are warm. Fairness: vLLM-Omni has native replica-DP (replica2-throughput below, 250.5 s); TensorRT-LLM 1.4.0rc1 VisualGen has no data-parallel or replica option (visual_gen/args.py ParallelConfig), so its cell stays blackwell-omp8 (269.6 s)."
         }
       }
     },
@@ -327,6 +337,14 @@
             "section": "Two 24/32 GB GPUs: TP2 distributed layerwise offload",
             "recheck": "Re-checked 2026-10-22: the only change since the profile was written moved the FastH3 sections to recipes/FastVideo/ (95b1d97f); the base H3 serving sections are unchanged. The previously recorded f69b1f2b1 was a repo HEAD, not a commit to this file."
           }
+        },
+        "replica2-throughput": {
+          "framework_ref": "vllm-omni 0da1d831e + vllm 0.32.0",
+          "num_gpus": 2,
+          "serve_args": "--trust-remote-code --task-type fl2va --num-gpus 1 --tensor-parallel-size 1 --usp 1 --ring 1 --text-encoder-tp-size 1 --vae-use-tiling --diffusion-attention-backend CUDNN_ATTN --no-diffusion-compile-dynamic --omni-lb-policy round-robin --stage-overrides {\"0\":{\"num_replicas\":2,\"devices\":\"0,1\"}}",
+          "extra_env": {},
+          "description": "Throughput-only fairness arm for sglang dp2-throughput: vLLM-Omni's native replica data parallelism, one GPU per replica.",
+          "notes": "vLLM-Omni's replica-DP (examples/online_serving/replica_data_parallel; stage num_replicas + devices via --stage-overrides): blackwell-2gpu-static with every intra-request degree at 1, two single-GPU replicas. --omni-lb-policy round-robin instead of the default random so the harness's sequential warmups reach both replicas. Select explicitly in the throughput invocation (DIFFUSION_BENCH_VLLM_OMNI_PROFILE=replica2-throughput); no `hardware` key, single_e2e keeps blackwell-2gpu-static. 2026-10-30 b300final: 250.535/250.505 s against blackwell-2gpu-static's 276.55 s."
         }
       },
       "reason": "Empirically validated 2026-08-07, first on minimax-h3-5090-2gpu-v4 (2x RTX 5090) then on 2xB200: the default (compiled) profile segfaults identically on both GPU classes 1 step into denoising (see command_profiles.default.notes) -- a confirmed hardware-independent vLLM-Omni bug, despite the recipe's own claim that torch.compile is 'not enabled by default on consumer paths.' --enforce-eager avoids that segfault, but on RTX 5090 it fails differently at startup (a diffusion worker process dies before completing its init handshake, surfaced as EOFError) and never completes a request on that GPU class. On 2xB200 the identical --enforce-eager command works cleanly and completes a correct generation -- see command_profiles.b200-2gpu for the validated numbers and the sglang comparison on the same hardware. Net: vLLM-Omni H3 support is real but fragile below the B200 class tested here; RTX 5090 has no working profile for this case in either variant."
