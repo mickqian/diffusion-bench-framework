@@ -4,7 +4,7 @@
  "created_at": "2026-10-29",
  "run_date": "2026-10-22",
  "title": "4xB300 cross-framework (latest-vs-latest)",
- "description": "Cross-framework round on RunPod 4xB300 (x86 host): 16 cases, SGLang-Diffusion against vLLM-Omni, LightX2V, TRT-LLM VisualGen, ComfyUI and FastVideo. The sglang column is sglang main 1ab008f5b0 (2026-10-29) for every cell except FastH3 and the retired LTX-2 / LTX-2.3 rows; it replaces the per-cell preview trees of the first publish. Video cells come from the 2026-10-24 encode-aligned pass: every configurable framework encodes the MP4 like the closest competitor. LTX-2 and LTX-2.3 are retired after this round and keep their rows. Their successor LTX-2.5 is measured but held back: sglang main loads its Gemma-4-Unified text encoder through transformers, and the publish gate refuses non-native components.",
+ "description": "Cross-framework round on RunPod 4xB300 (x86 host): 17 cases, SGLang-Diffusion against vLLM-Omni, LightX2V, TRT-LLM VisualGen, ComfyUI and FastVideo. The sglang column is sglang main 1ab008f5b0 (2026-10-29) for every cell except FastH3, the retired LTX-2 / LTX-2.3 rows and LTX-2.5; it replaces the per-cell preview trees of the first publish. LTX-2.5 runs sgl-project/sglang#47411 (native Gemma-4-Unified text encoder; on main that encoder still loads through transformers, which the publish gate refuses). Video cells come from the 2026-10-24 encode-aligned pass: every configurable framework encodes the MP4 like the closest competitor. LTX-2 and LTX-2.3 are retired after this round and keep their rows.",
  "hardware": {
   "machine": "two RunPod 4xB300 boxes of the same spec: rx devbox b300r1022 for the 2026-10-22..24 passes (competitor columns, FastH3, LTX-2, LTX-2.3), and b300final for the 2026-10-29 sglang-main column plus the same-box competitor reruns listed under merge.replaced",
   "gpus": "4x NVIDIA B300 SXM6 AC 275040 MiB, 1100 W cap (both boxes)",
@@ -16,14 +16,14 @@
    "850052ac9": "reruns b300img1022r / b300vid1022r (TRT-LLM H3 throughput after the multipart fix, LTX-2.3 vLLM-Omni)",
    "bcb659a60": "competitor fixes b300*1022s and the sglang preview-tree pass b300*1022p",
    "72bdb18a3": "encode-aligned video pass enc1024 (scripts/run_b300_encode_align_20261024.sh)",
-   "f4bd198": "sglang-main column b300fm1029 / fm1029 on b300final (harness unchanged from 6f80e3b apart from reports and docs)"
+   "f4bd198": "sglang-main column b300fm1029 / fm1029 and LTX-2.5 b300g41030 on b300final (harness unchanged from 6f80e3b apart from reports and docs)"
   },
   "reproduce": "scripts/run_b300_full_20261022.sh",
   "runner": "scripts/devbox_run_cases.sh",
   "config": "configs/comparison_configs.json"
  },
  "frameworks": {
-  "sglang": "main 1ab008f5b0 (2026-10-29) for 13 of the 16 cases, measured on b300final with each case's selected B300 profile. FastH3: main 82f7249ce6 (matrix pass; not re-measured, by decision). LTX-2 and LTX-2.3 (retired, not re-measured): 3042cea843 = main 1e894eb92d + sgl-project/sglang#45965 #45977 #46045 #46046 #46047 #46099 #46100 #46101 #46102 #46105-#46111 #46145-#46149 (pass b300img1022p); all merged except #46100, which touches only the Qwen image cells. The first publish of this run (2026-10-29) used per-cell preview trees for every case; those inputs stay in raw/ and are replaced in the merge.",
+  "sglang": "main 1ab008f5b0 (2026-10-29) for 13 of the 17 cases, measured on b300final with each case's selected B300 profile. LTX-2.5: 4e1a4bb5c3 = main 52604e1d46 + sgl-project/sglang#47411 (native Gemma-4-Unified text encoder; hidden states bitwise equal to the transformers encoder main loads, same end-to-end MP4 md5), b300final 2026-10-30; open at publish time. FastH3: main 82f7249ce6 (matrix pass; not re-measured, by decision). LTX-2 and LTX-2.3 (retired, not re-measured): 3042cea843 = main 1e894eb92d + sgl-project/sglang#45965 #45977 #46045 #46046 #46047 #46099 #46100 #46101 #46102 #46105-#46111 #46145-#46149 (pass b300img1022p); all merged except #46100, which touches only the Qwen image cells. The first publish of this run (2026-10-29) used per-cell preview trees for every case; those inputs stay in raw/ and are replaced in the merge.",
   "vllm-omni": "main 0da1d831e (vllm-omni 0.32.0rc2.dev46) on vllm 0.32.0, torch 2.13.0",
   "lightx2v": "main 19c19614b067 (0.5.0), torch 2.11.0, flash-attn 2.8.3",
   "trtllm-visual": "tensorrt_llm 1.4.0rc1, torch 2.14.0+cu130",
@@ -126,6 +126,8 @@
    "raw/run_b300fm1029_cosmos3_nano_t2v_720p_189f_sglang_r1_cosmos3_nano_t2v_720p_189f.json",
    "raw/run_b300fm1029_cosmos3_nano_i2v_720p_189f_sglang_r1_cosmos3_nano_i2v_720p_189f.json",
    "raw/run_b300fm1029_flux3_klein_base_t2i_1024_sglang_r1_flux3_klein_base_t2i_1024.json",
+   "raw/run_b300g41030_ltx2.5_twostage_t2v_2gpus_vllm-omni_r2_ltx2.5_twostage_t2v_2gpus.json",
+   "raw/run_b300g41030_ltx2.5_twostage_t2v_2gpus_sglang_r2_ltx2.5_twostage_t2v_2gpus.json",
    "raw/run_b300fm1029_ideogram4_t2i_1024_2gpu_tp_sglang_r1_ideogram4_t2i_1024_2gpu_tp.json"
   ],
   "replaced": {
@@ -136,17 +138,15 @@
    "LightX2V Qwen-Image-2.1, Wan2.2, Cosmos3 T2V/I2V": "b300*1022s (torch_sdpa) replaces the matrix pass (Qwen 3.02 -> 2.56 s, Wan2.2 241.6 -> 100.3 s).",
    "vLLM-Omni LTX-2 / LTX-2.3": "b300img1022s (VAE patch parallel) replaces the matrix and r passes.",
    "sglang (13 cases on main)": "b300fm1029 / fm1029 (main 1ab008f5b0, b300final) replace the preview-tree rows (3042cea843, e52f28491c, 4be217383f). Where a cell ran several interleaved rounds the last one is published for every framework in it: Wan2.2 round 3, Qwen Edit round 4, Qwen T2I, H3 T2VA and H3 Ref2VA round 2.",
-   "same-box competitor reruns": "b300final, interleaved with the sglang-main arms: TRT-LLM Wan2.2 (93.905 s; was 94.382), vLLM-Omni Qwen T2I (2.347 s; was 2.372) and its throughput, Qwen Edit (2.840; was 2.862), H3 T2VA (69.017; was 69.268) and its throughput, H3 Ref2VA (106.154; was 106.367). Every other competitor row is from b300r1022."
+   "same-box competitor reruns": "b300final, interleaved with the sglang-main arms: TRT-LLM Wan2.2 (93.905 s; was 94.382), vLLM-Omni Qwen T2I (2.347 s; was 2.372) and its throughput, Qwen Edit (2.840; was 2.862), H3 T2VA (69.017; was 69.268) and its throughput, H3 Ref2VA (106.154; was 106.367). Every other competitor row is from b300r1022.",
+   "LTX-2.5": "b300g41030 (b300final, 2026-10-30): sglang on #47411 and vLLM-Omni 0da1d831, interleaved over 2 rounds (sglang 5.093 / 5.086 s, vLLM-Omni 5.962 / 6.032 s); round 2 is published. The 2026-10-29 pair on main (5.113 / 5.101 against 5.996 / 6.009) stays out: main loaded the text encoder through transformers."
   },
-  "last_input": "run_b300fm1029_ideogram4_t2i_1024_2gpu_tp_sglang_r1 is listed last so the run-level sglang version (taken from the last input) names main 1ab008f5b0, the tree behind 13 of the 16 sglang cells."
+  "last_input": "run_b300fm1029_ideogram4_t2i_1024_2gpu_tp_sglang_r1 is listed last so the run-level sglang version (taken from the last input) names main 1ab008f5b0, the tree behind 13 of the 17 sglang cells."
  },
  "files": {
   "raw/": "original runner output; exactly the merge inputs above",
   "merged.json": "merged artifact the Pages data was published from",
   "issue.md": "data-only tracker report with per-cell statuses and reasons"
  },
- "updated_at": "2026-10-30",
- "held_back": {
-  "ltx2.5_twostage_t2v_2gpus": "measured on b300final 2026-10-29 (sglang main 1ab008f5b0 5.113 / 5.101 s against vLLM-Omni 0da1d831 5.996 / 6.009 s, interleaved) but not published: sglang loads the Gemma-4-Unified text encoder through transformers.AutoModel ('doesn't have a customized version yet, using native version'), which the native-fallback gate refuses. Its result files are not in raw/; the cell is re-measured once sglang has a native encoder."
- }
+ "updated_at": "2026-10-30"
 }

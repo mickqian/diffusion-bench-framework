@@ -30,7 +30,7 @@
       "date": "2026-10-22",
       "gpu": "4x NVIDIA B300 SXM6 AC 275GB",
       "title": "4xB300 cross-framework (latest-vs-latest)",
-      "subtitle": "Steady-state single-request latency, best lossless config per framework (compile on, no caches, no quantization). SGLang-Diffusion fastest in 16/16 comparable cases.",
+      "subtitle": "Steady-state single-request latency, best lossless config per framework (compile on, no caches, no quantization). SGLang-Diffusion fastest in 17/17 comparable cases.",
       "mode": "single_e2e",
       "framework_versions": {
         "sglang": "0.0.0.dev1+gc10e0e177 @ 1ab008f5b",
@@ -41,8 +41,8 @@
         "fastvideo": "FastVideo @ fa2d1324c + fastvideo-kernel 0.3.5"
       },
       "summary": {
-        "sglang_wins": 16,
-        "comparable": 16
+        "sglang_wins": 17,
+        "comparable": 17
       },
       "rows": [
         {
@@ -352,6 +352,47 @@
           },
           "winner": "sglang",
           "winner_speedup": "1.05x"
+        },
+        {
+          "case_id": "ltx2.5_twostage_t2v_2gpus",
+          "case": "LTX-2.5 two-stage T2V · 2 GPUs",
+          "details": "1920x1088x121f · 8 steps · cfg 1",
+          "gpus": "2 GPU",
+          "mode": "single_e2e",
+          "cells": {
+            "sglang": {
+              "gpus": 2,
+              "profile": "b300-auto-bcg",
+              "status": "ok",
+              "latency_s": 5.086,
+              "ratio_to_sglang": 1.0
+            },
+            "vllm-omni": {
+              "gpus": 2,
+              "profile": "blackwell-2gpu-distilled-usp2",
+              "status": "ok",
+              "latency_s": 6.032,
+              "ratio_to_sglang": 1.186
+            },
+            "lightx2v": {
+              "status": "unsupported",
+              "reason": "LightX2V's LTX-2.5 runner (ltx2_5, main 19c19614 = HEAD on 2026-10-24) decodes only with the diffusion VAE: LTX25VideoVAE raises 'LTX25VideoVAE requires a CausalDiffusionVAE checkpoint' for anything else (lightx2v/models/video_encoders/hf/ltx2/model.py), and the runner class fixes video_vae_class, so this case's convolutional decode is not reachable from its config. Its distilled two-stage itself would match (one distilled DiT for both stages, the same 8 + 3 sigmas, CFG 1); a diffusion-VAE row would be different, heavier work. Checked 2026-10-24."
+            },
+            "trtllm-visual": {
+              "status": "unsupported",
+              "reason": "TensorRT-LLM 1.4.0rc1 (the newest release candidate, installed) has no LTX-2.5: its VisualGen ltx2 package serves Lightricks/LTX-2 (19B) only, and nothing under tensorrt_llm/_torch/visual_gen loads Gemma-4, LTX-2.5's text encoder. Checked 2026-10-24."
+            },
+            "comfyui": {
+              "status": "no_profile",
+              "reason": "ComfyUI master (1a82e6d0) ships an official LTX-2.5 T2V template (video_ltx2_5_t2v): the same distilled two-stage (8 sigmas, x2 latent upsampler, a 3-sigma tail, CFG 1), but on the int8-convrot DiT and text encoder, with the diffusion VAE (ltx-2.5-video-vae-bf16), a stage-2 schedule starting at 0.85, and a prompt-enhancer node. A bf16 graph with the conv VAE (vae/ltx-2.5-video-vae-conv-bf16) and the official stage-2 sigmas is not built or validated yet. 2026-10-24."
+            },
+            "fastvideo": {
+              "status": "no_profile",
+              "reason": "FastVideo main (fa2d1324) registers LTX-2.5 distilled (FastVideo/LTX-2.5-Distilled-Diffusers, preset ltx2_5_distilled_two_stage), but this harness integrates FastVideo for MiniMax-H3 only (2026-10-08); no command validated."
+            }
+          },
+          "winner": "sglang",
+          "winner_speedup": "1.19x"
         },
         {
           "case_id": "cosmos3_nano_t2i_720p",
@@ -783,8 +824,8 @@
       "reproduce": "scripts/run_b300_full_20261022.sh",
       "reproduce_link": {
         "path": "scripts/run_b300_full_20261022.sh",
-        "ref": "3a406d3c2",
-        "url": "https://github.com/mickqian/diffusion-bench-framework/blob/3a406d3c2687ecbb794badbdc4dfbd3891b2384e/scripts/run_b300_full_20261022.sh"
+        "ref": "eea12906b",
+        "url": "https://github.com/mickqian/diffusion-bench-framework/blob/eea12906b69904041442b5fca9ae6097c8ae6f3f/scripts/run_b300_full_20261022.sh"
       },
       "round": "round-20261022",
       "round_label": "Round 2026-10-22"
@@ -935,8 +976,8 @@
       "reproduce": "scripts/run_b300_full_20261022.sh",
       "reproduce_link": {
         "path": "scripts/run_b300_full_20261022.sh",
-        "ref": "3a406d3c2",
-        "url": "https://github.com/mickqian/diffusion-bench-framework/blob/3a406d3c2687ecbb794badbdc4dfbd3891b2384e/scripts/run_b300_full_20261022.sh"
+        "ref": "eea12906b",
+        "url": "https://github.com/mickqian/diffusion-bench-framework/blob/eea12906b69904041442b5fca9ae6097c8ae6f3f/scripts/run_b300_full_20261022.sh"
       },
       "round": "round-20261022",
       "round_label": "Round 2026-10-22"
