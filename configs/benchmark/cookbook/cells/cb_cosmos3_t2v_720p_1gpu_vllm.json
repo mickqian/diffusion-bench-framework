@@ -1,0 +1,158 @@
+{
+  "id": "cb_cosmos3_t2v_720p_1gpu_vllm",
+  "label": "Cosmos3-Nano T2V 1280x720 189f 35 steps, guardrails on (vLLM-Omni recipe, 1 GPU)",
+  "base_case": "cosmos3_nano_t2v_720p_189f",
+  "set": {
+    "num_gpus": 1,
+    "request_extra.extra_params.guardrails": true,
+    "framework_request_extra.trtllm-visual.extra_params.use_guardrails": true
+  },
+  "unset": [
+    "frameworks.trtllm-visual.visual_gen_args"
+  ],
+  "cookbook": {
+    "framework": "vllm-omni",
+    "repo": "vllm-project/vllm-omni",
+    "path": "recipes/cosmos3/Cosmos3-Nano.md",
+    "commit": "45d7c005",
+    "commit_date": "2026-10-23",
+    "section": "### 1x H200 141GB / B300 (Online serving) > #### Command",
+    "source_hardware": "1x H200 141GB / B300",
+    "source_metric": "none published for T2V; the recipe's request is the workload",
+    "workload": {
+      "width": 1280,
+      "height": 720,
+      "num_frames": 189,
+      "fps": 24,
+      "num_inference_steps": 35,
+      "guidance_scale": 6.0,
+      "request_extra.flow_shift": 10.0,
+      "request_extra.extra_params.guardrails": true,
+      "num_gpus": 1,
+      "dit_forwards": 35
+    }
+  },
+  "forwards": {
+    "vllm-omni": 35,
+    "sglang": 35,
+    "lightx2v": 35,
+    "trtllm-visual": null
+  },
+  "deviations": [],
+  "arms": {
+    "vllm-omni": {
+      "cb-vllm-verbatim": {
+        "tier": "verbatim",
+        "num_gpus": 1,
+        "upstream_recipe": {
+          "repo": "vllm-project/vllm-omni",
+          "path": "recipes/cosmos3/Cosmos3-Nano.md",
+          "commit": "45d7c005",
+          "commit_date": "2026-10-23",
+          "section": "### 1x H200 141GB / B300 (Online serving) > #### Command"
+        },
+        "serve_args": "--init-timeout 1800",
+        "notes": "Guardrails on (the recipe default): needs `cosmos-guardrail` and a token that can read nvidia/Cosmos-1.0-Guardrail."
+      }
+    },
+    "sglang": {
+      "cb-sgl-cookbook": {
+        "tier": "verbatim",
+        "num_gpus": 1,
+        "upstream_recipe": {
+          "repo": "sgl-project/sglang",
+          "path": "docs/cookbook/diffusion/Cosmos/Cosmos3.mdx",
+          "commit": "2b8e4cde9564",
+          "commit_date": "2026-10-23",
+          "section": "## 3. Serve Cosmos3"
+        },
+        "serve_args": "",
+        "extra_env": {
+          "SGLANG_DISABLE_COSMOS3_GUARDRAILS": "0"
+        },
+        "notes": "`sglang serve --model-path nvidia/Cosmos3-Nano --num-gpus 1`. Guardrails on when cosmos-guardrail is installed; the env value undoes the base case's opt-out."
+      },
+      "cb-sgl-tuned": {
+        "tier": "tuned",
+        "num_gpus": 1,
+        "serve_args": "--model-type diffusion --warmup-mode server --attention-backend fa --sp-degree 1 --performance-mode speed --enable-torch-compile false",
+        "extra_env": {
+          "SGLANG_DISABLE_COSMOS3_GUARDRAILS": "0"
+        },
+        "notes": "The H200 cookbook-method run's SGLang command (2026-10-30): our own choice, listed beside the verbatim arm, never in its place."
+      }
+    },
+    "lightx2v": {
+      "cb-lx-verbatim": {
+        "tier": "verbatim",
+        "num_gpus": 1,
+        "upstream_recipe": {
+          "repo": "ModelTC/LightX2V",
+          "path": "configs/cosmos3/cosmos3_nano_omni.json",
+          "commit": "65935cad",
+          "commit_date": "2026-09-24",
+          "section": "whole file"
+        },
+        "serve_args": "",
+        "lightx2v_config": {
+          "infer_steps": 35,
+          "sample_guide_scale": 6.0,
+          "sample_shift": 10.0,
+          "size": [
+            720,
+            1280
+          ],
+          "num_frames": 189,
+          "fps": 24.0,
+          "enable_cfg": true,
+          "rms_norm_type": "one-pass",
+          "attn_rms_norm_type": "one-pass",
+          "rope_type": "cosmos3_rope",
+          "self_attn_type": "flash_attn3",
+          "causal_self_attn_type": "flash_attn3",
+          "add_resolution_template": false,
+          "add_duration_template": false,
+          "vae_cpu_offload": false,
+          "cpu_offload": false,
+          "parallel": false,
+          "use_compile": false
+        },
+        "allow_inherited": [
+          "lightx2v_config.lazy_load",
+          "lightx2v_config.unload_modules"
+        ],
+        "notes": "LightX2V's cosmos3 runner has no guardrail stage, so this arm runs without one. `parallel: false` only clears the base case's parallel block; the file sets none."
+      }
+    },
+    "trtllm-visual": {
+      "cb-trt-verbatim": {
+        "tier": "verbatim",
+        "num_gpus": 1,
+        "upstream_recipe": {
+          "repo": "NVIDIA/TensorRT-LLM",
+          "path": "examples/visual_gen/configs/cosmos3-nano-1gpu.yaml",
+          "commit": "1e4e65c",
+          "commit_date": "2026-09-29",
+          "section": "whole file"
+        },
+        "serve_args": "",
+        "visual_gen_args": {
+          "attention_config": {
+            "backend": "VANILLA"
+          },
+          "parallel_config": {
+            "cfg_size": 1,
+            "ulysses_size": 1
+          }
+        },
+        "extra_env": {
+          "TRTLLM_DISABLE_COSMOS3_GUARDRAILS": "0"
+        },
+        "allow_inherited": [
+          "extra_env.PYTORCH_CUDA_ALLOC_CONF"
+        ],
+        "notes": "Forward count unverified for TRT-LLM's Cosmos3 path. On 2xH200 (2026-10-30) the request carried use_guardrails=true but no guardrail model load appeared in the log and the time matched guardrails-off: confirm the guardrail ran before quoting this arm."
+      }
+    }
+  }
+}

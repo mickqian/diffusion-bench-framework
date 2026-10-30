@@ -1,0 +1,89 @@
+{
+  "id": "cb_zimage_t2i_16x9_sp2_lightx2v",
+  "label": "Z-Image-Turbo 1664x928 9 steps Ulysses 2 (LightX2V dist config, 2 GPUs)",
+  "base_case": "zimage_turbo_t2i_1024",
+  "set": {
+    "num_gpus": 2,
+    "width": 1664,
+    "height": 928
+  },
+  "unset": [
+    "frameworks.vllm-omni.extra_env.DIFFUSION_ATTENTION_BACKEND"
+  ],
+  "cookbook": {
+    "framework": "lightx2v",
+    "repo": "ModelTC/LightX2V",
+    "path": "configs/z_image/z_image_turbo_t2i_dist.json",
+    "commit": "4fe984c0",
+    "commit_date": "2026-10-10",
+    "section": "whole file",
+    "source_hardware": "2 GPUs (Ulysses 2); no GPU class stated",
+    "source_metric": "offline `RUN pipeline cost` log line (PROFILING_DEBUG_LEVEL=2), one run",
+    "sglang_verbatim_gap": "The sglang cookbook has no NVIDIA 2-GPU Z-Image command: its builder plans 1 GPU on H200/B200/H100 and errors on 2; the only 2-device recipe is Ascend A3 TP2.",
+    "workload": {
+      "width": 1664,
+      "height": 928,
+      "num_inference_steps": 9,
+      "guidance_scale": 0.0,
+      "num_gpus": 2,
+      "dit_forwards": 9,
+      "metric": "offline `RUN pipeline cost` log line (PROFILING_DEBUG_LEVEL=2), one run"
+    }
+  },
+  "forwards": {
+    "lightx2v": 9,
+    "sglang": 9,
+    "vllm-omni": 9
+  },
+  "deviations": [
+    {
+      "field": "metric",
+      "source": "offline `RUN pipeline cost` log line (PROFILING_DEBUG_LEVEL=2), one run",
+      "run": "client_e2e_median",
+      "reason": "every arm is timed by the same client; the source's own timer is not available for the other frameworks"
+    }
+  ],
+  "arms": {
+    "lightx2v": {
+      "cb-lx-verbatim": {
+        "tier": "verbatim",
+        "num_gpus": 2,
+        "upstream_recipe": {
+          "repo": "ModelTC/LightX2V",
+          "path": "configs/z_image/z_image_turbo_t2i_dist.json",
+          "commit": "4fe984c0",
+          "commit_date": "2026-10-10",
+          "section": "whole file"
+        },
+        "serve_args": "",
+        "lightx2v_config": {
+          "attn_type": "flash_attn3",
+          "enable_cfg": false,
+          "sample_guide_scale": 0.0,
+          "use_compile": false,
+          "parallel": {
+            "seq_p_size": 2,
+            "seq_p_attn_type": "ulysses"
+          }
+        },
+        "notes": "File verbatim except aspect_ratio and infer_steps, which the harness sends per request (1664x928 is LightX2V's z_image_runner size for 16:9; 9 steps)."
+      }
+    },
+    "sglang": {
+      "cb-sgl-tuned": {
+        "tier": "tuned",
+        "num_gpus": 2,
+        "serve_args": "--model-type diffusion --warmup-mode server --ulysses-degree 2 --dit-layerwise-offload false --performance-mode speed --enable-torch-compile false",
+        "notes": "The H200 cookbook-method run's SGLang command (2026-10-30): our own choice, listed beside the verbatim arm, never in its place. Ulysses 2 to match the source's topology."
+      }
+    },
+    "vllm-omni": {
+      "cb-vllm-tuned": {
+        "tier": "tuned",
+        "num_gpus": 2,
+        "serve_args": "--num-gpus 2 --usp 2",
+        "notes": "The vLLM-Omni recipe has no 2-GPU command; Ulysses 2 matches the source's topology."
+      }
+    }
+  }
+}

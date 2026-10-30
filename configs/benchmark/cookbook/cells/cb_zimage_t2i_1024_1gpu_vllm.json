@@ -1,0 +1,86 @@
+{
+  "id": "cb_zimage_t2i_1024_1gpu_vllm",
+  "label": "Z-Image-Turbo 1024 9 steps (vLLM-Omni recipe, 1 GPU)",
+  "base_case": "zimage_turbo_t2i_1024",
+  "set": {
+    "num_gpus": 1
+  },
+  "unset": [
+    "frameworks.vllm-omni.extra_env.DIFFUSION_ATTENTION_BACKEND"
+  ],
+  "cookbook": {
+    "framework": "vllm-omni",
+    "repo": "vllm-project/vllm-omni",
+    "path": "recipes/Tongyi-MAI/Z-Image-Turbo.md",
+    "commit": "c586c28e",
+    "commit_date": "2026-10-25",
+    "section": "## GPU > ### 1x RTX 5880 48GB > #### Command",
+    "source_hardware": "1x RTX 5880 48GB",
+    "source_metric": "client latency, size=1024x1024, num_inference_steps=9, seed=42",
+    "workload": {
+      "width": 1024,
+      "height": 1024,
+      "num_inference_steps": 9,
+      "num_gpus": 1,
+      "dit_forwards": 9
+    }
+  },
+  "forwards": {
+    "vllm-omni": 9,
+    "sglang": 9,
+    "lightx2v": 9
+  },
+  "deviations": [],
+  "arms": {
+    "vllm-omni": {
+      "cb-vllm-verbatim": {
+        "tier": "verbatim",
+        "num_gpus": 1,
+        "upstream_recipe": {
+          "repo": "vllm-project/vllm-omni",
+          "path": "recipes/Tongyi-MAI/Z-Image-Turbo.md",
+          "commit": "c586c28e",
+          "commit_date": "2026-10-25",
+          "section": "## GPU > ### 1x RTX 5880 48GB > #### Command"
+        },
+        "serve_args": "",
+        "notes": "The recipe's only CUDA section is an RTX 5880 48GB; its command has no hardware-specific flags."
+      }
+    },
+    "sglang": {
+      "cb-sgl-cookbook": {
+        "tier": "verbatim",
+        "num_gpus": 1,
+        "upstream_recipe": {
+          "repo": "sgl-project/sglang",
+          "path": "docs/src/snippets/configs/TongyiMAI/z-image-turbo.jsx",
+          "commit": "2b8e4cde9564",
+          "commit_date": "2026-10-23",
+          "section": "Z-Image-Turbo.mdx '## 1. Quick start' builder: H200 x 1"
+        },
+        "serve_args": "--ulysses-degree=1 --ring-degree=1"
+      }
+    },
+    "lightx2v": {
+      "cb-lx-verbatim": {
+        "tier": "verbatim",
+        "num_gpus": 1,
+        "upstream_recipe": {
+          "repo": "ModelTC/LightX2V",
+          "path": "configs/z_image/z_image_turbo_t2i.json",
+          "commit": "4fe984c0",
+          "commit_date": "2026-10-10",
+          "section": "whole file"
+        },
+        "serve_args": "",
+        "lightx2v_config": {
+          "attn_type": "flash_attn3",
+          "enable_cfg": false,
+          "sample_guide_scale": 0.0,
+          "use_compile": false
+        },
+        "notes": "File verbatim except aspect_ratio and infer_steps, which the harness sends per request (1664x928 is LightX2V's z_image_runner size for 16:9; 9 steps)."
+      }
+    }
+  }
+}

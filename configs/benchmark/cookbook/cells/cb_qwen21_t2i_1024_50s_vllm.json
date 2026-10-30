@@ -1,0 +1,63 @@
+{
+  "id": "cb_qwen21_t2i_1024_50s_vllm",
+  "label": "Qwen-Image-2.1 T2I 1024 50 steps (vLLM-Omni recipe, 1 GPU)",
+  "base_case": "qwen_image_21_t2i_1024",
+  "set": {
+    "num_inference_steps": 50
+  },
+  "cookbook": {
+    "framework": "vllm-omni",
+    "repo": "vllm-project/vllm-omni",
+    "path": "recipes/Qwen/Qwen-Image-2.1.md",
+    "commit": "b164fea7",
+    "commit_date": "2026-10-17",
+    "section": "## Online Serving",
+    "source_hardware": "1x H200 (CUDA Graph decode section)",
+    "source_metric": "warmup 1 + median of 3, end-to-end per image",
+    "workload": {
+      "width": 1024,
+      "height": 1024,
+      "num_inference_steps": 50,
+      "guidance_scale": 1.0,
+      "num_gpus": 1,
+      "dit_forwards": 50
+    }
+  },
+  "forwards": {
+    "vllm-omni": 50,
+    "sglang": 50
+  },
+  "deviations": [],
+  "arms": {
+    "vllm-omni": {
+      "cb-vllm-verbatim": {
+        "tier": "verbatim",
+        "num_gpus": 1,
+        "upstream_recipe": {
+          "repo": "vllm-project/vllm-omni",
+          "path": "recipes/Qwen/Qwen-Image-2.1.md",
+          "commit": "b164fea7",
+          "commit_date": "2026-10-17",
+          "section": "## Online Serving"
+        },
+        "serve_args": "",
+        "notes": "`vllm serve Qwen/Qwen-Image-2.1 --omni`: regional compile + CUDA Graph decode by default."
+      }
+    },
+    "sglang": {
+      "cb-sgl-cookbook": {
+        "tier": "verbatim",
+        "num_gpus": 1,
+        "upstream_recipe": {
+          "repo": "sgl-project/sglang",
+          "path": "docs/src/snippets/configs/Qwen/qwen-image-2.1.jsx",
+          "commit": "cde16aa64dd6",
+          "commit_date": "2026-10-10",
+          "section": "Qwen-Image-2.1.mdx '## 1. Quick start' builder: H200 x 1 (verified recipe h200-1-resident)"
+        },
+        "serve_args": "--performance-mode speed",
+        "notes": "Builder output for H200 x 1; on B200 the builder also appends `--attention-backend fa`."
+      }
+    }
+  }
+}
