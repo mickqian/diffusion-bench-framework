@@ -10,7 +10,9 @@
     "framework_request_extra.vllm-omni.extra_params": {
       "task": "t2va",
       "duration": 5.0,
-      "audio_flow_shift": 3.0
+      "audio_flow_shift": 3.0,
+      "aspect_ratio": "16:9",
+      "preencode_mp4": true
     },
     "frameworks.vllm-omni.request_omit_keys": [
       "num_frames"
