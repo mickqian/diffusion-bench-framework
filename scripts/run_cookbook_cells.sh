@@ -16,10 +16,11 @@
 #     2xH200 box and baa9befa on the 2xB200 one; only checking tells them apart.
 #   * Each arm takes the GPU lock (scripts/gpu_job_lock.sh) for its own run only.
 #   * The run stops when the state disk has less than CB_MIN_FREE_GB free (120).
-#     That guards a full disk, NOT the pod's ephemeral-storage limit: two B200
-#     boxes and the 2xH200 box were evicted for exceeding it (250Gi on the H200,
-#     2026-10-30 10:50 UTC) with terabytes free on `df`. Keep weights and logs
-#     on a volume that does not count toward that limit.
+#     That guards a full disk, NOT ephemeral storage: the 2xH200 box was
+#     evicted for exceeding its pod limit (250Gi, 2026-10-30 10:50 UTC) with
+#     terabytes free on `df`, and two 2xB200 boxes when their node ran low on
+#     ephemeral storage. Keep weights and logs on a volume that does not count
+#     as ephemeral.
 set -u
 
 TAG="${1:?tag}"; GPUS="${2:?gpu ids, e.g. 0,1}"; port="${3:?base port}"; CELL="${4:?cell id}"; shift 4

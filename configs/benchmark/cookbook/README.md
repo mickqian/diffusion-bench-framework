@@ -29,7 +29,7 @@ CB_SGLANG_COMMIT=<pin> DBF_SGLANG_PYTHONPATH=<sglang tree at the pin>/python \
   bash scripts/run_cookbook_cells.sh <tag> 0,1 39600 cb_h3_t2va_544_lightx2v_tp2
 ```
 
-The runner's free-space floor does not protect against the devbox pod's ephemeral-storage limit. Two 2xB200 boxes and the 2xH200 box were evicted for exceeding it (250Gi on the H200) while `df` showed terabytes free. Keep weights, HF cache and logs on a volume that does not count toward it.
+The runner's free-space floor does not protect against ephemeral-storage eviction. The 2xH200 box was evicted for exceeding its pod limit (250Gi) while `df` showed terabytes free, and two 2xB200 boxes when their node ran low on ephemeral storage. Keep weights, HF cache and logs on a volume that does not count as ephemeral.
 
 `scripts/check_competitor_recipes.py` checks every cell's source and every cited arm recipe
 for upstream drift, the same way it checks the headline commands.
