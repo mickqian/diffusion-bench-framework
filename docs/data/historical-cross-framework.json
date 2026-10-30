@@ -1,6 +1,6 @@
 {
   "id": "historical-cross-framework-20260610",
-  "updated_at": "2026-10-29",
+  "updated_at": "2026-10-30",
   "frameworks": {
     "sglang": "SGLang-Diffusion",
     "vllm-omni": "vLLM-Omni",
@@ -33,7 +33,7 @@
       "subtitle": "Steady-state single-request latency, best lossless config per framework (compile on, no caches, no quantization). SGLang-Diffusion fastest in 16/16 comparable cases.",
       "mode": "single_e2e",
       "framework_versions": {
-        "sglang": "0.0.0.dev1+gc1c287a42 @ 3042cea84",
+        "sglang": "0.0.0.dev1+gc10e0e177 @ 1ab008f5b",
         "vllm-omni": "vllm-omni 0.32.0rc2.dev46+g0da1d831e + vllm 0.32.0",
         "lightx2v": "lightx2v 0.5.0 @ 19c19614b",
         "trtllm-visual": "tensorrt_llm 1.4.0rc1",
@@ -56,7 +56,7 @@
               "gpus": 2,
               "profile": "default",
               "status": "ok",
-              "latency_s": 2.083,
+              "latency_s": 2.066,
               "ratio_to_sglang": 1.0
             },
             "vllm-omni": {
@@ -76,7 +76,7 @@
               "profile": "default",
               "status": "ok",
               "latency_s": 3.34,
-              "ratio_to_sglang": 1.603
+              "ratio_to_sglang": 1.617
             },
             "fastvideo": {
               "status": "unsupported",
@@ -84,7 +84,7 @@
             }
           },
           "winner": "sglang",
-          "winner_speedup": "1.60x"
+          "winner_speedup": "1.62x"
         },
         {
           "case_id": "qwen_image_21_t2i_1024",
@@ -97,22 +97,22 @@
               "gpus": 1,
               "profile": "b200-1gpu-resident-fa",
               "status": "ok",
-              "latency_s": 2.175,
+              "latency_s": 2.147,
               "ratio_to_sglang": 1.0
             },
             "vllm-omni": {
               "gpus": 1,
               "profile": "blackwell-cudnn-static",
               "status": "ok",
-              "latency_s": 2.372,
-              "ratio_to_sglang": 1.091
+              "latency_s": 2.347,
+              "ratio_to_sglang": 1.093
             },
             "lightx2v": {
               "gpus": 1,
               "profile": "blackwell-sdpa",
               "status": "ok",
               "latency_s": 2.56,
-              "ratio_to_sglang": 1.177
+              "ratio_to_sglang": 1.192
             },
             "trtllm-visual": {
               "status": "unsupported",
@@ -123,7 +123,7 @@
               "profile": "blackwell-gpuonly-compile",
               "status": "ok",
               "latency_s": 3.049,
-              "ratio_to_sglang": 1.402
+              "ratio_to_sglang": 1.42
             },
             "fastvideo": {
               "status": "unsupported",
@@ -144,7 +144,7 @@
               "gpus": 2,
               "profile": "gb300-2gpu-tp2",
               "status": "ok",
-              "latency_s": 1.383,
+              "latency_s": 1.364,
               "ratio_to_sglang": 1.0
             },
             "vllm-omni": {
@@ -152,7 +152,7 @@
               "profile": "blackwell-cudnn-static",
               "status": "ok",
               "latency_s": 1.564,
-              "ratio_to_sglang": 1.131
+              "ratio_to_sglang": 1.147
             },
             "lightx2v": {
               "status": "no_profile",
@@ -172,7 +172,7 @@
             }
           },
           "winner": "sglang",
-          "winner_speedup": "1.13x"
+          "winner_speedup": "1.15x"
         },
         {
           "case_id": "qwen_image_21_edit_1024",
@@ -185,15 +185,15 @@
               "gpus": 1,
               "profile": "b200-1gpu-resident-fa",
               "status": "ok",
-              "latency_s": 2.621,
+              "latency_s": 2.62,
               "ratio_to_sglang": 1.0
             },
             "vllm-omni": {
               "gpus": 1,
               "profile": "blackwell-cudnn-static",
               "status": "ok",
-              "latency_s": 2.862,
-              "ratio_to_sglang": 1.092
+              "latency_s": 2.84,
+              "ratio_to_sglang": 1.084
             },
             "lightx2v": {
               "status": "no_profile",
@@ -213,7 +213,7 @@
             }
           },
           "winner": "sglang",
-          "winner_speedup": "1.09x"
+          "winner_speedup": "1.08x"
         },
         {
           "case_id": "zimage_turbo_t2i_1024",
@@ -226,7 +226,7 @@
               "gpus": 2,
               "profile": "b300-speed",
               "status": "ok",
-              "latency_s": 0.337,
+              "latency_s": 0.335,
               "ratio_to_sglang": 1.0
             },
             "vllm-omni": {
@@ -234,14 +234,14 @@
               "profile": "blackwell-tp2-static",
               "status": "ok",
               "latency_s": 0.595,
-              "ratio_to_sglang": 1.766
+              "ratio_to_sglang": 1.776
             },
             "lightx2v": {
               "gpus": 2,
               "profile": "blackwell-fa2-fusion",
               "status": "ok",
               "latency_s": 0.831,
-              "ratio_to_sglang": 2.466
+              "ratio_to_sglang": 2.481
             },
             "trtllm-visual": {
               "status": "not_run",
@@ -252,7 +252,7 @@
               "profile": "blackwell-gpuonly",
               "status": "ok",
               "latency_s": 0.847,
-              "ratio_to_sglang": 2.513
+              "ratio_to_sglang": 2.528
             },
             "fastvideo": {
               "status": "no_profile",
@@ -260,7 +260,7 @@
             }
           },
           "winner": "sglang",
-          "winner_speedup": "1.77x"
+          "winner_speedup": "1.78x"
         },
         {
           "case_id": "ideogram4_t2i_1024_2gpu_tp",
@@ -273,7 +273,7 @@
               "gpus": 2,
               "profile": "b300-speed",
               "status": "ok",
-              "latency_s": 1.939,
+              "latency_s": 1.92,
               "ratio_to_sglang": 1.0
             },
             "vllm-omni": {
@@ -293,7 +293,7 @@
               "profile": "blackwell-gpuonly-compile",
               "status": "ok",
               "latency_s": 3.696,
-              "ratio_to_sglang": 1.906
+              "ratio_to_sglang": 1.925
             },
             "fastvideo": {
               "status": "unsupported",
@@ -301,7 +301,7 @@
             }
           },
           "winner": "sglang",
-          "winner_speedup": "1.91x"
+          "winner_speedup": "1.93x"
         },
         {
           "case_id": "wan22_t2v_a14b_720p",
@@ -314,7 +314,7 @@
               "gpus": 4,
               "profile": "b300-noexp",
               "status": "ok",
-              "latency_s": 89.661,
+              "latency_s": 89.193,
               "ratio_to_sglang": 1.0
             },
             "vllm-omni": {
@@ -322,20 +322,20 @@
               "profile": "blackwell-4gpu-cfg2-usp2-vaepp-devpost",
               "status": "ok",
               "latency_s": 99.962,
-              "ratio_to_sglang": 1.115
+              "ratio_to_sglang": 1.121
             },
             "lightx2v": {
               "gpus": 4,
               "profile": "blackwell-sdpa",
               "status": "ok",
               "latency_s": 100.29,
-              "ratio_to_sglang": 1.119
+              "ratio_to_sglang": 1.124
             },
             "trtllm-visual": {
               "gpus": 4,
               "profile": "blackwell-cudnn",
               "status": "ok",
-              "latency_s": 94.382,
+              "latency_s": 93.905,
               "ratio_to_sglang": 1.053
             },
             "comfyui": {
@@ -343,7 +343,7 @@
               "profile": "blackwell-gpuonly",
               "status": "ok",
               "latency_s": 521.564,
-              "ratio_to_sglang": 5.817
+              "ratio_to_sglang": 5.848
             },
             "fastvideo": {
               "status": "no_profile",
@@ -364,7 +364,7 @@
               "gpus": 2,
               "profile": "blackwell-2gpu-cfg-parallel",
               "status": "ok",
-              "latency_s": 0.515,
+              "latency_s": 0.505,
               "ratio_to_sglang": 1.0
             },
             "vllm-omni": {
@@ -372,7 +372,7 @@
               "profile": "blackwell-cudnn-static",
               "status": "ok",
               "latency_s": 0.644,
-              "ratio_to_sglang": 1.25
+              "ratio_to_sglang": 1.275
             },
             "lightx2v": {
               "status": "failed",
@@ -383,7 +383,7 @@
               "profile": "default",
               "status": "ok",
               "latency_s": 0.602,
-              "ratio_to_sglang": 1.169
+              "ratio_to_sglang": 1.192
             },
             "comfyui": {
               "status": "unsupported",
@@ -395,7 +395,7 @@
             }
           },
           "winner": "sglang",
-          "winner_speedup": "1.17x"
+          "winner_speedup": "1.19x"
         },
         {
           "case_id": "cosmos3_nano_t2v_720p_189f",
@@ -408,7 +408,7 @@
               "gpus": 4,
               "profile": "b300-noexp",
               "status": "ok",
-              "latency_s": 22.833,
+              "latency_s": 22.745,
               "ratio_to_sglang": 1.0
             },
             "vllm-omni": {
@@ -416,21 +416,21 @@
               "profile": "blackwell-cudnn-vaepp",
               "status": "ok",
               "latency_s": 27.154,
-              "ratio_to_sglang": 1.189
+              "ratio_to_sglang": 1.194
             },
             "lightx2v": {
               "gpus": 4,
               "profile": "blackwell-cfg2-sp2-sdpa",
               "status": "ok",
               "latency_s": 44.33,
-              "ratio_to_sglang": 1.941
+              "ratio_to_sglang": 1.949
             },
             "trtllm-visual": {
               "gpus": 4,
               "profile": "default",
               "status": "ok",
               "latency_s": 26.117,
-              "ratio_to_sglang": 1.144
+              "ratio_to_sglang": 1.148
             },
             "comfyui": {
               "status": "unsupported",
@@ -442,7 +442,7 @@
             }
           },
           "winner": "sglang",
-          "winner_speedup": "1.14x"
+          "winner_speedup": "1.15x"
         },
         {
           "case_id": "cosmos3_nano_i2v_720p_189f",
@@ -455,7 +455,7 @@
               "gpus": 4,
               "profile": "b300-noexp",
               "status": "ok",
-              "latency_s": 22.898,
+              "latency_s": 22.796,
               "ratio_to_sglang": 1.0
             },
             "vllm-omni": {
@@ -463,21 +463,21 @@
               "profile": "blackwell-cudnn-vaepp",
               "status": "ok",
               "latency_s": 26.866,
-              "ratio_to_sglang": 1.173
+              "ratio_to_sglang": 1.179
             },
             "lightx2v": {
               "gpus": 4,
               "profile": "blackwell-cfg2-sp2-sdpa",
               "status": "ok",
               "latency_s": 46.427,
-              "ratio_to_sglang": 2.028
+              "ratio_to_sglang": 2.037
             },
             "trtllm-visual": {
               "gpus": 4,
               "profile": "default",
               "status": "ok",
               "latency_s": 28.153,
-              "ratio_to_sglang": 1.229
+              "ratio_to_sglang": 1.235
             },
             "comfyui": {
               "status": "unsupported",
@@ -489,7 +489,7 @@
             }
           },
           "winner": "sglang",
-          "winner_speedup": "1.17x"
+          "winner_speedup": "1.18x"
         },
         {
           "case_id": "minimax_h3_t2va_5s",
@@ -502,43 +502,43 @@
               "gpus": 2,
               "profile": "b300-noexp",
               "status": "ok",
-              "latency_s": 62.955,
+              "latency_s": 62.609,
               "ratio_to_sglang": 1.0
             },
             "vllm-omni": {
               "gpus": 2,
               "profile": "blackwell-2gpu-static",
               "status": "ok",
-              "latency_s": 69.268,
-              "ratio_to_sglang": 1.1
+              "latency_s": 69.017,
+              "ratio_to_sglang": 1.102
             },
             "lightx2v": {
               "gpus": 2,
               "profile": "blackwell-sp2-sdpa",
               "status": "ok",
               "latency_s": 71.755,
-              "ratio_to_sglang": 1.14
+              "ratio_to_sglang": 1.146
             },
             "trtllm-visual": {
               "gpus": 2,
               "profile": "blackwell-omp8",
               "status": "ok",
               "latency_s": 69.603,
-              "ratio_to_sglang": 1.106
+              "ratio_to_sglang": 1.112
             },
             "comfyui": {
               "gpus": 1,
               "profile": "blackwell-gpuonly",
               "status": "ok",
               "latency_s": 304.892,
-              "ratio_to_sglang": 4.843
+              "ratio_to_sglang": 4.87
             },
             "fastvideo": {
               "gpus": 2,
               "profile": "blackwell-2gpu",
               "status": "ok",
               "latency_s": 75.182,
-              "ratio_to_sglang": 1.194
+              "ratio_to_sglang": 1.201
             }
           },
           "winner": "sglang",
@@ -555,7 +555,7 @@
               "gpus": 4,
               "profile": "b300-noexp",
               "status": "ok",
-              "latency_s": 32.136,
+              "latency_s": 31.942,
               "ratio_to_sglang": 1.0
             },
             "vllm-omni": {
@@ -563,21 +563,21 @@
               "profile": "blackwell-4gpu-static",
               "status": "ok",
               "latency_s": 37.284,
-              "ratio_to_sglang": 1.16
+              "ratio_to_sglang": 1.167
             },
             "lightx2v": {
               "gpus": 4,
               "profile": "blackwell-sp4-sdpa",
               "status": "ok",
               "latency_s": 37.012,
-              "ratio_to_sglang": 1.152
+              "ratio_to_sglang": 1.159
             },
             "trtllm-visual": {
               "gpus": 4,
               "profile": "blackwell-fa4-omp8",
               "status": "ok",
               "latency_s": 37.793,
-              "ratio_to_sglang": 1.176
+              "ratio_to_sglang": 1.183
             },
             "comfyui": {
               "status": "not_run",
@@ -588,11 +588,11 @@
               "profile": "blackwell-4gpu",
               "status": "ok",
               "latency_s": 48.568,
-              "ratio_to_sglang": 1.511
+              "ratio_to_sglang": 1.521
             }
           },
           "winner": "sglang",
-          "winner_speedup": "1.15x"
+          "winner_speedup": "1.16x"
         },
         {
           "case_id": "minimax_h3_ref2va_5s",
@@ -605,43 +605,43 @@
               "gpus": 2,
               "profile": "b300-noexp",
               "status": "ok",
-              "latency_s": 96.64,
+              "latency_s": 96.484,
               "ratio_to_sglang": 1.0
             },
             "vllm-omni": {
               "gpus": 2,
               "profile": "blackwell-2gpu-static",
               "status": "ok",
-              "latency_s": 106.367,
-              "ratio_to_sglang": 1.101
+              "latency_s": 106.154,
+              "ratio_to_sglang": 1.1
             },
             "lightx2v": {
               "gpus": 2,
               "profile": "blackwell-sp2-sdpa",
               "status": "ok",
               "latency_s": 113.889,
-              "ratio_to_sglang": 1.178
+              "ratio_to_sglang": 1.18
             },
             "trtllm-visual": {
               "gpus": 2,
               "profile": "blackwell-fa4-omp8",
               "status": "ok",
               "latency_s": 106.92,
-              "ratio_to_sglang": 1.106
+              "ratio_to_sglang": 1.108
             },
             "comfyui": {
               "gpus": 1,
               "profile": "blackwell-gpuonly",
               "status": "ok",
               "latency_s": 516.829,
-              "ratio_to_sglang": 5.348
+              "ratio_to_sglang": 5.357
             },
             "fastvideo": {
               "gpus": 2,
               "profile": "blackwell-2gpu",
               "status": "ok",
               "latency_s": 111.093,
-              "ratio_to_sglang": 1.15
+              "ratio_to_sglang": 1.151
             }
           },
           "winner": "sglang",
@@ -783,8 +783,8 @@
       "reproduce": "scripts/run_b300_full_20261022.sh",
       "reproduce_link": {
         "path": "scripts/run_b300_full_20261022.sh",
-        "ref": "a61608e87",
-        "url": "https://github.com/mickqian/diffusion-bench-framework/blob/a61608e87b52debf18c43873e7fec7ceced23a52/scripts/run_b300_full_20261022.sh"
+        "ref": "3a406d3c2",
+        "url": "https://github.com/mickqian/diffusion-bench-framework/blob/3a406d3c2687ecbb794badbdc4dfbd3891b2384e/scripts/run_b300_full_20261022.sh"
       },
       "round": "round-20261022",
       "round_label": "Round 2026-10-22"
@@ -799,7 +799,7 @@
       "subtitle": "High-pressure throughput on a representative pair (one popular image model, one video+audio case) — the matrix is deliberately not swept, see configs/benchmark/workloads.json. SGLang-Diffusion highest QPS in 2/2 comparable cases.",
       "mode": "throughput",
       "framework_versions": {
-        "sglang": "0.0.0.dev1+gc1c287a42 @ 3042cea84",
+        "sglang": "0.0.0.dev1+gc10e0e177 @ 1ab008f5b",
         "vllm-omni": "vllm-omni 0.32.0rc2.dev46+g0da1d831e + vllm 0.32.0",
         "lightx2v": "lightx2v 0.5.0 @ 19c19614b",
         "trtllm-visual": "tensorrt_llm 1.4.0rc1",
@@ -822,7 +822,7 @@
               "gpus": 1,
               "profile": "b200-1gpu-resident-fa",
               "status": "ok",
-              "qps": 0.4637,
+              "qps": 0.468,
               "num_requests": 4,
               "concurrency": 2,
               "ratio_to_sglang": 1.0
@@ -831,7 +831,7 @@
               "gpus": 1,
               "profile": "blackwell-cudnn-static",
               "status": "ok",
-              "qps": 0.4321,
+              "qps": 0.4361,
               "num_requests": 4,
               "concurrency": 2,
               "ratio_to_sglang": 0.932
@@ -843,7 +843,7 @@
               "qps": 0.3625,
               "num_requests": 4,
               "concurrency": 2,
-              "ratio_to_sglang": 0.782
+              "ratio_to_sglang": 0.775
             },
             "trtllm-visual": {
               "status": "unsupported",
@@ -856,7 +856,7 @@
               "qps": 0.3202,
               "num_requests": 4,
               "concurrency": 2,
-              "ratio_to_sglang": 0.691
+              "ratio_to_sglang": 0.684
             },
             "fastvideo": {
               "status": "unsupported",
@@ -877,7 +877,7 @@
               "gpus": 2,
               "profile": "b300-noexp",
               "status": "ok",
-              "qps": 0.0158,
+              "qps": 0.016,
               "num_requests": 4,
               "concurrency": 2,
               "ratio_to_sglang": 1.0
@@ -886,10 +886,10 @@
               "gpus": 2,
               "profile": "blackwell-2gpu-static",
               "status": "ok",
-              "qps": 0.0144,
+              "qps": 0.0145,
               "num_requests": 4,
               "concurrency": 2,
-              "ratio_to_sglang": 0.911
+              "ratio_to_sglang": 0.906
             },
             "lightx2v": {
               "gpus": 2,
@@ -898,7 +898,7 @@
               "qps": 0.0138,
               "num_requests": 4,
               "concurrency": 2,
-              "ratio_to_sglang": 0.873
+              "ratio_to_sglang": 0.862
             },
             "trtllm-visual": {
               "gpus": 2,
@@ -907,7 +907,7 @@
               "qps": 0.0147,
               "num_requests": 4,
               "concurrency": 2,
-              "ratio_to_sglang": 0.93
+              "ratio_to_sglang": 0.919
             },
             "comfyui": {
               "gpus": 1,
@@ -916,7 +916,7 @@
               "qps": 0.0033,
               "num_requests": 4,
               "concurrency": 2,
-              "ratio_to_sglang": 0.209
+              "ratio_to_sglang": 0.206
             },
             "fastvideo": {
               "gpus": 2,
@@ -925,18 +925,18 @@
               "qps": 0.0133,
               "num_requests": 4,
               "concurrency": 2,
-              "ratio_to_sglang": 0.842
+              "ratio_to_sglang": 0.831
             }
           },
           "winner": "sglang",
-          "winner_speedup": "1.07x"
+          "winner_speedup": "1.09x"
         }
       ],
       "reproduce": "scripts/run_b300_full_20261022.sh",
       "reproduce_link": {
         "path": "scripts/run_b300_full_20261022.sh",
-        "ref": "a61608e87",
-        "url": "https://github.com/mickqian/diffusion-bench-framework/blob/a61608e87b52debf18c43873e7fec7ceced23a52/scripts/run_b300_full_20261022.sh"
+        "ref": "3a406d3c2",
+        "url": "https://github.com/mickqian/diffusion-bench-framework/blob/3a406d3c2687ecbb794badbdc4dfbd3891b2384e/scripts/run_b300_full_20261022.sh"
       },
       "round": "round-20261022",
       "round_label": "Round 2026-10-22"

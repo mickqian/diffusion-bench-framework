@@ -1,6 +1,6 @@
 {
-  "timestamp": "2026-10-29T13:03:44.672674+00:00",
-  "commit_sha": "a61608e87b52debf18c43873e7fec7ceced23a52",
+  "timestamp": "2026-10-30T01:22:34.117020+00:00",
+  "commit_sha": "3a406d3c2687ecbb794badbdc4dfbd3891b2384e",
   "run_id": "b300x4-20261022",
   "hardware": {
     "runner_labels": null,
@@ -14,13 +14,13 @@
     "hardware_profile_override": "b300"
   },
   "sglang_runtime": {
-    "package_version": "0.0.0.dev1+gc1c287a42",
-    "module_path": "/workspace/r1022/sgl-preview/python/sglang/__init__.py",
-    "git_root": "/workspace/r1022/sgl-preview",
-    "git_commit": "3042cea843c88493875dc2e326002af1dff2eb59"
+    "package_version": "0.0.0.dev1+gc10e0e177",
+    "module_path": "/workspace/fm/sgl/python/sglang/__init__.py",
+    "git_root": "/workspace/fm/sgl",
+    "git_commit": "1ab008f5b090e6595479ba57934e9211ab083565"
   },
   "framework_runtime": {
-    "venv_root": "/workspace/r1022/fw-venvs",
+    "venv_root": "/workspace/fm/fw-venvs",
     "install_specs": {
       "vllm": "vllm==0.18.0",
       "vllm_omni": "vllm-omni==0.18.0",
@@ -41,48 +41,48 @@
       "trtllm_visual_server_bin": "trtllm-serve"
     },
     "vllm-omni": {
-      "venv_path": "/workspace/r1022/fw-venvs/vllm-omni",
+      "venv_path": "/workspace/fm/fw-venvs/vllm-omni",
       "packages": {
         "vllm": {
           "Name": "vllm",
           "Version": "0.32.0",
           "Home-page": "https://github.com/vllm-project/vllm",
-          "Location": "/workspace/r1022/fw-venvs/vllm-omni/lib/python3.12/site-packages"
+          "Location": "/workspace/fm/fw-venvs/vllm-omni/lib/python3.12/site-packages"
         },
         "vllm-omni": {
           "Name": "vllm-omni",
           "Version": "0.32.0rc2.dev46+g0da1d831e",
           "Home-page": "https://github.com/vllm-project/vllm-omni",
-          "Location": "/workspace/r1022/fw-venvs/vllm-omni/lib/python3.12/site-packages"
+          "Location": "/workspace/fm/fw-venvs/vllm-omni/lib/python3.12/site-packages"
         },
         "torch": {
           "Name": "torch",
           "Version": "2.13.0",
           "Home-page": "https://pytorch.org",
-          "Location": "/workspace/r1022/fw-venvs/vllm-omni/lib/python3.12/site-packages"
+          "Location": "/workspace/fm/fw-venvs/vllm-omni/lib/python3.12/site-packages"
         },
         "transformers": {
           "Name": "transformers",
           "Version": "5.19.0",
           "Home-page": "https://github.com/huggingface/transformers",
-          "Location": "/workspace/r1022/fw-venvs/vllm-omni/lib/python3.12/site-packages"
+          "Location": "/workspace/fm/fw-venvs/vllm-omni/lib/python3.12/site-packages"
         },
         "diffusers": {
           "Name": "diffusers",
           "Version": "0.40.0",
           "Home-page": "https://github.com/huggingface/diffusers",
-          "Location": "/workspace/r1022/fw-venvs/vllm-omni/lib/python3.12/site-packages"
+          "Location": "/workspace/fm/fw-venvs/vllm-omni/lib/python3.12/site-packages"
         },
         "huggingface_hub": {
           "Name": "huggingface_hub",
           "Version": "1.33.0",
           "Home-page": "https://github.com/huggingface/huggingface_hub",
-          "Location": "/workspace/r1022/fw-venvs/vllm-omni/lib/python3.12/site-packages"
+          "Location": "/workspace/fm/fw-venvs/vllm-omni/lib/python3.12/site-packages"
         }
       },
       "direct_urls": {
         "vllm_omni-0.32.0rc2.dev46+g0da1d831e.dist-info": {
-          "url": "file:///workspace/r1022/fw-venvs/vllm-omni/src/vllm-omni",
+          "url": "file:///workspace/fm/fw-venvs/vllm-omni/src/vllm-omni",
           "dir_info": {
             "editable": true
           }
@@ -90,7 +90,7 @@
       }
     },
     "lightx2v": {
-      "venv_path": "/workspace/r1022/fw-venvs/lightx2v",
+      "venv_path": "/workspace/fm/fw-venvs/lightx2v",
       "packages": {
         "lightx2v": {
           "Name": "lightx2v",
@@ -147,42 +147,42 @@
       }
     },
     "trtllm-visual": {
-      "venv_path": "/workspace/r1022/fw-venvs/trtllm-visual",
+      "venv_path": "/workspace/fm/fw-venvs/trtllm-visual",
       "packages": {
         "tensorrt_llm": {
           "Name": "tensorrt_llm",
           "Version": "1.4.0rc1",
           "Home-page": "https://github.com/NVIDIA/TensorRT-LLM",
-          "Location": "/workspace/r1022/fw-venvs/trtllm-visual/lib/python3.12/site-packages"
+          "Location": "/workspace/fm/fw-venvs/trtllm-visual/lib/python3.12/site-packages"
         },
         "torch": {
           "Name": "torch",
           "Version": "2.14.0+cu130",
           "Home-page": "https://pytorch.org",
-          "Location": "/workspace/r1022/fw-venvs/trtllm-visual/lib/python3.12/site-packages"
+          "Location": "/workspace/fm/fw-venvs/trtllm-visual/lib/python3.12/site-packages"
         },
         "transformers": {
           "Name": "transformers",
           "Version": "5.5.4",
           "Home-page": "https://github.com/huggingface/transformers",
-          "Location": "/workspace/r1022/fw-venvs/trtllm-visual/lib/python3.12/site-packages"
+          "Location": "/workspace/fm/fw-venvs/trtllm-visual/lib/python3.12/site-packages"
         },
         "diffusers": {
           "Name": "diffusers",
           "Version": "0.40.0",
           "Home-page": "https://github.com/huggingface/diffusers",
-          "Location": "/workspace/r1022/fw-venvs/trtllm-visual/lib/python3.12/site-packages"
+          "Location": "/workspace/fm/fw-venvs/trtllm-visual/lib/python3.12/site-packages"
         },
         "huggingface_hub": {
           "Name": "huggingface_hub",
           "Version": "1.33.0",
           "Home-page": "https://github.com/huggingface/huggingface_hub",
-          "Location": "/workspace/r1022/fw-venvs/trtllm-visual/lib/python3.12/site-packages"
+          "Location": "/workspace/fm/fw-venvs/trtllm-visual/lib/python3.12/site-packages"
         }
       }
     },
     "comfyui": {
-      "venv_path": "/workspace/r1022/fw-venvs/comfyui",
+      "venv_path": "/workspace/fm/fw-venvs/comfyui",
       "packages": {
         "torchvision": {
           "Name": "torchvision",
@@ -243,7 +243,7 @@
       "source_commit_date": "2026-10-21T23:43:22-04:00"
     },
     "fastvideo": {
-      "venv_path": "/workspace/r1022/fw-venvs/fastvideo",
+      "venv_path": "/workspace/fm/fw-venvs/fastvideo",
       "packages": {
         "fastvideo": {
           "Name": "fastvideo",
@@ -813,6 +813,114 @@
       "run_id": "local",
       "commit_sha": "72bdb18a31a54c243bc18615e6f508faa8740579",
       "timestamp": "2026-10-24T08:01:59.610548+00:00"
+    },
+    {
+      "path": "reports/round-20261022/raw/run_fm1029_trt2_r3_wan22_t2v_a14b_720p.json",
+      "run_id": "local",
+      "commit_sha": "6f80e3b4861b46dee9a4c6bd5916d82bc30867a9",
+      "timestamp": "2026-10-29T14:20:20.559387+00:00"
+    },
+    {
+      "path": "reports/round-20261022/raw/run_fm1029_sgl-sel_r3_wan22_t2v_a14b_720p.json",
+      "run_id": "local",
+      "commit_sha": "6f80e3b4861b46dee9a4c6bd5916d82bc30867a9",
+      "timestamp": "2026-10-29T13:57:22.987619+00:00"
+    },
+    {
+      "path": "reports/round-20261022/raw/run_b300fm1029_qwen_image_21_t2i_1024_vllm-omni_r2_qwen_image_21_t2i_1024.json",
+      "run_id": "local",
+      "commit_sha": "f4bd1981f1ee4df6eac48515e70dca36e8d7fc95",
+      "timestamp": "2026-10-29T14:49:00.105966+00:00"
+    },
+    {
+      "path": "reports/round-20261022/raw/run_b300fm1029_qwen_image_21_t2i_1024_sglang_r2_qwen_image_21_t2i_1024.json",
+      "run_id": "local",
+      "commit_sha": "f4bd1981f1ee4df6eac48515e70dca36e8d7fc95",
+      "timestamp": "2026-10-29T14:50:39.068595+00:00"
+    },
+    {
+      "path": "reports/round-20261022/raw/run_b300fm1029_qwen_image_21_edit_1024_vllm-omni_r4_qwen_image_21_edit_1024.json",
+      "run_id": "local",
+      "commit_sha": "f4bd1981f1ee4df6eac48515e70dca36e8d7fc95",
+      "timestamp": "2026-10-29T17:09:37.315837+00:00"
+    },
+    {
+      "path": "reports/round-20261022/raw/run_b300fm1029_qwen_image_21_edit_1024_sglang_r4_qwen_image_21_edit_1024.json",
+      "run_id": "local",
+      "commit_sha": "f4bd1981f1ee4df6eac48515e70dca36e8d7fc95",
+      "timestamp": "2026-10-29T17:11:04.940028+00:00"
+    },
+    {
+      "path": "reports/round-20261022/raw/run_b300fm1029_qwen_image_21_t2i_1024_2gpu_sglang_r1_qwen_image_21_t2i_1024_2gpu.json",
+      "run_id": "local",
+      "commit_sha": "f4bd1981f1ee4df6eac48515e70dca36e8d7fc95",
+      "timestamp": "2026-10-29T15:00:42.468207+00:00"
+    },
+    {
+      "path": "reports/round-20261022/raw/run_b300fm1029_zimage_turbo_t2i_1024_sglang_r1_zimage_turbo_t2i_1024.json",
+      "run_id": "local",
+      "commit_sha": "f4bd1981f1ee4df6eac48515e70dca36e8d7fc95",
+      "timestamp": "2026-10-29T15:02:41.807357+00:00"
+    },
+    {
+      "path": "reports/round-20261022/raw/run_b300fm1029_cosmos3_nano_t2i_720p_sglang_r1_cosmos3_nano_t2i_720p.json",
+      "run_id": "local",
+      "commit_sha": "f4bd1981f1ee4df6eac48515e70dca36e8d7fc95",
+      "timestamp": "2026-10-29T15:04:16.951665+00:00"
+    },
+    {
+      "path": "reports/round-20261022/raw/run_b300fm1029_minimax_h3_t2va_5s_vllm-omni_r2_minimax_h3_t2va_5s.json",
+      "run_id": "local",
+      "commit_sha": "f4bd1981f1ee4df6eac48515e70dca36e8d7fc95",
+      "timestamp": "2026-10-29T15:34:59.697299+00:00"
+    },
+    {
+      "path": "reports/round-20261022/raw/run_b300fm1029_minimax_h3_t2va_5s_sglang_r2_minimax_h3_t2va_5s.json",
+      "run_id": "local",
+      "commit_sha": "f4bd1981f1ee4df6eac48515e70dca36e8d7fc95",
+      "timestamp": "2026-10-29T15:50:05.346637+00:00"
+    },
+    {
+      "path": "reports/round-20261022/raw/run_b300fm1029_minimax_h3_ref2va_5s_vllm-omni_r2_minimax_h3_ref2va_5s.json",
+      "run_id": "local",
+      "commit_sha": "f4bd1981f1ee4df6eac48515e70dca36e8d7fc95",
+      "timestamp": "2026-10-29T16:28:01.476050+00:00"
+    },
+    {
+      "path": "reports/round-20261022/raw/run_b300fm1029_minimax_h3_ref2va_5s_sglang_r2_minimax_h3_ref2va_5s.json",
+      "run_id": "local",
+      "commit_sha": "f4bd1981f1ee4df6eac48515e70dca36e8d7fc95",
+      "timestamp": "2026-10-29T16:40:48.591307+00:00"
+    },
+    {
+      "path": "reports/round-20261022/raw/run_b300fm1029_minimax_h3_t2va_5s_4gpu_sglang_r1_minimax_h3_t2va_5s_4gpu.json",
+      "run_id": "local",
+      "commit_sha": "f4bd1981f1ee4df6eac48515e70dca36e8d7fc95",
+      "timestamp": "2026-10-29T16:53:08.022416+00:00"
+    },
+    {
+      "path": "reports/round-20261022/raw/run_b300fm1029_cosmos3_nano_t2v_720p_189f_sglang_r1_cosmos3_nano_t2v_720p_189f.json",
+      "run_id": "local",
+      "commit_sha": "f4bd1981f1ee4df6eac48515e70dca36e8d7fc95",
+      "timestamp": "2026-10-29T16:58:09.432908+00:00"
+    },
+    {
+      "path": "reports/round-20261022/raw/run_b300fm1029_cosmos3_nano_i2v_720p_189f_sglang_r1_cosmos3_nano_i2v_720p_189f.json",
+      "run_id": "local",
+      "commit_sha": "f4bd1981f1ee4df6eac48515e70dca36e8d7fc95",
+      "timestamp": "2026-10-29T17:02:00.106840+00:00"
+    },
+    {
+      "path": "reports/round-20261022/raw/run_b300fm1029_flux3_klein_base_t2i_1024_sglang_r1_flux3_klein_base_t2i_1024.json",
+      "run_id": "local",
+      "commit_sha": "f4bd1981f1ee4df6eac48515e70dca36e8d7fc95",
+      "timestamp": "2026-10-29T17:30:41.546759+00:00"
+    },
+    {
+      "path": "reports/round-20261022/raw/run_b300fm1029_ideogram4_t2i_1024_2gpu_tp_sglang_r1_ideogram4_t2i_1024_2gpu_tp.json",
+      "run_id": "local",
+      "commit_sha": "f4bd1981f1ee4df6eac48515e70dca36e8d7fc95",
+      "timestamp": "2026-10-29T17:33:39.163270+00:00"
     }
   ],
   "results": [
@@ -832,7 +940,7 @@
       "true_cfg_scale": null,
       "negative_prompt_set": false,
       "num_gpus": 2,
-      "latency_s": 2.083,
+      "latency_s": 2.066,
       "error": null,
       "framework_metadata": {
         "profile": "default",
@@ -858,44 +966,44 @@
         "sglang_profile_source": "default",
         "sglang_ref": "current-main (FLUX.3 Image since sglang#44418, merged 2026-10-15)"
       },
-      "server_command": "sglang serve --model-path black-forest-labs/flux-3-image-klein-base --port 61020 --host 127.0.0.1 --backend sglang --num-gpus 2 --model-type diffusion --warmup-mode server --enable-cfg-parallel --performance-mode speed",
+      "server_command": "sglang serve --model-path black-forest-labs/flux-3-image-klein-base --port 64040 --host 127.0.0.1 --backend sglang --num-gpus 2 --model-type diffusion --warmup-mode server --enable-cfg-parallel --performance-mode speed",
       "metrics": {
-        "client_latency_s": 2.083,
-        "client_latency_min_s": 2.076,
-        "client_latency_max_s": 2.088,
+        "client_latency_s": 2.066,
+        "client_latency_min_s": 2.063,
+        "client_latency_max_s": 2.068,
         "measured_repeats": 5,
-        "server_latency_s": 2.063,
+        "server_latency_s": 2.0,
         "server_latency_source": "separate instrumented request, not one of the measured repeats",
         "diagnostic_stages_s": {
-          "Flux3ImageTextEncodeStage": 0.044,
+          "Flux3ImageTextEncodeStage": 0.043,
           "Flux3ImageConditionEncodeStage": 0.0,
-          "Flux3ImageDenoiseStage": 1.843,
-          "Flux3ImageDecodeStage": 0.173
+          "Flux3ImageDenoiseStage": 1.829,
+          "Flux3ImageDecodeStage": 0.125
         },
-        "diagnostic_stage_sum_s": 2.06,
-        "diagnostic_client_latency_s": 2.087,
-        "unattributed_tail_s": 0.027,
-        "unattributed_tail_frac": 0.013,
+        "diagnostic_stage_sum_s": 1.997,
+        "diagnostic_client_latency_s": 2.072,
+        "unattributed_tail_s": 0.075,
+        "unattributed_tail_frac": 0.036,
         "latency_samples_s": [
-          2.08,
-          2.076,
-          2.083,
-          2.088,
-          2.085
+          2.066,
+          2.063,
+          2.068,
+          2.063,
+          2.067
         ],
-        "latency_spread_pct": 0.5,
+        "latency_spread_pct": 0.2,
         "warmup_latencies_s": [
-          1.546,
-          0.258
+          2.354,
+          0.249
         ],
         "warmup_steady_latencies_s": [
-          2.081,
-          2.079
+          2.075,
+          2.056
         ],
-        "server_startup_s": 46.07,
-        "warmup_s": 6.01
+        "server_startup_s": 62.08,
+        "warmup_s": 6.78
       },
-      "source_result": "reports/round-20261022/raw/run_b300img1022p_flux3_klein_base_t2i_1024_flux3_klein_base_t2i_1024.json"
+      "source_result": "reports/round-20261022/raw/run_b300fm1029_flux3_klein_base_t2i_1024_sglang_r1_flux3_klein_base_t2i_1024.json"
     },
     {
       "case_id": "flux3_klein_base_t2i_1024",
@@ -988,7 +1096,7 @@
       "true_cfg_scale": null,
       "negative_prompt_set": false,
       "num_gpus": 1,
-      "latency_s": 2.175,
+      "latency_s": 2.147,
       "error": null,
       "framework_metadata": {
         "profile": "b200-1gpu-resident-fa",
@@ -1019,46 +1127,46 @@
         "sglang_profile_source": "hardware",
         "sglang_ref": "sglang 6ad78f22 (2026-09-21)"
       },
-      "server_command": "sglang serve --model-path Qwen/Qwen-Image-2.1 --port 61000 --host 127.0.0.1 --backend sglang --model-type diffusion --warmup-mode server --performance-mode speed --attention-backend fa",
+      "server_command": "sglang serve --model-path Qwen/Qwen-Image-2.1 --port 62030 --host 127.0.0.1 --backend sglang --model-type diffusion --warmup-mode server --performance-mode speed --attention-backend fa",
       "metrics": {
-        "client_latency_s": 2.175,
-        "client_latency_min_s": 2.166,
-        "client_latency_max_s": 2.189,
+        "client_latency_s": 2.147,
+        "client_latency_min_s": 2.143,
+        "client_latency_max_s": 2.154,
         "measured_repeats": 5,
-        "server_latency_s": 2.01,
+        "server_latency_s": 1.979,
         "server_latency_source": "separate instrumented request, not one of the measured repeats",
         "diagnostic_stages_s": {
           "QwenImage21InputValidationStage": 0.0,
-          "QwenImage21EncodingStage": 0.039,
+          "QwenImage21EncodingStage": 0.037,
           "LatentPreparationStage": 0.002,
           "TimestepPreparationStage": 0.0,
-          "QwenImage21DenoisingStage": 1.945,
+          "QwenImage21DenoisingStage": 1.916,
           "DecodingStage": 0.022
         },
-        "diagnostic_stage_sum_s": 2.008,
-        "diagnostic_client_latency_s": 2.197,
-        "unattributed_tail_s": 0.189,
+        "diagnostic_stage_sum_s": 1.976,
+        "diagnostic_client_latency_s": 2.162,
+        "unattributed_tail_s": 0.185,
         "unattributed_tail_frac": 0.086,
         "latency_samples_s": [
-          2.166,
-          2.175,
-          2.172,
-          2.18,
-          2.189
+          2.143,
+          2.147,
+          2.154,
+          2.145,
+          2.148
         ],
-        "latency_spread_pct": 1.0,
+        "latency_spread_pct": 0.5,
         "warmup_latencies_s": [
-          0.293,
-          0.262
+          0.286,
+          0.256
         ],
         "warmup_steady_latencies_s": [
-          2.168,
-          2.166
+          2.137,
+          2.136
         ],
-        "server_startup_s": 96.1,
-        "warmup_s": 4.92
+        "server_startup_s": 82.12,
+        "warmup_s": 4.84
       },
-      "source_result": "reports/round-20261022/raw/run_b300img1022p_qwen_image_21_t2i_1024_qwen_image_21_t2i_1024.json"
+      "source_result": "reports/round-20261022/raw/run_b300fm1029_qwen_image_21_t2i_1024_sglang_r2_qwen_image_21_t2i_1024.json"
     },
     {
       "case_id": "qwen_image_21_t2i_1024",
@@ -1076,7 +1184,7 @@
       "true_cfg_scale": null,
       "negative_prompt_set": false,
       "num_gpus": 1,
-      "latency_s": 2.372,
+      "latency_s": 2.347,
       "error": null,
       "framework_metadata": {
         "profile": "blackwell-cudnn-static",
@@ -1105,32 +1213,32 @@
         ],
         "request_inputs": "distinct-per-request"
       },
-      "server_command": "vllm serve Qwen/Qwen-Image-2.1 --port 61000 --host 127.0.0.1 --omni --no-diffusion-compile-dynamic",
+      "server_command": "vllm serve Qwen/Qwen-Image-2.1 --port 62020 --host 127.0.0.1 --omni --no-diffusion-compile-dynamic",
       "metrics": {
-        "client_latency_s": 2.372,
-        "client_latency_min_s": 2.367,
-        "client_latency_max_s": 2.378,
+        "client_latency_s": 2.347,
+        "client_latency_min_s": 2.346,
+        "client_latency_max_s": 2.354,
         "measured_repeats": 5,
         "latency_samples_s": [
-          2.372,
-          2.376,
-          2.371,
-          2.378,
-          2.367
+          2.347,
+          2.346,
+          2.353,
+          2.346,
+          2.354
         ],
-        "latency_spread_pct": 0.5,
+        "latency_spread_pct": 0.3,
         "warmup_latencies_s": [
-          3.005,
-          0.356
+          1.642,
+          0.341
         ],
         "warmup_steady_latencies_s": [
-          2.362,
-          2.373
+          2.339,
+          2.339
         ],
-        "server_startup_s": 74.07,
-        "warmup_s": 8.1
+        "server_startup_s": 38.06,
+        "warmup_s": 6.66
       },
-      "source_result": "reports/round-20261022/raw/run_b300img1022_qwen_image_21_t2i_1024_qwen_image_21_t2i_1024.json"
+      "source_result": "reports/round-20261022/raw/run_b300fm1029_qwen_image_21_t2i_1024_vllm-omni_r2_qwen_image_21_t2i_1024.json"
     },
     {
       "case_id": "qwen_image_21_t2i_1024",
@@ -1310,7 +1418,7 @@
       "true_cfg_scale": null,
       "negative_prompt_set": false,
       "num_gpus": 2,
-      "latency_s": 1.383,
+      "latency_s": 1.364,
       "error": null,
       "framework_metadata": {
         "profile": "gb300-2gpu-tp2",
@@ -1339,46 +1447,46 @@
         "sglang_profile_source": "hardware",
         "sglang_ref": "main 3831e7e09 + sglang#43565 #43568 #43577 #43575 #43576 #43584 #43586 (GB300 rerun tree)"
       },
-      "server_command": "sglang serve --model-path Qwen/Qwen-Image-2.1 --port 61004 --host 127.0.0.1 --backend sglang --num-gpus 2 --model-type diffusion --warmup-mode server --ulysses-degree 1 --tp-size 2 --performance-mode speed --attention-backend fa",
+      "server_command": "sglang serve --model-path Qwen/Qwen-Image-2.1 --port 62080 --host 127.0.0.1 --backend sglang --num-gpus 2 --model-type diffusion --warmup-mode server --ulysses-degree 1 --tp-size 2 --performance-mode speed --attention-backend fa",
       "metrics": {
-        "client_latency_s": 1.383,
-        "client_latency_min_s": 1.381,
-        "client_latency_max_s": 1.384,
+        "client_latency_s": 1.364,
+        "client_latency_min_s": 1.362,
+        "client_latency_max_s": 1.391,
         "measured_repeats": 5,
-        "server_latency_s": 1.273,
+        "server_latency_s": 1.269,
         "server_latency_source": "separate instrumented request, not one of the measured repeats",
         "diagnostic_stages_s": {
           "QwenImage21InputValidationStage": 0.0,
-          "QwenImage21EncodingStage": 0.042,
-          "LatentPreparationStage": 0.002,
-          "TimestepPreparationStage": 0.0,
-          "QwenImage21DenoisingStage": 1.217,
+          "QwenImage21EncodingStage": 0.054,
+          "LatentPreparationStage": 0.004,
+          "TimestepPreparationStage": 0.001,
+          "QwenImage21DenoisingStage": 1.197,
           "DecodingStage": 0.01
         },
-        "diagnostic_stage_sum_s": 1.27,
-        "diagnostic_client_latency_s": 1.388,
-        "unattributed_tail_s": 0.118,
-        "unattributed_tail_frac": 0.085,
+        "diagnostic_stage_sum_s": 1.266,
+        "diagnostic_client_latency_s": 1.386,
+        "unattributed_tail_s": 0.12,
+        "unattributed_tail_frac": 0.087,
         "latency_samples_s": [
-          1.383,
-          1.381,
-          1.383,
-          1.382,
-          1.384
+          1.362,
+          1.37,
+          1.362,
+          1.364,
+          1.391
         ],
-        "latency_spread_pct": 0.2,
+        "latency_spread_pct": 2.2,
         "warmup_latencies_s": [
-          0.241,
-          0.209
+          0.244,
+          0.207
         ],
         "warmup_steady_latencies_s": [
-          1.38,
-          1.382
+          1.371,
+          1.369
         ],
-        "server_startup_s": 50.08,
-        "warmup_s": 3.24
+        "server_startup_s": 76.1,
+        "warmup_s": 3.22
       },
-      "source_result": "reports/round-20261022/raw/run_b300img1022p_qwen_image_21_t2i_1024_2gpu_qwen_image_21_t2i_1024_2gpu.json"
+      "source_result": "reports/round-20261022/raw/run_b300fm1029_qwen_image_21_t2i_1024_2gpu_sglang_r1_qwen_image_21_t2i_1024_2gpu.json"
     },
     {
       "case_id": "qwen_image_21_t2i_1024_2gpu",
@@ -1468,7 +1576,7 @@
       "true_cfg_scale": null,
       "negative_prompt_set": false,
       "num_gpus": 1,
-      "latency_s": 2.621,
+      "latency_s": 2.62,
       "error": null,
       "framework_metadata": {
         "profile": "b200-1gpu-resident-fa",
@@ -1499,46 +1607,46 @@
         "sglang_profile_source": "hardware",
         "sglang_ref": "sglang 6ad78f22 (2026-09-21)"
       },
-      "server_command": "sglang serve --model-path Qwen/Qwen-Image-2.1 --port 61008 --host 127.0.0.1 --backend sglang --model-type diffusion --warmup-mode server --performance-mode speed --attention-backend fa",
+      "server_command": "sglang serve --model-path Qwen/Qwen-Image-2.1 --port 63030 --host 127.0.0.1 --backend sglang --model-type diffusion --warmup-mode server --performance-mode speed --attention-backend fa",
       "metrics": {
-        "client_latency_s": 2.621,
-        "client_latency_min_s": 2.606,
-        "client_latency_max_s": 2.622,
+        "client_latency_s": 2.62,
+        "client_latency_min_s": 2.612,
+        "client_latency_max_s": 2.661,
         "measured_repeats": 5,
-        "server_latency_s": 2.424,
+        "server_latency_s": 2.422,
         "server_latency_source": "separate instrumented request, not one of the measured repeats",
         "diagnostic_stages_s": {
           "QwenImage21InputValidationStage": 0.026,
-          "QwenImage21EncodingStage": 0.148,
+          "QwenImage21EncodingStage": 0.173,
           "LatentPreparationStage": 0.002,
           "TimestepPreparationStage": 0.0,
-          "QwenImage21DenoisingStage": 2.221,
+          "QwenImage21DenoisingStage": 2.195,
           "DecodingStage": 0.024
         },
-        "diagnostic_stage_sum_s": 2.421,
-        "diagnostic_client_latency_s": 2.614,
-        "unattributed_tail_s": 0.193,
-        "unattributed_tail_frac": 0.074,
+        "diagnostic_stage_sum_s": 2.419,
+        "diagnostic_client_latency_s": 2.615,
+        "unattributed_tail_s": 0.196,
+        "unattributed_tail_frac": 0.075,
         "latency_samples_s": [
-          2.606,
-          2.622,
+          2.616,
+          2.62,
+          2.661,
           2.612,
-          2.621,
-          2.622
+          2.621
         ],
-        "latency_spread_pct": 0.6,
+        "latency_spread_pct": 1.9,
         "warmup_latencies_s": [
-          0.533,
-          0.599
+          0.598,
+          0.508
         ],
         "warmup_steady_latencies_s": [
-          2.598,
-          2.604
+          2.616,
+          2.616
         ],
-        "server_startup_s": 40.07,
-        "warmup_s": 8.6
+        "server_startup_s": 88.11,
+        "warmup_s": 8.07
       },
-      "source_result": "reports/round-20261022/raw/run_b300img1022p_qwen_image_21_edit_1024_qwen_image_21_edit_1024.json"
+      "source_result": "reports/round-20261022/raw/run_b300fm1029_qwen_image_21_edit_1024_sglang_r4_qwen_image_21_edit_1024.json"
     },
     {
       "case_id": "qwen_image_21_edit_1024",
@@ -1556,7 +1664,7 @@
       "true_cfg_scale": null,
       "negative_prompt_set": false,
       "num_gpus": 1,
-      "latency_s": 2.862,
+      "latency_s": 2.84,
       "error": null,
       "framework_metadata": {
         "profile": "blackwell-cudnn-static",
@@ -1585,32 +1693,32 @@
         ],
         "request_inputs": "distinct-per-request"
       },
-      "server_command": "vllm serve Qwen/Qwen-Image-2.1 --port 61008 --host 127.0.0.1 --omni --no-diffusion-compile-dynamic",
+      "server_command": "vllm serve Qwen/Qwen-Image-2.1 --port 63020 --host 127.0.0.1 --omni --no-diffusion-compile-dynamic",
       "metrics": {
-        "client_latency_s": 2.862,
-        "client_latency_min_s": 2.861,
-        "client_latency_max_s": 2.867,
+        "client_latency_s": 2.84,
+        "client_latency_min_s": 2.832,
+        "client_latency_max_s": 2.855,
         "measured_repeats": 5,
         "latency_samples_s": [
-          2.862,
-          2.861,
-          2.862,
-          2.861,
-          2.867
+          2.832,
+          2.836,
+          2.846,
+          2.84,
+          2.855
         ],
-        "latency_spread_pct": 0.2,
+        "latency_spread_pct": 0.8,
         "warmup_latencies_s": [
-          13.843,
-          0.57
+          2.533,
+          0.583
         ],
         "warmup_steady_latencies_s": [
-          2.845,
-          2.848
+          2.818,
+          2.825
         ],
-        "server_startup_s": 64.07,
-        "warmup_s": 20.11
+        "server_startup_s": 28.05,
+        "warmup_s": 10.83
       },
-      "source_result": "reports/round-20261022/raw/run_b300img1022_qwen_image_21_edit_1024_qwen_image_21_edit_1024.json"
+      "source_result": "reports/round-20261022/raw/run_b300fm1029_qwen_image_21_edit_1024_vllm-omni_r4_qwen_image_21_edit_1024.json"
     },
     {
       "case_id": "zimage_turbo_t2i_1024",
@@ -1628,7 +1736,7 @@
       "true_cfg_scale": null,
       "negative_prompt_set": false,
       "num_gpus": 2,
-      "latency_s": 0.337,
+      "latency_s": 0.335,
       "error": null,
       "framework_metadata": {
         "profile": "b300-speed",
@@ -1656,46 +1764,46 @@
         "sglang_profile_source": "hardware",
         "sglang_ref": "current-main"
       },
-      "server_command": "sglang serve --model-path Tongyi-MAI/Z-Image-Turbo --port 61012 --host 127.0.0.1 --backend sglang --num-gpus 2 --model-type diffusion --warmup-mode server --tp-size 2 --dit-layerwise-offload false --performance-mode speed --enable-torch-compile false",
+      "server_command": "sglang serve --model-path Tongyi-MAI/Z-Image-Turbo --port 62090 --host 127.0.0.1 --backend sglang --num-gpus 2 --model-type diffusion --warmup-mode server --tp-size 2 --dit-layerwise-offload false --performance-mode speed --enable-torch-compile false",
       "metrics": {
-        "client_latency_s": 0.337,
-        "client_latency_min_s": 0.334,
+        "client_latency_s": 0.335,
+        "client_latency_min_s": 0.333,
         "client_latency_max_s": 0.348,
         "measured_repeats": 5,
-        "server_latency_s": 0.266,
+        "server_latency_s": 0.264,
         "server_latency_source": "separate instrumented request, not one of the measured repeats",
         "diagnostic_stages_s": {
           "InputValidationStage": 0.0,
-          "TextEncodingStage": 0.037,
+          "TextEncodingStage": 0.038,
           "LatentPreparationStage": 0.0,
           "TimestepPreparationStage": 0.0,
-          "DenoisingStage": 0.218,
+          "DenoisingStage": 0.216,
           "DecodingStage": 0.008
         },
-        "diagnostic_stage_sum_s": 0.264,
-        "diagnostic_client_latency_s": 0.339,
-        "unattributed_tail_s": 0.075,
-        "unattributed_tail_frac": 0.222,
+        "diagnostic_stage_sum_s": 0.262,
+        "diagnostic_client_latency_s": 0.338,
+        "unattributed_tail_s": 0.077,
+        "unattributed_tail_frac": 0.226,
         "latency_samples_s": [
           0.334,
-          0.336,
-          0.337,
-          0.341,
+          0.335,
+          0.333,
+          0.335,
           0.348
         ],
-        "latency_spread_pct": 4.1,
+        "latency_spread_pct": 4.6,
         "warmup_latencies_s": [
-          0.189,
-          0.171
+          0.28,
+          0.172
         ],
         "warmup_steady_latencies_s": [
-          0.34,
-          0.34
+          0.336,
+          0.335
         ],
-        "server_startup_s": 50.07,
-        "warmup_s": 1.06
+        "server_startup_s": 60.08,
+        "warmup_s": 1.15
       },
-      "source_result": "reports/round-20261022/raw/run_b300img1022p_zimage_turbo_t2i_1024_zimage_turbo_t2i_1024.json"
+      "source_result": "reports/round-20261022/raw/run_b300fm1029_zimage_turbo_t2i_1024_sglang_r1_zimage_turbo_t2i_1024.json"
     },
     {
       "case_id": "zimage_turbo_t2i_1024",
@@ -1937,7 +2045,7 @@
       "true_cfg_scale": null,
       "negative_prompt_set": false,
       "num_gpus": 2,
-      "latency_s": 1.939,
+      "latency_s": 1.92,
       "error": null,
       "framework_metadata": {
         "profile": "b300-speed",
@@ -1965,41 +2073,41 @@
         "sglang_profile_source": "hardware",
         "sglang_ref": "current-main"
       },
-      "server_command": "sglang serve --model-path ideogram-ai/ideogram-4-fp8 --port 61024 --host 127.0.0.1 --backend sglang --num-gpus 2 --model-type diffusion --warmup-mode server --dit-layerwise-offload false --tp-size 2 --performance-mode speed --enable-torch-compile false",
+      "server_command": "sglang serve --model-path ideogram-ai/ideogram-4-fp8 --port 64050 --host 127.0.0.1 --backend sglang --num-gpus 2 --model-type diffusion --warmup-mode server --dit-layerwise-offload false --tp-size 2 --performance-mode speed --enable-torch-compile false",
       "metrics": {
-        "client_latency_s": 1.939,
-        "client_latency_min_s": 1.937,
-        "client_latency_max_s": 1.943,
+        "client_latency_s": 1.92,
+        "client_latency_min_s": 1.914,
+        "client_latency_max_s": 1.925,
         "measured_repeats": 5,
-        "server_latency_s": 1.806,
+        "server_latency_s": 1.786,
         "server_latency_source": "separate instrumented request, not one of the measured repeats",
         "diagnostic_stages_s": {
           "InputValidationStage": 0.0,
           "Ideogram4TextEncodingStage": 0.042,
           "LatentPreparationStage": 0.0,
-          "DenoisingStage": 1.749,
+          "DenoisingStage": 1.727,
           "Ideogram4DecodingStage": 0.013
         },
-        "diagnostic_stage_sum_s": 1.804,
-        "diagnostic_client_latency_s": 1.943,
-        "unattributed_tail_s": 0.139,
-        "unattributed_tail_frac": 0.072,
+        "diagnostic_stage_sum_s": 1.783,
+        "diagnostic_client_latency_s": 1.926,
+        "unattributed_tail_s": 0.143,
+        "unattributed_tail_frac": 0.074,
         "latency_samples_s": [
-          1.937,
-          1.943,
-          1.939,
-          1.937,
-          1.94
+          1.92,
+          1.919,
+          1.914,
+          1.921,
+          1.925
         ],
-        "latency_spread_pct": 0.3,
+        "latency_spread_pct": 0.6,
         "warmup_steady_latencies_s": [
-          2.01,
-          1.94
+          1.992,
+          1.931
         ],
         "server_startup_s": 46.07,
-        "warmup_s": 3.97
+        "warmup_s": 3.94
       },
-      "source_result": "reports/round-20261022/raw/run_b300img1022p_ideogram4_t2i_1024_2gpu_tp_ideogram4_t2i_1024_2gpu_tp.json"
+      "source_result": "reports/round-20261022/raw/run_b300fm1029_ideogram4_t2i_1024_2gpu_tp_sglang_r1_ideogram4_t2i_1024_2gpu_tp.json"
     },
     {
       "case_id": "ideogram4_t2i_1024_2gpu_tp",
@@ -2096,7 +2204,7 @@
       "true_cfg_scale": null,
       "negative_prompt_set": false,
       "num_gpus": 4,
-      "latency_s": 89.661,
+      "latency_s": 89.193,
       "error": null,
       "framework_metadata": {
         "profile": "b300-noexp",
@@ -2128,42 +2236,42 @@
       },
       "server_command": "sglang serve --model-path Wan-AI/Wan2.2-T2V-A14B-Diffusers --port 61580 --host 127.0.0.1 --backend sglang --num-gpus 4 --model-type diffusion --warmup-mode server --enable-cfg-parallel --ulysses-degree 2 --dit-cpu-offload false --pin-cpu-memory --dit-layerwise-offload false --performance-mode speed --enable-torch-compile false",
       "metrics": {
-        "client_latency_s": 89.661,
-        "client_latency_min_s": 89.644,
-        "client_latency_max_s": 89.677,
+        "client_latency_s": 89.193,
+        "client_latency_min_s": 89.174,
+        "client_latency_max_s": 89.213,
         "measured_repeats": 2,
-        "server_latency_s": 89.694,
+        "server_latency_s": 89.175,
         "server_latency_source": "separate instrumented request, not one of the measured repeats",
         "diagnostic_stages_s": {
           "InputValidationStage": 0.0,
-          "TextEncodingStage": 0.1,
+          "TextEncodingStage": 0.101,
           "LatentPreparationStage": 0.0,
           "TimestepPreparationStage": 0.0,
-          "DenoisingStage": 86.627,
-          "DecodingStage": 2.964
+          "DenoisingStage": 86.115,
+          "DecodingStage": 2.955
         },
-        "diagnostic_stage_sum_s": 89.691,
-        "diagnostic_client_latency_s": 89.721,
-        "unattributed_tail_s": 0.03,
+        "diagnostic_stage_sum_s": 89.171,
+        "diagnostic_client_latency_s": 89.198,
+        "unattributed_tail_s": 0.027,
         "unattributed_tail_frac": 0.0,
         "poll_interval_s": 0.02,
         "latency_samples_s": [
-          89.644,
-          89.677
+          89.213,
+          89.174
         ],
         "latency_spread_pct": 0.0,
         "warmup_latencies_s": [
-          9.197,
-          7.547,
-          7.591
+          8.797,
+          7.559,
+          7.595
         ],
         "warmup_steady_latencies_s": [
-          89.487
+          89.118
         ],
-        "server_startup_s": 70.07,
-        "warmup_s": 113.82
+        "server_startup_s": 66.08,
+        "warmup_s": 113.07
       },
-      "source_result": "reports/round-20261022/raw/run_enc1024_wan_sgl-stack_r2_wan22_t2v_a14b_720p.json"
+      "source_result": "reports/round-20261022/raw/run_fm1029_sgl-sel_r3_wan22_t2v_a14b_720p.json"
     },
     {
       "case_id": "wan22_t2v_a14b_720p",
@@ -2322,7 +2430,7 @@
       "true_cfg_scale": null,
       "negative_prompt_set": false,
       "num_gpus": 4,
-      "latency_s": 94.382,
+      "latency_s": 93.905,
       "error": null,
       "framework_metadata": {
         "profile": "blackwell-cudnn",
@@ -2351,29 +2459,29 @@
         ],
         "request_inputs": "distinct-per-request"
       },
-      "server_command": "trtllm-serve serve Wan-AI/Wan2.2-T2V-A14B-Diffusers --host 127.0.0.1 --port 61570 --visual_gen_args /tmp/diffusion-bench-trtllm/wan22_t2v_a14b_720p-61570.yaml",
+      "server_command": "trtllm-serve serve Wan-AI/Wan2.2-T2V-A14B-Diffusers --host 127.0.0.1 --port 61610 --visual_gen_args /tmp/diffusion-bench-trtllm/wan22_t2v_a14b_720p-61610.yaml",
       "metrics": {
-        "client_latency_s": 94.382,
-        "client_latency_min_s": 94.347,
-        "client_latency_max_s": 94.416,
+        "client_latency_s": 93.905,
+        "client_latency_min_s": 93.877,
+        "client_latency_max_s": 93.933,
         "measured_repeats": 2,
         "latency_samples_s": [
-          94.347,
-          94.416
+          93.877,
+          93.933
         ],
         "latency_spread_pct": 0.1,
         "warmup_latencies_s": [
-          8.871,
-          8.527,
-          8.544
+          8.841,
+          8.493,
+          8.527
         ],
         "warmup_steady_latencies_s": [
-          94.24
+          93.868
         ],
-        "server_startup_s": 104.26,
-        "warmup_s": 120.18
+        "server_startup_s": 90.09,
+        "warmup_s": 119.73
       },
-      "source_result": "reports/round-20261022/raw/run_enc1024_wan_trtllm_r2_wan22_t2v_a14b_720p.json"
+      "source_result": "reports/round-20261022/raw/run_fm1029_trt2_r3_wan22_t2v_a14b_720p.json"
     },
     {
       "case_id": "wan22_t2v_a14b_720p",
@@ -2468,7 +2576,7 @@
       "true_cfg_scale": null,
       "negative_prompt_set": false,
       "num_gpus": 2,
-      "latency_s": 0.515,
+      "latency_s": 0.505,
       "error": null,
       "framework_metadata": {
         "profile": "blackwell-2gpu-cfg-parallel",
@@ -2501,46 +2609,46 @@
         "sglang_profile_source": "hardware",
         "sglang_ref": "current-main"
       },
-      "server_command": "sglang serve --model-path nvidia/Cosmos3-Nano --port 61016 --host 127.0.0.1 --backend sglang --num-gpus 2 --model-type diffusion --warmup-mode server --attention-backend torch_cudnn_sdpa --tp-size 1 --cfg-parallel-size 2 --dit-layerwise-offload false --performance-mode speed --enable-torch-compile false",
+      "server_command": "sglang serve --model-path nvidia/Cosmos3-Nano --port 62100 --host 127.0.0.1 --backend sglang --num-gpus 2 --model-type diffusion --warmup-mode server --attention-backend torch_cudnn_sdpa --tp-size 1 --cfg-parallel-size 2 --dit-layerwise-offload false --performance-mode speed --enable-torch-compile false",
       "metrics": {
-        "client_latency_s": 0.515,
-        "client_latency_min_s": 0.513,
-        "client_latency_max_s": 0.519,
+        "client_latency_s": 0.505,
+        "client_latency_min_s": 0.503,
+        "client_latency_max_s": 0.543,
         "measured_repeats": 5,
-        "server_latency_s": 0.465,
+        "server_latency_s": 0.463,
         "server_latency_source": "separate instrumented request, not one of the measured repeats",
         "diagnostic_stages_s": {
           "Cosmos3ImagePreprocessStage": 0.0,
           "Cosmos3TokenizationStage": 0.001,
           "Cosmos3LatentPreparationStage": 0.0,
           "Cosmos3TimestepPreparationStage": 0.0,
-          "Cosmos3DenoisingStage": 0.428,
+          "Cosmos3DenoisingStage": 0.427,
           "Cosmos3DecodingStage": 0.007
         },
-        "diagnostic_stage_sum_s": 0.437,
-        "diagnostic_client_latency_s": 0.519,
-        "unattributed_tail_s": 0.082,
-        "unattributed_tail_frac": 0.157,
+        "diagnostic_stage_sum_s": 0.435,
+        "diagnostic_client_latency_s": 0.513,
+        "unattributed_tail_s": 0.078,
+        "unattributed_tail_frac": 0.153,
         "latency_samples_s": [
-          0.513,
-          0.516,
-          0.519,
-          0.515,
-          0.514
+          0.504,
+          0.503,
+          0.511,
+          0.543,
+          0.505
         ],
-        "latency_spread_pct": 1.1,
+        "latency_spread_pct": 7.9,
         "warmup_latencies_s": [
-          0.194,
-          0.116
+          6.319,
+          0.113
         ],
         "warmup_steady_latencies_s": [
-          0.519,
-          0.532
+          0.509,
+          0.525
         ],
-        "server_startup_s": 52.09,
-        "warmup_s": 1.38
+        "server_startup_s": 54.07,
+        "warmup_s": 7.49
       },
-      "source_result": "reports/round-20261022/raw/run_b300img1022p_cosmos3_nano_t2i_720p_cosmos3_nano_t2i_720p.json"
+      "source_result": "reports/round-20261022/raw/run_b300fm1029_cosmos3_nano_t2i_720p_sglang_r1_cosmos3_nano_t2i_720p.json"
     },
     {
       "case_id": "cosmos3_nano_t2i_720p",
@@ -2708,7 +2816,7 @@
       "true_cfg_scale": null,
       "negative_prompt_set": true,
       "num_gpus": 4,
-      "latency_s": 22.833,
+      "latency_s": 22.745,
       "error": null,
       "framework_metadata": {
         "profile": "b300-noexp",
@@ -2739,45 +2847,45 @@
         "sglang_profile_source": "hardware",
         "sglang_ref": "sgl-project/sglang@3d540563916394115f9612f30601ae3fa97ada7c"
       },
-      "server_command": "sglang serve --model-path nvidia/Cosmos3-Nano --port 61670 --host 127.0.0.1 --backend sglang --num-gpus 4 --model-type diffusion --warmup-mode server --attention-backend fa --cfg-parallel-size 2 --ulysses-degree 2",
+      "server_command": "sglang serve --model-path nvidia/Cosmos3-Nano --port 62200 --host 127.0.0.1 --backend sglang --num-gpus 4 --model-type diffusion --warmup-mode server --attention-backend fa --cfg-parallel-size 2 --ulysses-degree 2",
       "metrics": {
-        "client_latency_s": 22.833,
-        "client_latency_min_s": 22.822,
-        "client_latency_max_s": 22.844,
+        "client_latency_s": 22.745,
+        "client_latency_min_s": 22.706,
+        "client_latency_max_s": 22.784,
         "measured_repeats": 2,
-        "server_latency_s": 22.866,
+        "server_latency_s": 22.81,
         "server_latency_source": "separate instrumented request, not one of the measured repeats",
         "diagnostic_stages_s": {
           "Cosmos3ImagePreprocessStage": 0.0,
           "Cosmos3TokenizationStage": 0.002,
           "Cosmos3LatentPreparationStage": 0.0,
           "Cosmos3TimestepPreparationStage": 0.0,
-          "Cosmos3DenoisingStage": 20.88,
-          "Cosmos3DecodingStage": 1.261
+          "Cosmos3DenoisingStage": 20.842,
+          "Cosmos3DecodingStage": 1.245
         },
-        "diagnostic_stage_sum_s": 22.143,
-        "diagnostic_client_latency_s": 22.881,
-        "unattributed_tail_s": 0.738,
-        "unattributed_tail_frac": 0.032,
+        "diagnostic_stage_sum_s": 22.089,
+        "diagnostic_client_latency_s": 22.834,
+        "unattributed_tail_s": 0.746,
+        "unattributed_tail_frac": 0.033,
         "poll_interval_s": 0.02,
         "latency_samples_s": [
-          22.822,
-          22.844
+          22.784,
+          22.706
         ],
-        "latency_spread_pct": 0.1,
+        "latency_spread_pct": 0.3,
         "warmup_latencies_s": [
-          4.53,
-          3.081,
-          3.061
+          10.551,
+          3.124,
+          3.117
         ],
         "warmup_steady_latencies_s": [
-          22.9,
-          22.881
+          22.904,
+          22.919
         ],
-        "server_startup_s": 52.1,
-        "warmup_s": 56.45
+        "server_startup_s": 66.11,
+        "warmup_s": 62.62
       },
-      "source_result": "reports/round-20261022/raw/run_enc1024_cos_t2v_sgl-stack_r2_cosmos3_nano_t2v_720p_189f.json"
+      "source_result": "reports/round-20261022/raw/run_b300fm1029_cosmos3_nano_t2v_720p_189f_sglang_r1_cosmos3_nano_t2v_720p_189f.json"
     },
     {
       "case_id": "cosmos3_nano_t2v_720p_189f",
@@ -3025,7 +3133,7 @@
       "true_cfg_scale": null,
       "negative_prompt_set": true,
       "num_gpus": 4,
-      "latency_s": 22.898,
+      "latency_s": 22.796,
       "error": null,
       "framework_metadata": {
         "profile": "b300-noexp",
@@ -3056,45 +3164,45 @@
         "sglang_profile_source": "hardware",
         "sglang_ref": "sgl-project/sglang@3d540563916394115f9612f30601ae3fa97ada7c"
       },
-      "server_command": "sglang serve --model-path nvidia/Cosmos3-Nano --port 61750 --host 127.0.0.1 --backend sglang --num-gpus 4 --model-type diffusion --warmup-mode server --attention-backend fa --cfg-parallel-size 2 --ulysses-degree 2 --dit-layerwise-offload false --performance-mode speed --enable-torch-compile false",
+      "server_command": "sglang serve --model-path nvidia/Cosmos3-Nano --port 62210 --host 127.0.0.1 --backend sglang --num-gpus 4 --model-type diffusion --warmup-mode server --attention-backend fa --cfg-parallel-size 2 --ulysses-degree 2 --dit-layerwise-offload false --performance-mode speed --enable-torch-compile false",
       "metrics": {
-        "client_latency_s": 22.898,
-        "client_latency_min_s": 22.857,
-        "client_latency_max_s": 22.939,
+        "client_latency_s": 22.796,
+        "client_latency_min_s": 22.782,
+        "client_latency_max_s": 22.809,
         "measured_repeats": 2,
-        "server_latency_s": 22.742,
+        "server_latency_s": 22.892,
         "server_latency_source": "separate instrumented request, not one of the measured repeats",
         "diagnostic_stages_s": {
-          "Cosmos3ImagePreprocessStage": 0.159,
+          "Cosmos3ImagePreprocessStage": 0.151,
           "Cosmos3TokenizationStage": 0.002,
-          "Cosmos3LatentPreparationStage": 0.012,
+          "Cosmos3LatentPreparationStage": 0.013,
           "Cosmos3TimestepPreparationStage": 0.0,
-          "Cosmos3DenoisingStage": 20.862,
-          "Cosmos3DecodingStage": 0.999
+          "Cosmos3DenoisingStage": 20.889,
+          "Cosmos3DecodingStage": 1.131
         },
-        "diagnostic_stage_sum_s": 22.036,
-        "diagnostic_client_latency_s": 22.788,
-        "unattributed_tail_s": 0.752,
+        "diagnostic_stage_sum_s": 22.186,
+        "diagnostic_client_latency_s": 22.941,
+        "unattributed_tail_s": 0.755,
         "unattributed_tail_frac": 0.033,
         "poll_interval_s": 0.02,
         "latency_samples_s": [
-          22.857,
-          22.939
+          22.809,
+          22.782
         ],
-        "latency_spread_pct": 0.4,
+        "latency_spread_pct": 0.1,
         "warmup_latencies_s": [
-          4.339,
-          3.079,
-          3.081
+          4.843,
+          3.216,
+          3.122
         ],
         "warmup_steady_latencies_s": [
-          22.788,
-          22.906
+          22.758,
+          22.824
         ],
-        "server_startup_s": 98.09,
-        "warmup_s": 63.93
+        "server_startup_s": 56.09,
+        "warmup_s": 64.7
       },
-      "source_result": "reports/round-20261022/raw/run_enc1024_cos_i2v_sgl-stack_r2_cosmos3_nano_i2v_720p_189f.json"
+      "source_result": "reports/round-20261022/raw/run_b300fm1029_cosmos3_nano_i2v_720p_189f_sglang_r1_cosmos3_nano_i2v_720p_189f.json"
     },
     {
       "case_id": "cosmos3_nano_i2v_720p_189f",
@@ -3342,7 +3450,7 @@
       "true_cfg_scale": null,
       "negative_prompt_set": false,
       "num_gpus": 2,
-      "latency_s": 62.955,
+      "latency_s": 62.609,
       "error": null,
       "framework_metadata": {
         "profile": "b300-noexp",
@@ -3372,44 +3480,44 @@
         "sglang_profile_source": "hardware",
         "sglang_ref": "8d0c77081 (2026-08-07 checkout, includes sgl-project/sglang#33969)"
       },
-      "server_command": "sglang serve --model-path MiniMaxAI/MiniMax-H3 --port 61860 --host 127.0.0.1 --backend sglang --num-gpus 2 --model-type diffusion --warmup-mode server --model-variant fl2va --ulysses-degree 2 --performance-mode speed --enable-torch-compile false",
+      "server_command": "sglang serve --model-path MiniMaxAI/MiniMax-H3 --port 62140 --host 127.0.0.1 --backend sglang --num-gpus 2 --model-type diffusion --warmup-mode server --model-variant fl2va --ulysses-degree 2 --performance-mode speed --enable-torch-compile false",
       "metrics": {
-        "client_latency_s": 62.955,
-        "client_latency_min_s": 62.949,
-        "client_latency_max_s": 62.962,
+        "client_latency_s": 62.609,
+        "client_latency_min_s": 62.589,
+        "client_latency_max_s": 62.628,
         "measured_repeats": 2,
-        "server_latency_s": 62.93,
+        "server_latency_s": 62.508,
         "server_latency_source": "separate instrumented request, not one of the measured repeats",
         "diagnostic_stages_s": {
           "InputValidationStage": 0.0,
           "MiniMaxH3PartitionAdmissionStage": 0.0,
-          "MiniMaxH3TextEncodingStage": 0.065,
+          "MiniMaxH3TextEncodingStage": 0.066,
           "MiniMaxH3VisualEncodingStage": 0.0,
           "MiniMaxH3AudioEncodingStage": 0.0,
-          "MiniMaxH3LatentPreparationStage": 0.016,
+          "MiniMaxH3LatentPreparationStage": 0.017,
           "MiniMaxH3TimestepPreparationStage": 0.0,
-          "MiniMaxH3DenoisingStage": 60.487,
-          "MiniMaxH3DecodingStage": 1.346
+          "MiniMaxH3DenoisingStage": 60.225,
+          "MiniMaxH3DecodingStage": 1.189
         },
-        "diagnostic_stage_sum_s": 61.914,
-        "diagnostic_client_latency_s": 62.95,
-        "unattributed_tail_s": 1.036,
-        "unattributed_tail_frac": 0.016,
+        "diagnostic_stage_sum_s": 61.499,
+        "diagnostic_client_latency_s": 62.532,
+        "unattributed_tail_s": 1.034,
+        "unattributed_tail_frac": 0.017,
         "poll_interval_s": 0.02,
         "latency_samples_s": [
-          62.962,
-          62.949
+          62.589,
+          62.628
         ],
-        "latency_spread_pct": 0.0,
+        "latency_spread_pct": 0.1,
         "warmup_latencies_s": [
-          62.872,
-          62.943,
-          62.921
+          62.628,
+          62.557,
+          62.539
         ],
-        "server_startup_s": 72.24,
-        "warmup_s": 188.74
+        "server_startup_s": 100.11,
+        "warmup_s": 187.72
       },
-      "source_result": "reports/round-20261022/raw/run_enc1024_h3_sgl-stack_r1_minimax_h3_t2va_5s.json"
+      "source_result": "reports/round-20261022/raw/run_b300fm1029_minimax_h3_t2va_5s_sglang_r2_minimax_h3_t2va_5s.json"
     },
     {
       "case_id": "minimax_h3_t2va_5s",
@@ -3427,7 +3535,7 @@
       "true_cfg_scale": null,
       "negative_prompt_set": false,
       "num_gpus": 2,
-      "latency_s": 69.268,
+      "latency_s": 69.017,
       "error": null,
       "framework_metadata": {
         "profile": "blackwell-2gpu-static",
@@ -3457,26 +3565,26 @@
         ],
         "request_inputs": "distinct-per-request"
       },
-      "server_command": "vllm serve MiniMaxAI/MiniMax-H3 --port 61870 --host 127.0.0.1 --omni --trust-remote-code --task-type fl2va --num-gpus 2 --tensor-parallel-size 2 --usp 1 --ring 1 --text-encoder-tp-size 2 --vae-patch-parallel-size 2 --vae-parallel-mode tile --vae-use-tiling --diffusion-attention-backend CUDNN_ATTN --no-diffusion-compile-dynamic",
+      "server_command": "vllm serve MiniMaxAI/MiniMax-H3 --port 62130 --host 127.0.0.1 --omni --trust-remote-code --task-type fl2va --num-gpus 2 --tensor-parallel-size 2 --usp 1 --ring 1 --text-encoder-tp-size 2 --vae-patch-parallel-size 2 --vae-parallel-mode tile --vae-use-tiling --diffusion-attention-backend CUDNN_ATTN --no-diffusion-compile-dynamic",
       "metrics": {
-        "client_latency_s": 69.268,
-        "client_latency_min_s": 69.245,
-        "client_latency_max_s": 69.292,
+        "client_latency_s": 69.017,
+        "client_latency_min_s": 68.986,
+        "client_latency_max_s": 69.048,
         "measured_repeats": 2,
         "latency_samples_s": [
-          69.245,
-          69.292
+          69.048,
+          68.986
         ],
         "latency_spread_pct": 0.1,
         "warmup_latencies_s": [
-          148.909,
-          69.176,
-          69.214
+          160.549,
+          68.963,
+          69.055
         ],
-        "server_startup_s": 88.29,
-        "warmup_s": 287.3
+        "server_startup_s": 86.08,
+        "warmup_s": 298.57
       },
-      "source_result": "reports/round-20261022/raw/run_enc1024_h3_vllm-omni_r1_minimax_h3_t2va_5s.json"
+      "source_result": "reports/round-20261022/raw/run_b300fm1029_minimax_h3_t2va_5s_vllm-omni_r2_minimax_h3_t2va_5s.json"
     },
     {
       "case_id": "minimax_h3_t2va_5s",
@@ -3803,7 +3911,7 @@
       "true_cfg_scale": null,
       "negative_prompt_set": false,
       "num_gpus": 4,
-      "latency_s": 32.136,
+      "latency_s": 31.942,
       "error": null,
       "framework_metadata": {
         "profile": "b300-noexp",
@@ -3833,44 +3941,44 @@
         "sglang_profile_source": "hardware",
         "sglang_ref": "origin/main"
       },
-      "server_command": "sglang serve --model-path MiniMaxAI/MiniMax-H3 --port 61850 --host 127.0.0.1 --backend sglang --num-gpus 4 --model-type diffusion --warmup-mode server --model-variant fl2va --ulysses-degree 4 --encoder-parallel auto --performance-mode speed --enable-torch-compile false",
+      "server_command": "sglang serve --model-path MiniMaxAI/MiniMax-H3 --port 62190 --host 127.0.0.1 --backend sglang --num-gpus 4 --model-type diffusion --warmup-mode server --model-variant fl2va --ulysses-degree 4 --encoder-parallel auto --performance-mode speed --enable-torch-compile false",
       "metrics": {
-        "client_latency_s": 32.136,
-        "client_latency_min_s": 32.097,
-        "client_latency_max_s": 32.174,
+        "client_latency_s": 31.942,
+        "client_latency_min_s": 31.917,
+        "client_latency_max_s": 31.968,
         "measured_repeats": 2,
-        "server_latency_s": 32.088,
+        "server_latency_s": 31.931,
         "server_latency_source": "separate instrumented request, not one of the measured repeats",
         "diagnostic_stages_s": {
           "InputValidationStage": 0.0,
           "MiniMaxH3PartitionAdmissionStage": 0.0,
-          "MiniMaxH3TextEncodingStage": 0.067,
+          "MiniMaxH3TextEncodingStage": 0.066,
           "MiniMaxH3VisualEncodingStage": 0.0,
           "MiniMaxH3AudioEncodingStage": 0.0,
           "MiniMaxH3LatentPreparationStage": 0.016,
           "MiniMaxH3TimestepPreparationStage": 0.0,
-          "MiniMaxH3DenoisingStage": 30.581,
-          "MiniMaxH3DecodingStage": 0.779
+          "MiniMaxH3DenoisingStage": 30.502,
+          "MiniMaxH3DecodingStage": 0.702
         },
-        "diagnostic_stage_sum_s": 31.444,
-        "diagnostic_client_latency_s": 32.11,
-        "unattributed_tail_s": 0.666,
+        "diagnostic_stage_sum_s": 31.286,
+        "diagnostic_client_latency_s": 31.974,
+        "unattributed_tail_s": 0.687,
         "unattributed_tail_frac": 0.021,
         "poll_interval_s": 0.02,
         "latency_samples_s": [
-          32.174,
-          32.097
+          31.917,
+          31.968
         ],
         "latency_spread_pct": 0.2,
         "warmup_latencies_s": [
-          32.111,
-          32.191,
-          32.125
+          31.993,
+          31.963,
+          31.972
         ],
-        "server_startup_s": 124.29,
-        "warmup_s": 96.43
+        "server_startup_s": 78.11,
+        "warmup_s": 95.93
       },
-      "source_result": "reports/round-20261022/raw/run_enc1024_h3_4gpu_sgl-stack_r2_minimax_h3_t2va_5s_4gpu.json"
+      "source_result": "reports/round-20261022/raw/run_b300fm1029_minimax_h3_t2va_5s_4gpu_sglang_r1_minimax_h3_t2va_5s_4gpu.json"
     },
     {
       "case_id": "minimax_h3_t2va_5s_4gpu",
@@ -4195,7 +4303,7 @@
       "true_cfg_scale": null,
       "negative_prompt_set": false,
       "num_gpus": 2,
-      "latency_s": 96.64,
+      "latency_s": 96.484,
       "error": null,
       "framework_metadata": {
         "profile": "b300-noexp",
@@ -4225,44 +4333,44 @@
         "sglang_profile_source": "hardware",
         "sglang_ref": "8d0c77081 (2026-08-07 checkout, includes sgl-project/sglang#33969)"
       },
-      "server_command": "sglang serve --model-path MiniMaxAI/MiniMax-H3 --port 61910 --host 127.0.0.1 --backend sglang --num-gpus 2 --model-type diffusion --warmup-mode server --model-variant ref2va --ulysses-degree 2 --performance-mode speed --enable-torch-compile false",
+      "server_command": "sglang serve --model-path MiniMaxAI/MiniMax-H3 --port 62180 --host 127.0.0.1 --backend sglang --num-gpus 2 --model-type diffusion --warmup-mode server --model-variant ref2va --ulysses-degree 2 --performance-mode speed --enable-torch-compile false",
       "metrics": {
-        "client_latency_s": 96.64,
-        "client_latency_min_s": 96.627,
-        "client_latency_max_s": 96.653,
+        "client_latency_s": 96.484,
+        "client_latency_min_s": 96.465,
+        "client_latency_max_s": 96.503,
         "measured_repeats": 2,
-        "server_latency_s": 96.437,
+        "server_latency_s": 96.227,
         "server_latency_source": "separate instrumented request, not one of the measured repeats",
         "diagnostic_stages_s": {
           "InputValidationStage": 0.0,
           "MiniMaxH3PartitionAdmissionStage": 0.0,
-          "MiniMaxH3TextEncodingStage": 0.524,
-          "MiniMaxH3VisualEncodingStage": 0.499,
+          "MiniMaxH3TextEncodingStage": 0.622,
+          "MiniMaxH3VisualEncodingStage": 0.495,
           "MiniMaxH3AudioEncodingStage": 0.0,
-          "MiniMaxH3LatentPreparationStage": 0.016,
+          "MiniMaxH3LatentPreparationStage": 0.018,
           "MiniMaxH3TimestepPreparationStage": 0.0,
-          "MiniMaxH3DenoisingStage": 92.436,
-          "MiniMaxH3DecodingStage": 1.37
+          "MiniMaxH3DenoisingStage": 92.307,
+          "MiniMaxH3DecodingStage": 1.197
         },
-        "diagnostic_stage_sum_s": 94.845,
-        "diagnostic_client_latency_s": 96.671,
-        "unattributed_tail_s": 1.826,
+        "diagnostic_stage_sum_s": 94.64,
+        "diagnostic_client_latency_s": 96.482,
+        "unattributed_tail_s": 1.841,
         "unattributed_tail_frac": 0.019,
         "poll_interval_s": 0.02,
         "latency_samples_s": [
-          96.653,
-          96.627
+          96.503,
+          96.465
         ],
         "latency_spread_pct": 0.0,
         "warmup_latencies_s": [
-          96.692,
-          96.575,
-          96.721
+          96.563,
+          96.371,
+          96.532
         ],
-        "server_startup_s": 128.27,
-        "warmup_s": 298.67
+        "server_startup_s": 112.12,
+        "warmup_s": 298.08
       },
-      "source_result": "reports/round-20261022/raw/run_enc1024_ref2va_sgl-stack_r1_minimax_h3_ref2va_5s.json"
+      "source_result": "reports/round-20261022/raw/run_b300fm1029_minimax_h3_ref2va_5s_sglang_r2_minimax_h3_ref2va_5s.json"
     },
     {
       "case_id": "minimax_h3_ref2va_5s",
@@ -4280,7 +4388,7 @@
       "true_cfg_scale": null,
       "negative_prompt_set": false,
       "num_gpus": 2,
-      "latency_s": 106.367,
+      "latency_s": 106.154,
       "error": null,
       "framework_metadata": {
         "profile": "blackwell-2gpu-static",
@@ -4310,26 +4418,26 @@
         ],
         "request_inputs": "distinct-per-request"
       },
-      "server_command": "vllm serve MiniMaxAI/MiniMax-H3 --port 61920 --host 127.0.0.1 --omni --trust-remote-code --task-type ref2va --num-gpus 2 --tensor-parallel-size 2 --usp 1 --ring 1 --text-encoder-tp-size 2 --vae-patch-parallel-size 2 --vae-parallel-mode tile --vae-use-tiling --diffusion-attention-backend CUDNN_ATTN --no-diffusion-compile-dynamic",
+      "server_command": "vllm serve MiniMaxAI/MiniMax-H3 --port 62170 --host 127.0.0.1 --omni --trust-remote-code --task-type ref2va --num-gpus 2 --tensor-parallel-size 2 --usp 1 --ring 1 --text-encoder-tp-size 2 --vae-patch-parallel-size 2 --vae-parallel-mode tile --vae-use-tiling --diffusion-attention-backend CUDNN_ATTN --no-diffusion-compile-dynamic",
       "metrics": {
-        "client_latency_s": 106.367,
-        "client_latency_min_s": 106.346,
-        "client_latency_max_s": 106.388,
+        "client_latency_s": 106.154,
+        "client_latency_min_s": 106.117,
+        "client_latency_max_s": 106.191,
         "measured_repeats": 2,
         "latency_samples_s": [
-          106.346,
-          106.388
+          106.191,
+          106.117
         ],
-        "latency_spread_pct": 0.0,
+        "latency_spread_pct": 0.1,
         "warmup_latencies_s": [
-          189.712,
-          106.316,
-          106.401
+          203.358,
+          106.092,
+          106.122
         ],
-        "server_startup_s": 86.36,
-        "warmup_s": 411.12
+        "server_startup_s": 88.1,
+        "warmup_s": 423.88
       },
-      "source_result": "reports/round-20261022/raw/run_enc1024_ref2va_vllm-omni_r1_minimax_h3_ref2va_5s.json"
+      "source_result": "reports/round-20261022/raw/run_b300fm1029_minimax_h3_ref2va_5s_vllm-omni_r2_minimax_h3_ref2va_5s.json"
     },
     {
       "case_id": "minimax_h3_ref2va_5s",
@@ -5342,7 +5450,7 @@
       "true_cfg_scale": null,
       "negative_prompt_set": false,
       "num_gpus": 1,
-      "latency_s": 4.291,
+      "latency_s": 4.254,
       "error": null,
       "framework_metadata": {
         "profile": "b200-1gpu-resident-fa",
@@ -5373,25 +5481,25 @@
         "sglang_profile_source": "hardware",
         "sglang_ref": "sglang 6ad78f22 (2026-09-21)"
       },
-      "server_command": "sglang serve --model-path Qwen/Qwen-Image-2.1 --port 61000 --host 127.0.0.1 --backend sglang --model-type diffusion --warmup-mode server --performance-mode speed --attention-backend fa",
+      "server_command": "sglang serve --model-path Qwen/Qwen-Image-2.1 --port 62030 --host 127.0.0.1 --backend sglang --model-type diffusion --warmup-mode server --performance-mode speed --attention-backend fa",
       "metrics": {
-        "duration_s": 8.625,
+        "duration_s": 8.547,
         "num_requests": 4,
         "completed_requests": 4,
         "failed_requests": 0,
         "max_concurrency": 2,
-        "throughput_rps": 0.4637,
-        "output_throughput_ops": 0.4637,
-        "latency_mean_s": 3.776,
-        "latency_p50_s": 4.291,
-        "latency_p90_s": 4.32,
-        "latency_p95_s": 4.325,
-        "latency_p99_s": 4.329,
+        "throughput_rps": 0.468,
+        "output_throughput_ops": 0.468,
+        "latency_mean_s": 3.739,
+        "latency_p50_s": 4.254,
+        "latency_p90_s": 4.278,
+        "latency_p95_s": 4.281,
+        "latency_p99_s": 4.284,
         "errors": [],
-        "server_startup_s": 96.1,
-        "warmup_s": 4.92
+        "server_startup_s": 82.12,
+        "warmup_s": 4.84
       },
-      "source_result": "reports/round-20261022/raw/run_b300img1022p_qwen_image_21_t2i_1024_qwen_image_21_t2i_1024.json"
+      "source_result": "reports/round-20261022/raw/run_b300fm1029_qwen_image_21_t2i_1024_sglang_r2_qwen_image_21_t2i_1024.json"
     },
     {
       "case_id": "qwen_image_21_t2i_1024",
@@ -5409,7 +5517,7 @@
       "true_cfg_scale": null,
       "negative_prompt_set": false,
       "num_gpus": 1,
-      "latency_s": 4.577,
+      "latency_s": 4.538,
       "error": null,
       "framework_metadata": {
         "profile": "blackwell-cudnn-static",
@@ -5438,25 +5546,25 @@
         ],
         "request_inputs": "distinct-per-request"
       },
-      "server_command": "vllm serve Qwen/Qwen-Image-2.1 --port 61000 --host 127.0.0.1 --omni --no-diffusion-compile-dynamic",
+      "server_command": "vllm serve Qwen/Qwen-Image-2.1 --port 62020 --host 127.0.0.1 --omni --no-diffusion-compile-dynamic",
       "metrics": {
-        "duration_s": 9.256,
+        "duration_s": 9.173,
         "num_requests": 4,
         "completed_requests": 4,
         "failed_requests": 0,
         "max_concurrency": 2,
-        "throughput_rps": 0.4321,
-        "output_throughput_ops": 0.4321,
-        "latency_mean_s": 4.055,
-        "latency_p50_s": 4.577,
-        "latency_p90_s": 4.649,
-        "latency_p95_s": 4.665,
-        "latency_p99_s": 4.677,
+        "throughput_rps": 0.4361,
+        "output_throughput_ops": 0.4361,
+        "latency_mean_s": 4.019,
+        "latency_p50_s": 4.538,
+        "latency_p90_s": 4.604,
+        "latency_p95_s": 4.618,
+        "latency_p99_s": 4.629,
         "errors": [],
-        "server_startup_s": 74.07,
-        "warmup_s": 8.1
+        "server_startup_s": 38.06,
+        "warmup_s": 6.66
       },
-      "source_result": "reports/round-20261022/raw/run_b300img1022_qwen_image_21_t2i_1024_qwen_image_21_t2i_1024.json"
+      "source_result": "reports/round-20261022/raw/run_b300fm1029_qwen_image_21_t2i_1024_vllm-omni_r2_qwen_image_21_t2i_1024.json"
     },
     {
       "case_id": "qwen_image_21_t2i_1024",
@@ -5623,7 +5731,7 @@
       "true_cfg_scale": null,
       "negative_prompt_set": false,
       "num_gpus": 2,
-      "latency_s": 126.289,
+      "latency_s": 125.285,
       "error": null,
       "framework_metadata": {
         "profile": "b300-noexp",
@@ -5653,25 +5761,25 @@
         "sglang_profile_source": "hardware",
         "sglang_ref": "8d0c77081 (2026-08-07 checkout, includes sgl-project/sglang#33969)"
       },
-      "server_command": "sglang serve --model-path MiniMaxAI/MiniMax-H3 --port 62004 --host 127.0.0.1 --backend sglang --num-gpus 2 --model-type diffusion --warmup-mode server --model-variant fl2va --ulysses-degree 2 --performance-mode speed --enable-torch-compile false",
+      "server_command": "sglang serve --model-path MiniMaxAI/MiniMax-H3 --port 62140 --host 127.0.0.1 --backend sglang --num-gpus 2 --model-type diffusion --warmup-mode server --model-variant fl2va --ulysses-degree 2 --performance-mode speed --enable-torch-compile false",
       "metrics": {
-        "duration_s": 253.569,
+        "duration_s": 250.577,
         "num_requests": 4,
         "completed_requests": 4,
         "failed_requests": 0,
         "max_concurrency": 2,
-        "throughput_rps": 0.0158,
-        "output_throughput_ops": 0.0158,
-        "latency_mean_s": 111.003,
-        "latency_p50_s": 126.289,
-        "latency_p90_s": 126.993,
-        "latency_p95_s": 127.142,
-        "latency_p99_s": 127.261,
+        "throughput_rps": 0.016,
+        "output_throughput_ops": 0.016,
+        "latency_mean_s": 109.759,
+        "latency_p50_s": 125.285,
+        "latency_p90_s": 125.306,
+        "latency_p95_s": 125.307,
+        "latency_p99_s": 125.307,
         "errors": [],
-        "server_startup_s": 98.37,
-        "warmup_s": 189.2
+        "server_startup_s": 100.11,
+        "warmup_s": 187.72
       },
-      "source_result": "reports/round-20261022/raw/run_b300vid1022p_minimax_h3_t2va_5s_minimax_h3_t2va_5s.json"
+      "source_result": "reports/round-20261022/raw/run_b300fm1029_minimax_h3_t2va_5s_sglang_r2_minimax_h3_t2va_5s.json"
     },
     {
       "case_id": "minimax_h3_t2va_5s",
@@ -5689,7 +5797,7 @@
       "true_cfg_scale": null,
       "negative_prompt_set": false,
       "num_gpus": 2,
-      "latency_s": 138.265,
+      "latency_s": 138.272,
       "error": null,
       "framework_metadata": {
         "profile": "blackwell-2gpu-static",
@@ -5719,25 +5827,25 @@
         ],
         "request_inputs": "distinct-per-request"
       },
-      "server_command": "vllm serve MiniMaxAI/MiniMax-H3 --port 62000 --host 127.0.0.1 --omni --trust-remote-code --task-type fl2va --num-gpus 2 --tensor-parallel-size 2 --usp 1 --ring 1 --text-encoder-tp-size 2 --vae-patch-parallel-size 2 --vae-parallel-mode tile --vae-use-tiling --diffusion-attention-backend CUDNN_ATTN --no-diffusion-compile-dynamic",
+      "server_command": "vllm serve MiniMaxAI/MiniMax-H3 --port 62130 --host 127.0.0.1 --omni --trust-remote-code --task-type fl2va --num-gpus 2 --tensor-parallel-size 2 --usp 1 --ring 1 --text-encoder-tp-size 2 --vae-patch-parallel-size 2 --vae-parallel-mode tile --vae-use-tiling --diffusion-attention-backend CUDNN_ATTN --no-diffusion-compile-dynamic",
       "metrics": {
-        "duration_s": 277.543,
+        "duration_s": 276.547,
         "num_requests": 4,
         "completed_requests": 4,
         "failed_requests": 0,
         "max_concurrency": 2,
-        "throughput_rps": 0.0144,
-        "output_throughput_ops": 0.0144,
-        "latency_mean_s": 121.492,
-        "latency_p50_s": 138.265,
-        "latency_p90_s": 138.985,
-        "latency_p95_s": 139.137,
-        "latency_p99_s": 139.258,
+        "throughput_rps": 0.0145,
+        "output_throughput_ops": 0.0145,
+        "latency_mean_s": 120.993,
+        "latency_p50_s": 138.272,
+        "latency_p90_s": 138.282,
+        "latency_p95_s": 138.282,
+        "latency_p99_s": 138.283,
         "errors": [],
-        "server_startup_s": 88.07,
-        "warmup_s": 297.44
+        "server_startup_s": 86.08,
+        "warmup_s": 298.57
       },
-      "source_result": "reports/round-20261022/raw/run_b300vid1022_minimax_h3_t2va_5s_minimax_h3_t2va_5s.json"
+      "source_result": "reports/round-20261022/raw/run_b300fm1029_minimax_h3_t2va_5s_vllm-omni_r2_minimax_h3_t2va_5s.json"
     },
     {
       "case_id": "minimax_h3_t2va_5s",
