@@ -66,13 +66,18 @@ sage() {
     [ -d "${tree}/.git" ] || git clone -q --depth 1 --branch v2.2.0 https://github.com/thu-ml/SageAttention "$tree"
     python3 - "${tree}/sageattention/sm90_compile.py" <<'PY'
 import re, sys
+# A register_fake'd function must not share the real wrapper's name: in 2.2.0
+# qk_int8_sv_f8_accum_f32_fuse_v_scale_attn_inst_buf's fake impl is defined
+# under that same name and replaces it. Rename every fake impl not already
+# suffixed (the attn_inst_buf one is), which is upstream d9704247's change.
 p = sys.argv[1]; s = open(p).read()
-if "_fake_impl" in s:
-    sys.exit(print("sm90 fix present"))
-new = re.sub(r"(@torch\.library\.register_fake\([^)]*\)\s*\ndef )(\w+)\(", r"\1\2_fake_impl(", s)
-if new == s:
-    sys.exit("sm90 fix: register_fake pattern not found; apply thu-ml/SageAttention@d9704247 by hand")
-open(p, "w").write(new); print("sm90 fix applied")
+pat = re.compile(r"(@torch\.library\.register_fake\([^)]*\)\s*\ndef )(\w+)\(")
+bad = [m.group(2) for m in pat.finditer(s) if not m.group(2).endswith("_fake_impl")]
+if not bad:
+    sys.exit(print("sm90 fix present: every register_fake impl is a *_fake_impl"))
+s = pat.sub(lambda m: m.group(0) if m.group(2).endswith("_fake_impl")
+            else f"{m.group(1)}{m.group(2)}_fake_impl(", s)
+open(p, "w").write(s); print("sm90 fix applied to", bad)
 PY
     export TORCH_CUDA_ARCH_LIST="${TORCH_CUDA_ARCH_LIST:-9.0}" EXT_PARALLEL=4 NVCC_APPEND_FLAGS="--threads 8"
     (cd "$tree" && "$LXPY" -m pip install -q --no-build-isolation --no-deps --force-reinstall .)
