@@ -74,6 +74,10 @@
           "section": "### Multi-GPU low-latency path"
         },
         "serve_args": "--num-gpus 2 --model-class-name LTX2DistilledTwoStagePipeline --usp 2 --vae-patch-parallel-size 2 --vae-use-tiling --stage-init-timeout 900",
+        "scaled_from": {
+          "num_gpus": 4,
+          "serve_args": "--model-class-name LTX2DistilledTwoStagePipeline --usp 4 --vae-patch-parallel-size 4 --vae-use-tiling --stage-init-timeout 900"
+        },
         "notes": "The recipe's four-GPU command with --usp / --vae-patch-parallel-size matched to 2 GPUs, as it instructs; 8 distilled steps plus the 3-step refinement."
       }
     },

@@ -149,10 +149,15 @@ expect_error("source_gpu must be hardware tokens",
 expect_error("an arm reading a machine path names how to create it",
              lambda c: c["arms"]["sglang"]["cb-sgl-cookbook"].update(
                  serve_args="--minimax-h3-adaln-cache-path /scratch/bench/x.safetensors"), "`requires`")
-expect_error("a matched-lossy arm names its prerequisites",
-             lambda c: c["arms"]["sglang"].update({"cb-sgl-sage": {"tier": "matched-lossy", "num_gpus": 1,
-                                                                    "serve_args": "", "lossy": ["sage_attn"]}}),
-             "`requires`")
+check("a matched-lossy arm reading no machine path needs no `requires`", not errors_of(
+    lambda c: c["arms"]["sglang"].update({"cb-sgl-fp8": {"tier": "matched-lossy", "num_gpus": 1,
+                                                         "serve_args": "--quantization fp8", "lossy": ["fp8"]}})))
+expect_error("a matched arm names the source default it matches",
+             lambda c: c["arms"]["sglang"].update({"cb-sgl-adaln": {"tier": "matched", "num_gpus": 1, "serve_args": "",
+                                                                     "upstream_recipe": SGL}}), "`matches`")
+check("a matched arm with `matches` and its doc is legal", not errors_of(
+    lambda c: c["arms"]["sglang"].update({"cb-sgl-adaln": {"tier": "matched", "num_gpus": 1, "serve_args": "",
+                                                            "matches": "vLLM-Omni AdaLN reuse", "upstream_recipe": SGL}})))
 
 # The headline Z-Image vLLM entry sets DIFFUSION_ATTENTION_BACKEND; a verbatim
 # vLLM arm whose recipe does not must not pick it up silently.
@@ -188,11 +193,71 @@ check("lightx2v config is resolved in full into the arm",
       "lightx2v_config" not in case["frameworks"]["lightx2v"]
       and case["frameworks"]["lightx2v"]["command_profiles"]["cb-lx-verbatim"]["lightx2v_config"]["enable_cfg"] is False)
 
+print("scaling rule")
+sys.path.insert(0, str(ROOT / "scripts"))
+import cookbook_scaling as cs  # noqa: E402
+
+def scaled(fw, arm_args, src_args, src_gpus, gpus, **extra):
+    return cs.check_scaled_arm(fw, {"serve_args": arm_args,
+                                    "scaled_from": {"num_gpus": src_gpus, "serve_args": src_args, **extra}},
+                               gpus, "arm")
+
+WAN = "--num-gpus 4 --cfg-parallel-size 2 --usp 2 --use-hsdp"
+check("CFG is kept, SP takes the rest", not scaled("vllm-omni", "--num-gpus 2 --cfg-parallel-size 2 --usp 1 --use-hsdp", WAN, 4, 2))
+check("dropping CFG for SP breaks the rule",
+      any("cfg 1" in p for p in scaled("vllm-omni", "--num-gpus 2 --usp 2 --use-hsdp", WAN, 4, 2)))
+H3 = "--num-gpus 4 --usp 4 --ring 1 --text-encoder-tp-size 4 --vae-patch-parallel-size 4 --vae-use-tiling"
+check("no CFG: pure SP, per-component degrees capped at the GPU count", not scaled(
+    "vllm-omni", "--num-gpus 2 --usp 2 --ring 1 --text-encoder-tp-size 2 --vae-patch-parallel-size 2 --vae-use-tiling", H3, 4, 2))
+check("TP is not a scaling dimension", any("tp 2" in p for p in scaled(
+    "vllm-omni", "--num-gpus 2 --tensor-parallel-size 2 --text-encoder-tp-size 2 --vae-patch-parallel-size 2 --vae-use-tiling", H3, 4, 2)))
+check("any other flag must stay the source's", any("vae-use-tiling" in p for p in scaled(
+    "vllm-omni", "--num-gpus 2 --usp 2 --text-encoder-tp-size 2 --vae-patch-parallel-size 2", H3, 4, 2)))
+check("an added flag needs {flag, reason}", scaled(
+    "vllm-omni", "--num-gpus 2 --usp 2 --text-encoder-tp-size 2 --vae-patch-parallel-size 2 --vae-use-tiling --task-type fl2va",
+    H3, 4, 2, added=["--task-type"]))
+check("a listed addition with a reason is accepted", not scaled(
+    "vllm-omni", "--num-gpus 2 --usp 2 --text-encoder-tp-size 2 --vae-patch-parallel-size 2 --vae-use-tiling --task-type fl2va",
+    H3, 4, 2, added=[{"flag": "--task-type", "reason": "memory"}]))
+OFF = "--ulysses-degree 2 --dit-cpu-offload true --vae-cpu-offload true"
+check("rule 3: offload switches may be dropped when listed", not scaled(
+    "sglang", "--ulysses-degree 2", OFF, 2, 2, removed=["--dit-cpu-offload", "--vae-cpu-offload"]))
+check("only memory-saving switches may be dropped", any("not a memory-saving" in p for p in scaled(
+    "sglang", "--ulysses-degree 2", "--ulysses-degree 2 --performance-mode speed", 2, 2, removed=["--performance-mode"])))
+check("sglang without SP flags runs Ulysses over all its GPUs", not scaled(
+    "sglang", "--attention-backend x", "--num-gpus 8 --attention-backend x", 8, 2))
+check("lightx2v: CFG 2 kept, SP 1 on 2 GPUs", not cs.check_scaled_arm("lightx2v", {
+    "lightx2v_config": {"parallel": {"cfg_p_size": 2, "seq_p_size": 1}, "attn_type": "fa3"},
+    "scaled_from": {"num_gpus": 8, "lightx2v_config": {"parallel": {"cfg_p_size": 2, "seq_p_size": 4}, "attn_type": "fa3"}}},
+    2, "arm"))
+check("trtllm: Ulysses 4 -> 2, parallel VAE capped", not cs.check_scaled_arm("trtllm-visual", {
+    "visual_gen_args": {"parallel_config": {"ulysses_size": 2, "parallel_vae_size": 2}},
+    "scaled_from": {"num_gpus": 4, "visual_gen_args": {"parallel_config": {"ulysses_size": 4, "parallel_vae_size": 4}}}},
+    2, "arm"))
+
+print("sources inventory")
+built = [build(lambda c: vllm_arm(c))[0]]
+inv = {"sources": [
+    {"repo": RECIPE["repo"], "path": RECIPE["path"], "commit": RECIPE["commit"],
+     "sections": [{"section": "whole file", "cells": ["cb_test"]}]},
+    {"repo": VO["repo"], "path": VO["path"], "commit": VO["commit"],
+     "sections": [{"section": "x", "cells": ["cb_test"]}, {"section": "y", "skip": "AMD only"}]},
+]}
+check("a fully listed inventory passes", not bcc.check_sources(built, inv), bcc.check_sources(built, inv))
+check("an arm's own source file counts as covered by that cell", not bcc.check_sources(built, inv))
+bad = copy.deepcopy(inv); bad["sources"][0]["sections"][0]["section"] = "another"
+check("a cell whose source section is unlisted fails", any("not listed" in e for e in bcc.check_sources(built, bad)))
+bad = copy.deepcopy(inv); bad["sources"][1]["sections"][1] = {"section": "y"}
+check("a section with neither cells nor skip fails", any("exactly one" in e for e in bcc.check_sources(built, bad)))
+bad = copy.deepcopy(inv); bad["sources"][1]["sections"][1] = {"section": "y", "cells": ["cb_nope"]}
+check("a section pointing at an unknown cell fails", any("unknown cell" in e for e in bcc.check_sources(built, bad)))
+
 print("generated files")
 with tempfile.TemporaryDirectory() as td:
     tmp = pathlib.Path(td)
     (tmp / "scripts").mkdir()
-    shutil.copy(ROOT / "scripts" / "build_cookbook_config.py", tmp / "scripts")
+    for script in ("build_cookbook_config.py", "cookbook_scaling.py"):
+        shutil.copy(ROOT / "scripts" / script, tmp / "scripts")
     shutil.copytree(ROOT / "configs", tmp / "configs")
     shutil.copytree(ROOT / "src", tmp / "src")
     proc = subprocess.run([sys.executable, str(tmp / "scripts" / "build_cookbook_config.py")],

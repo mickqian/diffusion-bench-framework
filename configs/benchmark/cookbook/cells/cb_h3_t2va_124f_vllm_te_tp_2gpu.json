@@ -1,0 +1,135 @@
+{
+  "id": "cb_h3_t2va_124f_vllm_te_tp_2gpu",
+  "label": "MiniMax-H3 T2VA 1344x768 124f 50 steps (vLLM-Omni text-encoder TP, 2 GPUs)",
+  "base_case": "minimax_h3_t2va_5s",
+  "set": {
+    "num_gpus": 2,
+    "num_inference_steps": 50,
+    "framework_request_extra.sglang.num_inference_steps": 50,
+    "framework_request_extra.vllm-omni.num_inference_steps": 50,
+    "framework_request_extra.vllm-omni.extra_params": {
+      "task": "t2va",
+      "duration": 5.0,
+      "audio_flow_shift": 3.0
+    },
+    "frameworks.vllm-omni.request_omit_keys": [
+      "num_frames"
+    ]
+  },
+  "unset": [
+    "frameworks.vllm-omni.extra_env"
+  ],
+  "cookbook": {
+    "framework": "vllm-omni",
+    "repo": "vllm-project/vllm-omni",
+    "path": "recipes/MiniMaxAI/MiniMax-H3.md",
+    "commit": "fb7ab707",
+    "commit_date": "2026-10-26",
+    "section": "### Text encoder tensor parallelism",
+    "source_hardware": "4x H200 ('## Request-scoped quality': SP4, text-encoder TP4)",
+    "source_metric": "lossless 85.49 s median inference latency on 4x H200",
+    "workload": {
+      "width": 1344,
+      "height": 768,
+      "num_frames": 124,
+      "num_gpus": 4,
+      "dit_forwards": 50,
+      "metric": "median inference latency over three prompt/seed pairs ('## Request-scoped quality')",
+      "warmup": "1 request",
+      "repeats": "median of 3"
+    },
+    "source_gpu": [
+      "h200"
+    ]
+  },
+  "forwards": {
+    "vllm-omni": 50,
+    "sglang": 50
+  },
+  "deviations": [
+    {
+      "field": "num_gpus",
+      "source": 4,
+      "run": 2,
+      "reason": "scaling rule: SP 4 -> 2, text-encoder TP and VAE patch parallel capped at 2"
+    },
+    {
+      "field": "metric",
+      "source": "median inference latency over three prompt/seed pairs ('## Request-scoped quality')",
+      "run": "client_e2e_median",
+      "reason": "every arm is timed by the same client; the source's own timer is not available for the other frameworks"
+    },
+    {
+      "field": "warmup",
+      "source": "1 request",
+      "run": "3 request(s) at 3 steps",
+      "reason": "the harness warms every arm the same way before timing"
+    },
+    {
+      "field": "repeats",
+      "source": "median of 3",
+      "run": "median of 2",
+      "reason": "the harness takes the same median for every arm"
+    }
+  ],
+  "arms": {
+    "vllm-omni": {
+      "cb-vllm-verbatim": {
+        "tier": "verbatim",
+        "num_gpus": 2,
+        "upstream_recipe": {
+          "repo": "vllm-project/vllm-omni",
+          "path": "recipes/MiniMaxAI/MiniMax-H3.md",
+          "commit": "fb7ab707",
+          "commit_date": "2026-10-26",
+          "section": "### Text encoder tensor parallelism"
+        },
+        "serve_args": "--trust-remote-code --num-gpus 2 --usp 2 --ring 1 --text-encoder-tp-size 2 --vae-patch-parallel-size 2 --vae-parallel-mode tile --vae-use-tiling --task-type fl2va",
+        "scaled_from": {
+          "num_gpus": 4,
+          "serve_args": "--trust-remote-code --num-gpus 4 --usp 4 --ring 1 --text-encoder-tp-size 4 --vae-patch-parallel-size 4 --vae-parallel-mode tile --vae-use-tiling",
+          "added": [
+            {
+              "flag": "--task-type",
+              "reason": "a combined server keeps the FL2VA and Ref2VA DiTs resident on every rank under pure USP; with Qwen3-VL on rank 0 that does not fit (183 GB B200, 2026-09-30 note in minimax_h3_t2va_5s). The recipe's own per-task serving selects one partition."
+            }
+          ]
+        },
+        "extra_env": {
+          "VLLM_WORKER_MULTIPROC_METHOD": "spawn",
+          "VLLM_OMNI_VIDEO_SYNC_TIMEOUT": "1800"
+        }
+      }
+    },
+    "sglang": {
+      "cb-sgl-cookbook": {
+        "tier": "verbatim",
+        "num_gpus": 2,
+        "serve_args": "--ulysses-degree 2 --model-variant fl2va --performance-mode speed",
+        "upstream_recipe": {
+          "repo": "sgl-project/sglang",
+          "path": "docs/src/snippets/configs/MiniMaxAI/minimax-h3.jsx",
+          "commit": "2b8e4cde9564",
+          "commit_date": "2026-10-23",
+          "section": "MiniMax-H3.mdx '## 1. Quick start' builder: 2 GPU(s); no verified recipe, autoTopology (marked Unverified)"
+        },
+        "notes": "The builder marks this topology Unverified."
+      },
+      "cb-sgl-adaln-online": {
+        "tier": "matched",
+        "num_gpus": 2,
+        "serve_args": "--ulysses-degree 2 --model-variant fl2va --performance-mode speed --minimax-h3-adaln-online true",
+        "matches": "vLLM-Omni's exact AdaLN projection reuse, on by default ('## Exact AdaLN reuse')",
+        "upstream_recipe": {
+          "repo": "sgl-project/sglang",
+          "path": "docs/cookbook/diffusion/MiniMax/MiniMax-H3.mdx",
+          "commit": "0498ab7b6ee2",
+          "commit_date": "2026-10-24",
+          "section": "### Advanced: online AdaLN rebuild with a host cache"
+        },
+        "notes": "Bit-exact per the sglang cookbook; the counterpart of vLLM-Omni's default AdaLN reuse."
+      }
+    }
+  },
+  "notes": "The only base-H3 H200 number vLLM-Omni publishes (85.49 s, 4x H200)."
+}

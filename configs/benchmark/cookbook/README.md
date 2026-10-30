@@ -74,13 +74,56 @@ token, because arms are only ever selected explicitly.
 | tier | what it is | required |
 |---|---|---|
 | `verbatim` | a command copied from a published cookbook, recipe or config. The harness adds `--model-path`, `--port`, `--host` and `--num-gpus`, and for sglang also `--backend sglang` (so a native-pipeline miss fails instead of benchmarking the Diffusers fallback); do not repeat them. | `upstream_recipe`. The source framework's verbatim arm cites the cell's source file. |
-| `matched-lossy` | turns on the lossy features the source ships with (SageAttention, AdaLN cache, FP8, Cache-DiT) | `lossy` lists them; `requires` names how to build what they read |
+| `matched` | turns on a lossless feature the source runs by default, through a switch its own cookbook documents (vLLM-Omni's exact AdaLN reuse is on by default; sglang matches it with `--minimax-h3-adaln-online true`, bit-exact per its cookbook) | `matches` names the source default; `upstream_recipe` cites the switch's documentation |
+| `matched-lossy` | turns on the lossy features the source ships with (SageAttention, AdaLN cache, FP8, Cache-DiT) | `lossy` lists them |
 | `tuned` | anything we chose ourselves | `notes` |
 
 A cell's sglang number is its **verbatim** sglang arm. Tuned rows are reported beside it,
 never in its place. When the sglang cookbook has no command for the workload (for example,
 Z-Image or Wan2.2 on 2 NVIDIA GPUs), the cell says so in `cookbook.sglang_verbatim_gap`.
 That gap is itself a finding for the cookbook.
+
+### Groups
+
+`cookbook.group` is `lossless` (default), `lossy` (the source ships a lossy default:
+SageAttention, FP8, an AdaLN cache sidecar) or `distilled` (FastH3, FastH3-Omni, VDN).
+Each group is reported on its own and never ranked against the others.
+
+### Scaling to fewer (or more) GPUs
+
+A box with fewer GPUs than a source command was written for is not a reason to skip the
+section, but the command is re-derived one way only, never decided per cell
+(`scripts/cookbook_scaling.py`):
+
+1. If the source documents a section for the target GPU count, use that section and
+   scale nothing.
+2. Otherwise re-derive the parallel layout for M GPUs. A source that runs CFG parallel
+   keeps CFG 2 when M >= 2 and gives the rest to sequence parallel (Ulysses / USP /
+   ring): SP = M / 2. A source without CFG parallel runs pure SP: SP = M. Tensor
+   parallelism of the DiT is not used. Per-component degrees that follow the GPU count
+   (VAE patch parallel, text-encoder TP) are capped at M. Every other flag stays as the
+   source wrote it. sglang without an SP flag gives its GPUs to Ulysses, so the
+   cookbook's `--num-gpus 8` commands scale through `--num-gpus` alone.
+3. On datacenter GPUs an arm may also drop memory-saving switches (offload, layerwise
+   streaming) and lists each in `scaled_from.removed`.
+4. Anything else is listed in `scaled_from.added` as `{flag, reason}`. For example,
+   vLLM-Omni's four-GPU combined H3 service gets `--task-type fl2va`, because both DiTs
+   plus Qwen3-VL do not fit on one rank.
+
+Such an arm carries `scaled_from` (`num_gpus` plus the source command:
+`serve_args`, `lightx2v_config` or `visual_gen_args`). The build re-derives the arm from
+it and fails on any difference, so a scaled command cannot be hand-written. The cell
+records the GPU count as a `num_gpus` deviation.
+
+### Source inventory
+
+`sources.json` lists every section of every tracked recipe file. Each section either
+names the cells built from it (or running it as an arm) or says in `skip` why none is
+built: AMD only, RTX only, a lossy flag variant, prose without a command, and so on.
+The build fails in three cases: a cell whose source section is not listed, a section
+with neither `cells` nor `skip`, or a listed cell that does not exist. Without this,
+the first cut covered three of the twenty-odd sections of vLLM-Omni's MiniMax-H3
+recipe, and nothing said so.
 
 ### Workload and deviations
 
@@ -134,6 +177,8 @@ A verbatim LightX2V arm must set `use_compile`. `devbox_run_cases.sh` exports
 while LightX2V's own default is false.
 
 ## Adding a cell
+
+Start from `sources.json`: list the file's sections, then build the ones that run.
 
 1. Pick a source and pin it: the last commit to the file at the framework version you will
    install (`git log -1 <version> -- <path>`). Check that the file exists at that version.

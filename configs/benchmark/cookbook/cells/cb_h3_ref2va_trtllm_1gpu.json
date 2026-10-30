@@ -1,0 +1,125 @@
+{
+  "id": "cb_h3_ref2va_trtllm_1gpu",
+  "label": "MiniMax-H3 Ref2VA 768x1344 124f, 27 forwards (TRT-LLM minimax-h3-ref2va-bf16-1gpu.yaml, 1 GPU)",
+  "base_case": "minimax_h3_ref2va_5s",
+  "set": {
+    "num_gpus": 1,
+    "num_inference_steps": 28,
+    "framework_request_extra.sglang.num_inference_steps": 27
+  },
+  "unset": [
+    "frameworks.trtllm-visual.visual_gen_args"
+  ],
+  "cookbook": {
+    "framework": "trtllm-visual",
+    "repo": "NVIDIA/TensorRT-LLM",
+    "path": "examples/visual_gen/configs/minimax-h3-ref2va-bf16-1gpu.yaml",
+    "commit": "4945d31",
+    "commit_date": "2026-10-22",
+    "section": "whole file",
+    "source_hardware": "1 GPU; H3 CI runs on B200 only",
+    "source_metric": "benchmark_visual_gen e2e_latency",
+    "workload": {
+      "width": 1344,
+      "height": 768,
+      "num_frames": 124,
+      "num_inference_steps": 28,
+      "num_gpus": 1,
+      "dit_forwards": 27,
+      "metric": "benchmark_visual_gen e2e_latency (client)",
+      "warmup": "startup precompile when compilation_config lists shapes; no warmup request",
+      "repeats": "3 prompts at concurrency 1"
+    },
+    "source_gpu": []
+  },
+  "forwards": {
+    "trtllm-visual": 27,
+    "sglang": 27
+  },
+  "deviations": [
+    {
+      "field": "metric",
+      "source": "benchmark_visual_gen e2e_latency (client)",
+      "run": "client_e2e_median",
+      "reason": "every arm is timed by the same client; the source's own timer is not available for the other frameworks"
+    },
+    {
+      "field": "warmup",
+      "source": "startup precompile when compilation_config lists shapes; no warmup request",
+      "run": "3 request(s) at 3 steps",
+      "reason": "the harness warms every arm the same way before timing"
+    },
+    {
+      "field": "repeats",
+      "source": "3 prompts at concurrency 1",
+      "run": "median of 2",
+      "reason": "the harness takes the same median for every arm"
+    }
+  ],
+  "arms": {
+    "trtllm-visual": {
+      "cb-trt-verbatim": {
+        "tier": "verbatim",
+        "num_gpus": 1,
+        "upstream_recipe": {
+          "repo": "NVIDIA/TensorRT-LLM",
+          "path": "examples/visual_gen/configs/minimax-h3-ref2va-bf16-1gpu.yaml",
+          "commit": "4945d31",
+          "commit_date": "2026-10-22",
+          "section": "whole file"
+        },
+        "serve_args": "",
+        "visual_gen_args": {
+          "pipeline_config": {
+            "workflow": "ref2va"
+          },
+          "torch_compile_config": {
+            "enable": true
+          },
+          "cuda_graph_config": {
+            "enable": false
+          },
+          "attention_config": {
+            "backend": "VANILLA"
+          },
+          "compilation_config": {
+            "skip_warmup": true
+          }
+        },
+        "allow_inherited": [
+          "extra_env.PYTORCH_CUDA_ALLOC_CONF"
+        ],
+        "notes": "The README's default Ref2VA canvas is 768x1344."
+      }
+    },
+    "sglang": {
+      "cb-sgl-cookbook": {
+        "tier": "verbatim",
+        "num_gpus": 1,
+        "serve_args": "--model-variant ref2va --performance-mode speed",
+        "upstream_recipe": {
+          "repo": "sgl-project/sglang",
+          "path": "docs/src/snippets/configs/MiniMaxAI/minimax-h3.jsx",
+          "commit": "2b8e4cde9564",
+          "commit_date": "2026-10-23",
+          "section": "MiniMax-H3.mdx '## 1. Quick start' builder: 1 GPU(s); no verified recipe, autoTopology (marked Unverified)"
+        },
+        "notes": "The builder marks this topology Unverified."
+      },
+      "cb-sgl-adaln-online": {
+        "tier": "matched",
+        "num_gpus": 1,
+        "serve_args": "--model-variant ref2va --performance-mode speed --minimax-h3-adaln-online true",
+        "matches": "vLLM-Omni's exact AdaLN projection reuse, on by default ('## Exact AdaLN reuse')",
+        "upstream_recipe": {
+          "repo": "sgl-project/sglang",
+          "path": "docs/cookbook/diffusion/MiniMax/MiniMax-H3.mdx",
+          "commit": "0498ab7b6ee2",
+          "commit_date": "2026-10-24",
+          "section": "### Advanced: online AdaLN rebuild with a host cache"
+        },
+        "notes": "Bit-exact per the sglang cookbook; the counterpart of vLLM-Omni's default AdaLN reuse."
+      }
+    }
+  }
+}

@@ -91,10 +91,14 @@
           "section": "# 3.1 Basic Serving Command; # 7 Performance Results (CFG 2, USP 2, HSDP on)"
         },
         "serve_args": "--num-gpus 2 --cfg-parallel-size 2 --usp 1 --use-hsdp",
+        "scaled_from": {
+          "num_gpus": 4,
+          "serve_args": "--num-gpus 4 --cfg-parallel-size 2 --usp 2 --use-hsdp"
+        },
         "allow_inherited": [
           "extra_env.DIFFUSION_ATTENTION_BACKEND"
         ],
-        "notes": "The dashboard's parallel settings with USP 4->1 for the num_gpus deviation; nothing else changed."
+        "notes": "scaled_from is the dashboard's results-table configuration (CFG 2, USP 2, HSDP on) as flags; the page gives no full launch line. The rule keeps CFG 2 and gives SP the rest (1)."
       }
     },
     "sglang": {

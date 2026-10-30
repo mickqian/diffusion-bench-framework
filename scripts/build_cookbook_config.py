@@ -25,6 +25,10 @@ against that workload. Its rules, enforced here:
       verbatim       copied from a published cookbook/recipe/config; needs
                      `upstream_recipe`. The source framework's verbatim arm must
                      cite the cell's source file.
+      matched        turns on a lossless feature the source runs by default,
+                     through a switch its own cookbook documents (vLLM-Omni's
+                     exact AdaLN reuse <-> sglang --minimax-h3-adaln-online);
+                     names it in `matches` and cites `upstream_recipe`.
       matched-lossy  turns on the lossy features the source ships with
                      (SageAttention, AdaLN cache, FP8, Cache-DiT); lists them
                      in `lossy`.
@@ -34,6 +38,13 @@ against that workload. Its rules, enforced here:
     the base case's. The build resolves them into each arm and lists what was
     inherited; a verbatim arm fails unless each inherited key is named in its
     `allow_inherited` (harness plumbing such as the MP4 encode alignment).
+  * An arm run on fewer GPUs than its source command was written for carries
+    `scaled_from` (the source command and GPU count); the build re-derives the
+    arm with scripts/cookbook_scaling.py and fails on any difference, so a
+    scaled command cannot be hand-written.
+  * configs/benchmark/cookbook/sources.json lists every tracked recipe section;
+    each points at the cells built from it or says why none is. A cell whose
+    source section is not listed, or a section with neither, fails the build.
   * Each cell needs an sglang arm; a cell with no verbatim sglang arm says why
     in `cookbook.sglang_verbatim_gap`.
 
@@ -53,6 +64,8 @@ import sys
 
 REPO = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.insert(0, os.path.join(REPO, "src"))
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+from cookbook_scaling import check_scaled_arm  # noqa: E402
 from diffusion_bench.config_guard import (  # noqa: E402
     HARDWARE_TOKENS,
     _merge_nested,
@@ -65,8 +78,9 @@ CASES = os.path.join(BENCH, "cases")
 CELLS = os.path.join(BENCH, "cookbook", "cells")
 OUT = os.path.join(REPO, "configs", "cookbook_configs.json")
 OUT_MD = os.path.join(BENCH, "cookbook", "COOKBOOK.md")
+SOURCES = os.path.join(BENCH, "cookbook", "sources.json")
 
-TIERS = ("verbatim", "matched-lossy", "tuned")
+TIERS = ("verbatim", "matched", "matched-lossy", "tuned")
 # What every arm is timed by. A source that times something else (LightX2V's
 # offline `RUN pipeline cost`, TRT-LLM's gen_latency) is a deviation.
 RUN_METRIC = "client_e2e_median"
@@ -178,6 +192,10 @@ def build_cell(cell: dict, bases: dict, in_scope: list[str],
     for problem in upstream_recipe_problems(src):
         err(f"cookbook: {problem.replace('upstream_recipe', 'cookbook')}")
     src_fw = src.get("framework")
+    # Distilled and lossy cells are reported in their own groups, never ranked
+    # against the lossless rows.
+    if src.get("group", "lossless") not in ("lossless", "lossy", "distilled"):
+        err(f"cookbook.group {src.get('group')!r} not in lossless / lossy / distilled")
     if src_fw not in in_scope:
         err(f"cookbook.framework {src_fw!r} is not an in-scope framework")
     for key in ("source_hardware", "source_metric"):
@@ -283,19 +301,27 @@ def build_cell(cell: dict, bases: dict, in_scope: list[str],
                     recipe.get("repo"), recipe.get("path")) != (src.get("repo"), src.get("path")):
                     err(f"{where}: the source framework's verbatim arm must cite the cell's source "
                         f"{src.get('repo')}:{src.get('path')}")
+            elif tier == "matched" and (not prof.get("matches") or upstream_recipe_problems(prof.get("upstream_recipe"))):
+                err(f"{where}: matched arm names the source default it matches in `matches` and cites "
+                    "the switch's documentation in `upstream_recipe`")
             elif tier == "matched-lossy" and not prof.get("lossy"):
                 err(f"{where}: matched-lossy arm must list its lossy features in `lossy`")
+            if profiles[name].get("scaled_from") is not None:
+                if tier not in ("verbatim", "matched", "matched-lossy"):
+                    err(f"{where}: scaled_from belongs on an arm that claims a source command, not a {tier} arm")
+                for problem in check_scaled_arm(fw, profiles[name], case.get("num_gpus"), where):
+                    err(problem)
             # A cache sidecar or a patched kernel built on one box by hand is
             # gone with that box (2xH200, 2026-10-30): name how to rebuild it.
             paths = _machine_paths(prof)
-            if (paths or tier == "matched-lossy") and not prof.get("requires"):
-                err(f"{where}: reads {paths or 'lossy-feature artifacts'} -- list the steps that create them "
-                    "in `requires` (e.g. `scripts/prepare_cookbook_h3.sh sgl-adaln`)")
+            if paths and not prof.get("requires"):
+                err(f"{where}: reads {paths} -- list the steps that create them in `requires` "
+                    "(e.g. `scripts/prepare_cookbook_h3.sh sgl-adaln`)")
             elif tier == "tuned" and not prof.get("notes"):
                 err(f"{where}: tuned arm needs `notes` saying what was chosen and why")
             built_profiles[name] = prof
             arm_index.setdefault(fw, {})[name] = {
-                k: prof[k] for k in ("tier", "lossy", "upstream_recipe") if k in prof
+                k: prof[k] for k in ("tier", "lossy", "matches", "upstream_recipe", "scaled_from") if k in prof
             }
         body["command_profiles"] = built_profiles
         frameworks[fw] = body
@@ -366,7 +392,65 @@ def build_cell(cell: dict, bases: dict, in_scope: list[str],
     return case, errors
 
 
-def build(cells_dir=CELLS, out=OUT, out_md=OUT_MD) -> int:
+def _cell_arms(cell: dict) -> list[dict]:
+    return [arm for body in cell["frameworks"].values() for arm in body["command_profiles"].values()]
+
+
+def check_sources(cells: list[dict], sources: dict) -> list[str]:
+    """Every tracked recipe section points at its cells or says why none is built.
+
+    Without this a section can drop out of the track unnoticed -- the round-1
+    cells covered three of vLLM-Omni's MiniMax-H3 recipe's twenty-odd sections
+    and nothing said so. Same idea as KNOWN_FRAMEWORK_GAPS in the headline build.
+    """
+    errors = []
+    by_id = {c["id"]: c for c in cells}
+    listed: dict[tuple[str, str], dict[str, dict]] = {}
+    for src in sources.get("sources", []):
+        key = (src.get("repo"), src.get("path"))
+        where = f"sources.json {key[0]}:{key[1]}"
+        if key in listed:
+            errors.append(f"{where}: listed twice")
+            continue
+        sections = listed[key] = {}
+        for sec in src.get("sections", []):
+            name = sec.get("section")
+            if not name:
+                errors.append(f"{where}: a section without `section`")
+                continue
+            if name in sections:
+                errors.append(f"{where}: section {name!r} listed twice")
+            sections[name] = sec
+            has_cells, skip = sec.get("cells"), sec.get("skip")
+            if bool(has_cells) == bool(skip):
+                errors.append(f"{where}: section {name!r} needs exactly one of `cells` or `skip` (a reason)")
+            for cid in has_cells or []:
+                cell = by_id.get(cid)
+                if cell is None:
+                    errors.append(f"{where}: section {name!r} points at unknown cell {cid}")
+                    continue
+                # A file is covered by a cell that is built from it, or by an arm
+                # that runs it (FastVideo's FastH3 serving yaml, LightX2V's Cosmos
+                # config inside the vLLM-Omni Cosmos cell).
+                cites = [cell["cookbook"]] + [
+                    arm["upstream_recipe"] for arm in _cell_arms(cell) if arm.get("upstream_recipe")]
+                match = [c for c in cites if (c.get("repo"), c.get("path")) == key]
+                if not match:
+                    errors.append(f"{where}: section {name!r} points at {cid}, which neither is built from "
+                                  "nor runs this file")
+                elif all(c.get("commit") != src.get("commit") for c in match):
+                    errors.append(f"{where}: {cid} cites {match[0].get('commit')}, the inventory was read at "
+                                  f"{src.get('commit')}")
+    for cid, cell in by_id.items():
+        cb = cell["cookbook"]
+        sec = listed.get((cb["repo"], cb["path"]), {}).get(cb["section"])
+        if sec is None or cid not in (sec.get("cells") or []):
+            errors.append(f"{cid}: source section {cb['path']} / {cb['section']!r} is not listed in "
+                          "sources.json with this cell")
+    return errors
+
+
+def build(cells_dir=CELLS, out=OUT, out_md=OUT_MD, sources_path=SOURCES) -> int:
     in_scope = list(load(os.path.join(BENCH, "frameworks.json"))["frameworks"])
     meta = load(os.path.join(BENCH, "meta.json"))
     headline = load(os.path.join(REPO, "configs", "comparison_configs.json"))
@@ -381,6 +465,8 @@ def build(cells_dir=CELLS, out=OUT, out_md=OUT_MD) -> int:
     ids = [c["id"] for c in cases]
     for cid in sorted({i for i in ids if ids.count(i) > 1}):
         errors.append(f"{cid}: duplicate cell id")
+    if not errors:
+        errors += check_sources(cases, load(sources_path))
     if errors:
         print("COOKBOOK BUILD FAILED:", file=sys.stderr)
         for e in errors:
@@ -422,6 +508,7 @@ def _write_md(cases, out_md):
             f"## {c['id']}",
             "",
             f"{c['label']}  ",
+            f"Group: **{cb.get('group', 'lossless')}**  ",
             f"Source: **{cb['framework']}** `{cb['repo']}:{cb['path']}` @ `{cb['commit']}` "
             f"({cb['commit_date']}), section \"{cb['section']}\"; written for {cb['source_hardware']} "
             f"(GPU tokens: {', '.join(cb['source_gpu']) or 'none stated'}); "
@@ -436,15 +523,21 @@ def _write_md(cases, out_md):
                 lines.append(f"| {d['field']} | {d['source']} | {d['run']} | {d['reason']} |")
             lines.append("")
         lines += [
-            "| framework | arm | tier | forwards | lossy | command | inherited from base case |",
-            "|---|---|---|---|---|---|---|",
+            "| framework | arm | tier | forwards | lossy / matches | scaled | command | inherited from base case |",
+            "|---|---|---|---|---|---|---|---|",
         ]
         for fw, body in c["frameworks"].items():
             for name, prof in body["command_profiles"].items():
+                sf = prof.get("scaled_from") or {}
+                scaled = ""
+                if sf:
+                    scaled = f"{sf['num_gpus']} -> {c['num_gpus']} GPUs by rule"
+                    scaled += "".join(f"; +`{a['flag']}` ({a['reason']})" for a in sf.get("added") or [])
+                    scaled += "".join(f"; -`{r}`" for r in sf.get("removed") or [])
                 lines.append(
                     f"| {fw} | `{name}` | {prof['tier']} | {cb['forwards'].get(fw)} | "
-                    f"{', '.join(prof.get('lossy') or [])} | {_cmd(prof)} | "
-                    f"{', '.join(prof.get('inherited') or [])} |"
+                    f"{', '.join(prof.get('lossy') or []) or prof.get('matches') or ''} | {scaled} | "
+                    f"{_cmd(prof)} | {', '.join(prof.get('inherited') or [])} |"
                 )
         lines.append("")
     with open(out_md, "w") as f:
