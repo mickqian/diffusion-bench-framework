@@ -23,6 +23,7 @@ Usage:
 import argparse
 import base64
 import copy
+import hashlib
 import csv
 import io
 import itertools
@@ -39,6 +40,7 @@ import sys
 import tempfile
 import threading
 import time
+import urllib.parse
 from collections.abc import Iterator
 from dataclasses import dataclass
 from datetime import datetime, timezone
@@ -1372,10 +1374,28 @@ def _download_ref_image(config: dict, case: dict) -> bytes:
         raise RuntimeError("No test_image_url in config for image-conditioned case")
     if url in _cached_ref_images:
         return _cached_ref_images[url]
+    # Every arm is its own process, so the in-memory cache alone fetches the
+    # image once per arm; unauthenticated huggingface.co fetches then hit 429
+    # over a night's queue. Keep one copy on disk per URL.
+    disk = None
+    if os.environ.get("DBF_STATE_DIR"):
+        disk = Path(os.environ["DBF_STATE_DIR"]) / "ref-images" / hashlib.sha256(url.encode()).hexdigest()
+        if disk.is_file() and disk.stat().st_size:
+            _cached_ref_images[url] = disk.read_bytes()
+            return _cached_ref_images[url]
     print(f"  Downloading reference image from {url} ...")
-    resp = requests.get(url, timeout=60)
+    headers = {}
+    token = os.environ.get("HF_TOKEN")
+    if token and urllib.parse.urlparse(url).hostname == "huggingface.co":
+        headers["Authorization"] = f"Bearer {token}"
+    resp = requests.get(url, timeout=60, headers=headers)
     _raise_for_status(resp)
     _cached_ref_images[url] = resp.content
+    if disk is not None:
+        disk.parent.mkdir(parents=True, exist_ok=True)
+        tmp = disk.with_suffix(f".{os.getpid()}.tmp")
+        tmp.write_bytes(resp.content)
+        tmp.replace(disk)
     return _cached_ref_images[url]
 
 
