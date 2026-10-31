@@ -1,0 +1,124 @@
+{
+  "id": "cb_vdn_h3_t2va_124f_vllm_tp2",
+  "label": "VDN-H3 T2VA 124f 8 steps (vLLM-Omni VDN-H3 checkpoint, TP2)",
+  "base_case": "minimax_h3_t2va_5s",
+  "set": {
+    "num_inference_steps": 8,
+    "framework_request_extra.vllm-omni": {
+      "extra_params": {
+        "task": "t2va",
+        "duration": 5,
+        "aspect_ratio": "16:9",
+        "preencode_mp4": true
+      },
+      "num_inference_steps": 8
+    },
+    "framework_request_extra.sglang": {
+      "task": "t2va",
+      "conditions": [],
+      "target": {
+        "short_edge": 768,
+        "aspect_ratio": "16:9",
+        "duration_seconds": 5.0
+      },
+      "num_frames": null,
+      "fps": null,
+      "num_inference_steps": 8,
+      "x264_preset": "ultrafast",
+      "output_compression": 63
+    },
+    "frameworks.sglang.model": "OpenVDN/vdn-minimax-h3",
+    "frameworks.vllm-omni.request_omit_keys": [
+      "num_frames",
+      "fps"
+    ]
+  },
+  "unset": [
+    "frameworks.vllm-omni.extra_env"
+  ],
+  "cookbook": {
+    "framework": "vllm-omni",
+    "repo": "vllm-project/vllm-omni",
+    "path": "recipes/MiniMaxAI/MiniMax-H3.md",
+    "commit": "fb7ab707",
+    "commit_date": "2026-10-26",
+    "section": "### VDN-H3 checkpoint",
+    "group": "distilled",
+    "source_hardware": "H200 (TP 1 with offload, 2 and 8 run end to end)",
+    "source_metric": "offline API, compile on, first request excluded: 2x H200 VDN BF16 74.6 s at 345 frames",
+    "workload": {
+      "num_frames": 124,
+      "num_gpus": 2,
+      "dit_forwards": 8,
+      "metric": "offline API, one request per row",
+      "warmup": "1 request",
+      "repeats": "one request"
+    },
+    "source_gpu": [
+      "h200"
+    ]
+  },
+  "forwards": {
+    "vllm-omni": 8,
+    "sglang": 8
+  },
+  "deviations": [
+    {
+      "field": "metric",
+      "source": "offline API, one request per row",
+      "run": "client_e2e_median",
+      "reason": "every arm is timed by the same client; the source's own timer is not available for the other frameworks"
+    },
+    {
+      "field": "warmup",
+      "source": "1 request",
+      "run": "3 request(s) at 3 steps",
+      "reason": "the harness warms every arm the same way before timing"
+    },
+    {
+      "field": "repeats",
+      "source": "one request",
+      "run": "median of 2",
+      "reason": "the harness takes the same median for every arm"
+    }
+  ],
+  "arms": {
+    "vllm-omni": {
+      "cb-vllm-verbatim": {
+        "tier": "verbatim",
+        "num_gpus": 2,
+        "upstream_recipe": {
+          "repo": "vllm-project/vllm-omni",
+          "path": "recipes/MiniMaxAI/MiniMax-H3.md",
+          "commit": "fb7ab707",
+          "commit_date": "2026-10-26",
+          "section": "### VDN-H3 checkpoint"
+        },
+        "serve_args": "--trust-remote-code --task-type fl2va --lora-path OpenVDN/vdn-minimax-h3 --diffusion-attention-backend VDNH3_ATTN --tensor-parallel-size 2 --text-encoder-tp-size 2 --vae-patch-parallel-size 2",
+        "extra_env": {
+          "VLLM_WORKER_MULTIPROC_METHOD": "spawn"
+        },
+        "notes": "On B200 this failed in round 1: VDNH3_ATTN runs its window as dense FlashAttention, which vLLM-Omni does not have on Blackwell (worker EOFError before health). Run it on H200."
+      }
+    },
+    "sglang": {
+      "cb-sgl-cookbook": {
+        "tier": "verbatim",
+        "num_gpus": 2,
+        "upstream_recipe": {
+          "repo": "sgl-project/sglang",
+          "path": "docs/cookbook/diffusion/MiniMax/MiniMax-H3.mdx",
+          "commit": "0498ab7b6ee2",
+          "commit_date": "2026-10-24",
+          "section": "## 7. VDN-H3: hybrid attention, 8-step distill"
+        },
+        "serve_args": "--attention-backend hybrid_window_attn_h3 --performance-mode speed --warmup-num-frames 345 --warmup-resolutions 1344x768",
+        "scaled_from": {
+          "num_gpus": 8,
+          "serve_args": "--num-gpus 8 --attention-backend hybrid_window_attn_h3 --performance-mode speed --warmup-num-frames 345 --warmup-resolutions 1344x768"
+        },
+        "notes": "The cookbook's 8x B200 command; it states --num-gpus 4, 2 or 1 gives the smaller Ulysses recipes. On Blackwell the DiT defaults to online MXFP8 (lossy); H200 runs BF16."
+      }
+    }
+  }
+}
