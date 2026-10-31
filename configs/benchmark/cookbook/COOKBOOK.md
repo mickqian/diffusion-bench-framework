@@ -360,6 +360,61 @@ Source: **vllm-omni** `vllm-project/vllm-omni:recipes/LTX/LTX-2.5.md` @ `a091098
 | vllm-omni | `cb-vllm-verbatim` | verbatim | 8 | fp8 (online) |  | `--model-class-name LTX2DistilledOneStagePipeline --quantization fp8 --diffusion-attention-backend CUDNN_ATTN` |  |
 | sglang | `cb-sgl-cookbook-fp8` | verbatim | 8 | fp8 (online) |  | `--pipeline-class-name LTX2Pipeline --quantization fp8` |  |
 
+## cb_mossimage_t2i_1024_1gpu_vllm
+
+MOSS-Image-Base 1024 50 steps CFG 3 + uncond skip [22] (vLLM-Omni recipe, 1 GPU)  
+Group: **lossless**  
+Source: **vllm-omni** `vllm-project/vllm-omni:recipes/MOSS-Image/MOSS-Image-Base.md` @ `2c72dea3` (2026-10-18), section "## Example request"; written for 1x H200 ('## Summary' and '## Performance') (GPU tokens: h200); source metric: 11.657 s resident on 1x H200 ('## Performance', CFG 3, uncond skip [22], window .01-1).
+
+| deviation | source | run | reason |
+|---|---|---|---|
+| metric | single-run image generation latency, excluding model initialization and image saving ('## Performance') | client_e2e_median | every arm is timed by the same client; the source's own timer is not available for the other framework |
+| warmup | not stated | 2 request(s) at 3 steps | the harness warms every arm the same way before timing |
+| repeats | single run | median of 5 | the harness takes the same median for every arm |
+| prompt | the 'nutrition-pagoda' prompt (not reproduced in the recipe) | A quiet coastal town at sunrise, cinematic photography | the recipe does not print its benchmark prompt; prompt and seed do not change the work done at a fixed size and step count |
+
+| framework | arm | tier | forwards | lossy / matches | scaled | command | inherited from base case |
+|---|---|---|---|---|---|---|---|
+| vllm-omni | `cb-vllm-verbatim` | verbatim | 50 |  |  | `--enforce-eager` |  |
+| sglang | `cb-sgl-cookbook` | verbatim | 50 |  |  | (recipe default) |  |
+
+## cb_mossimage_t2i_1024_1gpu_vllm_cfg
+
+MOSS-Image-Base 1024 50 steps ordinary CFG 3 (vLLM-Omni recipe, 1 GPU)  
+Group: **lossless**  
+Source: **vllm-omni** `vllm-project/vllm-omni:recipes/MOSS-Image/MOSS-Image-Base.md` @ `2c72dea3` (2026-10-18), section "## Performance"; written for 1x H200 ('## Summary' and '## Performance') (GPU tokens: h200); source metric: 11.735 s resident on 1x H200 ('## Performance', CFG 3, no SLG).
+
+| deviation | source | run | reason |
+|---|---|---|---|
+| metric | single-run image generation latency, excluding model initialization and image saving ('## Performance') | client_e2e_median | every arm is timed by the same client; the source's own timer is not available for the other framework |
+| warmup | not stated | 2 request(s) at 3 steps | the harness warms every arm the same way before timing |
+| repeats | single run | median of 5 | the harness takes the same median for every arm |
+| prompt | the 'nutrition-pagoda' prompt (not reproduced in the recipe) | A quiet coastal town at sunrise, cinematic photography | the recipe does not print its benchmark prompt; prompt and seed do not change the work done at a fixed size and step count |
+
+| framework | arm | tier | forwards | lossy / matches | scaled | command | inherited from base case |
+|---|---|---|---|---|---|---|---|
+| vllm-omni | `cb-vllm-verbatim` | verbatim | 50 |  |  | `--enforce-eager` |  |
+| sglang | `cb-sgl-cookbook` | verbatim | 50 |  |  | (recipe default) |  |
+
+## cb_mossimage_t2i_1024_2gpu_cfgp_vllm
+
+MOSS-Image-Base 1024 50 steps CFG 3 + uncond skip [22] (vLLM-Omni CFG parallel, 2 GPUs)  
+Group: **lossless**  
+Source: **vllm-omni** `vllm-project/vllm-omni:recipes/MOSS-Image/MOSS-Image-Base.md` @ `2c72dea3` (2026-10-18), section "## Features"; written for 1x H200 ('## Summary' and '## Performance') (GPU tokens: none stated); source metric: none (the '## Features' table lists `--cfg-parallel-size 2` without a measurement).
+
+| deviation | source | run | reason |
+|---|---|---|---|
+| metric | single-run image generation latency, excluding model initialization and image saving ('## Performance') | client_e2e_median | every arm is timed by the same client; the source's own timer is not available for the other framework |
+| warmup | not stated | 2 request(s) at 3 steps | the harness warms every arm the same way before timing |
+| repeats | single run | median of 5 | the harness takes the same median for every arm |
+| prompt | the 'nutrition-pagoda' prompt (not reproduced in the recipe) | A quiet coastal town at sunrise, cinematic photography | the recipe does not print its benchmark prompt; prompt and seed do not change the work done at a fixed size and step count |
+
+| framework | arm | tier | forwards | lossy / matches | scaled | command | inherited from base case |
+|---|---|---|---|---|---|---|---|
+| vllm-omni | `cb-vllm-verbatim` | verbatim | 50 |  |  | `--enforce-eager --cfg-parallel-size 2` |  |
+| sglang | `cb-sgl-cookbook` | verbatim | 50 |  |  | `--tp-size 1 --ulysses-degree 2 --ring-degree 1` |  |
+| sglang | `cb-sgl-cfgp` | matched | 50 | vLLM-Omni's `--cfg-parallel-size 2` ('## Features') |  | `--cfg-parallel-size 2` |  |
+
 ## cb_qwen21_t2i_1024_40s_lightx2v
 
 Qwen-Image-2.1 T2I 1024 40 steps cfg off (LightX2V config, 1 GPU)  

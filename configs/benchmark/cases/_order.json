@@ -6,6 +6,7 @@
     "qwen_image_21_edit_1024",
     "zimage_turbo_t2i_1024",
     "ideogram4_t2i_1024_2gpu_tp",
+    "mossimage_base_t2i_1024",
     "wan22_t2v_a14b_720p",
     "ltx2.5_twostage_t2v_2gpus",
     "cosmos3_nano_t2i_720p",

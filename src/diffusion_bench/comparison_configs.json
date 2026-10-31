@@ -1915,6 +1915,79 @@
             }
         },
         {
+            "id": "mossimage_base_t2i_1024",
+            "model": "OpenMOSS-Team/MOSS-Image-Base",
+            "task": "text-to-image",
+            "label": "MOSS-Image-Base T2I 1024",
+            "prompt": "A quiet coastal town at sunrise, cinematic photography",
+            "width": 1024,
+            "height": 1024,
+            "seed": 42,
+            "num_gpus": 1,
+            "num_inference_steps": 50,
+            "guidance_scale": 3.0,
+            "request_extra": {
+                "output_format": "png"
+            },
+            "framework_request_extra": {
+                "sglang": {
+                    "uncond_skip_layers": [
+                        22
+                    ],
+                    "slg_start": 0.01,
+                    "slg_stop": 1.0
+                },
+                "vllm-omni": {
+                    "flow_shift": 5.0,
+                    "extra_params": {
+                        "uncond_skip_layers": [
+                            22
+                        ],
+                        "slg_start": 0.01,
+                        "slg_stop": 1.0
+                    }
+                }
+            },
+            "notes": "Both frameworks' recommended guidance: CFG 3 with the unconditional branch skipping DiT block 22 inside the 0.01-1.0 step window (two DiT passes per step), 50 steps, flow shift 5. sglang applies this by default (configs/sample/moss_image.py resolves uncond_skip_layers None to (22,)); vLLM-Omni applies it only through extra_params, so both are sent explicitly and neither side falls back to its own default. Ordinary CFG is uncond_skip_layers [] for both. MOSS-Image has no TP (sglang validate_server_args rejects tp_size != 1) and no validated torch.compile; autocast is disabled by the pipeline config.",
+            "frameworks": {
+                "sglang": {
+                    "serve_args": "--model-type diffusion --warmup-mode server",
+                    "extra_env": {},
+                    "command_profiles": {
+                        "default": {
+                            "description": "The sglang cookbook builder's 1-GPU command (auto placement, platform attention).",
+                            "sglang_ref": "current-main",
+                            "serve_args": "--model-type diffusion --warmup-mode server",
+                            "notes": "docs/cookbook/diffusion/OpenMOSS/MOSS-Image.mdx: TP, Cache-DiT, quantization, compilation and breakable CUDA graphs have no validated recipe for this model."
+                        }
+                    }
+                },
+                "vllm-omni": {
+                    "num_gpus": 1,
+                    "serve_args": "--enforce-eager",
+                    "command_profiles": {
+                        "default": {
+                            "description": "recipes/MOSS-Image/MOSS-Image-Base.md '## Deploy' (resident, eager).",
+                            "serve_args": "--enforce-eager",
+                            "policy_exception": "Unmeasured, not a speed choice: the vLLM-Omni recipe (recipes/MOSS-Image/MOSS-Image-Base.md @ 2c72dea3, checked 2026-10-31) documents and measures only the eager path; its fused kernels target the eager CUDA path and no compiled MOSS-Image run is published. Replace with a measured non-eager profile if one proves faster and output-equivalent."
+                        }
+                    }
+                }
+            },
+            "report_framework_statuses": {
+                "lightx2v": "unsupported",
+                "trtllm-visual": "unsupported",
+                "fastvideo": "unsupported",
+                "comfyui": "unsupported"
+            },
+            "report_framework_reasons": {
+                "lightx2v": "LightX2V ce0f526a has no MOSS-Image pipeline.",
+                "trtllm-visual": "TensorRT-LLM 1.4.0rc1 VisualGen has no MOSS-Image pipeline.",
+                "fastvideo": "This harness integrates FastVideo for MiniMax-H3 only.",
+                "comfyui": "No MOSS-Image ComfyUI workflow in this harness (configs/benchmark/comfyui)."
+            }
+        },
+        {
             "id": "wan22_t2v_a14b_720p",
             "model": "Wan-AI/Wan2.2-T2V-A14B-Diffusers",
             "task": "text-to-video",

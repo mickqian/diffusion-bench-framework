@@ -553,6 +553,58 @@
           "skip": "an offline example script; the harness drives `fastvideo serve`, so its engine settings would have to be re-expressed as serve overrides by hand -- not verbatim"
         }
       ]
+    },
+    {
+      "framework": "vllm-omni",
+      "repo": "vllm-project/vllm-omni",
+      "path": "recipes/MOSS-Image/MOSS-Image-Base.md",
+      "commit": "2c72dea3",
+      "sections": [
+        {
+          "section": "## Summary",
+          "skip": "prose: model, pipeline and hardware (H200)"
+        },
+        {
+          "section": "## Features",
+          "cells": [
+            "cb_mossimage_t2i_1024_2gpu_cfgp_vllm"
+          ]
+        },
+        {
+          "section": "## Kernel fusion",
+          "skip": "prose about the eager fused path the '## Deploy' command already runs"
+        },
+        {
+          "section": "## Environment",
+          "skip": "versions only"
+        },
+        {
+          "section": "## Deploy",
+          "cells": [
+            "cb_mossimage_t2i_1024_1gpu_vllm",
+            "cb_mossimage_t2i_1024_1gpu_vllm_cfg",
+            "cb_mossimage_t2i_1024_2gpu_cfgp_vllm"
+          ]
+        },
+        {
+          "section": "## Example request",
+          "cells": [
+            "cb_mossimage_t2i_1024_1gpu_vllm"
+          ]
+        },
+        {
+          "section": "## Performance",
+          "cells": [
+            "cb_mossimage_t2i_1024_1gpu_vllm_cfg",
+            "cb_mossimage_t2i_1024_1gpu_vllm"
+          ],
+          "note": "the DLO column and the three-pass SLG row (CFG 5, slg_scale 3) are not built: DLO is a memory-saving variant of the same command, three-pass SLG a different sampling algorithm"
+        },
+        {
+          "section": "## Offline inference",
+          "skip": "offline script, not the server path"
+        }
+      ]
     }
   ]
 }
