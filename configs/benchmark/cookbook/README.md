@@ -170,6 +170,18 @@ patched SageAttention went with its eviction. `scripts/prepare_cookbook_h3.sh` b
 MiniMax-H3 ones: `sgl-adaln`, `lx-adaln`, and `sage`. The `sage` step applies the SM90 fix
 from thu-ml/SageAttention@d9704247 and fails unless the result matches SDPA.
 
+The vLLM-Omni recipes assume optional extras that `install_comparison_frameworks.sh`
+installs only when asked. A cell that needs one fails at its first request, not at
+install time. Export these before installing `vllm-omni`:
+
+| Export | For | Without it |
+|---|---|---|
+| `VLLM_OMNI_CUDNN_FRONTEND_SPEC=nvidia-cudnn-frontend==1.31.0` | FastH3 V2 and FastH3-Omni (`fastvideo_vsa_provider: cudnn`, the `[cudnn-bsa]` extra) | `cuDNN BSA requires nvidia-cudnn-frontend>=1.31.0`; 1.32.1 removed `block_sparse_attention_forward` |
+| `VLLM_OMNI_FA4_SPEC='flash-attn-4[cu13]==4.0.0b18'` (Blackwell only) | every recipe that names `FLASH_ATTN`, and `VDNH3_ATTN` (VDN, Wan dashboard, H3 single GPU) | `FLASH_ATTN was explicitly selected but is unsupported` on sm_100 |
+| `VLLM_OMNI_QUACK_SPEC` (default `quack-kernels==0.5.3`, installed with FA4) | FA4 4.0.0b18's CuTe utils | `quack.activation has no attribute 'sub_packed_f32x2'` under quack 0.6.x |
+
+On an existing venv, install the same specs with `--no-deps`.
+
 ### LightX2V compile
 
 A verbatim LightX2V arm must set `use_compile`. `devbox_run_cases.sh` exports
