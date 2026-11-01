@@ -33,6 +33,7 @@ import re
 import shlex
 import shutil
 import signal
+import socket
 import statistics
 import struct
 import subprocess
@@ -47,6 +48,8 @@ from datetime import datetime, timezone
 from pathlib import Path
 
 import requests
+import requests.adapters
+import urllib3
 
 from diffusion_bench import comfyui_client, fastvideo_client
 from diffusion_bench.config_guard import apply_hardware_statuses
@@ -148,17 +151,40 @@ def _poll_get(url: str, deadline: float, timeout: int = 30):
 HTTP_READ_CHUNK = 1 << 18  # 256 KiB
 
 
+# A new connection's receive window starts at tcp_rmem's default (87 KB on the bench
+# hosts), and a multi-MB reply (a base64 PNG, an MP4) can fill it before the window
+# grows: Linux then waits out its 200 ms zero-window probe. On loopback that added
+# 0.2 s to a random 15-40% of requests, whichever framework answered (Z-Image, 4.2 MB
+# replies: 7 of 40 slow; 0 of 40 with this buffer, 2026-11-01). Set before connect,
+# so the window scale covers it.
+POST_RECV_BUFFER = 16 << 20
+
+
+class _LargeReceiveBufferAdapter(requests.adapters.HTTPAdapter):
+    def init_poolmanager(self, *args, **kwargs):
+        kwargs["socket_options"] = list(urllib3.connection.HTTPConnection.default_socket_options) + [
+            (socket.SOL_SOCKET, socket.SO_RCVBUF, POST_RECV_BUFFER)
+        ]
+        super().init_poolmanager(*args, **kwargs)
+
+
 def _post_drained(url: str, **kwargs):
     """POST and read the whole body in large reads.
 
     Returns a normal Response -- `.content`, `.text` and `.json()` work -- with
     the body already materialised, so the caller's timing stops when the last
-    byte arrives, as it would with curl.
+    byte arrives, as it would with curl. Each call opens its own connection, as
+    requests.post does, with a receive buffer large enough for the reply.
     """
-    resp = requests.post(url, stream=True, **kwargs)
-    # What Response.content would do, minus the 10 KiB read size.
-    resp._content = b"".join(resp.iter_content(HTTP_READ_CHUNK))
-    resp._content_consumed = True
+    session = requests.Session()
+    session.mount("http://", _LargeReceiveBufferAdapter())
+    try:
+        resp = session.post(url, stream=True, **kwargs)
+        # What Response.content would do, minus the 10 KiB read size.
+        resp._content = b"".join(resp.iter_content(HTTP_READ_CHUNK))
+        resp._content_consumed = True
+    finally:
+        session.close()
     return resp
 
 GPU_CLEAR_WAIT = 15  # seconds between framework runs
