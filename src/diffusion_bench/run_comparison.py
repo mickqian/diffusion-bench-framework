@@ -1453,6 +1453,66 @@ def _substitute_ref_image(node, uri: str):
     return node
 
 
+# A case conditioning on several references, or on a reference video, names each
+# file once in `reference_media` ({name: path on the bench host}) and marks where it
+# belongs: `__MEDIA:<name>__` becomes the file inline as a data URI (the multipart
+# uploads' JSON counterpart), `__MEDIA_PATH:<name>__` its host path, for a framework
+# whose API takes only server-local paths. Either may sit inside a longer string.
+# A path may hold `{variant}`, filled with the request's two-digit input variant: like
+# the marked reference image, every request then conditions on files of its own, so
+# no server's conditioning cache answers a repeat (see test_distinct_request_inputs).
+MEDIA_TOKEN = re.compile(r"__MEDIA(_PATH)?:([A-Za-z0-9_.-]+)__")
+MEDIA_MIME = {".png": "image/png", ".jpg": "image/jpeg", ".jpeg": "image/jpeg", ".webp": "image/webp",
+              ".mp4": "video/mp4", ".wav": "audio/wav", ".mp3": "audio/mpeg"}
+
+
+def _media_path(case: dict, name: str) -> str:
+    media = case.get("reference_media") or {}
+    if name not in media:
+        raise RuntimeError(f"{case['id']}: request extras name media {name!r}, absent from reference_media")
+    path = media[name].replace("{variant}", f"{case.get('input_variant', 0):02d}")
+    if not os.path.isfile(path):
+        raise RuntimeError(f"{case['id']}: reference_media {name!r} -> {path} does not exist")
+    return path
+
+
+def _media_mime(path: str) -> str:
+    mime = MEDIA_MIME.get(os.path.splitext(path)[1].lower())
+    if mime is None:
+        raise RuntimeError(f"reference media {path}: unknown type; add its extension to MEDIA_MIME")
+    return mime
+
+
+def _substitute_media(node, case: dict, cache: dict):
+    if isinstance(node, dict):
+        return {k: _substitute_media(v, case, cache) for k, v in node.items()}
+    if isinstance(node, list):
+        return [_substitute_media(v, case, cache) for v in node]
+    if not isinstance(node, str) or "__MEDIA" not in node:
+        return node
+
+    def repl(m: re.Match) -> str:
+        path = _media_path(case, m.group(2))
+        if m.group(1):
+            return path
+        if path not in cache:
+            with open(path, "rb") as f:
+                cache[path] = f"data:{_media_mime(path)};base64," + base64.b64encode(f.read()).decode()
+        return cache[path]
+
+    return MEDIA_TOKEN.sub(repl, node)
+
+
+def _media_uploads(case: dict, field: str, names: list[str]) -> list[tuple]:
+    """Multipart entries, one `field` part per named reference, in the listed order."""
+    uploads = []
+    for name in names:
+        path = _media_path(case, name)
+        with open(path, "rb") as f:
+            uploads.append((field, (os.path.basename(path), io.BytesIO(f.read()), _media_mime(path))))
+    return uploads
+
+
 def _without_comments(extras: dict) -> dict:
     """A request-extras dict minus its `_`-prefixed keys: cases record why a field is set as `_note`."""
     return {key: value for key, value in (extras or {}).items() if not key.startswith("_")}
@@ -1471,6 +1531,8 @@ def _request_extra(case: dict, framework: str, config: dict | None = None) -> di
         # instead of a URL the server downloads inside the measured window.
         uri = "data:image/png;base64," + _get_ref_image_b64(config or {}, case)
         merged = _substitute_ref_image(merged, uri)
+    if "__MEDIA" in json.dumps(merged):
+        merged = _substitute_media(merged, case, {})
     return merged
 
 
@@ -1785,7 +1847,10 @@ def send_request_vllm_omni(base_url: str, case: dict, config: dict) -> float:
         # answers `ref2va requires at least one image or video reference`,
         # which reads like an unsupported case rather than a missing argument.
         files = None
-        if case.get("reference_image") or fw_entry.get("reference_image"):
+        if fw_entry.get("reference_uploads"):
+            # Several references (images, videos): Omni's repeated `input_references` part.
+            files = _media_uploads(case, "input_references", fw_entry["reference_uploads"])
+        elif case.get("reference_image") or fw_entry.get("reference_image"):
             files = {
                 "input_reference": (
                     "ref.png",
@@ -1947,7 +2012,8 @@ def _lightx2v_payload(case: dict, config: dict, is_image: bool) -> dict:
         payload["negative_prompt"] = case["negative_prompt"]
     # This framework's extras only: the shared request_extra carries fields
     # (qwen_image_21's output_format) the schema rejects.
-    payload.update(copy.deepcopy(_without_comments((case.get("framework_request_extra") or {}).get("lightx2v", {}))))
+    lightx2v_extra = _without_comments((case.get("framework_request_extra") or {}).get("lightx2v", {}))
+    payload.update(_substitute_media(copy.deepcopy(lightx2v_extra), case, {}))
     # The vLLM-Omni opt-in: H3 Ref2VA conditions sglang through a conditions[]
     # extra, so the case itself sets no reference_image.
     fw_entry = (case.get("frameworks") or {}).get("lightx2v") or {}

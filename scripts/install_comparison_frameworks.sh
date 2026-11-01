@@ -391,6 +391,9 @@ if cute_dir.exists():
     python3 -m pip install --upgrade --upgrade-strategy only-if-needed \
       --extra-index-url "${TRTLLM_PIP_EXTRA_INDEX_URL:-https://pypi.nvidia.com}" \
       "${TRTLLM_INSTALL_SPEC:-tensorrt-llm==1.3.0rc18}"
+    # MiniMax-H3 Ref2VA decodes a reference video (and its soundtrack) with PyAV,
+    # which tensorrt-llm does not pull in: without it such a request answers 500.
+    python3 -m pip install "${TRTLLM_PYAV_SPEC:-av}"
     # Local patch: let VisualGen run in eager mode (TORCH_COMPILE_DISABLE=1) for
     # a same-policy compile-off comparison. See the patcher's docstring.
     python3 "$(dirname "$0")/patches/apply_trtllm_visual_patches.py"
