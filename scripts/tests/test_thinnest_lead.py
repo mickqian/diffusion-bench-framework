@@ -133,6 +133,9 @@ got = thinnest_lead(secs["throughput"], merged, "2x Test GPU")
 check("higher qps is the better side", ids(got) == ["t_loss", "t_close", "t_win"], str(ids(got)))
 check("qps compared, not latency", got[0]["metric"] == "qps" and got[0]["sglang"]["qps"] == 0.2)
 check("single_e2e tail never lands on a throughput row", "unattributed_tail_s" not in got[0]["sglang"])
+# a throughput-only case would otherwise print as a row of "not run"
+check("single_e2e lists only the cases measured in that mode",
+      ids(secs["single_e2e"]["rows"]) == ["t_loss"], str(ids(secs["single_e2e"]["rows"])))
 
 print("tracker issue table")
 REAL = ["qwen_image_21_t2i_1024", "zimage_turbo_t2i_1024", "qwen_image_21_t2i_1024_2gpu",

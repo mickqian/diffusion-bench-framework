@@ -102,8 +102,12 @@ def _profile_of(row: dict) -> str:
 
 def build_single_e2e_rows(merged: dict, config_cases: dict, case_order) -> tuple[list, int, int]:
     ok_rows, failed_rows = _rows_by_mode(merged, "single_e2e")
+    # A case that ran only in throughput mode has no single-request row to show.
+    measured = {cid for (cid, _fw) in list(ok_rows) + list(failed_rows)}
     rows, wins, comparable = [], 0, 0
     for case_id in case_order:
+        if case_id not in measured:
+            continue
         cfg = config_cases[case_id]
         cells: dict[str, Any] = {}
         competitor_lat: dict[str, float] = {}
