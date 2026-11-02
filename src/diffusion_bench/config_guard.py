@@ -198,14 +198,26 @@ def verify_merged_commands(
             profiles = fw_cfg.get("command_profiles") or {}
             if not profiles:
                 continue
-            selected_name, selected_cfg, _ = select_profile(profiles, candidates)
-            if selected_cfg is None:
-                continue
-            row_profile = (row.get("framework_metadata") or {}).get("profile")
+            row_meta = row.get("framework_metadata") or {}
+            row_profile = row_meta.get("profile")
             dedup = (case_id, str(row_profile))
             if dedup in seen:
                 continue
             seen.add(dedup)
+            # A profile requested by name (e.g. a throughput-only arm) is checked
+            # against that profile; hardware selection never picks it.
+            if row_meta.get("profile_source") == "explicit":
+                selected_name, selected_cfg = row_profile, profiles.get(row_profile)
+                if selected_cfg is None:
+                    warnings.append(
+                        f"{case_id}/{framework}: published row ran explicit profile "
+                        f"{row_profile!r}, which the config no longer has — re-run before publishing"
+                    )
+                    continue
+            else:
+                selected_name, selected_cfg, _ = select_profile(profiles, candidates)
+                if selected_cfg is None:
+                    continue
             if row_profile and row_profile != selected_name:
                 warnings.append(
                     f"{case_id}/{framework}: published row ran profile "
