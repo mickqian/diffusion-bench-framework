@@ -1,0 +1,11 @@
+# wave 2: MiniMax-H3 T2V+A throughput (harness: 4 requests, concurrency 2) on both B300s.
+# main pair: sglang dp2-throughput (D) vs vllm-omni replica2-throughput (V); order D V | V D | D V.
+# references (one round each, between rounds 2 and 3): sglang b300-noexp (U2, auto) and vllm-omni blackwell-2gpu-static (TP2, auto).
+h-d-r1 sglang minimax_h3_t2va_5s throughput 0,1 dp2-throughput
+h-v-r1 vllm-omni minimax_h3_t2va_5s throughput 0,1 replica2-throughput
+h-v-r2 vllm-omni minimax_h3_t2va_5s throughput 0,1 replica2-throughput
+h-d-r2 sglang minimax_h3_t2va_5s throughput 0,1 dp2-throughput
+h-u2-ref sglang minimax_h3_t2va_5s throughput 0,1 -
+h-vtp2-ref vllm-omni minimax_h3_t2va_5s throughput 0,1 -
+h-d-r3 sglang minimax_h3_t2va_5s throughput 0,1 dp2-throughput
+h-v-r3 vllm-omni minimax_h3_t2va_5s throughput 0,1 replica2-throughput

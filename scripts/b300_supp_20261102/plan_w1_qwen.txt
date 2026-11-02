@@ -1,0 +1,23 @@
+# wave 1: Qwen-Image-2.1 on one B300 (GPU 0). w0-* arms are discarded cache/plumbing primers.
+# Order per round alternates so each framework leads twice: r1 S V, r2 V S, r3 S V, r4 V S (S=sglang, V=vllm-omni).
+# columns: <arm> <framework> <case> <modes> <gpus> <profile|-> [ENV=VAL ...]   (profile '-' = auto-selected for b300)
+w0-s-t2i sglang qwen_image_21_t2i_1024 single_e2e+throughput 0 -
+w0-v-t2i vllm-omni qwen_image_21_t2i_1024 single_e2e+throughput 0 -
+w0-s-edit sglang qwen_image_21_edit_1024 single_e2e 0 -
+w0-v-edit vllm-omni qwen_image_21_edit_1024 single_e2e 0 -
+s-t2i-r1 sglang qwen_image_21_t2i_1024 single_e2e+throughput 0 -
+v-t2i-r1 vllm-omni qwen_image_21_t2i_1024 single_e2e+throughput 0 -
+s-edit-r1 sglang qwen_image_21_edit_1024 single_e2e 0 -
+v-edit-r1 vllm-omni qwen_image_21_edit_1024 single_e2e 0 -
+v-t2i-r2 vllm-omni qwen_image_21_t2i_1024 single_e2e+throughput 0 -
+s-t2i-r2 sglang qwen_image_21_t2i_1024 single_e2e+throughput 0 -
+v-edit-r2 vllm-omni qwen_image_21_edit_1024 single_e2e 0 -
+s-edit-r2 sglang qwen_image_21_edit_1024 single_e2e 0 -
+s-t2i-r3 sglang qwen_image_21_t2i_1024 single_e2e+throughput 0 -
+v-t2i-r3 vllm-omni qwen_image_21_t2i_1024 single_e2e+throughput 0 -
+s-edit-r3 sglang qwen_image_21_edit_1024 single_e2e 0 -
+v-edit-r3 vllm-omni qwen_image_21_edit_1024 single_e2e 0 -
+v-t2i-r4 vllm-omni qwen_image_21_t2i_1024 single_e2e+throughput 0 -
+s-t2i-r4 sglang qwen_image_21_t2i_1024 single_e2e+throughput 0 -
+v-edit-r4 vllm-omni qwen_image_21_edit_1024 single_e2e 0 -
+s-edit-r4 sglang qwen_image_21_edit_1024 single_e2e 0 -

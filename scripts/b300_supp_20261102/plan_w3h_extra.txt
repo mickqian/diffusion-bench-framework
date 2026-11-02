@@ -1,0 +1,5 @@
+# wave 3b: a fourth H3 round (V D, completing D V | V D | D V | V D) and a second round of both references.
+h-v-r4 vllm-omni minimax_h3_t2va_5s throughput 0,1 replica2-throughput
+h-d-r4 sglang minimax_h3_t2va_5s throughput 0,1 dp2-throughput
+h-u2-ref2 sglang minimax_h3_t2va_5s throughput 0,1 -
+h-vtp2-ref2 vllm-omni minimax_h3_t2va_5s throughput 0,1 -

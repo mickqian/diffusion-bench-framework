@@ -1,0 +1,12 @@
+# wave 3a: vLLM-Omni 0da1d831 (last round's pin, own venv) against the current main (d94d8e98) and sglang, same box, interleaved.
+# The ENV=VAL column points the harness at the old venv root and records its install spec.
+vo-t2i-r1 vllm-omni qwen_image_21_t2i_1024 single_e2e+throughput 0 - DBF_VENV_ROOT=/workspace/r1102/fw-venvs-0da1 VLLM_OMNI_INSTALL_SPEC=git+https://github.com/vllm-project/vllm-omni.git@0da1d831e07fadccc3ab51ef27b7c21623b693c2
+vn-t2i-r5 vllm-omni qwen_image_21_t2i_1024 single_e2e+throughput 0 -
+s-t2i-r5 sglang qwen_image_21_t2i_1024 single_e2e+throughput 0 -
+vo-edit-r1 vllm-omni qwen_image_21_edit_1024 single_e2e 0 - DBF_VENV_ROOT=/workspace/r1102/fw-venvs-0da1 VLLM_OMNI_INSTALL_SPEC=git+https://github.com/vllm-project/vllm-omni.git@0da1d831e07fadccc3ab51ef27b7c21623b693c2
+vn-edit-r5 vllm-omni qwen_image_21_edit_1024 single_e2e 0 -
+s-edit-r5 sglang qwen_image_21_edit_1024 single_e2e 0 -
+vn-t2i-r6 vllm-omni qwen_image_21_t2i_1024 single_e2e+throughput 0 -
+vo-t2i-r2 vllm-omni qwen_image_21_t2i_1024 single_e2e+throughput 0 - DBF_VENV_ROOT=/workspace/r1102/fw-venvs-0da1 VLLM_OMNI_INSTALL_SPEC=git+https://github.com/vllm-project/vllm-omni.git@0da1d831e07fadccc3ab51ef27b7c21623b693c2
+vn-edit-r6 vllm-omni qwen_image_21_edit_1024 single_e2e 0 -
+vo-edit-r2 vllm-omni qwen_image_21_edit_1024 single_e2e 0 - DBF_VENV_ROOT=/workspace/r1102/fw-venvs-0da1 VLLM_OMNI_INSTALL_SPEC=git+https://github.com/vllm-project/vllm-omni.git@0da1d831e07fadccc3ab51ef27b7c21623b693c2
