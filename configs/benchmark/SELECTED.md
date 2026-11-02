@@ -446,7 +446,7 @@ offloaded on datacenter hardware without one (see KNOWN_COMPETITOR_VIOLATIONS).
 | qwen_image_21_edit_1024 | vllm-omni | rtx4090 | `default` |  |  | vllm-project/vllm-omni@b164fea79753 (2026-10-17) |  |  |
 | qwen_image_21_edit_1024 | vllm-omni | rtx5090 | `rtx5090-cpu-offload` |  |  | vllm-project/vllm-omni@b164fea79753 (2026-10-17) | `--enable-cpu-offload --no-enable-cuda-graph-decode` | `DIFFUSION_ATTENTION_BACKEND=CUDNN_ATTN` |
 | qwen_image_21_t2i_1024 | sglang | b200 | `b200-1gpu-resident-fa` |  |  |  | `--model-type diffusion --warmup-mode server --performance-mode speed --attention-backend fa` |  |
-| qwen_image_21_t2i_1024 | sglang | b300 | `b200-1gpu-resident-fa` |  |  |  | `--model-type diffusion --warmup-mode server --performance-mode speed --attention-backend fa` |  |
+| qwen_image_21_t2i_1024 | sglang | b300 | `b300-1gpu-resident-fa-async-save` |  | AMBIGUOUS: b200-1gpu-resident-fa |  | `--model-type diffusion --warmup-mode server --performance-mode speed --attention-backend fa --async-output-save` |  |
 | qwen_image_21_t2i_1024 | sglang | gb200 | `b200-1gpu-resident-fa` |  |  |  | `--model-type diffusion --warmup-mode server --performance-mode speed --attention-backend fa` |  |
 | qwen_image_21_t2i_1024 | sglang | gb300 | `b200-1gpu-resident-fa` |  |  |  | `--model-type diffusion --warmup-mode server --performance-mode speed --attention-backend fa` |  |
 | qwen_image_21_t2i_1024 | sglang | h100 | `h200-1gpu-resident` |  |  |  | `--model-type diffusion --warmup-mode server --performance-mode speed` |  |

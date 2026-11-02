@@ -273,6 +273,15 @@
                             "serve_args": "--model-type diffusion --warmup-mode server --performance-mode speed",
                             "notes": "Cookbook verifiedRecipes `h200-1-resident` (default: true), attentions [fa, sdpa]. The picker's 'Automatic' attention emits NO flag on H200 because the runtime already selects FlashAttention there; only B200 gets an explicit --attention-backend fa. VALIDATED 2026-09-21 on a 1x H200 devbox (sglang 6ad78f22): p50 4.519s over 3 repeats after warmup [4.51, 4.52, 4.52], 0.1034 s/step x 40 = 4.14s of the 4.52s, 39.6 GB after load settling to 32.7 GB steady out of 140 GB."
                         },
+                        "b300-1gpu-resident-fa-async-save": {
+                            "description": "B300 resident with an explicit FlashAttention backend and async output save.",
+                            "hardware": [
+                                "b300"
+                            ],
+                            "sglang_ref": "sglang main 15ef6758 + sgl-project/sglang#47465 #47466 #47467 (2026-10-30)",
+                            "serve_args": "--model-type diffusion --warmup-mode server --performance-mode speed --attention-backend fa --async-output-save",
+                            "notes": "b200-1gpu-resident-fa plus --async-output-save, which finalizes each output (D2H, PNG encode, reply) on a background thread so the next queued request starts its GPU work at once; it changes nothing a single request does. VALIDATED 2026-10-30 on b300final (RunPod 4xB300 SXM6 AC, 1100 W), harness devbox_run_cases.sh, two interleaved rounds in reversed order (tag q10ab2), tree = main 15ef6758 + #47465 #47466 #47467: single_e2e 2.093 / 2.094 s against 2.093 / 2.094 without the flag; throughput 0.4805 / 0.4810 req/s against 0.4789 / 0.4789 (vLLM-Omni 0da1d831 blackwell-cudnn-static 0.4348 / 0.4348 in the same rounds); on main alone the flag measured 0.4758 / 0.4757 vs 0.4744 / 0.4747 (tag q10ab1, with #47465). Decoded output pixels identical (md5 of the RGBA array). b300 only: not measured on b200/gb200/gb300."
+                        },
                         "b200-1gpu-resident-fa": {
                             "description": "B200 resident with an explicit FlashAttention backend.",
                             "hardware": [
