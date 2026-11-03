@@ -1,7 +1,7 @@
 {
   "id": "b300x4-20261022",
   "title": "4xB300 cross-framework (latest-vs-latest)",
-  "updated_at": "2026-10-30",
+  "updated_at": "2026-11-03",
   "source_report": "reports/round-20261022/",
   "source_script": "configs/benchmark/ (explicit matrix) + scripts/build_benchmark_config.py",
   "hardware": {
@@ -30,8 +30,10 @@
       "ideogram-ai/ideogram-4-fp8": "ee79a7237",
       "nvidia/Cosmos3-Nano": "e59a53c25"
     },
-    "sglang": "main 1ab008f5b0 (2026-10-29) for every cell except LTX-2.5 (main + sgl-project/sglang#47411, the native Gemma-4-Unified text encoder; main still loads it through transformers), FastH3 (main 82f7249ce6, not re-measured) and the retired LTX-2 / LTX-2.3 rows (preview tree 3042cea843). Measured on a second RunPod 4xB300 of the same spec; the closest competitor was re-run beside it on Wan2.2, Qwen T2I/Edit, H3 T2VA/Ref2VA and LTX-2.5. Details in reports/round-20261022/manifest.json.",
-    "harness": "round-20261022: 320a118 matrix pass, 850052a and bcb659a reruns, 72bdb18 encode-aligned video pass, f4bd198 sglang-main column and LTX-2.5",
+    "sglang": "main 1ab008f5b0 (2026-10-29) for every cell except Qwen-Image-2.1 T2I and Edit and both throughput cells (main ca819c11cd, re-measured 2026-11-02 on a RunPod 2xB300 of the same GPU, interleaved with vLLM-Omni over four rounds), LTX-2.5 (main + sgl-project/sglang#47411, the native Gemma-4-Unified text encoder; main still loads it through transformers), FastH3 (main 82f7249ce6, not re-measured) and the retired LTX-2 / LTX-2.3 rows (preview tree 3042cea843). The closest competitor was re-run beside sglang on Wan2.2, Qwen T2I/Edit, H3 T2VA/Ref2VA, LTX-2.5 and both throughput cells. Details in reports/round-20261022/manifest.json.",
+    "vllm_omni": "main 0da1d831 for every cell except the four re-measured on 2026-11-02 (main d94d8e98). Qwen-Image-2.1 is about 6% slower on d94d8e98, bisected to vllm-omni PR 9272; against 0da1d831 on the same box sglang leads T2I by 11.9%, T2I throughput by 10.3% and Edit by 11.9%.",
+    "throughput": "MiniMax-H3 throughput compares the multi-replica modes where a framework has one: sglang DP2 (one replica per GPU) against vLLM-Omni replica data parallelism 2. LightX2V, TRT-LLM and FastVideo have no multi-replica profile and run their 2-GPU intra-request command.",
+    "harness": "round-20261022: 320a118 matrix pass, 850052a and bcb659a reruns, 72bdb18 encode-aligned video pass, f4bd198 sglang-main column and LTX-2.5, 8168764 for the 2026-11-02 cells",
     "video_encode": "every configurable framework encodes the MP4 like its closest competitor; TRT-LLM and LightX2V hard-code x264 medium/CRF 23",
     "coverage": "LTX-2 and LTX-2.3 retire after this round and keep their rows; LTX-2.5 replaces them; FastH3 was not re-measured after the matrix pass"
   },
@@ -112,24 +114,24 @@
       "cells": {
         "sglang": {
           "gpus": 1,
-          "profile": "b200-1gpu-resident-fa",
+          "profile": "b300-1gpu-resident-fa-async-save",
           "status": "ok",
-          "latency_s": 2.147,
+          "latency_s": 2.097,
           "ratio_to_sglang": 1.0
         },
         "vllm-omni": {
           "gpus": 1,
           "profile": "blackwell-cudnn-static",
           "status": "ok",
-          "latency_s": 2.347,
-          "ratio_to_sglang": 1.093
+          "latency_s": 2.476,
+          "ratio_to_sglang": 1.181
         },
         "lightx2v": {
           "gpus": 1,
           "profile": "blackwell-sdpa",
           "status": "ok",
           "latency_s": 2.56,
-          "ratio_to_sglang": 1.192
+          "ratio_to_sglang": 1.221
         },
         "trtllm-visual": {
           "status": "unsupported",
@@ -140,7 +142,7 @@
           "profile": "blackwell-gpuonly-compile",
           "status": "ok",
           "latency_s": 3.049,
-          "ratio_to_sglang": 1.42
+          "ratio_to_sglang": 1.454
         },
         "fastvideo": {
           "status": "unsupported",
@@ -148,7 +150,7 @@
         }
       },
       "winner": "sglang",
-      "winner_speedup": "1.09x"
+      "winner_speedup": "1.18x"
     },
     {
       "case_id": "qwen_image_21_t2i_1024_2gpu",
@@ -202,15 +204,15 @@
           "gpus": 1,
           "profile": "b200-1gpu-resident-fa",
           "status": "ok",
-          "latency_s": 2.62,
+          "latency_s": 2.523,
           "ratio_to_sglang": 1.0
         },
         "vllm-omni": {
           "gpus": 1,
           "profile": "blackwell-cudnn-static",
           "status": "ok",
-          "latency_s": 2.84,
-          "ratio_to_sglang": 1.084
+          "latency_s": 3.064,
+          "ratio_to_sglang": 1.214
         },
         "lightx2v": {
           "status": "no_profile",
@@ -230,7 +232,7 @@
         }
       },
       "winner": "sglang",
-      "winner_speedup": "1.08x"
+      "winner_speedup": "1.21x"
     },
     {
       "case_id": "zimage_turbo_t2i_1024",
@@ -911,24 +913,24 @@
           "cells": {
             "sglang": {
               "gpus": 1,
-              "profile": "b200-1gpu-resident-fa",
+              "profile": "b300-1gpu-resident-fa-async-save",
               "status": "ok",
-              "latency_s": 2.147,
+              "latency_s": 2.097,
               "ratio_to_sglang": 1.0
             },
             "vllm-omni": {
               "gpus": 1,
               "profile": "blackwell-cudnn-static",
               "status": "ok",
-              "latency_s": 2.347,
-              "ratio_to_sglang": 1.093
+              "latency_s": 2.476,
+              "ratio_to_sglang": 1.181
             },
             "lightx2v": {
               "gpus": 1,
               "profile": "blackwell-sdpa",
               "status": "ok",
               "latency_s": 2.56,
-              "ratio_to_sglang": 1.192
+              "ratio_to_sglang": 1.221
             },
             "trtllm-visual": {
               "status": "unsupported",
@@ -939,7 +941,7 @@
               "profile": "blackwell-gpuonly-compile",
               "status": "ok",
               "latency_s": 3.049,
-              "ratio_to_sglang": 1.42
+              "ratio_to_sglang": 1.454
             },
             "fastvideo": {
               "status": "unsupported",
@@ -947,7 +949,7 @@
             }
           },
           "winner": "sglang",
-          "winner_speedup": "1.09x"
+          "winner_speedup": "1.18x"
         },
         {
           "case_id": "qwen_image_21_t2i_1024_2gpu",
@@ -1001,15 +1003,15 @@
               "gpus": 1,
               "profile": "b200-1gpu-resident-fa",
               "status": "ok",
-              "latency_s": 2.62,
+              "latency_s": 2.523,
               "ratio_to_sglang": 1.0
             },
             "vllm-omni": {
               "gpus": 1,
               "profile": "blackwell-cudnn-static",
               "status": "ok",
-              "latency_s": 2.84,
-              "ratio_to_sglang": 1.084
+              "latency_s": 3.064,
+              "ratio_to_sglang": 1.214
             },
             "lightx2v": {
               "status": "no_profile",
@@ -1029,7 +1031,7 @@
             }
           },
           "winner": "sglang",
-          "winner_speedup": "1.08x"
+          "winner_speedup": "1.21x"
         },
         {
           "case_id": "zimage_turbo_t2i_1024",
@@ -1640,8 +1642,8 @@
       "reproduce": "scripts/run_b300_full_20261022.sh",
       "reproduce_link": {
         "path": "scripts/run_b300_full_20261022.sh",
-        "ref": "eea12906b",
-        "url": "https://github.com/mickqian/diffusion-bench-framework/blob/eea12906b69904041442b5fca9ae6097c8ae6f3f/scripts/run_b300_full_20261022.sh"
+        "ref": "c7a3e8635",
+        "url": "https://github.com/mickqian/diffusion-bench-framework/blob/c7a3e8635778e78eaae300451a85c9bed677e7fc/scripts/run_b300_full_20261022.sh"
       },
       "round": "round-20261022",
       "round_label": "Round 2026-10-22"
@@ -1677,9 +1679,9 @@
           "cells": {
             "sglang": {
               "gpus": 1,
-              "profile": "b200-1gpu-resident-fa",
+              "profile": "b300-1gpu-resident-fa-async-save",
               "status": "ok",
-              "qps": 0.468,
+              "qps": 0.4804,
               "num_requests": 4,
               "concurrency": 2,
               "ratio_to_sglang": 1.0
@@ -1688,10 +1690,10 @@
               "gpus": 1,
               "profile": "blackwell-cudnn-static",
               "status": "ok",
-              "qps": 0.4361,
+              "qps": 0.3939,
               "num_requests": 4,
               "concurrency": 2,
-              "ratio_to_sglang": 0.932
+              "ratio_to_sglang": 0.82
             },
             "lightx2v": {
               "gpus": 1,
@@ -1700,7 +1702,7 @@
               "qps": 0.3625,
               "num_requests": 4,
               "concurrency": 2,
-              "ratio_to_sglang": 0.775
+              "ratio_to_sglang": 0.755
             },
             "trtllm-visual": {
               "status": "unsupported",
@@ -1713,7 +1715,7 @@
               "qps": 0.3202,
               "num_requests": 4,
               "concurrency": 2,
-              "ratio_to_sglang": 0.684
+              "ratio_to_sglang": 0.667
             },
             "fastvideo": {
               "status": "unsupported",
@@ -1721,7 +1723,7 @@
             }
           },
           "winner": "sglang",
-          "winner_speedup": "1.07x"
+          "winner_speedup": "1.22x"
         },
         {
           "case_id": "minimax_h3_t2va_5s",
@@ -1732,21 +1734,21 @@
           "cells": {
             "sglang": {
               "gpus": 2,
-              "profile": "b300-noexp",
+              "profile": "dp2-throughput",
               "status": "ok",
-              "qps": 0.016,
+              "qps": 0.0168,
               "num_requests": 4,
               "concurrency": 2,
               "ratio_to_sglang": 1.0
             },
             "vllm-omni": {
               "gpus": 2,
-              "profile": "blackwell-2gpu-static",
+              "profile": "replica2-throughput",
               "status": "ok",
-              "qps": 0.0145,
+              "qps": 0.016,
               "num_requests": 4,
               "concurrency": 2,
-              "ratio_to_sglang": 0.906
+              "ratio_to_sglang": 0.952
             },
             "lightx2v": {
               "gpus": 2,
@@ -1755,7 +1757,7 @@
               "qps": 0.0138,
               "num_requests": 4,
               "concurrency": 2,
-              "ratio_to_sglang": 0.862
+              "ratio_to_sglang": 0.821
             },
             "trtllm-visual": {
               "gpus": 2,
@@ -1764,7 +1766,7 @@
               "qps": 0.0147,
               "num_requests": 4,
               "concurrency": 2,
-              "ratio_to_sglang": 0.919
+              "ratio_to_sglang": 0.875
             },
             "comfyui": {
               "gpus": 1,
@@ -1773,7 +1775,7 @@
               "qps": 0.0033,
               "num_requests": 4,
               "concurrency": 2,
-              "ratio_to_sglang": 0.206
+              "ratio_to_sglang": 0.196
             },
             "fastvideo": {
               "gpus": 2,
@@ -1782,18 +1784,18 @@
               "qps": 0.0133,
               "num_requests": 4,
               "concurrency": 2,
-              "ratio_to_sglang": 0.831
+              "ratio_to_sglang": 0.792
             }
           },
           "winner": "sglang",
-          "winner_speedup": "1.09x"
+          "winner_speedup": "1.05x"
         }
       ],
       "reproduce": "scripts/run_b300_full_20261022.sh",
       "reproduce_link": {
         "path": "scripts/run_b300_full_20261022.sh",
-        "ref": "eea12906b",
-        "url": "https://github.com/mickqian/diffusion-bench-framework/blob/eea12906b69904041442b5fca9ae6097c8ae6f3f/scripts/run_b300_full_20261022.sh"
+        "ref": "c7a3e8635",
+        "url": "https://github.com/mickqian/diffusion-bench-framework/blob/c7a3e8635778e78eaae300451a85c9bed677e7fc/scripts/run_b300_full_20261022.sh"
       },
       "round": "round-20261022",
       "round_label": "Round 2026-10-22"
@@ -1825,61 +1827,46 @@
     {
       "mode": "single_e2e",
       "metric": "latency_s",
-      "case_id": "qwen_image_21_edit_1024",
-      "case": "Qwen-Image-2.1 edit 1024 (one reference) · 1 GPU",
+      "case_id": "minimax_h3_ref2va_5s",
+      "case": "MiniMax-H3 Ref2V+A · 2 GPUs",
       "hardware": "4x NVIDIA B300 SXM6 AC 275GB",
       "sglang": {
-        "gpus": 1,
-        "latency_s": 2.62,
-        "diagnostic_client_latency_s": 2.615,
-        "diagnostic_stage_sum_s": 2.419,
-        "unattributed_tail_s": 0.196,
-        "unattributed_tail_frac": 0.075
+        "gpus": 2,
+        "latency_s": 96.484,
+        "diagnostic_client_latency_s": 96.482,
+        "diagnostic_stage_sum_s": 94.64,
+        "unattributed_tail_s": 1.841,
+        "unattributed_tail_frac": 0.019,
+        "poll_interval_s": 0.02
       },
       "fastest_competitor": {
         "framework": "vllm-omni",
-        "gpus": 1,
-        "latency_s": 2.84
+        "gpus": 2,
+        "latency_s": 106.154
       },
-      "ratio_to_sglang": 1.084
+      "ratio_to_sglang": 1.1
     },
     {
       "mode": "single_e2e",
       "metric": "latency_s",
-      "case_id": "qwen_image_21_t2i_1024",
-      "case": "Qwen-Image-2.1 T2I 1024 · 1 GPU",
+      "case_id": "minimax_h3_t2va_5s",
+      "case": "MiniMax-H3 T2V+A · 2 GPUs",
       "hardware": "4x NVIDIA B300 SXM6 AC 275GB",
       "sglang": {
-        "gpus": 1,
-        "latency_s": 2.147,
-        "diagnostic_client_latency_s": 2.162,
-        "diagnostic_stage_sum_s": 1.976,
-        "unattributed_tail_s": 0.185,
-        "unattributed_tail_frac": 0.086
+        "gpus": 2,
+        "latency_s": 62.609,
+        "diagnostic_client_latency_s": 62.532,
+        "diagnostic_stage_sum_s": 61.499,
+        "unattributed_tail_s": 1.034,
+        "unattributed_tail_frac": 0.017,
+        "poll_interval_s": 0.02
       },
       "fastest_competitor": {
         "framework": "vllm-omni",
-        "gpus": 1,
-        "latency_s": 2.347
+        "gpus": 2,
+        "latency_s": 69.017
       },
-      "ratio_to_sglang": 1.093
-    },
-    {
-      "mode": "throughput",
-      "metric": "qps",
-      "case_id": "qwen_image_21_t2i_1024",
-      "case": "Qwen-Image-2.1 T2I 1024 · 1 GPU",
-      "hardware": "4x NVIDIA B300 SXM6 AC 275GB",
-      "sglang": {
-        "gpus": 1,
-        "qps": 0.468
-      },
-      "fastest_competitor": {
-        "framework": "vllm-omni",
-        "gpus": 1,
-        "qps": 0.4361
-      },
-      "ratio_to_sglang": 0.932
+      "ratio_to_sglang": 1.102
     },
     {
       "mode": "throughput",
@@ -1889,14 +1876,31 @@
       "hardware": "4x NVIDIA B300 SXM6 AC 275GB",
       "sglang": {
         "gpus": 2,
-        "qps": 0.016
+        "qps": 0.0168
       },
       "fastest_competitor": {
-        "framework": "trtllm-visual",
+        "framework": "vllm-omni",
         "gpus": 2,
-        "qps": 0.0147
+        "qps": 0.016
       },
-      "ratio_to_sglang": 0.919
+      "ratio_to_sglang": 0.952
+    },
+    {
+      "mode": "throughput",
+      "metric": "qps",
+      "case_id": "qwen_image_21_t2i_1024",
+      "case": "Qwen-Image-2.1 T2I 1024 · 1 GPU",
+      "hardware": "4x NVIDIA B300 SXM6 AC 275GB",
+      "sglang": {
+        "gpus": 1,
+        "qps": 0.4804
+      },
+      "fastest_competitor": {
+        "framework": "vllm-omni",
+        "gpus": 1,
+        "qps": 0.3939
+      },
+      "ratio_to_sglang": 0.82
     }
   ]
 }

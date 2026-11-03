@@ -1,6 +1,6 @@
 {
   "id": "historical-cross-framework-20260610",
-  "updated_at": "2026-11-02",
+  "updated_at": "2026-11-03",
   "frameworks": {
     "sglang": "SGLang-Diffusion",
     "vllm-omni": "vLLM-Omni",
@@ -23,226 +23,6 @@
     "h200_throughput_other_wins": 0
   },
   "sections": [
-    {
-      "id": "b300x2-supp-20261102_single_e2e",
-      "run": "b300x2-supp-20261102",
-      "run_label": "2xB300 supplement: Qwen-Image-2.1 + MiniMax-H3 throughput (latest-vs-latest)",
-      "date": "2026-11-02",
-      "gpu": "2x NVIDIA B300 SXM6 AC 275GB",
-      "title": "2xB300 supplement: Qwen-Image-2.1 + MiniMax-H3 throughput (latest-vs-latest)",
-      "subtitle": "Steady-state single-request latency, best lossless config per framework (compile on, no caches, no quantization). SGLang-Diffusion fastest in 2/2 comparable cases.",
-      "mode": "single_e2e",
-      "framework_versions": {
-        "sglang": "0.5.23 @ ca819c11c",
-        "vllm-omni": "vllm-omni 0.32.0rc2.dev305+gd94d8e980 + vllm 0.32.0"
-      },
-      "summary": {
-        "sglang_wins": 2,
-        "comparable": 2
-      },
-      "rows": [
-        {
-          "case_id": "qwen_image_21_t2i_1024",
-          "case": "Qwen-Image-2.1 T2I 1024 · 1 GPU",
-          "details": "1024x1024 · 40 steps · cfg 1",
-          "gpus": "1 GPU",
-          "mode": "single_e2e",
-          "cells": {
-            "sglang": {
-              "gpus": 1,
-              "profile": "b300-1gpu-resident-fa-async-save",
-              "status": "ok",
-              "latency_s": 2.097,
-              "ratio_to_sglang": 1.0
-            },
-            "vllm-omni": {
-              "gpus": 1,
-              "profile": "blackwell-cudnn-static",
-              "status": "ok",
-              "latency_s": 2.476,
-              "ratio_to_sglang": 1.181
-            },
-            "lightx2v": {
-              "status": "not_run"
-            },
-            "trtllm-visual": {
-              "status": "unsupported",
-              "reason": "TensorRT-LLM VisualGen carries a Qwen-Image pipeline (tensorrt_llm/_torch/visual_gen/models/qwen_image/) but nothing for the 2.1 architecture: a code search for QwenImage21 / Qwen-Image-2.1 over NVIDIA/TensorRT-LLM returns no hits, and the model is absent from pipeline_registry.py. Qwen-Image-2.1 is a distinct architecture (QwenImage21Pipeline / QwenImage21Transformer2DModel / AutoencoderKLQwenImage21 / Qwen3-VL encoder), so the existing Qwen-Image pipeline does not cover it."
-            },
-            "comfyui": {
-              "status": "not_run"
-            },
-            "fastvideo": {
-              "status": "unsupported",
-              "reason": "No Qwen-Image pipeline in FastVideo main (2b164405c3d1, 2026-10-07)."
-            }
-          },
-          "winner": "sglang",
-          "winner_speedup": "1.18x"
-        },
-        {
-          "case_id": "qwen_image_21_edit_1024",
-          "case": "Qwen-Image-2.1 edit 1024 (one reference) · 1 GPU",
-          "details": "1024x1024 · 40 steps · cfg 1",
-          "gpus": "1 GPU",
-          "mode": "single_e2e",
-          "cells": {
-            "sglang": {
-              "gpus": 1,
-              "profile": "b200-1gpu-resident-fa",
-              "status": "ok",
-              "latency_s": 2.523,
-              "ratio_to_sglang": 1.0
-            },
-            "vllm-omni": {
-              "gpus": 1,
-              "profile": "blackwell-cudnn-static",
-              "status": "ok",
-              "latency_s": 3.064,
-              "ratio_to_sglang": 1.214
-            },
-            "lightx2v": {
-              "status": "no_profile",
-              "reason": "LightX2V's Qwen-Image-2.1 integration is validated in this harness for t2i only (lightx2v_task t2i); its image-conditioned path has no validated profile yet (2026-10-10)."
-            },
-            "trtllm-visual": {
-              "status": "unsupported",
-              "reason": "TensorRT-LLM VisualGen carries a Qwen-Image pipeline (tensorrt_llm/_torch/visual_gen/models/qwen_image/) but nothing for the 2.1 architecture: a code search for QwenImage21 / Qwen-Image-2.1 over NVIDIA/TensorRT-LLM returns no hits, and the model is absent from pipeline_registry.py. Qwen-Image-2.1 is a distinct architecture (QwenImage21Pipeline / QwenImage21Transformer2DModel / AutoencoderKLQwenImage21 / Qwen3-VL encoder), so the existing Qwen-Image pipeline does not cover it."
-            },
-            "comfyui": {
-              "status": "no_profile",
-              "reason": "The harness's Qwen-Image-2.1 graph is the official t2i template; an edit graph wiring the reference into its images.image_1 input has not been built and validated yet (2026-10-10)."
-            },
-            "fastvideo": {
-              "status": "unsupported",
-              "reason": "No Qwen-Image pipeline in FastVideo main (2b164405c3d1, 2026-10-07)."
-            }
-          },
-          "winner": "sglang",
-          "winner_speedup": "1.21x"
-        }
-      ],
-      "reproduce": "scripts/b300_supp_20261102/run_supp_ab.sh",
-      "reproduce_link": {
-        "path": "scripts/b300_supp_20261102/run_supp_ab.sh",
-        "ref": "10874dee7",
-        "url": "https://github.com/mickqian/diffusion-bench-framework/blob/10874dee7c0e1ba30f74ebdffb5644f438f23f42/scripts/b300_supp_20261102/run_supp_ab.sh"
-      },
-      "round": "round-20261102-supp",
-      "round_label": "Supplement 2026-11-02 (2xB300)"
-    },
-    {
-      "id": "b300x2-supp-20261102_throughput",
-      "run": "b300x2-supp-20261102",
-      "run_label": "2xB300 supplement: Qwen-Image-2.1 + MiniMax-H3 throughput (latest-vs-latest)",
-      "date": "2026-11-02",
-      "gpu": "2x NVIDIA B300 SXM6 AC 275GB",
-      "title": "2xB300 supplement: Qwen-Image-2.1 + MiniMax-H3 throughput (latest-vs-latest) — throughput",
-      "subtitle": "High-pressure throughput on a representative pair (one popular image model, one video+audio case) — the matrix is deliberately not swept, see configs/benchmark/workloads.json. SGLang-Diffusion highest QPS in 2/2 comparable cases.",
-      "mode": "throughput",
-      "framework_versions": {
-        "sglang": "0.5.23 @ ca819c11c",
-        "vllm-omni": "vllm-omni 0.32.0rc2.dev305+gd94d8e980 + vllm 0.32.0"
-      },
-      "summary": {
-        "sglang_wins": 2,
-        "comparable": 2
-      },
-      "rows": [
-        {
-          "case_id": "qwen_image_21_t2i_1024",
-          "case": "Qwen-Image-2.1 T2I 1024 · 1 GPU",
-          "details": "1024x1024 · 40 steps · cfg 1",
-          "gpus": "1 GPU",
-          "mode": "throughput",
-          "cells": {
-            "sglang": {
-              "gpus": 1,
-              "profile": "b300-1gpu-resident-fa-async-save",
-              "status": "ok",
-              "qps": 0.4804,
-              "num_requests": 4,
-              "concurrency": 2,
-              "ratio_to_sglang": 1.0
-            },
-            "vllm-omni": {
-              "gpus": 1,
-              "profile": "blackwell-cudnn-static",
-              "status": "ok",
-              "qps": 0.3939,
-              "num_requests": 4,
-              "concurrency": 2,
-              "ratio_to_sglang": 0.82
-            },
-            "lightx2v": {
-              "status": "not_run"
-            },
-            "trtllm-visual": {
-              "status": "unsupported",
-              "reason": "TensorRT-LLM VisualGen carries a Qwen-Image pipeline (tensorrt_llm/_torch/visual_gen/models/qwen_image/) but nothing for the 2.1 architecture: a code search for QwenImage21 / Qwen-Image-2.1 over NVIDIA/TensorRT-LLM returns no hits, and the model is absent from pipeline_registry.py. Qwen-Image-2.1 is a distinct architecture (QwenImage21Pipeline / QwenImage21Transformer2DModel / AutoencoderKLQwenImage21 / Qwen3-VL encoder), so the existing Qwen-Image pipeline does not cover it."
-            },
-            "comfyui": {
-              "status": "not_run"
-            },
-            "fastvideo": {
-              "status": "unsupported",
-              "reason": "No Qwen-Image pipeline in FastVideo main (2b164405c3d1, 2026-10-07)."
-            }
-          },
-          "winner": "sglang",
-          "winner_speedup": "1.22x"
-        },
-        {
-          "case_id": "minimax_h3_t2va_5s",
-          "case": "MiniMax-H3 T2V+A · 2 GPUs",
-          "details": "1344x768x124f · 50 steps · cfg ?",
-          "gpus": "2 GPU",
-          "mode": "throughput",
-          "cells": {
-            "sglang": {
-              "gpus": 2,
-              "profile": "dp2-throughput",
-              "status": "ok",
-              "qps": 0.0168,
-              "num_requests": 4,
-              "concurrency": 2,
-              "ratio_to_sglang": 1.0
-            },
-            "vllm-omni": {
-              "gpus": 2,
-              "profile": "replica2-throughput",
-              "status": "ok",
-              "qps": 0.016,
-              "num_requests": 4,
-              "concurrency": 2,
-              "ratio_to_sglang": 0.952
-            },
-            "lightx2v": {
-              "status": "not_run"
-            },
-            "trtllm-visual": {
-              "status": "not_run"
-            },
-            "comfyui": {
-              "status": "not_run"
-            },
-            "fastvideo": {
-              "status": "not_run"
-            }
-          },
-          "winner": "sglang",
-          "winner_speedup": "1.05x"
-        }
-      ],
-      "reproduce": "scripts/b300_supp_20261102/run_supp_ab.sh",
-      "reproduce_link": {
-        "path": "scripts/b300_supp_20261102/run_supp_ab.sh",
-        "ref": "10874dee7",
-        "url": "https://github.com/mickqian/diffusion-bench-framework/blob/10874dee7c0e1ba30f74ebdffb5644f438f23f42/scripts/b300_supp_20261102/run_supp_ab.sh"
-      },
-      "round": "round-20261102-supp",
-      "round_label": "Supplement 2026-11-02 (2xB300)"
-    },
     {
       "id": "b300x4-20261022_single_e2e",
       "run": "b300x4-20261022",
@@ -315,24 +95,24 @@
           "cells": {
             "sglang": {
               "gpus": 1,
-              "profile": "b200-1gpu-resident-fa",
+              "profile": "b300-1gpu-resident-fa-async-save",
               "status": "ok",
-              "latency_s": 2.147,
+              "latency_s": 2.097,
               "ratio_to_sglang": 1.0
             },
             "vllm-omni": {
               "gpus": 1,
               "profile": "blackwell-cudnn-static",
               "status": "ok",
-              "latency_s": 2.347,
-              "ratio_to_sglang": 1.093
+              "latency_s": 2.476,
+              "ratio_to_sglang": 1.181
             },
             "lightx2v": {
               "gpus": 1,
               "profile": "blackwell-sdpa",
               "status": "ok",
               "latency_s": 2.56,
-              "ratio_to_sglang": 1.192
+              "ratio_to_sglang": 1.221
             },
             "trtllm-visual": {
               "status": "unsupported",
@@ -343,7 +123,7 @@
               "profile": "blackwell-gpuonly-compile",
               "status": "ok",
               "latency_s": 3.049,
-              "ratio_to_sglang": 1.42
+              "ratio_to_sglang": 1.454
             },
             "fastvideo": {
               "status": "unsupported",
@@ -351,7 +131,7 @@
             }
           },
           "winner": "sglang",
-          "winner_speedup": "1.09x"
+          "winner_speedup": "1.18x"
         },
         {
           "case_id": "qwen_image_21_t2i_1024_2gpu",
@@ -405,15 +185,15 @@
               "gpus": 1,
               "profile": "b200-1gpu-resident-fa",
               "status": "ok",
-              "latency_s": 2.62,
+              "latency_s": 2.523,
               "ratio_to_sglang": 1.0
             },
             "vllm-omni": {
               "gpus": 1,
               "profile": "blackwell-cudnn-static",
               "status": "ok",
-              "latency_s": 2.84,
-              "ratio_to_sglang": 1.084
+              "latency_s": 3.064,
+              "ratio_to_sglang": 1.214
             },
             "lightx2v": {
               "status": "no_profile",
@@ -433,7 +213,7 @@
             }
           },
           "winner": "sglang",
-          "winner_speedup": "1.08x"
+          "winner_speedup": "1.21x"
         },
         {
           "case_id": "zimage_turbo_t2i_1024",
@@ -1044,8 +824,8 @@
       "reproduce": "scripts/run_b300_full_20261022.sh",
       "reproduce_link": {
         "path": "scripts/run_b300_full_20261022.sh",
-        "ref": "eea12906b",
-        "url": "https://github.com/mickqian/diffusion-bench-framework/blob/eea12906b69904041442b5fca9ae6097c8ae6f3f/scripts/run_b300_full_20261022.sh"
+        "ref": "c7a3e8635",
+        "url": "https://github.com/mickqian/diffusion-bench-framework/blob/c7a3e8635778e78eaae300451a85c9bed677e7fc/scripts/run_b300_full_20261022.sh"
       },
       "round": "round-20261022",
       "round_label": "Round 2026-10-22"
@@ -1081,9 +861,9 @@
           "cells": {
             "sglang": {
               "gpus": 1,
-              "profile": "b200-1gpu-resident-fa",
+              "profile": "b300-1gpu-resident-fa-async-save",
               "status": "ok",
-              "qps": 0.468,
+              "qps": 0.4804,
               "num_requests": 4,
               "concurrency": 2,
               "ratio_to_sglang": 1.0
@@ -1092,10 +872,10 @@
               "gpus": 1,
               "profile": "blackwell-cudnn-static",
               "status": "ok",
-              "qps": 0.4361,
+              "qps": 0.3939,
               "num_requests": 4,
               "concurrency": 2,
-              "ratio_to_sglang": 0.932
+              "ratio_to_sglang": 0.82
             },
             "lightx2v": {
               "gpus": 1,
@@ -1104,7 +884,7 @@
               "qps": 0.3625,
               "num_requests": 4,
               "concurrency": 2,
-              "ratio_to_sglang": 0.775
+              "ratio_to_sglang": 0.755
             },
             "trtllm-visual": {
               "status": "unsupported",
@@ -1117,7 +897,7 @@
               "qps": 0.3202,
               "num_requests": 4,
               "concurrency": 2,
-              "ratio_to_sglang": 0.684
+              "ratio_to_sglang": 0.667
             },
             "fastvideo": {
               "status": "unsupported",
@@ -1125,7 +905,7 @@
             }
           },
           "winner": "sglang",
-          "winner_speedup": "1.07x"
+          "winner_speedup": "1.22x"
         },
         {
           "case_id": "minimax_h3_t2va_5s",
@@ -1136,21 +916,21 @@
           "cells": {
             "sglang": {
               "gpus": 2,
-              "profile": "b300-noexp",
+              "profile": "dp2-throughput",
               "status": "ok",
-              "qps": 0.016,
+              "qps": 0.0168,
               "num_requests": 4,
               "concurrency": 2,
               "ratio_to_sglang": 1.0
             },
             "vllm-omni": {
               "gpus": 2,
-              "profile": "blackwell-2gpu-static",
+              "profile": "replica2-throughput",
               "status": "ok",
-              "qps": 0.0145,
+              "qps": 0.016,
               "num_requests": 4,
               "concurrency": 2,
-              "ratio_to_sglang": 0.906
+              "ratio_to_sglang": 0.952
             },
             "lightx2v": {
               "gpus": 2,
@@ -1159,7 +939,7 @@
               "qps": 0.0138,
               "num_requests": 4,
               "concurrency": 2,
-              "ratio_to_sglang": 0.862
+              "ratio_to_sglang": 0.821
             },
             "trtllm-visual": {
               "gpus": 2,
@@ -1168,7 +948,7 @@
               "qps": 0.0147,
               "num_requests": 4,
               "concurrency": 2,
-              "ratio_to_sglang": 0.919
+              "ratio_to_sglang": 0.875
             },
             "comfyui": {
               "gpus": 1,
@@ -1177,7 +957,7 @@
               "qps": 0.0033,
               "num_requests": 4,
               "concurrency": 2,
-              "ratio_to_sglang": 0.206
+              "ratio_to_sglang": 0.196
             },
             "fastvideo": {
               "gpus": 2,
@@ -1186,18 +966,18 @@
               "qps": 0.0133,
               "num_requests": 4,
               "concurrency": 2,
-              "ratio_to_sglang": 0.831
+              "ratio_to_sglang": 0.792
             }
           },
           "winner": "sglang",
-          "winner_speedup": "1.09x"
+          "winner_speedup": "1.05x"
         }
       ],
       "reproduce": "scripts/run_b300_full_20261022.sh",
       "reproduce_link": {
         "path": "scripts/run_b300_full_20261022.sh",
-        "ref": "eea12906b",
-        "url": "https://github.com/mickqian/diffusion-bench-framework/blob/eea12906b69904041442b5fca9ae6097c8ae6f3f/scripts/run_b300_full_20261022.sh"
+        "ref": "c7a3e8635",
+        "url": "https://github.com/mickqian/diffusion-bench-framework/blob/c7a3e8635778e78eaae300451a85c9bed677e7fc/scripts/run_b300_full_20261022.sh"
       },
       "round": "round-20261022",
       "round_label": "Round 2026-10-22"

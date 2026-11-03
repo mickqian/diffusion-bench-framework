@@ -1,0 +1,186 @@
+{
+ "timestamp": "2026-11-02T03:26:37.978314+00:00",
+ "commit_sha": "81687645b21ec83faee9bdaf13b8890cde442d3e",
+ "run_id": "local",
+ "hardware": {
+  "runner_labels": null,
+  "gpu_config": null,
+  "gpus": [
+   "NVIDIA B300 SXM6 AC, 275040 MiB, 595.91.07",
+   "NVIDIA B300 SXM6 AC, 275040 MiB, 595.91.07"
+  ],
+  "hardware_profile_override": "b300"
+ },
+ "sglang_runtime": {
+  "package_version": "0.5.23",
+  "module_path": "/workspace/r1102/sgl/python/sglang/__init__.py",
+  "git_root": "/workspace/r1102/sgl",
+  "git_commit": "ca819c11cd2cd886bb651a4b44e000ab11f7e7ea"
+ },
+ "framework_runtime": {
+  "venv_root": "/workspace/r1102/fw-venvs",
+  "install_specs": {
+   "vllm": "vllm==0.32.0",
+   "vllm_omni": "git+https://github.com/vllm-project/vllm-omni.git@d94d8e9809d8b56e4c58e37a39ddf454ab61f2fd",
+   "lightx2v": "git+https://github.com/ModelTC/LightX2V.git@7efd05f8e1425b83321fd4f1cef779ef6504076f",
+   "lightx2v_flash_attn": "flash-attn==2.8.3",
+   "lightx2v_flash_attn3": "",
+   "lightx2v_fa3_hf_repo": "varunneal/flash-attention-3",
+   "lightx2v_fa3_hf_revision": "de87b9b5af06dd9984df595bef90b2eba44b181a",
+   "lightx2v_fa3_hf_subdir": "build/torch28-cxx11-cu128-x86_64-linux/flash_attention_3",
+   "lightx2v_flashinfer": "flashinfer-python==0.6.11",
+   "trtllm": "tensorrt-llm==1.3.0rc18",
+   "fastvideo": "https://github.com/hao-ai-lab/FastVideo.git@main",
+   "torch_cuda_arch_list": ""
+  },
+  "launchers": {
+   "vllm_omni_server_bin": "vllm",
+   "vllm_omni_required_help_args": "--omni",
+   "trtllm_visual_server_bin": "trtllm-serve"
+  },
+  "vllm-omni": {
+   "venv_path": "/workspace/r1102/fw-venvs/vllm-omni",
+   "packages": {
+    "vllm": {
+     "Name": "vllm",
+     "Version": "0.32.0",
+     "Home-page": "https://github.com/vllm-project/vllm",
+     "Location": "/workspace/r1102/fw-venvs/vllm-omni/lib/python3.12/site-packages"
+    },
+    "vllm-omni": {
+     "Name": "vllm-omni",
+     "Version": "0.32.0rc2.dev305+gd94d8e980",
+     "Home-page": "https://github.com/vllm-project/vllm-omni",
+     "Location": "/workspace/r1102/fw-venvs/vllm-omni/lib/python3.12/site-packages"
+    },
+    "torch": {
+     "Name": "torch",
+     "Version": "2.13.0",
+     "Home-page": "https://pytorch.org",
+     "Location": "/workspace/r1102/fw-venvs/vllm-omni/lib/python3.12/site-packages"
+    },
+    "transformers": {
+     "Name": "transformers",
+     "Version": "5.19.0",
+     "Home-page": "https://github.com/huggingface/transformers",
+     "Location": "/workspace/r1102/fw-venvs/vllm-omni/lib/python3.12/site-packages"
+    },
+    "diffusers": {
+     "Name": "diffusers",
+     "Version": "0.40.0",
+     "Home-page": "https://github.com/huggingface/diffusers",
+     "Location": "/workspace/r1102/fw-venvs/vllm-omni/lib/python3.12/site-packages"
+    },
+    "huggingface_hub": {
+     "Name": "huggingface_hub",
+     "Version": "1.33.0",
+     "Home-page": "https://github.com/huggingface/huggingface_hub",
+     "Location": "/workspace/r1102/fw-venvs/vllm-omni/lib/python3.12/site-packages"
+    }
+   },
+   "direct_urls": {
+    "vllm_omni-0.32.0rc2.dev305+gd94d8e980.dist-info": {
+     "url": "file:///workspace/r1102/fw-venvs/vllm-omni/src/vllm-omni",
+     "dir_info": {
+      "editable": true
+     }
+    }
+   }
+  },
+  "lightx2v": {
+   "venv_path": "/workspace/r1102/fw-venvs/lightx2v"
+  },
+  "trtllm-visual": {
+   "venv_path": "/workspace/r1102/fw-venvs/trtllm-visual"
+  },
+  "comfyui": {
+   "venv_path": "/workspace/r1102/fw-venvs/comfyui"
+  },
+  "fastvideo": {
+   "venv_path": "/workspace/r1102/fw-venvs/fastvideo"
+  }
+ },
+ "benchmark_env": {},
+ "benchmark_framework_args": {
+  "vllm-omni": [],
+  "lightx2v": {
+   "config": {
+    "use_compile": true
+   }
+  },
+  "fastvideo": []
+ },
+ "torch_compile_disabled": false,
+ "benchmark_modes": [
+  "throughput"
+ ],
+ "requested_sglang_profile": "auto",
+ "request_inputs": "distinct-per-request",
+ "results": [],
+ "throughput_results": [
+  {
+   "case_id": "minimax_h3_t2va_5s",
+   "framework": "vllm-omni",
+   "mode": "throughput",
+   "model": "MiniMaxAI/MiniMax-H3",
+   "task": "text-to-video",
+   "width": 1344,
+   "height": 768,
+   "num_frames": 124,
+   "fps": 24,
+   "num_inference_steps": 50,
+   "guidance_scale": null,
+   "guidance_scale_2": null,
+   "true_cfg_scale": null,
+   "negative_prompt_set": false,
+   "num_gpus": 2,
+   "latency_s": 124.274,
+   "error": null,
+   "framework_metadata": {
+    "profile": "replica2-throughput",
+    "profile_request": "replica2-throughput",
+    "profile_source": "explicit",
+    "framework_ref": "vllm-omni 0da1d831e + vllm 0.32.0",
+    "hardware": null,
+    "hardware_candidates": [
+     "b300"
+    ],
+    "description": "Throughput-only fairness arm for sglang dp2-throughput: vLLM-Omni's native replica data parallelism, one GPU per replica.",
+    "notes": "vLLM-Omni's replica-DP (examples/online_serving/replica_data_parallel; stage num_replicas + devices via --stage-overrides): blackwell-2gpu-static with every intra-request degree at 1, two single-GPU replicas. --omni-lb-policy round-robin instead of the default random so the harness's sequential warmups reach both replicas. Select explicitly in the throughput invocation (DIFFUSION_BENCH_VLLM_OMNI_PROFILE=replica2-throughput); no `hardware` key, single_e2e keeps blackwell-2gpu-static. 2026-10-30 b300final: 250.535/250.505 s against blackwell-2gpu-static's 276.55 s.",
+    "install_specs": null,
+    "server_bin": null,
+    "use_omni_arg": null,
+    "required_help_args": null,
+    "serve_args": "--trust-remote-code --task-type fl2va --num-gpus 1 --tensor-parallel-size 1 --usp 1 --ring 1 --text-encoder-tp-size 1 --vae-use-tiling --diffusion-attention-backend CUDNN_ATTN --no-diffusion-compile-dynamic --omni-lb-policy round-robin --stage-overrides {\"0\":{\"num_replicas\":2,\"devices\":\"0,1\"}}",
+    "num_gpus": 2,
+    "extra_env_keys": [
+     "VLLM_OMNI_VIDEO_SYNC_TIMEOUT",
+     "VLLM_WORKER_MULTIPROC_METHOD"
+    ],
+    "request_inputs": "distinct-per-request"
+   },
+   "server_command": "vllm serve MiniMaxAI/MiniMax-H3 --port 61310 --host 127.0.0.1 --omni --trust-remote-code --task-type fl2va --num-gpus 1 --tensor-parallel-size 1 --usp 1 --ring 1 --text-encoder-tp-size 1 --vae-use-tiling --diffusion-attention-backend CUDNN_ATTN --no-diffusion-compile-dynamic --omni-lb-policy round-robin --stage-overrides '{\"0\":{\"num_replicas\":2,\"devices\":\"0,1\"}}'",
+   "metrics": {
+    "duration_s": 250.551,
+    "num_requests": 4,
+    "completed_requests": 4,
+    "failed_requests": 0,
+    "max_concurrency": 2,
+    "throughput_rps": 0.016,
+    "output_throughput_ops": 0.016,
+    "latency_mean_s": 124.023,
+    "latency_p50_s": 124.274,
+    "latency_p90_s": 125.275,
+    "latency_p95_s": 125.275,
+    "latency_p99_s": 125.275,
+    "errors": [],
+    "server_startup_s": 166.18,
+    "warmup_s": 419.75
+   }
+  }
+ ],
+ "partial": false,
+ "model_revisions": {
+  "MiniMaxAI/MiniMax-H3": "42ed227ee7df40d41602854ae760620d6eb651fe"
+ }
+}

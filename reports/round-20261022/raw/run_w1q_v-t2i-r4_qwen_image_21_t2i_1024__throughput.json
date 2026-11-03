@@ -1,0 +1,191 @@
+{
+ "timestamp": "2026-11-02T02:55:49.615804+00:00",
+ "commit_sha": "81687645b21ec83faee9bdaf13b8890cde442d3e",
+ "run_id": "local",
+ "hardware": {
+  "runner_labels": null,
+  "gpu_config": null,
+  "gpus": [
+   "NVIDIA B300 SXM6 AC, 275040 MiB, 595.91.07",
+   "NVIDIA B300 SXM6 AC, 275040 MiB, 595.91.07"
+  ],
+  "hardware_profile_override": "b300"
+ },
+ "sglang_runtime": {
+  "package_version": "0.5.23",
+  "module_path": "/workspace/r1102/sgl/python/sglang/__init__.py",
+  "git_root": "/workspace/r1102/sgl",
+  "git_commit": "ca819c11cd2cd886bb651a4b44e000ab11f7e7ea"
+ },
+ "framework_runtime": {
+  "venv_root": "/workspace/r1102/fw-venvs",
+  "install_specs": {
+   "vllm": "vllm==0.32.0",
+   "vllm_omni": "git+https://github.com/vllm-project/vllm-omni.git@d94d8e9809d8b56e4c58e37a39ddf454ab61f2fd",
+   "lightx2v": "git+https://github.com/ModelTC/LightX2V.git@7efd05f8e1425b83321fd4f1cef779ef6504076f",
+   "lightx2v_flash_attn": "flash-attn==2.8.3",
+   "lightx2v_flash_attn3": "",
+   "lightx2v_fa3_hf_repo": "varunneal/flash-attention-3",
+   "lightx2v_fa3_hf_revision": "de87b9b5af06dd9984df595bef90b2eba44b181a",
+   "lightx2v_fa3_hf_subdir": "build/torch28-cxx11-cu128-x86_64-linux/flash_attention_3",
+   "lightx2v_flashinfer": "flashinfer-python==0.6.11",
+   "trtllm": "tensorrt-llm==1.3.0rc18",
+   "fastvideo": "https://github.com/hao-ai-lab/FastVideo.git@main",
+   "torch_cuda_arch_list": ""
+  },
+  "launchers": {
+   "vllm_omni_server_bin": "vllm",
+   "vllm_omni_required_help_args": "--omni",
+   "trtllm_visual_server_bin": "trtllm-serve"
+  },
+  "vllm-omni": {
+   "venv_path": "/workspace/r1102/fw-venvs/vllm-omni",
+   "packages": {
+    "vllm": {
+     "Name": "vllm",
+     "Version": "0.32.0",
+     "Home-page": "https://github.com/vllm-project/vllm",
+     "Location": "/workspace/r1102/fw-venvs/vllm-omni/lib/python3.12/site-packages"
+    },
+    "vllm-omni": {
+     "Name": "vllm-omni",
+     "Version": "0.32.0rc2.dev305+gd94d8e980",
+     "Home-page": "https://github.com/vllm-project/vllm-omni",
+     "Location": "/workspace/r1102/fw-venvs/vllm-omni/lib/python3.12/site-packages"
+    },
+    "torch": {
+     "Name": "torch",
+     "Version": "2.13.0",
+     "Home-page": "https://pytorch.org",
+     "Location": "/workspace/r1102/fw-venvs/vllm-omni/lib/python3.12/site-packages"
+    },
+    "transformers": {
+     "Name": "transformers",
+     "Version": "5.19.0",
+     "Home-page": "https://github.com/huggingface/transformers",
+     "Location": "/workspace/r1102/fw-venvs/vllm-omni/lib/python3.12/site-packages"
+    },
+    "diffusers": {
+     "Name": "diffusers",
+     "Version": "0.40.0",
+     "Home-page": "https://github.com/huggingface/diffusers",
+     "Location": "/workspace/r1102/fw-venvs/vllm-omni/lib/python3.12/site-packages"
+    },
+    "huggingface_hub": {
+     "Name": "huggingface_hub",
+     "Version": "1.33.0",
+     "Home-page": "https://github.com/huggingface/huggingface_hub",
+     "Location": "/workspace/r1102/fw-venvs/vllm-omni/lib/python3.12/site-packages"
+    }
+   },
+   "direct_urls": {
+    "vllm_omni-0.32.0rc2.dev305+gd94d8e980.dist-info": {
+     "url": "file:///workspace/r1102/fw-venvs/vllm-omni/src/vllm-omni",
+     "dir_info": {
+      "editable": true
+     }
+    }
+   }
+  },
+  "lightx2v": {
+   "venv_path": "/workspace/r1102/fw-venvs/lightx2v"
+  },
+  "trtllm-visual": {
+   "venv_path": "/workspace/r1102/fw-venvs/trtllm-visual"
+  },
+  "comfyui": {
+   "venv_path": "/workspace/r1102/fw-venvs/comfyui"
+  },
+  "fastvideo": {
+   "venv_path": "/workspace/r1102/fw-venvs/fastvideo"
+  }
+ },
+ "benchmark_env": {},
+ "benchmark_framework_args": {
+  "vllm-omni": [],
+  "lightx2v": {
+   "config": {
+    "use_compile": true
+   }
+  },
+  "fastvideo": []
+ },
+ "torch_compile_disabled": false,
+ "benchmark_modes": [
+  "single_e2e",
+  "throughput"
+ ],
+ "requested_sglang_profile": "auto",
+ "request_inputs": "distinct-per-request",
+ "results": [],
+ "throughput_results": [
+  {
+   "case_id": "qwen_image_21_t2i_1024",
+   "framework": "vllm-omni",
+   "mode": "throughput",
+   "model": "Qwen/Qwen-Image-2.1",
+   "task": "text-to-image",
+   "width": 1024,
+   "height": 1024,
+   "num_frames": null,
+   "fps": null,
+   "num_inference_steps": 40,
+   "guidance_scale": 1.0,
+   "guidance_scale_2": null,
+   "true_cfg_scale": null,
+   "negative_prompt_set": false,
+   "num_gpus": 1,
+   "latency_s": 5.063,
+   "error": null,
+   "framework_metadata": {
+    "profile": "blackwell-cudnn-static",
+    "profile_request": "auto",
+    "profile_source": "hardware",
+    "framework_ref": null,
+    "hardware": [
+     "b200",
+     "gb200",
+     "b300",
+     "gb300"
+    ],
+    "hardware_candidates": [
+     "b300"
+    ],
+    "description": "Blackwell: The selected command plus --no-diffusion-compile-dynamic.",
+    "notes": " Promoted from cand-static by the 2026-10-22 4xB300 A/B (scripts/run_b300_ab_20261022.sh): two interleaved rounds, 2.372 / 2.376 s against blackwell-cudnn's 2.400 / 2.407 s (every sample below).",
+    "install_specs": null,
+    "server_bin": null,
+    "use_omni_arg": null,
+    "required_help_args": null,
+    "serve_args": " --no-diffusion-compile-dynamic",
+    "num_gpus": 1,
+    "extra_env_keys": [
+     "DIFFUSION_ATTENTION_BACKEND"
+    ],
+    "request_inputs": "distinct-per-request"
+   },
+   "server_command": "vllm serve Qwen/Qwen-Image-2.1 --port 61260 --host 127.0.0.1 --omni --no-diffusion-compile-dynamic",
+   "metrics": {
+    "duration_s": 10.155,
+    "num_requests": 4,
+    "completed_requests": 4,
+    "failed_requests": 0,
+    "max_concurrency": 2,
+    "throughput_rps": 0.3939,
+    "output_throughput_ops": 0.3939,
+    "latency_mean_s": 4.444,
+    "latency_p50_s": 5.063,
+    "latency_p90_s": 5.156,
+    "latency_p95_s": 5.16,
+    "latency_p99_s": 5.164,
+    "errors": [],
+    "server_startup_s": 38.05,
+    "warmup_s": 7.83
+   }
+  }
+ ],
+ "partial": false,
+ "model_revisions": {
+  "Qwen/Qwen-Image-2.1": "d26bb61231c349cf6b7896fa83353113880e1ba3"
+ }
+}
