@@ -675,6 +675,7 @@ After a full run, publish results so they are durable and comparable over time:
 - commit the complete result JSONs (every case, every framework, single + throughput) into the repo
 - update the GitHub Pages benchmark section: write `docs/data/latest-cross-framework.json` and append the run to `docs/data/historical-cross-framework.json`, then run `scripts/refresh_docs_data.py` to refresh the inline preview
 - the published benchmark MUST state the **benchmark date** and the **exact version/commit of every framework** (sglang commit, vllm-omni commit, lightx2v commit, trtllm-visual version) — a latest-vs-latest comparison is uninterpretable later without the dated version set
+- **Re-measuring a few cells of a published round goes INTO that round, under its run id.** The page opens on the newest tab, so a supplement published as its own run hides every cell it did not re-measure: the 2026-11-02 2xB300 supplement (4 cells, c7a3e86) made the benchmark section read as four cases and the rest as deleted. Republish the round instead (8c2a8d4 is the worked example): copy the new inputs into `reports/<round>/raw/`, append them to `manifest.merge.inputs_in_order` with a `merge.replaced` entry, list the round's version-anchor input again after them (the run-level versions come from the last input), pass `DBF_REPORT_DIR=reports/<round>` plus the round's `--round`/`--round-label` and its current `--note`s (the policy block is rebuilt, not inherited), then diff every section against the previous publish so only the re-measured cells moved.
 
 ## Output Discipline
 
