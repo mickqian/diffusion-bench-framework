@@ -1,0 +1,125 @@
+{
+  "id": "cb_wan22_t2v_720p_6s_vllm_dashboard",
+  "label": "Wan2.2 T2V 1280x720 81f 6 steps (vLLM-Omni dashboard B, 2 GPUs)",
+  "base_case": "wan22_t2v_a14b_720p",
+  "set": {
+    "num_gpus": 2,
+    "width": 1280,
+    "height": 720,
+    "num_inference_steps": 6,
+    "num_frames": 81,
+    "fps": 16,
+    "frameworks.lightx2v.lightx2v_config.parallel": {
+      "cfg_p_size": 2,
+      "seq_p_size": 1,
+      "seq_p_attn_type": "ulysses"
+    }
+  },
+  "cookbook": {
+    "framework": "vllm-omni",
+    "repo": "vllm-project/vllm-omni",
+    "path": "benchmarks/diffusion/performance_dashboard/wan_2_2_serving_performance.md",
+    "commit": "1fa73441",
+    "commit_date": "2026-05-19",
+    "section": "# 3.1 Basic Serving Command; # 7 Performance Results (CFG 2, USP 2, HSDP on)",
+    "source_hardware": "4x A100-SXM4-80GB (CFG 2 x USP 2 + HSDP)",
+    "source_metric": "benchmarks/diffusion client, mean / P99 latency, max concurrency 1",
+    "sglang_verbatim_gap": "The sglang cookbook has no NVIDIA 2-GPU Wan2.2 command: its builder maps any count above 1 to the 4-GPU plan (--dit-layerwise-offload true --num-gpus 4 --ulysses-degree 2 --enable-cfg-parallel) and errors on 2.",
+    "workload": {
+      "width": 1280,
+      "height": 720,
+      "num_inference_steps": 6,
+      "num_frames": 80,
+      "fps": 16,
+      "num_gpus": 4,
+      "dit_forwards": 6,
+      "metric": "mean / P99 latency at max concurrency 1",
+      "warmup": "not stated",
+      "repeats": "--num-prompts N (N not stated)"
+    },
+    "source_gpu": [
+      "a100"
+    ]
+  },
+  "forwards": {
+    "vllm-omni": 6,
+    "sglang": 6,
+    "lightx2v": 6
+  },
+  "deviations": [
+    {
+      "field": "num_frames",
+      "source": 80,
+      "run": 81,
+      "reason": "Wan2.2 takes 4n+1 frames; 80 is rounded by the pipeline anyway"
+    },
+    {
+      "field": "num_gpus",
+      "source": 4,
+      "run": 2,
+      "reason": "2-GPU box: the dashboard's CFG 2 x USP 2 + HSDP is scaled to CFG 2 + HSDP"
+    },
+    {
+      "field": "metric",
+      "source": "mean / P99 latency at max concurrency 1",
+      "run": "client_e2e_median",
+      "reason": "every arm is timed by the same client; the source's own timer is not available for the other frameworks"
+    },
+    {
+      "field": "warmup",
+      "source": "not stated",
+      "run": "3 request(s) at 3 steps",
+      "reason": "the harness warms every arm the same way before timing"
+    },
+    {
+      "field": "repeats",
+      "source": "--num-prompts N (N not stated)",
+      "run": "median of 2",
+      "reason": "the harness takes the same median for every arm"
+    }
+  ],
+  "arms": {
+    "vllm-omni": {
+      "cb-vllm-dashboard": {
+        "tier": "verbatim",
+        "num_gpus": 2,
+        "upstream_recipe": {
+          "repo": "vllm-project/vllm-omni",
+          "path": "benchmarks/diffusion/performance_dashboard/wan_2_2_serving_performance.md",
+          "commit": "1fa73441",
+          "commit_date": "2026-05-19",
+          "section": "# 3.1 Basic Serving Command; # 7 Performance Results (CFG 2, USP 2, HSDP on)"
+        },
+        "serve_args": "--num-gpus 2 --cfg-parallel-size 2 --usp 1 --use-hsdp",
+        "scaled_from": {
+          "num_gpus": 4,
+          "serve_args": "--num-gpus 4 --cfg-parallel-size 2 --usp 2 --use-hsdp"
+        },
+        "allow_inherited": [
+          "extra_env.DIFFUSION_ATTENTION_BACKEND"
+        ],
+        "notes": "scaled_from is the dashboard's results-table configuration (CFG 2, USP 2, HSDP on) as flags; the page gives no full launch line. The rule keeps CFG 2 and gives SP the rest (1)."
+      }
+    },
+    "sglang": {
+      "cb-sgl-tuned": {
+        "tier": "tuned",
+        "num_gpus": 2,
+        "serve_args": "--model-type diffusion --warmup-mode server --enable-cfg-parallel --ulysses-degree 1 --dit-cpu-offload false --pin-cpu-memory --dit-layerwise-offload false --performance-mode speed --enable-torch-compile false",
+        "notes": "The H200 cookbook-method run's SGLang command (2026-10-30): our own choice, listed beside the verbatim arm, never in its place. CFG parallel 2, resident."
+      }
+    },
+    "lightx2v": {
+      "cb-lx-tuned": {
+        "tier": "tuned",
+        "num_gpus": 2,
+        "serve_args": "",
+        "lightx2v_config": {
+          "self_attn_1_type": "flash_attn3",
+          "cross_attn_1_type": "flash_attn3"
+        },
+        "notes": "wan_moe_t2v.json with CFG parallel 2 to match the source's topology; LightX2V publishes no 2-GPU Wan2.2 config."
+      }
+    }
+  }
+}

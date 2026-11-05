@@ -23,6 +23,7 @@ Usage:
 import argparse
 import base64
 import copy
+import hashlib
 import csv
 import io
 import itertools
@@ -32,6 +33,7 @@ import re
 import shlex
 import shutil
 import signal
+import socket
 import statistics
 import struct
 import subprocess
@@ -39,12 +41,15 @@ import sys
 import tempfile
 import threading
 import time
+import urllib.parse
 from collections.abc import Iterator
 from dataclasses import dataclass
 from datetime import datetime, timezone
 from pathlib import Path
 
 import requests
+import requests.adapters
+import urllib3
 
 from diffusion_bench import comfyui_client, fastvideo_client
 from diffusion_bench.config_guard import apply_hardware_statuses
@@ -146,17 +151,40 @@ def _poll_get(url: str, deadline: float, timeout: int = 30):
 HTTP_READ_CHUNK = 1 << 18  # 256 KiB
 
 
+# A new connection's receive window starts at tcp_rmem's default (87 KB on the bench
+# hosts), and a multi-MB reply (a base64 PNG, an MP4) can fill it before the window
+# grows: Linux then waits out its 200 ms zero-window probe. On loopback that added
+# 0.2 s to a random 15-40% of requests, whichever framework answered (Z-Image, 4.2 MB
+# replies: 7 of 40 slow; 0 of 40 with this buffer, 2026-11-01). Set before connect,
+# so the window scale covers it.
+POST_RECV_BUFFER = 16 << 20
+
+
+class _LargeReceiveBufferAdapter(requests.adapters.HTTPAdapter):
+    def init_poolmanager(self, *args, **kwargs):
+        kwargs["socket_options"] = list(urllib3.connection.HTTPConnection.default_socket_options) + [
+            (socket.SOL_SOCKET, socket.SO_RCVBUF, POST_RECV_BUFFER)
+        ]
+        super().init_poolmanager(*args, **kwargs)
+
+
 def _post_drained(url: str, **kwargs):
     """POST and read the whole body in large reads.
 
     Returns a normal Response -- `.content`, `.text` and `.json()` work -- with
     the body already materialised, so the caller's timing stops when the last
-    byte arrives, as it would with curl.
+    byte arrives, as it would with curl. Each call opens its own connection, as
+    requests.post does, with a receive buffer large enough for the reply.
     """
-    resp = requests.post(url, stream=True, **kwargs)
-    # What Response.content would do, minus the 10 KiB read size.
-    resp._content = b"".join(resp.iter_content(HTTP_READ_CHUNK))
-    resp._content_consumed = True
+    session = requests.Session()
+    session.mount("http://", _LargeReceiveBufferAdapter())
+    try:
+        resp = session.post(url, stream=True, **kwargs)
+        # What Response.content would do, minus the 10 KiB read size.
+        resp._content = b"".join(resp.iter_content(HTTP_READ_CHUNK))
+        resp._content_consumed = True
+    finally:
+        session.close()
     return resp
 
 GPU_CLEAR_WAIT = 15  # seconds between framework runs
@@ -1372,10 +1400,28 @@ def _download_ref_image(config: dict, case: dict) -> bytes:
         raise RuntimeError("No test_image_url in config for image-conditioned case")
     if url in _cached_ref_images:
         return _cached_ref_images[url]
+    # Every arm is its own process, so the in-memory cache alone fetches the
+    # image once per arm; unauthenticated huggingface.co fetches then hit 429
+    # over a night's queue. Keep one copy on disk per URL.
+    disk = None
+    if os.environ.get("DBF_STATE_DIR"):
+        disk = Path(os.environ["DBF_STATE_DIR"]) / "ref-images" / hashlib.sha256(url.encode()).hexdigest()
+        if disk.is_file() and disk.stat().st_size:
+            _cached_ref_images[url] = disk.read_bytes()
+            return _cached_ref_images[url]
     print(f"  Downloading reference image from {url} ...")
-    resp = requests.get(url, timeout=60)
+    headers = {}
+    token = os.environ.get("HF_TOKEN")
+    if token and urllib.parse.urlparse(url).hostname == "huggingface.co":
+        headers["Authorization"] = f"Bearer {token}"
+    resp = requests.get(url, timeout=60, headers=headers)
     _raise_for_status(resp)
     _cached_ref_images[url] = resp.content
+    if disk is not None:
+        disk.parent.mkdir(parents=True, exist_ok=True)
+        tmp = disk.with_suffix(f".{os.getpid()}.tmp")
+        tmp.write_bytes(resp.content)
+        tmp.replace(disk)
     return _cached_ref_images[url]
 
 
@@ -1433,6 +1479,66 @@ def _substitute_ref_image(node, uri: str):
     return node
 
 
+# A case conditioning on several references, or on a reference video, names each
+# file once in `reference_media` ({name: path on the bench host}) and marks where it
+# belongs: `__MEDIA:<name>__` becomes the file inline as a data URI (the multipart
+# uploads' JSON counterpart), `__MEDIA_PATH:<name>__` its host path, for a framework
+# whose API takes only server-local paths. Either may sit inside a longer string.
+# A path may hold `{variant}`, filled with the request's two-digit input variant: like
+# the marked reference image, every request then conditions on files of its own, so
+# no server's conditioning cache answers a repeat (see test_distinct_request_inputs).
+MEDIA_TOKEN = re.compile(r"__MEDIA(_PATH)?:([A-Za-z0-9_.-]+)__")
+MEDIA_MIME = {".png": "image/png", ".jpg": "image/jpeg", ".jpeg": "image/jpeg", ".webp": "image/webp",
+              ".mp4": "video/mp4", ".wav": "audio/wav", ".mp3": "audio/mpeg"}
+
+
+def _media_path(case: dict, name: str) -> str:
+    media = case.get("reference_media") or {}
+    if name not in media:
+        raise RuntimeError(f"{case['id']}: request extras name media {name!r}, absent from reference_media")
+    path = media[name].replace("{variant}", f"{case.get('input_variant', 0):02d}")
+    if not os.path.isfile(path):
+        raise RuntimeError(f"{case['id']}: reference_media {name!r} -> {path} does not exist")
+    return path
+
+
+def _media_mime(path: str) -> str:
+    mime = MEDIA_MIME.get(os.path.splitext(path)[1].lower())
+    if mime is None:
+        raise RuntimeError(f"reference media {path}: unknown type; add its extension to MEDIA_MIME")
+    return mime
+
+
+def _substitute_media(node, case: dict, cache: dict):
+    if isinstance(node, dict):
+        return {k: _substitute_media(v, case, cache) for k, v in node.items()}
+    if isinstance(node, list):
+        return [_substitute_media(v, case, cache) for v in node]
+    if not isinstance(node, str) or "__MEDIA" not in node:
+        return node
+
+    def repl(m: re.Match) -> str:
+        path = _media_path(case, m.group(2))
+        if m.group(1):
+            return path
+        if path not in cache:
+            with open(path, "rb") as f:
+                cache[path] = f"data:{_media_mime(path)};base64," + base64.b64encode(f.read()).decode()
+        return cache[path]
+
+    return MEDIA_TOKEN.sub(repl, node)
+
+
+def _media_uploads(case: dict, field: str, names: list[str]) -> list[tuple]:
+    """Multipart entries, one `field` part per named reference, in the listed order."""
+    uploads = []
+    for name in names:
+        path = _media_path(case, name)
+        with open(path, "rb") as f:
+            uploads.append((field, (os.path.basename(path), io.BytesIO(f.read()), _media_mime(path))))
+    return uploads
+
+
 def _without_comments(extras: dict) -> dict:
     """A request-extras dict minus its `_`-prefixed keys: cases record why a field is set as `_note`."""
     return {key: value for key, value in (extras or {}).items() if not key.startswith("_")}
@@ -1451,6 +1557,8 @@ def _request_extra(case: dict, framework: str, config: dict | None = None) -> di
         # instead of a URL the server downloads inside the measured window.
         uri = "data:image/png;base64," + _get_ref_image_b64(config or {}, case)
         merged = _substitute_ref_image(merged, uri)
+    if "__MEDIA" in json.dumps(merged):
+        merged = _substitute_media(merged, case, {})
     return merged
 
 
@@ -1765,7 +1873,10 @@ def send_request_vllm_omni(base_url: str, case: dict, config: dict) -> float:
         # answers `ref2va requires at least one image or video reference`,
         # which reads like an unsupported case rather than a missing argument.
         files = None
-        if case.get("reference_image") or fw_entry.get("reference_image"):
+        if fw_entry.get("reference_uploads"):
+            # Several references (images, videos): Omni's repeated `input_references` part.
+            files = _media_uploads(case, "input_references", fw_entry["reference_uploads"])
+        elif case.get("reference_image") or fw_entry.get("reference_image"):
             files = {
                 "input_reference": (
                     "ref.png",
@@ -1927,7 +2038,8 @@ def _lightx2v_payload(case: dict, config: dict, is_image: bool) -> dict:
         payload["negative_prompt"] = case["negative_prompt"]
     # This framework's extras only: the shared request_extra carries fields
     # (qwen_image_21's output_format) the schema rejects.
-    payload.update(copy.deepcopy(_without_comments((case.get("framework_request_extra") or {}).get("lightx2v", {}))))
+    lightx2v_extra = _without_comments((case.get("framework_request_extra") or {}).get("lightx2v", {}))
+    payload.update(_substitute_media(copy.deepcopy(lightx2v_extra), case, {}))
     # The vLLM-Omni opt-in: H3 Ref2VA conditions sglang through a conditions[]
     # extra, so the case itself sets no reference_image.
     fw_entry = (case.get("frameworks") or {}).get("lightx2v") or {}

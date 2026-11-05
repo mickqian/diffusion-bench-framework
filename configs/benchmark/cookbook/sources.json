@@ -1,0 +1,610 @@
+{
+  "_comment": "Every tracked recipe section and where it went: `cells` built from it (or running it as an arm), or `skip` with the reason. scripts/build_cookbook_config.py fails on a cell whose source section is not listed here, a section with neither, or a listed cell that does not exist. Read at the commits below; scripts/check_competitor_recipes.py --cookbook says when a file moves on.",
+  "sources": [
+    {
+      "framework": "vllm-omni",
+      "repo": "vllm-project/vllm-omni",
+      "path": "recipes/MiniMaxAI/MiniMax-H3.md",
+      "commit": "fb7ab707",
+      "sections": [
+        {
+          "section": "### Single GPU: blockwise capacity path",
+          "cells": [
+            "cb_h3_t2va_209f_vllm_1gpu"
+          ]
+        },
+        {
+          "section": "### Two 24/32 GB GPUs: TP2 distributed layerwise offload",
+          "skip": "RTX 4090/5090 only (2x 24/32 GB, layerwise offload); not run on datacenter GPUs"
+        },
+        {
+          "section": "### RTX 5090 target-hardware validation",
+          "skip": "RTX 4090/5090 only (2x 24/32 GB, layerwise offload); not run on datacenter GPUs"
+        },
+        {
+          "section": "### Four GPUs: throughput-oriented combined service",
+          "cells": [
+            "cb_h3_fl2va_209f_vllm_4gpu",
+            "cb_h3_fl2va_209f_vllm_2gpu"
+          ]
+        },
+        {
+          "section": "### Attention Backends",
+          "skip": "flag variants of the serving commands: TRTLLM_ATTN is already the datacenter-Blackwell default, FA4 is Blackwell-only, the SAGE fp8 option is lossy"
+        },
+        {
+          "section": "### Text encoder tensor parallelism",
+          "cells": [
+            "cb_h3_t2va_124f_vllm_te_tp_4gpu",
+            "cb_h3_t2va_124f_vllm_te_tp_2gpu"
+          ]
+        },
+        {
+          "section": "### Step execution and continuous batching",
+          "skip": "a batching mode for concurrent requests; the track times single requests"
+        },
+        {
+          "section": "### Online FP8 quantization",
+          "skip": "lossy flag variant without a workload of its own; a lossy-group cell can add it"
+        },
+        {
+          "section": "#### Single 96 GB GPU, no-offload capacity check",
+          "skip": "prose only, no command"
+        },
+        {
+          "section": "### ROCm single GPU",
+          "skip": "AMD only"
+        },
+        {
+          "section": "### ROCm four GPUs",
+          "skip": "AMD only"
+        },
+        {
+          "section": "### Validated ROCm evidence",
+          "skip": "AMD only"
+        },
+        {
+          "section": "## HTTP API examples",
+          "skip": "request formats; used as the request of the cells above"
+        },
+        {
+          "section": "## Request-scoped quality",
+          "skip": "the measured run of '### Text encoder tensor parallelism' (4x H200, 85.49 s); its workload is cb_h3_t2va_124f_vllm_te_tp_*"
+        },
+        {
+          "section": "## Cache-DiT and TaylorSeer",
+          "skip": "lossy cache; evidence on NPU only"
+        },
+        {
+          "section": "## Exact AdaLN reuse",
+          "skip": "on by default in every vLLM-Omni arm; sglang matches it with the cb-sgl-adaln-online arms"
+        },
+        {
+          "section": "### Default AdaLN weight offload",
+          "skip": "automatic only on SM120"
+        },
+        {
+          "section": "### Turbo LoRA",
+          "skip": "distilled LoRA; no sglang counterpart settled"
+        },
+        {
+          "section": "### FlashGen native LoRA",
+          "skip": "distilled LoRA; no sglang counterpart settled"
+        },
+        {
+          "section": "### VDN-H3 checkpoint",
+          "cells": [
+            "cb_vdn_h3_t2va_124f_vllm_tp2"
+          ]
+        },
+        {
+          "section": "### FastH3 adapter",
+          "skip": "pointer to recipes/FastVideo/FastH3.md, tracked there"
+        },
+        {
+          "section": "### FastH3 8-Step V2 full checkpoint",
+          "skip": "pointer to recipes/FastVideo/FastH3-V2.md, tracked there"
+        },
+        {
+          "section": "### FastH3 Omni 8-Step V1 (experimental)",
+          "skip": "pointer to recipes/FastVideo/FastH3-Omni.md, tracked there"
+        },
+        {
+          "section": "## Validated four-GPU evidence",
+          "skip": "the measured run of '### Four GPUs: throughput-oriented combined service' (FL2VA 209f 1248x768, 86.964 s on 4x B300); its workload is cb_h3_fl2va_209f_vllm_*"
+        },
+        {
+          "section": "## Validated FP8 evidence",
+          "skip": "quality evaluation, not a serving configuration"
+        },
+        {
+          "section": "## TeaCache acceleration",
+          "skip": "lossy cache"
+        },
+        {
+          "section": "## Latent super-resolution",
+          "skip": "community upscaler; not a latency workload"
+        },
+        {
+          "section": "## Long video and driving audio",
+          "skip": "feature demonstration without hardware or latency"
+        },
+        {
+          "section": "## Request-scoped sampler",
+          "skip": "sampler variant (res_multistep) without numbers"
+        }
+      ]
+    },
+    {
+      "framework": "vllm-omni",
+      "repo": "vllm-project/vllm-omni",
+      "path": "recipes/LTX/LTX-2.5.md",
+      "commit": "a0910980",
+      "sections": [
+        {
+          "section": "## Choose a pipeline; ## Online serving",
+          "cells": [
+            "cb_ltx25_t2v_544_1gpu_vllm"
+          ]
+        },
+        {
+          "section": "### Multi-GPU low-latency path",
+          "cells": [
+            "cb_ltx25_t2v_1088_2gpu_vllm",
+            "cb_ltx25_t2v_1088_4gpu_vllm"
+          ]
+        },
+        {
+          "section": "### H100 80 GB FP8",
+          "cells": [
+            "cb_ltx25_t2v_544_1gpu_vllm_fp8"
+          ]
+        },
+        {
+          "section": "## Video decoder",
+          "skip": "decoder option (legacy convolutional VAE); the cells keep the default diffusion decoder"
+        },
+        {
+          "section": "### 1x Intel Arc Pro B70 32 GB (XPU)",
+          "skip": "Intel XPU only"
+        },
+        {
+          "section": "## Offline inference",
+          "skip": "offline form of the same pipelines"
+        },
+        {
+          "section": "Text-to-audio (LTX2TextToAudioPipeline)",
+          "skip": "audio-only pipeline"
+        }
+      ]
+    },
+    {
+      "framework": "vllm-omni",
+      "repo": "vllm-project/vllm-omni",
+      "path": "recipes/FastVideo/FastH3-V2.md",
+      "commit": "95b1d97f",
+      "sections": [
+        {
+          "section": "## Start the server",
+          "cells": [
+            "cb_fasth3_t2va_124f_vllm_4gpu",
+            "cb_fasth3_t2va_124f_vllm_2gpu"
+          ]
+        }
+      ]
+    },
+    {
+      "framework": "vllm-omni",
+      "repo": "vllm-project/vllm-omni",
+      "path": "recipes/FastVideo/FastH3-Omni.md",
+      "commit": "95b1d97f",
+      "sections": [
+        {
+          "section": "## Start the server",
+          "cells": [
+            "cb_fasth3omni_ref2va_124f_vllm_4gpu",
+            "cb_fasth3omni_ref2va_124f_vllm_2gpu"
+          ]
+        },
+        {
+          "section": "## Optional NVFP4 video decoder",
+          "skip": "NVFP4, Blackwell only; lossy"
+        },
+        {
+          "section": "## Benchmark: 8x NVIDIA RTX PRO 5000",
+          "skip": "the measured run of '## Start the server' on 8x RTX PRO 5000 (41.04 s, 124f)"
+        }
+      ]
+    },
+    {
+      "framework": "vllm-omni",
+      "repo": "vllm-project/vllm-omni",
+      "path": "recipes/FastVideo/FastH3 RefOmni Single Card.md",
+      "commit": "95b1d97f",
+      "sections": [
+        {
+          "section": "Blackwell (RTX 5090 / DGX Spark / RTX PRO 6000)",
+          "skip": "NVFP4 checkpoint and decoder, Blackwell consumer cards only"
+        },
+        {
+          "section": "RTX 4090",
+          "skip": "RTX 4090 profile (online FP8 + layerwise offload); not run on datacenter GPUs"
+        }
+      ]
+    },
+    {
+      "framework": "vllm-omni",
+      "repo": "vllm-project/vllm-omni",
+      "path": "recipes/FastVideo/FastH3.md",
+      "commit": "95b1d97f",
+      "sections": [
+        {
+          "section": "## Serve the Dense / Data-Free adapter",
+          "skip": "the 4-step preview LoRA, superseded by FastH3-V2 (tracked)"
+        }
+      ]
+    },
+    {
+      "framework": "vllm-omni",
+      "repo": "vllm-project/vllm-omni",
+      "path": "recipes/Qwen/Qwen-Image-2.1.md",
+      "commit": "b164fea7",
+      "sections": [
+        {
+          "section": "## Online Serving",
+          "cells": [
+            "cb_qwen21_t2i_1024_50s_vllm",
+            "cb_qwen21_t2i_1024_40s_lightx2v"
+          ]
+        },
+        {
+          "section": "## Qwen-Image-2.1-Turbo (8-step distilled)",
+          "skip": "distilled Turbo checkpoint; no cell yet"
+        },
+        {
+          "section": "### Four-GPU BF16 eager inference",
+          "skip": "Turbo checkpoint; the recipe states it does not measure latency"
+        },
+        {
+          "section": "### CUDA Graph decode",
+          "skip": "on by default in the Online Serving command; its 1x H200 numbers belong to cb_qwen21_t2i_1024_50s_vllm"
+        },
+        {
+          "section": "### FP8 quantization",
+          "skip": "lossy"
+        },
+        {
+          "section": "## Quality Comparison",
+          "skip": "quality evaluation"
+        },
+        {
+          "section": "## Offline Inference",
+          "skip": "offline form of the same pipeline"
+        }
+      ]
+    },
+    {
+      "framework": "vllm-omni",
+      "repo": "vllm-project/vllm-omni",
+      "path": "recipes/cosmos3/Cosmos3-Nano.md",
+      "commit": "45d7c005",
+      "sections": [
+        {
+          "section": "### 1x H200 141GB / B300 (Online serving) > #### Command",
+          "cells": [
+            "cb_cosmos3_t2v_720p_1gpu_vllm"
+          ]
+        },
+        {
+          "section": "### 1x GPU (Offline generation)",
+          "skip": "offline form of the same serving command"
+        },
+        {
+          "section": "ROCm / NPU sections",
+          "skip": "AMD and Ascend only"
+        }
+      ]
+    },
+    {
+      "framework": "vllm-omni",
+      "repo": "vllm-project/vllm-omni",
+      "path": "recipes/Tongyi-MAI/Z-Image-Turbo.md",
+      "commit": "c586c28e",
+      "sections": [
+        {
+          "section": "## GPU > ### 1x RTX 5880 48GB > #### Command",
+          "cells": [
+            "cb_zimage_t2i_1024_1gpu_vllm",
+            "cb_zimage_t2i_16x9_1gpu_lightx2v"
+          ]
+        },
+        {
+          "section": "### 1x Intel Arc Pro B70 (32 GB)",
+          "skip": "Intel XPU only"
+        },
+        {
+          "section": "#### Optional acceleration features",
+          "skip": "lossy (fp8, TeaCache, Cache-DiT)"
+        }
+      ]
+    },
+    {
+      "framework": "vllm-omni",
+      "repo": "vllm-project/vllm-omni",
+      "path": "benchmarks/diffusion/performance_dashboard/wan_2_2_serving_performance.md",
+      "commit": "1fa73441",
+      "sections": [
+        {
+          "section": "# 3.1 Basic Serving Command; # 7 Performance Results (CFG 2, USP 2, HSDP on)",
+          "cells": [
+            "cb_wan22_t2v_480p_3s_vllm_dashboard",
+            "cb_wan22_t2v_720p_6s_vllm_dashboard",
+            "cb_wan22_t2v_720p_40s_1gpu_lightx2v"
+          ]
+        },
+        {
+          "section": "Dataset C (Mix Resolution)",
+          "skip": "a mixed-resolution request stream; the track times single requests"
+        }
+      ]
+    },
+    {
+      "framework": "lightx2v",
+      "repo": "ModelTC/LightX2V",
+      "path": "configs/minimax_h3/minimax_h3_tp.json",
+      "commit": "c301bc5d",
+      "sections": [
+        {
+          "section": "whole file",
+          "cells": [
+            "cb_h3_t2va_544_lightx2v_tp2"
+          ]
+        }
+      ]
+    },
+    {
+      "framework": "lightx2v",
+      "repo": "ModelTC/LightX2V",
+      "path": "configs/cosmos3/cosmos3_nano_omni.json",
+      "commit": "65935cad",
+      "sections": [
+        {
+          "section": "whole file",
+          "cells": [
+            "cb_cosmos3_t2v_720p_1gpu_vllm"
+          ]
+        }
+      ]
+    },
+    {
+      "framework": "lightx2v",
+      "repo": "ModelTC/LightX2V",
+      "path": "configs/z_image/z_image_turbo_t2i.json",
+      "commit": "4fe984c0",
+      "sections": [
+        {
+          "section": "whole file",
+          "cells": [
+            "cb_zimage_t2i_16x9_1gpu_lightx2v",
+            "cb_zimage_t2i_1024_1gpu_vllm"
+          ]
+        }
+      ]
+    },
+    {
+      "framework": "lightx2v",
+      "repo": "ModelTC/LightX2V",
+      "path": "configs/z_image/z_image_turbo_t2i_dist.json",
+      "commit": "4fe984c0",
+      "sections": [
+        {
+          "section": "whole file",
+          "cells": [
+            "cb_zimage_t2i_16x9_sp2_lightx2v"
+          ]
+        }
+      ]
+    },
+    {
+      "framework": "lightx2v",
+      "repo": "ModelTC/LightX2V",
+      "path": "configs/qwen_image_21/qwen_image_21.json",
+      "commit": "4fe984c0",
+      "sections": [
+        {
+          "section": "whole file",
+          "cells": [
+            "cb_qwen21_t2i_1024_40s_lightx2v"
+          ]
+        }
+      ]
+    },
+    {
+      "framework": "lightx2v",
+      "repo": "ModelTC/LightX2V",
+      "path": "configs/wan22/wan_moe_t2v.json",
+      "commit": "cc942919",
+      "sections": [
+        {
+          "section": "whole file",
+          "cells": [
+            "cb_wan22_t2v_720p_40s_1gpu_lightx2v"
+          ]
+        }
+      ]
+    },
+    {
+      "framework": "lightx2v",
+      "repo": "ModelTC/LightX2V",
+      "path": "configs/ltx2/ltx2_5_distilled.json",
+      "commit": "4fe984c0",
+      "sections": [
+        {
+          "section": "whole file",
+          "skip": "the harness has never served LTX-2.5 through LightX2V (headline status unsupported); add once validated"
+        }
+      ]
+    },
+    {
+      "framework": "trtllm-visual",
+      "repo": "NVIDIA/TensorRT-LLM",
+      "path": "examples/visual_gen/configs/minimax-h3-bf16-2gpu.yaml",
+      "commit": "a8ce107",
+      "sections": [
+        {
+          "section": "whole file",
+          "cells": [
+            "cb_h3_t2va_544_trtllm_ulysses2"
+          ]
+        }
+      ]
+    },
+    {
+      "framework": "trtllm-visual",
+      "repo": "NVIDIA/TensorRT-LLM",
+      "path": "examples/visual_gen/configs/minimax-h3-bf16-1gpu.yaml",
+      "commit": "4945d31",
+      "sections": [
+        {
+          "section": "whole file",
+          "cells": [
+            "cb_h3_t2va_544_trtllm_1gpu"
+          ]
+        }
+      ]
+    },
+    {
+      "framework": "trtllm-visual",
+      "repo": "NVIDIA/TensorRT-LLM",
+      "path": "examples/visual_gen/configs/minimax-h3-bf16-tp2.yaml",
+      "commit": "a8ce107",
+      "sections": [
+        {
+          "section": "whole file",
+          "cells": [
+            "cb_h3_t2va_544_trtllm_tp2"
+          ]
+        }
+      ]
+    },
+    {
+      "framework": "trtllm-visual",
+      "repo": "NVIDIA/TensorRT-LLM",
+      "path": "examples/visual_gen/configs/minimax-h3-ref2va-bf16-1gpu.yaml",
+      "commit": "4945d31",
+      "sections": [
+        {
+          "section": "whole file",
+          "cells": [
+            "cb_h3_ref2va_trtllm_1gpu"
+          ]
+        }
+      ]
+    },
+    {
+      "framework": "trtllm-visual",
+      "repo": "NVIDIA/TensorRT-LLM",
+      "path": "examples/visual_gen/configs/minimax-h3-fp8-blockwise-1gpu.yaml",
+      "commit": "4945d31",
+      "sections": [
+        {
+          "section": "whole file",
+          "skip": "FP8 block scales (lossy); no cell yet"
+        }
+      ]
+    },
+    {
+      "framework": "trtllm-visual",
+      "repo": "NVIDIA/TensorRT-LLM",
+      "path": "examples/visual_gen/configs/cosmos3-nano-1gpu.yaml",
+      "commit": "1e4e65c",
+      "sections": [
+        {
+          "section": "whole file",
+          "cells": [
+            "cb_cosmos3_t2v_720p_1gpu_vllm"
+          ]
+        }
+      ]
+    },
+    {
+      "framework": "fastvideo",
+      "repo": "hao-ai-lab/FastVideo",
+      "path": "examples/serving/openai_fasth3_8step.yaml",
+      "commit": "7f03e03d",
+      "sections": [
+        {
+          "section": "whole file",
+          "cells": [
+            "cb_fasth3_t2va_124f_vllm_4gpu",
+            "cb_fasth3_t2va_124f_vllm_2gpu"
+          ]
+        }
+      ]
+    },
+    {
+      "framework": "fastvideo",
+      "repo": "hao-ai-lab/FastVideo",
+      "path": "examples/inference/basic/basic_minimax_h3_t2v.py",
+      "commit": "6e4813f8",
+      "sections": [
+        {
+          "section": "whole file",
+          "skip": "an offline example script; the harness drives `fastvideo serve`, so its engine settings would have to be re-expressed as serve overrides by hand -- not verbatim"
+        }
+      ]
+    },
+    {
+      "framework": "vllm-omni",
+      "repo": "vllm-project/vllm-omni",
+      "path": "recipes/MOSS-Image/MOSS-Image-Base.md",
+      "commit": "2c72dea3",
+      "sections": [
+        {
+          "section": "## Summary",
+          "skip": "prose: model, pipeline and hardware (H200)"
+        },
+        {
+          "section": "## Features",
+          "cells": [
+            "cb_mossimage_t2i_1024_2gpu_cfgp_vllm"
+          ]
+        },
+        {
+          "section": "## Kernel fusion",
+          "skip": "prose about the eager fused path the '## Deploy' command already runs"
+        },
+        {
+          "section": "## Environment",
+          "skip": "versions only"
+        },
+        {
+          "section": "## Deploy",
+          "cells": [
+            "cb_mossimage_t2i_1024_1gpu_vllm",
+            "cb_mossimage_t2i_1024_1gpu_vllm_cfg",
+            "cb_mossimage_t2i_1024_2gpu_cfgp_vllm"
+          ]
+        },
+        {
+          "section": "## Example request",
+          "cells": [
+            "cb_mossimage_t2i_1024_1gpu_vllm"
+          ]
+        },
+        {
+          "section": "## Performance",
+          "cells": [
+            "cb_mossimage_t2i_1024_1gpu_vllm_cfg",
+            "cb_mossimage_t2i_1024_1gpu_vllm"
+          ],
+          "note": "the DLO column and the three-pass SLG row (CFG 5, slg_scale 3) are not built: DLO is a memory-saving variant of the same command, three-pass SLG a different sampling algorithm"
+        },
+        {
+          "section": "## Offline inference",
+          "skip": "offline script, not the server path"
+        }
+      ]
+    }
+  ]
+}

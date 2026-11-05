@@ -59,6 +59,7 @@ write_desired_stamp() {
         echo "vllm_omni_vsa_kernel_spec=${VLLM_OMNI_VSA_KERNEL_SPEC:-<unset>}"
         # only when set, so venvs installed before the knob keep a matching stamp
         [[ -z "${VLLM_OMNI_CUDNN_FRONTEND_SPEC:-}" ]] || echo "vllm_omni_cudnn_frontend_spec=${VLLM_OMNI_CUDNN_FRONTEND_SPEC}"
+        [[ -z "${VLLM_OMNI_FA4_SPEC:-}" ]] || echo "vllm_omni_fa4_spec=${VLLM_OMNI_FA4_SPEC} quack=${VLLM_OMNI_QUACK_SPEC:-quack-kernels==0.5.3}"
         echo "vllm_omni_target_device=${VLLM_OMNI_TARGET_DEVICE:-cuda} vllm_rocm_extra_index_url=${VLLM_ROCM_EXTRA_INDEX_URL:-<unset>} vllm_rocm_userspace_release=${VLLM_ROCM_USERSPACE_RELEASE:-<unset>}"
         ;;
       lightx2v)
@@ -254,6 +255,18 @@ case "${FRAMEWORK}" in
       python3 -c 'from cudnn.torch import block_sparse_attention_forward'
       [[ "$(python3 -c 'import torch; print(torch.__version__)')" == "${torch_before}" ]]
     fi
+    # On Blackwell, FLASH_ATTN is CuTe FA4 (vllm-omni's [fa4] extra); every recipe that names
+    # FLASH_ATTN, and VDNH3_ATTN, refuses to start on sm_100 without it. Opt in with
+    # VLLM_OMNI_FA4_SPEC='flash-attn-4[cu13]==4.0.0b18'. That release asks only for
+    # quack-kernels>=0.5.0, and 0.6.x moved activation.sub_packed_f32x2, which its CuTe utils
+    # call at the first request (4xB200, 2026-10-31): VLLM_OMNI_QUACK_SPEC pins the one it needs.
+    if [[ -n "${VLLM_OMNI_FA4_SPEC:-}" ]]; then
+      torch_before="$(python3 -c 'import torch; print(torch.__version__)')"
+      python3 -m pip install "${VLLM_OMNI_FA4_SPEC}"
+      python3 -m pip install --no-deps "${VLLM_OMNI_QUACK_SPEC:-quack-kernels==0.5.3}"
+      python3 -c 'import quack.activation as a, flash_attn.cute.utils; assert hasattr(a, "sub_packed_f32x2")'
+      [[ "$(python3 -c 'import torch; print(torch.__version__)')" == "${torch_before}" ]]
+    fi
     ;;
   lightx2v)
     lx2v_spec="${LIGHTX2V_INSTALL_SPEC:-git+https://github.com/ModelTC/LightX2V.git@7efd05f8e1425b83321fd4f1cef779ef6504076f}"
@@ -378,6 +391,9 @@ if cute_dir.exists():
     python3 -m pip install --upgrade --upgrade-strategy only-if-needed \
       --extra-index-url "${TRTLLM_PIP_EXTRA_INDEX_URL:-https://pypi.nvidia.com}" \
       "${TRTLLM_INSTALL_SPEC:-tensorrt-llm==1.3.0rc18}"
+    # MiniMax-H3 Ref2VA decodes a reference video (and its soundtrack) with PyAV,
+    # which tensorrt-llm does not pull in: without it such a request answers 500.
+    python3 -m pip install "${TRTLLM_PYAV_SPEC:-av}"
     # Local patch: let VisualGen run in eager mode (TORCH_COMPILE_DISABLE=1) for
     # a same-policy compile-off comparison. See the patcher's docstring.
     python3 "$(dirname "$0")/patches/apply_trtllm_visual_patches.py"
