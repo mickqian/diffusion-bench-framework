@@ -1,0 +1,117 @@
+{
+  "id": "cb_qwen21_t2i_1024_40s_lightx2v",
+  "label": "Qwen-Image-2.1 T2I 1024 40 steps cfg off (LightX2V config, 1 GPU)",
+  "base_case": "qwen_image_21_t2i_1024",
+  "set": {},
+  "cookbook": {
+    "framework": "lightx2v",
+    "repo": "ModelTC/LightX2V",
+    "path": "configs/qwen_image_21/qwen_image_21.json",
+    "commit": "4fe984c0",
+    "commit_date": "2026-10-10",
+    "section": "whole file",
+    "source_hardware": "1 GPU; no GPU class stated",
+    "source_metric": "offline `RUN pipeline cost` log line (PROFILING_DEBUG_LEVEL=2), one run",
+    "workload": {
+      "width": 1024,
+      "height": 1024,
+      "num_inference_steps": 40,
+      "guidance_scale": 1.0,
+      "num_gpus": 1,
+      "dit_forwards": 40,
+      "metric": "offline `RUN pipeline cost` log line (PROFILING_DEBUG_LEVEL=2), one run",
+      "warmup": "config `warmup: true` (startup warmup)",
+      "repeats": "one run"
+    },
+    "source_gpu": []
+  },
+  "forwards": {
+    "lightx2v": 40,
+    "sglang": 40,
+    "vllm-omni": 40
+  },
+  "deviations": [
+    {
+      "field": "metric",
+      "source": "offline `RUN pipeline cost` log line (PROFILING_DEBUG_LEVEL=2), one run",
+      "run": "client_e2e_median",
+      "reason": "every arm is timed by the same client; the source's own timer is not available for the other frameworks"
+    },
+    {
+      "field": "warmup",
+      "source": "config `warmup: true` (startup warmup)",
+      "run": "2 request(s) at 3 steps",
+      "reason": "the harness warms every arm the same way before timing"
+    },
+    {
+      "field": "repeats",
+      "source": "one run",
+      "run": "median of 5",
+      "reason": "the harness takes the same median for every arm"
+    }
+  ],
+  "arms": {
+    "lightx2v": {
+      "cb-lx-verbatim": {
+        "tier": "verbatim",
+        "num_gpus": 1,
+        "upstream_recipe": {
+          "repo": "ModelTC/LightX2V",
+          "path": "configs/qwen_image_21/qwen_image_21.json",
+          "commit": "4fe984c0",
+          "commit_date": "2026-10-10",
+          "section": "whole file"
+        },
+        "serve_args": "",
+        "lightx2v_config": {
+          "infer_steps": 40,
+          "resolution": 1024,
+          "attn_type": "flash_attn3",
+          "rope_type": "flashinfer_rope",
+          "rms_norm_type": "fp32_variance",
+          "layer_norm_type": "Triton",
+          "modulate_type": "triton",
+          "fused_qk_rms_norm": true,
+          "fused_block_ops": true,
+          "fused_block_min_tokens": 1024,
+          "enable_cfg": false,
+          "sample_guide_scale": 1.0,
+          "warmup": true,
+          "use_compile": false
+        },
+        "allow_inherited": [
+          "lightx2v_config.vae_scale_factor"
+        ]
+      }
+    },
+    "sglang": {
+      "cb-sgl-cookbook": {
+        "tier": "verbatim",
+        "num_gpus": 1,
+        "upstream_recipe": {
+          "repo": "sgl-project/sglang",
+          "path": "docs/src/snippets/configs/Qwen/qwen-image-2.1.jsx",
+          "commit": "cde16aa64dd6",
+          "commit_date": "2026-10-10",
+          "section": "Qwen-Image-2.1.mdx '## 1. Quick start' builder: H200 x 1 (verified recipe h200-1-resident)"
+        },
+        "serve_args": "--performance-mode speed",
+        "notes": "Builder output for H200 x 1; on B200 the builder also appends `--attention-backend fa`."
+      }
+    },
+    "vllm-omni": {
+      "cb-vllm-verbatim": {
+        "tier": "verbatim",
+        "num_gpus": 1,
+        "upstream_recipe": {
+          "repo": "vllm-project/vllm-omni",
+          "path": "recipes/Qwen/Qwen-Image-2.1.md",
+          "commit": "b164fea7",
+          "commit_date": "2026-10-17",
+          "section": "## Online Serving"
+        },
+        "serve_args": ""
+      }
+    }
+  }
+}

@@ -24,6 +24,7 @@ configs/benchmark/
 ├── MATRIX.md            # auto-generated coverage grid (case × framework)
 ├── frameworks.json      # the in-scope frameworks + version policy + launch style
 ├── workloads.json       # single_e2e / throughput / warmup → benchmark_defaults
+├── cookbook/            # separate track: competitors' own workloads + commands (see cookbook/README.md)
 ├── meta.json            # top-level fields (_comment, test_image_url)
 └── cases/
     ├── _order.json      # order cases appear in the built config

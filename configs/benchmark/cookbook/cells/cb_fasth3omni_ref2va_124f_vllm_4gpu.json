@@ -1,0 +1,145 @@
+{
+  "id": "cb_fasth3omni_ref2va_124f_vllm_4gpu",
+  "label": "FastH3-Omni Ref2VA 1344x768 124f 8 steps (vLLM-Omni FastH3-Omni recipe, 4 GPUs)",
+  "base_case": "minimax_h3_ref2va_5s",
+  "set": {
+    "model": "FastVideo/FastVideo-FastH3-Omni-8-Step-V1",
+    "num_inference_steps": 8,
+    "framework_request_extra.sglang.num_inference_steps": 8,
+    "framework_request_extra.sglang.flow_shift": null,
+    "framework_request_extra.sglang.audio_flow_shift": null,
+    "framework_request_extra.vllm-omni": {
+      "extra_params": {
+        "task": "ref2va",
+        "duration": 5.0
+      }
+    },
+    "frameworks.vllm-omni.request_omit_keys": [
+      "num_frames"
+    ],
+    "num_gpus": 4
+  },
+  "unset": [
+    "frameworks.vllm-omni.extra_env"
+  ],
+  "cookbook": {
+    "framework": "vllm-omni",
+    "repo": "vllm-project/vllm-omni",
+    "path": "recipes/FastVideo/FastH3-Omni.md",
+    "commit": "95b1d97f",
+    "commit_date": "2026-10-21",
+    "section": "## Start the server",
+    "group": "distilled",
+    "source_hardware": "eight GPUs; benchmark on 8x RTX PRO 5000 (72 GB Blackwell)",
+    "source_metric": "8x RTX PRO 5000 offline 124f: 41.04 s median of 3",
+    "workload": {
+      "width": 1344,
+      "height": 768,
+      "num_frames": 124,
+      "num_gpus": 8,
+      "dit_forwards": 8,
+      "metric": "not stated",
+      "warmup": "not stated",
+      "repeats": "not stated"
+    },
+    "source_gpu": [
+      "rtxpro6000"
+    ]
+  },
+  "forwards": {
+    "vllm-omni": 8,
+    "sglang": 8
+  },
+  "deviations": [
+    {
+      "field": "num_gpus",
+      "source": 8,
+      "run": 4,
+      "reason": "scaling rule: USP 8 -> 4, text-encoder TP and VAE patch parallel capped at 4"
+    },
+    {
+      "field": "metric",
+      "source": "not stated",
+      "run": "client_e2e_median",
+      "reason": "every arm is timed by the same client; the source's own timer is not available for the other frameworks"
+    },
+    {
+      "field": "warmup",
+      "source": "not stated",
+      "run": "3 request(s) at 3 steps",
+      "reason": "the harness warms every arm the same way before timing"
+    },
+    {
+      "field": "repeats",
+      "source": "not stated",
+      "run": "median of 2",
+      "reason": "the harness takes the same median for every arm"
+    }
+  ],
+  "arms": {
+    "vllm-omni": {
+      "cb-vllm-verbatim": {
+        "tier": "verbatim",
+        "num_gpus": 4,
+        "upstream_recipe": {
+          "repo": "vllm-project/vllm-omni",
+          "path": "recipes/FastVideo/FastH3-Omni.md",
+          "commit": "95b1d97f",
+          "commit_date": "2026-10-21",
+          "section": "## Start the server"
+        },
+        "serve_args": "--trust-remote-code --enforce-eager --usp 4 --use-hsdp --text-encoder-tp-size 4 --vae-patch-parallel-size 4 --vae-use-tiling --diffusion-attention-config {\"default\":{\"backend\":\"FASTVIDEO_VSA\",\"fastvideo_vsa_provider\":\"cudnn\"}} --init-timeout 1800 --stage-init-timeout 1800",
+        "scaled_from": {
+          "num_gpus": 8,
+          "serve_args": "--trust-remote-code --enforce-eager --usp 8 --use-hsdp --text-encoder-tp-size 8 --vae-patch-parallel-size 8 --vae-use-tiling --diffusion-attention-config {\"default\":{\"backend\":\"FASTVIDEO_VSA\",\"fastvideo_vsa_provider\":\"cudnn\"}} --init-timeout 1800 --stage-init-timeout 1800"
+        },
+        "extra_env": {
+          "VLLM_WORKER_MULTIPROC_METHOD": "spawn",
+          "VLLM_OMNI_VIDEO_SYNC_TIMEOUT": "7200"
+        },
+        "notes": "Same fasth3-8step-8gpu.yaml as FastH3-V2; the request uploads the reference image."
+      }
+    },
+    "sglang": {
+      "cb-sgl-cookbook": {
+        "tier": "verbatim",
+        "num_gpus": 4,
+        "upstream_recipe": {
+          "repo": "sgl-project/sglang",
+          "path": "docs/cookbook/diffusion/MiniMax/MiniMax-H3.mdx",
+          "commit": "0498ab7b6ee2",
+          "commit_date": "2026-10-24",
+          "section": "### FastH3 Omni: Ref2VA, 8-step PDD"
+        },
+        "serve_args": "--ulysses-degree 4 --dit-cpu-offload true --text-encoder-cpu-offload true --vae-cpu-offload true",
+        "notes": "The cookbook's 2x H200 command with its three CPU offloads, kept to measure what they cost.",
+        "scaled_from": {
+          "num_gpus": 2,
+          "serve_args": "--num-gpus 2 --ulysses-degree 2 --dit-cpu-offload true --text-encoder-cpu-offload true --vae-cpu-offload true"
+        }
+      },
+      "cb-sgl-cookbook-resident": {
+        "tier": "verbatim",
+        "num_gpus": 4,
+        "upstream_recipe": {
+          "repo": "sgl-project/sglang",
+          "path": "docs/cookbook/diffusion/MiniMax/MiniMax-H3.mdx",
+          "commit": "0498ab7b6ee2",
+          "commit_date": "2026-10-24",
+          "section": "### FastH3 Omni: Ref2VA, 8-step PDD"
+        },
+        "serve_args": "--ulysses-degree 4",
+        "scaled_from": {
+          "num_gpus": 2,
+          "serve_args": "--num-gpus 2 --ulysses-degree 2 --dit-cpu-offload true --text-encoder-cpu-offload true --vae-cpu-offload true",
+          "removed": [
+            "--dit-cpu-offload",
+            "--text-encoder-cpu-offload",
+            "--vae-cpu-offload"
+          ]
+        },
+        "notes": "Rule 3: the cookbook command without its three offloads."
+      }
+    }
+  }
+}
