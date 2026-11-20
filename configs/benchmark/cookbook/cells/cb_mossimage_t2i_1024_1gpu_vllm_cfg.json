@@ -1,0 +1,98 @@
+{
+  "id": "cb_mossimage_t2i_1024_1gpu_vllm_cfg",
+  "label": "MOSS-Image-Base 1024 50 steps ordinary CFG 3 (vLLM-Omni recipe, 1 GPU)",
+  "base_case": "mossimage_base_t2i_1024",
+  "set": {
+    "num_gpus": 1,
+    "framework_request_extra.sglang.uncond_skip_layers": []
+  },
+  "unset": [
+    "framework_request_extra.vllm-omni.extra_params"
+  ],
+  "cookbook": {
+    "framework": "vllm-omni",
+    "repo": "vllm-project/vllm-omni",
+    "path": "recipes/MOSS-Image/MOSS-Image-Base.md",
+    "commit": "2c72dea3",
+    "commit_date": "2026-10-18",
+    "section": "## Performance",
+    "source_hardware": "1x H200 ('## Summary' and '## Performance')",
+    "source_metric": "11.735 s resident on 1x H200 ('## Performance', CFG 3, no SLG)",
+    "workload": {
+      "width": 1024,
+      "height": 1024,
+      "num_inference_steps": 50,
+      "num_gpus": 1,
+      "dit_forwards": 50,
+      "prompt": "the 'nutrition-pagoda' prompt (not reproduced in the recipe)",
+      "metric": "single-run image generation latency, excluding model initialization and image saving ('## Performance')",
+      "warmup": "not stated",
+      "repeats": "single run"
+    },
+    "source_gpu": [
+      "h200"
+    ]
+  },
+  "forwards": {
+    "vllm-omni": 50,
+    "sglang": 50
+  },
+  "deviations": [
+    {
+      "field": "metric",
+      "source": "single-run image generation latency, excluding model initialization and image saving ('## Performance')",
+      "run": "client_e2e_median",
+      "reason": "every arm is timed by the same client; the source's own timer is not available for the other framework"
+    },
+    {
+      "field": "warmup",
+      "source": "not stated",
+      "run": "2 request(s) at 3 steps",
+      "reason": "the harness warms every arm the same way before timing"
+    },
+    {
+      "field": "repeats",
+      "source": "single run",
+      "run": "median of 5",
+      "reason": "the harness takes the same median for every arm"
+    },
+    {
+      "field": "prompt",
+      "source": "the 'nutrition-pagoda' prompt (not reproduced in the recipe)",
+      "run": "A quiet coastal town at sunrise, cinematic photography",
+      "reason": "the recipe does not print its benchmark prompt; prompt and seed do not change the work done at a fixed size and step count"
+    }
+  ],
+  "arms": {
+    "vllm-omni": {
+      "cb-vllm-verbatim": {
+        "tier": "verbatim",
+        "num_gpus": 1,
+        "upstream_recipe": {
+          "repo": "vllm-project/vllm-omni",
+          "path": "recipes/MOSS-Image/MOSS-Image-Base.md",
+          "commit": "2c72dea3",
+          "commit_date": "2026-10-18",
+          "section": "## Deploy"
+        },
+        "serve_args": "--enforce-eager",
+        "notes": "'## Deploy' resident command; 'For baseline generation, omit extra_params' ('## Example request'), so the request carries no skip layers."
+      }
+    },
+    "sglang": {
+      "cb-sgl-cookbook": {
+        "tier": "verbatim",
+        "num_gpus": 1,
+        "upstream_recipe": {
+          "repo": "sgl-project/sglang",
+          "path": "docs/cookbook/diffusion/OpenMOSS/MOSS-Image.mdx",
+          "commit": "610a74d648",
+          "commit_date": "2026-10-28",
+          "section": "'## 1. Quick start' builder: H200 x 1; '## 3. Guidance and precision': uncond_skip_layers=[] for ordinary CFG"
+        },
+        "serve_args": "",
+        "notes": "The sglang cookbook command builder (docs/src/snippets/configs/OpenMOSS/moss-image.jsx): auto placement, platform attention, no flags beyond the topology."
+      }
+    }
+  }
+}

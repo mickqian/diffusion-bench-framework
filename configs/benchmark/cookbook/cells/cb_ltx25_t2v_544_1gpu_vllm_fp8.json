@@ -1,0 +1,98 @@
+{
+  "id": "cb_ltx25_t2v_544_1gpu_vllm_fp8",
+  "label": "LTX-2.5 distilled one-stage T2V 960x544 121f 8 steps, FP8 (vLLM-Omni H100 recipe, 1 GPU)",
+  "base_case": "ltx2.5_twostage_t2v_2gpus",
+  "set": {
+    "num_gpus": 1,
+    "width": 960,
+    "height": 544
+  },
+  "unset": [
+    "frameworks.vllm-omni.extra_env.DIFFUSION_ATTENTION_BACKEND"
+  ],
+  "cookbook": {
+    "framework": "vllm-omni",
+    "repo": "vllm-project/vllm-omni",
+    "path": "recipes/LTX/LTX-2.5.md",
+    "commit": "a0910980",
+    "commit_date": "2026-10-17",
+    "section": "### H100 80 GB FP8",
+    "group": "lossy",
+    "source_hardware": "H100 80 GB",
+    "source_metric": "none published",
+    "workload": {
+      "width": 960,
+      "height": 544,
+      "num_frames": 121,
+      "num_inference_steps": 8,
+      "num_gpus": 1,
+      "dit_forwards": 8,
+      "metric": "not stated",
+      "warmup": "not stated",
+      "repeats": "not stated"
+    },
+    "source_gpu": [
+      "h100"
+    ]
+  },
+  "forwards": {
+    "vllm-omni": 8,
+    "sglang": 8
+  },
+  "deviations": [
+    {
+      "field": "metric",
+      "source": "not stated",
+      "run": "client_e2e_median",
+      "reason": "every arm is timed by the same client; the source's own timer is not available for the other frameworks"
+    },
+    {
+      "field": "warmup",
+      "source": "not stated",
+      "run": "3 request(s) at 8 steps",
+      "reason": "the harness warms every arm the same way before timing"
+    },
+    {
+      "field": "repeats",
+      "source": "not stated",
+      "run": "median of 2",
+      "reason": "the harness takes the same median for every arm"
+    }
+  ],
+  "arms": {
+    "vllm-omni": {
+      "cb-vllm-verbatim": {
+        "tier": "verbatim",
+        "num_gpus": 1,
+        "upstream_recipe": {
+          "repo": "vllm-project/vllm-omni",
+          "path": "recipes/LTX/LTX-2.5.md",
+          "commit": "a0910980",
+          "commit_date": "2026-10-17",
+          "section": "### H100 80 GB FP8"
+        },
+        "lossy": [
+          "fp8 (online)"
+        ],
+        "serve_args": "--model-class-name LTX2DistilledOneStagePipeline --quantization fp8 --diffusion-attention-backend CUDNN_ATTN"
+      }
+    },
+    "sglang": {
+      "cb-sgl-cookbook-fp8": {
+        "tier": "verbatim",
+        "num_gpus": 1,
+        "upstream_recipe": {
+          "repo": "sgl-project/sglang",
+          "path": "docs/cookbook/diffusion/LTX/LTX2.5.mdx",
+          "commit": "af7d941fc3",
+          "commit_date": "2026-10-24",
+          "section": "### 3.4 fp8 quantization"
+        },
+        "lossy": [
+          "fp8 (online)"
+        ],
+        "serve_args": "--pipeline-class-name LTX2Pipeline --quantization fp8"
+      }
+    }
+  }
+}
