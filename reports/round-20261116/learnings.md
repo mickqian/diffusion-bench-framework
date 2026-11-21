@@ -293,6 +293,13 @@ Coverage was checked mechanically on 2026-11-19: every commit of each window was
 (`git log --name-only`), and each commit that touches code one of our cells runs is either a row below or falls in a row's
 category. The counts are under each heading.
 
+A second pass from the other side (2026-11-21): every window commit whose title has a speed word (perf, fast, fuse,
+graph, cache, compile, kernel, latency, overlap...) and is not named here: vLLM-Omni 147 of 175, TensorRT-LLM 122 of
+126, LightX2V 5 of 14, ComfyUI 4 of 10, FastVideo 16 of 32. Read one by one, they are other models (TTS and omni
+models, Hy-Nomas, HunyuanVideo-1.5, MiniCPM-o, PAN2), the LLM side of TensorRT-LLM (its QKV preprocessing, Qwen3-VL
+encoder graphs and NCCL scope changes live in LLM attention and VLM encoders, not VisualGen), Ascend, ROCm, XPU, MUSA,
+MLX and DGX Spark paths, lossy caches, CI and docs. None reaches a cell of ours.
+
 ### vLLM-Omni (`0da1d831e` -> `24e547284`, vllm 0.32.0 -> 0.33.0)
 
 | change | reaches our cells | verdict |
