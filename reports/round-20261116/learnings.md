@@ -178,6 +178,22 @@ narrower throughput lead is all vLLM-Omni's own 2%.
 | TRT-LLM rc1 -> rc3 | per-request fixed cost about -1.1 s on H3; per-step unchanged | sglang's non-denoise time is already lower (section 4) |
 | LightX2V `19c19614..395e2ac4` | Qwen-Image-2.1 2.560 -> 2.478 (-3.2%), Z-Image 0.831 -> 0.852 (+2.5%), the rest within 1.3% | not attributed upstream-side (its only Qwen hot-path change casts a Triton norm kernel's `eps` to fp32; its Z-Image FA2 calls now take the varlen entry); neither is a path sglang runs |
 
+From the outcome side (2026-11-21): every competitor cell that moved by 1.5% or more between the two published rounds,
+and what explains it.
+
+| framework, cell | move | explained by |
+|---|---:|---|
+| vLLM-Omni Z-Image | -23.2% | #4989 (-81 ms under compile), #10120 (-43 ms outside the engine), #7597 (+18 ms) |
+| vLLM-Omni Cosmos3 T2I, Qwen-Image-2.1 2 GPUs, FastH3 | -8.1%, -7.1%, -6.2% | the 11-11..11-16 window, bucketed on one box (-6.5%, -4.8%, -6.2%) |
+| vLLM-Omni Cosmos3 I2V / T2V, LTX-2.5, Ref2VA, H3 2 GPUs, Wan2.2 | -4.0% to -2.1% | cuDNN 9.24 attention, -3% per step |
+| vLLM-Omni Qwen-Image-2.1 Edit (and T2I, -1.5%) | -3.7% | #10268 restored the decode graph that #9272 dropped per request; the previous round's Qwen rows (2026-11-02) carried that regression |
+| TensorRT-LLM H3 4 GPUs / 2 GPUs | -3.4% / -1.8% | about 1.1 s less fixed cost per request, per step unchanged (two-point fit) |
+| LightX2V Qwen-Image-2.1 / Z-Image | -3.2% / +2.5% | not attributed: different boxes, and no hot-path change of note in its window; sglang leads both cells by 14% and 2.7x |
+| ComfyUI FLUX.3 | -2.5% | #17196 fused Flux2 VAE; different boxes |
+
+Nothing in this list is a change sglang lacks: each is already in sglang (cuDNN 9.24, response encoding, a persistent decode
+graph), compile-only, or the competitor catching up on its own overhead.
+
 Checked and closed without a change: the Qwen-Image-2.1 VAE padding fold that B300 rejects costs at most 5 ms (forced on:
 2.126 / 2.130 against 2.135 / 2.132); LightX2V's fused anti-aliased SnakeBeta for the H3 vocoder (#1721) targets an audio
 decode that takes 0.080-0.085 s of a request in sglang (1.6% of FastH3, 0.25% of H3 on four GPUs); the `SiluAndMul` layer
