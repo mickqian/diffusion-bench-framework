@@ -718,6 +718,32 @@ request broadcast, so the sampling window's idle padding shows up there on every
   model's own band: LTX-2.5's videos move 24-29 dB between any two numerically
   different correct runs (lossless against exact, K/V-gather against Ulysses).
 
+### Reproducing an InferenceX VideoGenX cell
+
+VideoGenX (https://inferencex.semianalysis.com/vgx) runs its own builds daily; a cell there is
+reproduced from its public sources, not from this repo's profiles (2026-11-22, MiniMax-H3 on AMD).
+
+- **Read the engine builds from the data, not from hearsay.** `GET /api/v1/views/video?view=overview`
+  returns every cell; `point.runtime` is the engine commit and `point.server` the parallel layout.
+  A relayed "vLLM-Omni v0.32.0" was v0.30.0 (`a8576ccb`) on MI355X.
+- **Serve flags and env** are in SemiAnalysisAI/InferenceX,
+  `inferencex-e2e/benchmarks/single_node/srt-slurm-recipes/<model>/<engine>/<hw>/video/*.yaml`;
+  the images are in `inferencex-e2e/configs/{amd,nvidia}-master.yaml`.
+- **Use their request shape** (`video-generation/evaluator/runner.py`, `_payload`): both engines
+  get `POST /v1/videos`, a 0.1 s status poll and `/content`; vLLM-Omni takes multipart with
+  `width/height/fps/num_frames` and `extra_params.target`. Latency is submit to the last MP4
+  byte, p50 is `statistics.median`, one warmup case. `scripts/vgx/vgx_client.py` does this;
+  `arm.sh` / `chain.sh` run fresh-server arms one after another on GPUs `0..N-1`.
+- **Two engines on one node need two images.** On a k8s cluster swap the image in place
+  (`rx devbox reprovision`) and keep data on the data volume. The new container has no sshd, so
+  poll and fetch with `rx devbox run` (a wait loop on `ssh` idled a box for 2.5 h). Slurm-variant
+  clusters cannot reprovision.
+- **MI350X stands in for MI355X within about 2 points.** SGLang v0.5.23 against vLLM-Omni v0.30.0
+  on 8x MI350X (virtual functions): +6.3 / -2.3 / -3.7 / -5.3 % at 8 / 4 / 2 / 1 GPUs; VideoGenX
+  on MI355X: +5.1 / -3.6 / -3.7 / -7.7 %. Run that calibration pair before reading other arms.
+  Per-cell min-max stayed under 1 % and two near-identical trees 7 h apart differed by at most
+  0.5 %, so 8-10 requests give the same median as 20 on the long 1- and 2-GPU cells.
+
 ## Failure Classification
 
 Classify every failed or missing cell:
