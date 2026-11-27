@@ -14,6 +14,7 @@ Exit 0: every recorded recipe is current. 1: at least one is stale.
 fresh, so this outranks 1.
 
     python3 scripts/check_competitor_recipes.py
+    python3 scripts/check_competitor_recipes.py --cookbook   # plus the cookbook track
 """
 import argparse
 import glob
@@ -28,6 +29,7 @@ sys.path.insert(0, os.path.join(REPO, "src"))
 from diffusion_bench.config_guard import upstream_recipe_problems  # noqa: E402
 
 CASES = os.path.join(REPO, "configs", "benchmark", "cases")
+COOKBOOK_CELLS = os.path.join(REPO, "configs", "benchmark", "cookbook", "cells")
 
 
 def gh_commits(repo: str, path: str, since: str) -> list[dict]:
@@ -64,6 +66,24 @@ def recipe_profiles(cases_dir: str) -> list[tuple[str, str, str, dict]]:
     return found
 
 
+def cookbook_profiles(cells_dir: str) -> list[tuple[str, str, str, dict]]:
+    """The same rows for the cookbook track: each cell's source, then every arm that cites one.
+
+    A cookbook cell is only as good as its claim to run the source verbatim, so
+    a source that has moved is as stale as a headline competitor command.
+    """
+    found = []
+    for path in sorted(glob.glob(os.path.join(cells_dir, "*.json"))):
+        cell = json.load(open(path))
+        source = cell.get("cookbook") or {}
+        found.append((cell["id"], source.get("framework", "?"), "(cookbook source)", source))
+        for fw, arms in (cell.get("arms") or {}).items():
+            for name, arm in arms.items():
+                if "upstream_recipe" in arm:
+                    found.append((cell["id"], fw, name, arm["upstream_recipe"]))
+    return found
+
+
 def newer_commits(recipe: dict, list_commits) -> list[dict]:
     """Commits to the recipe's path after its recorded commit; raises if that
     commit is not among the path's commits since its recorded date."""
@@ -80,11 +100,18 @@ def newer_commits(recipe: dict, list_commits) -> list[dict]:
 def main(argv=None, list_commits=gh_commits) -> int:
     parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     parser.add_argument("--cases-dir", default=CASES)
+    # Opt-in, so a headline round's pre-flight keeps its rows and exit code.
+    parser.add_argument("--cookbook", action="store_true",
+                        help=f"also check the cookbook track's sources and arm recipes ({COOKBOOK_CELLS})")
+    parser.add_argument("--cookbook-dir", default=None, help="cookbook cells directory (implies --cookbook)")
     args = parser.parse_args(argv)
 
     rows, stale, failed = [], 0, 0
     answers = {}  # (repo, path, commit, commit_date) -> newer commits, or the error
-    for cid, fw, name, recipe in recipe_profiles(args.cases_dir):
+    profiles = recipe_profiles(args.cases_dir)
+    if args.cookbook or args.cookbook_dir:
+        profiles += cookbook_profiles(args.cookbook_dir or COOKBOOK_CELLS)
+    for cid, fw, name, recipe in profiles:
         problems = upstream_recipe_problems(recipe)
         if problems:
             failed += 1

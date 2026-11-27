@@ -1,0 +1,159 @@
+{
+  "id": "cb_h3_t2va_544_trtllm_ulysses2",
+  "label": "MiniMax-H3 T2V+A 544x960 124f, 27 forwards (TRT-LLM example, Ulysses 2)",
+  "base_case": "minimax_h3_t2va_5s",
+  "set": {
+    "width": 960,
+    "height": 544,
+    "num_frames": 124,
+    "num_inference_steps": 28,
+    "framework_request_extra.sglang.target": {
+      "short_edge": 544,
+      "aspect_ratio": "16:9",
+      "duration_seconds": 5.166666666666667
+    },
+    "framework_request_extra.sglang.num_inference_steps": 27
+  },
+  "unset": [
+    "frameworks.trtllm-visual.visual_gen_args.torch_compile_config"
+  ],
+  "cookbook": {
+    "framework": "trtllm-visual",
+    "repo": "NVIDIA/TensorRT-LLM",
+    "path": "examples/visual_gen/configs/minimax-h3-bf16-2gpu.yaml",
+    "commit": "a8ce107",
+    "commit_date": "2026-10-27",
+    "section": "whole file",
+    "source_hardware": "2 GPUs; no GPU class stated",
+    "source_metric": "benchmark_visual_gen e2e_latency (client)",
+    "request_defaults": {
+      "repo": "NVIDIA/TensorRT-LLM",
+      "path": "examples/visual_gen/models/minimax_h3.py",
+      "commit": "4945d31",
+      "commit_date": "2026-10-22",
+      "section": "960x544 canvas, seed 42, inherited 28 steps / 124 frames @ 24 fps"
+    },
+    "workload": {
+      "width": 960,
+      "height": 544,
+      "num_frames": 124,
+      "num_inference_steps": 28,
+      "num_gpus": 2,
+      "dit_forwards": 27,
+      "metric": "benchmark_visual_gen e2e_latency (client)",
+      "warmup": "startup precompile of 544x960/124 (compilation_config); no warmup request",
+      "repeats": "3 prompts at concurrency 1"
+    },
+    "source_gpu": []
+  },
+  "forwards": {
+    "trtllm-visual": 27,
+    "sglang": 27
+  },
+  "deviations": [
+    {
+      "field": "metric",
+      "source": "benchmark_visual_gen e2e_latency (client)",
+      "run": "client_e2e_median",
+      "reason": "every arm is timed by the same client; the source's own timer is not available for the other frameworks"
+    },
+    {
+      "field": "warmup",
+      "source": "startup precompile of 544x960/124 (compilation_config); no warmup request",
+      "run": "3 request(s) at 3 steps",
+      "reason": "the harness warms every arm the same way before timing"
+    },
+    {
+      "field": "repeats",
+      "source": "3 prompts at concurrency 1",
+      "run": "median of 2",
+      "reason": "the harness takes the same median for every arm"
+    }
+  ],
+  "arms": {
+    "trtllm-visual": {
+      "cb-trt-verbatim": {
+        "tier": "verbatim",
+        "num_gpus": 2,
+        "upstream_recipe": {
+          "repo": "NVIDIA/TensorRT-LLM",
+          "path": "examples/visual_gen/configs/minimax-h3-bf16-2gpu.yaml",
+          "commit": "a8ce107",
+          "commit_date": "2026-10-27",
+          "section": "whole file"
+        },
+        "serve_args": "",
+        "visual_gen_args": {
+          "cuda_graph_config": {
+            "enable": false
+          },
+          "attention_config": {
+            "backend": "VANILLA"
+          },
+          "parallel_config": {
+            "ulysses_size": 2,
+            "parallel_vae_size": 2
+          },
+          "compilation_config": {
+            "skip_warmup": false,
+            "resolutions": [
+              [
+                544,
+                960
+              ]
+            ],
+            "num_frames": [
+              124
+            ]
+          }
+        },
+        "allow_inherited": [
+          "extra_env.PYTORCH_CUDA_ALLOC_CONF"
+        ],
+        "notes": "The file is on main only: it does not exist at v1.4.0rc1, the version the harness installs. Record the installed tensorrt_llm version with the result."
+      }
+    },
+    "sglang": {
+      "cb-sgl-cookbook": {
+        "tier": "verbatim",
+        "num_gpus": 2,
+        "upstream_recipe": {
+          "repo": "sgl-project/sglang",
+          "path": "docs/src/snippets/configs/MiniMaxAI/minimax-h3.jsx",
+          "commit": "2b8e4cde9564",
+          "commit_date": "2026-10-23",
+          "section": "MiniMax-H3.mdx '## 1. Quick start' builder: H200 x 2, FL2VA, Placement resident",
+          "note": "No verified 2-GPU H200 recipe; the builder falls back to TP1/Ulysses2/Ring1 and marks it Unverified."
+        },
+        "serve_args": "--ulysses-degree 2 --model-variant fl2va --performance-mode speed",
+        "notes": "Builder output for H200 x 2 minus the flags the harness sets (--model-path, --num-gpus, --host, --port)."
+      },
+      "cb-sgl-adaln": {
+        "tier": "matched-lossy",
+        "num_gpus": 2,
+        "lossy": [
+          "adaln-cache (precomputed sidecar)"
+        ],
+        "requires": [
+          "scripts/prepare_cookbook_h3.sh sgl-adaln"
+        ],
+        "upstream_recipe": {
+          "repo": "sgl-project/sglang",
+          "path": "docs/cookbook/diffusion/MiniMax/MiniMax-H3.mdx",
+          "commit": "0498ab7b6ee2",
+          "commit_date": "2026-10-24",
+          "section": "AdaLN cache: precomputed sidecar (--minimax-h3-adaln-cache-path)"
+        },
+        "serve_args": "--ulysses-degree 2 --model-variant fl2va --performance-mode speed --minimax-h3-adaln-cache-path /scratch/bench/sgl-adaln/fl2va-t2va-27.safetensors",
+        "notes": "Matches the source's AdaLN cache. The sidecar is built for this exact schedule; the cookbook documents it on 4 GPUs (TP2 + Ulysses 2), here on the verbatim 2-GPU topology."
+      },
+      "cb-sgl-tuned": {
+        "tier": "tuned",
+        "num_gpus": 2,
+        "serve_args": "--model-type diffusion --warmup-mode server --model-variant fl2va --enable-torch-compile false",
+        "notes": "The H200 cookbook-method run's SGLang command (2026-10-30): our own choice, listed beside the verbatim arm, never in its place. The headline minimax_h3_t2va_5s default (Ulysses 2, eager DiT)."
+      }
+    }
+  },
+  "notes": "TRT-LLM reads 28 steps as 28 sigma grid points (27 DiT forwards); sglang is sent 27 forwards."
+}
